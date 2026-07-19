@@ -1,4 +1,66 @@
 {
+  "sageRecords": {
+    "title": "Records lifecycle",
+    "retentionPolicy": "Retention policy",
+    "retentionPeriod": "Retention period",
+    "retainUntil": "Retain until",
+    "legalHold": "Legal hold",
+    "placeLegalHold": "Place legal hold",
+    "releaseLegalHold": "Release legal hold",
+    "destructionEligibility": "Destruction eligibility",
+    "destructionBlocked": "Destruction blocked",
+    "requestDestruction": "Request destruction",
+    "approveDestruction": "Approve destruction",
+    "denyDestruction": "Deny destruction",
+    "verifiedDestroyed": "Verified destroyed",
+    "destructionFailed": "Destruction failed",
+    "packageUnavailable": "Package unavailable",
+    "activeLegalHoldPreventsDestruction": "An active legal hold prevents destruction",
+    "retentionPeriodNotElapsed": "The retention period has not elapsed",
+    "differentApproverRequired": "A different authorized person must approve this destruction",
+    "retentionNotAssigned": "No retention policy is assigned",
+    "packageAlreadyDestroyed": "This package has already been destroyed",
+    "confirmDestruction": "Confirm destruction",
+    "tombstone": "This package has been permanently destroyed and can no longer be downloaded or delivered."
+  },
+  "sageDelivery": {
+    "title": "Secure delivery",
+    "intro": "External access is verified, independently approved, revocable, and expiring.",
+    "sections": {
+      "requests": "Delivery requests",
+      "approvals": "Approval queue",
+      "grants": "Active grants",
+      "revoked": "Revoked / expired grants",
+      "receipts": "Delivery receipts"
+    },
+    "verifiedRecipient": "Email-verified recipient",
+    "deliveryRequest": "Delivery request",
+    "deliveryApproval": "Delivery approval",
+    "accessExpiry": "Access expiry",
+    "maxAccesses": "Maximum accesses",
+    "issueInvitation": "Issue invitation",
+    "invitationExpires": "Invitation expires",
+    "claimInvitation": "Claim invitation",
+    "accessGranted": "Access granted",
+    "accessRevoked": "Access revoked",
+    "accessExpired": "Access expired",
+    "deliveryReceipts": "Delivery receipts",
+    "recipientAcknowledgment": "Recipient acknowledgment",
+    "cannotApproveOwn": "You cannot approve your own request.",
+    "recipientIdentityChanged": "Recipient identity changed; new approval required.",
+    "packageChanged": "Package changed; new approval required.",
+    "externalAccessRevocable": "External access is revocable and may expire.",
+    "createRecipient": "Add email-verified recipient",
+    "requestDelivery": "Request delivery",
+    "approve": "Approve",
+    "deny": "Deny",
+    "revoke": "Revoke",
+    "revokeReason": "Revocation reason",
+    "recipientNotice": "This mailbox-verified access is intended only for the person controlling the invited email address.",
+    "integrityNotice": "The package is integrity-checked before download.",
+    "download": "Download package",
+    "acknowledge": "Acknowledge receipt"
+  },
   "common": {
     "appName": "Platform Admin",
     "loading": "Loading...",
@@ -7,5 +69,253 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create"
+  },
+  "sage": {
+    "navLabel": "SAGE",
+    "breadcrumb": "SAGE",
+    "pageTitle": "Service Assurance & Governance Evidence",
+    "pageDescription": "Internal workspace for organizing service assurance and governance evidence. For internal review use only — not a public service, product, or certification.",
+    "tableCaption": "Organization SAGE workspaces",
+    "createWorkspace": "Create workspace",
+    "workspaceName": "Workspace name",
+    "workspaceNameHelp": "A short internal label for this workspace.",
+    "institutionType": "Institution type",
+    "riskSurface": "Risk surface",
+    "status": "Status",
+    "emptyState": "No SAGE workspaces for this organization yet.",
+    "submit": "Create",
+    "submitting": "Creating…",
+    "cancel": "Cancel",
+    "columns": {
+      "workspace": "Workspace",
+      "institutionType": "Institution type",
+      "riskSurface": "Risk surface",
+      "status": "Status",
+      "updated": "Updated",
+      "action": "Action",
+      "open": "Open"
+    },
+    "validation": {
+      "nameRequired": "A workspace name is required."
+    },
+    "error": {
+      "createFailed": "Could not create the workspace. Please try again."
+    },
+    "sections": {
+      "identity": "Workspace identity",
+      "boundaryProfile": "Boundary profile",
+      "counts": "Summary"
+    },
+    "boundary": {
+      "prohibitedUses": "Prohibited uses",
+      "excludedSourceClasses": "Excluded source classes",
+      "requiredReviewers": "Required reviewers",
+      "exportRestrictions": "Export restrictions"
+    },
+    "counts": {
+      "evidenceSources": "Evidence sources",
+      "evidenceItems": "Evidence items",
+      "boundaryFlags": "Boundary flags",
+      "decisionRecords": "Decision records",
+      "openExportRequests": "Open export requests"
+    },
+    "evidence": {
+      "tab": "Evidence"
+    },
+    "governance": {
+      "tab": "Review & decisions"
+    },
+    "exports": {
+      "tab": "Controlled Exports"
+    }
+  },
+  "sageEvidence": {
+    "pageTitle": "Evidence",
+    "pageDescription": "Register evidence sources, classify them, create evidence items, and link them for internal review. For internal review use only — not a public service, product, certification, or availability claim.",
+    "sourcesHeading": "Evidence sources",
+    "itemsHeading": "Evidence items",
+    "registerSource": "Register source",
+    "sourceType": "Source type",
+    "containsPersonalInformation": "Contains personal information",
+    "containsSensitiveInformation": "Contains sensitive information",
+    "sourceQuality": "Source quality",
+    "authorizationLevel": "Authorization level",
+    "classify": "Classify",
+    "confidenceLevel": "Confidence level",
+    "evidenceSource": "Evidence source",
+    "createItem": "Create item",
+    "link": "Link",
+    "submitting": "Saving…",
+    "noSources": "No evidence sources you can view yet.",
+    "noItems": "No evidence items you can view yet.",
+    "notClassifiedYet": "Not classified yet",
+    "needClassifiedSource": "Classify a source before creating evidence items.",
+    "humanReviewRequired": "Human review required",
+    "excludedFromExternalReview": "Excluded from external review",
+    "sourcesTableCaption": "Evidence sources",
+    "itemsTableCaption": "Evidence items",
+    "validation": {
+      "sourceTypeRequired": "Select a source type.",
+      "sourceRequired": "Select an evidence source."
+    },
+    "error": {
+      "registerFailed": "Could not register the source. Please try again.",
+      "classifyFailed": "Could not classify the source. Please try again.",
+      "createItemFailed": "Could not create the evidence item. Please try again.",
+      "linkFailed": "Could not link the evidence item. Please try again."
+    },
+    "lifecycle": {
+      "proposed": "Proposed",
+      "registered": "Registered",
+      "classified": "Classified",
+      "linked": "Linked",
+      "reviewed": "Reviewed",
+      "accepted": "Accepted",
+      "needs_review": "Needs review",
+      "excluded": "Excluded",
+      "archived": "Archived"
+    },
+    "governanceTab": "Review & decisions",
+    "exportsTab": "Controlled Exports"
+  },
+  "sageGovernance": {
+    "pageTitle": "Review & decisions",
+    "pageDescription": "Human review and governance over the evidence lifecycle: open and resolve boundary flags, record attributed review notes, and create named-human decision records. For internal review use only — not an automated decision, score, or certification.",
+    "boundaryFlags": "Boundary flags",
+    "reviewNotes": "Review notes",
+    "decisionRecords": "Decision records",
+    "openFlag": "Open flag",
+    "flagType": "Flag type",
+    "target": "Target",
+    "note": "Note",
+    "submitting": "Saving…",
+    "noFlags": "No boundary flags you can view yet.",
+    "flagsListLabel": "Boundary flags",
+    "flagStatus": {
+      "open": "Open",
+      "under_review": "Under review",
+      "resolved": "Resolved",
+      "retained": "Retained"
+    },
+    "resolvedBy": "resolved by",
+    "resolutionNote": "Resolution note",
+    "resolveFlag": "Resolve flag",
+    "resolutionOutcome": "Outcome",
+    "validation": {
+      "resolutionNoteRequired": "A resolution note is required.",
+      "noteRequired": "A note is required.",
+      "decisionRequired": "A decision statement is required.",
+      "uncertaintyRequired": "An uncertainty / limitations statement is required."
+    },
+    "error": {
+      "flagFailed": "Could not open the boundary flag. Please try again.",
+      "resolveFailed": "Could not resolve the boundary flag. Please try again.",
+      "noteFailed": "Could not add the review note. Please try again.",
+      "decisionFailed": "Could not create the decision record. Please try again."
+    },
+    "addReviewNote": "Add review note",
+    "humanAuthoredHint": "A review note is a human observation. It does not approve evidence or record a decision.",
+    "reviewer": "Reviewer",
+    "noteType": "Note type",
+    "noteDoesNotDecide": "Recording a note does not approve evidence or constitute a decision.",
+    "humanAuthored": "Human-authored observation",
+    "recordedBy": "Recorded by",
+    "notesListLabel": "Review notes",
+    "noNotes": "No review notes you can view yet.",
+    "createDecision": "Create decision record",
+    "humanDecisionHint": "A decision record is a named human judgment. Evidence references do not constitute an automated conclusion.",
+    "decisionStatement": "Decision statement",
+    "rationale": "Rationale",
+    "uncertainty": "Uncertainty and limitations",
+    "uncertaintyHelp": "State what remains uncertain or out of scope. This is required.",
+    "reviewedEvidence": "Reviewed evidence",
+    "relatedFlags": "Related boundary flags",
+    "humanDecisionRecord": "Human decision record",
+    "decisionRecord": "Decision record",
+    "evidenceNotAutomated": "Evidence references do not constitute an automated conclusion.",
+    "noDecisions": "No decision records you can view yet.",
+    "decisionsListLabel": "Decision records",
+    "distinctions": {
+      "heading": "Evidence, review, flag, and decision are distinct",
+      "evidenceTerm": "Evidence",
+      "evidence": "Sourced factual material.",
+      "reviewTerm": "Review note",
+      "review": "A named human observation.",
+      "flagTerm": "Boundary flag",
+      "flag": "A concern, limitation, or review condition.",
+      "decisionTerm": "Decision record",
+      "decision": "A named human judgment and rationale."
+    },
+    "targetWorkspace": "Workspace",
+    "targetSourcePrefix": "Source:",
+    "targetItemPrefix": "Item:",
+    "permissionDenied": "You do not have permission for this action.",
+    "unableToLoad": "Unable to load review & decisions.",
+    "exportsTab": "Controlled Exports"
+  },
+  "sageExports": {
+    "title": "Controlled Exports",
+    "nav": {
+      "overview": "Overview",
+      "evidence": "Evidence",
+      "governance": "Review & Decisions"
+    },
+    "internalOnlyBanner": "Internal package generation only. External delivery is disabled.",
+    "sections": {
+      "requests": "Export requests",
+      "packages": "Generated packages"
+    },
+    "approvalQueue": "Approval queue",
+    "requestExport": "Request export",
+    "requestedBy": "Requested by",
+    "approvedBy": "Approved by",
+    "purpose": "Purpose",
+    "packageType": "Package type",
+    "selectedEvidence": "Selected evidence",
+    "selectedGovernance": "Selected governance records",
+    "submitting": "Submitting…",
+    "itemCount": "Items",
+    "excludedCount": "Excluded",
+    "noPurpose": "(no purpose provided)",
+    "cannotDecideOwn": "Cannot approve or deny your own request.",
+    "scopeChanged": "Scope changed; a new approval is required.",
+    "decisionRationale": "Decision rationale",
+    "approvalRationale": "Approval rationale",
+    "denialRationale": "Denial rationale",
+    "approveRequest": "Approve request",
+    "denyRequest": "Deny request",
+    "manifestHash": "Manifest hash",
+    "contentHash": "Content hash",
+    "generatedBy": "Generated by",
+    "policyVersion": "Policy version",
+    "generatable": "Approved requests ready to generate",
+    "generatePackage": "Generate package",
+    "downloadInternal": "Download internal package",
+    "status": {
+      "requested": "Export requested."
+    },
+    "statusLabel": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "denied": "Denied",
+      "cancelled": "Cancelled",
+      "generated": "Generated"
+    },
+    "empty": {
+      "requests": "No export requests.",
+      "approvals": "No approvals pending.",
+      "packages": "No generated packages."
+    },
+    "validation": {
+      "purposeRequired": "A purpose is required.",
+      "selectionRequired": "Select at least one resource.",
+      "approvalRationaleRequired": "An approval rationale is required.",
+      "denialRationaleRequired": "A denial rationale is required."
+    },
+    "error": {
+      "requestFailed": "The export request could not be submitted.",
+      "decisionFailed": "The decision could not be recorded.",
+      "generateFailed": "The package could not be generated."
+    }
   }
 }

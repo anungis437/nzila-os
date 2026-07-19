@@ -256,7 +256,7 @@ describe('RED-TEAM-005 — Replay attack resistance', () => {
     // Valid chain
     const validResult = verifyChain(
       [entry1, entry2, entry3],
-      (e: any) => e.payload,
+      (e: unknown) => e.payload,
     )
     expect(validResult.valid).toBe(true)
 
@@ -265,7 +265,7 @@ describe('RED-TEAM-005 — Replay attack resistance', () => {
     // The hash won't match because it was computed with previousHash=null
     const replayResult = verifyChain(
       [entry1, entry2, replay],
-      (e: any) => e.payload,
+      (e: unknown) => e.payload,
     )
     expect(replayResult.valid).toBe(false)
     expect(replayResult.brokenAtIndex).toBe(2)

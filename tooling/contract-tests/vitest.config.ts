@@ -30,7 +30,9 @@ export default defineProject({
     name: 'contract-tests',
     environment: 'node',
     globals: false,
-    testTimeout: 30_000, // Contract tests scan the full file tree — need headroom under parallel load
+    // Large contract scans can exceed 30s on busy developer machines; keep this
+    // high enough to avoid nondeterministic pre-push failures.
+    testTimeout: 120_000,
     include: ['**/*.test.ts'],
     exclude: [
       '**/node_modules/**',

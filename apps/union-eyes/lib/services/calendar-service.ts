@@ -99,6 +99,10 @@ export interface AvailabilitySlot {
   occupiedBy?: string[];
 }
 
+export interface RecurringInstanceSourceEvent extends CalendarEvent {
+  recurrenceRule: string;
+}
+
 // ============================================================================
 // Calendar Operations
 // ============================================================================
@@ -341,83 +345,97 @@ export async function generateRecurringInstances(
     if (!event || !event.recurrenceRule) {
       return [];
     }
-
-    const instances: RecurringEventInstance[] = [];
-    const rruleString = event.recurrenceRule;
-    
-    // Parse RRULE format: FREQ=DAILY;INTERVAL=1;COUNT=10
-    const rruleParts = parseRRule(rruleString);
-    
-    if (!rruleParts.FREQ) {
-      logger.warn("Invalid RRULE", { rruleString });
-      return [];
-    }
-
-    const eventStart = event.startTime;
-    const eventDuration = event.endTime.getTime() - event.startTime.getTime();
-    const exceptionDates = new Set(
-      (event.exceptionDates || []).map(d => d.toISOString().split('T')[0])
+    return buildRecurringInstances(
+      { ...event, recurrenceRule: event.recurrenceRule },
+      startDate,
+      endDate,
     );
-
-    const currentDate = new Date(eventStart);
-    let count = 0;
-    const maxCount = rruleParts.COUNT || 365; // Safety limit
-    const interval = rruleParts.INTERVAL || 1;
-
-    while (count < maxCount && currentDate <= endDate) {
-      if (currentDate >= startDate) {
-        const dateKey = currentDate.toISOString().split('T')[0];
-        
-        // Skip exception dates
-        if (!exceptionDates.has(dateKey)) {
-          const instanceStart = new Date(currentDate);
-          const instanceEnd = new Date(currentDate.getTime() + eventDuration);
-          
-          instances.push({
-            instanceDate: new Date(currentDate),
-            event: {
-              ...event,
-              id: `${event.id}_${dateKey}`,
-              startTime: instanceStart,
-              endTime: instanceEnd,
-            },
-            isException: false,
-          });
-        }
-      }
-
-      // Advance to next occurrence based on frequency
-      switch (rruleParts.FREQ) {
-        case 'DAILY':
-          currentDate.setDate(currentDate.getDate() + interval);
-          break;
-        case 'WEEKLY':
-          currentDate.setDate(currentDate.getDate() + (7 * interval));
-          break;
-        case 'MONTHLY':
-          currentDate.setMonth(currentDate.getMonth() + interval);
-          break;
-        case 'YEARLY':
-          currentDate.setFullYear(currentDate.getFullYear() + interval);
-          break;
-        default:
-          logger.warn("Unsupported frequency", { frequency: rruleParts.FREQ });
-          return instances;
-      }
-
-      count++;
-      
-      // Check UNTIL date if specified
-      if (rruleParts.UNTIL && currentDate > new Date(rruleParts.UNTIL)) {
-        break;
-      }
-    }
-
-    return instances;
   } catch (error) {
     logger.error("Error generating recurring instances", { error, eventId });
     throw new Error("Failed to generate recurring instances");
   }
+}
+
+/**
+ * Build recurring event instances from an event payload.
+ */
+export function buildRecurringInstances(
+  event: RecurringInstanceSourceEvent,
+  startDate: Date,
+  endDate: Date
+): RecurringEventInstance[] {
+  const instances: RecurringEventInstance[] = [];
+  const rruleString = event.recurrenceRule;
+
+  // Parse RRULE format: FREQ=DAILY;INTERVAL=1;COUNT=10
+  const rruleParts = parseRRule(rruleString);
+
+  if (!rruleParts.FREQ) {
+    logger.warn("Invalid RRULE", { rruleString });
+    return [];
+  }
+
+  const eventStart = event.startTime;
+  const eventDuration = event.endTime.getTime() - event.startTime.getTime();
+  const exceptionDates = new Set(
+    (event.exceptionDates || []).map(d => d.toISOString().split('T')[0])
+  );
+
+  const currentDate = new Date(eventStart);
+  let count = 0;
+  const maxCount = rruleParts.COUNT || 365; // Safety limit
+  const interval = rruleParts.INTERVAL || 1;
+
+  while (count < maxCount && currentDate <= endDate) {
+    if (currentDate >= startDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+
+      // Skip exception dates
+      if (!exceptionDates.has(dateKey)) {
+        const instanceStart = new Date(currentDate);
+        const instanceEnd = new Date(currentDate.getTime() + eventDuration);
+
+        instances.push({
+          instanceDate: new Date(currentDate),
+          event: {
+            ...event,
+            id: `${event.id}_${dateKey}`,
+            startTime: instanceStart,
+            endTime: instanceEnd,
+          },
+          isException: false,
+        });
+      }
+    }
+
+    // Advance to next occurrence based on frequency
+    switch (rruleParts.FREQ) {
+      case 'DAILY':
+        currentDate.setDate(currentDate.getDate() + interval);
+        break;
+      case 'WEEKLY':
+        currentDate.setDate(currentDate.getDate() + (7 * interval));
+        break;
+      case 'MONTHLY':
+        currentDate.setMonth(currentDate.getMonth() + interval);
+        break;
+      case 'YEARLY':
+        currentDate.setFullYear(currentDate.getFullYear() + interval);
+        break;
+      default:
+        logger.warn("Unsupported frequency", { frequency: rruleParts.FREQ });
+        return instances;
+    }
+
+    count++;
+
+    // Check UNTIL date if specified
+    if (rruleParts.UNTIL && currentDate > new Date(rruleParts.UNTIL)) {
+      break;
+    }
+  }
+
+  return instances;
 }
 
 /**

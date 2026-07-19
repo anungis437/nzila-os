@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Union representative supervision and case management tools",
 };
 
-function serializeUnknownError(error: unknown) {
+function serializeUnknownError(error: any) {
   if (error instanceof Error) {
     return {
       name: error.name,

@@ -55,13 +55,13 @@ import { AuditTrailService } from '../services/audit-trail-service';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function setupInsertChain(returnRow: unknown) {
+function setupInsertChain(returnRow: any) {
   mocks.mockReturning.mockResolvedValue([returnRow]);
   mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
   mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
 }
 
-function setupSelectChain(rows: unknown[]) {
+function setupSelectChain(rows: any[]) {
   mocks.mockOffset.mockResolvedValue(rows);
   mocks.mockLimit.mockReturnValue({ offset: mocks.mockOffset });
   mocks.mockOrderBy.mockReturnValue({ limit: mocks.mockLimit });

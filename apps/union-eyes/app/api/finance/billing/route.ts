@@ -69,7 +69,7 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
     return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {
@@ -121,7 +121,7 @@ export const PATCH = withMinRole('admin', async (request, context: BaseAuthConte
     return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

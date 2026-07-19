@@ -70,6 +70,21 @@ describe('console perf store', () => {
     expect(failed[0].lastAt).toBe(t + 1)
   })
 
+  it('ignores non-5xx failures and sorts failed actions by count', () => {
+    const t = Date.now()
+    recordRoute({ route: '/not-failed', durationMs: 20, status: 499, ts: t })
+    recordRoute({ route: '/x', durationMs: 50, status: 500, ts: t + 1 })
+    recordRoute({ route: '/x', durationMs: 50, status: 502, ts: t + 2 })
+    recordRoute({ route: '/y', durationMs: 50, status: 503, ts: t + 3 })
+
+    const failed = summarizeFailedActions()
+    expect(failed).toHaveLength(2)
+    expect(failed[0].route).toBe('/x')
+    expect(failed[0].count).toBe(2)
+    expect(failed[1].route).toBe('/y')
+    expect(failed[1].count).toBe(1)
+  })
+
   it('caps the vitals ring at the configured maximum', () => {
     for (let i = 0; i < 3000; i += 1) {
       recordVital({ name: 'TTFB', value: i, route: '/x', ts: Date.now() })
@@ -78,5 +93,16 @@ describe('console perf store', () => {
     // Bounded at MAX_VITALS = 2000
     expect(v.count).toBeLessThanOrEqual(2000)
     expect(v.count).toBeGreaterThan(0)
+  })
+
+  it('caps the routes ring at the configured maximum', () => {
+    const now = Date.now()
+    for (let i = 0; i < 1400; i += 1) {
+      recordRoute({ route: '/hot', durationMs: 10 + (i % 3), status: 200, ts: now + i })
+    }
+
+    const routes = summarizeRoutes(24 * 60 * 60 * 1000)
+    const hot = routes.find((r) => r.route === '/hot')
+    expect(hot?.count).toBe(1000)
   })
 })

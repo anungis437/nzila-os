@@ -154,7 +154,7 @@ describe('validateAbrAuditEvent', () => {
   })
 
   it('reports unknown entityType', () => {
-    const errors = validateAbrAuditEvent({ ...validEvent, entityType: 'invalid_type' as any })
+      const errors = validateAbrAuditEvent({ ...validEvent, entityType: 'invalid_type' as AbrEntityType })
     expect(errors).toContain('Unknown entityType: invalid_type')
   })
 

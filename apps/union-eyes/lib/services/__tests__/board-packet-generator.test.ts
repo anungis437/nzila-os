@@ -33,7 +33,7 @@ vi.mock('@/db/schema/board-packet-schema', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
-  sql: vi.fn((...args: unknown[]) => args),
+  sql: vi.fn((...args: any[]) => args),
 }));
 
 vi.mock('crypto', () => ({

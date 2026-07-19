@@ -14,13 +14,13 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
+import type { Metadata } from 'next';
 /**
  * Locale-aware Status page
  * Accessible at /{locale}/status
  */
 export const dynamic = 'force-dynamic';
 
-import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { StatusPage } from '@/components/monitoring/StatusPage';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';

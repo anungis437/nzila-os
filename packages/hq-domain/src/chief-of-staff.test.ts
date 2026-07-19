@@ -87,8 +87,8 @@ describe('generateUrgentRiskDigest', () => {
 describe('generateCapitalDirectionMemo', () => {
   it('groups by recommendation', () => {
     const scores: AllocationScore[] = [
-      { ventureSlug: 'alpha', composite: 80, recommendation: 'invest-more', signal: 'green', axes: {} as any, reasons: ['strong'], computedAt: NOW },
-      { ventureSlug: 'beta', composite: 25, recommendation: 'pause', signal: 'red', axes: {} as any, reasons: ['weak'], computedAt: NOW },
+      { ventureSlug: 'alpha', composite: 80, recommendation: 'invest-more', signal: 'green', axes: {} as unknown, reasons: ['strong'], computedAt: NOW },
+      { ventureSlug: 'beta', composite: 25, recommendation: 'pause', signal: 'red', axes: {} as unknown, reasons: ['weak'], computedAt: NOW },
     ]
     const out = generateCapitalDirectionMemo({ now: NOW, scores })
     expect(out.markdown).toContain('alpha')

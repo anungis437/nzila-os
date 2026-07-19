@@ -15,7 +15,7 @@
  */
 
 import { _resetScenarioCatalog, getAllScenarios, getScenariosByScope } from '../lib/governance-simulation/scenarios.js';
-import { runScenario, replayScenario } from '../lib/governance-simulation/simulation.js';
+import { replayScenario } from '../lib/governance-simulation/simulation.js';
 import { simulateFederationConflict } from '../lib/governance-simulation/federation.js';
 import { simulateContinuityStress } from '../lib/governance-simulation/continuity.js';
 import { simulateAIGovernance } from '../lib/governance-simulation/ai-simulation.js';

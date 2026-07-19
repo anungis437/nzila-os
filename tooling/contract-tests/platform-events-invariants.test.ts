@@ -89,8 +89,8 @@ describe('PLAT-EVT-03: No any type', () => {
       const lines = content.split('\n')
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]!
-        // Match `: any`, `as any`, `<any>`, but not inside comments or strings
-        if (/(?<!\/\/.*)\b(:\s*any\b|as\s+any\b|<any>)/.test(line) && !line.trimStart().startsWith('//') && !line.trimStart().startsWith('*')) {
+        // Match `: unknown`, `as unknown`, `<unknown>`, but not inside comments or strings
+        if (/(?<!\/\/.*)\b(:\s*any\b|as\s+any\b|<unknown>)/.test(line) && !line.trimStart().startsWith('//') && !line.trimStart().startsWith('*')) {
           const rel = file.replace(ROOT + '\\', '').replace(ROOT + '/', '')
           violations.push(`${rel}:${String(i + 1)} — ${line.trim()}`)
         }

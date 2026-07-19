@@ -37,19 +37,26 @@ vi.mock("@/db/schema", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
   asc: vi.fn(),
 }));
 vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+import { logger } from "@/lib/logger";
+
 import {
   getCalendarById, listCalendars, createCalendar, updateCalendar, deleteCalendar,
   createEvent, getEventById, updateEvent, deleteEvent, listEvents,
   getEventsForDateRange, generateRecurringInstances,
+  buildRecurringInstances,
   addRecurringException, updateRecurringInstance,
   addAttendee, updateAttendeeResponse, removeAttendee, getEventAttendees,
+  listMeetingRooms, checkRoomAvailability, bookMeetingRoom, cancelRoomBooking,
+  getUserAvailability, findCommonAvailability, syncExternalCalendar,
+  enableCalendarSync, disableCalendarSync, addEventReminder, getPendingReminders,
+  getCalendarStatistics,
 } from "../calendar-service";
 
 describe("calendar-service", () => {
@@ -119,6 +126,11 @@ describe("calendar-service", () => {
       mocks.mockReturning.mockResolvedValueOnce([]);
       const result = await updateCalendar("nope", {});
       expect(result).toBeNull();
+    });
+
+    it("throws on update error", async () => {
+      mocks.mockSetWhere.mockRejectedValueOnce(new Error("fail"));
+      await expect(updateCalendar("cal-1", { name: "Broken" } as never)).rejects.toThrow("Failed to update calendar");
     });
   });
 
@@ -192,6 +204,85 @@ describe("calendar-service", () => {
     });
   });
 
+  describe("buildRecurringInstances", () => {
+    const baseEvent = {
+      id: "event-1",
+      calendarId: "cal-1",
+      title: "Recurring meeting",
+      eventType: "meeting",
+      startTime: new Date("2026-01-01T09:00:00.000Z"),
+      endTime: new Date("2026-01-01T10:00:00.000Z"),
+      allDay: false,
+      status: "confirmed",
+      createdBy: "u1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      recurrenceRule: "RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3",
+    } as const;
+
+    it("builds recurring instances and skips exception dates", () => {
+      const instances = buildRecurringInstances(
+        {
+          ...baseEvent,
+          exceptionDates: [new Date("2026-01-03T09:00:00.000Z")],
+        },
+        new Date("2026-01-01T00:00:00.000Z"),
+        new Date("2026-01-10T00:00:00.000Z")
+      );
+
+      expect(instances).toHaveLength(2);
+      expect(instances[0].event.id).toBe("event-1_2026-01-01");
+      expect(instances[1].event.id).toBe("event-1_2026-01-05");
+      expect(instances[0].event.startTime).toEqual(new Date("2026-01-01T09:00:00.000Z"));
+      expect(instances[0].event.endTime).toEqual(new Date("2026-01-01T10:00:00.000Z"));
+    });
+
+    it("stops at UNTIL and supports weekly recurrence", () => {
+      const instances = buildRecurringInstances(
+        {
+          ...baseEvent,
+          recurrenceRule: "RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20260116T000000Z",
+        },
+        new Date("2026-01-01T00:00:00.000Z"),
+        new Date("2026-01-31T00:00:00.000Z")
+      );
+
+      expect(instances.map(instance => instance.event.id)).toEqual([
+        "event-1_2026-01-01",
+        "event-1_2026-01-08",
+        "event-1_2026-01-15",
+      ]);
+    });
+
+    it("returns existing instances when frequency is unsupported", () => {
+      const instances = buildRecurringInstances(
+        {
+          ...baseEvent,
+          recurrenceRule: "RRULE:FREQ=HOURLY;COUNT=2",
+        },
+        new Date("2026-01-01T00:00:00.000Z"),
+        new Date("2026-01-02T00:00:00.000Z")
+      );
+
+      expect(instances).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledWith("Unsupported frequency", { frequency: "HOURLY" });
+    });
+
+    it("returns empty for invalid rules", () => {
+      const instances = buildRecurringInstances(
+        {
+          ...baseEvent,
+          recurrenceRule: "RRULE:COUNT=2",
+        },
+        new Date("2026-01-01T00:00:00.000Z"),
+        new Date("2026-01-02T00:00:00.000Z")
+      );
+
+      expect(instances).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith("Invalid RRULE", { rruleString: "RRULE:COUNT=2" });
+    });
+  });
+
   describe("addRecurringException", () => {
     it("returns null when event not found", async () => {
       const result = await addRecurringException("e1", new Date());
@@ -231,6 +322,117 @@ describe("calendar-service", () => {
   describe("getEventAttendees", () => {
     it("returns empty array (stub)", async () => {
       expect(await getEventAttendees("e1")).toEqual([]);
+    });
+  });
+
+  // ── Meeting rooms ────────────────────────────────────────────────────────
+  describe("listMeetingRooms", () => {
+    it("returns empty array (stub)", async () => {
+      expect(await listMeetingRooms()).toEqual([]);
+      expect(await listMeetingRooms({ location: 'HQ', minCapacity: 10, amenities: ['video'] })).toEqual([]);
+    });
+  });
+
+  describe("checkRoomAvailability", () => {
+    it("returns true (stub)", async () => {
+      expect(await checkRoomAvailability("room-1", new Date(), new Date())).toBe(true);
+    });
+  });
+
+  describe("bookMeetingRoom", () => {
+    it("returns booking with generated ID", async () => {
+      const booking = await bookMeetingRoom("room-1", "event-1", new Date(), new Date(), "u1");
+      expect(booking.id).toMatch(/^booking-/);
+      expect(booking.roomId).toBe("room-1");
+    });
+  });
+
+  describe("cancelRoomBooking", () => {
+    it("returns true (stub)", async () => {
+      expect(await cancelRoomBooking("booking-1")).toBe(true);
+    });
+  });
+
+  // ── Availability ─────────────────────────────────────────────────────────
+  describe("getUserAvailability", () => {
+    it("returns empty array (stub)", async () => {
+      expect(await getUserAvailability("u1", new Date(), new Date())).toEqual([]);
+    });
+  });
+
+  describe("findCommonAvailability", () => {
+    it("returns empty array (stub)", async () => {
+      expect(await findCommonAvailability(["u1", "u2"], new Date(), new Date(), 30)).toEqual([]);
+    });
+  });
+
+  // ── External sync ────────────────────────────────────────────────────────
+  describe("syncExternalCalendar", () => {
+    it("returns success when calendar found", async () => {
+      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce({ id: "cal-1", name: "My Cal" });
+      mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", name: "My Cal" }]);
+      const result = await syncExternalCalendar("cal-1", "google");
+      expect(result.success).toBe(true);
+      expect(result.syncedEvents).toBe(0);
+    });
+
+    it("throws when calendar not found", async () => {
+      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce(undefined);
+      // updateCalendar will be called on error path
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      await expect(syncExternalCalendar("nope", "outlook")).rejects.toThrow("Failed to sync external calendar");
+    });
+  });
+
+  describe("enableCalendarSync", () => {
+    it("returns updated calendar after syncing", async () => {
+      // updateCalendar for enable
+      mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", syncEnabled: true }]);
+      // getCalendarById inside syncExternalCalendar
+      mocks.mockDb.query.calendars.findFirst.mockResolvedValueOnce({ id: "cal-1" });
+      // updateCalendar inside syncExternalCalendar (lastSyncAt)
+      mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", syncStatus: "synced" }]);
+      const result = await enableCalendarSync("cal-1", "google", "ext-123");
+      expect(result).toEqual({ id: "cal-1", syncEnabled: true });
+    });
+
+    it("returns null when update returns null", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([]);
+      expect(await enableCalendarSync("cal-1", "google", "ext-1")).toBeNull();
+    });
+  });
+
+  describe("disableCalendarSync", () => {
+    it("returns updated calendar", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ id: "cal-1", syncEnabled: false }]);
+      const result = await disableCalendarSync("cal-1");
+      expect(result).toEqual({ id: "cal-1", syncEnabled: false });
+    });
+  });
+
+  // ── Reminders ────────────────────────────────────────────────────────────
+  describe("addEventReminder", () => {
+    it("returns reminder with generated ID", async () => {
+      const r = await addEventReminder("e1", "email", 15);
+      expect(r.id).toMatch(/^reminder-/);
+      expect(r.eventId).toBe("e1");
+      expect(r.minutesBefore).toBe(15);
+    });
+  });
+
+  describe("getPendingReminders", () => {
+    it("returns empty array (stub)", async () => {
+      expect(await getPendingReminders()).toEqual([]);
+      expect(await getPendingReminders(30)).toEqual([]);
+    });
+  });
+
+  // ── Statistics ───────────────────────────────────────────────────────────
+  describe("getCalendarStatistics", () => {
+    it("returns zero stats (stub)", async () => {
+      const stats = await getCalendarStatistics("cal-1", new Date(), new Date());
+      expect(stats.totalEvents).toBe(0);
+      expect(stats.eventsByType).toEqual({});
     });
   });
 });

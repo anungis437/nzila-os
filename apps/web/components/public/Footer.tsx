@@ -7,15 +7,11 @@ import { MARKETING_FACTS, platformCoverageLabel } from '@/lib/marketing-facts';
 import type { Locale } from '@/lib/locales';
 
 const CONSOLE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'http://localhost:3001';
-const PARTNERS_URL = process.env.NEXT_PUBLIC_PARTNERS_URL ?? 'http://localhost:3004';
 const UNION_EYES_URL = process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003';
-const ABR_URL = process.env.NEXT_PUBLIC_ABR_URL ?? 'http://localhost:3005';
 
 const appLinks = [
   { name: 'Console', href: CONSOLE_URL, external: true },
-  { name: 'Partner Portal', href: PARTNERS_URL, external: true },
   { name: 'Union Eyes', href: UNION_EYES_URL, external: true },
-  { name: 'FAIRCASE', href: ABR_URL, external: true },
 ];
 
 const footerCopy: Record<Locale, {
@@ -36,6 +32,7 @@ const footerCopy: Record<Locale, {
         category: 'Platform',
         links: [
           { name: 'Organizational Continuity', href: '/organizational-continuity' },
+          { name: 'Public Service (CIVIC)', href: '/public-service' },
           { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Platform', href: '/platform' },
           { name: 'Trust Center', href: '/trust' },
@@ -85,6 +82,7 @@ const footerCopy: Record<Locale, {
         category: 'Plateforme',
         links: [
           { name: 'Continuité organisationnelle', href: '/organizational-continuity' },
+          { name: 'Service public (CIVIC)', href: '/public-service' },
           { name: 'Union Eyes', href: '/union-eyes' },
           { name: 'Plateforme', href: '/platform' },
           { name: 'Centre de confiance', href: '/trust' },

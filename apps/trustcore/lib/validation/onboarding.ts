@@ -50,7 +50,7 @@ export type Step3Input = z.infer<typeof step3Schema>
 // ── Step 4 — Vendors ──────────────────────────────────────────────────────
 
 export const knownVendorEnum = z.enum([
-  'google_workspace',
+  'ue_docs',
   'microsoft_365',
   'stripe',
   'shopify',

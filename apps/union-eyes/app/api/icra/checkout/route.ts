@@ -78,7 +78,7 @@ function buildLineItems(
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  let body: unknown;
+  let body: any;
   try {
     body = await request.json();
   } catch {

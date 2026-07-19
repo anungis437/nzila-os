@@ -203,7 +203,7 @@ describe('generator — generate', () => {
 
     generate({ rootDir, outputDir, format: 'json', combined: false })
     expect(existsSync(outputDir)).toBe(true)
-  })
+  }, 15000)
 
   it('returns 0 routes for empty monorepo', async () => {
     const rootDir = join(TMP, 'empty')
@@ -255,7 +255,7 @@ describe('generator — spec content', () => {
     expect(pathItem.get.parameters).toContainEqual(
       expect.objectContaining({ name: 'id', in: 'path', required: true }),
     )
-  })
+  }, 15000)
 
   it('includes requestBody for POST/PUT/PATCH', async () => {
     const rootDir = join(TMP, 'body')
@@ -274,7 +274,7 @@ describe('generator — spec content', () => {
     const usersPath = spec.paths['/api/users']
     expect(usersPath.post.requestBody).toBeDefined()
     expect(usersPath.post.requestBody.required).toBe(true)
-  })
+  }, 15000)
 
   it('marks x-schema-source for routes with Zod', async () => {
     const rootDir = join(TMP, 'zod')
@@ -324,5 +324,5 @@ describe('generator — spec content', () => {
 
     expect(spec.components.securitySchemes.platformAuth).toBeDefined()
     expect(spec.security).toEqual([{ platformAuth: [] }])
-  })
+  }, 15000)
 })

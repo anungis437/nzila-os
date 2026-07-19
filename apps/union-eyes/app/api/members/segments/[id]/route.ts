@@ -48,7 +48,7 @@ export const PATCH = withApi(
     const { name, description, filters } = body as {
       name?: string;
       description?: string;
-      filters?: unknown;
+      filters?: any;
     };
 
     const [existing] = await db

@@ -31,7 +31,6 @@ import {
   clearSessionCookie,
   getSessionFromCookie,
 } from './session'
-import type { CreateSessionOptions, SessionData } from './session'
 import { issueMfaChallenge } from '../mfa/service'
 import { assessRisk } from '../risk/assess'
 

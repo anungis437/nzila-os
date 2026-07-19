@@ -42,8 +42,8 @@ vi.mock('drizzle-orm', () => ({
   desc: vi.fn((col) => ({ column: col, direction: 'desc' })),
   asc: vi.fn((col) => ({ column: col, direction: 'asc' })),
   sql: vi.fn(),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   gt: vi.fn((a, b) => ({ field: a, value: b })),
   lt: vi.fn((a, b) => ({ field: a, value: b })),
   gte: vi.fn((a, b) => ({ field: a, value: b })),
@@ -156,12 +156,56 @@ describe('PCIComplianceService', () => {
       expect(id).toBe('assessment-1');
       expect(mocks.mockInsert).toHaveBeenCalled();
     });
+
+    it('returns assessment id even when the template has no requirements', async () => {
+      const mockOrder = vi.fn().mockResolvedValue({ data: [{ id: 'org-1' }], error: null });
+      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const id = await service.createAssessment('org-1');
+      expect(id).toBe('assessment-1');
+    });
+
+    it('filters invalid template rows before inserting requirements', async () => {
+      const mockOrder = vi.fn().mockResolvedValue({
+        data: [
+          { requirement_number: '1.1', requirement_description: 'Valid requirement' },
+          { requirement_number: '1.2' },
+        ],
+        error: null,
+      });
+      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const id = await service.createAssessment('org-1');
+      expect(id).toBe('assessment-1');
+      expect(mocks.mockValues).toHaveBeenCalledWith(expect.arrayContaining([
+        expect.objectContaining({ requirementNumber: '1.1' }),
+      ]));
+    });
+
+    it('handles non-array template data', async () => {
+      const mockOrder = vi.fn().mockResolvedValue({ data: null, error: null });
+      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const id = await service.createAssessment('org-1');
+      expect(id).toBe('assessment-1');
+    });
   });
 
   describe('updateRequirement', () => {
     it('updates requirement status', async () => {
       await service.updateRequirement('req-1', 'compliant', 'evidence data');
       expect(mocks.mockUpdate).toHaveBeenCalled();
+    });
+
+    it('stores nulls when optional fields are omitted', async () => {
+      await service.updateRequirement('req-2', 'not_applicable');
+      expect(mocks.mockUpdate).toHaveBeenCalledWith(expect.anything());
     });
   });
 
@@ -229,6 +273,133 @@ describe('PCIComplianceService', () => {
       }]);
       const result = await service.isQuarterlyScanDue('org-1');
       expect(result).toBe(false);
+    });
+
+    it('returns true when the latest scan is stale', async () => {
+      mocks.mockLimit.mockResolvedValue([{
+        id: 'scan-1',
+        organizationId: 'org-1',
+        scanDate: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+        vendorName: 'Qualys',
+        scanStatus: 'pass',
+        vulnerabilitiesFound: 0,
+        criticalIssues: 0,
+        reportUrl: null,
+      }]);
+      const result = await service.isQuarterlyScanDue('org-1');
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('getOverdueScans', () => {
+    it('returns empty when no organizations exist', async () => {
+      mocks.mockSupabaseSelect.mockResolvedValue({ data: [], error: null });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const result = await service.getOverdueScans();
+      expect(result).toEqual([]);
+    });
+
+    it('returns overdue organizations when scans are stale', async () => {
+      const staleScanDate = new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString();
+      mocks.mockSupabaseSelect.mockResolvedValue({ data: [{ id: 'org-1' }, { id: 'invalid' }], error: null });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const originalGetLatest = service.getLatestQuarterlyScan.bind(service);
+      service.getLatestQuarterlyScan = vi.fn(async (orgId: string) => {
+        if (orgId === 'org-1') {
+          return {
+            id: 'scan-1',
+            organizationId: 'org-1',
+            scanDate: new Date(staleScanDate),
+            vendorName: 'Qualys',
+            scanStatus: 'pass',
+            vulnerabilitiesFound: 0,
+            criticalIssues: 0,
+          };
+        }
+        return originalGetLatest(orgId);
+      }) as any;
+
+      const result = await service.getOverdueScans();
+      expect(result[0]).toMatchObject({ organizationId: 'org-1' });
+    });
+
+    it('skips organizations with recent scans', async () => {
+      mocks.mockSupabaseSelect.mockResolvedValue({ data: [{ id: 'org-2' }], error: null });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      service.getLatestQuarterlyScan = vi.fn(async () => ({
+        id: 'scan-2',
+        organizationId: 'org-2',
+        scanDate: new Date(),
+        vendorName: 'Qualys',
+        scanStatus: 'pass',
+        vulnerabilitiesFound: 0,
+        criticalIssues: 0,
+      })) as any;
+
+      const result = await service.getOverdueScans();
+      expect(result).toEqual([]);
+    });
+
+    it('handles non-array organization data', async () => {
+      mocks.mockSupabaseSelect.mockResolvedValue({ data: null, error: null });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const result = await service.getOverdueScans();
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getKeysNeedingRotation', () => {
+    it('returns empty when no keys exist', async () => {
+      const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
+      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const result = await service.getKeysNeedingRotation();
+      expect(result).toEqual([]);
+    });
+
+    it('returns keys that are older than 90 days', async () => {
+      const mockOrder = vi.fn().mockResolvedValue({
+        data: [
+          { organization_id: 'org-1', key_type: 'stripe_secret_key', rotated_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString() },
+          { organization_id: 'org-2', key_type: 'database_encryption', rotated_at: new Date().toISOString() },
+        ],
+        error: null,
+      });
+      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const result = await service.getKeysNeedingRotation();
+      expect(result).toEqual([
+        expect.objectContaining({ organizationId: 'org-1', keyType: 'stripe_secret_key' }),
+      ]);
+    });
+
+    it('returns empty for non-array responses', async () => {
+      const mockOrder = vi.fn().mockResolvedValue({ data: null, error: null });
+      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
+      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+
+      const result = await service.getKeysNeedingRotation();
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('trackKeyRotation', () => {
+    it('records a scheduled key rotation', async () => {
+      await service.trackKeyRotation('org-1', 'stripe_secret_key', 'key-123');
+      expect(mocks.mockInsert).toHaveBeenCalled();
     });
   });
 });

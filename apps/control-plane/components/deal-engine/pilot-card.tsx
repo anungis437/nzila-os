@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { DealStageBadge } from "./deal-stage-badge";
 import type { Pilot } from "@nzila/deal-engine/types";
 
 interface PilotCardProps {

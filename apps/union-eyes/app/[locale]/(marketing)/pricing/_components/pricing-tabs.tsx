@@ -190,15 +190,20 @@ export default function PricingTabs({ locale, copy }: PricingTabsProps) {
   // Hydrate initial tab from URL hash (so deep links work) without forcing
   // scroll on first paint.
   useEffect(() => {
-    const fromHash = parseHashTab(window.location.hash);
-    if (fromHash) setActiveTab(fromHash);
+    const timeoutId = window.setTimeout(() => {
+      const fromHash = parseHashTab(window.location.hash);
+      if (fromHash) setActiveTab(fromHash);
+    }, 0);
 
     const onHashChange = () => {
       const next = parseHashTab(window.location.hash);
       if (next) setActiveTab(next);
     };
     window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('hashchange', onHashChange);
+    };
   }, []);
 
   const selectTab = useCallback((id: TabId, opts: { updateHash?: boolean; focus?: boolean } = {}) => {

@@ -177,7 +177,7 @@ async function checkForUnresolvedCriticalSignals(claimId: string): Promise<boole
     }
 
     const latestSignalData = recentSignalUpdates[0];
-    const metadata = latestSignalData.metadata as unknown;
+    const metadata = latestSignalData.metadata as any;
 
     // Check for critical signals in the metadata
     if (metadata?.criticalCount && metadata.criticalCount > 0) {
@@ -914,7 +914,7 @@ async function evaluateConditions(
   if (!claim) return false;
 
   // PR #14: Type-safe field access with proper validation
-  const getClaimField = (fieldName: string): unknown => {
+  const getClaimField = (fieldName: string): any => {
     // Runtime check for valid claim fields
     if (fieldName in claim) {
       return (claim as Record<string, unknown>)[fieldName];
@@ -1099,7 +1099,7 @@ async function autoAssignOfficer(
       assignmentCriteria,
       userId,
       {
-        role: role as unknown,
+        role: role as any,
         forceAssignment: criteria.forceAssignment || false,
         minScore: criteria.minScore || 0.5,
       }

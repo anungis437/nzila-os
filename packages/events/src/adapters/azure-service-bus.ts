@@ -36,6 +36,7 @@ export class AzureServiceBusAdapter implements DurableEventBus {
     // await sender.sendMessages({ body: event, subject: event.type })
     // await sender.close()
     // await client.close()
+    void event
     throw new Error(
       `AzureServiceBusAdapter.publish() not yet implemented. ` +
         `Provision Azure Service Bus and install @azure/service-bus to enable.`,

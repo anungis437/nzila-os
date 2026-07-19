@@ -57,7 +57,7 @@ async function getHandler(_req: NextRequest, _context: Record<string, unknown>) 
       dataSources: formattedDataSources,
       count: formattedDataSources.length,
     });
-  } catch (_error: unknown) {
+  } catch (_error: any) {
     return NextResponse.json(
       { error: 'Failed to fetch data sources' },
       { status: 500 }

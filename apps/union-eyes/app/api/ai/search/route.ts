@@ -16,7 +16,7 @@ import { buildCanonicalAiOutput } from '@nzila/ai-sdk';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
-import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
@@ -114,7 +114,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       LIMIT ${max_results}
     `));
 
-    const hits = (results as unknown as Array<Record<string, unknown>>)
+    const hits = (results as any as Array<Record<string, unknown>>)
       .filter((r) => (r.similarity as number) >= threshold)
       .map((r) => ({
         id: r.id,
@@ -145,6 +145,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         const ai = getAiClient();
         const gen = await ai.generate({
           orgId: UE_SYSTEM_ORG_ID,
+          trace: buildOrgAiTrace(orgId),
           appKey: UE_APP_KEY,
           profileKey: UE_PROFILES.CHATBOT,
           input: `Answer the following question based ONLY on the provided context documents. If the documents don't contain enough information, say so.\n\nQuestion: ${query}\n\nContext:\n${contextText}`,
@@ -207,7 +208,7 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, _context
       WHERE is_active = true
     `));
 
-    const stats = (rows as unknown as Array<Record<string, unknown>>)[0] || {};
+    const stats = (rows as any as Array<Record<string, unknown>>)[0] || {};
     const total = (stats.total as number) || 0;
     const withEmbeddings = (stats.with_embeddings as number) || 0;
 

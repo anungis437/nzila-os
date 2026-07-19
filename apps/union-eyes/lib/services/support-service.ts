@@ -12,6 +12,9 @@ import {
   ticketHistory,
   slaPolices,
   knowledgeBaseArticles,
+  ticketStatusEnum,
+  ticketPriorityEnum,
+  ticketCategoryEnum,
   type SupportTicket,
   type NewSupportTicket,
   type TicketComment,
@@ -58,6 +61,34 @@ export interface SLAMetrics {
   avgResolutionTime: number;
 }
 
+type TicketPriority = typeof ticketPriorityEnum.enumValues[number];
+type TicketCategory = typeof ticketCategoryEnum.enumValues[number];
+type TicketStatus = typeof ticketStatusEnum.enumValues[number];
+
+const ticketPriorities = new Set<TicketPriority>(ticketPriorityEnum.enumValues);
+const ticketCategories = new Set<TicketCategory>(ticketCategoryEnum.enumValues);
+const ticketStatuses = new Set<TicketStatus>(ticketStatusEnum.enumValues);
+
+function normalizeTicketPriority(value: string): TicketPriority {
+  return ticketPriorities.has(value as TicketPriority) ? (value as TicketPriority) : 'medium';
+}
+
+function normalizeTicketCategory(value: string): TicketCategory {
+  return ticketCategories.has(value as TicketCategory) ? (value as TicketCategory) : 'other';
+}
+
+function normalizeTicketStatuses(values: string[]): TicketStatus[] {
+  return values.filter((value): value is TicketStatus => ticketStatuses.has(value as TicketStatus));
+}
+
+function normalizeTicketPriorities(values: string[]): TicketPriority[] {
+  return values.filter((value): value is TicketPriority => ticketPriorities.has(value as TicketPriority));
+}
+
+function normalizeTicketCategories(values: string[]): TicketCategory[] {
+  return values.filter((value): value is TicketCategory => ticketCategories.has(value as TicketCategory));
+}
+
 // ============================================================================
 // TICKET GENERATION
 // ============================================================================
@@ -88,6 +119,9 @@ async function calculateSLADeadlines(
   category: string,
   createdAt: Date = new Date()
 ): Promise<{ responseBy: Date; resolveBy: Date }> {
+  const normalizedPriority = normalizeTicketPriority(priority);
+  const normalizedCategory = normalizeTicketCategory(category);
+
   // Get applicable SLA policy
   const policies = await db
     .select()
@@ -97,14 +131,11 @@ async function calculateSLADeadlines(
         eq(slaPolices.isActive, true),
         or(
           and(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            eq(slaPolices.priority, priority as any),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            eq(slaPolices.category, category as any)
+            eq(slaPolices.priority, normalizedPriority),
+            eq(slaPolices.category, normalizedCategory)
           ),
           and(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            eq(slaPolices.priority, priority as any),
+            eq(slaPolices.priority, normalizedPriority),
             sql`${slaPolices.category} IS NULL`
           ),
           eq(slaPolices.isDefault, true)
@@ -189,18 +220,24 @@ export async function listTickets(
   const conditions: SQL[] = [];
   
   if (filters.status?.length) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(inArray(supportTickets.status, filters.status as any));
+    const statuses = normalizeTicketStatuses(filters.status);
+    if (statuses.length > 0) {
+      conditions.push(inArray(supportTickets.status, statuses));
+    }
   }
   
   if (filters.priority?.length) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(inArray(supportTickets.priority, filters.priority as any));
+    const priorities = normalizeTicketPriorities(filters.priority);
+    if (priorities.length > 0) {
+      conditions.push(inArray(supportTickets.priority, priorities));
+    }
   }
   
   if (filters.category?.length) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conditions.push(inArray(supportTickets.category, filters.category as any));
+    const categories = normalizeTicketCategories(filters.category);
+    if (categories.length > 0) {
+      conditions.push(inArray(supportTickets.category, categories));
+    }
   }
   
   if (filters.assignedTo) {

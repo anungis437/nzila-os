@@ -431,7 +431,7 @@ export class ZohoSyncService {
             result.recordsProcessed++
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Unknown error'
+          const message = String(error)
           result.recordsFailed++
           result.recordsProcessed++
           result.errors.push({
@@ -673,8 +673,8 @@ export class ZohoSyncService {
                 customerId: quoteData.customerId ?? '',
                 createdBy: 'zoho-sync',
                 ref: `ZOHO-${deal.id.slice(0, 8)}`,
-                status: quoteData.status ?? 'draft',
-                total: quoteData.total ?? '0',
+                status: quoteData.status,
+                total: quoteData.total,
                 notes: quoteData.notes,
                 currency: (await getOrgSettings(this.orgId)).currency,
                 metadata: { zohoDealId: deal.id, dealName: deal.Deal_Name },
@@ -685,7 +685,7 @@ export class ZohoSyncService {
           }
           result.recordsProcessed++
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Unknown error'
+          const message = String(error)
           result.recordsFailed++
           result.recordsProcessed++
           result.errors.push({

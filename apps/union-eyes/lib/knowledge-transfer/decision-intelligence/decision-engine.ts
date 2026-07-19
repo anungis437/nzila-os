@@ -11,11 +11,10 @@
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import { forecastContinuityTrends } from '../forecasting/continuity-forecaster';
+import type { DependencyNode } from '../propagation/propagation-models';
 import {
   type ContinuityRecommendation,
   type DecisionBrief,
-  type EvidenceItem,
-  type ReasoningStep,
 } from './decision-models';
 
 let _recCounter = 0;
@@ -26,11 +25,11 @@ function recId(): string {
 function buildSingleSourceRecommendation(
   singleSourceCount: number,
   totalNodes: number,
-  criticalSingleSource: any[],
+  criticalSingleSource: DependencyNode[],
 ): ContinuityRecommendation | null {
   if (singleSourceCount === 0) return null;
   const pct = Math.round((singleSourceCount / Math.max(totalNodes, 1)) * 100);
-  const topNodes = criticalSingleSource.slice(0, 3).map((n: any) => n.label);
+  const topNodes = criticalSingleSource.slice(0, 3).map((node) => node.label);
   return {
     id: recId(),
     category: 'redundancy_investment',
@@ -66,7 +65,7 @@ function buildSingleSourceRecommendation(
       {
         step: 3,
         evaluation: 'Prioritized by operational sensitivity',
-        conclusion: `${criticalSingleSource.filter((n: any) => n.continuitySensitivity === 'critical').length} critical-sensitivity nodes identified`,
+        conclusion: `${criticalSingleSource.filter((node) => node.continuitySensitivity === 'critical').length} critical-sensitivity nodes identified`,
         assumption: 'Continuity sensitivity ratings are based on role coverage and interview frequency',
       },
     ],
@@ -241,7 +240,7 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
     forecastContinuityTrends(orgId),
   ]);
 
-  const nodes = propagationMap.nodes as any[];
+  const nodes = propagationMap.nodes;
   const singleSourceNodes = nodes.filter((n) => n.isSingleSource);
   const govNodes = nodes.filter((n) => n.category === 'governance' || n.category === 'compliance');
   const govSingleSource = govNodes.filter((n) => n.isSingleSource);
@@ -249,7 +248,7 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
   const vendorSingleSource = vendorNodes.filter((n) => n.isSingleSource);
   const criticalSingleSource = singleSourceNodes.filter((n) => n.continuitySensitivity === 'critical');
   const undocumentedChains = singleSourceNodes.filter((n) => {
-    const downstream = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === n.id);
+    const downstream = propagationMap.downstreamImpacts.find((impact) => impact.nodeId === n.id);
     return downstream && downstream.directDependents?.length > 0;
   });
 
@@ -304,7 +303,7 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
   if (govSingleSource.length > 0) {
     criticalGaps.push(`${govSingleSource.length} governance/compliance processes are single-source`);
   }
-  const criticalBottlenecks = propagationMap.bottlenecks?.filter((b: any) => b.riskLevel === 'critical') ?? [];
+  const criticalBottlenecks = propagationMap.bottlenecks?.filter((bottleneck) => bottleneck.riskLevel === 'critical') ?? [];
   if (criticalBottlenecks.length > 0) {
     criticalGaps.push(`${criticalBottlenecks.length} critical operational bottlenecks identified`);
   }

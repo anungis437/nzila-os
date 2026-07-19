@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -225,11 +224,7 @@ const itemVariant = {
 };
 
 export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
-  const [greeting, setGreeting] = useState('Welcome');
-
-  useEffect(() => {
-    setGreeting(getGreeting());
-  }, []);
+  const greeting = getGreeting();
 
   const tiles = isCupeDemo ? DEMO_TILES : DEFAULT_TILES;
   const withLocale = (href: string) => `/${locale}${href}`;
@@ -342,7 +337,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
               <Link
                 key={href}
                 href={withLocale(href)}
-                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-xs font-semibold text-white/65 transition-all hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
+                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/4.5 px-4 py-2 text-xs font-semibold text-white/65 transition-all hover:border-white/20 hover:bg-white/9 hover:text-white"
               >
                 <Icon size={12} />
                 {label}
@@ -381,7 +376,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           >
             <Link
               href={withLocale(DEMO_URGENT.href)}
-              className="group flex items-center gap-3.5 rounded-xl border border-amber-500/30 bg-amber-500/[0.07] px-4 py-3.5 transition-all hover:border-amber-500/50 hover:bg-amber-500/[0.11]"
+              className="group flex items-center gap-3.5 rounded-xl border border-amber-500/30 bg-amber-500/[0.07] px-4 py-3.5 transition-all hover:border-amber-500/50 hover:bg-amber-500/11"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20">
                 <AlarmClock size={14} className="text-amber-400" />
@@ -421,7 +416,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
               <motion.div key={tile.href} variants={itemVariant}>
                 <Link
                   href={withLocale(tile.href)}
-                  className="group relative flex flex-col gap-3.5 overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.032] p-4 transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.065] hover:shadow-xl hover:shadow-black/30"
+                  className="group relative flex flex-col gap-3.5 overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.032] p-4 transition-all duration-200 hover:border-white/13 hover:bg-white/6.5 hover:shadow-xl hover:shadow-black/30"
                 >
                   {/* Icon */}
                   <div
@@ -467,9 +462,9 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
                 <Link
                   key={href}
                   href={withLocale(href)}
-                  className="group flex items-center gap-3.5 rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3 transition-all hover:border-white/[0.11] hover:bg-white/[0.05]"
+                  className="group flex items-center gap-3.5 rounded-xl border border-white/6 bg-white/2.5 px-4 py-3 transition-all hover:border-white/11 hover:bg-white/5"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/4">
                     <Icon size={14} className="text-white/35" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -498,7 +493,7 @@ export function PortalHome({ locale, displayName, email, isCupeDemo }: Props) {
           >
             <Link
               href={withLocale(DEMO_SPOTLIGHT.href)}
-              className="group relative flex items-center gap-5 overflow-hidden rounded-xl border border-indigo-500/20 bg-gradient-to-r from-indigo-600/10 via-violet-600/8 to-sky-600/10 px-6 py-5 transition-all hover:border-indigo-500/35 hover:shadow-xl hover:shadow-indigo-950/30"
+              className="group relative flex items-center gap-5 overflow-hidden rounded-xl border border-indigo-500/20 bg-linear-to-r from-indigo-600/10 via-violet-600/8 to-sky-600/10 px-6 py-5 transition-all hover:border-indigo-500/35 hover:shadow-xl hover:shadow-indigo-950/30"
             >
               {/* glow orb */}
               <div

@@ -4,7 +4,7 @@ import type { EvidenceChainLink, EvidenceChainVerification } from "./types";
 
 const LEGACY_TARGET_ID_KEY = "entity" + "Id";
 
-function toEvidenceChainLink(value: unknown): EvidenceChainLink | null {
+function toEvidenceChainLink(value: any): EvidenceChainLink | null {
   if (typeof value !== "object" || value === null) return null;
   const record = value as Record<string, unknown>;
   const linkId = typeof record.linkId === "string" ? record.linkId : "";

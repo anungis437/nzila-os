@@ -60,9 +60,9 @@ function assertNoForbiddenKeys(input: Record<string, unknown>, path: string): vo
 export function buildNarrativeContext(
   input: BuildNarrativeContextInput,
 ): NarrativeContext {
-  assertNoForbiddenKeys(input as unknown as Record<string, unknown>, 'input');
+  assertNoForbiddenKeys(input as any as Record<string, unknown>, 'input');
   assertNoForbiddenKeys(
-    input.adaptiveContext as unknown as Record<string, unknown>,
+    input.adaptiveContext as any as Record<string, unknown>,
     'input.adaptiveContext',
   );
 

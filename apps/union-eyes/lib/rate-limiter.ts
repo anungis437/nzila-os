@@ -25,7 +25,7 @@ interface RedisPipeline {
   zcard(key: string): void;
   zadd(key: string, opts: { score: number; member: string }): void;
   expire(key: string, seconds: number): void;
-  exec(): Promise<unknown[]>;
+  exec(): Promise<any[]>;
 }
 
 interface RedisClient {
@@ -39,7 +39,7 @@ function createRedisClient(): RedisClient | null {
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
     });
-    return upstash as unknown as RedisClient;
+    return upstash as any as RedisClient;
   }
 
   // Fallback to ioredis via REDIS_URL (local dev / Docker)

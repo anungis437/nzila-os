@@ -8,10 +8,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStripeClient } from '@nzila/payments-stripe'
 import { authenticateUser } from '@/lib/api-guards'
+import { resolveActiveOrgId } from '@/lib/org-context'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await authenticateUser()
   if (!auth.ok) return auth.response
+
+  const activeOrgId = await resolveActiveOrgId(auth.userId)
+  if (!activeOrgId) {
+    return NextResponse.json({ error: 'Forbidden: no active organization' }, { status: 403 })
+  }
 
   const { searchParams } = new URL(req.url)
   const sessionId = searchParams.get('session_id')
@@ -25,6 +31,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['subscription', 'customer'],
     })
+
+    const metadataOrgId = (session.metadata as Record<string, string> | null)?.org_id
+    if (metadataOrgId && metadataOrgId !== activeOrgId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const subscription = session.subscription as { id: string; status: string } | null
 

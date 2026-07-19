@@ -72,7 +72,7 @@ export interface SortRule {
 
 export interface ExecutionResult {
   success: boolean;
-  data?: unknown[];
+  data?: Record<string, unknown>[];
   rowCount?: number;
   executionTimeMs: number;
   error?: string;
@@ -204,7 +204,7 @@ export class ReportExecutor {
 
       return {
         success: true,
-        data: results as unknown[],
+        data: results as unknown as Record<string, unknown>[],
         rowCount: results.length,
         executionTimeMs,
         sql: query.queryChunks.join(' '), // For debugging

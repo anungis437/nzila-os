@@ -25,8 +25,6 @@ import {
   detectAIAutonomyConflict,
   detectEscalationDeadlock,
 } from './conflicts';
-import { modelContinuitySharing, modelJointPublication } from './coordination';
-import { evaluateDelegationChain } from './delegation';
 
 // ── Scenario registry ─────────────────────────────────────────────────────────
 

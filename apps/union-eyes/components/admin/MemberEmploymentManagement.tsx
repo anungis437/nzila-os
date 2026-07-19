@@ -19,6 +19,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
  
@@ -75,6 +76,9 @@ import {
   deleteMemberEmploymentAction,
   getEmploymentByOrganizationAction,
 } from "@/actions/member-employment-actions";
+import type { NewMemberEmployment } from "@/db/schema/domains/member/member-employment";
+
+type EmploymentFormValues = z.infer<typeof createMemberEmploymentSchema>;
 
 // =============================================================================
 // TYPES
@@ -174,8 +178,7 @@ export default function MemberEmploymentManagement({ organizationId }: MemberEmp
     try {
       const result = await getEmploymentByOrganizationAction(organizationId, statusFilter);
       if (result.isSuccess && result.data) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setEmploymentRecords(result.data as any);
+        setEmploymentRecords(result.data as unknown as MemberEmployment[]);
       } else {
         toast({
           title: "Error",
@@ -391,10 +394,8 @@ function EmploymentFormDialog({
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form = useForm<any>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createMemberEmploymentSchema) as any,
+  const form = useForm<EmploymentFormValues>({
+    resolver: zodResolver(createMemberEmploymentSchema) as Resolver<EmploymentFormValues>,
     defaultValues: editingRecord
       ? {
           organizationId: editingRecord.organizationId,
@@ -402,20 +403,16 @@ function EmploymentFormDialog({
           hireDate: editingRecord.hireDate,
           seniorityDate: editingRecord.seniorityDate,
           jobTitle: editingRecord.jobTitle,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          employmentStatus: editingRecord.employmentStatus as any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          employmentType: editingRecord.employmentType as any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          payFrequency: editingRecord.payFrequency as any,
+          employmentStatus: editingRecord.employmentStatus as EmploymentFormValues['employmentStatus'],
+          employmentType: editingRecord.employmentType as EmploymentFormValues['employmentType'],
+          payFrequency: editingRecord.payFrequency as EmploymentFormValues['payFrequency'],
           jobCode: editingRecord.jobCode || undefined,
           hourlyRate: editingRecord.hourlyRate ? parseFloat(editingRecord.hourlyRate) : undefined,
           baseSalary: editingRecord.baseSalary ? parseFloat(editingRecord.baseSalary) : undefined,
           regularHoursPerWeek: editingRecord.regularHoursPerWeek
             ? parseFloat(editingRecord.regularHoursPerWeek)
             : 40,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          shiftType: editingRecord.shiftType as any,
+          shiftType: editingRecord.shiftType as EmploymentFormValues['shiftType'],
           checkoffAuthorized: editingRecord.checkoffAuthorized ?? true,
         }
       : {
@@ -431,19 +428,17 @@ function EmploymentFormDialog({
         },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: EmploymentFormValues) => {
     setSubmitting(true);
     try {
       // Convert numeric fields to strings for database compatibility
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const employmentData: any = {
+      const employmentData = {
         ...data,
         hourlyRate: data.hourlyRate ? String(data.hourlyRate) : undefined,
         baseSalary: data.baseSalary ? String(data.baseSalary) : undefined,
         seniorityYears: data.seniorityYears ? String(data.seniorityYears) : undefined,
         regularHoursPerWeek: data.regularHoursPerWeek ? String(data.regularHoursPerWeek) : undefined,
-      };
+      } as unknown as NewMemberEmployment;
       
       const result = editingRecord
         ? await updateMemberEmploymentAction(editingRecord.id, employmentData)

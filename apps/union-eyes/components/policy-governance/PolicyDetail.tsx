@@ -15,7 +15,6 @@ export default function PolicyDetail({ policyId, onClose }: PolicyDetailProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
     fetch(`/api/governance/lifecycle/policies/${policyId}`)
       .then((r) => r.json())
       .then((d) => { setPolicy(d.policy ?? null); setLoading(false) })

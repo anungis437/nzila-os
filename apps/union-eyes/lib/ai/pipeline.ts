@@ -12,7 +12,7 @@
 import { logger } from '@/lib/logger';
 import { dataIngestion, IngestedDocument } from './data-ingestion';
 import { entityExtraction, ExtractionResult } from './entity-extraction';
-import { ragPipeline, SearchResult } from './rag-pipeline';
+import { ragPipeline, SearchResult, type DocumentMetadata } from './rag-pipeline';
 import { templateEngine, TemplateContext } from './template-engine';
 import { aiSafety, SafetyCheckResult } from './safety';
 import { learningService } from './learning';
@@ -114,12 +114,10 @@ class AIPipeline {
       // 3. Build template context
       const templateContext: TemplateContext = {
         query,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        jurisdiction: (context.jurisdiction || 'federal') as any,
+        jurisdiction: context.jurisdiction || 'federal',
         userRole: 'member',
         intent: this.classifyIntent(query),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        orgs: [] as any[],
+        orgs: [],
         retrievedContext: sources.map(s => s.chunk.content),
         sla: 'standard',
         organizationId: context.organizationId,
@@ -229,8 +227,7 @@ class AIPipeline {
       content: document.content,
       metadata: {
         source: metadata.source,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        type: extraction.documentType as any,
+        type: extraction.documentType as DocumentMetadata['type'],
         jurisdiction: metadata.jurisdiction,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -251,10 +248,12 @@ class AIPipeline {
    * Generate response using template engine
    */
   private async generateResponse(context: TemplateContext): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const prompt = (templateEngine as any).buildPrompt('general_query', context);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await (templateEngine as any).execute(prompt, context);
+    const engine = templateEngine as unknown as {
+      buildPrompt: (templateId: string, context: TemplateContext) => unknown;
+      execute: (prompt: unknown, context: TemplateContext) => Promise<string>;
+    };
+    const prompt = engine.buildPrompt('general_query', context);
+    const response = await engine.execute(prompt, context);
     return response;
   }
 

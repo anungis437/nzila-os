@@ -138,8 +138,8 @@ describe('api-client', () => {
 
     try {
       await client.get('/fail');
-    } catch (err: unknown) {
-      const e = err as { status: number; response: unknown; name: string };
+    } catch (err: any) {
+      const e = err as { status: number; response: any; name: string };
       expect(e.name).toBe('ApiError');
       expect(e.status).toBe(422);
       expect(e.response).toEqual({ error: 'validation' });
@@ -158,8 +158,8 @@ describe('api-client', () => {
 
     try {
       await client.get('/fail');
-    } catch (err: unknown) {
-      const e = err as { response: unknown };
+    } catch (err: any) {
+      const e = err as { response: any };
       expect(e.response).toBe('plain error');
     }
   });
@@ -173,7 +173,7 @@ describe('api-client', () => {
 
     try {
       await client.get('/slow');
-    } catch (err: unknown) {
+    } catch (err: any) {
       const e = err as { name: string; isTimeout: boolean };
       expect(e.name).toBe('TimeoutError');
       expect(e.isTimeout).toBe(true);
@@ -198,7 +198,7 @@ describe('api-client', () => {
       });
     });
 
-    const request = timeoutClient.get('/slow').catch((e: unknown) => e);
+    const request = timeoutClient.get('/slow').catch((e: any) => e);
     await vi.advanceTimersByTimeAsync(60);
 
     const err = await request;

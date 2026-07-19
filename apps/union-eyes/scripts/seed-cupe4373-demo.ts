@@ -31,7 +31,6 @@ if (!process.env.DATABASE_URL) {
 }
 
 import { db, client } from '../db/db';
-import { grievances } from '../db/schema/grievance-schema';
 import { demoCases, type DemoCase } from '../lib/demo/cupe4373-demo';
 import {
   PRIORITY_FEATURE_SPEC,
@@ -504,7 +503,7 @@ async function seedPriorityScores() {
        AND model_key = ${PRIORITY_MODEL_KEY}::text
        AND version = ${PRIORITY_MODEL_VERSION}
      LIMIT 1;
-  `)) as unknown as Array<{ id: string }>;
+  `)) as any as Array<{ id: string }>;
   const modelId = modelRows[0]?.id;
   if (!modelId) {
     console.warn('[seed]   no model row created — skipping scores');
@@ -653,7 +652,7 @@ async function main() {
     await seedPriorityScores();
     console.log('[seed] OK');
   } catch (err) {
-    const cause = (err as { cause?: unknown })?.cause;
+    const cause = (err as { cause?: any })?.cause;
     console.error('[seed] FAILED:', err);
     if (cause) console.error('[seed] cause:', cause);
     process.exitCode = 1;

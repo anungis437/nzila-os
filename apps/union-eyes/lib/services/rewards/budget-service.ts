@@ -16,7 +16,7 @@ import {
   type NewRewardBudgetEnvelope,
   type RewardBudgetEnvelope,
 } from '@/db/schema';
-import { eq, and, sql, lte, gte, desc, asc, ne } from 'drizzle-orm';
+import { eq, and, sql, lte, gte, desc, asc, ne, type SQL } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 
@@ -72,22 +72,23 @@ export async function listBudgetEnvelopes(
 ): Promise<RewardBudgetEnvelope[]> {
   const now = new Date();
   
-  let conditions = and(
+  const conditions: SQL[] = [
     eq(rewardBudgetEnvelopes.programId, programId),
-    eq(rewardBudgetEnvelopes.orgId, orgId)
-  );
+    eq(rewardBudgetEnvelopes.orgId, orgId),
+  ];
 
   if (activeOnly) {
-    conditions = and(
-      conditions,
-      lte(rewardBudgetEnvelopes.startsAt, now),
-      gte(rewardBudgetEnvelopes.endsAt, now)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any;
+    conditions.push(lte(rewardBudgetEnvelopes.startsAt, now));
+    conditions.push(gte(rewardBudgetEnvelopes.endsAt, now));
+  }
+
+  const whereClause = and(...conditions);
+  if (!whereClause) {
+    return [];
   }
 
   const envelopes = await db.query.rewardBudgetEnvelopes.findMany({
-    where: conditions,
+    where: whereClause,
     orderBy: [desc(rewardBudgetEnvelopes.startsAt)],
   });
 
@@ -241,10 +242,14 @@ export async function getBudgetUsageSummary(
 }>> {
   const now = new Date();
 
-  let whereClause = eq(rewardBudgetEnvelopes.orgId, orgId);
+  const conditions: SQL[] = [eq(rewardBudgetEnvelopes.orgId, orgId)];
   if (programId) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    whereClause = and(whereClause, eq(rewardBudgetEnvelopes.programId, programId)) as any;
+    conditions.push(eq(rewardBudgetEnvelopes.programId, programId));
+  }
+
+  const whereClause = and(...conditions);
+  if (!whereClause) {
+    return [];
   }
 
   const envelopes = await db.query.rewardBudgetEnvelopes.findMany({
@@ -509,15 +514,19 @@ export async function cleanupExpiredReservations(): Promise<{
 }> {
   const now = new Date();
 
+  const expiredReservationConditions: SQL[] = [
+    ne(budgetReservations.status, 'released'),
+    ne(budgetReservations.status, 'expired'),
+    lte(budgetReservations.expiresAt, now),
+  ];
+
+  const expiredReservationWhere = and(...expiredReservationConditions);
+  if (!expiredReservationWhere) {
+    return { cleaned: 0, released: 0 };
+  }
+
   const expiredReservations = await db.query.budgetReservations.findMany({
-    where: and(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ne(budgetReservations.status, 'released' as any),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ne(budgetReservations.status, 'expired' as any),
-      lte(budgetReservations.expiresAt, now)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any,
+    where: expiredReservationWhere,
   });
 
   let released = 0;
@@ -568,16 +577,18 @@ export async function checkBudgetWithReservations(
 export async function getActiveReservations(poolId?: string) {
   const _now = new Date();
   
-  let whereClause = and(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ne(budgetReservations.status, 'released' as any),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ne(budgetReservations.status, 'expired' as any)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  const conditions: SQL[] = [
+    ne(budgetReservations.status, 'released'),
+    ne(budgetReservations.status, 'expired'),
+  ];
 
   if (poolId) {
-    whereClause = and(whereClause, eq(budgetReservations.poolId, poolId));
+    conditions.push(eq(budgetReservations.poolId, poolId));
+  }
+
+  const whereClause = and(...conditions);
+  if (!whereClause) {
+    return [];
   }
 
   return await db.query.budgetReservations.findMany({

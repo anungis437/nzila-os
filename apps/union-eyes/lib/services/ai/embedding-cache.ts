@@ -278,7 +278,7 @@ class EmbeddingCacheService {
           match: `${this.CACHE_PREFIX}:*`,
           count: 100,
         });
-        cursor = result[0] as unknown as number;
+        cursor = result[0] as any as number;
         keys.push(...(result[1] as string[]));
       } while (cursor !== 0);
       

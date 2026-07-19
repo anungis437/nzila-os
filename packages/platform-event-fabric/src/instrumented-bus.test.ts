@@ -140,7 +140,6 @@ describe('createInstrumentedEventBus', () => {
     })
 
     bus.subscribe('workflow.started', async () => {
-      // eslint-disable-next-line no-throw-literal
       throw 'string-error'
     })
 

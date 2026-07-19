@@ -105,7 +105,7 @@ function getDjangoApiUrl(): string {
 
 async function apiPost<T = unknown>(
   path: string,
-  body: unknown,
+  body: any,
   options: { authToken?: string } = {}
 ): Promise<T> {
   const base = getDjangoApiUrl().replace(/\/$/, '');

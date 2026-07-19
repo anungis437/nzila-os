@@ -335,7 +335,7 @@ export class CircuitBreakerRegistry {
  */
 export function withCircuitBreaker(options: CircuitBreakerOptions & { name: string }) {
   return function (
-    target: unknown,
+    target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
@@ -345,7 +345,7 @@ export function withCircuitBreaker(options: CircuitBreakerOptions & { name: stri
       options
     );
 
-    descriptor.value = async function (...args: unknown[]) {
+    descriptor.value = async function (...args: any[]) {
       return breaker.execute(() => originalMethod.apply(this, args));
     };
 

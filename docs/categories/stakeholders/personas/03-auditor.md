@@ -11,7 +11,7 @@ Nzila OS provides five categories of verifiable evidence:
 
 | Category | What You Get | How to Verify |
 |----------|-------------|---------------|
-| **Evidence packs** | Per-action tamper-evident bundles (hash-chained, Azure Blob sealed) | Hash-chain verification: any altered record breaks the chain |
+| **Evidence packs** | Per-action tamper-evident bundles (hash-chained, Azure Blob sealed) | Hash-chain verification: unknown altered record breaks the chain |
 | **Compliance snapshots** | Point-in-time compliance state (deterministic, hash-chained) | Reproduce via `pnpm exec tsx packages/platform-validation/src/run-all.ts` |
 | **Build attestation** | Ed25519-signed build provenance | Verify signature against published public key |
 | **SBOM** | CycloneDX software bill of materials | `scripts/generate-sbom.ts` → `ops/security/sbom.json` |

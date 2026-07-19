@@ -106,8 +106,7 @@ export async function processArrearsManagement(params: {
             oldestDebtDate: record.dueDate,
             arrearsStatus: 'active',
             notes: `1 overdue transaction(s), ${daysOverdue} days overdue. Last notification: ${scanDate.toISOString()}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any);
+          });
 
           arrearsCreated++;
           logger.info(`Created arrears record for member ${record.memberId}`);
@@ -120,8 +119,7 @@ export async function processArrearsManagement(params: {
             .set({
               totalOwed: currentTotal.toString(),
               notes: `Multiple overdue transactions, ${daysOverdue} days overdue. Last notification: ${scanDate.toISOString()}`,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any)
+            })
             .where(eq(arrears.id, existingArrears[0].id));
 
           logger.info(`Updated arrears record for member ${record.memberId}`);
@@ -150,8 +148,7 @@ export async function processArrearsManagement(params: {
         // Update transaction status
         await db
           .update(duesTransactions)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .set({ status: 'overdue', updatedAt: scanDate } as any)
+          .set({ status: 'overdue', updatedAt: scanDate.toISOString() })
           .where(eq(duesTransactions.id, record.transactionId));
 
       } catch (recordError) {

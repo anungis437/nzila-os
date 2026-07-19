@@ -39,14 +39,14 @@ export const GET = withApi(
 
     // Filter to specific node if requested
     if (nodeId) {
-      const node = propagationMap.nodes.find((n: any) => n.id === nodeId);
+      const node = propagationMap.nodes.find((n) => n.id === nodeId);
       if (!node) {
         throw new Error('Node not found');
       }
 
-      const downstreamImpact = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === nodeId);
-      const upstreamDeps = propagationMap.upstreamDependencies.find((u: any) => u.nodeId === nodeId);
-      const coupling = propagationMap.couplingAnalysis.find((c: any) => c.nodeId === nodeId);
+      const downstreamImpact = propagationMap.downstreamImpacts.find((d) => d.nodeId === nodeId);
+      const upstreamDeps = propagationMap.upstreamDependencies.find((u) => u.nodeId === nodeId);
+      const coupling = propagationMap.couplingAnalysis.find((c) => c.nodeId === nodeId);
 
       return {
         data: {

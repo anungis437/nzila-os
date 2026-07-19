@@ -313,7 +313,7 @@ describe('generateRfpResponse — alternate branches', () => {
   it('renders verification appendix with missing signature', () => {
     const altPack: ProcurementPack = {
       ...mockPack,
-      signature: undefined as any,
+      signature: undefined as unknown,
     }
     const input: RfpGeneratorInput = {
       orgId: 'org-1',

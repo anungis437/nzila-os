@@ -25,7 +25,7 @@ vi.mock('@/lib/api/standardized-responses', () => ({
 
 vi.mock('next/server', () => ({
   NextResponse: {
-    json: vi.fn((body: unknown, init?: { status?: number }) => ({
+    json: vi.fn((body: any, init?: { status?: number }) => ({
       body,
       status: init?.status || 200,
     })),

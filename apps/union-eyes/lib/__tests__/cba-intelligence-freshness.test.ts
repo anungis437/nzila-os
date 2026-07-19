@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { computeFreshnessStatus } from "@/lib/services/cba-intelligence/freshness-service";
+import {
+  computeFreshnessStatus,
+  normalizeFreshnessThresholds,
+} from "@/lib/services/cba-intelligence/freshness-service";
 
 describe("freshness-service – computeFreshnessStatus", () => {
   const thresholds = { agingDays: 14, staleDays: 30, expiredDays: 90 };
@@ -53,5 +56,26 @@ describe("freshness-service – computeFreshnessStatus", () => {
     expect(computeFreshnessStatus(7, custom)).toBe("aging");
     expect(computeFreshnessStatus(14, custom)).toBe("stale");
     expect(computeFreshnessStatus(30, custom)).toBe("expired");
+  });
+
+  it("normalizes invalid threshold ordering before status evaluation", () => {
+    const invalid = { agingDays: 30, staleDays: 20, expiredDays: 10 };
+
+    // Normalized ordering becomes 30, 31, 32.
+    expect(computeFreshnessStatus(30, invalid)).toBe("aging");
+    expect(computeFreshnessStatus(31, invalid)).toBe("stale");
+    expect(computeFreshnessStatus(32, invalid)).toBe("expired");
+  });
+});
+
+describe("freshness-service – normalizeFreshnessThresholds", () => {
+  it("uses positive defaults and enforces strict ordering", () => {
+    expect(
+      normalizeFreshnessThresholds({ agingDays: -1, staleDays: 0, expiredDays: 0 }),
+    ).toEqual({ agingDays: 14, staleDays: 30, expiredDays: 90 });
+
+    expect(
+      normalizeFreshnessThresholds({ agingDays: 30, staleDays: 30, expiredDays: 31 }),
+    ).toEqual({ agingDays: 30, staleDays: 31, expiredDays: 32 });
   });
 });

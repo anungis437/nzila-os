@@ -206,7 +206,7 @@
 ## Hard Rules (enforced in every file)
 
 1. **"org" everywhere** — never "tenant"
-2. **Strict TypeScript** — no `any`, no `as any`, no `@ts-ignore`
+2. **Strict TypeScript** — no `any`, no `as unknown`, no `@ts-ignore`
 3. **Zod validation** on all external boundaries
 4. **No `console.*`** — use `createLogger` from `@nzila/os-core/telemetry`
 5. **Layered architecture** — ports/adapters, no direct DB in services

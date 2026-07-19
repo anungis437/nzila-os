@@ -11,7 +11,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
 import type { Answer, ConsentRecord } from '@/lib/icra/types'
 import { scoreAssessment } from '@/lib/icra/scoring'
 import { rateLimit } from '@/lib/rate-limit'
@@ -39,8 +38,6 @@ import {
   routeQuestionBank,
   buildPersistedAdaptiveContext,
   embedPersistedAdaptiveContext,
-  embedPersistedAdaptiveReportAISlot,
-  resolveAdaptiveReportAISlot,
   type RoutableQuestion,
 } from '@/lib/icra/adaptation'
 
@@ -179,7 +176,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           questionBankVersion: QUESTION_BANK_VERSION,
           doctrineVersion: DOCTRINE_VERSION,
           consent,
-          organizationContext: normalizedOrgContext,
+          organizationContext: organizationContextForInsert,
           locale,
           submittedAt: new Date(),
         })

@@ -25,7 +25,6 @@ import { memberEmployment } from "../schema/domains/member/member-employment";
 import { eq, and, or, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 // =============================================================================
 // SEGMENT CRUD
@@ -37,7 +36,7 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 export async function createSegment(
   data: InsertMemberSegment
 ): Promise<SelectMemberSegment> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [segment] = await tx
@@ -60,7 +59,7 @@ export async function getSegments(
   organizationId: string,
   userId?: string
 ): Promise<SelectMemberSegment[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const conditions: SQL[] = [
@@ -97,7 +96,7 @@ export async function getSegmentById(
   id: string,
   organizationId: string
 ): Promise<SelectMemberSegment | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [segment] = await tx
@@ -126,7 +125,7 @@ export async function updateSegment(
   id: string,
   data: Partial<InsertMemberSegment>
 ): Promise<SelectMemberSegment> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [updated] = await tx
@@ -156,7 +155,7 @@ export async function updateSegment(
 export async function deleteSegment(
   id: string
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       await tx
@@ -190,7 +189,7 @@ export async function searchMembersAdvanced(
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const page = options?.page || 1;
@@ -348,7 +347,7 @@ export async function executeSegment(
   }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       // Get segment
@@ -407,7 +406,7 @@ export async function executeSegment(
 export async function logSegmentExecution(
   data: InsertSegmentExecution
 ): Promise<SelectSegmentExecution> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [execution] = await tx
@@ -430,7 +429,7 @@ export async function getSegmentExecutions(
   segmentId: string,
   limit: number = 50
 ): Promise<SelectSegmentExecution[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       return await tx
@@ -456,7 +455,7 @@ export async function getSegmentExecutions(
 export async function logSegmentExport(
   data: InsertSegmentExport
 ): Promise<SelectSegmentExport> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       const [exportLog] = await tx
@@ -479,7 +478,7 @@ export async function getExportHistory(
   organizationId: string,
   limit: number = 100
 ): Promise<SelectSegmentExport[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return withRLSContext(async (tx: RLSTx) => {
     try {
       return await tx

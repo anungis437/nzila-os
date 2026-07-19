@@ -44,8 +44,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return {
     ...actual,
-    eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
-    and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
+    eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
+    and: vi.fn((...args: any[]) => ({ type: 'and', args })),
     or: vi.fn(),
     relations: vi.fn(() => ({})),
   };
@@ -56,7 +56,7 @@ vi.mock('../logger', () => ({
 }));
 
 /** Helper: set up N sequential db.select→from→where→limit chains */
-function setupLimitSequence(...values: unknown[][]) {
+function setupLimitSequence(...values: any[][]) {
   let callCount = 0;
   mocks.mockLimit.mockImplementation(() => {
     const idx = Math.min(callCount, values.length - 1);
@@ -223,7 +223,19 @@ describe('organization-utils', () => {
       expect(result).toBe('org-first');
     });
 
-    it('falls back to default org when user has no orgs', async () => {
+    it('BR-6: fails closed when user has no verified membership (production)', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('UE_ALLOW_DEFAULT_ORG', '');
+      mocks.mockCookiesGet.mockReturnValue(undefined);
+      setupLimitSequence([]); // no membership anywhere
+      const { getOrganizationIdForUser } = await import('../organization-utils');
+      await expect(getOrganizationIdForUser('user-1')).rejects.toThrow('Default Organization fallback');
+      vi.unstubAllEnvs();
+    });
+
+    it('BR-6: default org fallback only when explicitly opted in (non-production)', async () => {
+      vi.stubEnv('NODE_ENV', 'development');
+      vi.stubEnv('UE_ALLOW_DEFAULT_ORG', 'true');
       mocks.mockCookiesGet.mockReturnValue(undefined);
       // Query 1: first user org → none
       // Query 2: validate default org → exists
@@ -231,15 +243,19 @@ describe('organization-utils', () => {
       const { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } = await import('../organization-utils');
       const result = await getOrganizationIdForUser('user-1');
       expect(result).toBe(DEFAULT_ORGANIZATION_ID);
+      vi.unstubAllEnvs();
     });
 
-    it('throws when default org not found in DB', async () => {
+    it('throws when default org not found in DB (explicit dev fallback)', async () => {
+      vi.stubEnv('NODE_ENV', 'development');
+      vi.stubEnv('UE_ALLOW_DEFAULT_ORG', 'true');
       mocks.mockCookiesGet.mockReturnValue(undefined);
       // Query 1: first user org → none
       // Query 2: validate default org → not found → throw
       setupLimitSequence([], []);
       const { getOrganizationIdForUser } = await import('../organization-utils');
       await expect(getOrganizationIdForUser('user-1')).rejects.toThrow('not found');
+      vi.unstubAllEnvs();
     });
 
     it('rethrows on unexpected error', async () => {

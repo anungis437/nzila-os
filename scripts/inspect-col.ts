@@ -4,9 +4,9 @@ import { PgTable } from 'drizzle-orm/pg-core';
 
 for (const [name, value] of Object.entries(schema)) {
   if (!is(value, PgTable)) continue;
-  const cols = getTableColumns(value as PgTable<any>);
-  const firstCol = Object.values(cols)[0] as any;
-  console.log('Table:', getTableName(value as PgTable<any>));
+  const cols = getTableColumns(value as PgTable<unknown>);
+  const firstCol = Object.values(cols)[0] as unknown;
+  console.log('Table:', getTableName(value as PgTable<unknown>));
   console.log('Column name:', firstCol.name);
   console.log('columnType:', firstCol.columnType);
   console.log('dataType:', firstCol.dataType);
@@ -20,7 +20,7 @@ for (const [name, value] of Object.entries(schema)) {
   console.log('defaultFn:', typeof firstCol.defaultFn);
   console.log('enumValues:', firstCol.enumValues);
   // Second column for variety
-  const secondCol = Object.values(cols)[1] as any;
+  const secondCol = Object.values(cols)[1] as unknown;
   if (secondCol) {
     console.log('\n--- Second column ---');
     console.log('Column name:', secondCol.name);
@@ -29,7 +29,7 @@ for (const [name, value] of Object.entries(schema)) {
     if (typeof secondCol.getSQLType === 'function') console.log('SQL type:', secondCol.getSQLType());
   }
   // Third column
-  const thirdCol = Object.values(cols)[2] as any;
+  const thirdCol = Object.values(cols)[2] as unknown;
   if (thirdCol) {
     console.log('\n--- Third column ---');
     console.log('Column name:', thirdCol.name);

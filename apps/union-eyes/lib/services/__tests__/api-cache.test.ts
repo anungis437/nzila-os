@@ -24,7 +24,7 @@ vi.mock('next/server', () => {
       this.headers = init?.headers ?? new Map();
     }
 
-    static json(data: unknown, init?: { status?: number }) {
+    static json(data: any, init?: { status?: number }) {
       return new MockNextResponse(JSON.stringify(data), { status: init?.status ?? 200 });
     }
   }

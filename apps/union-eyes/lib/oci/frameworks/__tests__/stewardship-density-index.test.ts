@@ -163,7 +163,7 @@ describe('Stewardship Density Index', () => {
       const holders = [
         { criticality: 'institution_critical' as const, tenureBand: '7_15y' as const, successorIdentified: false },
         // Simulate a DB row whose criticality column has a new/unrecognised value.
-        { criticality: 'rogue_enum' as unknown as null, tenureBand: '7_15y' as const, successorIdentified: false },
+        { criticality: 'rogue_enum' as any as null, tenureBand: '7_15y' as const, successorIdentified: false },
       ];
       const result = computeStewardshipDensity(holders);
       expect(Number.isFinite(result.index)).toBe(true);
@@ -174,7 +174,7 @@ describe('Stewardship Density Index', () => {
 
     it('skips holders with unknown tenureBand (uses 1.0 amplifier)', () => {
       const holders = [
-        { criticality: 'institution_critical' as const, tenureBand: 'rogue' as unknown as null, successorIdentified: false },
+        { criticality: 'institution_critical' as const, tenureBand: 'rogue' as any as null, successorIdentified: false },
       ];
       const result = computeStewardshipDensity(holders);
       // criticality 1.0 * tenure fallback 1.0 = 1.0
@@ -184,8 +184,8 @@ describe('Stewardship Density Index', () => {
 
     it('skips null/undefined holder rows defensively', () => {
       const holders = [
-        null as unknown as HolderForIndex,
-        undefined as unknown as HolderForIndex,
+        null as any as HolderForIndex,
+        undefined as any as HolderForIndex,
         { criticality: 'institution_critical' as const, tenureBand: '7_15y' as const, successorIdentified: false },
       ];
       const result = computeStewardshipDensity(holders);
@@ -194,7 +194,7 @@ describe('Stewardship Density Index', () => {
     });
 
     it('returns the empty result when input is not an array', () => {
-      const result = computeStewardshipDensity(undefined as unknown as readonly HolderForIndex[]);
+      const result = computeStewardshipDensity(undefined as any as readonly HolderForIndex[]);
       expect(result.index).toBe(0);
       expect(result.band.id).toBe('distributed');
       expect(result.totalCarriers).toBe(0);

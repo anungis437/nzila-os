@@ -45,7 +45,9 @@ function eligibleForEnv(app: string, env: Env, cfg: AppConfig, zongaOverride: bo
     return zongaOverride
   }
 
-  return cfg.prodPromotionEligible === true || cfg.releaseStatus === 'prod-approved' || cfg.releaseStatus === 'internal-only'
+  // Phase 4B: internal-only surfaces are NEVER production-promotable via this
+  // pipeline. They deploy through their dedicated internal workflow instead.
+  return cfg.prodPromotionEligible === true || cfg.releaseStatus === 'prod-approved'
 }
 
 function main() {
@@ -76,12 +78,23 @@ function main() {
     throw new Error(`No deployable apps after policy filtering for ${env}. Denied: ${denied.join(', ') || 'none'}`)
   }
 
+  const decisions = requestedApps.map((app) => {
+    const cfg = inventory.apps[app]
+    return {
+      app,
+      releaseStatus: cfg.releaseStatus,
+      prodPromotionEligible: cfg.prodPromotionEligible ?? false,
+      eligible: eligibleForEnv(app, env, cfg, zongaOverride),
+    }
+  })
+
   const output = {
     environment: env,
     requestedApps,
     approvedApps: approved,
     deniedApps: denied,
     zongaOverride,
+    decisions,
   }
 
   process.stdout.write(JSON.stringify(output, null, 2))

@@ -26,7 +26,7 @@ export const GET = withApi(
     const offset = Number(url.searchParams.get('offset') ?? 0)
 
     return withSystemContext(async () => {
-      const conditions: SQL<unknown>[] = []
+      const conditions: SQL<any>[] = []
       if (domain) conditions.push(eq(governedPolicies.domain, domain))
       if (status) conditions.push(eq(governedPolicies.lifecycleStatus, status as never))
 
@@ -54,8 +54,8 @@ export const POST = withApi(
       semver: string
       name: string
       domain: string
-      workflowBindings?: unknown
-      operationalScope?: unknown
+      workflowBindings?: any
+      operationalScope?: any
       authorRole: string
       governanceRationale: string
       riskClassification?: string

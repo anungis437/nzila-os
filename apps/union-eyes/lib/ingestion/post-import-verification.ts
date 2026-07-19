@@ -21,7 +21,7 @@ export interface VerificationIssue {
   severity: 'error' | 'warning';
   message: string;
   count?: number;
-  details?: unknown;
+  details?: any;
 }
 
 export interface VerificationResult {

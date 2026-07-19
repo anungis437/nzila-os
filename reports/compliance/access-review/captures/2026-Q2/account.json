@@ -1,0 +1,16 @@
+{
+  "environmentName": "AzureCloud",
+  "homeTenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+  "id": "5d819f33-d16f-429c-a3c0-5b0e94740ba3",
+  "isDefault": true,
+  "managedByTenants": [],
+  "name": "Azure subscription 1 Nzila",
+  "state": "Enabled",
+  "tenantDefaultDomain": "onelabtech.com",
+  "tenantDisplayName": "One Lab Technologies Corp.",
+  "tenantId": "5082b8be-b04d-4a13-b61c-b6397670177b",
+  "user": {
+    "name": "support@onelabtech.com",
+    "type": "user"
+  }
+}

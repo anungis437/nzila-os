@@ -52,6 +52,15 @@ export type RLSTx = typeof db
  *   });
  * }
  */
+/**
+ * Sentinel value accepted by the context-map overload to request a
+ * system-scoped bootstrap lookup. The authenticated user context is still
+ * applied, but org context is intentionally cleared (e.g. resolving which
+ * organization a freshly-authenticated user belongs to before an active org
+ * is known). Only org scoping is relaxed — auth is still required.
+ */
+const SYSTEM_ORG_CONTEXT = 'system'
+
 export async function withRLSContext<T>(
   operation: (tx: RLSTx) => Promise<T>,
 ): Promise<T>
@@ -73,9 +82,33 @@ export async function withRLSContext<T>(
     | ((tx: RLSTx) => Promise<T>)
     | (() => Promise<T>),
 ): Promise<T> {
-  const operation = (
-    typeof contextOrOperation === 'function' ? contextOrOperation : maybeOperation!
-  ) as (tx: RLSTx) => Promise<T>
+  const hasContext = typeof contextOrOperation !== 'function'
+  const context = hasContext
+    ? (contextOrOperation as Record<string, unknown>)
+    : undefined
+  const operation = (hasContext ? maybeOperation! : contextOrOperation) as (
+    tx: RLSTx,
+  ) => Promise<T>
+
+  // Binary contract: when a context map is supplied it MUST carry an explicit,
+  // non-empty string `organizationId`. The previous implementation silently
+  // discarded the supplied context — code that appeared to scope by org
+  // ({ organizationId }) actually resolved org from auth, "implying" scoping
+  // without enforcing it. That ambiguity is removed here: a context map either
+  // enforces its organizationId (or the "system" sentinel) or fails closed.
+  let explicitOrgId: string | undefined
+  if (hasContext) {
+    const raw = context?.organizationId
+    if (typeof raw !== 'string' || raw.trim() === '') {
+      throw new Error(
+        'withRLSContext: context map requires a non-empty string `organizationId`. ' +
+          'Pass { organizationId } to enforce org scoping, or use the no-context ' +
+          'overload to resolve org from the authenticated session. For system-scoped ' +
+          'lookups pass { organizationId: "system" } or use withSystemContext().',
+      )
+    }
+    explicitOrgId = raw
+  }
 
   // Get authenticated user from auth provider
   const { userId, orgId: clerkOrgId } = await auth()
@@ -86,36 +119,51 @@ export async function withRLSContext<T>(
     )
   }
 
-  // Resolve orgId using the same fallback chain as getCurrentUser():
-  // platform JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
-  let orgId = clerkOrgId
-  if (!orgId) {
-    try {
-      const user = await currentUser()
-      if (user) {
-        const pub = user.publicMetadata || {}
-        const priv = user.privateMetadata || {}
-        orgId =
-          (pub.organizationId as string) ||
-          (priv.organizationId as string) ||
-          (pub.tenantId as string) ||
-          (priv.tenantId as string) ||
-          null
-      }
-    } catch {
-      // currentUser() can fail in edge cases — proceed without org
+  // Resolve the org context that will actually be applied to the session:
+  //  - explicit "system" sentinel → clear org context (bootstrap lookup)
+  //  - explicit organizationId    → enforce exactly that org (no silent drift)
+  //  - no context map             → resolve from auth/session metadata, fail closed
+  let orgId: string | null
+  let systemScoped = false
+  if (explicitOrgId !== undefined) {
+    if (explicitOrgId === SYSTEM_ORG_CONTEXT) {
+      orgId = null
+      systemScoped = true
+    } else {
+      orgId = explicitOrgId
     }
-  }
+  } else {
+    // Resolve orgId using the same fallback chain as getCurrentUser():
+    // platform JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
+    orgId = clerkOrgId
+    if (!orgId) {
+      try {
+        const user = await currentUser()
+        if (user) {
+          const pub = user.publicMetadata || {}
+          const priv = user.privateMetadata || {}
+          orgId =
+            (pub.organizationId as string) ||
+            (priv.organizationId as string) ||
+            (pub.tenantId as string) ||
+            (priv.tenantId as string) ||
+            null
+        }
+      } catch {
+        // currentUser() can fail in edge cases — proceed without org
+      }
+    }
 
-  // Organization context is mandatory — fail closed if missing.
-  // For system/background jobs, use withSystemRLSContext().
-  // For platform-admin operations, use withPlatformAdminRLSContext().
-  if (!orgId) {
-    throw new Error(
-      'Organization context required for scoped data access. ' +
-        'User must have an active organization selected. ' +
-        'For system operations, use withSystemRLSContext() instead.',
-    )
+    // Organization context is mandatory for the default overload — fail closed.
+    // For system/background jobs, use withSystemRLSContext().
+    // For platform-admin operations, use withPlatformAdminRLSContext().
+    if (!orgId) {
+      throw new Error(
+        'Organization context required for scoped data access. ' +
+          'User must have an active organization selected. ' +
+          'For system operations, use withSystemRLSContext() instead.',
+      )
+    }
   }
 
   // Execute in transaction to ensure context is properly scoped
@@ -127,13 +175,17 @@ export async function withRLSContext<T>(
     // NOTE: SET LOCAL does not accept parameterized values ($1); use set_config() instead
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)
 
-    // Set org context for RLS policies when available
-    if (orgId) {
+    if (systemScoped) {
+      // Explicitly clear org context for the system bootstrap lookup so RLS
+      // does not bind the query to a stale/auth organization.
+      await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
+    } else if (orgId) {
+      // Apply the resolved/enforced org context for RLS policies.
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`)
     }
 
     // Execute the operation with user + org context set
-    const result = await operation(tx as unknown as RLSTx)
+    const result = await operation(tx as any as RLSTx)
 
     // Transaction commit automatically clears local config variables
     return result
@@ -228,7 +280,7 @@ export async function withSystemContext<T>(
     // NzilaOS PR-UE-02: Explicitly clear org context for system operations
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
     const result = await (operation as (tx: RLSTx) => Promise<T>)(
-      tx as unknown as RLSTx,
+      tx as any as RLSTx,
     )
     return result
   })
@@ -395,7 +447,7 @@ export type RLSAwareQuery<T> = () => Promise<T>
  *
  * export const GET = withRLS(handleGET);
  */
-export function withRLS<TArgs extends unknown[], TReturn>(
+export function withRLS<TArgs extends any[], TReturn>(
   handler: (...args: TArgs) => Promise<TReturn>,
 ): (...args: TArgs) => Promise<TReturn> {
   return async (...args: TArgs): Promise<TReturn> => {

@@ -11,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/products',
     '/portfolio',
     '/verticals',
+    '/public-service',
+    '/insights/public-service-continuity-problem',
     '/platform',
     '/contact',
     '/resources',

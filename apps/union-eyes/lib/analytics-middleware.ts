@@ -16,7 +16,7 @@ import { aggregationService } from './analytics-aggregation';
  */
 export function withAnalyticsCache<T>(
   endpoint: string,
-  handler: (req: NextRequest, organizationId: string, params: unknown) => Promise<T>,
+  handler: (req: NextRequest, organizationId: string, params: any) => Promise<T>,
   ttl: number = 5 * 60 * 1000 // 5 minutes default
 ) {
   return async (req: NextRequest) => {

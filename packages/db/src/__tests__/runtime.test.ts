@@ -37,8 +37,9 @@ describe('db client proxy', () => {
     'throws when DATABASE_URL is missing and the proxy is used',
     async () => {
       const { clientModule } = await importClientWithMocks()
+      const runtimeDb = clientModule.db as unknown as Record<string, unknown>
 
-      expect(() => (clientModule.db as any).select).toThrow(
+      expect(() => runtimeDb.select).toThrow(
         'DATABASE_URL environment variable is required',
       )
     },
@@ -51,9 +52,10 @@ describe('db client proxy', () => {
       databaseUrl: 'postgres://example.test/nzila',
       drizzleReturn: { query, marker: 'runtime-db' },
     })
+    const runtimeDb = clientModule.db as unknown as Record<string, unknown>
 
-    expect((clientModule.db as any).query).toBe(query)
-    expect('marker' in (clientModule.db as any)).toBe(true)
+    expect(runtimeDb.query).toBe(query)
+    expect('marker' in runtimeDb).toBe(true)
     expect(postgresMock).toHaveBeenCalledTimes(1)
     expect(drizzleMock).toHaveBeenCalledTimes(1)
   })

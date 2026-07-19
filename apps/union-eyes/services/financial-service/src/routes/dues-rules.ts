@@ -11,6 +11,16 @@ import { logger } from '@/lib/logger';
 
 const router = Router();
 
+type AuthUser = {
+  organizationId: string;
+  userId: string;
+  role: string;
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as any as { user: AuthUser }).user;
+}
+
 // ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
@@ -57,8 +67,7 @@ const createDuesRuleSchema = z.object({
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { active, _category, _status } = req.query;
 
     // Build query conditions
@@ -91,8 +100,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { id } = req.params;
 
     const [rule] = await db
@@ -121,8 +129,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
 
     // Check permissions
     if (!['admin', 'financial_admin'].includes(role)) {
@@ -138,8 +145,7 @@ router.post('/', async (req: Request, res: Response) => {
         ...validatedData,
         organizationId: organizationId,
         createdBy: userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as any as typeof schema.duesRules.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: newRule });
@@ -158,8 +164,7 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, _userId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
 
     // Check permissions
@@ -171,8 +176,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const validatedData = createDuesRuleSchema.partial().parse(req.body);
 
     // Convert numeric fields to strings for database
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = { ...validatedData };
+    const updateData: Record<string, unknown> = { ...validatedData };
     ['percentageRate', 'flatAmount', 'hourlyRate', 'minimumAmount', 'maximumAmount'].forEach(field => {
       if (updateData[field] !== undefined && typeof updateData[field] === 'number') {
         updateData[field] = updateData[field].toString();
@@ -181,7 +185,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     const [updatedRule] = await db
       .update(schema.duesRules)
-      .set(updateData)
+      .set(updateData as any as Partial<typeof schema.duesRules.$inferInsert>)
       .where(and(
         eq(schema.duesRules.id, id),
         eq(schema.duesRules.organizationId, organizationId)
@@ -208,8 +212,7 @@ router.put('/:id', async (req: Request, res: Response) => {
  */
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, role } = (req as any).user;
+    const { organizationId, role } = getAuthUser(req);
     const { id } = req.params;
 
     // Check permissions (admin only)
@@ -222,8 +225,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       .set({
         isActive: false,
         updatedAt: new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as any as Partial<typeof schema.duesRules.$inferInsert>)
       .where(and(
         eq(schema.duesRules.id, id),
         eq(schema.duesRules.organizationId, organizationId)
@@ -247,8 +249,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
  */
 router.post('/:id/duplicate', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
     const { id } = req.params;
     const { newCode, newName } = req.body;
 
@@ -289,8 +290,7 @@ router.post('/:id/duplicate', async (req: Request, res: Response) => {
         ruleName: newName,
         organizationId: organizationId,
         createdBy: userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as any as typeof schema.duesRules.$inferInsert)
       .returning();
 
     res.status(201).json({ success: true, data: duplicatedRule });

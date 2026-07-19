@@ -54,7 +54,7 @@ toast({
     } finally {
       setLoading(false);
     }
-  }, [userId, toast]);
+  }, [userId, toast, t]);
 
   useEffect(() => {
     loadPaymentMethods();

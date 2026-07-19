@@ -81,16 +81,16 @@ describe('verify-pack extended', () => {
     }
 
     // existsSync: first for the index file, then for artifactsDir, then for the artifact file
-    vi.mocked(existsSync).mockImplementation((path: any) => {
+    vi.mocked(existsSync).mockImplementation((path: Parameters<typeof existsSync>[0]) => {
       const p = String(path)
       if (p.includes('index.json')) return true
       if (p.includes('report.pdf')) return true
       return true
     })
-    vi.mocked(readFileSync).mockImplementation((path: any) => {
+    vi.mocked(readFileSync).mockImplementation((path: Parameters<typeof readFileSync>[0]): string => {
       const p = String(path)
       if (p.includes('index.json')) return JSON.stringify(packData)
-      return content as any
+      return content.toString('utf8')
     })
 
     const result = verifyPackIndex('/dir/index.json', { artifactsDir: '/dir' })
@@ -110,10 +110,10 @@ describe('verify-pack extended', () => {
     }
 
     vi.mocked(existsSync).mockReturnValue(true)
-    vi.mocked(readFileSync).mockImplementation((path: any) => {
+    vi.mocked(readFileSync).mockImplementation((path: Parameters<typeof readFileSync>[0]): string => {
       const p = String(path)
       if (p.includes('index.json')) return JSON.stringify(packData)
-      return Buffer.from('actual content') as any
+      return 'actual content'
     })
 
     const result = verifyPackIndex('/dir/index.json', { artifactsDir: '/dir' })
@@ -150,7 +150,7 @@ describe('verify-pack extended', () => {
       seal: {},
     }
 
-    vi.mocked(existsSync).mockImplementation((path: any) => {
+    vi.mocked(existsSync).mockImplementation((path: unknown) => {
       const p = String(path)
       if (p.includes('index.json')) return true
       if (p.includes('missing.pdf')) return false

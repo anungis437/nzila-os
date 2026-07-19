@@ -105,7 +105,7 @@ export function projectGovernanceErosion(
   monthsSinceLastAudit: number,
 ): number {
   // Baseline decay: 2% per month without maintenance
-  let eroded = currentMaturity * Math.pow(0.98, Math.min(monthsSinceLastAudit, 12));
+  const eroded = currentMaturity * Math.pow(0.98, Math.min(monthsSinceLastAudit, 12));
   return Math.max(eroded, 10); // Never below 10%
 }
 
@@ -205,7 +205,7 @@ export function estimateCrisisDate(
   currentValue: number,
   projectionRate: number, // Change per month
   criticalThreshold: number,
-  direction: 'increasing' | 'decreasing',
+  _direction: 'increasing' | 'decreasing',
 ): Date | null {
   if (projectionRate === 0) return null;
 

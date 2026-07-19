@@ -30,7 +30,7 @@ async function getApiClient() {
 /**
  * List workflows.test records
  */
-export async function getWorkflows.testList(filters?: any) {
+export async function getWorkflows.testList(filters?: unknown) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
   
@@ -67,7 +67,7 @@ export async function getWorkflows.testById(id: string) {
 /**
  * Create new workflows.test record
  */
-export async function createWorkflows.test(data: any) {
+export async function createWorkflows.test(data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/api/workflows.test/`, {
@@ -86,7 +86,7 @@ export async function createWorkflows.test(data: any) {
 /**
  * Update workflows.test record
  */
-export async function updateWorkflows.test(id: string, data: any) {
+export async function updateWorkflows.test(id: string, data: unknown) {
   const client = await getApiClient();
   
   const response = await fetch(`${API_URL}/api/api/workflows.test/${{id}}/`, {

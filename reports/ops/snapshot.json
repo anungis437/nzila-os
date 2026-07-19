@@ -1,14 +1,14 @@
 {
   "_meta": {
     "schema_version": "2.0.0",
-    "generated_at": "2026-05-29T22:57:45.059Z",
+    "generated_at": "2026-07-19T14:33:00.784Z",
     "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
     "window_days": 30
   },
   "metrics": {
     "deploy_frequency_30d": {
-      "value": 10.7,
+      "value": 9.3,
       "source": "ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)",
       "source_needed": null
     },
@@ -58,9 +58,9 @@
       "source_needed": "No error-rate rollup artifact found. Add monthly app error export to ops/outputs/error-rate.json."
     },
     "monthly_infra_cost_estimate": {
-      "value": null,
+      "value": 843.98,
       "source": "ops/outputs/cost-allocation.json: total_monthly_cost_usd",
-      "source_needed": "Run pnpm collect:cost with Azure API enabled to populate real monthly cost."
+      "source_needed": null
     },
     "incidents_last_30d": {
       "value": null,

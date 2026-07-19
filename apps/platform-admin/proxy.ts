@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 
 /**
@@ -12,8 +12,7 @@ import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = async (request: any) => {
+export const proxy = async (request: NextRequest) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =

@@ -101,7 +101,7 @@ describe('seal', () => {
     })
 
     it('strips existing seal from input', () => {
-      const indexWithSeal = { ...sampleIndex, seal: { fake: true } } as any
+      const indexWithSeal = { ...sampleIndex, seal: { fake: true } } as unknown as SealablePackIndex
       const seal = generateSeal(indexWithSeal)
       expect(seal.packDigest).toBe(generateSeal(sampleIndex).packDigest)
     })

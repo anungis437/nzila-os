@@ -14,7 +14,6 @@ import {
   getCommonClasses,
 } from '../cca-schedule'
 import {
-  GIFI_CODES,
   getGifiMapping,
   getGifiBySchedule,
   ChartAccountSchema,

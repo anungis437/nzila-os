@@ -76,7 +76,7 @@ Checklist:
 
 ### 2.6 Stage 6 — Anti-surveillance review
 
-Reviewer: any maintainer (mandatory; no exceptions).
+Reviewer: unknown maintainer (mandatory; no exceptions).
 
 Checklist:
 - Does the prompt request personal identity?
@@ -91,7 +91,7 @@ Any "yes" answer to questions 1–6 **blocks** the change.
 
 ### 2.7 Stage 7 — Longitudinal-survivability review
 
-Reviewer: any maintainer.
+Reviewer: unknown maintainer.
 
 Checklist:
 - Does the prompt anchor to a stable institutional property (not a transient event, tooling, role-holder, or program)?

@@ -129,9 +129,15 @@ async function applyRetentionAction(
   policy: RetentionPolicy,
   actorId: string,
   computeEntryHash: Function,
-  db: any,
-  auditEvents: any,
+  db: unknown,
+  auditEvents: unknown,
 ): Promise<void> {
+  const database = db as {
+    insert: (table: unknown) => { values: (payload: unknown) => Promise<unknown> }
+    update: (table: unknown) => {
+      set: (payload: unknown) => { where: (predicate: unknown) => Promise<unknown> }
+    }
+  }
   const { eq } = await import('drizzle-orm')
   const { documents } = await import('@nzila/db/schema')
 
@@ -146,7 +152,7 @@ async function applyRetentionAction(
 
   const hash = computeEntryHash(payload, null)
 
-  await db.insert(auditEvents).values({
+  await database.insert(auditEvents).values({
     orgId: doc.orgId,
     actorClerkUserId: actorId,
     action: `retention.${policy.expiryAction}`,
@@ -159,15 +165,15 @@ async function applyRetentionAction(
 
   if (policy.expiryAction === 'delete') {
     // Mark document as deleted (soft delete -- physical blob deletion is async)
-    await db
+    await database
       .update(documents)
-      .set({ deletedAt: new Date() } as any)
+      .set({ deletedAt: new Date() } as unknown)
       .where(eq(documents.id, doc.id))
   } else if (policy.expiryAction === 'archive') {
     // Mark as archived
-    await db
+    await database
       .update(documents)
-      .set({ archivedAt: new Date() } as any)
+      .set({ archivedAt: new Date() } as unknown)
       .where(eq(documents.id, doc.id))
   }
 }

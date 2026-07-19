@@ -579,6 +579,57 @@ jobs:
           path: security/redteam/redteam-results.json
           retention-days: 365
 
+  # ── Gate Authority (taxonomy + CI authority) ────────────────────────────
+  # Makes gate authority EXPLICIT and HONEST. Reads
+  # governance/gates/gate-authority-registry.json and enforces:
+  #   - blocking gates fail the workflow;
+  #   - advisory / experimental gates run report-only (never fail);
+  #   - deprecated gates are excluded from canonical execution.
+  # This job does NOT re-execute the heavy validators (that would risk
+  # hard-failing on KNOWN advisory failures). It enforces registry integrity,
+  # PROVES the blocking-vs-advisory semantics via a synthetic self-test, and
+  # publishes a visible authority map artifact.
+  gate-authority:
+    runs-on: ubuntu-latest
+    name: Gate Authority
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate gate authority registry [BLOCKING]
+        # Fails CI if any gate is missing/has an invalid classification, or if a
+        # production-blocking target is dishonestly marked already-blocking.
+        run: pnpm gate-authority:validate
+
+      - name: Prove CI authority semantics [BLOCKING synthetic check]
+        # Synthetic proof that an ADVISORY failure does NOT fail CI while a
+        # BLOCKING failure DOES, and DEPRECATED gates are excluded.
+        run: pnpm gate-authority:selftest
+
+      - name: Publish gate authority map (advisory — never fails)
+        # Renders the classification map and emits ::warning:: annotations for
+        # advisory/repair-required/production-target gates so they stay VISIBLE.
+        run: pnpm gate-authority:report
+
+      - name: Upload gate authority map artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-authority-map-${{ github.run_id }}
+          path: reports/governance/gate-authority-map.json
+          retention-days: 365
+
   # ── Governance Gate Summary ──────────────────────────────────────────────
   governance-gate:
     runs-on: ubuntu-latest
@@ -593,6 +644,7 @@ jobs:
       - verify-seal
       - sbom
       - waiver-expiry
+      - gate-authority
     if: always()
     steps:
       - name: Check all governance jobs passed
@@ -607,6 +659,7 @@ jobs:
           echo "Verify Seal:       ${{ needs.verify-seal.result }}"
           echo "SBOM:              ${{ needs.sbom.result }}"
           echo "Waiver Expiry:     ${{ needs.waiver-expiry.result }}"
+          echo "Gate Authority:    ${{ needs.gate-authority.result }}"
           echo "======================================"
 
           # Fail if any required job failed
@@ -644,6 +697,10 @@ jobs:
           fi
           if [[ "${{ needs.waiver-expiry.result }}" == "failure" ]]; then
             echo "❌ Supply chain waiver(s) expired — renew or remediate"
+            exit 1
+          fi
+          if [[ "${{ needs.gate-authority.result }}" == "failure" ]]; then
+            echo "❌ Gate authority registry integrity / semantics check failed"
             exit 1
           fi
 

@@ -102,12 +102,21 @@ const severityConfig = {
   },
 };
 
+interface ComplianceReport {
+  summary: {
+    totalIssues: number;
+    openIssues: number;
+    resolvedIssues: number;
+  };
+  recommendations: string[];
+}
+
 export function AccessibilityDashboard() {
   const [audits, setAudits] = useState<AccessibilityAudit[]>([]);
   const [issues, setIssues] = useState<AccessibilityIssue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<AccessibilityIssue | null>(null);
   const [isRunningAudit, setIsRunningAudit] = useState(false);
-  const [complianceReport, setComplianceReport] = useState<Record<string, unknown> | null>(null);
+  const [complianceReport, setComplianceReport] = useState<ComplianceReport | null>(null);
   
   const { toast } = useToast();
   
@@ -495,8 +504,7 @@ export function AccessibilityDashboard() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(complianceReport as any).summary.totalIssues}
+                          {complianceReport.summary.totalIssues}
                         </div>
                       </CardContent>
                     </Card>
@@ -506,8 +514,7 @@ export function AccessibilityDashboard() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold text-orange-600">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(complianceReport as any).summary.openIssues}
+                          {complianceReport.summary.openIssues}
                         </div>
                       </CardContent>
                     </Card>
@@ -517,23 +524,20 @@ export function AccessibilityDashboard() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold text-green-600">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(complianceReport as any).summary.resolvedIssues}
+                          {complianceReport.summary.resolvedIssues}
                         </div>
                       </CardContent>
                     </Card>
                   </div>
                   
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {(complianceReport as any).recommendations.length > 0 && (
+                  {complianceReport.recommendations.length > 0 && (
                     <Card>
                       <CardHeader>
                         <CardTitle>Recommendations</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <ul className="space-y-2">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(complianceReport as any).recommendations.map(
+                          {complianceReport.recommendations.map(
                             (rec: string, idx: number) => (
                               <li key={idx} className="flex items-start gap-2">
                                 <Info className="h-4 w-4 mt-0.5 text-blue-600" />

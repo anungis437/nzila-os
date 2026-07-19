@@ -62,7 +62,7 @@ describe('Anti-exposure validation — sector envelope surface', () => {
   it('the envelope reports contributingInstitutions as a count, not a list', () => {
     const env = buildReadableEnvelope();
     expect(typeof env.contributingInstitutions).toBe('number');
-    expect(Array.isArray((env as unknown as Record<string, unknown>).contributingInstitutions)).toBe(false);
+    expect(Array.isArray((env as any as Record<string, unknown>).contributingInstitutions)).toBe(false);
   });
 
   it('the envelope is frozen-equivalent to its JSON round-trip', () => {

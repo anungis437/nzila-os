@@ -115,7 +115,7 @@ export async function logDeprecatedAccess(
 export function deprecatedResponse(
   deprecatedPath: string,
   canonicalPath: string,
-  body?: unknown,
+  body?: any,
 ): NextResponse {
   const res = NextResponse.json(
     {

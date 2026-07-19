@@ -33,6 +33,12 @@ export interface PageOrgContext {
   orgId: string
   orgRole: string
   orgName: string
+  /**
+   * Trusted authentication classification. `getPageOrgContext` authenticates an
+   * interactive signed-in operator via `auth()`, so every context it yields is
+   * an interactive user. Derived server-side; never browser-supplied.
+   */
+  authenticationType: 'interactive_user'
 }
 
 export interface OrgCandidate {
@@ -148,6 +154,7 @@ export async function getPageOrgContext(
       orgId: selectedOrgId,
       orgRole,
       orgName: row?.legalName ?? selectedOrgId,
+      authenticationType: 'interactive_user',
     },
   }
 }

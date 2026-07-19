@@ -105,7 +105,7 @@ function importRuntimeMonthlyBackfill(root: string, historyPath: string): number
     if (knownMonths.has(month) || existsSync(packDir)) continue
 
     const sourcePath = `reports/runtime/monthly/${fileName}`
-    const runtime = readJsonIfExists<any>(root, sourcePath)
+    const runtime = readJsonIfExists<unknown>(root, sourcePath)
     if (!runtime) continue
 
     const metricByName = new Map<string, any>()
@@ -230,12 +230,12 @@ function main(): void {
     }
   })
 
-  const dora = readJsonIfExists<any>(root, 'ops/outputs/dora-metrics.json')
-  const cost = readJsonIfExists<any>(root, 'ops/outputs/cost-allocation.json')
-  const portfolio = readJsonIfExists<any>(root, 'reports/portfolio-status.json')
-  const release = readJsonIfExists<any>(root, 'reports/release-governance-audit.json')
-  const sre = readJsonIfExists<any>(root, 'reports/sre-executive-dashboard.json')
-  const finops = readJsonIfExists<any>(root, 'reports/finops-summary.json')
+  const dora = readJsonIfExists<unknown>(root, 'ops/outputs/dora-metrics.json')
+  const cost = readJsonIfExists<unknown>(root, 'ops/outputs/cost-allocation.json')
+  const portfolio = readJsonIfExists<unknown>(root, 'reports/portfolio-status.json')
+  const release = readJsonIfExists<unknown>(root, 'reports/release-governance-audit.json')
+  const sre = readJsonIfExists<unknown>(root, 'reports/sre-executive-dashboard.json')
+  const finops = readJsonIfExists<unknown>(root, 'reports/finops-summary.json')
 
   const snapshot = {
     month,

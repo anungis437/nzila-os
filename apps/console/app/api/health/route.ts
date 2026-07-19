@@ -28,6 +28,7 @@ async function checkBlob(): Promise<boolean> {
 
 export async function GET() {
   const [db, blob] = await Promise.allSettled([checkDb(), checkBlob()])
+  const buildInfo = getBuildMetadata(APP)
 
   const checks = normalizeHealthChecks({
     process: true,
@@ -40,7 +41,8 @@ export async function GET() {
   return NextResponse.json(
     {
       status,
-      ...getBuildMetadata(APP),
+      buildInfo,
+      ...buildInfo,
       checks,
     },
     { status: status === 'ok' ? 200 : 503 },

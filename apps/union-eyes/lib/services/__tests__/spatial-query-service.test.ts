@@ -33,7 +33,13 @@ vi.mock('@/lib/logger', () => ({
 
 // ── Imports ──────────────────────────────────────────────────────────────────
 
-import { isPointInGeofence, calculateDistance } from '../spatial-query-service';
+import {
+  isPointInGeofence,
+  calculateDistance,
+  findNearbyLocations,
+  createCircularGeofence,
+  checkPostGISAvailability,
+} from '../spatial-query-service';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
@@ -86,5 +92,66 @@ describe('spatial-query-service', () => {
     expect(result.method).toBe('haversine');
     expect(typeof result.distance).toBe('number');
     expect(result.distance).toBeGreaterThan(0);
+  });
+
+  it('findNearbyLocations maps DB rows to API shape', async () => {
+    mockExecute.mockResolvedValue([
+      {
+        user_id: 'user-1',
+        latitude: 45.5,
+        longitude: -73.5,
+        distance_meters: 123.4,
+        timestamp: '2026-01-01T00:00:00Z',
+      },
+    ]);
+
+    const result = await findNearbyLocations(
+      { latitude: 45.5017, longitude: -73.5673 },
+      500,
+      5
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      userId: 'user-1',
+      latitude: 45.5,
+      longitude: -73.5,
+      distance: 123.4,
+    });
+    expect(result[0]?.timestamp).toBeInstanceOf(Date);
+  });
+
+  it('findNearbyLocations returns empty array on query error', async () => {
+    mockExecute.mockRejectedValue(new Error('query failed'));
+
+    await expect(
+      findNearbyLocations({ latitude: 45.5017, longitude: -73.5673 }, 500)
+    ).resolves.toEqual([]);
+  });
+
+  it('createCircularGeofence returns geojson string when query succeeds', async () => {
+    mockExecute.mockResolvedValue([{ geojson: '{"type":"Polygon"}' }]);
+
+    await expect(
+      createCircularGeofence({ latitude: 45.5017, longitude: -73.5673 }, 100)
+    ).resolves.toBe('{"type":"Polygon"}');
+  });
+
+  it('createCircularGeofence returns null on query failure', async () => {
+    mockExecute.mockRejectedValue(new Error('no postgis'));
+
+    await expect(
+      createCircularGeofence({ latitude: 45.5017, longitude: -73.5673 }, 100)
+    ).resolves.toBeNull();
+  });
+
+  it('checkPostGISAvailability returns true when extension is installed', async () => {
+    mockExecute.mockResolvedValue([{ available: true }]);
+    await expect(checkPostGISAvailability()).resolves.toBe(true);
+  });
+
+  it('checkPostGISAvailability returns false on query error', async () => {
+    mockExecute.mockRejectedValue(new Error('cannot query extensions'));
+    await expect(checkPostGISAvailability()).resolves.toBe(false);
   });
 });

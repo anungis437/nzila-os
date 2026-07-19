@@ -17,14 +17,18 @@
 import { randomUUID } from 'crypto';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   buildExplainabilityEnvelope,
   buildPropagationEvidence,
   buildGovernanceFlags,
-  assessConfidence,
 } from '../copilot-explainability/response-builder';
 import type { EvidenceReference, ReasoningLink, GovernanceFlag } from '../copilot-explainability/explainability-models';
 import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './copilot-models';
@@ -65,7 +69,7 @@ async function upsertConversation(
     const rows = await db.execute(sql`
       SELECT id FROM ue_copilot_conversations WHERE id = ${conversationId} AND org_id = ${orgId} LIMIT 1
     `);
-    const result = rows as unknown as Record<string, unknown>[];
+    const result = rows as any as Record<string, unknown>[];
     if (result.length > 0) return conversationId;
   }
   // Create new conversation
@@ -128,7 +132,7 @@ RESPONSE FORMAT:
 }
 
 /** Extract follow-up suggestions from an AI response. */
-function extractFollowUps(query: string, responseType: string): string[] {
+function extractFollowUps(query: string, _responseType: string): string[] {
   const suggestions: Record<string, string[]> = {
     fragility: [
       'What governance processes are most fragile?',
@@ -179,10 +183,10 @@ export async function processCopilotQuery(
     calculateResilienceIndex(orgId),
   ]);
 
-  const nodes = propagationMap.nodes as any[];
+  const nodes = propagationMap.nodes;
   const singleSourceCount = nodes.filter((n) => n.isSingleSource).length;
   const totalNodes = nodes.length;
-  const bottleneckCount = (propagationMap.bottlenecks as any[]).length;
+  const bottleneckCount = propagationMap.bottlenecks.length;
   const govNodes = nodes.filter((n) => n.category === 'governance' || n.category === 'compliance');
   const govSingleSource = govNodes.filter((n) => n.isSingleSource);
   const criticalGaps = resilienceIndex.dimensions
@@ -213,6 +217,7 @@ export async function processCopilotQuery(
   const ai = getAiClient();
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(orgId),
     appKey: UE_APP_KEY,
     profileKey: COPILOT_PROFILE,
     input: messages,
@@ -328,7 +333,7 @@ export async function loadConversationHistory(
     WHERE id = ${conversationId} AND org_id = ${orgId}
     LIMIT 1
   `);
-  const result = rows as unknown as Record<string, unknown>[];
+  const result = rows as any as Record<string, unknown>[];
   if (result.length === 0) return [];
   return (result[0].messages as CopilotMessage[]) ?? [];
 }
@@ -346,7 +351,7 @@ export async function listConversations(
     ORDER BY updated_at DESC
     LIMIT ${limit}
   `);
-  return (rows as unknown as Record<string, unknown>[]).map((r) => ({
+  return (rows as any as Record<string, unknown>[]).map((r) => ({
     id: r.id as string,
     title: r.title as string,
     updatedAt: (r.updated_at as Date)?.toISOString?.() ?? (r.updated_at as string),

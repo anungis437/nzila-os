@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nzila.dev/schemas/courtlens/phase-1-fr-review-ledger.schema.json",
+  "title": "CourtLens Phase 1 — fr-CA translation review ledger",
+  "description": "One entry per new or changed fr-CA translation key delivered in Phase 1. Stored hashes (not raw strings) keep diffs small and keep untranslated content from leaking into the ledger. Reviewed rows must be signed by a bilingual reviewer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "phase", "locale", "sourceLocale", "generatedAt", "entries"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "phase": { "type": "string", "const": "phase-1" },
+    "locale": { "type": "string", "const": "fr-CA" },
+    "sourceLocale": { "type": "string", "const": "en-CA" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "generatorVersion": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keyPath",
+        "enHash",
+        "frHash",
+        "reviewed",
+        "reviewer",
+        "reviewedAt",
+        "notes"
+      ],
+      "properties": {
+        "keyPath": {
+          "type": "string",
+          "description": "Dot-separated path into the next-intl message tree, e.g. courtlens.matterDetail.urgencyBadge.high",
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_]+(\\.[a-zA-Z0-9_]+)*$"
+        },
+        "enHash": {
+          "type": "string",
+          "description": "SHA-256 hex of the en-CA string value at this key",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "frHash": {
+          "type": "string",
+          "description": "SHA-256 hex of the fr-CA string value at this key",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "reviewed": { "type": "boolean" },
+        "reviewer": {
+          "description": "Handle of the bilingual reviewer, or null if unreviewed",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+        "reviewedAt": {
+          "description": "RFC 3339 timestamp of review, or null if unreviewed",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "format": "date-time" }
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form reviewer notes (may be empty)"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "reviewed": { "const": true } }, "required": ["reviewed"] },
+          "then": {
+            "properties": {
+              "reviewer": { "type": "string", "minLength": 1 },
+              "reviewedAt": { "type": "string", "format": "date-time" }
+            },
+            "required": ["reviewer", "reviewedAt"]
+          }
+        },
+        {
+          "if": { "properties": { "reviewed": { "const": false } }, "required": ["reviewed"] },
+          "then": {
+            "properties": {
+              "reviewer": { "type": "null" },
+              "reviewedAt": { "type": "null" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

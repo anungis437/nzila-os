@@ -11,7 +11,13 @@
  * - Cross-reference detection
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import type { PrecedentValueEnum, OutcomeEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
@@ -46,6 +52,59 @@ export interface ClassificationResult {
   reasoning: string;
 }
 
+export interface ClassificationPolicy {
+  autoAcceptThreshold: number;
+  reviewThreshold: number;
+}
+
+export interface ClassificationQuality {
+  decision: 'auto_accept' | 'needs_review';
+  confidence: number;
+  reason: string;
+}
+
+function parseThreshold(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(parsed, 1));
+}
+
+export function getClassificationPolicy(): ClassificationPolicy {
+  const autoAcceptThreshold = parseThreshold(
+    process.env.UE_AUTO_CLASSIFICATION_ACCEPT_THRESHOLD,
+    0.9,
+  );
+  const reviewThreshold = parseThreshold(
+    process.env.UE_AUTO_CLASSIFICATION_REVIEW_THRESHOLD,
+    0.65,
+  );
+
+  return {
+    autoAcceptThreshold: Math.max(autoAcceptThreshold, reviewThreshold),
+    reviewThreshold,
+  };
+}
+
+export function evaluateClassificationQuality(
+  result: Pick<ClassificationResult, 'confidence'>,
+  policy: ClassificationPolicy = getClassificationPolicy(),
+): ClassificationQuality {
+  if (result.confidence >= policy.autoAcceptThreshold) {
+    return {
+      decision: 'auto_accept',
+      confidence: result.confidence,
+      reason: `Confidence ${result.confidence.toFixed(3)} met auto-accept threshold ${policy.autoAcceptThreshold.toFixed(3)}`,
+    };
+  }
+
+  return {
+    decision: 'needs_review',
+    confidence: result.confidence,
+    reason: `Confidence ${result.confidence.toFixed(3)} below auto-accept threshold ${policy.autoAcceptThreshold.toFixed(3)}`,
+  };
+}
+
 export interface TagGenerationResult {
   tags: string[];
   confidence: number;
@@ -74,7 +133,16 @@ export async function classifyClause(
     clauseNumber?: string;
     jurisdiction?: string;
     sector?: string;
-  }
+  },
+  options?: {
+    onLowConfidence?: (payload: {
+      confidence: number;
+      threshold: number;
+      clauseType: ClauseType;
+      reasoning: string;
+    }) => Promise<void> | void;
+    policy?: ClassificationPolicy;
+  },
 ): Promise<ClassificationResult> {
   const systemPrompt = `You are an expert Canadian labour law classifier. 
 Classify the following clause into ONE of these types:
@@ -118,12 +186,24 @@ ${clauseContent}`
 
     const result = response.data as Record<string, unknown>;
     
-    return {
+    const classification: ClassificationResult = {
       clauseType: (result.clauseType as ClauseType) || 'other',
       confidence: (result.confidence as number) || 0.5,
       alternativeTypes: (result.alternativeTypes as { type: ClauseType; confidence: number }[]) || [],
       reasoning: (result.reasoning as string) || 'Classification based on content analysis',
     };
+
+    const policy = options?.policy ?? getClassificationPolicy();
+    if (classification.confidence < policy.reviewThreshold) {
+      await options?.onLowConfidence?.({
+        confidence: classification.confidence,
+        threshold: policy.reviewThreshold,
+        clauseType: classification.clauseType,
+        reasoning: classification.reasoning,
+      });
+    }
+
+    return classification;
   } catch (error) {
     logger.error('Error classifying clause', { error });
     return {
@@ -139,7 +219,8 @@ ${clauseContent}`
  */
 export async function generateClauseTags(
   clauseContent: string,
-  clauseType: ClauseType
+  clauseType: ClauseType,
+  organizationId?: string,
 ): Promise<TagGenerationResult> {
   const systemPrompt = `Generate 5-10 relevant, specific tags for this collective bargaining agreement clause.
 
@@ -159,6 +240,7 @@ Return JSON with:
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.TAG_GENERATION,
       promptKey: UE_PROFILES.TAG_GENERATION,
@@ -185,7 +267,8 @@ Return JSON with:
  * Detect cross-references to other clauses
  */
 export async function detectCrossReferences(
-  clauseContent: string
+  clauseContent: string,
+  organizationId?: string,
 ): Promise<CrossReferenceResult> {
   const systemPrompt = `Identify all cross-references to other clauses in this CBA clause.
 
@@ -202,6 +285,7 @@ Return JSON with:
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CROSS_REFERENCE,
       promptKey: UE_PROFILES.CROSS_REFERENCE,
@@ -231,7 +315,8 @@ export async function classifyPrecedent(
   caseTitle: string,
   facts: string,
   reasoning: string,
-  decision: string
+  decision: string,
+  organizationId?: string,
 ): Promise<PrecedentClassification> {
   const systemPrompt = `You are a labour arbitration expert. Analyze this arbitration decision and classify it.
 
@@ -270,6 +355,7 @@ Return JSON with:
     const ai = getAiClient();
     const response = await ai.extract({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(organizationId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,
       promptKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,

@@ -54,7 +54,7 @@ export interface AdaptiveContextResolution {
 
 export interface ResolveAdaptiveContextInputs {
   /** The raw `organization_context` jsonb from the assessment row. */
-  readonly organizationContext: unknown;
+  readonly organizationContext: any;
   /** The static OCRA question bank to route against. */
   readonly questionBank: readonly RoutableQuestion[];
   /** The current QUESTION_BANK_VERSION constant. */

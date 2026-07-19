@@ -19,9 +19,7 @@ export default function ApprovalQueue() {
   const [acting, setActing] = useState<string | null>(null)
   const [rationale, setRationale] = useState('')
 
-  const fetchQueue = useCallback(async () => {
-    setLoading(true)
-    // Fetch policies in approval_required state
+  const loadQueue = useCallback(async () => {
     const res = await fetch('/api/governance/lifecycle/policies?status=approval_required&limit=50')
     const data = await res.json()
     const items: QueueItem[] = []
@@ -42,7 +40,17 @@ export default function ApprovalQueue() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchQueue() }, [fetchQueue])
+  const fetchQueue = useCallback(async () => {
+    setLoading(true)
+    await loadQueue()
+  }, [loadQueue])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadQueue()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadQueue])
 
   const recordAction = async (item: QueueItem, action: 'approved' | 'rejected') => {
     setActing(item.policyId)
@@ -59,7 +67,7 @@ export default function ApprovalQueue() {
     })
     setActing(null)
     setRationale('')
-    fetchQueue()
+    await fetchQueue()
   }
 
   if (loading) return (

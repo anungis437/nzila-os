@@ -15,6 +15,8 @@ import {
   EmailService,
   ResendAdapter,
   SendGridAdapter,
+  createEmailServiceFromEnv,
+  getEmailService,
   type EmailProvider,
   type EmailMessage,
   type SendResult,
@@ -145,6 +147,20 @@ describe('ResendAdapter', () => {
     expect(result.provider).toBe('resend');
   });
 
+  it('maps attachments when sending', async () => {
+    const msg: EmailMessage = {
+      ...testMessage,
+      attachments: [{ filename: 'file.txt', content: Buffer.from('abc') }],
+    };
+    await adapter.send(msg);
+    expect(mockSendResendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [{ filename: 'file.txt', content: Buffer.from('abc') }],
+      }),
+      expect.anything(),
+    );
+  });
+
   it('returns error on SDK error', async () => {
     mockSendResendEmail.mockResolvedValue({ success: false, error: 'Invalid recipient' });
 
@@ -164,6 +180,21 @@ describe('ResendAdapter', () => {
   it('verifyConnection returns true when client exists', async () => {
     const ok = await adapter.verifyConnection();
     expect(ok).toBe(true);
+  });
+
+  it('sendBatch iterates and returns all results', async () => {
+    mockSendResendEmail
+      .mockResolvedValueOnce({ success: true, messageId: 'one' })
+      .mockResolvedValueOnce({ success: true, messageId: 'two' });
+
+    const results = await adapter.sendBatch([
+      testMessage,
+      { ...testMessage, to: 'two@example.com' },
+    ]);
+
+    expect(results).toHaveLength(2);
+    expect(results[0].messageId).toBe('one');
+    expect(results[1].messageId).toBe('two');
   });
 });
 
@@ -193,5 +224,92 @@ describe('SendGridAdapter', () => {
       'https://api.sendgrid.com/v3/mail/send',
       expect.objectContaining({ method: 'POST' }),
     );
+  });
+
+  it('maps array recipients and attachments for SendGrid payload', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'sg-msg-2' },
+      json: () => Promise.resolve({}),
+    });
+
+    const msg: EmailMessage = {
+      to: ['a@example.com', 'b@example.com'],
+      cc: ['c@example.com'],
+      bcc: ['d@example.com'],
+      subject: 'Bulk',
+      body: 'Body',
+      attachments: [{ filename: 'doc.pdf', content: Buffer.from('pdf'), contentType: 'application/pdf' }],
+    };
+
+    const result = await adapter.send(msg);
+    expect(result.success).toBe(true);
+    const payload = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(payload.personalizations[0].to).toHaveLength(2);
+    expect(payload.attachments[0].filename).toBe('doc.pdf');
+  });
+
+  it('returns error when SendGrid responds with failure', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ errors: [{ message: 'Bad request' }] }),
+    });
+    const result = await adapter.send(testMessage);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Bad request');
+  });
+
+  it('sendBatch iterates through messages', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, headers: { get: () => 'id-1' }, json: () => Promise.resolve({}) })
+      .mockResolvedValueOnce({ ok: true, headers: { get: () => 'id-2' }, json: () => Promise.resolve({}) });
+
+    const results = await adapter.sendBatch([testMessage, { ...testMessage, to: 'two@example.com' }]);
+    expect(results).toHaveLength(2);
+    expect(results[0].success).toBe(true);
+  });
+
+  it('verifyConnection returns true and false based on API response', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true });
+    expect(await adapter.verifyConnection()).toBe(true);
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('network'));
+    expect(await adapter.verifyConnection()).toBe(false);
+  });
+});
+
+describe('email-service factory helpers', () => {
+  const OLD_ENV = { ...process.env };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env = { ...OLD_ENV };
+    delete process.env.EMAIL_PROVIDER;
+    delete process.env.SENDGRID_API_KEY;
+    delete process.env.RESEND_API_KEY;
+  });
+
+  it('createEmailServiceFromEnv defaults to resend', () => {
+    const service = createEmailServiceFromEnv();
+    expect(service).toBeInstanceOf(EmailService);
+  });
+
+  it('createEmailServiceFromEnv supports sendgrid provider', () => {
+    process.env.EMAIL_PROVIDER = 'sendgrid';
+    process.env.SENDGRID_API_KEY = 'sg-key';
+    const service = createEmailServiceFromEnv();
+    expect(service).toBeInstanceOf(EmailService);
+  });
+
+  it('throws on unsupported provider', () => {
+    process.env.EMAIL_PROVIDER = 'unknown-provider';
+    expect(() => createEmailServiceFromEnv()).toThrow('Unsupported email provider');
+  });
+
+  it('getEmailService returns singleton instance', () => {
+    const a = getEmailService();
+    const b = getEmailService();
+    expect(a).toBe(b);
   });
 });

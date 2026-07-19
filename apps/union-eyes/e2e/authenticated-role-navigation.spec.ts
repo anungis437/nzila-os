@@ -5,6 +5,7 @@ import {
   REQUIRED_VISIBLE_LABELS,
   STAKEHOLDER_ORDER,
   getExpectedLanding,
+  getExpectedActiveLabel,
   getFixture,
   getExpectedSidebar,
   toLocalizedPath,
@@ -32,15 +33,16 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       expect(localizedLanding).toContain(getExpectedLanding(role));
 
       const expectedSidebar = getExpectedSidebar(role);
+      const expectedActiveLabel = getExpectedActiveLabel(role);
       await assertVisibleNavLabels(page, expectedSidebar);
       await assertVisibleNavLabels(page, REQUIRED_VISIBLE_LABELS[role]);
       await assertForbiddenNavLabels(page, FORBIDDEN_LABELS[role]);
-      await assertSidebarActiveLabel(page, expectedSidebar[0]);
-      await assertHeadingOrFallback(page, expectedSidebar[0]);
+      await assertSidebarActiveLabel(page, expectedActiveLabel);
+      await assertHeadingOrFallback(page, expectedActiveLabel);
 
       await page.goto(localizedLanding, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(`${escapeRegExp(localizedLanding)}(?:$|[/?#])`));
-      await assertHeadingOrFallback(page, expectedSidebar[0]);
+      await assertHeadingOrFallback(page, expectedActiveLabel);
 
       // Ensure role-irrelevant groups do not leak through role switches.
       await assertForbiddenNavLabels(page, FORBIDDEN_LABELS[role]);
@@ -58,7 +60,14 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       await page.goto(localizedLanding, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(`${escapeRegExp(localizedLanding)}(?:$|[/?#])`));
 
-      await expect(page.locator('nav, [role="navigation"]').first()).toBeVisible();
+      // On mobile the primary <nav> collapses behind a trigger, so the desktop
+      // sidebar nav is present in the DOM but hidden. Assert the *reachable*
+      // nav affordance — a visible nav, or the control that opens it.
+      const reachableNav = page
+        .locator('nav, [role="navigation"], button[aria-label="Open navigation"]')
+        .filter({ visible: true })
+        .first();
+      await expect(reachableNav).toBeVisible();
       await expect(page.locator('body')).toBeVisible();
       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
     });

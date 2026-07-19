@@ -10,21 +10,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 // ── Mock @nzila/tax ──────────────────────────────────────────────────────────
 
-function calculateBracketTax(income: number, brackets: Array<{ rate: number; limit?: number }>): number {
-  let tax = 0
-  let remaining = income
-  let prev = 0
-  for (const bracket of brackets) {
-    const size = bracket.limit != null ? bracket.limit - prev : Infinity
-    const taxable = Math.min(remaining, size)
-    tax += taxable * bracket.rate
-    remaining -= taxable
-    prev = bracket.limit ?? 0
-    if (remaining <= 0) break
-  }
-  return tax
-}
-
 vi.mock('@nzila/tax', () => {
   const _calculateBracketTax = (
     income: number,
@@ -110,7 +95,6 @@ import {
   buildPayrollRegister,
   quickPayrollEstimate,
   type PayrollEmployeeInput,
-  type PayrollResult,
 } from '../payroll-engine'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

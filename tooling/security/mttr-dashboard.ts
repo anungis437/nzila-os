@@ -236,7 +236,7 @@ function syncRemediationState(
 ): RemediationEvent[] {
   const now = new Date().toISOString()
 
-  // 1. Mark resolved: any advisory in history that's no longer in audit
+  // 1. Mark resolved: unknown advisory in history that's no longer in audit
   for (const event of history) {
     if (event.resolvedAt == null && !(event.advisoryId in audit.advisories)) {
       event.resolvedAt = now
@@ -247,7 +247,7 @@ function syncRemediationState(
     }
   }
 
-  // 2. Add new: any advisory in audit not yet in history
+  // 2. Add new: unknown advisory in audit not yet in history
   const knownIds = new Set(history.map((e) => e.advisoryId))
   for (const [id, advisory] of Object.entries(audit.advisories)) {
     if (!knownIds.has(id)) {

@@ -201,7 +201,7 @@ export async function getDAUTrend(
     GROUP BY created_at::date
     ORDER BY day
   `);
-  return (result as unknown as Array<{ day: string; users: number }>).map((r) => ({
+  return (result as any as Array<{ day: string; users: number }>).map((r) => ({
     date: String(r.day),
     users: Number(r.users),
   }));

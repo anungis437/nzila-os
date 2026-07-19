@@ -25,8 +25,11 @@ import {
   type UpcomingInstallment,
 } from '@nzila/executive-os'
 import { getExecutiveOrgId, runAndPersist } from '../../../../lib/executive-os'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.finance.compliance')
 
 const SEVERITY_BADGE: Record<string, string> = {
   info: 'bg-slate-100 text-slate-700',
@@ -41,11 +44,22 @@ function daysFrom(today: Date, dateIso: string): number {
 async function loadSignal(orgId: string): Promise<TaxSignal> {
   const today = new Date()
 
-  const [years, filings, installments] = await Promise.all([
-    platformDb.select().from(taxYears).where(and(eq(taxYears.orgId, orgId), ne(taxYears.status, 'closed'))),
-    platformDb.select().from(taxFilings).where(eq(taxFilings.orgId, orgId)),
-    platformDb.select().from(taxInstallments).where(eq(taxInstallments.orgId, orgId)),
-  ])
+  let years: Array<typeof taxYears.$inferSelect> = []
+  let filings: Array<typeof taxFilings.$inferSelect> = []
+  let installments: Array<typeof taxInstallments.$inferSelect> = []
+
+  try {
+    ;[years, filings, installments] = await Promise.all([
+      platformDb.select().from(taxYears).where(and(eq(taxYears.orgId, orgId), ne(taxYears.status, 'closed'))),
+      platformDb.select().from(taxFilings).where(eq(taxFilings.orgId, orgId)),
+      platformDb.select().from(taxInstallments).where(eq(taxInstallments.orgId, orgId)),
+    ])
+  } catch (error) {
+    logger.warn('tax signal load failed; returning empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { filings: [], installments: [] }
+  }
 
   const filingsByYear = new Map<string, typeof filings>()
   for (const f of filings) {
@@ -120,8 +134,11 @@ export default async function CompliancePage() {
     revalidatePath('/actions')
   }
 
-  const lastRun = orgId
-    ? (
+  let lastRun: typeof executiveAgentRuns.$inferSelect | undefined
+  let insights: Array<typeof executiveAgentInsights.$inferSelect> = []
+  if (orgId) {
+    try {
+      lastRun = (
         await platformDb
           .select()
           .from(executiveAgentRuns)
@@ -129,11 +146,18 @@ export default async function CompliancePage() {
           .orderBy(desc(executiveAgentRuns.startedAt))
           .limit(1)
       )[0]
-    : undefined
-
-  const insights = lastRun
-    ? await platformDb.select().from(executiveAgentInsights).where(eq(executiveAgentInsights.runId, lastRun.id))
-    : []
+      if (lastRun) {
+        insights = await platformDb
+          .select()
+          .from(executiveAgentInsights)
+          .where(eq(executiveAgentInsights.runId, lastRun.id))
+      }
+    } catch (error) {
+      logger.warn('tax run history load failed; returning empty fallback', {
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">

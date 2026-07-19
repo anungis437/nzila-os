@@ -39,8 +39,7 @@ interface WorkflowStep {
   stepNumber: number;
   type: 'action' | 'condition' | 'delay' | 'loop' | 'branch';
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   nextStepId?: string;
   branchSteps?: { condition: string; nextStepId: string }[];
 }
@@ -50,12 +49,10 @@ interface AutomationWorkflow {
   description: string;
   category: string;
   triggerType: 'schedule' | 'event' | 'webhook' | 'manual';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  triggerConfig: Record<string, any>;
+  triggerConfig: Record<string, unknown>;
   isEnabled: boolean;
   steps: WorkflowStep[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
 }
 
 // Pre-built workflow templates
@@ -270,6 +267,10 @@ const WORKFLOW_TEMPLATES = [
     ],
   },
 ];
+
+// Coercion helpers for heterogeneous config values
+const cfgStr = (v: unknown): string => (v == null ? '' : String(v));
+const cfgNum = (v: unknown): number => (typeof v === 'number' ? v : Number(v) || 0);
 
 const STEP_TYPES = [
   { type: 'action', label: 'Action', icon: Zap, color: 'bg-blue-500' },
@@ -498,8 +499,7 @@ export default function AutomationWorkflowBuilder() {
                     key={type}
                     variant={workflow.triggerType === type ? 'default' : 'outline'}
                     size="sm"
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => setWorkflow({ ...workflow, triggerType: type as any, triggerConfig: {} })}
+                    onClick={() => setWorkflow({ ...workflow, triggerType: type as AutomationWorkflow['triggerType'], triggerConfig: {} })}
                     className="justify-start"
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -516,7 +516,7 @@ export default function AutomationWorkflowBuilder() {
                   <Label>Cron Expression</Label>
                   <Input
                     placeholder="e.g., 0 9 * * 1 (Every Monday 9am)"
-                    value={workflow.triggerConfig.cron || ''}
+                    value={cfgStr(workflow.triggerConfig.cron)}
                     onChange={(e) => setWorkflow({
                       ...workflow,
                       triggerConfig: { ...workflow.triggerConfig, cron: e.target.value },
@@ -532,7 +532,7 @@ export default function AutomationWorkflowBuilder() {
                 <>
                   <Label>Event Name</Label>
                   <select
-                    value={workflow.triggerConfig.event || ''}
+                    value={cfgStr(workflow.triggerConfig.event)}
                     onChange={(e) => setWorkflow({
                       ...workflow,
                       triggerConfig: { ...workflow.triggerConfig, event: e.target.value },
@@ -554,7 +554,7 @@ export default function AutomationWorkflowBuilder() {
                   <Label>Webhook Path</Label>
                   <Input
                     placeholder="/webhooks/my-workflow"
-                    value={workflow.triggerConfig.path || ''}
+                    value={cfgStr(workflow.triggerConfig.path)}
                     onChange={(e) => setWorkflow({
                       ...workflow,
                       triggerConfig: { ...workflow.triggerConfig, path: e.target.value },
@@ -585,8 +585,7 @@ export default function AutomationWorkflowBuilder() {
                     key={type}
                     variant="outline"
                     size="sm"
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => addStep(type as any)}
+                    onClick={() => addStep(type as WorkflowStep['type'])}
                     className="justify-start"
                   >
                     <div className={`h-2 w-2 rounded-full ${color} mr-2`} />
@@ -640,11 +639,11 @@ export default function AutomationWorkflowBuilder() {
                               <p className="font-medium truncate">
                                 {step.name || `Untitled ${step.type}`}
                               </p>
-                              {step.config.actionType && (
+                              {step.config.actionType ? (
                                 <p className="text-xs text-muted-foreground mt-1">
                                   {ACTION_TYPES.find(a => a.type === step.config.actionType)?.label}
                                 </p>
-                              )}
+                              ) : null}
                             </div>
                             <Button
                               variant="ghost"
@@ -701,7 +700,7 @@ export default function AutomationWorkflowBuilder() {
                     <div>
                       <Label>Action Type</Label>
                       <select
-                        value={currentStep.config.actionType || ''}
+                        value={cfgStr(currentStep.config.actionType)}
                         onChange={(e) => updateStep(currentStep.id, {
                           config: { actionType: e.target.value },
                         })}
@@ -720,7 +719,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Email Template</Label>
                           <Input
                             placeholder="template_name"
-                            value={currentStep.config.template || ''}
+                            value={cfgStr(currentStep.config.template)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, template: e.target.value },
                             })}
@@ -730,7 +729,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Recipient</Label>
                           <Input
                             placeholder="{{member.email}}"
-                            value={currentStep.config.to || ''}
+                            value={cfgStr(currentStep.config.to)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, to: e.target.value },
                             })}
@@ -745,7 +744,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Message</Label>
                           <Textarea
                             placeholder="SMS message content"
-                            value={currentStep.config.message || ''}
+                            value={cfgStr(currentStep.config.message)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, message: e.target.value },
                             })}
@@ -756,7 +755,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Recipient Phone</Label>
                           <Input
                             placeholder="{{member.phone}}"
-                            value={currentStep.config.to || ''}
+                            value={cfgStr(currentStep.config.to)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, to: e.target.value },
                             })}
@@ -771,7 +770,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Task Title</Label>
                           <Input
                             placeholder="Task title"
-                            value={currentStep.config.title || ''}
+                            value={cfgStr(currentStep.config.title)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, title: e.target.value },
                             })}
@@ -781,7 +780,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Assigned To</Label>
                           <Input
                             placeholder="{{steward.id}}"
-                            value={currentStep.config.assignedTo || ''}
+                            value={cfgStr(currentStep.config.assignedTo)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, assignedTo: e.target.value },
                             })}
@@ -792,7 +791,7 @@ export default function AutomationWorkflowBuilder() {
                           <Input
                             type="number"
                             placeholder="3"
-                            value={currentStep.config.dueInDays || ''}
+                            value={cfgStr(currentStep.config.dueInDays)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, dueInDays: parseInt(e.target.value) },
                             })}
@@ -807,7 +806,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Table</Label>
                           <Input
                             placeholder="e.g., members"
-                            value={currentStep.config.table || ''}
+                            value={cfgStr(currentStep.config.table)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, table: e.target.value },
                             })}
@@ -838,7 +837,7 @@ export default function AutomationWorkflowBuilder() {
                           <Label>Webhook URL</Label>
                           <Input
                             placeholder="https://api.example.com/webhook"
-                            value={currentStep.config.url || ''}
+                            value={cfgStr(currentStep.config.url)}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, url: e.target.value },
                             })}
@@ -847,7 +846,7 @@ export default function AutomationWorkflowBuilder() {
                         <div>
                           <Label>HTTP Method</Label>
                           <select
-                            value={currentStep.config.method || 'POST'}
+                            value={cfgStr(currentStep.config.method) || 'POST'}
                             onChange={(e) => updateStep(currentStep.id, {
                               config: { ...currentStep.config, method: e.target.value },
                             })}
@@ -867,7 +866,7 @@ export default function AutomationWorkflowBuilder() {
                         <Label>SQL Query</Label>
                         <Textarea
                           placeholder="SELECT * FROM members WHERE..."
-                          value={currentStep.config.query || ''}
+                          value={cfgStr(currentStep.config.query)}
                           onChange={(e) => updateStep(currentStep.id, {
                             config: { ...currentStep.config, query: e.target.value },
                           })}
@@ -885,7 +884,7 @@ export default function AutomationWorkflowBuilder() {
                       <Label>Field Path</Label>
                       <Input
                         placeholder="e.g., member.status"
-                        value={currentStep.config.field || ''}
+                        value={cfgStr(currentStep.config.field)}
                         onChange={(e) => updateStep(currentStep.id, {
                           config: { ...currentStep.config, field: e.target.value },
                         })}
@@ -894,7 +893,7 @@ export default function AutomationWorkflowBuilder() {
                     <div>
                       <Label>Operator</Label>
                       <select
-                        value={currentStep.config.operator || ''}
+                        value={cfgStr(currentStep.config.operator)}
                         onChange={(e) => updateStep(currentStep.id, {
                           config: { ...currentStep.config, operator: e.target.value },
                         })}
@@ -910,7 +909,7 @@ export default function AutomationWorkflowBuilder() {
                       <Label>Value</Label>
                       <Input
                         placeholder="Comparison value"
-                        value={currentStep.config.value || ''}
+                        value={cfgStr(currentStep.config.value)}
                         onChange={(e) => updateStep(currentStep.id, {
                           config: { ...currentStep.config, value: e.target.value },
                         })}
@@ -927,14 +926,14 @@ export default function AutomationWorkflowBuilder() {
                       <Input
                         type="number"
                         placeholder="24"
-                        value={currentStep.config.delayHours || ''}
+                        value={cfgStr(currentStep.config.delayHours)}
                         onChange={(e) => updateStep(currentStep.id, {
                           config: { ...currentStep.config, delayHours: parseInt(e.target.value) },
                         })}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         {currentStep.config.delayHours ? 
-                          `Wait ${currentStep.config.delayHours} hours (${(currentStep.config.delayHours / 24).toFixed(1)} days)` :
+                          `Wait ${cfgNum(currentStep.config.delayHours)} hours (${(cfgNum(currentStep.config.delayHours) / 24).toFixed(1)} days)` :
                           'Enter delay in hours'}
                       </p>
                     </div>
@@ -948,7 +947,7 @@ export default function AutomationWorkflowBuilder() {
                       <Label>Iterator Variable</Label>
                       <Input
                         placeholder="e.g., members"
-                        value={currentStep.config.iterator || ''}
+                        value={cfgStr(currentStep.config.iterator)}
                         onChange={(e) => updateStep(currentStep.id, {
                           config: { ...currentStep.config, iterator: e.target.value },
                         })}

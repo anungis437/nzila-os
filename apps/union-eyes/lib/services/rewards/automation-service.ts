@@ -10,6 +10,44 @@ import { eq, and } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
+type AutomationRuleRow = typeof automationRules.$inferSelect;
+type AutomationRuleInsert = typeof automationRules.$inferInsert;
+
+interface AnniversaryRow {
+  user_id: string;
+  user_name: string | null;
+  joined_at: Date | string;
+  years_of_service: number | string;
+}
+
+type AutomationConditions = {
+  metric?: string;
+  operator?: 'eq' | 'gt' | 'gte' | 'lt' | 'lte';
+  value?: number;
+  schedule?: string;
+};
+
+function getAutomationConditions(value: unknown): AutomationConditions {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  const record = value as Record<string, unknown>;
+  return {
+    metric: typeof record.metric === 'string' ? record.metric : undefined,
+    operator:
+      record.operator === 'eq' ||
+      record.operator === 'gt' ||
+      record.operator === 'gte' ||
+      record.operator === 'lt' ||
+      record.operator === 'lte'
+        ? record.operator
+        : undefined,
+    value: typeof record.value === 'number' ? record.value : undefined,
+    schedule: typeof record.schedule === 'string' ? record.schedule : undefined,
+  };
+}
+
 export interface AutomationRule {
   id: string;
   orgId: string;
@@ -52,8 +90,7 @@ export async function processAnniversaryAwards(orgId: string) {
     `;
 
     const result = await db.execute(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anniversaries = result as any[];
+    const anniversaries = result as unknown as AnniversaryRow[];
     // Get anniversary award type (should be configured in settings)
     const anniversaryAwardType = await db.query.recognitionAwardTypes.findFirst({
       where: (types, { eq, and }) =>
@@ -128,30 +165,27 @@ export async function processMilestoneAwards(
       .from(automationRules)
       .where(
         and(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(automationRules.orgId, orgId as any),
+          eq(automationRules.orgId, orgId),
           eq(automationRules.triggerType, 'milestone'),
           eq(automationRules.isActive, true)
         )
       );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const triggeredRules = rules.filter((rule: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const conditions = rule.conditions as any;
-      if (conditions?.metric !== milestoneType) return false;
+    const triggeredRules = rules.filter((rule: AutomationRuleRow) => {
+      const conditions = getAutomationConditions(rule.conditions);
+      if (conditions.metric !== milestoneType) return false;
 
-      switch (conditions?.operator) {
+      switch (conditions.operator) {
         case 'eq':
-          return currentValue === conditions?.value;
+          return currentValue === conditions.value;
         case 'gt':
-          return currentValue > conditions?.value;
+          return currentValue > (conditions.value ?? Number.NaN);
         case 'gte':
-          return currentValue >= conditions?.value;
+          return currentValue >= (conditions.value ?? Number.NaN);
         case 'lt':
-          return currentValue < conditions?.value;
+          return currentValue < (conditions.value ?? Number.NaN);
         case 'lte':
-          return currentValue <= conditions?.value;
+          return currentValue <= (conditions.value ?? Number.NaN);
         default:
           return false;
       }
@@ -261,8 +295,7 @@ export async function processScheduledAwards(orgId: string) {
       .from(automationRules)
       .where(
         and(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          eq(automationRules.orgId, orgId as any),
+          eq(automationRules.orgId, orgId),
           eq(automationRules.triggerType, 'scheduled'),
           eq(automationRules.isActive, true)
         )
@@ -316,32 +349,29 @@ export async function createAutomationRule(rule: {
   name: string;
   description?: string;
   triggerType: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   awardTypeId: string;
   creditAmount?: number;
   schedule?: string;
   createdBy?: string;
 }) {
   try {
+    const newRuleValues: AutomationRuleInsert = {
+      orgId: rule.orgId,
+      name: rule.name,
+      description: rule.description,
+      triggerType: rule.triggerType,
+      conditions: rule.conditions,
+      awardTypeId: rule.awardTypeId,
+      creditAmount: rule.creditAmount || 0,
+      schedule: rule.schedule,
+      isActive: true,
+      createdBy: rule.createdBy,
+    };
+
     const [newRule] = await db
       .insert(automationRules)
-      .values({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        orgId: rule.orgId as any,
-        name: rule.name,
-        description: rule.description,
-        triggerType: rule.triggerType,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conditions: rule.conditions as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        awardTypeId: rule.awardTypeId as any,
-        creditAmount: rule.creditAmount || 0,
-        schedule: rule.schedule,
-        isActive: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        createdBy: rule.createdBy as any,
-      })
+      .values(newRuleValues)
       .returning();
 
     logger.info('[Automation] Rule created successfully', { ruleId: newRule.id, name: rule.name });
@@ -358,8 +388,7 @@ export async function createAutomationRule(rule: {
 export async function updateAutomationRule(ruleId: string, updates: Partial<{
   name: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
   creditAmount: number;
   schedule: string;
   isActive: boolean;
@@ -371,8 +400,7 @@ export async function updateAutomationRule(ruleId: string, updates: Partial<{
         ...updates,
         updatedAt: new Date(),
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(eq(automationRules.id, ruleId as any))
+      .where(eq(automationRules.id, ruleId))
       .returning();
 
     if (!updatedRule) {
@@ -394,8 +422,7 @@ export async function deleteAutomationRule(ruleId: string) {
   try {
     const _result = await db
       .delete(automationRules)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(eq(automationRules.id, ruleId as any));
+      .where(eq(automationRules.id, ruleId));
 
     logger.info('[Automation] Rule deleted successfully', { ruleId });
     return { success: true };

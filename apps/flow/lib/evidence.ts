@@ -13,7 +13,7 @@ import {
   type CommerceEvidencePackResult,
   type TransitionAuditContext,
 } from '@nzila/commerce-audit'
-import { OrgRole } from '@nzila/commerce-core/enums'
+import { OrgRole } from '@nzila/commerce-core'
 
 export {
   buildCommerceEvidencePack,

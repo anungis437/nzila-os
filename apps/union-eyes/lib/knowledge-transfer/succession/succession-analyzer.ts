@@ -17,7 +17,13 @@
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import {
+  buildOrgAiTrace,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client';
 
 export type SuccessorReadiness = 'none' | 'minimal' | 'partial' | 'adequate';
 
@@ -188,6 +194,7 @@ export async function analyzeSuccessionFragility(orgId: string): Promise<Success
 
     const result = await ai.generate({
       orgId: UE_SYSTEM_ORG_ID,
+      trace: buildOrgAiTrace(orgId),
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CONTINUITY_RISK,
       input: [

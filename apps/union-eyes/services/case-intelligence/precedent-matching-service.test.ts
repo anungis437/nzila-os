@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type SelectStep = {
-  rows: unknown[];
+  rows: any[];
 };
 
 const selectSteps: SelectStep[] = [];
@@ -21,7 +21,7 @@ const dbMock = {
       orderBy: () => builder,
       where: () => builder,
       limit: async () => step.rows,
-      then: (onFulfilled: (value: unknown[]) => unknown, onRejected?: (reason: unknown) => unknown) =>
+      then: (onFulfilled: (value: any[]) => unknown, onRejected?: (reason: any) => unknown) =>
         Promise.resolve(step.rows).then(onFulfilled, onRejected),
     };
 
@@ -86,5 +86,42 @@ describe('case-intelligence precedent-matching-service', () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.documentId).toBe('doc-safe');
     expect(result[0]?.reasons.length).toBeGreaterThan(0);
+  });
+
+  it('sorts multiple authorized precedents by descending final score', async () => {
+    queueSelectSteps([
+      {
+        rows: [{
+          id: 'case-root', title: 'Termination case', description: 'Termination issue', grievantId: 'member-1', employerId: 'employer-1',
+          workplaceId: 'worksite-1', cbaId: 'agreement-1', unionRepId: 'lro-1', awardSummary: null, organizationId: 'org-1'
+        }],
+      },
+      {
+        rows: [
+          {
+            id: 'doc-low', title: 'Unrelated note', filename: null, name: 'Unrelated note', privacyLabel: 'team_confidential',
+            documentType: 'memo', fileUrl: 'https://example.com/low', updatedAt: new Date('2026-01-01T00:00:00Z'),
+            linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: [], uploadedBy: 'lro-1',
+          },
+          {
+            id: 'doc-high', title: 'Termination award precedent', filename: null, name: 'Termination award precedent', privacyLabel: 'team_confidential',
+            documentType: 'award', fileUrl: 'https://example.com/high', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
+          },
+        ],
+      },
+    ]);
+    filterAuthorizedDocumentsForActor.mockImplementation(async ({ documents }) => documents);
+
+    const { findPrecedentDocuments } = await import('./precedent-matching-service');
+    const result = await findPrecedentDocuments({
+      context: { caseId: 'case-root', orgId: 'org-1', actorId: 'user-1' },
+      actor: { userId: 'user-1', isStewardPlus: false },
+      similarCases: [{ caseId: 'case-similar', score: 70, matchReasons: ['Same agreement'], matchedDimensions: { agreement: true } }],
+      limit: 10,
+    });
+
+    expect(result.length).toBeGreaterThanOrEqual(2);
+    expect(result[0]!.finalScore).toBeGreaterThanOrEqual(result[1]!.finalScore);
   });
 });

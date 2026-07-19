@@ -52,6 +52,7 @@ const ADAPTER_PATH_PATTERNS = [
   /partner-auth/,                // partner auth bridge layer
   /with-rls-context/,            // RLS context passes through migration-era ids
   /org-resolver/,                // org resolution bridge (clerkOrgId → appOrgId)
+  /workspace\/_lib\/house-partner/, // Console bridge uses legacy schema column clerkOrgId
   /profiles-queries/,            // DB queries that reference clerkId columns
   /state-machine/,               // governance state machine (actorClerkUserId field)
   /auth\/types/,                 // auth type definitions with legacy field names

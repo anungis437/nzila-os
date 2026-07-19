@@ -40,7 +40,7 @@ export class CarbonAccountingIntegration {
 
     const emissions = await Promise.all(
       resources.map(async (resource) => {
-        const isRenewable = await this.isRenewableRegion(resource.region);
+        const isRenewable = await this.isRenewableRegion(resource.location);
         const emissions = await this.calculateResourceEmissions(resource);
 
         return {

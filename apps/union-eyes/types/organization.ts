@@ -89,7 +89,7 @@ export interface OrganizationSettings {
   formed_by_merger?: string[];
   international_affiliate?: string;
   sectors?: string[];
-  [key: string]: unknown; // Allow additional custom settings
+  [key: string]: any; // Allow additional custom settings
 }
 
 /**

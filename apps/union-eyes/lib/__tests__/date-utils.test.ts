@@ -27,7 +27,7 @@ describe('date-utils', () => {
     });
 
     it('throws when date is falsy', () => {
-      expect(() => toUTCISO('' as unknown as string)).toThrow();
+      expect(() => toUTCISO('' as any as string)).toThrow();
     });
   });
 
@@ -48,7 +48,7 @@ describe('date-utils', () => {
     });
 
     it('throws when date is falsy', () => {
-      expect(() => parseDate('' as unknown as string)).toThrow();
+      expect(() => parseDate('' as any as string)).toThrow();
     });
   });
 
@@ -107,7 +107,7 @@ describe('date-utils', () => {
     });
 
     it('returns false for non-string input', () => {
-      expect(isValidISODate(123 as unknown as string)).toBe(false);
+      expect(isValidISODate(123 as any as string)).toBe(false);
     });
   });
 

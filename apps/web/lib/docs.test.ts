@@ -78,7 +78,7 @@ describe('getAllDocs', () => {
     expect(dated?.date).toBe('2026-02-01')
     // Extracted to variable to satisfy TS2358 — instanceof requires object-typed LHS
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dateVal: any = dated?.date
+    const dateVal: unknown = dated?.date
     expect(dateVal instanceof Date).toBe(false)
   })
 })
@@ -103,7 +103,7 @@ describe('getDocBySlug', () => {
     expect(doc?.date).toBe('2026-02-01')
     // Extracted to variable to satisfy TS2358 — instanceof requires object-typed LHS
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const docDateVal: any = doc?.date
+    const docDateVal: unknown = doc?.date
     expect(docDateVal instanceof Date).toBe(false)
   })
 })

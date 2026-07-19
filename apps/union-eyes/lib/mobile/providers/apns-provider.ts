@@ -60,16 +60,6 @@ export class APNsProvider {
 
     // Generate JWT token
     // In production, use proper JWT library
-    const header = Buffer.from(JSON.stringify({
-      alg: 'ES256',
-      kid: this.config.keyId
-    })).toString('base64');
-
-    const payload = Buffer.from(JSON.stringify({
-      iss: this.config.teamId,
-      iat: Math.floor(Date.now() / 1000)
-    })).toString('base64');
-
     // APNs requires ES256 signatures over the JWT header/payload using the
     // team's .p8 private key. We do not perform that signing here. Apple will
     // reject every token with SIGNATURE_PLACEHOLDER, so any caller that

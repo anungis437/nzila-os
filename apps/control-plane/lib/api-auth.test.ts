@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { requireApiAuth, requireAuditReadAuth, ApiAuthError, handleAuthError } from './api-auth'
 import { createAuditorAccessToken } from './auditor-token'
 
@@ -17,45 +17,54 @@ function makeRequest(headers: Record<string, string> = {}): Request {
   } as unknown as Request
 }
 
+function setNodeEnv(value: string | undefined): void {
+  Object.defineProperty(process.env, 'NODE_ENV', {
+    value,
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  })
+}
+
 describe('requireApiAuth', () => {
   const originalEnv = { ...process.env }
 
   afterEach(() => {
     process.env.CONTROL_PLANE_API_KEY = originalEnv.CONTROL_PLANE_API_KEY
-    ;(process.env as any).NODE_ENV = originalEnv.NODE_ENV
+    setNodeEnv(originalEnv.NODE_ENV)
   })
 
   it('allows in development when no key is configured', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
-    ;(process.env as any).NODE_ENV = 'development'
+    setNodeEnv('development')
     const result = await requireApiAuth(makeRequest())
     expect(result).toEqual({ authenticated: true, role: 'admin' })
   })
 
   it('throws 500 when key not set in non-development', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
-    ;(process.env as any).NODE_ENV = 'production'
+    setNodeEnv('production')
     await expect(requireApiAuth(makeRequest())).rejects.toThrow('Server misconfiguration')
     await expect(requireApiAuth(makeRequest())).rejects.toMatchObject({ status: 500 })
   })
 
   it('throws 401 when no api key header provided', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'secret-key'
-    ;(process.env as any).NODE_ENV = 'production'
+    setNodeEnv('production')
     await expect(requireApiAuth(makeRequest())).rejects.toThrow('Unauthorized')
     await expect(requireApiAuth(makeRequest())).rejects.toMatchObject({ status: 401 })
   })
 
   it('throws 401 when wrong api key provided', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'secret-key'
-    ;(process.env as any).NODE_ENV = 'production'
+    setNodeEnv('production')
     const req = makeRequest({ 'x-api-key': 'wrong-key' })
     await expect(requireApiAuth(req)).rejects.toThrow('Unauthorized')
   })
 
   it('allows access with correct api key', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'my-key'
-    ;(process.env as any).NODE_ENV = 'production'
+    setNodeEnv('production')
     const req = makeRequest({ 'x-api-key': 'my-key' })
     const result = await requireApiAuth(req)
     expect(result).toEqual({ authenticated: true, role: 'admin' })
@@ -63,7 +72,7 @@ describe('requireApiAuth', () => {
 
   it('works without request argument in dev mode', async () => {
     delete process.env.CONTROL_PLANE_API_KEY
-    ;(process.env as any).NODE_ENV = 'development'
+    setNodeEnv('development')
     const result = await requireApiAuth(undefined)
     expect(result).toEqual({ authenticated: true, role: 'admin' })
   })
@@ -75,19 +84,19 @@ describe('requireAuditReadAuth', () => {
   afterEach(() => {
     process.env.CONTROL_PLANE_API_KEY = originalEnv.CONTROL_PLANE_API_KEY
     process.env.AUDITOR_TOKEN_SECRET = originalEnv.AUDITOR_TOKEN_SECRET
-    ;(process.env as any).NODE_ENV = originalEnv.NODE_ENV
+    setNodeEnv(originalEnv.NODE_ENV)
   })
 
   it('accepts admin api key', async () => {
     process.env.CONTROL_PLANE_API_KEY = 'admin-key'
-    ;(process.env as any).NODE_ENV = 'production'
+    setNodeEnv('production')
     const result = await requireAuditReadAuth(makeRequest({ 'x-api-key': 'admin-key' }))
     expect(result).toEqual({ authenticated: true, role: 'admin' })
   })
 
   it('accepts valid auditor bearer token', async () => {
     process.env.AUDITOR_TOKEN_SECRET = 'auditor-secret'
-    ;(process.env as any).NODE_ENV = 'production'
+    setNodeEnv('production')
 
     const token = createAuditorAccessToken({
       organizationId: 'org-auditor',

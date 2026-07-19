@@ -22,6 +22,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/auth(.*)',
   '/api/health(.*)',
   '/api/webhooks(.*)',
+  '/api/courtlens/public-intake(.*)',
+  '/:locale/courtlens/t/:tenantSlug/intake',
   '/legal(.*)',
   '/resources(.*)',
 ])

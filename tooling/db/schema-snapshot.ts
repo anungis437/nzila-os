@@ -19,11 +19,13 @@ import {
 } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 
-const REPO_ROOT = realpathSync(join(__dirname, '../..'))
-const SCHEMA_DIR = join(REPO_ROOT, 'packages', 'db', 'src', 'schema')
-const SNAPSHOT_FILE = join(REPO_ROOT, 'tooling', 'db', 'schema-snapshot.json')
+// `import.meta.dirname` under vitest/vite; `__dirname` under tsx (CommonJS root).
+const MODULE_DIR = import.meta.dirname ?? __dirname
+const REPO_ROOT = realpathSync(join(MODULE_DIR, '../..'))
+export const SCHEMA_DIR = join(REPO_ROOT, 'packages', 'db', 'src', 'schema')
+export const SNAPSHOT_FILE = join(REPO_ROOT, 'tooling', 'db', 'schema-snapshot.json')
 
-interface SchemaSnapshot {
+export interface SchemaSnapshot {
   capturedAt: string
   schemaDir: string
   files: Record<string, { hash: string; size: number }>
@@ -55,7 +57,7 @@ function getSchemaFiles(): string[] {
   return results.sort()
 }
 
-function captureSnapshot(): SchemaSnapshot {
+export function captureSnapshot(): SchemaSnapshot {
   const files: Record<string, { hash: string; size: number }> = {}
   const schemaFiles = getSchemaFiles()
 
@@ -81,6 +83,22 @@ function captureSnapshot(): SchemaSnapshot {
   }
 }
 
+export interface SchemaDrift {
+  added: string[]
+  removed: string[]
+  modified: string[]
+}
+
+/** Pure drift comparison between a persisted snapshot and a fresh capture. */
+export function computeDrift(persisted: SchemaSnapshot, current: SchemaSnapshot): SchemaDrift {
+  const added = Object.keys(current.files).filter((f) => !persisted.files[f])
+  const removed = Object.keys(persisted.files).filter((f) => !current.files[f])
+  const modified = Object.keys(current.files).filter(
+    (f) => persisted.files[f] && persisted.files[f].hash !== current.files[f].hash,
+  )
+  return { added, removed, modified }
+}
+
 function writeSnapshot(): void {
   const snapshot = captureSnapshot()
   writeFileSync(SNAPSHOT_FILE, JSON.stringify(snapshot, null, 2) + '\n')
@@ -99,12 +117,7 @@ function verifySnapshot(): void {
   const persisted: SchemaSnapshot = JSON.parse(readFileSync(SNAPSHOT_FILE, 'utf-8'))
   const current = captureSnapshot()
 
-  const added = Object.keys(current.files).filter((f) => !persisted.files[f])
-  const removed = Object.keys(persisted.files).filter((f) => !current.files[f])
-  const modified = Object.keys(current.files).filter(
-    (f) => persisted.files[f] && persisted.files[f].hash !== current.files[f].hash,
-  )
-
+  const { added, removed, modified } = computeDrift(persisted, current)
   const hasDrift = added.length > 0 || removed.length > 0 || modified.length > 0
 
   if (hasDrift) {
@@ -124,11 +137,19 @@ function verifySnapshot(): void {
 }
 
 const command = process.argv[2]
-if (command === 'write') {
-  writeSnapshot()
-} else if (command === 'verify') {
-  verifySnapshot()
-} else {
-  console.error('Usage: schema-snapshot.ts <write|verify>')
-  process.exit(1)
+
+// Only run the CLI when invoked directly (tsx). When imported by a test the
+// `require.main === module` guard is false, so no side effects / process.exit.
+const invokedDirectly =
+  typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module
+
+if (invokedDirectly) {
+  if (command === 'write') {
+    writeSnapshot()
+  } else if (command === 'verify') {
+    verifySnapshot()
+  } else {
+    console.error('Usage: schema-snapshot.ts <write|verify>')
+    process.exit(1)
+  }
 }

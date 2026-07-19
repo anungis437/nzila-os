@@ -23,8 +23,7 @@ export default function PolicyRegistry() {
   const [page, setPage] = useState(0)
   const limit = 20
 
-  const fetchPolicies = useCallback(async () => {
-    setLoading(true)
+  const loadPolicies = useCallback(async () => {
     const params = new URLSearchParams({ limit: String(limit), offset: String(page * limit) })
     if (domain) params.set('domain', domain)
     if (status !== 'all') params.set('status', status)
@@ -35,7 +34,12 @@ export default function PolicyRegistry() {
     setLoading(false)
   }, [domain, status, page])
 
-  useEffect(() => { fetchPolicies() }, [fetchPolicies])
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadPolicies()
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
+  }, [loadPolicies])
 
   return (
     <div className="space-y-4">
@@ -101,7 +105,7 @@ export default function PolicyRegistry() {
 
       {selected && (
         <div className="border-t pt-4">
-          <PolicyDetail policyId={selected} onClose={() => setSelected(null)} />
+          <PolicyDetail key={selected} policyId={selected} onClose={() => setSelected(null)} />
         </div>
       )}
     </div>

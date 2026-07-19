@@ -35,7 +35,7 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  let body: unknown = {};
+  let body: any = {};
   try {
     if (request.headers.get('content-length') && Number(request.headers.get('content-length')) > 0) {
       body = await request.json();

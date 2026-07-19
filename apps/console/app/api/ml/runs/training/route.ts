@@ -3,7 +3,7 @@
  * GET /api/ml/runs/training
  *
  * Returns recent training runs for an entity.
- * RBAC: any active entity member.
+ * RBAC: unknown active entity member.
  *
  * Query params:
  *   orgId    required

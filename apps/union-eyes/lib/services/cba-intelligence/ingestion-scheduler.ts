@@ -336,3 +336,12 @@ export function isSchedulerRunning(): boolean {
 export function isIngestionInProgress(): boolean {
   return isRunning;
 }
+
+export const __test__ = {
+  getSourceSchedules,
+  updateFreshnessLogs,
+  getDefaultSchedule: () => DEFAULT_SCHEDULE,
+  setRunning: (value: boolean) => {
+    isRunning = value;
+  },
+};

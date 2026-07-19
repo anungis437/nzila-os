@@ -481,7 +481,7 @@ describe('validateParams', () => {
   });
 
   it('rethrows non-Zod errors', () => {
-    const throwSchema = { parse: () => { throw new TypeError('unexpected'); } } as unknown as z.ZodSchema;
+    const throwSchema = { parse: () => { throw new TypeError('unexpected'); } } as any as z.ZodSchema;
     expect(() => validateParams({}, throwSchema)).toThrow(TypeError);
   });
 });
@@ -528,7 +528,7 @@ describe('validateBody', () => {
   });
 
   it('rethrows non-Zod non-Syntax errors', async () => {
-    const throwSchema = { parse: () => { throw new TypeError('unexpected'); } } as unknown as z.ZodSchema;
+    const throwSchema = { parse: () => { throw new TypeError('unexpected'); } } as any as z.ZodSchema;
     const req = new Request('http://localhost/api', {
       method: 'POST',
       body: JSON.stringify({ name: 'x' }),
@@ -567,7 +567,7 @@ describe('validateQuery', () => {
   });
 
   it('rethrows non-Zod errors', () => {
-    const throwSchema = { parse: () => { throw new TypeError('unexpected'); } } as unknown as z.ZodSchema;
+    const throwSchema = { parse: () => { throw new TypeError('unexpected'); } } as any as z.ZodSchema;
     const req = new Request('http://localhost/api');
     expect(() => validateQuery(req, throwSchema)).toThrow(TypeError);
   });

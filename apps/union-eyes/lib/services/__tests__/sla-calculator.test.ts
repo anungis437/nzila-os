@@ -3,6 +3,8 @@ import {
   SLA_STANDARDS,
   calculateAcknowledgmentSla,
   calculateCaseSlaStatus,
+  getAtRiskCases,
+  getBreachedCases,
 } from '../sla-calculator';
 
 describe('sla-calculator', () => {
@@ -112,6 +114,56 @@ describe('sla-calculator', () => {
 
       expect(result.firstResponse).toBeUndefined();
       expect(result.investigation).toBeUndefined();
+    });
+  });
+
+  describe('assessment filters', () => {
+    it('getAtRiskCases returns at_risk and breached assessments', () => {
+      const assessments = [
+        calculateCaseSlaStatus(
+          'case-risk',
+          [{ timestamp: new Date('2026-01-13'), type: 'submitted' as const }],
+          new Date('2026-01-15')
+        ),
+        calculateCaseSlaStatus(
+          'case-breach',
+          [{ timestamp: new Date('2026-01-13'), type: 'submitted' as const }],
+          new Date('2026-01-20')
+        ),
+        calculateCaseSlaStatus(
+          'case-ok',
+          [
+            { timestamp: new Date('2026-01-13'), type: 'submitted' as const },
+            { timestamp: new Date('2026-01-13'), type: 'acknowledged' as const },
+          ],
+          new Date('2026-01-13')
+        ),
+      ];
+
+      const filtered = getAtRiskCases(assessments);
+      expect(filtered.map((c) => c.caseId)).toContain('case-risk');
+      expect(filtered.map((c) => c.caseId)).toContain('case-breach');
+      expect(filtered.map((c) => c.caseId)).not.toContain('case-ok');
+    });
+
+    it('getBreachedCases returns only breached assessments', () => {
+      const assessments = [
+        calculateCaseSlaStatus(
+          'case-risk',
+          [{ timestamp: new Date('2026-01-13'), type: 'submitted' as const }],
+          new Date('2026-01-15')
+        ),
+        calculateCaseSlaStatus(
+          'case-breach',
+          [{ timestamp: new Date('2026-01-13'), type: 'submitted' as const }],
+          new Date('2026-01-20')
+        ),
+      ];
+
+      const breached = getBreachedCases(assessments);
+      expect(breached).toHaveLength(1);
+      expect(breached[0].caseId).toBe('case-breach');
+      expect(breached[0].overallStatus).toBe('breached');
     });
   });
 });

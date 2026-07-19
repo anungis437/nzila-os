@@ -44,7 +44,7 @@ The Wave 7 constitutional trust framing (proof-record semantics, reviewer-of-rec
 
 ## Executive continuity confidence results
 
-The executive cadence inherits the Wave 9 lifts indirectly: any executive entering a sovereignty-gated surface (cognition, longitudinal cognition, security, ops) now sees a fully localized constitutional band before the surface content loads, including a localized role label that names them as the reviewer of record. The “informal-systems substitution” risk is reduced because the institutional contract of the surface is communicated up-front in the executive's working language.
+The executive cadence inherits the Wave 9 lifts indirectly: unknown executive entering a sovereignty-gated surface (cognition, longitudinal cognition, security, ops) now sees a fully localized constitutional band before the surface content loads, including a localized role label that names them as the reviewer of record. The “informal-systems substitution” risk is reduced because the institutional contract of the surface is communicated up-front in the executive's working language.
 
 ---
 

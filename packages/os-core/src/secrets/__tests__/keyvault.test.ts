@@ -13,7 +13,7 @@ describe('keyvault', () => {
   beforeEach(() => {
     clearSecretCache()
     delete process.env.KEY_VAULT_URI
-    delete (process.env as any).NODE_ENV
+    delete (process.env as Record<string, string | undefined>).NODE_ENV
     delete process.env.MY_SECRET
     delete process.env.DATABASE_URL
   })

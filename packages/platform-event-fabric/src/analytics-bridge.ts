@@ -225,7 +225,6 @@ export function createConsoleAnalyticsAdapter(): AnalyticsAdapter {
   return {
     name: 'console',
     async track(event) {
-      // eslint-disable-next-line no-console
       console.log(`[analytics:${event.eventName}]`, {
         distinctId: event.distinctId,
         orgId: event.orgId,
@@ -234,7 +233,6 @@ export function createConsoleAnalyticsAdapter(): AnalyticsAdapter {
       })
     },
     async identify(userId, properties) {
-      // eslint-disable-next-line no-console
       console.log(`[analytics:identify]`, { userId, properties })
     },
   }

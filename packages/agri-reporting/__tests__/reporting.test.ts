@@ -114,7 +114,7 @@ describe('buildCompositeReport', () => {
     )
     expect(composite.title).toBe('Annual Summary')
     expect(composite.metrics).toHaveLength(1)
-    expect((composite.metadata as any).sourceReportIds).toContain(r1.id)
+    expect((composite.metadata as unknown).sourceReportIds).toContain(r1.id)
   })
 })
 

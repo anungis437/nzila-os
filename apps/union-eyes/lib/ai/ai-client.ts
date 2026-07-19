@@ -16,6 +16,7 @@ import {
   createAiClient,
   type AiClient,
   type AiExecutionTelemetry,
+  type AiTrace,
   type EmbedResult,
   type ExtractResult,
   type GenerateResult,
@@ -119,6 +120,18 @@ export const UE_PROFILES = {
   CONTINUITY_RISK: 'ue-continuity-risk',
   TOPIC_EXTRACTION: 'ue-topic-extraction',
 } as const
+
+export function buildOrgAiTrace(
+  organizationId?: string | null,
+  correlationId?: string,
+): AiTrace | undefined {
+  if (!organizationId && !correlationId) return undefined
+
+  return {
+    ...(correlationId ? { correlationId } : {}),
+    ...(organizationId ? { domainType: 'organization', domainId: organizationId } : {}),
+  }
+}
 
 export async function runAICompletionDetailed(input: Parameters<AiClient['generate']>[0]): Promise<{ content: string; execution: AiExecutionTelemetry }> {
   const result = await getAiClient().generate(input)

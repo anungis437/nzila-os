@@ -23,7 +23,6 @@ import {
 } from './_helpers'
 
 // Cross-org evidence IDs that must be inaccessible to primary-org users
-const CROSS_ORG_CASE_ID = 'aaaaaaaa-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
 const INVALID_EVIDENCE_ID = '00000000-0000-0000-0000-000000000000'
 const PRIMARY_CASE_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
 

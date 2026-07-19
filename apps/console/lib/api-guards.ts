@@ -17,7 +17,7 @@ import { orgMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { headers } from 'next/headers'
-import { getUserRole, type NzilaRole } from '@/lib/rbac'
+import { getUserRole, isOperatorRole, type NzilaRole } from '@/lib/rbac'
 import { createRequestContext, runWithContext } from '@nzila/os-core'
 
 // ── Re-exports for route convenience ────────────────────────────────────────
@@ -68,6 +68,12 @@ export async function authenticateUser(): Promise<
     }
   }
   const platformRole = await getUserRole()
+  if (!isOperatorRole(platformRole)) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden: operator role required' }, { status: 403 }),
+    }
+  }
   return { ok: true, userId, platformRole }
 }
 
@@ -103,7 +109,7 @@ export async function getOrgMembership(orgId: string, userId: string) {
 export async function requireOrgAccess(
   orgId: string,
   options?: {
-    /** Minimum org role required. Default: any active member. */
+    /** Minimum org role required. Default: unknown active member. */
     minRole?: 'org_admin' | 'org_secretary'
     /** Platform roles that bypass org membership checks. */
     platformBypass?: NzilaRole[]
@@ -116,14 +122,6 @@ export async function requireOrgAccess(
   if (!authResult.ok) return authResult
 
   const { userId, platformRole } = authResult
-
-  // Service accounts bypass org membership (inter-service AI calls)
-  if ('isService' in authResult && authResult.isService) {
-    return {
-      ok: true,
-      context: { userId, platformRole, membership: null },
-    }
-  }
 
   // Platform admins can bypass org membership
   if (options?.platformBypass?.includes(platformRole)) {

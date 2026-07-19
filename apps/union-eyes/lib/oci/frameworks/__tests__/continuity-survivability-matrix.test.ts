@@ -56,7 +56,7 @@ describe('Continuity Survivability Matrix', () => {
   });
 
   it('falls back to worst-case cell (singular_absent) for unknown enum inputs', () => {
-    // Hardening: unknown inputs must NOT cheerfully produce a healthy
+    // Hardening: any inputs must NOT cheerfully produce a healthy
     // posture. Falling back to the worst-case cell makes the
     // misclassification loud in meaning.
     const result = classifySurvivability(

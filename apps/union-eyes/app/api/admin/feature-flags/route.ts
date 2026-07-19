@@ -50,7 +50,7 @@ export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
  * Toggle a feature flag
  */
 export const PATCH = withAdminAuth(async (request, context: BaseAuthContext) => {
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

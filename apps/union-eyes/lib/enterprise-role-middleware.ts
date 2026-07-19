@@ -46,7 +46,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withOrganizationAuth } from './organization-middleware';
+import { withOrganizationAuth, type OrganizationContext } from './organization-middleware';
 import {
   getMemberRoles,
   getMemberHighestRoleLevel,
@@ -104,8 +104,7 @@ interface PermissionCheckResult {
  * @param handler - Request handler receiving enhanced context
  * @param options - Additional options (scope checking, audit config)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withEnhancedRoleAuth<T = any>(
+export function withEnhancedRoleAuth<T = unknown>(
   minRoleLevel: number,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
   options: {
@@ -116,15 +115,13 @@ export function withEnhancedRoleAuth<T = any>(
     isSensitive?: boolean; // Flag as sensitive action
   } = {}
 ) {
-  return withOrganizationAuth(async (request: NextRequest, orgContext: unknown) => {
+  return withOrganizationAuth(async (request: NextRequest, orgContext: OrganizationContext) => {
     const startTime = Date.now();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = orgContext as any;
+    const { organizationId, userId } = orgContext;
     
     try {
       // Get member from context (requires org middleware to populate this)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberId = (orgContext as any).memberId;
+      const memberId = orgContext.memberId;
       if (!memberId) {
         await logAuditDenial(
           orgContext,
@@ -234,8 +231,7 @@ return NextResponse.json(
  * @param handler - Request handler
  * @param options - Additional options
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withPermission<T = any>(
+export function withPermission<T = unknown>(
   requiredPermission: string,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
   options: {
@@ -246,14 +242,12 @@ export function withPermission<T = any>(
     allowExceptions?: boolean; // Allow permission exceptions (default: true)
   } = {}
 ) {
-  return withOrganizationAuth(async (request: NextRequest, orgContext: unknown) => {
+  return withOrganizationAuth(async (request: NextRequest, orgContext: OrganizationContext) => {
     const startTime = Date.now();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = orgContext as any;
+    const { organizationId, userId } = orgContext;
     
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberId = (orgContext as any).memberId;
+      const memberId = orgContext.memberId;
       if (!memberId) {
         await logAuditDenial(
           { organizationId, userId, memberId: '' },
@@ -350,8 +344,7 @@ return NextResponse.json(
  * @param scopeType - Required scope type (e.g., "department")
  * @param handler - Request handler
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withScopedRoleAuth<T = any>(
+export function withScopedRoleAuth<T = unknown>(
   roleCode: string,
   scopeType: string,
   handler: (request: NextRequest, context: EnhancedRoleContext) => Promise<NextResponse<T>>,
@@ -362,14 +355,12 @@ export function withScopedRoleAuth<T = any>(
     isSensitive?: boolean;
   } = {}
 ) {
-  return withOrganizationAuth(async (request: NextRequest, orgContext: unknown) => {
+  return withOrganizationAuth(async (request: NextRequest, orgContext: OrganizationContext) => {
     const startTime = Date.now();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId } = orgContext as any;
+    const { organizationId, userId } = orgContext;
     
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memberId = (orgContext as any).memberId;
+      const memberId = orgContext.memberId;
       if (!memberId) {
         await logAuditDenial(
           { organizationId, userId, memberId: '' },
@@ -533,8 +524,7 @@ async function getPermissionExceptionId(
     query = sql`${query} LIMIT 1`;
     
     const result = await db.execute(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (result as any[])[0]?.id || null;
+    return (result as Array<{ id?: string }>)[0]?.id || null;
   } catch (_error) {
 return null;
   }
@@ -596,7 +586,7 @@ async function checkMemberPermission(
  * Log denied access attempt
  */
 async function logAuditDenial(
-  context: unknown,
+  context: OrganizationContext,
   action: string,
   resourceType: string,
   reason: string,
@@ -604,12 +594,10 @@ async function logAuditDenial(
   isSensitive?: boolean
 ): Promise<void> {
   await logPermissionCheck({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    actorId: (context as any).memberId || (context as any).userId || 'unknown',
+    actorId: context.memberId || context.userId || 'unknown',
     action,
     resourceType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    organizationId: (context as any).organizationId,
+    organizationId: context.organizationId,
     granted: false,
     denialReason: reason,
     executionTimeMs,

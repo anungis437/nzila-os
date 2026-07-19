@@ -14,6 +14,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@nzila/db": "workspace:*",
+    "@nzila/comms-email": "workspace:*",
     "@nzila/decision-core": "workspace:*",
     "@nzila/governed-workflow": "workspace:*",
     "@nzila/integrations-core": "workspace:*",
@@ -35,6 +36,7 @@
     "@nzila/platform-ops": "workspace:*",
     "@nzila/platform-reasoning-engine": "workspace:*",
     "@nzila/platform-semantic-search": "workspace:*",
+    "@nzila/sage-core": "workspace:*",
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.45.2",
@@ -47,9 +49,11 @@
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.0.0",
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10",
     "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",

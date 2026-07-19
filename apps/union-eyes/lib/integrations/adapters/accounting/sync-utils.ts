@@ -78,8 +78,8 @@ export interface ReconciliationResult {
 export interface InvoiceConflict {
   externalId: string;
   field: string;
-  externalValue: unknown;
-  internalValue: unknown;
+  externalValue: any;
+  internalValue: any;
   lastSyncedAt: Date;
 }
 

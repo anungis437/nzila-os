@@ -28,7 +28,7 @@ vi.mock('../policy-governance-events-service', () => ({
   recordGovernanceEvent: vi.fn().mockResolvedValue({}),
 }))
 
-function buildDb(options: { policy?: unknown; chain?: unknown; approvedCount?: number } = {}) {
+function _buildDb(options: { policy?: unknown; chain?: unknown; approvedCount?: number } = {}) {
   let callCount = 0
   const chain = {
     select: vi.fn().mockReturnThis(),
@@ -46,8 +46,7 @@ function buildDb(options: { policy?: unknown; chain?: unknown; approvedCount?: n
   }
   // Override for approved count query
   const approvedCountMock = Promise.resolve([{ count: options.approvedCount ?? 1 }])
-  const origSelect = chain.select.getMockImplementation()
-  chain.select.mockImplementation((...args: unknown[]) => {
+  chain.select.mockImplementation((..._args: unknown[]) => {
     const c = { ...chain }
     c.limit = vi.fn().mockReturnValue(approvedCountMock)
     return c

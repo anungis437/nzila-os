@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { generateStripeReports } from '@nzila/payments-stripe/reports'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
 import { createLogger } from '@nzila/os-core'
 
@@ -32,6 +32,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const { orgId, startDate, endDate, periodId } = parsed.data
+
+  const orgAccess = await requireOrgAccess(orgId, {
+    minRole: 'org_admin',
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
 
   try {
     const artifacts = await generateStripeReports({

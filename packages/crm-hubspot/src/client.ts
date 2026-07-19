@@ -39,6 +39,33 @@ export interface HubSpotEngagementNote {
   ownerId?: string
 }
 
+/** A deal record as returned by HubSpot list/get endpoints. */
+export interface HubSpotDealRecord {
+  id: string
+  properties: {
+    dealname?: string | null
+    amount?: string | null
+    dealstage?: string | null
+    closedate?: string | null
+    pipeline?: string | null
+  }
+  associations?: {
+    contacts?: { results?: { id: string }[] }
+  }
+}
+
+/** A contact record as returned by HubSpot get endpoints. */
+export interface HubSpotContactRecord {
+  id: string
+  properties: {
+    email?: string | null
+    firstname?: string | null
+    lastname?: string | null
+    company?: string | null
+    phone?: string | null
+  }
+}
+
 export const HubSpotContactSchema = z.object({
   email: z.string().email(),
   firstName: z.string().optional(),
@@ -191,6 +218,95 @@ export class HubSpotClient {
     }
 
     return { ok: true, id: result.data.id }
+  }
+
+  /**
+   * Update an existing deal. Only the provided fields are written.
+   */
+  async updateDeal(
+    dealId: string,
+    deal: Partial<Pick<HubSpotDeal, 'name' | 'stage' | 'amount' | 'properties'>> & {
+      closeDate?: string | null
+    },
+  ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+    const properties: Record<string, string> = {
+      ...(deal.name !== undefined ? { dealname: deal.name } : {}),
+      ...(deal.stage !== undefined ? { dealstage: deal.stage } : {}),
+      ...(deal.amount !== undefined ? { amount: String(deal.amount) } : {}),
+      ...(deal.closeDate ? { closedate: deal.closeDate } : {}),
+      ...deal.properties,
+    }
+
+    const result = await this.request<{ id: string }>(
+      'PATCH',
+      `/crm/v3/objects/deals/${dealId}`,
+      { properties },
+    )
+
+    if (!result.ok) return result
+    return { ok: true, id: result.data.id }
+  }
+
+  /**
+   * List deals (most recent first by default), including associated contacts.
+   * Returns the paging cursor for subsequent pages, or null when exhausted.
+   */
+  async listDeals(opts?: {
+    limit?: number
+    after?: string
+  }): Promise<
+    { ok: true; deals: HubSpotDealRecord[]; after: string | null } | { ok: false; error: string }
+  > {
+    const params = new URLSearchParams()
+    params.set('limit', String(opts?.limit ?? 100))
+    params.set('properties', 'dealname,amount,dealstage,closedate,pipeline')
+    params.set('associations', 'contacts')
+    if (opts?.after) params.set('after', opts.after)
+
+    const result = await this.request<{
+      results: HubSpotDealRecord[]
+      paging?: { next?: { after: string } }
+    }>('GET', `/crm/v3/objects/deals?${params.toString()}`)
+
+    if (!result.ok) return result
+    return {
+      ok: true,
+      deals: result.data.results ?? [],
+      after: result.data.paging?.next?.after ?? null,
+    }
+  }
+
+  /** Fetch a single deal by id, including associated contacts. */
+  async getDeal(
+    dealId: string,
+  ): Promise<{ ok: true; deal: HubSpotDealRecord } | { ok: false; error: string }> {
+    const params = new URLSearchParams()
+    params.set('properties', 'dealname,amount,dealstage,closedate,pipeline')
+    params.set('associations', 'contacts')
+
+    const result = await this.request<HubSpotDealRecord>(
+      'GET',
+      `/crm/v3/objects/deals/${dealId}?${params.toString()}`,
+    )
+
+    if (!result.ok) return result
+    return { ok: true, deal: result.data }
+  }
+
+  /** Fetch a single contact by id. */
+  async getContact(
+    contactId: string,
+  ): Promise<{ ok: true; contact: HubSpotContactRecord } | { ok: false; error: string }> {
+    const params = new URLSearchParams()
+    params.set('properties', 'email,firstname,lastname,company,phone')
+
+    const result = await this.request<HubSpotContactRecord>(
+      'GET',
+      `/crm/v3/objects/contacts/${contactId}?${params.toString()}`,
+    )
+
+    if (!result.ok) return result
+    return { ok: true, contact: result.data }
   }
 
   async logEngagementNote(

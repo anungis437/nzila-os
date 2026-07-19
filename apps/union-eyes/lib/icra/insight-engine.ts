@@ -22,7 +22,6 @@ import type {
   DimensionId,
   DimensionScore,
   ExecutivePersonaId,
-  SectionId,
   SectionScore,
   StewardshipSignal,
 } from './types';
@@ -386,7 +385,6 @@ function generateContinuitySignals(
   const om = dim(scores, 'operational_memory');
   const tr = dim(scores, 'transition_readiness');
   const td = dim(scores, 'trust_debt');
-
   const sectionMap = new Map(sections.map((s) => [s.section, s.score]));
 
   return [
@@ -442,7 +440,6 @@ function generateStewardshipSignals(scores: DimensionScore[]): StewardshipSignal
   const gf = dim(scores, 'governance_fragility');
   const om = dim(scores, 'operational_memory');
   const tr = dim(scores, 'transition_readiness');
-  const td = dim(scores, 'trust_debt');
 
   function severity(score: number): StewardshipSignal['severity'] {
     if (score < T.MATERIAL_LOW) return 'elevated';

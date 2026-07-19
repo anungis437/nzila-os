@@ -133,10 +133,8 @@ export async function processPaymentCollection(params: {
               status: 'failed',
               reconciliationStatus: 'unreconciled',
               failureReason: 'No outstanding dues transactions found for member',
-              notes: `Payment requires manual review - no matching transactions found for member ${payment.memberId}`,
-              updatedAt: new Date(),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any)
+              updatedAt: new Date().toISOString(),
+            })
             .where(eq(payments.id, payment.id))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .catch((err: any) => {
@@ -162,8 +160,7 @@ export async function processPaymentCollection(params: {
             .set({
               status: 'paid',
               notes: `Paid ${amountToApply} via ${payment.paymentMethod}`,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any)
+            } as Partial<typeof duesTransactions.$inferInsert>)
             .where(eq(duesTransactions.id, transaction.id));
 
           updatedTransactionIds.push(transaction.id);
@@ -190,8 +187,7 @@ export async function processPaymentCollection(params: {
                 .set({
                   arrearsStatus: 'resolved',
                   notes: `Paid via ${payment.paymentMethod} - Ref: ${payment.processorPaymentId || payment.id}`,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any)
+                } as Partial<typeof arrears.$inferInsert>)
                 .where(eq(arrears.id, arrearsRecord[0].id));
 
               arrearsUpdated++;
@@ -207,15 +203,13 @@ export async function processPaymentCollection(params: {
         
         await db.update(payments)
           .set({ 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: finalPaymentStatus as any,
+            status: finalPaymentStatus as typeof payments.$inferInsert['status'],
             reconciliationStatus: 'reconciled',
-            reconciliationDate: new Date(),
-            paidDate: new Date(),
-            notes: paymentNotes,
-            updatedAt: new Date(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any)
+            reconciliationDate: new Date().toISOString(),
+            paidDate: new Date().toISOString(),
+            failureReason: remainingAmount > 0 ? paymentNotes : null,
+            updatedAt: new Date().toISOString(),
+          })
           .where(eq(payments.id, payment.id))
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .catch((err: any) => {
@@ -236,8 +230,18 @@ export async function processPaymentCollection(params: {
           const paidAt = payment.paidDate ?? payment.createdAt;
           const paymentDate = new Date(String(paidAt));
 
+          // BR-6: never issue a payment receipt under a default-org fallback.
+          // A member with no verified organization context fails closed (the
+          // surrounding catch logs and the loop continues without a receipt).
+          const receiptOrgId = member?.organizationId;
+          if (!receiptOrgId) {
+            throw new Error(
+              `Member ${memberId} has no verified organization context; refusing default-org payment receipt (BR-6).`,
+            );
+          }
+
           await sendPaymentReceipt({
-            organizationId: member?.organizationId || process.env.DEFAULT_ORGANIZATION_ID || 'default-org',
+            organizationId: receiptOrgId,
             memberId,
             memberName: `${payment.memberFirstName || ''} ${payment.memberLastName || ''}`.trim() || 'Member',
             memberEmail: payment.memberEmail || '',
@@ -275,10 +279,8 @@ export async function processPaymentCollection(params: {
             status: 'failed',
             reconciliationStatus: 'unreconciled',
             failureReason: paymentError instanceof Error ? paymentError.message : String(paymentError),
-            notes: `Payment processing failed - marked for retry. Error: ${paymentError instanceof Error ? paymentError.message : String(paymentError)}`,
-            updatedAt: new Date(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any)
+            updatedAt: new Date().toISOString(),
+          })
           .where(eq(payments.id, payment.id))
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .catch((err: any) => {

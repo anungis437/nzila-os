@@ -20,8 +20,11 @@ import { Card } from '@nzila/ui'
 import { QboConnectButton } from './QboConnectButton'
 import { listIntegrationConnections } from '@/lib/integrations-connections'
 import { type ProviderKey } from '@/lib/integrations-provider-catalog'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.settings.integrations')
 
 interface QboStatus {
   connected: boolean
@@ -31,10 +34,18 @@ interface QboStatus {
 }
 
 async function getQboStatus(orgId: string): Promise<QboStatus> {
-  const connection = await platformDb.query.qboConnections.findFirst({
-    where: and(eq(qboConnections.orgId, orgId), eq(qboConnections.isActive, true)),
-    orderBy: [desc(qboConnections.connectedAt)],
-  })
+  const connection = await platformDb.query.qboConnections
+    .findFirst({
+      where: and(eq(qboConnections.orgId, orgId), eq(qboConnections.isActive, true)),
+      orderBy: [desc(qboConnections.connectedAt)],
+    })
+    .catch((error) => {
+      logger.warn('qbo status load failed; returning disconnected fallback', {
+        orgId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return null
+    })
   if (!connection) return { connected: false }
   return {
     connected: true,
@@ -95,12 +106,29 @@ export default async function IntegrationsPage({
     .from(orgMembers)
     .where(eq(orgMembers.userId, userId))
     .limit(10)
+    .catch((error) => {
+      logger.warn('integrations memberships load failed; returning empty fallback', {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return [] as Array<{ orgId: string }>
+    })
 
   // Load entity names
   const entityIds = memberships.map((m) => m.orgId)
   const entityRows =
     entityIds.length > 0
-      ? await platformDb.select().from(orgs).where(eq(orgs.id, entityIds[0]))
+      ? await platformDb
+          .select()
+          .from(orgs)
+          .where(eq(orgs.id, entityIds[0]))
+          .catch((error) => {
+            logger.warn('integrations org load failed; returning empty fallback', {
+              orgId: entityIds[0],
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return [] as Array<typeof orgs.$inferSelect>
+          })
       : []
 
   const primaryEntityId = params.orgId ?? entityIds[0]
@@ -111,7 +139,13 @@ export default async function IntegrationsPage({
     : { connected: false }
 
   const integrationConnections = primaryEntityId
-    ? await listIntegrationConnections(primaryEntityId)
+    ? await listIntegrationConnections(primaryEntityId).catch((error) => {
+        logger.warn('integration connections load failed; returning empty fallback', {
+          orgId: primaryEntityId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return []
+      })
     : []
   const integrationConnectionMap = new Map(
     integrationConnections.map((connection) => [connection.provider, connection]),

@@ -10,7 +10,7 @@ vi.mock('@/db', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  sql: (strings: TemplateStringsArray, ..._values: unknown[]) => strings.join(''),
+  sql: (strings: TemplateStringsArray, ..._values: any[]) => strings.join(''),
   relations: vi.fn(() => ({})),
 }));
 

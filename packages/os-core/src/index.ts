@@ -3,6 +3,7 @@
  */
 export * from './types'
 export { checkRateLimit, rateLimitHeaders } from './rateLimit'
+export { checkDistributedRateLimit, type DistributedRateLimitResult } from './distributed-rate-limit'
 export { auditedAction } from './audited-action'
 export type {
   AuditedActionInput,
@@ -20,6 +21,7 @@ export * from './retention/index'
 // Disambiguate: retention/policies has the authoritative RetentionClass (superset of evidence's version)
 export { RetentionClass } from './retention/policies'
 export { assertBootInvariants } from './boot-assert'
+export { isSuperAdmin } from './config/super-admins'
 export * from './resilience/index'
 export {
   ApiError,

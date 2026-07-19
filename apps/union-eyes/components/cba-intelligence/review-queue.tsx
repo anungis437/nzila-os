@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +72,17 @@ interface ReviewCountsResponse {
   data: QueueCounts;
 }
 
+interface OperationalHealthResponse {
+  success: boolean;
+  data: {
+    checks: Array<{
+      name: string;
+      level: "healthy" | "warning" | "critical";
+      detail: string;
+    }>;
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -85,7 +97,7 @@ const TARGET_TYPES = [
 const DECISIONS = [
   { value: "approved", label: "Approve", icon: CheckCircle2, variant: "default" as const },
   { value: "rejected", label: "Reject", icon: XCircle, variant: "destructive" as const },
-  { value: "needs_revision", label: "Needs Revision", icon: RotateCcw, variant: "secondary" as const },
+  { value: "needs_followup", label: "Needs Follow-up", icon: RotateCcw, variant: "secondary" as const },
 ];
 
 function confidenceBadge(c: number | null | undefined) {
@@ -129,6 +141,12 @@ export function ReviewQueue() {
       fetch(`/api/cba-intelligence/review?${queryParams}`).then((r) => r.json()),
   });
 
+  const { data: healthData } = useQuery<OperationalHealthResponse>({
+    queryKey: ["cba-intel-operational-health"],
+    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
+    refetchInterval: 60_000,
+  });
+
   // Submit review
   const submitMutation = useMutation({
     mutationFn: (payload: {
@@ -156,6 +174,8 @@ export function ReviewQueue() {
   const items = data?.data?.items ?? [];
   const total = data?.data?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
+  const backlogHealth = healthData?.data.checks.find((c) => c.name === "review_backlog");
+  const showBacklogAlert = backlogHealth && backlogHealth.level !== "healthy";
 
   function handleSubmit(targetId: string) {
     if (!decision || !reason) return;
@@ -189,6 +209,17 @@ export function ReviewQueue() {
         </div>
       </CardHeader>
       <CardContent>
+        {showBacklogAlert && (
+          <Alert
+            className={`mb-4 ${backlogHealth.level === "critical" ? "border-red-300 text-red-700" : "border-yellow-300 text-yellow-700"}`}
+            variant={backlogHealth.level === "critical" ? "destructive" : "default"}
+          >
+            <AlertDescription>
+              {backlogHealth.detail}. Triage low-confidence and inferred items first to reduce operational risk.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPage(1); setReviewingId(null); }}>
           <TabsList>
             {TARGET_TYPES.map((t) => (
@@ -251,7 +282,7 @@ export function ReviewQueue() {
                                 <div className="text-sm text-muted-foreground">{item.employer}</div>
                               )}
                               {item.citationText && (
-                                <div className="text-sm text-muted-foreground truncate max-w-[300px]">
+                                <div className="text-sm text-muted-foreground truncate max-w-75">
                                   &ldquo;{item.citationText}&rdquo;
                                 </div>
                               )}
@@ -268,7 +299,7 @@ export function ReviewQueue() {
                           </TableCell>
                           <TableCell>
                             {reviewingId === item.id ? (
-                              <div className="space-y-2 min-w-[250px]">
+                              <div className="space-y-2 min-w-62.5">
                                 <div className="flex gap-1">
                                   {DECISIONS.map((d) => (
                                     <Button

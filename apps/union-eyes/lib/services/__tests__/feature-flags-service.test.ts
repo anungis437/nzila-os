@@ -26,7 +26,7 @@ const { mockFindFirst, mockFindMany, mockCacheGet, mockCacheSet, mockInsertChain
   };
   const updateHandler: ProxyHandler<object> = {
     get: (_t, p) => {
-      if (p === 'then') return (r: (v: unknown) => void) => r(undefined);
+      if (p === 'then') return (r: (v: any) => void) => r(undefined);
       return vi.fn(() => new Proxy({}, updateHandler));
     },
   };

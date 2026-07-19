@@ -26,7 +26,7 @@ export async function expectGovernanceHeadersOnHealth(
   }
 }
 
-export function expectCalmRefusalShape(body: unknown): void {
+export function expectCalmRefusalShape(body: any): void {
   expect(body).toBeTruthy()
   const json = body as Record<string, unknown>
   expect(json.error === 'forbidden' || json.error === 'requires_approval').toBe(true)

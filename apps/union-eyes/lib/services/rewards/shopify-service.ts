@@ -92,6 +92,75 @@ export interface CheckoutSession {
   discountCode: string;
 }
 
+interface ShopifyEdge<TNode> {
+  node: TNode;
+}
+
+interface ShopifyImageNode {
+  url: string;
+  altText?: string | null;
+}
+
+interface ShopifyVariantNode {
+  id: string;
+  title: string;
+  price: {
+    amount: string;
+    currencyCode: string;
+  };
+  availableForSale: boolean;
+}
+
+interface ShopifyProductNode {
+  id: string;
+  title: string;
+  description: string;
+  handle: string;
+  images: { edges: ShopifyEdge<ShopifyImageNode>[] };
+  priceRange: ShopifyProduct['priceRange'];
+  variants: { edges: ShopifyEdge<ShopifyVariantNode>[] };
+}
+
+interface StorefrontCollectionResponse {
+  data?: {
+    collectionByHandle?: {
+      id: string;
+      title: string;
+      description: string;
+      handle: string;
+      products: { edges: ShopifyEdge<ShopifyProductNode>[] };
+    } | null;
+  };
+}
+
+interface StorefrontProductResponse {
+  data?: {
+    productByHandle?: ShopifyProductNode | null;
+  };
+}
+
+interface ShopifyPriceRule {
+  id: string;
+}
+
+interface ShopifyDiscountCode {
+  id: string;
+}
+
+interface ShopifyPriceRuleResponse {
+  price_rule?: ShopifyPriceRule;
+}
+
+interface ShopifyDiscountCodeResponse {
+  discount_code?: ShopifyDiscountCode;
+}
+
+type ShopifyShop = Record<string, unknown>;
+
+interface ShopifyShopResponse {
+  shop?: ShopifyShop;
+}
+
 /**
  * Fetch curated product collections for redemption
  * 
@@ -211,7 +280,7 @@ async function fetchCollectionByHandle(
     return null;
   }
 
-  const result = await response.json();
+  const result = (await response.json()) as StorefrontCollectionResponse;
 
   if (!result.data?.collectionByHandle) {
     logger.warn('[Shopify] Collection not found', { handle });
@@ -225,20 +294,17 @@ async function fetchCollectionByHandle(
     title: collection.title,
     description: collection.description,
     handle: collection.handle,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    products: collection.products.edges.map((edge: any) => ({
+    products: collection.products.edges.map((edge) => ({
       id: edge.node.id,
       title: edge.node.title,
       description: edge.node.description,
       handle: edge.node.handle,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      images: edge.node.images.edges.map((imgEdge: any) => ({
+      images: edge.node.images.edges.map((imgEdge) => ({
         url: imgEdge.node.url,
-        altText: imgEdge.node.altText,
+        altText: imgEdge.node.altText ?? undefined,
       })),
       priceRange: edge.node.priceRange,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      variants: edge.node.variants.edges.map((variantEdge: any) => ({
+      variants: edge.node.variants.edges.map((variantEdge) => ({
         id: variantEdge.node.id,
         title: variantEdge.node.title,
         price: variantEdge.node.price,
@@ -299,8 +365,7 @@ async function createPriceRule(
   amount: number,
   currency: string,
   title: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<ShopifyPriceRule> {
   const response = await fetch(`${ADMIN_API_URL}/price_rules.json`, {
     method: 'POST',
     headers: {
@@ -329,7 +394,12 @@ async function createPriceRule(
     throw new Error('Failed to create price rule');
   }
 
-  const result = await response.json();
+  const result = (await response.json()) as ShopifyPriceRuleResponse;
+
+  if (!result.price_rule) {
+    throw new Error('Shopify response missing price_rule');
+  }
+
   return result.price_rule;
 }
 
@@ -343,8 +413,7 @@ async function createPriceRule(
 async function createDiscountCodeForPriceRule(
   priceRuleId: string,
   code: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<ShopifyDiscountCode> {
   const response = await fetch(
     `${ADMIN_API_URL}/price_rules/${priceRuleId}/discount_codes.json`,
     {
@@ -367,7 +436,12 @@ async function createDiscountCodeForPriceRule(
     throw new Error('Failed to create discount code');
   }
 
-  const result = await response.json();
+  const result = (await response.json()) as ShopifyDiscountCodeResponse;
+
+  if (!result.discount_code) {
+    throw new Error('Shopify response missing discount_code');
+  }
+
   return result.discount_code;
 }
 
@@ -422,8 +496,7 @@ export async function createCheckoutSession(
  * 
  * @returns Shop information or null if connection fails
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function testShopifyConnection(): Promise<any | null> {
+export async function testShopifyConnection(): Promise<ShopifyShop | null> {
   try {
     const response = await fetch(`${ADMIN_API_URL}/shop.json`, {
       headers: {
@@ -436,8 +509,8 @@ export async function testShopifyConnection(): Promise<any | null> {
       return null;
     }
 
-    const result = await response.json();
-    return result.shop;
+    const result = (await response.json()) as ShopifyShopResponse;
+    return result.shop ?? null;
   } catch (error) {
     logger.error('[Shopify] Connection error', { error });
     return null;
@@ -514,7 +587,7 @@ export async function getProductByHandle(
       return null;
     }
 
-    const result = await response.json();
+    const result = (await response.json()) as StorefrontProductResponse;
 
     if (!result.data?.productByHandle) {
       return null;
@@ -527,14 +600,12 @@ export async function getProductByHandle(
       title: product.title,
       description: product.description,
       handle: product.handle,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      images: product.images.edges.map((edge: any) => ({
+      images: product.images.edges.map((edge) => ({
         url: edge.node.url,
-        altText: edge.node.altText,
+        altText: edge.node.altText ?? undefined,
       })),
       priceRange: product.priceRange,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      variants: product.variants.edges.map((edge: any) => ({
+      variants: product.variants.edges.map((edge) => ({
         id: edge.node.id,
         title: edge.node.title,
         price: edge.node.price,

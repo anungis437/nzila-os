@@ -25,7 +25,7 @@ export interface GuardrailResult {
 // ── Guardrail Checks ────────────────────────────────────────────────────────
 
 /**
- * Prevent hallucinated legal advice: any response about rights or
+ * Prevent hallucinated legal advice: unknown response about rights or
  * contracts must have citations.
  */
 function checkNoHallucinatedLegalAdvice(

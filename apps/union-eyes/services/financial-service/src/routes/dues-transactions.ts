@@ -12,6 +12,30 @@ import { eq, and, desc, between, isNull, inArray } from 'drizzle-orm';
 const router = Router();
 const calculationEngine = new DuesCalculationEngine();
 
+type AuthUser = {
+  organizationId: string;
+  userId: string;
+  role: string;
+};
+
+type BatchCalcResultRow = {
+  memberId: string;
+  totalAmount: number;
+  errors?: string[];
+};
+
+type BatchCalcResult = {
+  totalProcessed: number;
+  successful: number;
+  failed: number;
+  summary: Record<string, unknown>;
+  results: BatchCalcResultRow[];
+};
+
+function getAuthUser(req: Request): AuthUser {
+  return (req as any as { user: AuthUser }).user;
+}
+
 // Validation schemas
 const calculateDuesSchema = z.object({
   memberId: z.string().uuid(),
@@ -43,8 +67,7 @@ const batchCalculateSchema = z.object({
  */
 router.post('/calculate', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, _userId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const validatedData = calculateDuesSchema.parse(req.body);
 
     // Fetch active assignment with joined rule
@@ -81,8 +104,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
     }
 
     // Prepare calculation input
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const calculationInput: any = {
+    const calculationInput = {
       memberId: validatedData.memberId,
       organizationId: organizationId,
       assignmentId: assignment.member_dues_assignments.id,
@@ -156,8 +178,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
  */
 router.post('/batch', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId, userId, role } = (req as any).user;
+    const { organizationId, userId, role } = getAuthUser(req);
 
     if (!['admin', 'financial_admin'].includes(role)) {
       return res.status(403).json({
@@ -253,8 +274,7 @@ router.post('/batch', async (req: Request, res: Response) => {
       });
 
     // Run batch calculation
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const batchResult = calculationEngine.batchCalculateDuesSimple(calculationInputs as any);
+    const batchResult = calculationEngine.batchCalculateDuesSimple(calculationInputs) as any as BatchCalcResult;
 
     // If dry run, return results without saving
     if (validatedData.dryRun) {
@@ -273,10 +293,8 @@ router.post('/batch', async (req: Request, res: Response) => {
 
     // Create transaction records
     const transactionsToInsert = batchResult.results
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((r: any) => !r.errors || r.errors.length === 0) // Check for no errors instead of success property
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((result: any) => {
+      .filter((r) => !r.errors || r.errors.length === 0)
+      .map((result) => {
         const assignment = assignments.find(
           (a) => a.member_dues_assignments.memberId === result.memberId
         )!;
@@ -298,13 +316,11 @@ router.post('/batch', async (req: Request, res: Response) => {
         };
       });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let createdTransactions: any[] = [];
+    let createdTransactions: Array<typeof schema.duesTransactions.$inferSelect> = [];
     if (transactionsToInsert.length > 0) {
       createdTransactions = await db
         .insert(schema.duesTransactions)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .values(transactionsToInsert as any)
+        .values(transactionsToInsert as any as Array<typeof schema.duesTransactions.$inferInsert>)
         .returning();
     }
 
@@ -314,8 +330,7 @@ router.post('/batch', async (req: Request, res: Response) => {
         summary: batchResult.summary,
         transactionsCreated: createdTransactions.length,
         transactions: createdTransactions,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        errors: batchResult.results.filter((r: any) => r.errors && r.errors.length > 0),
+        errors: batchResult.results.filter((r) => r.errors && r.errors.length > 0),
       },
     });
   } catch (error) {
@@ -339,8 +354,7 @@ router.post('/batch', async (req: Request, res: Response) => {
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { memberId, status, startDate, endDate } = req.query;
 
     const conditions = [eq(schema.duesTransactions.organizationId, organizationId)];
@@ -349,8 +363,12 @@ router.get('/', async (req: Request, res: Response) => {
       conditions.push(eq(schema.duesTransactions.memberId, memberId as string));
     }
     if (status) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(schema.duesTransactions.status, status as any));
+      conditions.push(
+        eq(
+          schema.duesTransactions.status,
+          status as typeof schema.duesTransactions.$inferSelect['status'],
+        ),
+      );
     }
     if (startDate && endDate) {
       conditions.push(
@@ -387,8 +405,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { organizationId } = (req as any).user;
+    const { organizationId } = getAuthUser(req);
     const { id } = req.params;
 
     const [transaction] = await db

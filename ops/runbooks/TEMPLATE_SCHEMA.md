@@ -55,8 +55,8 @@ runbook_instance:
   # Customizations from template
   divergence_log:
     - field: string
-      original: any
-      modified: any
+      original: unknown
+      modified: unknown
       reason: string
       modified_by: uuid
       modified_at: datetime

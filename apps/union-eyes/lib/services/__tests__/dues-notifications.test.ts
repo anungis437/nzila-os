@@ -70,9 +70,9 @@ vi.mock('@/db/schema/domains/finance/dues', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
-  and: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: any[]) => args),
   inArray: vi.fn((a, b) => ({ field: a, values: b })),
-  or: vi.fn((...args: unknown[]) => args),
+  or: vi.fn((...args: any[]) => args),
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -88,13 +88,13 @@ import {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function chain(resolvedValue: unknown) {
+function chain(resolvedValue: any) {
   const result = {
     from: vi.fn().mockReturnThis(),
     innerJoin: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue(resolvedValue),
-    then: (resolve: (v: unknown) => void) => Promise.resolve(resolvedValue).then(resolve),
+    then: (resolve: (v: any) => void) => Promise.resolve(resolvedValue).then(resolve),
   };
   return result;
 }
@@ -122,7 +122,7 @@ const memberRow = {
   memberMetadata: null,
 };
 
-function setupTransactionQuery(rows: unknown[]) {
+function setupTransactionQuery(rows: any[]) {
   const c = chain(rows);
   mocks.mockSelect.mockReturnValue(c);
 }
@@ -436,7 +436,7 @@ describe('Batch 36: branch gap-fill', () => {
     await sendPaymentFailure('tx-1', 'Declined', true, '2025-07-10');
     // push notification should have been sent
     const pushCall = mocks.mockSend.mock.calls.find(
-      (c: unknown[]) => (c[0] as Record<string, unknown>).type === 'push',
+      (c: any[]) => (c[0] as Record<string, unknown>).type === 'push',
     );
     expect(pushCall).toBeDefined();
     expect((pushCall![0] as Record<string, unknown>).title).toBe('Payment Retry Scheduled');
@@ -460,7 +460,7 @@ describe('Batch 36: branch gap-fill', () => {
 
     await sendPaymentFailure('tx-1', 'Insufficient funds', false);
     const pushCall = mocks.mockSend.mock.calls.find(
-      (c: unknown[]) => (c[0] as Record<string, unknown>).type === 'push',
+      (c: any[]) => (c[0] as Record<string, unknown>).type === 'push',
     );
     expect(pushCall).toBeDefined();
     expect((pushCall![0] as Record<string, unknown>).title).toBe('⚠️ Payment Failed');

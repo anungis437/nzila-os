@@ -19,6 +19,7 @@ import {
   automationCommands,
 } from '@nzila/db/schema'
 import { count, sql, gte } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   CurrencyDollarIcon,
   BuildingOffice2Icon,
@@ -29,6 +30,8 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.platform-economics')
 
 // ── Economics computation (all from DB) ─────────────────────────────────────
 
@@ -55,46 +58,59 @@ async function computePlatformEconomics(): Promise<PlatformEconomics> {
   const windowStart = new Date()
   windowStart.setDate(windowStart.getDate() - WINDOW_DAYS)
 
-  const [
-    totalOrgsResult,
-    auditCountResult,
-    claimsResult,
-    revenueResult,
-    quotesResult,
-    automationResult,
-  ] = await Promise.all([
-    platformDb.select({ total: count().as('total') }).from(orgs),
-    platformDb
-      .select({ total: count().as('total') })
-      .from(auditEvents)
-      .where(gte(auditEvents.createdAt, windowStart)),
-    platformDb
-      .select({ total: count().as('total') })
-      .from(ueCases)
-      .where(gte(ueCases.createdAt, windowStart)),
-    platformDb
-      .select({
-        total: count().as('total'),
-        sumAmount: sql<number>`COALESCE(SUM(${zongaRevenueEvents.amount}), 0)`.as('sum_amount'),
-      })
-      .from(zongaRevenueEvents)
-      .where(gte(zongaRevenueEvents.createdAt, windowStart)),
-    platformDb
-      .select({ total: count().as('total') })
-      .from(commerceQuotes)
-      .where(gte(commerceQuotes.createdAt, windowStart)),
-    platformDb
-      .select({ total: count().as('total') })
-      .from(automationCommands),
-  ])
+  let totalOrgsResult: Array<{ total: number | bigint | null }> = []
+  let auditCountResult: Array<{ total: number | bigint | null }> = []
+  let claimsResult: Array<{ total: number | bigint | null }> = []
+  let revenueResult: Array<{ total: number | bigint | null; sumAmount: number | null }> = []
+  let quotesResult: Array<{ total: number | bigint | null }> = []
+  let automationResult: Array<{ total: number | bigint | null }> = []
 
-  const totalOrgs = totalOrgsResult[0]?.total ?? 0
-  const auditCount = auditCountResult[0]?.total ?? 0
-  const claimsCount = claimsResult[0]?.total ?? 0
-  const revenueCount = revenueResult[0]?.total ?? 0
+  try {
+    [
+      totalOrgsResult,
+      auditCountResult,
+      claimsResult,
+      revenueResult,
+      quotesResult,
+      automationResult,
+    ] = await Promise.all([
+      platformDb.select({ total: count().as('total') }).from(orgs),
+      platformDb
+        .select({ total: count().as('total') })
+        .from(auditEvents)
+        .where(gte(auditEvents.createdAt, windowStart)),
+      platformDb
+        .select({ total: count().as('total') })
+        .from(ueCases)
+        .where(gte(ueCases.createdAt, windowStart)),
+      platformDb
+        .select({
+          total: count().as('total'),
+          sumAmount: sql<number>`COALESCE(SUM(${zongaRevenueEvents.amount}), 0)`.as('sum_amount'),
+        })
+        .from(zongaRevenueEvents)
+        .where(gte(zongaRevenueEvents.createdAt, windowStart)),
+      platformDb
+        .select({ total: count().as('total') })
+        .from(commerceQuotes)
+        .where(gte(commerceQuotes.createdAt, windowStart)),
+      platformDb
+        .select({ total: count().as('total') })
+        .from(automationCommands),
+    ])
+  } catch (error) {
+    logger.warn('platform economics DB load failed; using empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+
+  const totalOrgs = Number(totalOrgsResult[0]?.total ?? 0)
+  const auditCount = Number(auditCountResult[0]?.total ?? 0)
+  const claimsCount = Number(claimsResult[0]?.total ?? 0)
+  const revenueCount = Number(revenueResult[0]?.total ?? 0)
   const revenueSum = Number(revenueResult[0]?.sumAmount ?? 0)
-  const quotesCount = quotesResult[0]?.total ?? 0
-  const automationCount = automationResult[0]?.total ?? 0
+  const quotesCount = Number(quotesResult[0]?.total ?? 0)
+  const automationCount = Number(automationResult[0]?.total ?? 0)
 
   // App contributions — value derived from usage volume
   const appContributions: AppContribution[] = [

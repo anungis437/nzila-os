@@ -53,7 +53,7 @@ interface Props {
 
 // ── Active subscription card ─────────────────────────────────────────────────
 
-function ActiveSubscriptionCard({ sub }: { sub: ActiveSub }) {
+function ActiveSubscriptionCard({ sub, orgId }: { sub: ActiveSub; orgId: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -72,6 +72,7 @@ function ActiveSubscriptionCard({ sub }: { sub: ActiveSub }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          orgId,
           customerId: sub.customerId,
           returnUrl: window.location.href,
         }),
@@ -226,7 +227,7 @@ function PlanPicker({ orgId }: { orgId: string }) {
 
 export default function SubscriptionManager({ orgId, activeSub }: Props) {
   if (activeSub) {
-    return <ActiveSubscriptionCard sub={activeSub} />
+    return <ActiveSubscriptionCard sub={activeSub} orgId={orgId} />
   }
 
   return (

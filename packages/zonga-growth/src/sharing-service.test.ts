@@ -33,7 +33,7 @@ function makeRepo(): SharingRepository {
       id: 'share-new',
       clickCount: 0,
       createdAt: new Date().toISOString(),
-    })) as any,
+    })) as unknown as SharingRepository['insertShare'],
     findShareById: vi.fn(async () => makeShare()),
     incrementClickCount: vi.fn(async () => {}),
     listSharesByUser: vi.fn(async () => [makeShare()]),

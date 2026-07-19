@@ -10,10 +10,10 @@ import { logger } from "@/lib/logger";
  */
 export const getDuesBalanceByMember = async (
   memberId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Get all transactions for the member
@@ -52,7 +52,7 @@ export const getDuesBalanceByMember = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -68,10 +68,10 @@ export const getDuesTransactionsByMember = async (
     endDate?: Date;
     limit?: number;
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       let query = dbOrTx
@@ -111,7 +111,7 @@ export const getDuesTransactionsByMember = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -126,10 +126,10 @@ export const getDuesTransactionsByOrganization = async (
     startDate?: Date;
     endDate?: Date;
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const transactions = await dbOrTx
@@ -162,7 +162,7 @@ export const getDuesTransactionsByOrganization = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -172,10 +172,10 @@ export const getDuesTransactionsByOrganization = async (
  */
 export const createDuesTransaction = async (
   data: NewDuesTransaction,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const [transaction] = await dbOrTx
@@ -193,7 +193,7 @@ export const createDuesTransaction = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -209,10 +209,10 @@ export const updateDuesTransactionStatus = async (
     paymentReference?: string;
     receiptUrl?: string;
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const updateData: Partial<DuesTransaction> = {
@@ -245,7 +245,7 @@ export const updateDuesTransactionStatus = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -254,10 +254,10 @@ export const updateDuesTransactionStatus = async (
  * Mark overdue transactions (to be called by a scheduled job)
  */
 export const markOverdueTransactions = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const today = new Date();
@@ -286,7 +286,7 @@ export const markOverdueTransactions = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };
@@ -296,10 +296,10 @@ export const markOverdueTransactions = async (
  */
 export const getOrganizationDuesSummary = async (
   organizationId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tx?: RLSTx
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       const transactions = await dbOrTx
@@ -349,7 +349,7 @@ export const getOrganizationDuesSummary = async (
   if (tx) {
     return executeQuery(tx);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
   }
 };

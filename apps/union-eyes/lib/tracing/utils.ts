@@ -64,11 +64,11 @@ export enum SpanStatusCode {
   ERROR = 2,
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Span {
-  setAttribute(key: string, value: any): this;
-  setAttributes(attributes: Record<string, any>): this;
-  addEvent(name: string, attributes?: Record<string, any>): this;
+  setAttribute(key: string, value: unknown): this;
+  setAttributes(attributes: Record<string, unknown>): this;
+  addEvent(name: string, attributes?: Record<string, unknown>): this;
+  spanContext(): { traceId: string; spanId: string };
   recordException(exception: Error | string, time?: number): this;
   setStatus(status: { code: SpanStatusCode; message?: string }): this;
   end(endTime?: number): void;
@@ -76,15 +76,24 @@ export interface Span {
 }
 
 export interface Tracer {
-  startSpan(name: string, options?: any): Span;
+  startSpan(name: string, options?: unknown): Span;
   startActiveSpan<T>(name: string, fn: (span: Span) => Promise<T>): Promise<T>;
-  startActiveSpan<T>(name: string, options: any, fn: (span: Span) => Promise<T>): Promise<T>;
+  startActiveSpan<T>(name: string, options: unknown, fn: (span: Span) => Promise<T>): Promise<T>;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
+
+interface OTelAPI {
+  trace: {
+    getTracer(name: string, version?: string): Tracer;
+    getSpan(context: unknown): Span | undefined;
+  };
+  context: {
+    active(): unknown;
+  };
+  SpanStatusCode: typeof SpanStatusCode;
+}
 
 // Lazy-loaded OpenTelemetry API
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let otelApi: any = null;
+let otelApi: OTelAPI | null = null;
 
 /**
  * Get OpenTelemetry API (lazy-loaded)
@@ -96,7 +105,7 @@ function getOTelAPI() {
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    otelApi = require('@opentelemetry/api');
+    otelApi = require('@opentelemetry/api') as OTelAPI;
     return otelApi;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
@@ -126,8 +135,7 @@ export function getTracer(name: string = 'unioneyes'): Tracer {
 export async function traced<T>(
   spanName: string,
   fn: (span: Span) => Promise<T>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 ): Promise<T> {
   const tracer = getTracer();
   const api = getOTelAPI();
@@ -179,8 +187,7 @@ export async function traced<T>(
  */
 export function startSpan(
   spanName: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 ): Span {
   const tracer = getTracer();
   const span = tracer.startSpan(spanName);
@@ -224,8 +231,7 @@ export function getTraceContext(): { trace_id?: string; span_id?: string } {
  */
 export function addSpanEvent(
   name: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 ): void {
   const api = getOTelAPI();
   
@@ -247,8 +253,7 @@ export function addSpanEvent(
  * Set attributes on the current span
  */
 export function setSpanAttributes(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attributes: Record<string, any>
+  attributes: Record<string, unknown>
 ): void {
   const api = getOTelAPI();
   
@@ -337,9 +342,11 @@ export const TraceAttributes = {
 function createNoOpTracer(): Tracer {
   return {
     startSpan: () => createNoOpSpan(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    startActiveSpan: async <T>(nameOrOptions: any, fnOrOptions?: any, fn?: any): Promise<T> => {
-      const actualFn = typeof fnOrOptions === 'function' ? fnOrOptions : fn;
+    startActiveSpan: async <T>(_nameOrOptions: unknown, fnOrOptions?: unknown, fn?: unknown): Promise<T> => {
+      const actualFn = (typeof fnOrOptions === 'function' ? fnOrOptions : fn) as ((span: Span) => Promise<T>) | undefined;
+      if (!actualFn) {
+        throw new Error('No-op tracer requires a callback');
+      }
       return await actualFn(createNoOpSpan());
     },
   };
@@ -353,6 +360,7 @@ function createNoOpSpan(): Span {
     setAttribute: () => createNoOpSpan(),
     setAttributes: () => createNoOpSpan(),
     addEvent: () => createNoOpSpan(),
+    spanContext: () => ({ traceId: '00000000000000000000000000000000', spanId: '0000000000000000' }),
     recordException: () => createNoOpSpan(),
     setStatus: () => createNoOpSpan(),
     end: () => {},

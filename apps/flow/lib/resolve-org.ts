@@ -9,12 +9,12 @@
  */
 import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { OrgContext } from '@nzila/commerce-core/types'
-import { OrgRole } from '@nzila/commerce-core/enums'
+import { OrgRole } from '@nzila/commerce-core'
 import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'
 import { getOrgCommerceConfig } from '@nzila/platform-commerce-org/service'
 import { resolveInternalOrgId } from './org-resolver'
 
-import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
+import { isSuperAdmin } from '@nzila/os-core'
 
 /**
  * Resolve org context from auth session.
@@ -74,6 +74,9 @@ export async function resolveOrgCommerceContext(): Promise<OrgCommerceContext> {
 
 function mapOrgRole(orgRole: string | undefined | null): OrgRole {
   switch (orgRole) {
+    case 'org:owner':
+    case 'org_owner':
+      return OrgRole.OWNER
     case 'org:admin':
     case 'org_admin':
       return OrgRole.ADMIN

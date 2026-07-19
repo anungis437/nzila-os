@@ -22,6 +22,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
 const updateLabelSchema = z.object({
   privacyLabel: z.enum([
@@ -175,6 +176,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       .select({
         id: documents.id,
         privacyLabel: documents.privacyLabel,
+        metadata: documents.metadata,
         linkedEntityType: documentLinks.linkedEntityType,
         linkedEntityId: documentLinks.linkedEntityId,
       })
@@ -192,6 +194,14 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
 
   if (!before) {
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+  }
+
+  const blockedReason = getDocumentMutabilityBlockReason({ metadata: before.metadata });
+  if (blockedReason) {
+    return standardErrorResponse(
+      ErrorCode.CONFLICT,
+      `Document update blocked: ${blockedReason}`,
+    );
   }
 
   const [updated] = await db

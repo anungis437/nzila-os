@@ -10,6 +10,7 @@ import { gradeFromScore } from '@nzila/platform-assurance'
 import { platformDb } from '@nzila/db/platform'
 import { evidencePacks, closePeriods, platformIsolationAudits } from '@nzila/db/schema'
 import { desc } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core/telemetry'
 import {
   ShieldCheckIcon,
   CurrencyDollarIcon,
@@ -20,6 +21,8 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.assurance')
 
 // ── Score computation from real platform data ────────────────────────────
 
@@ -33,22 +36,47 @@ interface KpiScore {
 }
 
 async function computeKpis(): Promise<{ kpis: KpiScore[]; overall: number }> {
-  const packs = await platformDb.select().from(evidencePacks)
+  let packs: Array<typeof evidencePacks.$inferSelect> = []
+  let periods: Array<typeof closePeriods.$inferSelect> = []
+  let isolationScore = 0
+
+  try {
+    packs = await platformDb.select().from(evidencePacks)
+  } catch (error) {
+    logger.warn('assurance evidence packs load failed; using empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+
+  try {
+    const [latestIsolation] = await platformDb
+      .select()
+      .from(platformIsolationAudits)
+      .orderBy(desc(platformIsolationAudits.auditedAt))
+      .limit(1)
+    isolationScore = Number(latestIsolation?.isolationScore ?? 0)
+  } catch (error) {
+    logger.warn('assurance isolation audit load failed; using zero fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+
+  try {
+    periods = await platformDb.select().from(closePeriods)
+  } catch (error) {
+    logger.warn('assurance close periods load failed; using empty fallback', {
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+
   const verifiedPacks = packs.filter((p) => p.status === 'verified').length
   const complianceValue = packs.length > 0 ? Math.round((verifiedPacks / packs.length) * 100) : 0
 
   const integrityPacks = packs.filter((p) => p.chainIntegrity === 'VERIFIED').length
-  const [latestIsolation] = await platformDb
-    .select()
-    .from(platformIsolationAudits)
-    .orderBy(desc(platformIsolationAudits.auditedAt))
-    .limit(1)
-  const isolationScore = latestIsolation?.isolationScore ?? 0
   const securityValue = packs.length > 0
-    ? Math.round((integrityPacks / packs.length) * 50 + Number(isolationScore) * 0.5)
-    : Math.round(Number(isolationScore))
+    ? Math.round((integrityPacks / packs.length) * 50 + isolationScore * 0.5)
+    : Math.round(isolationScore)
 
-  const periods = await platformDb.select().from(closePeriods)
   const closedPeriods = periods.filter((p) => p.status === 'closed').length
   const opsValue = periods.length > 0 ? Math.round((closedPeriods / periods.length) * 100) : 0
 
@@ -143,7 +171,7 @@ export default async function AssurancePage({
       </div>
 
       {/* Overall Score Hero */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-8 mb-8 text-white">
+      <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl p-8 mb-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-indigo-200">Overall Assurance Score</p>

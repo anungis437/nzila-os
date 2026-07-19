@@ -11,7 +11,7 @@ interface SecretField {
 interface Props {
   provider: string
   orgId: string
-  secrets: string[]
+  secrets: readonly string[]
 }
 
 function parseSecretField(raw: string): SecretField {

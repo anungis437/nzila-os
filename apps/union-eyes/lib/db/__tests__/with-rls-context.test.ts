@@ -23,7 +23,7 @@ vi.mock("@/lib/api-auth-guard", () => ({
 
 vi.mock("@/db/db", () => ({
   db: {
-    transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => {
+    transaction: vi.fn(async (fn: (tx: any) => Promise<any>) => {
       return fn({ execute: mocks.mockTxExecute });
     }),
     execute: mocks.mockDbExecute,
@@ -31,7 +31,13 @@ vi.mock("@/db/db", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  sql: vi.fn((_s: unknown, ..._v: unknown[]) => ({ _tag: "sql" })),
+  // Capture the interpolated template + values so tests can assert exactly
+  // which org/user value was applied to the session via set_config().
+  sql: vi.fn((strings: TemplateStringsArray, ...values: any[]) => ({
+    _tag: "sql",
+    strings: Array.from(strings ?? []),
+    values,
+  })),
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -53,6 +59,26 @@ import {
 } from "../with-rls-context";
 
 /* ── tests ──────────────────────────────────────────────────────────── */
+
+/**
+ * Reads back the value that was actually applied to a given Postgres session
+ * setting (e.g. "app.current_org_id") via set_config() during the last run.
+ * Handles both interpolated values (set_config(..., ${value}, true)) and the
+ * literal-clear form used by system context (set_config(..., '', true)).
+ * Returns undefined if that setting was never written.
+ */
+function appliedSetting(setting: string): string | undefined {
+  const call = mocks.mockTxExecute.mock.calls.find(
+    ([q]) => typeof q?.strings?.[0] === "string" && q.strings[0].includes(setting),
+  );
+  if (!call) return undefined;
+  const q = call[0];
+  if (Array.isArray(q.values) && q.values.length > 0) return q.values[0];
+  // Literal form, e.g. set_config('app.current_org_id', '', true) → cleared.
+  const escaped = setting.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = q.strings[0].match(new RegExp(`${escaped}'\\s*,\\s*'([^']*)'`));
+  return match ? match[1] : undefined;
+}
 
 describe("with-rls-context", () => {
   beforeEach(() => {
@@ -98,6 +124,8 @@ describe("with-rls-context", () => {
       expect(result).toBe("ok");
       // 2 calls: set user_id + set org_id (from publicMetadata)
       expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+      // The org resolved from session metadata is the one actually applied.
+      expect(appliedSetting("app.current_org_id")).toBe("org-pub");
     });
 
     it("falls back to tenantId when organizationId missing", async () => {
@@ -111,8 +139,73 @@ describe("with-rls-context", () => {
     });
 
     it("accepts context map + operation overload", async () => {
-      const result = await withRLSContext({ extra: "data" }, async () => 42);
+      const result = await withRLSContext({ organizationId: "org-A" }, async () => 42);
       expect(result).toBe(42);
+    });
+
+    /* ── Phase 1: binary context-map contract (org scoping enforced) ──
+     * The context-map overload must ENFORCE the supplied organizationId — it
+     * must no longer imply org scoping while silently resolving org from auth.
+     */
+
+    it("enforces the supplied organizationId (applies org A)", async () => {
+      // Session has NO active org; caller explicitly scopes to org-A.
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
+      const result = await withRLSContext({ organizationId: "org-A" }, async () => "ok");
+      expect(result).toBe("ok");
+      expect(appliedSetting("app.current_org_id")).toBe("org-A");
+      expect(appliedSetting("app.current_user_id")).toBe("user-1");
+    });
+
+    it("pins the session to the supplied org A even when auth's active org is org B (no silent drift)", async () => {
+      // This is the core regression: previously the supplied context was
+      // discarded and org-B (from auth) would have been applied. The supplied
+      // org-A must win, and org-B must never reach the session.
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: "org-B" });
+      await withRLSContext({ organizationId: "org-A" }, async () => "ok");
+      expect(appliedSetting("app.current_org_id")).toBe("org-A");
+      expect(appliedSetting("app.current_org_id")).not.toBe("org-B");
+    });
+
+    it("fails closed when the context map omits organizationId", async () => {
+      await expect(
+        withRLSContext({ extra: "data" } as Record<string, unknown>, async () => "ok"),
+      ).rejects.toThrow("context map requires a non-empty string `organizationId`");
+    });
+
+    it("fails closed when organizationId is an empty/whitespace string", async () => {
+      await expect(
+        withRLSContext({ organizationId: "" }, async () => "ok"),
+      ).rejects.toThrow("context map requires a non-empty string `organizationId`");
+      await expect(
+        withRLSContext({ organizationId: "   " }, async () => "ok"),
+      ).rejects.toThrow("context map requires a non-empty string `organizationId`");
+    });
+
+    it("fails closed when organizationId is a non-string value", async () => {
+      await expect(
+        withRLSContext({ organizationId: 123 } as unknown as Record<string, unknown>, async () => "ok"),
+      ).rejects.toThrow("context map requires a non-empty string `organizationId`");
+    });
+
+    it("still requires an authenticated user under the context-map overload", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: null, orgId: null });
+      await expect(
+        withRLSContext({ organizationId: "org-A" }, async () => "ok"),
+      ).rejects.toThrow("Unauthorized");
+    });
+
+    it('treats { organizationId: "system" } as a system bootstrap lookup: user set, org cleared, no throw', async () => {
+      // User is authenticated but has no active org yet (org-resolution bootstrap).
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
+      const result = await withRLSContext(
+        { organizationId: "system" },
+        async () => "resolved",
+      );
+      expect(result).toBe("resolved");
+      expect(appliedSetting("app.current_user_id")).toBe("user-1");
+      // Org context is explicitly cleared rather than bound to a stale/auth org.
+      expect(appliedSetting("app.current_org_id")).toBe("");
     });
 
     it("throws when currentUser() fails and orgId is null — fails closed", async () => {

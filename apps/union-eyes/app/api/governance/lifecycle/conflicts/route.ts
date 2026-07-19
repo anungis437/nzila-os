@@ -25,7 +25,7 @@ export const GET = withApi(
     const limit = Math.min(Number(url.searchParams.get('limit') ?? 50), 200)
 
     return withSystemContext(async () => {
-      const conditions: SQL<unknown>[] = []
+      const conditions: SQL<any>[] = []
       if (activeOnly) conditions.push(eq(policyConflicts.isActive, true))
       if (severity) conditions.push(eq(policyConflicts.severity, severity as never))
 

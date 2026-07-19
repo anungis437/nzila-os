@@ -1,0 +1,33 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#directoryObjects",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.user",
+      "businessPhones": [],
+      "displayName": "Aubert Nungisa",
+      "givenName": "Aubert",
+      "id": "a88c6cf4-adc7-4287-a553-53b93cd1f002",
+      "jobTitle": "Owner",
+      "mail": "aubert@onelabtech.com",
+      "mobilePhone": null,
+      "officeLocation": null,
+      "preferredLanguage": "en-US",
+      "surname": "Nungisa",
+      "userPrincipalName": "aubert@onelabtech.com"
+    },
+    {
+      "@odata.type": "#microsoft.graph.user",
+      "businessPhones": [],
+      "displayName": "David Amar",
+      "givenName": "David",
+      "id": "b210a094-7a0e-4c36-8a1f-07083e41344c",
+      "jobTitle": null,
+      "mail": "david@onelabtech.com",
+      "mobilePhone": null,
+      "officeLocation": null,
+      "preferredLanguage": "en-US",
+      "surname": "Amar",
+      "userPrincipalName": "david@onelabtech.com"
+    }
+  ]
+}

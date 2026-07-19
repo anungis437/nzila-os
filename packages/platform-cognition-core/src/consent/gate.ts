@@ -11,7 +11,7 @@
  *   5. Returns a structured ConsentGateResult with redaction flag and reasons
  *      that are safe to surface in audit logs (no PII).
  *
- * The gate is *fail-closed*: any unhandled exception in the producer is
+ * The gate is *fail-closed*: unknown unhandled exception in the producer is
  * surfaced as `allowed: false` with a generic reason, never as an unhandled
  * promise rejection.
  *

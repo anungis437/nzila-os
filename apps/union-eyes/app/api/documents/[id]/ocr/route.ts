@@ -22,10 +22,10 @@ export const POST = async (
   { params }: { params: { id: string } }
 ) => {
   return withRoleAuth('steward', async (request, context) => {
-    const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
+    const { userId, organizationId } = context as { userId: string; organizationId: string };
 
   try {
-        const result = await processDocumentOCR(params.id);
+        const result = await processDocumentOCR(params.id, organizationId);
         
         logApiAuditEvent({
           timestamp: new Date().toISOString(), userId,

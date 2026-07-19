@@ -154,7 +154,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Only steward or above can import cases');
   }
 
-  let rawBody: unknown;
+  let rawBody: any;
   try {
     rawBody = await request.json();
   } catch {

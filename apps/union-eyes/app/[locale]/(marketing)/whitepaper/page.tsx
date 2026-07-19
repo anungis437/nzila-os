@@ -1111,6 +1111,7 @@ export default async function LocaleWhitepaperPage({
       `}</style>
       <section className="relative overflow-hidden border-b border-slate-200 bg-[#0f2133]">
         {/* Use an <img> instead of CSS background-image so the photo prints reliably */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           aria-hidden="true"
           src={heroImagery.organizationalMemoryModule}
@@ -1119,7 +1120,7 @@ export default async function LocaleWhitepaperPage({
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-br from-[#0f2133]/85 via-[#123451]/75 to-[#0f2133]/90"
+          className="absolute inset-0 bg-linear-to-br from-[#0f2133]/85 via-[#123451]/75 to-[#0f2133]/90"
         />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-4xl text-center">
@@ -1144,7 +1145,7 @@ export default async function LocaleWhitepaperPage({
       </section>
 
       <section aria-labelledby="whitepaper-abstract" className="border-b border-slate-200 bg-slate-50">
-        <div className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10">
             <div className="flex flex-col gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
               <h2 id="whitepaper-abstract" className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1f5b84]">
@@ -1168,7 +1169,7 @@ export default async function LocaleWhitepaperPage({
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
         <section className="grid gap-8 xl:grid-cols-12">
           <aside className="xl:col-span-3 xl:sticky xl:top-24 xl:self-start space-y-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -1250,7 +1251,7 @@ export default async function LocaleWhitepaperPage({
                           sizes="(min-width: 1280px) 900px, 100vw"
                           className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#10263a]/70 via-[#10263a]/30 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-r from-[#10263a]/70 via-[#10263a]/30 to-transparent" />
                         <div className="relative z-10 flex h-full items-end p-5">
                           <p className="text-sm font-medium text-white/90">{renderInline(stripSectionPrefix(heading), `hero-${index}`)}</p>
                         </div>
@@ -1263,7 +1264,7 @@ export default async function LocaleWhitepaperPage({
                       {statSpec.stats.map((stat, statIndex) => (
                         <div
                           key={`wb-stat-${index}-${statIndex}`}
-                          className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f4f9fc] to-white p-4"
+                          className="rounded-xl border border-slate-200 bg-linear-to-br from-[#f4f9fc] to-white p-4"
                         >
                           <p className="text-2xl font-semibold tracking-tight text-[#1f5b84] sm:text-3xl">
                             {stat.value}
@@ -1318,9 +1319,9 @@ export default async function LocaleWhitepaperPage({
                                 {segment.items.map((item, itemIndex) => (
                                   <li
                                     key={`${key}-${itemIndex}`}
-                                    className="flex items-start gap-4 rounded-xl border border-slate-200 bg-gradient-to-r from-white to-slate-50 p-4"
+                                    className="flex items-start gap-4 rounded-xl border border-slate-200 bg-linear-to-r from-white to-slate-50 p-4"
                                   >
-                                    <span className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#1f5b84] text-sm font-semibold text-white shadow-sm">
+                                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1f5b84] text-sm font-semibold text-white shadow-sm">
                                       {itemIndex + 1}
                                     </span>
                                     <span className="pt-1 text-[1rem] leading-7 text-slate-800">
@@ -1402,7 +1403,7 @@ export default async function LocaleWhitepaperPage({
                             return (
                               <aside
                                 key={key}
-                                className="my-10 rounded-2xl border border-[#1f5b84]/30 bg-gradient-to-br from-[#1f5b84] to-[#163f5e] px-8 py-12 text-center shadow-md sm:px-12 sm:py-14"
+                                className="my-10 rounded-2xl border border-[#1f5b84]/30 bg-linear-to-br from-[#1f5b84] to-[#163f5e] px-8 py-12 text-center shadow-md sm:px-12 sm:py-14"
                               >
                                 <p className="mx-auto max-w-3xl text-[1.35rem] font-semibold leading-10 text-white sm:text-[1.5rem] sm:leading-[2.6rem]">
                                   {renderWithCitations(segment.body)}
@@ -1413,7 +1414,7 @@ export default async function LocaleWhitepaperPage({
                           return (
                             <aside
                               key={key}
-                              className="rounded-xl border border-[#1f5b84]/20 bg-gradient-to-br from-[#f4f9fc] to-white p-5 shadow-sm"
+                              className="rounded-xl border border-[#1f5b84]/20 bg-linear-to-br from-[#f4f9fc] to-white p-5 shadow-sm"
                             >
                               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1f5b84]">
                                 {renderInline(segment.title, `${key}-callout-title`)}

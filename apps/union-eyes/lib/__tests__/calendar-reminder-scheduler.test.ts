@@ -11,10 +11,10 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -33,11 +33,11 @@ vi.mock('@/db/schema/calendar-schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  lte: vi.fn((...a: unknown[]) => a),
-  gte: vi.fn((...a: unknown[]) => a),
-  isNull: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  lte: vi.fn((...a: any[]) => a),
+  gte: vi.fn((...a: any[]) => a),
+  isNull: vi.fn((...a: any[]) => a),
   relations: vi.fn(() => ({})),
 }));
 

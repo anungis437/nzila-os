@@ -108,6 +108,8 @@ describe('INV-11 — Every API route has authorization', () => {
     'authorize(',
     'withAuth(',
     'requireOrgAccess(',
+    'requireVerifiedOrgAccess(',  // ABR CourtLens — verifies session/DB membership (Phase 2C.6)
+    'requireVerifiedPermission(', // ABR CourtLens — server-derived RBAC check (Phase 2C.6)
     'requirePlatformRole(',
     'authenticateUser(',
     'requireAuth(',
@@ -152,6 +154,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/health',
     '/api/webhooks',
     '/api/public',
+    '/api/courtlens/public-intake',    // ABR CourtLens — pseudonymous public intake (validated + rate-limited, no PII beyond consent)
     '/api/trial',               // Public product trial signup
     '/api/ready',               // Readiness/liveness probes
     '/api/version',             // Build version metadata
@@ -180,6 +183,7 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/ocra',                           // OCRA canonical alias for ICRA public diagnostic routes
     '/api/exit-interviews/institutional-', // Legacy public redirect aliases to organizational-* exit-interview endpoints
     '/api/workbook/',                      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential; claim route enforces auth() at runtime, Stripe webhook signature-verified)
+    '/api/delivery/',                      // SAGE Phase 8A recipient delivery — grant-scoped session-token flow; X-Delivery-Session credential verified by delivery-service, never org-scope; recipient routes intentionally have no withOrgScope guard
     '/_perf/',                             // Web vitals beacon — intentionally anonymous (sendBeacon)
   ]
 
@@ -189,7 +193,7 @@ describe('INV-11 — Every API route has authorization', () => {
 
     for (const route of routes) {
       const relPath = relative(ROOT, route)
-      const normalizedPath = relPath.replace(/\\/g, '/')
+      const normalizedPath = relPath.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
       const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => normalizedPath.includes(p))
 
       if (isPublic) continue

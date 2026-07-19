@@ -44,7 +44,7 @@ export class GovernanceService {
         headers: await this.getAuthHeaders(),
         body: JSON.stringify({
           certificateNumber: data.certificateNumber,
-          issueDate: typeof data.issueDate === 'string' ? data.issueDate : (data.issueDate as unknown as Date).toISOString().split('T')[0],
+          issueDate: typeof data.issueDate === 'string' ? data.issueDate : (data.issueDate as any as Date).toISOString().split('T')[0],
           councilMembers: data.councilMembers,
         }),
       }

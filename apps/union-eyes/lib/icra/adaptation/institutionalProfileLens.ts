@@ -50,7 +50,7 @@ export function isExternalRespondent(lens: RespondentLens): boolean {
 
 // ── Profile field equality helper (used by AdaptiveRules predicates) ──────
 
-const PROFILE_FIELDS = [
+const _PROFILE_FIELDS = [
   'institutionalScale',
   'continuityComplexity',
   'governanceComplexity',
@@ -58,7 +58,7 @@ const PROFILE_FIELDS = [
   'respondentLens',
 ] as const;
 
-export type ProfileFieldName = (typeof PROFILE_FIELDS)[number];
+export type ProfileFieldName = (typeof _PROFILE_FIELDS)[number];
 
 export function getProfileFieldValue(
   profile: InstitutionalAssessmentProfile,

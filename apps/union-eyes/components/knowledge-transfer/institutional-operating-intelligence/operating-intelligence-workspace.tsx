@@ -2,22 +2,59 @@
 
 import { useEffect, useState } from 'react';
 
+interface SystemsPayload {
+  governanceFlow?: { pattern?: string; velocity?: number };
+  continuityMomentum?: { direction?: string; velocity?: number };
+  overallSystemsHealth?: number;
+  systemsNarrative?: string;
+}
+
+interface MultiDomainItem {
+  domain: string;
+  maturittyLevel?: string;
+  strength?: number;
+}
+
+interface MultiDomainPayload {
+  domains?: MultiDomainItem[];
+  institutionalContextSynthesis?: string;
+}
+
+interface CorrelationItem {
+  dimension1?: string;
+  dimension2?: string;
+  impact?: 'high' | 'moderate' | 'low' | string;
+  correlation_strength?: number;
+}
+
+interface CorrelationPayload {
+  correlations?: CorrelationItem[];
+  systemic_fragility_indicators?: string[];
+}
+
+interface OrganizationalCognitionResponse {
+  data?: {
+    byEngine?: Record<string, { payload?: any }>;
+    failures?: DashboardData['failures'];
+  };
+}
+
 // Local relaxed shape; envelope payloads are domain-specific. The dashboard
 // renders only a few fields for now and treats the rest as opaque.
 interface DashboardData {
-  systems: any;
-  coherence: any;
-  coordination: any;
-  rhythms: any;
-  elasticity: any;
-  momentum: any;
-  multiDomain: any;
-  procedural: any;
-  precedent: any;
-  trust: any;
-  correlation: any;
+  systems: SystemsPayload;
+  coherence: Record<string, unknown> | null;
+  coordination: Record<string, unknown> | null;
+  rhythms: Record<string, unknown> | null;
+  elasticity: Record<string, unknown> | null;
+  momentum: Record<string, unknown> | null;
+  multiDomain: MultiDomainPayload;
+  procedural: Record<string, unknown> | null;
+  precedent: Record<string, unknown> | null;
+  trust: Record<string, unknown> | null;
+  correlation: CorrelationPayload;
   /** Per-engine envelopes keyed by engineId, available for explainability surfaces. */
-  envelopes: Record<string, any>;
+  envelopes: Record<string, { payload?: any }>;
   /** Engine failures from the orchestrator (isolated, non-cascading). */
   failures: Array<{ engineId: string; domain: string; error: string }>;
 }
@@ -31,24 +68,24 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
     const fetchData = async () => {
       try {
         // Single orchestrated call — replaces the previous 11 parallel fetches.
-        const res = await fetch('/api/exit-interviews/organizational-cognition').then((r) =>
+        const res = (await fetch('/api/exit-interviews/organizational-cognition').then((r) =>
           r.json(),
-        );
-        const byEngine: Record<string, any> = res?.data?.byEngine ?? {};
+        )) as OrganizationalCognitionResponse;
+        const byEngine = res?.data?.byEngine ?? {};
         const failures: DashboardData['failures'] = res?.data?.failures ?? [];
-        const payloadOf = (id: string) => byEngine[id]?.payload ?? null;
+        const payloadOf = <T,>(id: string): T | null => (byEngine[id]?.payload as T | null) ?? null;
         setData({
-          systems: payloadOf('systems-dynamics'),
+          systems: payloadOf<SystemsPayload>('systems-dynamics') ?? {},
           coherence: payloadOf('governance-coherence'),
           coordination: payloadOf('operational-coordination'),
           rhythms: payloadOf('operating-rhythms'),
           elasticity: payloadOf('response-elasticity'),
           momentum: payloadOf('governance-momentum'),
-          multiDomain: payloadOf('multi-domain-cognition'),
+          multiDomain: payloadOf<MultiDomainPayload>('multi-domain-cognition') ?? {},
           procedural: payloadOf('procedural-continuity'),
           precedent: payloadOf('institutional-precedent'),
           trust: payloadOf('operational-trust'),
-          correlation: payloadOf('cross-domain-correlation'),
+          correlation: payloadOf<CorrelationPayload>('cross-domain-correlation') ?? {},
           envelopes: byEngine,
           failures,
         });
@@ -68,7 +105,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Organizational Operating Intelligence</h1>
@@ -128,7 +165,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-slate-600">Overall Health Score:</span>
-                  <span className="text-2xl font-bold text-slate-900">{Math.round(data.systems.overallSystemsHealth)}/100</span>
+                  <span className="text-2xl font-bold text-slate-900">{Math.round(data.systems.overallSystemsHealth ?? 0)}/100</span>
                 </div>
                 <div className="w-full bg-slate-200 rounded h-3">
                   <div className="bg-amber-600 h-3 rounded" style={{ width: `${data.systems.overallSystemsHealth}%` }} />
@@ -144,14 +181,14 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
           <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
             <h3 className="font-semibold text-slate-900 mb-4">Cognition Domains</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {data.multiDomain.domains?.map((domain: any, i: number) => (
+              {data.multiDomain.domains?.map((domain, i: number) => (
                 <div key={i} className="p-4 bg-slate-50 rounded border border-slate-200">
                   <div className="font-medium text-slate-900 mb-2">{domain.domain.replace(/_/g, ' ')}</div>
                   <div className="text-sm text-slate-600 mb-3">Maturity: {domain.maturittyLevel}</div>
                   <div className="flex justify-between items-center text-sm">
                     <span>Strength:</span>
                     <div className="w-24 bg-slate-300 rounded h-2">
-                      <div className="bg-indigo-600 h-2 rounded" style={{ width: `${domain.strength}%` }} />
+                      <div className="bg-indigo-600 h-2 rounded" style={{ width: `${domain.strength ?? 0}%` }} />
                     </div>
                   </div>
                 </div>
@@ -168,7 +205,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
           <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
             <h3 className="font-semibold text-slate-900 mb-4">Cross-Domain Organizational Correlations</h3>
             <div className="space-y-3">
-              {data.correlation.correlations?.map((corr: any, i: number) => (
+              {data.correlation.correlations?.map((corr, i: number) => (
                 <div key={i} className="p-4 bg-slate-50 rounded border border-slate-200">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
@@ -176,11 +213,11 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
                       <div className="text-xs text-slate-500 mt-1">↔ {corr.dimension2}</div>
                     </div>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${corr.impact === 'high' ? 'bg-red-100 text-red-800' : corr.impact === 'moderate' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
-                      {corr.impact.toUpperCase()}
+                      {(corr.impact ?? 'low').toUpperCase()}
                     </span>
                   </div>
                   <div className="w-full bg-slate-300 rounded h-2">
-                    <div className="bg-purple-600 h-2 rounded" style={{ width: `${corr.correlation_strength * 100}%` }} />
+                    <div className="bg-purple-600 h-2 rounded" style={{ width: `${(corr.correlation_strength ?? 0) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -188,7 +225,7 @@ export function InstitutionalOperatingIntelligenceWorkspace() {
             <div className="mt-6 p-4 bg-amber-50 rounded border border-amber-200">
               <p className="text-sm text-slate-700 font-medium mb-2">Fragility Indicators:</p>
               <ul className="text-sm text-slate-700 space-y-1">
-                {data.correlation.systemic_fragility_indicators?.map((indicator: string, i: number) => (
+                {data.correlation.systemic_fragility_indicators?.map((indicator, i: number) => (
                   <li key={i}>• {indicator}</li>
                 ))}
               </ul>

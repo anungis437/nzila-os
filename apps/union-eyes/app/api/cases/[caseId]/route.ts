@@ -101,7 +101,7 @@ const CLAIM_STATUS_VALUES = [
   'closed',
 ] as const;
 
-function isClaimStatus(value: unknown): value is ClaimStatus {
+function isClaimStatus(value: any): value is ClaimStatus {
   return typeof value === 'string' && CLAIM_STATUS_VALUES.includes(value as (typeof CLAIM_STATUS_VALUES)[number]);
 }
 

@@ -159,7 +159,7 @@ export class WaveClient {
   // GraphQL Helper
   // ==========================================================================
 
-  private async graphql<T>(query: string, variables: unknown = {}): Promise<T> {
+  private async graphql<T>(query: string, variables: any = {}): Promise<T> {
     await this.ensureValidToken();
 
     try {

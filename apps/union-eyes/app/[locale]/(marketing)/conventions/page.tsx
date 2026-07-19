@@ -14,6 +14,7 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
+import type { Metadata } from 'next';
 /**
  * Conventions & Federated Governance — Category-defining surface
  *
@@ -21,7 +22,6 @@
  * federated democratic institutions. Procedural continuity, constitutional
  * traceability and coordination across locals, regions, nationals.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   BookOpen,

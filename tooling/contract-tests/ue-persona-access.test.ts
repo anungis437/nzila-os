@@ -103,6 +103,7 @@ interface PageRule {
 const PAGE_ACCESS_MATRIX: PageRule[] = [
   // ── Base pages (any authenticated user) ────────────────────────────────
   { path: 'page.tsx',                                    minRole: 'member',               description: 'Main dashboard' },
+  { path: 'workspace/page.tsx',                          minRole: 'member',               description: 'Unified workspace shell (any authenticated member)' },
   { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified inbox' },
   { path: 'work/page.tsx',                               minRole: 'member',               description: 'Work surface' },
   { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console' },
@@ -177,6 +178,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/migrations/page.tsx',                   minRole: 'admin',                description: 'Migration observability dashboard' },
   { path: 'admin/migrations/[id]/page.tsx',              minRole: 'admin',                description: 'Migration batch detail view' },
   { path: 'admin/duplicates/page.tsx',                   minRole: 'admin',                description: 'Duplicate review panel' },
+  { path: 'admin/pilots/page.tsx',                       minRole: 'admin',                description: 'Pilot commercialization operations' },
 
   // ── Admin rewards (layout gates admin, each sub-page also checks admin) ─
   { path: 'admin/rewards/page.tsx',                      minRole: 'admin',                description: 'Recognition & rewards admin overview' },

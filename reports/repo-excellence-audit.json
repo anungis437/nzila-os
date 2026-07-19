@@ -1,21 +1,25 @@
 {
-  "generatedAt": "2026-05-26T02:31:33.459Z",
-  "overallScore": 8.7,
+  "generatedAt": "2026-07-19T11:34:38.320Z",
+  "overallScore": 7.8,
   "categories": {
     "runtime_proof": {
-      "score": 9,
+      "score": 8,
       "findings": [
-        "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+        "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
       ]
     },
     "duplication": {
-      "score": 9,
-      "findings": []
-    },
-    "script_sprawl": {
       "score": 8,
       "findings": [
-        "Root script count is 30."
+        "Duplicate script bodies remain: contract-tests, contract:test",
+        "Duplicate script bodies remain: inventory:check, docs:sync"
+      ]
+    },
+    "script_sprawl": {
+      "score": 2.1,
+      "findings": [
+        "Root script count is 299.",
+        "Root command surface is still dense and benefits from continued pruning."
       ]
     },
     "hidden_fragility": {
@@ -31,21 +35,24 @@
       "findings": []
     },
     "ci_efficiency": {
-      "score": 9.3,
+      "score": 9,
       "findings": [
-        "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-union-eyes.yml, deploy-web.yml",
-        "Effective active workflow count is 44 (total 48, emergency/manual 4)."
+        "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml",
+        "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml",
+        "Effective active workflow count is 49 (total 52, emergency/manual 3)."
       ]
     },
     "overengineering": {
-      "score": 6.6,
+      "score": 6.1,
       "findings": [
         "Effective workflow surface remains larger than ideal for a disciplined canonical release path."
       ]
     },
     "dead_assets": {
-      "score": 8,
-      "findings": []
+      "score": 7.9,
+      "findings": [
+        "Active app-specific deployment entry points remain and should be converged into the canonical release path."
+      ]
     },
     "ownership": {
       "score": 10,
@@ -56,23 +63,43 @@
   "improvementBacklog": [
     {
       "category": "runtime_proof",
-      "finding": "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+      "finding": "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+    },
+    {
+      "category": "duplication",
+      "finding": "Duplicate script bodies remain: contract-tests, contract:test"
+    },
+    {
+      "category": "duplication",
+      "finding": "Duplicate script bodies remain: inventory:check, docs:sync"
     },
     {
       "category": "script_sprawl",
-      "finding": "Root script count is 30."
+      "finding": "Root script count is 299."
+    },
+    {
+      "category": "script_sprawl",
+      "finding": "Root command surface is still dense and benefits from continued pruning."
     },
     {
       "category": "ci_efficiency",
-      "finding": "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-union-eyes.yml, deploy-web.yml"
+      "finding": "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml"
     },
     {
       "category": "ci_efficiency",
-      "finding": "Effective active workflow count is 44 (total 48, emergency/manual 4)."
+      "finding": "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml"
+    },
+    {
+      "category": "ci_efficiency",
+      "finding": "Effective active workflow count is 49 (total 52, emergency/manual 3)."
     },
     {
       "category": "overengineering",
       "finding": "Effective workflow surface remains larger than ideal for a disciplined canonical release path."
+    },
+    {
+      "category": "dead_assets",
+      "finding": "Active app-specific deployment entry points remain and should be converged into the canonical release path."
     }
   ],
   "blockers": []

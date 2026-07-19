@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-29T00:00:00.000Z",
+  "generatedAt": "2026-07-19T00:00:00.000Z",
   "appCount": 26,
-  "packageCount": 216,
-  "workspacePackageCount": 248,
-  "workflowCount": 48,
-  "contractTestCount": 253,
-  "tsTestFileCount": 1586,
+  "packageCount": 222,
+  "workspacePackageCount": 254,
+  "workflowCount": 52,
+  "contractTestCount": 272,
+  "tsTestFileCount": 2466,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -36,7 +36,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 248
+      "codeFileCount": 296
     },
     {
       "name": "agrimo",
@@ -73,7 +73,7 @@
         "ui"
       ],
       "purpose": "Agricultural field operations — harvest tracking, production management, logistics, warehousing, and certifications with a Django backend.",
-      "codeFileCount": 104
+      "codeFileCount": 106
     },
     {
       "name": "cfo",
@@ -173,7 +173,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 391
+      "codeFileCount": 448
     },
     {
       "name": "control-plane",
@@ -187,14 +187,19 @@
       "nzilaDeps": [
         "attestation-visibility",
         "config",
+        "continuity-analysis",
         "continuity-review",
         "db",
         "deal-engine",
         "decision-core",
+        "decision-evidence",
         "decision-intelligence",
+        "decision-intelligence-engine",
         "governance-operations",
+        "governance-rationale",
         "governance-review",
         "governed-workflow",
+        "institutional-intelligence",
         "metrics-commercial",
         "nar",
         "observability",
@@ -233,7 +238,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 322
+      "codeFileCount": 332
     },
     {
       "name": "cora",
@@ -265,7 +270,7 @@
         "ui"
       ],
       "purpose": "Agricultural intelligence dashboard — yield forecasting, price signals, risk analysis, cooperative performance, and impact traceability.",
-      "codeFileCount": 39
+      "codeFileCount": 43
     },
     {
       "name": "flow",
@@ -308,7 +313,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 346
+      "codeFileCount": 436
     },
     {
       "name": "maestria",
@@ -355,7 +360,7 @@
         "ui"
       ],
       "purpose": "Investment migration advisory platform — case management, program intelligence, KYC/AML compliance, and document workflows for citizenship-by-investment (CBI) and residency-by-investment (RBI) firms.",
-      "codeFileCount": 38
+      "codeFileCount": 41
     },
     {
       "name": "mobility-client-portal",
@@ -406,7 +411,7 @@
         "ui"
       ],
       "purpose": "National Anti-Corruption Programme examination and assessment platform.",
-      "codeFileCount": 61
+      "codeFileCount": 64
     },
     {
       "name": "nzila-hq",
@@ -483,7 +488,7 @@
         "ui"
       ],
       "purpose": "Partner portal for managing deals, commissions, certifications, and go-to-market operations.",
-      "codeFileCount": 107
+      "codeFileCount": 110
     },
     {
       "name": "platform-admin",
@@ -495,6 +500,7 @@
       "dependsOnPlatformShell": true,
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
+        "comms-email",
         "config",
         "db",
         "decision-core",
@@ -518,11 +524,12 @@
         "platform-reasoning-engine",
         "platform-semantic-search",
         "platform-shell",
+        "sage-core",
         "schema-core",
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 62
+      "codeFileCount": 182
     },
     {
       "name": "test-scaffold-gp",
@@ -568,7 +575,7 @@
         "ui"
       ],
       "purpose": "Cross-border trade management — deals, listings, shipments, and commission tracking.",
-      "codeFileCount": 53
+      "codeFileCount": 56
     },
     {
       "name": "trustcore",
@@ -592,7 +599,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 96
+      "codeFileCount": 98
     },
     {
       "name": "trustcore-trustops",
@@ -667,7 +674,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 4217
+      "codeFileCount": 4915
     },
     {
       "name": "veridian-admin",
@@ -684,7 +691,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 20
+      "codeFileCount": 23
     },
     {
       "name": "veridian-care",
@@ -701,7 +708,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 23
+      "codeFileCount": 26
     },
     {
       "name": "veridian-site",
@@ -718,7 +725,7 @@
         "platform-auth"
       ],
       "purpose": "",
-      "codeFileCount": 24
+      "codeFileCount": 27
     },
     {
       "name": "web",
@@ -742,7 +749,7 @@
         "ui"
       ],
       "purpose": "Public marketing site for the Nzila platform — landing pages, resource library, and public content.",
-      "codeFileCount": 88
+      "codeFileCount": 93
     },
     {
       "name": "weekone",
@@ -764,7 +771,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 97
+      "codeFileCount": 100
     },
     {
       "name": "zonga",
@@ -807,7 +814,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 454
+      "codeFileCount": 458
     }
   ],
   "workflows": [
@@ -815,7 +822,10 @@
     "agri-core-check.yml",
     "ai-governance.yml",
     "app-floor-check.yml",
+    "auto-promote-union-eyes.yml",
+    "br5-proof-deploy-staging.yml",
     "branch-tag-governance.yml",
+    "build-identity-proof.yml",
     "canary-deploy.yml",
     "capital-discipline.yml",
     "ci.yml",
@@ -853,6 +863,7 @@
     "release-train.yml",
     "reliability-guard.yml",
     "repo-inventory-check.yml",
+    "retire-legacy-union-eyes-ca.yml",
     "runtime-governance-attestation.yml",
     "sbom.yml",
     "secret-scan.yml",

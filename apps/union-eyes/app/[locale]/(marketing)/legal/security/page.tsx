@@ -14,9 +14,9 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
+import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Shield, Lock, Eye, Server, Key, Bug, Mail } from 'lucide-react';

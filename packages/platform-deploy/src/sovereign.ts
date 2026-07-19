@@ -14,7 +14,7 @@ import { z } from 'zod'
 export const EgressRuleSchema = z.object({
   /** Hostname (e.g. "api.stripe.com") */
   host: z.string().min(1),
-  /** Optional port restriction (default: any) */
+  /** Optional port restriction (default: unknown) */
   port: z.number().int().positive().optional(),
   /** Reason documented for auditing */
   reason: z.string().min(1),

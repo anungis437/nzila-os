@@ -56,7 +56,7 @@ function main(): void {
 
     for (const experience of policy.allowedExperiences) {
       if (!VALID_EXPERIENCES.includes(experience)) {
-        fail(`Domain ${policy.domain} has unknown experience: ${String(experience)}`);
+        fail(`Domain ${policy.domain} has any experience: ${String(experience)}`);
       }
       const allowedPrefixes = allowedPrefixesByExperience[experience] ?? [];
       for (const domainPrefix of policy.routePrefixes) {

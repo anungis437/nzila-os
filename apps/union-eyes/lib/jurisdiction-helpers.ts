@@ -34,7 +34,7 @@ export async function getOrganizationJurisdiction(organizationId: string): Promi
       WHERE id = ${organizationId}
     `);
     
-    const rows = result as unknown as Array<{ jurisdiction: string }>;
+    const rows = result as any as Array<{ jurisdiction: string }>;
     if (rows.length === 0 || !rows[0].jurisdiction) {
       return null;
     }
@@ -58,7 +58,7 @@ export async function getOrgJurisdiction(organizationId: string): Promise<CAJuri
       WHERE id = ${organizationId}
     `);
     
-    const rows = result as unknown as Array<{ jurisdiction: string }>;
+    const rows = result as any as Array<{ jurisdiction: string }>;
     if (rows.length > 0 && rows[0].jurisdiction) {
       return mapJurisdictionValue(rows[0].jurisdiction);
     }
@@ -88,7 +88,7 @@ export async function getJurisdictionDeadline(
       LIMIT 1
     `);
     
-    const rows = result as unknown as Array<{ days: number; legal_reference: string }>;
+    const rows = result as any as Array<{ days: number; legal_reference: string }>;
     if (rows.length === 0) {
       return null;
     }
@@ -119,7 +119,7 @@ export async function calculateBusinessDaysDeadline(
       ) as deadline
     `);
     
-    const rows = result as unknown as Array<{ deadline: string }>;
+    const rows = result as any as Array<{ deadline: string }>;
     if (rows.length === 0) {
       return null;
     }

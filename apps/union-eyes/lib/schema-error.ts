@@ -65,7 +65,7 @@ export async function wrapSchemaQuery<T>(
 ): Promise<T> {
   try {
     return await queryFn()
-  } catch (err: unknown) {
+  } catch (err: any) {
     const message = err instanceof Error ? err.message : String(err)
     const messageLower = message.toLowerCase()
 

@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
   }
 
-  let body: unknown;
+  let body: any;
   try {
     body = await req.json();
   } catch {

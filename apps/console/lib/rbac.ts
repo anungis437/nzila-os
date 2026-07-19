@@ -10,6 +10,12 @@ export type NzilaRole =
   | 'analyst'
   | 'viewer'
 
+export const OPERATOR_ROLES: readonly NzilaRole[] = [
+  'platform_admin',
+  'studio_admin',
+  'ops',
+]
+
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 
 /**
@@ -44,6 +50,21 @@ export async function requireRole(...allowed: NzilaRole[]): Promise<NzilaRole> {
   const role = await getUserRole()
   if (!allowed.includes(role)) {
     throw new Error(`Forbidden: role "${role}" is not in [${allowed.join(', ')}]`)
+  }
+  return role
+}
+
+export function isOperatorRole(role: NzilaRole): boolean {
+  return OPERATOR_ROLES.includes(role)
+}
+
+/**
+ * Guard for internal operator surfaces. Console is operator-only.
+ */
+export async function requireOperatorRole(): Promise<NzilaRole> {
+  const role = await getUserRole()
+  if (!isOperatorRole(role)) {
+    throw new Error(`Forbidden: operator role required, received "${role}"`)
   }
   return role
 }

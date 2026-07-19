@@ -16,7 +16,7 @@ function makeDbChain(): Record<string, unknown> {
   ]) {
     chain[m] = vi.fn(() => makeDbChain());
   }
-  chain.then = (resolve: (v: unknown[]) => void) => {
+  chain.then = (resolve: (v: any[]) => void) => {
     resolve([{ value: 0 }]);
     return Promise.resolve([{ value: 0 }]);
   };
@@ -35,10 +35,10 @@ function makeQueryProxy(): Record<string, unknown> {
 vi.mock("@/db/db", () => ({ db: { ...makeDbChain(), query: makeQueryProxy() } }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  gte: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((x: unknown) => x),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  gte: vi.fn((...a: any[]) => a),
+  desc: vi.fn((x: any) => x),
   count: vi.fn(() => "count"),
   sql: vi.fn(),
 }));

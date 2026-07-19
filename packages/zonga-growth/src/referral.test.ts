@@ -5,7 +5,6 @@ import {
   calculateReward,
   computeReferralStats,
   createReferralService,
-  DEFAULT_REFERRAL_CONFIG,
   CreateReferralCodeSchema,
   RedeemReferralSchema,
 } from './referral'
@@ -153,7 +152,7 @@ describe('referral', () => {
     })
 
     it('returns null for unknown type', () => {
-      const result = calculateReward('nonexistent' as any)
+      const result = calculateReward('nonexistent' as Parameters<typeof calculateReward>[0])
       expect(result).toBeNull()
     })
 

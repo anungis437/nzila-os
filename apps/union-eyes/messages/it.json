@@ -9914,6 +9914,7 @@
     "filters": {
       "jurisdictionPlaceholder": "Giurisdizione",
       "allJurisdictions": "Tutte le giurisdizioni",
+      "sectorPlaceholder": "Filtro settore...",
       "reviewPlaceholder": "Revisione",
       "allReviews": "Tutte le revisioni"
     },
@@ -9935,6 +9936,9 @@
     "loading": "Caricamento degli accordi...",
     "errorLoad": "Caricamento degli accordi fallito",
     "empty": "Nessun accordo trovato",
+    "actions": {
+      "exportCsv": "Esporta CSV"
+    },
     "pagination": {
       "count": "{count} accordo",
       "countPlural": "{count} accordi",

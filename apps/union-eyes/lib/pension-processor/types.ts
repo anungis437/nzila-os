@@ -193,7 +193,7 @@ export class PensionProcessorError extends Error {
     message: string,
     public planType: PensionPlanType,
     public code?: string,
-    public originalError?: unknown
+    public originalError?: any
   ) {
     super(message);
     this.name = 'PensionProcessorError';

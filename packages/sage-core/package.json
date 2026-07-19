@@ -1,0 +1,43 @@
+{
+  "name": "@nzila/sage-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./permissions": "./src/permissions.ts",
+    "./boundary-profile": "./src/boundary-profile.ts",
+    "./audit-events": "./src/audit-events.ts",
+    "./invariants": "./src/invariants.ts",
+    "./access-model": "./src/access-model.ts",
+    "./service-context": "./src/service-context.ts",
+    "./service-errors": "./src/service-errors.ts",
+    "./repository": "./src/repository.ts",
+    "./audit-sink": "./src/audit-sink.ts",
+    "./services": "./src/services.ts",
+    "./sql-client": "./src/sql-client.ts",
+    "./postgres-mappers": "./src/postgres-mappers.ts",
+    "./postgres-repository": "./src/postgres-repository.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^10",
+    "postgres": "^3.4.8",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

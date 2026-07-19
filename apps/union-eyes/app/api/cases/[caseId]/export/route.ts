@@ -72,9 +72,9 @@ export async function GET(
     exportedBy: userId,
     caseId,
     organizationId: orgId,
-    caseRecord: caseRows[0] as unknown as Record<string, unknown>,
-    notes: noteRows as unknown as Record<string, unknown>[],
-    auditTrail: auditRows as unknown as Record<string, unknown>[],
+    caseRecord: caseRows[0] as any as Record<string, unknown>,
+    notes: noteRows as any as Record<string, unknown>[],
+    auditTrail: auditRows as any as Record<string, unknown>[],
   };
 
   const packageEnvelope = buildEvidencePackage(evidenceInput);

@@ -33,13 +33,13 @@ const mockWithSystemContext = vi.fn().mockImplementation((fn: () => unknown) => 
 const mockDbExecute = vi.fn().mockResolvedValue([]);
 
 vi.mock('@/lib/audit-logger', () => ({
-  auditLog: (...args: unknown[]) => mockAuditLog(...args),
+  auditLog: (...args: any[]) => mockAuditLog(...args),
   AuditEventType: { DATA_ACCESS: 'data.access' },
   AuditSeverity: { LOW: 'low', MEDIUM: 'medium' },
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({
-  getUserContext: (...args: unknown[]) => mockGetUserContext(...args),
+  getUserContext: (...args: any[]) => mockGetUserContext(...args),
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -47,11 +47,11 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 
 vi.mock('@/db/db', () => ({
-  db: { execute: (...args: unknown[]) => mockDbExecute(...args) },
+  db: { execute: (...args: any[]) => mockDbExecute(...args) },
 }));
 
 vi.mock('drizzle-orm', () => ({
-  sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
+  sql: (strings: TemplateStringsArray, ...values: any[]) => ({ strings, values }),
 }));
 
 // ── Test Data ───────────────────────────────────────────────────────────────

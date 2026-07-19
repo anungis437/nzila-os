@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Eval Gate Thresholds",
+  "description": "Schema for tooling/ai-evals/eval.config.json. Consumed by eval-gate.ts.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "minPassRate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Minimum overall pass rate (0-100)."
+    },
+    "maxRefusalRate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Maximum allowed refusal rate (0-100)."
+    },
+    "maxAvgLatencyMs": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Maximum average latency in milliseconds."
+    },
+    "maxTotalCostUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Maximum total cost per eval run in USD."
+    },
+    "perApp": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "minPassRate": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

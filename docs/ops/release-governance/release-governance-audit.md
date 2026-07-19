@@ -1,12 +1,12 @@
 # Release Governance Audit
 
-Generated: 2026-05-25T22:20:07.866Z
+Generated: 2026-07-19T11:34:35.708Z
 
 ## Scores
 
 - Release Governance Score: 9/10
 - Deployment Risk Score: 10/10
-- Workflow Sprawl Score: 10/10
+- Workflow Sprawl Score: 9/10
 - Environment Drift Score: 8/10
 
 ## Canonical Workflows
@@ -16,19 +16,18 @@ Generated: 2026-05-25T22:20:07.866Z
 
 ## App-Specific Deployment Workflows (Active)
 
-- None
+- deploy-union-eyes.yml
 
 ## App-Specific Deployment Workflows (Demoted to Emergency/Manual)
 
 - deploy-console.yml
 - deploy-partners.yml
-- deploy-union-eyes.yml
 - deploy-web.yml
 
 ## Inventory Coverage
 
 - Governed applications: 27
-- Active workflow files discovered: 48
+- Active workflow files discovered: 52
 
 ## Risk Notes
 

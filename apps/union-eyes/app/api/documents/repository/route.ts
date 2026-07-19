@@ -22,11 +22,13 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
+import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
 
 const uploadDocumentSchema = z.object({
   title: z.string().min(1).max(300),
   filename: z.string().min(1).max(500),
-  fileUrl: z.string().url(),
+  fileUrl: z.string().url().optional(),
+  blobPath: z.string().min(1).optional(),
   documentType: z.string().min(1).max(120),
   mimeType: z.string().min(1).max(120),
   privacyLabel: z.enum([
@@ -38,7 +40,6 @@ const uploadDocumentSchema = z.object({
     'highly_sensitive',
   ]),
   fileSize: z.number().int().nonnegative().optional(),
-  contentHash: z.string().min(8),
   linkedEntityType: z.enum(['case', 'grievance', 'member', 'policy_library', 'template_library', 'collective_agreement', 'other']).optional(),
   linkedEntityId: z.string().uuid().optional(),
   containsPii: z.boolean().optional(),
@@ -47,6 +48,9 @@ const uploadDocumentSchema = z.object({
   memberPii: z.boolean().optional(),
   medicalSensitive: z.boolean().optional(),
   disciplinarySensitive: z.boolean().optional(),
+}).refine((value) => Boolean(value.blobPath || value.fileUrl), {
+  message: 'blobPath or fileUrl is required',
+  path: ['blobPath'],
 });
 
 export const GET = withOrganizationAuth(async (request, context) => {
@@ -187,6 +191,20 @@ export const POST = withOrganizationAuth(async (request, context) => {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document payload', parsed.error.flatten());
   }
 
+  let resolvedBlob;
+  try {
+    resolvedBlob = await resolveStoredBlob({
+      organizationId,
+      blobPath: parsed.data.blobPath,
+      fileUrl: parsed.data.fileUrl,
+    });
+  } catch (error) {
+    return standardErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      error instanceof Error ? error.message : 'Invalid storage payload',
+    );
+  }
+
   const created = await withRLSContext({ organizationId }, async (tx) => {
     const [insertedDocument] = await tx
       .insert(documents)
@@ -195,7 +213,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
         title: parsed.data.title,
         filename: parsed.data.filename,
         name: parsed.data.title,
-        fileUrl: parsed.data.fileUrl,
+        fileUrl: resolvedBlob.fileUrl,
         fileType: parsed.data.documentType,
         documentType: parsed.data.documentType,
         mimeType: parsed.data.mimeType,
@@ -215,8 +233,8 @@ export const POST = withOrganizationAuth(async (request, context) => {
       organizationId,
       documentId: insertedDocument.id,
       versionNo: 1,
-      storageKey: parsed.data.fileUrl,
-      contentHash: parsed.data.contentHash,
+      storageKey: resolvedBlob.blobPath,
+      contentHash: resolvedBlob.contentHash,
       uploadedBy: userId,
     });
 

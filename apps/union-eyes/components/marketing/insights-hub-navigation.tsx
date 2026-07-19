@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import {
-  institutionalModes,
   type InstitutionalMode,
   withInstitutionalContext,
 } from '@/lib/institutional-context';

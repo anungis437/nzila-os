@@ -325,7 +325,7 @@ describe('Evidence lifecycle — mutation chain → audit trail → sealed expor
 
     // And a freshly-computed seal over the tampered payload will not match
     // the original seal — proves the HMAC chains the case record.
-    const reseal = computeSeal({ ...tampered, seal: undefined as unknown as string });
+    const reseal = computeSeal({ ...tampered, seal: undefined as any as string });
     expect(reseal).not.toBe(pkg.pack.seal);
   });
 

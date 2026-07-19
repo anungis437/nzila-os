@@ -105,11 +105,11 @@ describe('BreakGlassService', () => {
 
   // ── Constants ──────────────────────────────────────────────────────
   it('has correct REQUIRED_KEY_HOLDERS constant (3)', () => {
-    expect((service as unknown as { REQUIRED_KEY_HOLDERS: number }).REQUIRED_KEY_HOLDERS).toBe(3);
+    expect((service as any as { REQUIRED_KEY_HOLDERS: number }).REQUIRED_KEY_HOLDERS).toBe(3);
   });
 
   it('has correct TOTAL_KEY_HOLDERS constant (5)', () => {
-    expect((service as unknown as { TOTAL_KEY_HOLDERS: number }).TOTAL_KEY_HOLDERS).toBe(5);
+    expect((service as any as { TOTAL_KEY_HOLDERS: number }).TOTAL_KEY_HOLDERS).toBe(5);
   });
 
   // ── declareEmergency ──────────────────────────────────────────────

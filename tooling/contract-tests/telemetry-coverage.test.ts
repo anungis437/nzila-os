@@ -56,7 +56,7 @@ function readContent(filePath: string): string {
 }
 
 function isApiRoute(filePath: string): boolean {
-  const rel = filePath.replace(/\\/g, '/')
+  const rel = filePath.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
   return (
     rel.includes('/api/') &&
     !rel.includes('/api/auth/') && // NextAuth handler — auth infrastructure, not a business route

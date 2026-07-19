@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import { createHash } from 'crypto';
 
 // PDF.js will be loaded dynamically for browser/server compatibility
-let pdfjsLib: unknown = null;
+let pdfjsLib: any = null;
 
 async function getPdfJs() {
   if (!pdfjsLib) {

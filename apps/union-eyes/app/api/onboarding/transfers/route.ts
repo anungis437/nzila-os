@@ -19,7 +19,7 @@ function unauthorized(): Response {
   });
 }
 
-export async function POST(request: Request, context: unknown) {
+export async function POST(request: Request, context: any) {
   if (!requireOrgAccess(request)) {
     return unauthorized();
   }

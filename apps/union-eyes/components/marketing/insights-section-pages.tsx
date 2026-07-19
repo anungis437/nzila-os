@@ -20,7 +20,6 @@ import {
   getInsightHref,
   getInsightCategoryCounts,
   getInsightCategories,
-  insightCategories,
   upcomingInsightTopics,
 } from '@/lib/insights-content';
 import ScrollReveal from '@/components/public/scroll-reveal';

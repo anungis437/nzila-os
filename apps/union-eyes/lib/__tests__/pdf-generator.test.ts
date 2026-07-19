@@ -32,7 +32,7 @@ const mocks = vi.hoisted(() => {
 vi.mock('pdfkit', () => {
   const PDFDocument = function PDFDocument() {
     return mocks.fakeDoc;
-  } as unknown as { new(opts?: unknown): typeof mocks.fakeDoc };
+  } as any as { new(opts?: any): typeof mocks.fakeDoc };
   return { default: PDFDocument };
 });
 
@@ -101,7 +101,7 @@ describe('generatePDF', () => {
   it('renders usage-report template', async () => {
     await generatePDF({
       title: 'Usage',
-      data: { period: { start: '2025-01', end: '2025-06' }, claims: { total: 5 }, members: { total: 100 } } as unknown as unknown[],
+      data: { period: { start: '2025-01', end: '2025-06' }, claims: { total: 5 }, members: { total: 100 } } as any as any[],
       template: 'usage-report',
     });
     expect(mocks.fakeDoc.text).toHaveBeenCalledWith('Usage', { align: 'center' });
@@ -110,7 +110,7 @@ describe('generatePDF', () => {
   it('renders financial-report template', async () => {
     await generatePDF({
       title: 'Finance',
-      data: { period: { start: '2025-01', end: '2025-06' }, revenue: 10000, expenses: 5000 } as unknown as unknown[],
+      data: { period: { start: '2025-01', end: '2025-06' }, revenue: 10000, expenses: 5000 } as any as any[],
       template: 'financial-report',
     });
     expect(mocks.fakeDoc.text).toHaveBeenCalledWith('Finance', { align: 'center' });
@@ -129,7 +129,7 @@ describe('generatePDF', () => {
   it('handles single object data (non-array)', async () => {
     await generatePDF({
       title: 'Single',
-      data: { key: 'value' } as unknown as unknown[],
+      data: { key: 'value' } as any as any[],
     });
     expect(mocks.fakeDoc.fontSize).toHaveBeenCalledWith(12);
   });
@@ -142,7 +142,7 @@ describe('generatePDF', () => {
         claims: { total: 1, byStatus: {}, byPriority: {} },
         members: { total: 2, active: 1, new: 1 },
         grievances: { total: 3, resolved: 2 },
-      } as unknown as unknown[],
+      } as any as any[],
       template: 'usage-report',
     });
 
@@ -167,7 +167,7 @@ describe('pdf test internals', () => {
     mocks.fakeDoc.y = 740;
 
     __testInternals.renderTable(
-      mocks.fakeDoc as unknown as typeof import('pdfkit'),
+      mocks.fakeDoc as any as typeof import('pdfkit'),
       [{ header: 'Value', key: 'value' }],
       [
         { value: new Date('2025-01-01') },
@@ -182,16 +182,16 @@ describe('pdf test internals', () => {
 
   it('accepts non-array data for specific report renderers', () => {
     __testInternals.renderClaimsReport(
-      mocks.fakeDoc as unknown as typeof import('pdfkit'),
-      { title: 'Claims Single', data: { claimNumber: 'C-1' } as unknown as unknown[] },
+      mocks.fakeDoc as any as typeof import('pdfkit'),
+      { title: 'Claims Single', data: { claimNumber: 'C-1' } as any as any[] },
     );
     __testInternals.renderMembersReport(
-      mocks.fakeDoc as unknown as typeof import('pdfkit'),
-      { title: 'Members Single', data: { name: 'A' } as unknown as unknown[] },
+      mocks.fakeDoc as any as typeof import('pdfkit'),
+      { title: 'Members Single', data: { name: 'A' } as any as any[] },
     );
     __testInternals.renderGrievancesReport(
-      mocks.fakeDoc as unknown as typeof import('pdfkit'),
-      { title: 'Grievance Single', data: { claimNumber: 'G-1' } as unknown as unknown[] },
+      mocks.fakeDoc as any as typeof import('pdfkit'),
+      { title: 'Grievance Single', data: { claimNumber: 'G-1' } as any as any[] },
     );
 
     expect(mocks.fakeDoc.text).toHaveBeenCalled();
@@ -202,14 +202,14 @@ describe('addHeader', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('renders header text with defaults', () => {
-    addHeader(mocks.fakeDoc as unknown as typeof import('pdfkit'), 'Report Header');
+    addHeader(mocks.fakeDoc as any as typeof import('pdfkit'), 'Report Header');
     expect(mocks.fakeDoc.fontSize).toHaveBeenCalledWith(12);
     expect(mocks.fakeDoc.text).toHaveBeenCalledWith('Report Header', { align: 'center' });
     expect(mocks.fakeDoc.moveDown).toHaveBeenCalled();
   });
 
   it('uses custom fontSize', () => {
-    addHeader(mocks.fakeDoc as unknown as typeof import('pdfkit'), 'Big', { fontSize: 24 });
+    addHeader(mocks.fakeDoc as any as typeof import('pdfkit'), 'Big', { fontSize: 24 });
     expect(mocks.fakeDoc.fontSize).toHaveBeenCalledWith(24);
   });
 });
@@ -218,7 +218,7 @@ describe('addFooter', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('renders footer text', () => {
-    addFooter(mocks.fakeDoc as unknown as typeof import('pdfkit'), 'Footer Text');
+    addFooter(mocks.fakeDoc as any as typeof import('pdfkit'), 'Footer Text');
     expect(mocks.fakeDoc.fontSize).toHaveBeenCalledWith(9);
     expect(mocks.fakeDoc.text).toHaveBeenCalledWith(
       'Footer Text', expect.any(Number), expect.any(Number), expect.any(Object),
@@ -226,7 +226,7 @@ describe('addFooter', () => {
   });
 
   it('hides page numbers when showPageNumbers=false', () => {
-    addFooter(mocks.fakeDoc as unknown as typeof import('pdfkit'), 'Footer', false);
+    addFooter(mocks.fakeDoc as any as typeof import('pdfkit'), 'Footer', false);
     // When false, text is called once (only the footer text, no page number)
     expect(mocks.fakeDoc.text).toHaveBeenCalledTimes(1);
   });

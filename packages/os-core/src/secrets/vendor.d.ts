@@ -13,12 +13,12 @@
  */
 
 declare module '@azure/keyvault-secrets' {
-  export const SecretClient: any
+  export const SecretClient: unknown
 }
 
 declare module '@azure/identity' {
-  export const DefaultAzureCredential: any
-  export const ManagedIdentityCredential: any
-  export const ClientSecretCredential: any
-  export const WorkloadIdentityCredential: any
+  export const DefaultAzureCredential: unknown
+  export const ManagedIdentityCredential: unknown
+  export const ClientSecretCredential: unknown
+  export const WorkloadIdentityCredential: unknown
 }

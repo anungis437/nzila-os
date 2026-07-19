@@ -62,19 +62,19 @@ describe('createInMemoryReasoningStore', () => {
 
   describe('getChainsByEntity', () => {
     it('returns chains matching entity type and id', async () => {
-      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as any, entityId: 'e1' }));
-      await store.persistChain(makeChain({ id: 'b', entityType: 'case' as any, entityId: 'e1' }));
-      await store.persistChain(makeChain({ id: 'c', entityType: 'case' as any, entityId: 'e2' }));
+      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as ReasoningChain['entityType'], entityId: 'e1' }));
+      await store.persistChain(makeChain({ id: 'b', entityType: 'case' as ReasoningChain['entityType'], entityId: 'e1' }));
+      await store.persistChain(makeChain({ id: 'c', entityType: 'case' as ReasoningChain['entityType'], entityId: 'e2' }));
 
-      const results = await store.getChainsByEntity('case' as any, 'e1');
+      const results = await store.getChainsByEntity('case' as ReasoningChain['entityType'], 'e1');
       expect(results).toHaveLength(2);
       expect(results.map((r) => r.id).sort()).toEqual(['a', 'b']);
     });
 
     it('returns empty array when no chains match', async () => {
-      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as any, entityId: 'e1' }));
+      await store.persistChain(makeChain({ id: 'a', entityType: 'case' as ReasoningChain['entityType'], entityId: 'e1' }));
 
-      const results = await store.getChainsByEntity('person' as any, 'e1');
+      const results = await store.getChainsByEntity('person' as ReasoningChain['entityType'], 'e1');
       expect(results).toHaveLength(0);
     });
   });

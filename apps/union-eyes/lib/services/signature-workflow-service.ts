@@ -18,12 +18,13 @@ const SYSTEM_USER_ID = "system";
 import {
   getSignatureProvider,
   SignatureProviderType,
+  SignatureStatus,
   SignerInfo,
 } from "./signature-providers";
 import { getNotificationService } from "./notification-service";
 import { createAuditLog } from "./audit-service";
 import { getDocumentStorageService } from "./document-storage-service";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { createHash } from "crypto";
 
@@ -56,6 +57,47 @@ export interface WorkflowStatus {
   }>;
   createdAt: Date;
   completedAt?: Date;
+}
+
+type SignatureWorkflowInsert = typeof signatureWorkflows.$inferInsert;
+type SignatureWorkflowRecord = typeof signatureWorkflows.$inferSelect;
+type SignatureSignerInsert = typeof signers.$inferInsert;
+type WorkflowLifecycleStatus = SignatureWorkflowRecord['status'];
+
+interface WorkflowData {
+  workflowType?: CreateWorkflowRequest['workflowType'];
+  subject?: string;
+  message?: string;
+  documentName?: string;
+  documentHash?: string;
+  signedDocumentHash?: string;
+  storageUrl?: string;
+  storageKey?: string;
+}
+
+function getWorkflowData(value: any): WorkflowData {
+  return typeof value === 'object' && value !== null ? (value as WorkflowData) : {};
+}
+
+function mapEnvelopeStatusToWorkflowStatus(status: SignatureStatus): WorkflowLifecycleStatus {
+  switch (status) {
+    case 'completed':
+      return 'completed';
+    case 'declined':
+      return 'declined';
+    case 'voided':
+      return 'voided';
+    case 'expired':
+      return 'expired';
+    case 'opened':
+    case 'signed':
+      return 'in_progress';
+    case 'sent':
+      return 'sent';
+    case 'pending':
+    default:
+      return 'draft';
+  }
 }
 
 // ============================================================================
@@ -100,46 +142,49 @@ export async function createSignatureWorkflow(
     });
 
     // Store workflow in database
+    const workflowValues: SignatureWorkflowInsert = {
+      organizationId: request.organizationId,
+      documentId: request.documentId,
+      name: request.documentName,
+      description: request.subject,
+      provider: provider.name,
+      externalEnvelopeId: envelope.id,
+      totalSigners: request.signers.length,
+      status: 'sent',
+      sentAt: new Date(),
+      expiresAt: request.expiresInDays
+        ? new Date(Date.now() + request.expiresInDays * 86400000)
+        : undefined,
+      workflowData: {
+        workflowType: request.workflowType,
+        subject: request.subject,
+        message: request.message,
+        documentName: request.documentName,
+        documentHash,
+      },
+      createdBy: request.userId,
+    };
+
     const [workflow] = await db
       .insert(signatureWorkflows)
-      .values({
-        organizationId: request.organizationId,
-        documentId: request.documentId,
-        name: request.documentName,
-        description: request.subject,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        provider: provider.name as any,
-        externalEnvelopeId: envelope.id,
-        totalSigners: request.signers.length,
-        status: "sent",
-        sentAt: new Date(),
-        expiresAt: request.expiresInDays
-          ? new Date(Date.now() + request.expiresInDays * 86400000)
-          : undefined,
-        workflowData: {
-          workflowType: request.workflowType,
-          subject: request.subject,
-          message: request.message,
-          documentName: request.documentName,
-          documentHash,
-        },
-        createdBy: request.userId,
-      })
+      .values(workflowValues)
       .returning();
 
     // Store signers
     const signerRecords = await Promise.all(
       request.signers.map(async (signer, index) => {
+        const signerValues: SignatureSignerInsert = {
+          workflowId: workflow.id,
+          name: signer.name,
+          email: signer.email,
+          signerOrder: signer.order || index + 1,
+          status: "pending",
+          signingUrl: `${envelope.documentUrl}/signer/${signer.email}`,
+        };
+
         const [signerRecord] = await db
           .insert(signers)
-          .values({
-            workflowId: workflow.id,
-            name: signer.name,
-            email: signer.email,
-            signerOrder: signer.order || index + 1,
-            status: "pending",
-            signingUrl: `${envelope.documentUrl}/signer/${signer.email}`,
-          })
+          .values(signerValues)
           .returning();
 
         return signerRecord;
@@ -263,12 +308,13 @@ export async function getWorkflowStatus(
       const envelope = await provider.getEnvelopeStatus(workflow.externalEnvelopeId);
 
       // Update workflow status if changed
-      if (envelope.status !== workflow.status) {
+      const nextStatus = mapEnvelopeStatusToWorkflowStatus(envelope.status);
+
+      if (nextStatus !== workflow.status) {
         await db
           .update(signatureWorkflows)
           .set({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: envelope.status as any,
+            status: nextStatus,
             completedAt:
               envelope.status === "completed" ? envelope.completedAt : undefined,
           })
@@ -351,6 +397,7 @@ export async function handleSignerCompleted(
 
     // Send confirmation notification
     const notificationService = getNotificationService();
+    const workflowData = getWorkflowData(workflow.workflowData);
     await notificationService.send({
       organizationId: workflow.organizationId,
       recipientEmail: signerEmail,
@@ -358,8 +405,7 @@ export async function handleSignerCompleted(
       priority: "normal",
       subject: "Signature Received - Thank You",
       title: "Signature Confirmed",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: `Thank you for signing ${(workflow.workflowData as any)?.documentName || workflow.name}. Your signature has been recorded.`,
+      body: `Thank you for signing ${workflowData.documentName || workflow.name}. Your signature has been recorded.`,
       metadata: {
         type: "signature_completed",
         workflowId,
@@ -415,6 +461,8 @@ async function completeWorkflow(workflowId: string): Promise<void> {
       .update(signedDocument)
       .digest("hex");
 
+    const workflowData = getWorkflowData(workflow.workflowData);
+
     // Update workflow
     await db
       .update(signatureWorkflows)
@@ -422,25 +470,33 @@ async function completeWorkflow(workflowId: string): Promise<void> {
         status: "completed",
         completedAt: new Date(),
         workflowData: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(workflow.workflowData as any || {}),
+          ...workflowData,
           signedDocumentHash,
         },
       })
       .where(eq(signatureWorkflows.id, workflowId));
 
+    const [latestSignedSigner] = await db
+      .select({ id: signers.id })
+      .from(signers)
+      .where(and(eq(signers.workflowId, workflowId), eq(signers.status, 'signed')))
+      .orderBy(desc(signers.signedAt))
+      .limit(1);
+
+    if (!latestSignedSigner) {
+      throw new Error(`Workflow ${workflowId} completed without a signed signer record`);
+    }
+
     // Create verification record
     await db.insert(signatureVerification).values({
       workflowId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      signerId: (workflow as any).lastSignerId || workflowId,
+      signerId: latestSignedSigner.id,
       verificationMethod: "provider_hash",
       isVerified: true,
       signatureHash: signedDocumentHash,
       verificationResult: {
         provider: workflow.provider,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        originalHash: (workflow.workflowData as any)?.documentHash,
+        originalHash: workflowData.documentHash,
         signedHash: signedDocumentHash,
       },
     });
@@ -462,8 +518,7 @@ async function completeWorkflow(workflowId: string): Promise<void> {
       const storageResult = await storageService.uploadDocument({
         organizationId: workflow.organizationId,
         documentBuffer: signedDocument,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        documentName: `${(workflow.workflowData as any)?.documentName || workflow.name}_signed.pdf`,
+        documentName: `${workflowData.documentName || workflow.name}_signed.pdf`,
         documentType: "signed_contract",
         contentType: "application/pdf",
         metadata: {
@@ -478,8 +533,7 @@ async function completeWorkflow(workflowId: string): Promise<void> {
         .update(signatureWorkflows)
         .set({
           workflowData: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ...(workflow.workflowData as any || {}),
+            ...workflowData,
             storageUrl: storageResult.url,
             storageKey: storageResult.key,
           },
@@ -506,11 +560,9 @@ async function completeWorkflow(workflowId: string): Promise<void> {
       recipientId: workflow.createdBy ?? undefined,
       type: "email",
       priority: "high",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      subject: `Signature Workflow Completed: ${(workflow.workflowData as any)?.subject || workflow.description}`,
+      subject: `Signature Workflow Completed: ${workflowData.subject || workflow.description}`,
       title: "All Signatures Received",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: `All parties have signed ${(workflow.workflowData as any)?.documentName || workflow.name}. The signed document is now available.`,
+      body: `All parties have signed ${workflowData.documentName || workflow.name}. The signed document is now available.`,
       actionUrl: `/documents/${workflow.documentId}`,
       actionLabel: "View Document",
       metadata: {
@@ -578,6 +630,8 @@ export async function voidWorkflow(
       .from(signers)
       .where(eq(signers.workflowId, workflowId));
 
+    const workflowData = getWorkflowData(workflow.workflowData);
+
     const notificationService = getNotificationService();
     await Promise.all(
       workflowSigners.map((signer) =>
@@ -586,11 +640,9 @@ export async function voidWorkflow(
           recipientEmail: signer.email,
           type: "email",
           priority: "normal",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          subject: `Signature Request Cancelled: ${(workflow.workflowData as any)?.subject || workflow.description}`,
+          subject: `Signature Request Cancelled: ${workflowData.subject || workflow.description}`,
           title: "Signature Request Cancelled",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          body: `The signature request for ${(workflow.workflowData as any)?.documentName || workflow.name} has been cancelled. Reason: ${reason}`,
+          body: `The signature request for ${workflowData.documentName || workflow.name} has been cancelled. Reason: ${reason}`,
           metadata: {
             type: "workflow_voided",
             workflowId,
@@ -634,6 +686,7 @@ export async function sendSignerReminders(workflowId: string, userId: string): P
 
     const provider = getSignatureProvider(workflow.provider as SignatureProviderType);
     const notificationService = getNotificationService();
+    const workflowData = getWorkflowData(workflow.workflowData);
 
     // Send reminders
     await Promise.all(
@@ -647,11 +700,9 @@ export async function sendSignerReminders(workflowId: string, userId: string): P
           recipientEmail: signer.email,
           type: "email",
           priority: "high",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          subject: `Reminder: Signature Required - ${(workflow.workflowData as any)?.subject || workflow.description}`,
+          subject: `Reminder: Signature Required - ${workflowData.subject || workflow.description}`,
           title: "Signature Reminder",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          body: `This is a reminder to sign ${(workflow.workflowData as any)?.documentName || workflow.name}`,
+          body: `This is a reminder to sign ${workflowData.documentName || workflow.name}`,
           actionUrl: signer.signingUrl || undefined,
           actionLabel: "Sign Now",
           metadata: {

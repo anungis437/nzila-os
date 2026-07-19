@@ -40,7 +40,7 @@ describe('boot-assert', () => {
   it('logs success when DATABASE_URL is set and dynamic imports succeed', async () => {
     delete process.env.NEXT_PHASE
     process.env.DATABASE_URL = 'postgresql://localhost/test'
-    ;(process.env as any).NODE_ENV = 'development'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'development'
 
     // Mock the dynamic imports
     vi.doMock('@nzila/db/scoped', () => ({}))
@@ -61,7 +61,7 @@ describe('boot-assert', () => {
   it('reports DATABASE_URL missing as a boot failure (server context)', async () => {
     delete process.env.NEXT_PHASE
     delete process.env.DATABASE_URL
-    ;(process.env as any).NODE_ENV = 'development'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'development'
 
     vi.doMock('@nzila/db/scoped', () => ({}))
     vi.doMock('@nzila/db/audit', () => ({}))
@@ -80,7 +80,7 @@ describe('boot-assert', () => {
   it('reports unresolvable @nzila/db/scoped', async () => {
     delete process.env.NEXT_PHASE
     process.env.DATABASE_URL = 'postgresql://localhost/test'
-    ;(process.env as any).NODE_ENV = 'development'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'development'
 
     vi.doMock('@nzila/db/scoped', () => { throw new Error('Cannot find module') })
     vi.doMock('@nzila/db/audit', () => ({}))
@@ -99,7 +99,7 @@ describe('boot-assert', () => {
   it('reports unresolvable @nzila/db/audit', async () => {
     delete process.env.NEXT_PHASE
     process.env.DATABASE_URL = 'postgresql://localhost/test'
-    ;(process.env as any).NODE_ENV = 'development'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'development'
 
     vi.doMock('@nzila/db/scoped', () => ({}))
     vi.doMock('@nzila/db/audit', () => { throw new Error('Cannot find module') })
@@ -118,7 +118,7 @@ describe('boot-assert', () => {
   it('warns when FIPS is required but not enabled', async () => {
     delete process.env.NEXT_PHASE
     process.env.DATABASE_URL = 'postgresql://localhost/test'
-    ;(process.env as any).NODE_ENV = 'development'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'development'
 
     vi.doMock('@nzila/db/scoped', () => ({}))
     vi.doMock('@nzila/db/audit', () => ({}))
@@ -142,7 +142,7 @@ describe('boot-assert', () => {
   it('warns when FIPS crypto module is not loadable', async () => {
     delete process.env.NEXT_PHASE
     process.env.DATABASE_URL = 'postgresql://localhost/test'
-    ;(process.env as any).NODE_ENV = 'development'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'development'
 
     vi.doMock('@nzila/db/scoped', () => ({}))
     vi.doMock('@nzila/db/audit', () => ({}))
@@ -159,7 +159,7 @@ describe('boot-assert', () => {
   it('calls process.exit(1) in production when assertions fail', async () => {
     delete process.env.NEXT_PHASE
     delete process.env.DATABASE_URL
-    ;(process.env as any).NODE_ENV = 'production'
+    ;(process.env as Record<string, string | undefined>).NODE_ENV = 'production'
 
     vi.doMock('@nzila/db/scoped', () => ({}))
     vi.doMock('@nzila/db/audit', () => ({}))

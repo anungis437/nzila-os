@@ -14,7 +14,6 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ShieldCheck, Eye, FileCheck, GitBranch, Vote, ArrowRight, ArrowLeft } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
@@ -136,7 +135,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
             <ul className="space-y-3">
               {copy.challenges.map((c) => (
                 <li key={c} className="flex items-start gap-3 text-gray-700 text-sm leading-relaxed">
-                  <div className="w-1.5 h-1.5 rounded-full bg-electric mt-1.5 flex-shrink-0" />
+                  <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-electric" />
                   {c}
                 </li>
               ))}
@@ -168,7 +167,7 @@ export default async function GovernanceLeadershipPage({ params }: { params: Pro
           <div className="grid sm:grid-cols-2 gap-4">
             {copy.commitments.map((label) => (
               <div key={label} className="flex items-center gap-2 p-4 rounded-xl bg-white border border-gray-100 text-sm font-medium text-navy">
-                <ShieldCheck className="h-4 w-4 text-electric flex-shrink-0" />
+                <ShieldCheck className="h-4 w-4 shrink-0 text-electric" />
                 {label}
               </div>
             ))}

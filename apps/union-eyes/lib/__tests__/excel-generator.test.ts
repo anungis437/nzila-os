@@ -9,9 +9,9 @@ const mocks = vi.hoisted(() => {
   const mockCells = new Map<string, Record<string, unknown>>();
 
   const mockRow = {
-    font: undefined as unknown,
-    fill: undefined as unknown,
-    alignment: undefined as unknown,
+    font: undefined as any,
+    fill: undefined as any,
+    alignment: undefined as any,
     getCell: vi.fn((colIndex: number) => {
       const key = `cell-${colIndex}`;
       if (!mockCells.has(key)) {
@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => {
   };
 
   const mockWorksheet = {
-    columns: [] as unknown[],
+    columns: [] as any[],
     addRow: vi.fn(() => mockRow),
     getRow: vi.fn(() => mockRow),
     getCell: vi.fn((row: number, col: number) => {
@@ -32,7 +32,7 @@ const mocks = vi.hoisted(() => {
       }
       return mockCells.get(key)!;
     }),
-    autoFilter: undefined as unknown,
+    autoFilter: undefined as any,
     addConditionalFormatting: vi.fn(),
     protect: vi.fn(),
   };
@@ -40,8 +40,8 @@ const mocks = vi.hoisted(() => {
   const mockWorkbook = {
     creator: '',
     lastModifiedBy: '',
-    created: undefined as unknown,
-    modified: undefined as unknown,
+    created: undefined as any,
+    modified: undefined as any,
     addWorksheet: vi.fn(() => mockWorksheet),
     xlsx: {
       writeBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(16)),
@@ -60,7 +60,7 @@ const mocks = vi.hoisted(() => {
 vi.mock('exceljs', () => {
   const M = function Workbook() {
     return mocks.mockWorkbook;
-  } as unknown as { new(): Record<string, unknown> };
+  } as any as { new(): Record<string, unknown> };
   return { default: { Workbook: M } };
 });
 
@@ -140,7 +140,7 @@ describe('generateExcel', () => {
 
   it('handles single object data (non-array)', async () => {
     await generateExcel({
-      title: 'Test', data: { id: 1, name: 'Solo' } as unknown as unknown[],
+      title: 'Test', data: { id: 1, name: 'Solo' } as any as any[],
       columns: sampleColumns,
     });
     expect(mocks.mockWorksheet.addRow).toHaveBeenCalledTimes(1);
@@ -268,7 +268,7 @@ describe('helper functions', () => {
 
   it('applyConditionalFormatting delegates to worksheet', () => {
     const rules = [{ type: 'cellIs' as const, operator: 'greaterThan' as const, formulae: ['0'], style: {} }];
-    applyConditionalFormatting(mocks.mockWorksheet as unknown as import('exceljs').Worksheet, 'A1:A10', rules as unknown as import('exceljs').ConditionalFormattingRule[]);
+    applyConditionalFormatting(mocks.mockWorksheet as any as import('exceljs').Worksheet, 'A1:A10', rules as any as import('exceljs').ConditionalFormattingRule[]);
     expect(mocks.mockWorksheet.addConditionalFormatting).toHaveBeenCalledWith({
       ref: 'A1:A10',
       rules,
@@ -277,7 +277,7 @@ describe('helper functions', () => {
 
   it('addChart writes chart metadata as cell note', async () => {
     const result = await addChart(
-      mocks.mockWorksheet as unknown as import('exceljs').Worksheet,
+      mocks.mockWorksheet as any as import('exceljs').Worksheet,
       { type: 'bar', title: 'Revenue', dataRange: 'A1:B5', position: { row: 3, col: 4 } },
     );
     expect(result.type).toBe('bar');
@@ -289,14 +289,14 @@ describe('helper functions', () => {
 
   it('addChart uses default position when not specified', async () => {
     await addChart(
-      mocks.mockWorksheet as unknown as import('exceljs').Worksheet,
+      mocks.mockWorksheet as any as import('exceljs').Worksheet,
       { type: 'line', title: 'Trend', dataRange: 'A1:C10' },
     );
     expect(mocks.mockWorksheet.getCell).toHaveBeenCalledWith(1, 1);
   });
 
   it('protectWorksheet sets protection options', () => {
-    protectWorksheet(mocks.mockWorksheet as unknown as import('exceljs').Worksheet, 'secret');
+    protectWorksheet(mocks.mockWorksheet as any as import('exceljs').Worksheet, 'secret');
     expect(mocks.mockWorksheet.protect).toHaveBeenCalledWith('secret', expect.objectContaining({
       selectLockedCells: true,
       formatCells: false,
@@ -306,7 +306,7 @@ describe('helper functions', () => {
   });
 
   it('protectWorksheet uses empty password when none given', () => {
-    protectWorksheet(mocks.mockWorksheet as unknown as import('exceljs').Worksheet);
+    protectWorksheet(mocks.mockWorksheet as any as import('exceljs').Worksheet);
     expect(mocks.mockWorksheet.protect).toHaveBeenCalledWith('', expect.any(Object));
   });
 });
@@ -393,13 +393,13 @@ describe('generateExcel — gap coverage', () => {
   it('exercises auto-width eachCell callback when columns have eachCell', async () => {
     // Intercept the columns setter to provide eachCell
     const originalColumns = mocks.mockWorksheet.columns;
-    let storedCols: unknown[] = [];
+    let storedCols: any[] = [];
     Object.defineProperty(mocks.mockWorksheet, 'columns', {
       get: () => storedCols,
       set: (cols: Record<string, unknown>[]) => {
         storedCols = cols.map(c => ({
           ...c,
-          eachCell: (_opts: unknown, cb: (cell: { value: unknown }) => void) => {
+          eachCell: (_opts: any, cb: (cell: { value: any }) => void) => {
             cb({ value: 'short' });
             cb({ value: 'a much longer cell value here' });
             cb({ value: null });

@@ -43,8 +43,7 @@ interface ItemHandlers { GET: RouteHandler; PATCH: RouteHandler; DELETE: RouteHa
 
 export interface CrudOptions {
   /** The Drizzle pgTable reference */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  table: PgTable<any>;
+  table: PgTable;
   /** Primary key column name (e.g. 'id', 'claimId', 'auditId'). Auto-detected if omitted or wrong. */
   pk?: string;
   /** OpenAPI tags */
@@ -76,35 +75,27 @@ export interface CrudOptions {
   blockedPatchFields?: string[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getColumn(table: PgTable<any>, name: string): PgColumn | undefined {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (table as any)[name] as PgColumn | undefined;
+function getColumn(table: PgTable, name: string): PgColumn | undefined {
+  return (table as unknown as Record<string, PgColumn>)[name];
 }
 
 /** Auto-detect the primary key column on a Drizzle pgTable */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function findPrimaryKeyColumn(table: PgTable<any>): { name: string; col: PgColumn } | undefined {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const [name, col] of Object.entries(table as any)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (col && typeof col === 'object' && (col as any).primary === true) {
+function findPrimaryKeyColumn(table: PgTable): { name: string; col: PgColumn } | undefined {
+  for (const [name, col] of Object.entries(table as unknown as Record<string, unknown>)) {
+    if (col && typeof col === 'object' && (col as { primary?: boolean }).primary === true) {
       return { name, col: col as PgColumn };
     }
     // Drizzle stores primaryKey flag in config
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (col && typeof col === 'object' && (col as any).config?.primaryKey === true) {
+    if (col && typeof col === 'object' && (col as { config?: { primaryKey?: boolean } }).config?.primaryKey === true) {
       return { name, col: col as PgColumn };
     }
   }
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getTableName(table: PgTable<any>): string {
+function getTableName(table: PgTable): string {
   const sym = Object.getOwnPropertySymbols(table).find(s => s.toString().includes('Name'));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (sym) return String((table as unknown as Record<symbol, any>)[sym]);
+  if (sym) return String((table as unknown as Record<symbol, unknown>)[sym]);
   return 'resource';
 }
 

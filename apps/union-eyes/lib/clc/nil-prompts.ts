@@ -28,7 +28,7 @@ export interface CLCPromptContract {
   /** System prompt / persona */
   systemPrompt: string;
   /** Builds the input payload from typed data */
-  buildInput: (...args: unknown[]) => Record<string, unknown>;
+  buildInput: (data: unknown) => Record<string, unknown>;
 }
 
 // ── Shared System Prompt Preamble ───────────────────────────────────────────

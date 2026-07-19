@@ -18,6 +18,33 @@ import { logger } from "./logger";
 export const DEFAULT_ORGANIZATION_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087"; // Default Organization
 
 /**
+ * BR-6: Raised when organization context cannot be resolved and no safe
+ * fallback is permitted. Callers must treat this as fail-closed (no data).
+ */
+export class OrgContextRequiredError extends Error {
+  readonly code = 'ORG_CONTEXT_REQUIRED';
+  constructor(message: string) {
+    super(message);
+    this.name = 'OrgContextRequiredError';
+  }
+}
+
+/**
+ * BR-6: Whether a silent fallback to the Default Organization is permitted.
+ *
+ * NEVER true in production — a production request with no verified membership
+ * must fail closed rather than silently read the Default Organization's
+ * substrate (cross-tenant drift). The default org is allowed ONLY in a
+ * non-production context that has explicitly opted in via UE_ALLOW_DEFAULT_ORG.
+ */
+export function isDefaultOrgFallbackAllowed(): boolean {
+  return (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.UE_ALLOW_DEFAULT_ORG === 'true'
+  );
+}
+
+/**
  * Get the organization ID for a given user ID.
  * 
  * Priority order:
@@ -223,7 +250,20 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
       return userOrgs[0].organizationId;
     }
     
-    // Final fallback to default organization
+    // BR-6: no verified organization membership was found for this user.
+    // A silent fallback to the Default Organization is FORBIDDEN in production
+    // because it lets an unscoped identity read another tenant's substrate.
+    // Fail closed in production; the default org is permitted ONLY in an
+    // explicitly-enabled non-production/demo context.
+    if (!isDefaultOrgFallbackAllowed()) {
+      throw new OrgContextRequiredError(
+        `No verified organization membership for user ${userId}. ` +
+          `Refusing silent Default Organization fallback (BR-6). ` +
+          `Set UE_ALLOW_DEFAULT_ORG=true in a non-production environment to allow it.`,
+      );
+    }
+
+    // Explicit non-production fallback to the default organization.
     const organizationId = DEFAULT_ORGANIZATION_ID;
     
     // Validate that organization exists

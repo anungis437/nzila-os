@@ -8,11 +8,11 @@ import type { GovernanceCollection, GovernanceStore } from './store'
 import { setGovernanceStore } from './store'
 
 interface DbBindings {
-  db: any
-  aiGovernanceDecisionLog: any
-  aiGovernanceModels: any
-  aiGovernancePromptVersions: any
-  aiGovernanceReviewFlags: any
+  db: unknown
+  aiGovernanceDecisionLog: unknown
+  aiGovernanceModels: unknown
+  aiGovernancePromptVersions: unknown
+  aiGovernanceReviewFlags: unknown
 }
 
 let cachedBindings: DbBindings | null = null
@@ -58,10 +58,10 @@ export class PostgresGovernanceStore implements GovernanceStore {
   private readonly decisionLog: AIDecisionLogEntry[] = []
   private readonly reviewFlags: HumanReviewFlag[] = []
   private persistQueue: Promise<void> = Promise.resolve()
-  private readonly database: any
+  private readonly database: unknown
   private readonly bindings: DbBindings
 
-  constructor(bindings: DbBindings, database?: any) {
+  constructor(bindings: DbBindings, database?: unknown) {
     this.bindings = bindings
     this.database = database ?? bindings.db
   }
@@ -76,7 +76,7 @@ export class PostgresGovernanceStore implements GovernanceStore {
 
     this.modelRegistry.length = 0
     this.modelRegistry.push(
-      ...models.map((row: any) => ({
+      ...models.map((row: unknown) => ({
         id: row.id,
         name: row.name,
         version: row.version,
@@ -91,7 +91,7 @@ export class PostgresGovernanceStore implements GovernanceStore {
 
     this.promptVersions.length = 0
     this.promptVersions.push(
-      ...prompts.map((row: any) => ({
+      ...prompts.map((row: unknown) => ({
         id: row.id,
         promptName: row.promptName,
         version: row.version,
@@ -105,7 +105,7 @@ export class PostgresGovernanceStore implements GovernanceStore {
 
     this.decisionLog.length = 0
     this.decisionLog.push(
-      ...decisions.map((row: any) => ({
+      ...decisions.map((row: unknown) => ({
         id: row.id,
         timestamp: toIso(row.timestamp),
         modelId: row.modelId,
@@ -127,7 +127,7 @@ export class PostgresGovernanceStore implements GovernanceStore {
 
     this.reviewFlags.length = 0
     this.reviewFlags.push(
-      ...flags.map((row: any) => ({
+      ...flags.map((row: unknown) => ({
         id: row.id,
         decisionId: row.decisionId,
         reason: row.reason,
@@ -262,14 +262,14 @@ export class PostgresGovernanceStore implements GovernanceStore {
   }
 }
 
-export async function createPostgresGovernanceStore(database?: any): Promise<PostgresGovernanceStore> {
+export async function createPostgresGovernanceStore(database?: unknown): Promise<PostgresGovernanceStore> {
   const bindings = await loadDbBindings()
   const store = new PostgresGovernanceStore(bindings, database)
   await store.hydrate()
   return store
 }
 
-export async function initializeGovernanceStoreFromEnv(database?: any): Promise<boolean> {
+export async function initializeGovernanceStoreFromEnv(database?: unknown): Promise<boolean> {
   const mode = process.env.AI_GOVERNANCE_STORE?.toLowerCase()
   if (mode !== 'postgres') {
     return false

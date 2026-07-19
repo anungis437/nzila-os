@@ -18,7 +18,7 @@ const APP_ORG_UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Lightweight UUID v4-ish shape check; rejects empty / non-UUID strings. */
-export function isAppOrgUuid(value: unknown): value is string {
+export function isAppOrgUuid(value: any): value is string {
   return typeof value === "string" && APP_ORG_UUID_RE.test(value);
 }
 

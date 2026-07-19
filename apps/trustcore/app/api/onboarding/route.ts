@@ -46,12 +46,12 @@ interface VendorSeed {
 }
 
 const KNOWN_VENDOR_CATALOGUE: Record<KnownVendor, VendorSeed> = {
-  google_workspace: {
-    name: 'Google Workspace',
-    serviceDescription: 'Productivity suite (Gmail, Drive, Meet, Docs)',
-    country: 'US',
-    crossBorderTransfer: true,
-    riskLevel: 'medium',
+  ue_docs: {
+    name: 'UE Docs',
+    serviceDescription: 'Internal documentation and policy repository',
+    country: 'CA',
+    crossBorderTransfer: false,
+    riskLevel: 'low',
   },
   microsoft_365: {
     name: 'Microsoft 365',

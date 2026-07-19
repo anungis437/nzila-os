@@ -30,8 +30,10 @@ export interface EvalThresholds {
 }
 
 /**
- * Default thresholds — can be overridden per environment.
- * These must be met before any release.
+ * Default thresholds — fallback when no eval.config.json is present.
+ * Prefer editing `tooling/ai-evals/eval.config.json` so non-engineers can
+ * tune CI gates without touching source. These defaults must be met
+ * before any release.
  */
 export const DEFAULT_THRESHOLDS: EvalThresholds = {
   minPassRate: 90,
@@ -45,6 +47,44 @@ export const DEFAULT_THRESHOLDS: EvalThresholds = {
     // memora not yet deployed — threshold preserved for when it ships
     memora: { minPassRate: 90 },
   },
+}
+
+/** Default config file location, relative to this file. */
+export const DEFAULT_CONFIG_PATH = path.join(__dirname, 'eval.config.json')
+
+/**
+ * Load thresholds from a JSON config file, merging on top of DEFAULT_THRESHOLDS.
+ * Returns DEFAULT_THRESHOLDS if the file is missing. Throws on invalid JSON
+ * or malformed structure so CI fails loudly rather than silently using defaults.
+ */
+export function loadThresholds(
+  configPath: string = DEFAULT_CONFIG_PATH,
+): EvalThresholds {
+  if (!fs.existsSync(configPath)) {
+    return DEFAULT_THRESHOLDS
+  }
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+  } catch (err) {
+    throw new Error(
+      `Failed to parse eval config at ${configPath}: ${(err as Error).message}`,
+    )
+  }
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(`Eval config at ${configPath} must be a JSON object`)
+  }
+
+  const cfg = parsed as Partial<EvalThresholds> & Record<string, unknown>
+  return {
+    minPassRate: cfg.minPassRate ?? DEFAULT_THRESHOLDS.minPassRate,
+    maxRefusalRate: cfg.maxRefusalRate ?? DEFAULT_THRESHOLDS.maxRefusalRate,
+    maxAvgLatencyMs: cfg.maxAvgLatencyMs ?? DEFAULT_THRESHOLDS.maxAvgLatencyMs,
+    maxTotalCostUsd: cfg.maxTotalCostUsd ?? DEFAULT_THRESHOLDS.maxTotalCostUsd,
+    perApp: cfg.perApp ?? DEFAULT_THRESHOLDS.perApp,
+  }
 }
 
 // ── Report types (mirrors run-evals.ts) ───────────────────────────────────
@@ -167,9 +207,20 @@ export function checkEvalGate(
 // ── CLI ───────────────────────────────────────────────────────────────────
 
 async function main() {
-  const reportPath = process.argv[2]
+  // Parse CLI: <report.json> [--config <path>]
+  const argv = process.argv.slice(2)
+  let reportPath: string | undefined
+  let configPath: string = DEFAULT_CONFIG_PATH
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--config' && argv[i + 1]) {
+      configPath = path.resolve(argv[++i])
+    } else if (!reportPath) {
+      reportPath = argv[i]
+    }
+  }
+
   if (!reportPath) {
-    console.error('Usage: eval-gate.ts <report.json>')
+    console.error('Usage: eval-gate.ts <report.json> [--config <path>]')
     process.exit(1)
   }
 
@@ -179,8 +230,16 @@ async function main() {
     process.exit(1)
   }
 
+  const configExists = fs.existsSync(configPath)
+  const thresholds = loadThresholds(configPath)
+  if (!configExists) {
+    console.log('ℹ️  No eval.config.json found — using DEFAULT_THRESHOLDS')
+  } else {
+    console.log(`📋 Loaded thresholds from ${path.relative(process.cwd(), configPath)}`)
+  }
+
   const report: EvalReport = JSON.parse(fs.readFileSync(fullPath, 'utf-8'))
-  const result = checkEvalGate(report)
+  const result = checkEvalGate(report, thresholds)
 
   console.log('\n🔒 AI Eval Gate Check')
   console.log(`   Pass rate:    ${result.metrics.passRate.toFixed(1)}%`)

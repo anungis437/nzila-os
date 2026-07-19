@@ -103,7 +103,7 @@ export function OrganizationTree({
             isExpanded: true,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-          } as unknown as OrganizationTreeNode);
+          } as any as OrganizationTreeNode);
         }
       } else {
         setTreeData(raw);
@@ -252,7 +252,7 @@ function TreeNode({ node, path, depth, maxDepth, onToggle, onSelect, selectedId,
   const hasChildren = (node.childCount && node.childCount > 0) || (node.children && node.children.length > 0);
   const isExpanded = node.isExpanded || false;
   const isSelected = selectedId === node.id;
-  const orgType = (node.organization_type || (node as unknown as Record<string, unknown>).type || 'union') as OrganizationType;
+  const orgType = (node.organization_type || (node as any as Record<string, unknown>).type || 'union') as OrganizationType;
   const config = typeConfig[orgType] ?? typeConfig.union;
   const canExpand = hasChildren && depth < maxDepth;
 

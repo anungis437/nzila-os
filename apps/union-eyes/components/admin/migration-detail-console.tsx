@@ -61,8 +61,8 @@ interface BatchDetail {
   completedAt: string | null;
   createdAt: string;
   durationMs: number | null;
-  errorSummary: unknown;
-  metadata: unknown;
+  errorSummary: any;
+  metadata: any;
   records: RecordSummary[];
   warnings: WarningEntry[];
 }

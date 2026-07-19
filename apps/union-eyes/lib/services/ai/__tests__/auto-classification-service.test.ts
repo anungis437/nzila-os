@@ -4,6 +4,10 @@ const mockExtract = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ extract: mockExtract }),
+  buildOrgAiTrace: vi.fn(() => ({
+    component: 'test',
+    action: 'mock',
+  })),
   UE_APP_KEY: 'test-app-key',
   UE_PROFILES: {
     CLAUSE_CLASSIFICATION: 'clause-classification',
@@ -26,6 +30,7 @@ import {
   batchClassifyClauses,
   enrichClauseMetadata,
   validateClassification,
+  evaluateClassificationQuality,
 } from '../auto-classification-service';
 
 describe('AutoClassificationService', () => {
@@ -91,6 +96,46 @@ describe('AutoClassificationService', () => {
       expect(result.clauseType).toBe('other');
       expect(result.confidence).toBe(0.5);
       expect(result.alternativeTypes).toEqual([]);
+    });
+
+    it('invokes low-confidence callback when below threshold', async () => {
+      mockExtract.mockResolvedValue({
+        data: {
+          clauseType: 'other',
+          confidence: 0.4,
+          reasoning: 'insufficient context',
+        },
+      });
+
+      const onLowConfidence = vi.fn();
+      await classifyClause('ambiguous text', undefined, {
+        policy: { autoAcceptThreshold: 0.9, reviewThreshold: 0.65 },
+        onLowConfidence,
+      });
+
+      expect(onLowConfidence).toHaveBeenCalledOnce();
+      expect(onLowConfidence.mock.calls[0][0]).toMatchObject({
+        threshold: 0.65,
+        confidence: 0.4,
+      });
+    });
+  });
+
+  describe('evaluateClassificationQuality', () => {
+    it('returns auto_accept for high confidence', () => {
+      const q = evaluateClassificationQuality(
+        { confidence: 0.93 },
+        { autoAcceptThreshold: 0.9, reviewThreshold: 0.65 },
+      );
+      expect(q.decision).toBe('auto_accept');
+    });
+
+    it('returns needs_review for lower confidence', () => {
+      const q = evaluateClassificationQuality(
+        { confidence: 0.72 },
+        { autoAcceptThreshold: 0.9, reviewThreshold: 0.65 },
+      );
+      expect(q.decision).toBe('needs_review');
     });
   });
 

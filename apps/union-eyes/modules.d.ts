@@ -20,9 +20,9 @@ declare module 'playwright' {
 
 declare module '@axe-core/playwright' {
   export class AxeBuilder {
-    constructor(opts: { page: unknown });
+    constructor(opts: { page: any });
     withTags(tags: string[]): this;
-    analyze(): Promise<{ violations: unknown[] }>;
+    analyze(): Promise<{ violations: any[] }>;
   }
 }
 
@@ -30,7 +30,7 @@ declare module '@axe-core/playwright' {
 declare module '@sendgrid/mail' {
   const sgMail: {
     setApiKey(key: string): void;
-    send(msg: Record<string, unknown>): Promise<unknown>;
+    send(msg: Record<string, unknown>): Promise<any>;
   };
   export default sgMail;
 }
@@ -52,7 +52,7 @@ declare module 'sharp' {
 // --- Optional: @azure/arm-resources (carbon-accounting-integration.ts) ---
 declare module '@azure/arm-resources' {
   export class ResourceManagementClient {
-    constructor(credential: unknown, subscriptionId: string);
+    constructor(credential: any, subscriptionId: string);
     resources: {
       listByResourceGroup(resourceGroupName: string): AsyncIterable<{
         id?: string; type?: string; location?: string; name?: string;

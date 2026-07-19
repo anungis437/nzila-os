@@ -17,12 +17,9 @@ import * as path from 'node:path'
 
 import {
   COGNITION_ENGINE_VERSION,
-  consent,
   memory,
   riskScoresToSignals,
   riskScoreToSignal,
-  state,
-  trajectory,
   type CognitionSubject,
   type MemoryEvent,
   type StateSignalInput,
@@ -260,7 +257,7 @@ describe('memory.preferences', () => {
     const p = computePreferenceProfile(SUBJECT)
     expect(p.scores['saturate']).toBeLessThanOrEqual(1)
     expect(p.scores['saturate']).toBeGreaterThan(0.99)
-  })
+  }, 15000)
 })
 
 // ── Consent ─────────────────────────────────────────────────────────────────

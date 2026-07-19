@@ -31,8 +31,8 @@ export type SimilarCaseResult = {
 
 export type IntelligenceResponse = {
   graph: {
-    nodes: Array<{ id: string; type: string; [key: string]: unknown }>;
-    edges: Array<{ id: string; type: string; [key: string]: unknown }>;
+    nodes: Array<{ id: string; type: string; [key: string]: any }>;
+    edges: Array<{ id: string; type: string; [key: string]: any }>;
   };
   relatedDocuments: RelatedDocumentRankResult[];
   similarCases: SimilarCaseResult[];

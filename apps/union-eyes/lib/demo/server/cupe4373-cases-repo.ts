@@ -125,8 +125,8 @@ type GrievanceRow = {
   desiredOutcome: string | null;
   filedDate: Date | null;
   responseDeadline: Date | null;
-  timeline: unknown;
-  attachments: unknown;
+  timeline: any;
+  attachments: any;
   organizationId: string;
   createdAt: Date;
   updatedAt: Date;

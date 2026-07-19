@@ -99,20 +99,28 @@ export default function Sidebar({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    try {
-      const c = window.localStorage.getItem(LS_COLLAPSED);
-      if (c === "1") setCollapsed(true);
-      const g = window.localStorage.getItem(LS_GROUPS);
-      if (g) setCollapsedGroups(new Set(JSON.parse(g) as string[]));
-    } catch {
-      /* ignore storage errors */
-    }
+    const timeoutId = window.setTimeout(() => {
+      setIsMounted(true);
+      try {
+        const c = window.localStorage.getItem(LS_COLLAPSED);
+        if (c === "1") setCollapsed(true);
+        const g = window.localStorage.getItem(LS_GROUPS);
+        if (g) setCollapsedGroups(new Set(JSON.parse(g) as string[]));
+      } catch {
+        /* ignore storage errors */
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   // Close drawer on route change
   useEffect(() => {
-    setMobileOpen(false);
+    const timeoutId = window.setTimeout(() => {
+      setMobileOpen(false);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [pathname]);
 
   const isViewingTenantOrg = !!(
@@ -124,12 +132,12 @@ export default function Sidebar({
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
   const items = useMemo<NavigationItem[]>(() => {
-    if (isCupeDemo) return getCupe4373DemoNavigation();
+    if (isCupeDemo) return getCupe4373DemoNavigation(userRole);
     const nav = getNavigationForExperience(experience);
     if (!isPilotMode) return nav;
     const pilotAllowed = new Set(nav.map((entry) => entry.href));
     return nav.filter((entry) => pilotAllowed.has(entry.href));
-  }, [experience, isPilotMode, isCupeDemo]);
+  }, [experience, isPilotMode, isCupeDemo, userRole]);
 
   // Build ordered groups from the nav. Use demo-defined order when available;
   // otherwise derive groups from the items themselves in encounter order.

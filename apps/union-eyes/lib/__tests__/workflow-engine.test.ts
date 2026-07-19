@@ -22,10 +22,10 @@ const mocks = vi.hoisted(() => ({
   mockCreateSatisfactionSurvey: vi.fn(),
 }));
 
-function chain(resolveValue: unknown): unknown {
+function chain(resolveValue: any): any {
   const handler: ProxyHandler<object> = {
     get: (_target, prop) => {
-      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      if (prop === 'then') return (resolve: (v: any) => void) => resolve(resolveValue);
       return vi.fn(() => new Proxy({}, handler));
     },
   };
@@ -39,18 +39,18 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/db/db', () => ({
   db: {
-    select: (...a: unknown[]) => mocks.mockSelect(...a),
-    update: (...a: unknown[]) => mocks.mockUpdate(...a),
-    insert: (...a: unknown[]) => mocks.mockInsert(...a),
+    select: (...a: any[]) => mocks.mockSelect(...a),
+    update: (...a: any[]) => mocks.mockUpdate(...a),
+    insert: (...a: any[]) => mocks.mockInsert(...a),
   },
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: (...a: unknown[]) => mocks.mockWithRLS(...a),
-  withSystemRLSContext: (_reason: string, fn: (tx: unknown) => unknown) => fn({
-    select: (...a: unknown[]) => mocks.mockSelect(...a),
-    update: (...a: unknown[]) => mocks.mockUpdate(...a),
-    insert: (...a: unknown[]) => mocks.mockInsert(...a),
+  withRLSContext: (...a: any[]) => mocks.mockWithRLS(...a),
+  withSystemRLSContext: (_reason: string, fn: (tx: any) => unknown) => fn({
+    select: (...a: any[]) => mocks.mockSelect(...a),
+    update: (...a: any[]) => mocks.mockUpdate(...a),
+    insert: (...a: any[]) => mocks.mockInsert(...a),
   }),
 }));
 
@@ -64,29 +64,29 @@ vi.mock('@/db/schema/user-management-schema', () => ({
   users: {},
 }));
 vi.mock('@/lib/claim-notifications', () => ({
-  sendClaimStatusNotification: (...a: unknown[]) => mocks.mockSendNotification(...a),
+  sendClaimStatusNotification: (...a: any[]) => mocks.mockSendNotification(...a),
 }));
 vi.mock('@/lib/services/claim-workflow-fsm', () => ({
-  validateClaimTransition: (...a: unknown[]) => mocks.mockValidateTransition(...a),
-  getAllowedClaimTransitions: (...a: unknown[]) => mocks.mockGetAllowedTransitions(...a),
+  validateClaimTransition: (...a: any[]) => mocks.mockValidateTransition(...a),
+  getAllowedClaimTransitions: (...a: any[]) => mocks.mockGetAllowedTransitions(...a),
 }));
 vi.mock('@/lib/services/lro-signals', () => ({
-  detectAllSignals: (...a: unknown[]) => mocks.mockDetectSignals(...a),
+  detectAllSignals: (...a: any[]) => mocks.mockDetectSignals(...a),
 }));
 vi.mock('@/lib/services/defensibility-pack', () => ({
-  generateDefensibilityPack: (...a: unknown[]) => mocks.mockGenerateDefPack(...a),
+  generateDefensibilityPack: (...a: any[]) => mocks.mockGenerateDefPack(...a),
 }));
 vi.mock('@/db/schema/defensibility-packs-schema', () => ({
   defensibilityPacks: {},
 }));
 vi.mock('@/lib/integrations/timeline-integration', () => ({
-  addTimelineEntry: (...a: unknown[]) => mocks.mockAddTimeline(...a),
+  addTimelineEntry: (...a: any[]) => mocks.mockAddTimeline(...a),
 }));
 vi.mock('@/lib/events/event-bus', () => ({
-  eventBus: { emit: (...a: unknown[]) => mocks.mockEventBusEmit(...a), on: vi.fn() },
+  eventBus: { emit: (...a: any[]) => mocks.mockEventBusEmit(...a), on: vi.fn() },
 }));
 vi.mock('@/lib/services/satisfaction-service', () => ({
-  createSatisfactionSurvey: (...a: unknown[]) => mocks.mockCreateSatisfactionSurvey(...a),
+  createSatisfactionSurvey: (...a: any[]) => mocks.mockCreateSatisfactionSurvey(...a),
 }));
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn(), and: vi.fn(), relations: vi.fn(() => ({})),
@@ -234,7 +234,7 @@ describe('workflow-engine', () => {
   // ── assignClaim ───────────────────────────────────────────────────────────
   describe('assignClaim', () => {
     it('assigns claim to steward', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
         const mockTx = {
           select: vi.fn(() => chain([{ claimId: 'c1', status: 'submitted', organizationId: 'org-1' }])),
           update: vi.fn(() => chain(undefined)),
@@ -248,7 +248,7 @@ describe('workflow-engine', () => {
     });
 
     it('rejects assignment when FSM blocks the transition', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
         const mockTx = {
           select: vi.fn(() => chain([{ claimId: 'c1', status: 'closed', organizationId: 'org-1' }])),
           update: vi.fn(() => chain(undefined)),
@@ -263,7 +263,7 @@ describe('workflow-engine', () => {
     });
 
     it('returns error when claim not found in organization', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
         const mockTx = {
           select: vi.fn(() => chain([])),
           update: vi.fn(() => chain(undefined)),
@@ -285,7 +285,7 @@ describe('workflow-engine', () => {
 
     it('denies access when claim belongs to a different organization', async () => {
       // org-2 submits a request for a claim that belongs to org-1 → claim not found
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: unknown) => unknown) => {
+      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
         const mockTx = {
           // Query is org-scoped — returns empty when org does not match
           select: vi.fn(() => chain([])),
@@ -373,7 +373,7 @@ describe('workflow-engine', () => {
     });
 
     it('wraps in RLS context when no tx', async () => {
-      mocks.mockWithRLS.mockImplementation(async (fn: (...args: unknown[]) => unknown) => {
+      mocks.mockWithRLS.mockImplementation(async (fn: (...args: any[]) => unknown) => {
         const mockTx = {
           select: vi.fn(() => chain([{ claimId: 'c1', claimNumber: 'CLM-001' }])),
           insert: vi.fn(() => chain(undefined)),
@@ -452,7 +452,7 @@ describe('workflow-engine', () => {
     });
 
     it('wraps in RLS context when no tx', async () => {
-      mocks.mockWithRLS.mockImplementation(async (fn: (...args: unknown[]) => unknown) => {
+      mocks.mockWithRLS.mockImplementation(async (fn: (...args: any[]) => unknown) => {
         mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
         mocks.mockDetectSignals.mockResolvedValue([]);
         const updatedClaim = { ...baseClaim, status: 'under_review' };
@@ -465,7 +465,7 @@ describe('workflow-engine', () => {
         };
         return fn(mockTx);
       });
-      const result = await updateClaimStatus('CLM-001', 'under_review' as unknown as Parameters<typeof updateClaimStatus>[1], 'user1', 'notes');
+      const result = await updateClaimStatus('CLM-001', 'under_review' as any as Parameters<typeof updateClaimStatus>[1], 'user1', 'notes');
       expect(result.success).toBe(true);
       expect(mocks.mockWithRLS).toHaveBeenCalled();
     });

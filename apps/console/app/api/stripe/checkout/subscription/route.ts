@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createSubscriptionCheckoutSession } from '@nzila/payments-stripe'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 
 const Schema = z.object({
@@ -36,6 +36,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const { orgId, priceId, customerId, ventureId, trialDays } = parsed.data
+
+  const orgAccess = await requireOrgAccess(orgId, {
+    minRole: 'org_secretary',
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
 
   const origin = req.nextUrl.origin
   const successUrl = `${origin}/settings/billing/success?session_id={CHECKOUT_SESSION_ID}`

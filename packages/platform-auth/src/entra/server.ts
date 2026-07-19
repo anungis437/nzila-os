@@ -16,7 +16,7 @@
  *     if (!userId) redirect('/sign-in')
  *   }
  */
-import { auth as nextAuth } from './config'
+import { auth as nextAuthBase } from './config'
 import { resolveIdentityFromEntra } from './adapter'
 import type { AuthResult, AuthenticatedIdentity } from '../identity'
 import type { EntraSession } from './types'
@@ -26,6 +26,10 @@ export type Session = EntraSession
 
 /** Cookie name for PG-backed password auth sessions */
 const PG_SESSION_COOKIE = 'nzila_session'
+
+const getSession = async (): Promise<EntraSession | null> => {
+  return (nextAuthBase as unknown as () => Promise<EntraSession | null>)()
+}
 
 function isPgFallbackEnabled(): boolean {
   const raw =
@@ -161,9 +165,9 @@ export async function auth(): Promise<AuthSessionResult> {
   }
 
   // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
-  let session: Awaited<ReturnType<typeof nextAuth>> | null = null
+  let session: EntraSession | null = null
   try {
-    session = await nextAuth()
+    session = await getSession()
   } catch {
     // NextAuth not configured in this environment (e.g. CI without Entra credentials)
   }
@@ -278,9 +282,9 @@ export async function currentUser() {
   }
 
   // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
-  let session: Awaited<ReturnType<typeof nextAuth>> | null = null
+  let session: EntraSession | null = null
   try {
-    session = await nextAuth()
+    session = await getSession()
   } catch {
     // NextAuth not configured in this environment (e.g. CI without Entra credentials)
   }
@@ -336,7 +340,7 @@ export async function getAuth(_req?: unknown): Promise<AuthSessionResult> {
  * Use when you need the full platform AuthResult type.
  */
 export async function getAuthSession(): Promise<AuthResult> {
-  const session = await nextAuth()
+  const session = await getSession()
   return resolveIdentityFromEntra(session)
 }
 
@@ -354,8 +358,7 @@ export async function getCurrentUser(): Promise<AuthenticatedIdentity | null> {
  * Use when you need access to tokens or raw session data.
  */
 export async function getRawSession(): Promise<EntraSession | null> {
-  const session = await nextAuth()
-  return session as EntraSession | null
+  return getSession()
 }
 
 /**
@@ -375,7 +378,7 @@ export async function requireAuthentication(): Promise<AuthenticatedIdentity> {
  * Get the active organization ID from the session.
  */
 export async function getActiveOrgId(): Promise<string | undefined> {
-  const session = await nextAuth() as EntraSession | null
+  const session = await getSession()
   return session?.activeOrgId
 }
 
@@ -383,7 +386,7 @@ export async function getActiveOrgId(): Promise<string | undefined> {
  * Get app roles from the Entra session.
  */
 export async function getSessionRoles(): Promise<string[]> {
-  const session = await nextAuth() as EntraSession | null
+  const session = await getSession()
   return session?.roles ?? []
 }
 
@@ -427,6 +430,7 @@ export function createRouteMatcher(patterns: string[]) {
 // ── Auth Middleware ──────────────────────────────────────────────────────────
 
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 /**
  * Platform auth middleware.
@@ -440,11 +444,29 @@ class AuthProtectRedirect {
   constructor(public url: string) {}
 }
 
+type MiddlewareRequestLike = {
+  auth?: EntraSession | null
+} & NextRequest
+
+type AuthCompat = {
+  (): Promise<{
+    userId: string | null
+    orgId: string | null
+    orgRole: string | null
+    sessionClaims: { metadata: { role: string | undefined } }
+  }>
+  protect: () => Promise<void>
+}
+
 export function authMiddleware(
-  handler: (auth: any, request: any) => Promise<any> | any,
+  handler: (auth: AuthCompat, request: NextRequest) => Promise<unknown> | unknown,
 ) {
-  return nextAuth(async (req: any) => {
-    const session = req.auth as any
+  const withAuthMiddleware = nextAuthBase as unknown as (
+    middleware: (req: MiddlewareRequestLike) => Promise<unknown> | unknown,
+  ) => unknown
+
+  return withAuthMiddleware(async (req: MiddlewareRequestLike) => {
+    const session = req.auth ?? null
     const authCompat = Object.assign(
       // auth() callable — returns session-like object
       async () => ({
@@ -474,7 +496,7 @@ export function authMiddleware(
       }
       throw e
     }
-  }) as any
+  }) as unknown
 }
 
 /** @deprecated Use `authMiddleware` instead */

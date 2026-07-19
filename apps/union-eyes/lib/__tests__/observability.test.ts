@@ -37,7 +37,7 @@ describe('observability', () => {
       debug: vi.fn(),
     });
     // Make runWithContext execute the callback immediately
-    mocks.mockRunWithContext.mockImplementation((_ctx: unknown, fn: () => Promise<unknown>) => fn());
+    mocks.mockRunWithContext.mockImplementation((_ctx: any, fn: () => Promise<any>) => fn());
   });
 
   describe('withObservability', () => {

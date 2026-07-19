@@ -35,6 +35,7 @@ import {
   Building2,
   MapPin,
   Users,
+  Download,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -290,7 +291,7 @@ function AgreementDetailPanel({
                         {c.clauseTitle && ` ${c.clauseTitle}`}
                         {!c.clauseNumber && !c.clauseTitle && "—"}
                       </TableCell>
-                      <TableCell className="text-sm max-w-[300px] truncate">
+                      <TableCell className="max-w-75 truncate text-sm">
                         {c.summary ?? "—"}
                       </TableCell>
                       <TableCell>{confidenceBadge(c.confidence)}</TableCell>
@@ -320,16 +321,25 @@ export function AgreementExplorer() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [jurisdiction, setJurisdiction] = useState("all");
+  const [sector, setSector] = useState("");
   const [reviewStatus, setReviewStatus] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const queryParams = new URLSearchParams({ page: String(page), limit: "25" });
   if (search) queryParams.set("search", search);
   if (jurisdiction !== "all") queryParams.set("jurisdiction", jurisdiction);
+  if (sector) queryParams.set("sector", sector);
   if (reviewStatus !== "all") queryParams.set("reviewStatus", reviewStatus);
 
+  const exportQueryParams = new URLSearchParams();
+  if (search) exportQueryParams.set("search", search);
+  if (jurisdiction !== "all") exportQueryParams.set("jurisdiction", jurisdiction);
+  if (sector) exportQueryParams.set("sector", sector);
+  if (reviewStatus !== "all") exportQueryParams.set("reviewStatus", reviewStatus);
+  const exportHref = `/api/cba-intelligence/agreements/export${exportQueryParams.size > 0 ? `?${exportQueryParams.toString()}` : ""}`;
+
   const { data, isLoading, error } = useQuery<AgreementListResponse>({
-    queryKey: ["cba-intel-agreements", page, search, jurisdiction, reviewStatus],
+    queryKey: ["cba-intel-agreements", page, search, jurisdiction, sector, reviewStatus],
     queryFn: () =>
       fetch(`/api/cba-intelligence/agreements?${queryParams}`).then((r) => r.json()),
   });
@@ -355,7 +365,7 @@ export function AgreementExplorer() {
       </CardHeader>
       <CardContent>
         {/* Filters */}
-        <div className="flex gap-3 mb-4">
+        <div className="mb-4 flex flex-wrap gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -369,7 +379,7 @@ export function AgreementExplorer() {
             />
           </div>
           <Select value={jurisdiction} onValueChange={(v) => { setJurisdiction(v); setPage(1); }}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder={t("filters.jurisdictionPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -379,8 +389,17 @@ export function AgreementExplorer() {
               ))}
             </SelectContent>
           </Select>
+          <Input
+            placeholder={t("filters.sectorPlaceholder")}
+            className="w-45"
+            value={sector}
+            onChange={(e) => {
+              setSector(e.target.value);
+              setPage(1);
+            }}
+          />
           <Select value={reviewStatus} onValueChange={(v) => { setReviewStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder={t("filters.reviewPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -391,6 +410,12 @@ export function AgreementExplorer() {
               <SelectItem value="needs_revision">{t("reviewStatuses.needs_revision")}</SelectItem>
             </SelectContent>
           </Select>
+          <Button asChild variant="outline" className="ml-auto">
+            <a href={exportHref} download>
+              <Download className="mr-2 h-4 w-4" />
+              {t("actions.exportCsv")}
+            </a>
+          </Button>
         </div>
 
         {/* Table */}

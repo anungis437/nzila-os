@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-05-23T20:56:51.039Z",
+  "capturedAt": "2026-07-18T23:57:43.176Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -167,8 +167,8 @@
       "size": 9283
     },
     "packages/db/src/schema/operations.ts": {
-      "hash": "3c67520448dd24e6060b223a26954e1e467e126fbf54fb931816826f943c124c",
-      "size": 9517
+      "hash": "f2edb70082b824c10e100425f812e0df94f7f935c6902e83a521af845ed367af",
+      "size": 10330
     },
     "packages/db/src/schema/org-entitlements.ts": {
       "hash": "d3b260dab36235d4accf64e100660538b45be307aaaea272c57a03e153e8b46c",
@@ -199,8 +199,8 @@
       "size": 2744
     },
     "packages/db/src/schema/platform.ts": {
-      "hash": "52f3b8ec098e9fbce3fffc9adf5d5735c3b178e2095bf9081adb7c7b690cfeb3",
-      "size": 7663
+      "hash": "e0b4e30cdafb7dcca9cbcbe49c3e71d7eeca4b0a8039dc1b4fe7487cefc795e3",
+      "size": 8211
     },
     "packages/db/src/schema/policy-conflicts.ts": {
       "hash": "7cbfc19681c1a77565508476cbd2e704bc23bbb099c8b90aeaa09bd030e46d2b",
@@ -239,5 +239,5 @@
       "size": 38020
     }
   },
-  "compositeHash": "3aea3f8197f2e282fce8e82b53f6ba11c482d392bf6fba1f60325a8eb2b3b266"
+  "compositeHash": "ac08dcf3163353c5f38e6299ac433415a16a537d5289acd2dfc5c581f7099412"
 }

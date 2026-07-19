@@ -17,7 +17,7 @@ function makeDbChain(): Record<string, unknown> {
   ]) {
     chain[m] = vi.fn(() => makeDbChain());
   }
-  chain.then = (resolve: (v: unknown[]) => void) => {
+  chain.then = (resolve: (v: any[]) => void) => {
     resolve([]);
     return Promise.resolve([]);
   };
@@ -44,9 +44,9 @@ function makeQueryProxy(): Record<string, unknown> {
 vi.mock("@/db/db", () => ({ db: { ...makeDbChain(), query: makeQueryProxy() } }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((x: unknown) => x),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  desc: vi.fn((x: any) => x),
   sql: vi.fn(),
 }));
 
@@ -61,6 +61,10 @@ vi.mock("@/db/schema/domains/claims/grievances", () => ({
 const mockGenerate = vi.fn();
 vi.mock("@/lib/ai/ai-client", () => ({
   getAiClient: () => ({ generate: mockGenerate }),
+  buildOrgAiTrace: vi.fn(() => ({
+    component: "test",
+    action: "mock",
+  })),
   UE_APP_KEY: "union-eyes",
   UE_PROFILES: {
     GRIEVANCE_TRIAGE: "ue-grievance-triage",

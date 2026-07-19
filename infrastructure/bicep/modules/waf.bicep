@@ -9,6 +9,68 @@ param enableBotProtection bool = true
 param enableRateLimiting bool = true
 param rateLimitThreshold int = 1000
 
+// ── Custom rule sets ────────────────────────────────────────────────────
+// Declared as variables (rather than an inline concat with a multi-line
+// ternary) so IaC scanners can parse the file and validate the WAF policy.
+var rateLimitRules = enableRateLimiting ? [
+  {
+    name: 'RateLimitPerIP'
+    priority: 100
+    ruleType: 'RateLimitRule'
+    rateLimitDurationInMinutes: 1
+    rateLimitThreshold: rateLimitThreshold
+    matchConditions: [
+      {
+        matchVariable: 'RemoteAddr'
+        operator: 'IPMatch'
+        matchValue: ['0.0.0.0/0']
+      }
+    ]
+    action: 'Block'
+  }
+] : []
+
+var staticSecurityRules = [
+  {
+    name: 'BlockSQLInjectionInPath'
+    priority: 200
+    ruleType: 'MatchRule'
+    matchConditions: [
+      {
+        matchVariable: 'RequestUri'
+        operator: 'RegEx'
+        matchValue: [
+          '(\\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER)\\b)'
+        ]
+        transforms: ['Uppercase']
+      }
+    ]
+    action: 'Block'
+  }
+  {
+    name: 'BlockKnownBadPaths'
+    priority: 300
+    ruleType: 'MatchRule'
+    matchConditions: [
+      {
+        matchVariable: 'RequestUri'
+        operator: 'Contains'
+        matchValue: [
+          '/wp-admin'
+          '/wp-login'
+          '/.env'
+          '/phpMyAdmin'
+          '/actuator'
+          '/.git'
+        ]
+      }
+    ]
+    action: 'Block'
+  }
+]
+
+var customWafRules = concat(rateLimitRules, staticSecurityRules)
+
 // ── WAF Policy ──────────────────────────────────────────────────────────
 
 resource wafPolicy 'Microsoft.Network/FrontDoorWebApplicationFirewallPolicies@2024-02-01' = {
@@ -38,65 +100,7 @@ resource wafPolicy 'Microsoft.Network/FrontDoorWebApplicationFirewallPolicies@20
       ]
     }
     customRules: {
-      rules: concat(
-        enableRateLimiting
-          ? [
-              {
-                name: 'RateLimitPerIP'
-                priority: 100
-                ruleType: 'RateLimitRule'
-                rateLimitDurationInMinutes: 1
-                rateLimitThreshold: rateLimitThreshold
-                matchConditions: [
-                  {
-                    matchVariable: 'RemoteAddr'
-                    operator: 'IPMatch'
-                    matchValue: ['0.0.0.0/0']
-                  }
-                ]
-                action: 'Block'
-              }
-            ]
-          : [],
-        [
-          {
-            name: 'BlockSQLInjectionInPath'
-            priority: 200
-            ruleType: 'MatchRule'
-            matchConditions: [
-              {
-                matchVariable: 'RequestUri'
-                operator: 'RegEx'
-                matchValue: [
-                  '(\\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER)\\b)'
-                ]
-                transforms: ['Uppercase']
-              }
-            ]
-            action: 'Block'
-          }
-          {
-            name: 'BlockKnownBadPaths'
-            priority: 300
-            ruleType: 'MatchRule'
-            matchConditions: [
-              {
-                matchVariable: 'RequestUri'
-                operator: 'Contains'
-                matchValue: [
-                  '/wp-admin'
-                  '/wp-login'
-                  '/.env'
-                  '/phpMyAdmin'
-                  '/actuator'
-                  '/.git'
-                ]
-              }
-            ]
-            action: 'Block'
-          }
-        ]
-      )
+      rules: customWafRules
     }
   }
 }

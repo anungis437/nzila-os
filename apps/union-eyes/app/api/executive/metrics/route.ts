@@ -26,7 +26,7 @@ export const GET = withApi(
       timeframe,
     });
 
-    return metrics as unknown as Record<string, unknown>;
+    return metrics as any as Record<string, unknown>;
   },
 );
 

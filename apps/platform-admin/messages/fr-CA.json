@@ -1,4 +1,66 @@
 {
+  "sageRecords": {
+    "title": "Cycle de vie des documents",
+    "retentionPolicy": "Calendrier de conservation",
+    "retentionPeriod": "Période de conservation",
+    "retainUntil": "Conserver jusqu'au",
+    "legalHold": "Gel juridique",
+    "placeLegalHold": "Appliquer un gel juridique",
+    "releaseLegalHold": "Lever le gel juridique",
+    "destructionEligibility": "Admissibilité à la destruction",
+    "destructionBlocked": "Destruction bloquée",
+    "requestDestruction": "Demander la destruction",
+    "approveDestruction": "Approuver la destruction",
+    "denyDestruction": "Refuser la destruction",
+    "verifiedDestroyed": "Destruction vérifiée",
+    "destructionFailed": "Échec de la destruction",
+    "packageUnavailable": "Lot indisponible",
+    "activeLegalHoldPreventsDestruction": "Un gel juridique actif empêche la destruction",
+    "retentionPeriodNotElapsed": "La période de conservation n'est pas écoulée",
+    "differentApproverRequired": "Une autre personne autorisée doit approuver cette destruction",
+    "retentionNotAssigned": "Aucun calendrier de conservation n'est attribué",
+    "packageAlreadyDestroyed": "Ce lot a déjà été détruit",
+    "confirmDestruction": "Confirmer la destruction",
+    "tombstone": "Ce lot a été détruit de façon permanente et ne peut plus être téléchargé ni transmis."
+  },
+  "sageDelivery": {
+    "title": "Livraison sécurisée",
+    "intro": "L’accès externe est vérifié, approuvé indépendamment, révocable et à durée limitée.",
+    "sections": {
+      "requests": "Demandes de livraison",
+      "approvals": "File d’approbation",
+      "grants": "Accès actifs",
+      "revoked": "Accès révoqués / expirés",
+      "receipts": "Reçus de livraison"
+    },
+    "verifiedRecipient": "Destinataire dont l’adresse courriel a été vérifiée",
+    "deliveryRequest": "Demande de livraison",
+    "deliveryApproval": "Approbation de livraison",
+    "accessExpiry": "Expiration de l’accès",
+    "maxAccesses": "Nombre maximal d’accès",
+    "issueInvitation": "Émettre l’invitation",
+    "invitationExpires": "L’invitation expire",
+    "claimInvitation": "Réclamer l’invitation",
+    "accessGranted": "Accès accordé",
+    "accessRevoked": "Accès révoqué",
+    "accessExpired": "Accès expiré",
+    "deliveryReceipts": "Reçus de livraison",
+    "recipientAcknowledgment": "Accusé de réception du destinataire",
+    "cannotApproveOwn": "Vous ne pouvez pas approuver votre propre demande.",
+    "recipientIdentityChanged": "L’identité du destinataire a changé; une nouvelle approbation est requise.",
+    "packageChanged": "Le dossier a changé; une nouvelle approbation est requise.",
+    "externalAccessRevocable": "L’accès externe est révocable et peut expirer.",
+    "createRecipient": "Ajouter un destinataire dont l’adresse courriel a été vérifiée",
+    "requestDelivery": "Demander la livraison",
+    "approve": "Approuver",
+    "deny": "Refuser",
+    "revoke": "Révoquer",
+    "revokeReason": "Motif de révocation",
+    "recipientNotice": "Cet accès vérifié par courriel est destiné uniquement à la personne qui exerce un contrôle vérifié de l’adresse courriel invitée.",
+    "integrityNotice": "L’intégrité du dossier est vérifiée avant le téléchargement.",
+    "download": "Télécharger le dossier",
+    "acknowledge": "Confirmer la réception"
+  },
   "common": {
     "appName": "Administration de la plateforme",
     "loading": "Chargement...",
@@ -26,5 +88,253 @@
     "roles": "Rôles",
     "permissions": "Permissions",
     "auditLog": "Journal d'audit"
+  },
+  "sage": {
+    "navLabel": "SAGE",
+    "breadcrumb": "SAGE",
+    "pageTitle": "Preuves d’assurance des services et de gouvernance",
+    "pageDescription": "Espace de travail interne pour organiser les preuves d’assurance des services et de gouvernance. À usage de révision interne seulement — il ne s’agit pas d’un service public, d’un produit ni d’une certification.",
+    "tableCaption": "Espaces de travail SAGE de l’organisation",
+    "createWorkspace": "Créer un espace de travail",
+    "workspaceName": "Nom de l’espace de travail",
+    "workspaceNameHelp": "Une courte étiquette interne pour cet espace de travail.",
+    "institutionType": "Type d’institution",
+    "riskSurface": "Surface de risque",
+    "status": "Statut",
+    "emptyState": "Aucun espace de travail SAGE pour cette organisation pour l’instant.",
+    "submit": "Créer",
+    "submitting": "Création…",
+    "cancel": "Annuler",
+    "columns": {
+      "workspace": "Espace de travail",
+      "institutionType": "Type d’institution",
+      "riskSurface": "Surface de risque",
+      "status": "Statut",
+      "updated": "Mis à jour",
+      "action": "Action",
+      "open": "Ouvrir"
+    },
+    "validation": {
+      "nameRequired": "Un nom d’espace de travail est requis."
+    },
+    "error": {
+      "createFailed": "Impossible de créer l’espace de travail. Veuillez réessayer."
+    },
+    "sections": {
+      "identity": "Identité de l’espace de travail",
+      "boundaryProfile": "Profil de délimitation",
+      "counts": "Sommaire"
+    },
+    "boundary": {
+      "prohibitedUses": "Utilisations interdites",
+      "excludedSourceClasses": "Catégories de sources exclues",
+      "requiredReviewers": "Réviseurs requis",
+      "exportRestrictions": "Restrictions d’exportation"
+    },
+    "counts": {
+      "evidenceSources": "Sources de preuves",
+      "evidenceItems": "Éléments de preuve",
+      "boundaryFlags": "Indicateurs de délimitation",
+      "decisionRecords": "Registres de décision",
+      "openExportRequests": "Demandes d’exportation ouvertes"
+    },
+    "evidence": {
+      "tab": "Preuves"
+    },
+    "governance": {
+      "tab": "Examen et décisions"
+    },
+    "exports": {
+      "tab": "Exportations contrôlées"
+    }
+  },
+  "sageEvidence": {
+    "pageTitle": "Preuves",
+    "pageDescription": "Enregistrez des sources de preuve, classez-les, créez des éléments de preuve et liez-les pour examen interne. À usage interne uniquement — il ne s’agit pas d’un service public, d’un produit, d’une certification ni d’une allégation de disponibilité.",
+    "sourcesHeading": "Sources de preuve",
+    "itemsHeading": "Éléments de preuve",
+    "registerSource": "Enregistrer la source",
+    "sourceType": "Type de source",
+    "containsPersonalInformation": "Contient des renseignements personnels",
+    "containsSensitiveInformation": "Contient des renseignements sensibles",
+    "sourceQuality": "Qualité de la source",
+    "authorizationLevel": "Niveau d’autorisation",
+    "classify": "Classer",
+    "confidenceLevel": "Niveau de confiance",
+    "evidenceSource": "Source de preuve",
+    "createItem": "Créer un élément",
+    "link": "Lier",
+    "submitting": "Enregistrement…",
+    "noSources": "Aucune source de preuve consultable pour l’instant.",
+    "noItems": "Aucun élément de preuve consultable pour l’instant.",
+    "notClassifiedYet": "Pas encore classé",
+    "needClassifiedSource": "Classez une source avant de créer des éléments de preuve.",
+    "humanReviewRequired": "Examen humain requis",
+    "excludedFromExternalReview": "Exclu de l’examen externe",
+    "sourcesTableCaption": "Sources de preuve",
+    "itemsTableCaption": "Éléments de preuve",
+    "validation": {
+      "sourceTypeRequired": "Sélectionnez un type de source.",
+      "sourceRequired": "Sélectionnez une source de preuve."
+    },
+    "error": {
+      "registerFailed": "Impossible d’enregistrer la source. Veuillez réessayer.",
+      "classifyFailed": "Impossible de classer la source. Veuillez réessayer.",
+      "createItemFailed": "Impossible de créer l’élément de preuve. Veuillez réessayer.",
+      "linkFailed": "Impossible de lier l’élément de preuve. Veuillez réessayer."
+    },
+    "lifecycle": {
+      "proposed": "Proposé",
+      "registered": "Enregistré",
+      "classified": "Classé",
+      "linked": "Lié",
+      "reviewed": "Examiné",
+      "accepted": "Accepté",
+      "needs_review": "À examiner",
+      "excluded": "Exclu",
+      "archived": "Archivé"
+    },
+    "governanceTab": "Examen et décisions",
+    "exportsTab": "Exportations contrôlées"
+  },
+  "sageGovernance": {
+    "pageTitle": "Examen et décisions",
+    "pageDescription": "Examen humain et gouvernance du cycle de vie des preuves : ouvrir et résoudre des signalements de limites, consigner des notes d’examen attribuées, et créer des dossiers de décision par une personne nommée. À usage interne uniquement — il ne s’agit pas d’une décision automatisée, d’un pointage ni d’une certification.",
+    "boundaryFlags": "Signalements de limites",
+    "reviewNotes": "Notes d’examen",
+    "decisionRecords": "Dossiers de décision",
+    "openFlag": "Ouvrir un signalement",
+    "flagType": "Type de signalement",
+    "target": "Cible",
+    "note": "Note",
+    "submitting": "Enregistrement…",
+    "noFlags": "Aucun signalement de limite consultable pour l’instant.",
+    "flagsListLabel": "Signalements de limites",
+    "flagStatus": {
+      "open": "Ouvert",
+      "under_review": "En examen",
+      "resolved": "Résolu",
+      "retained": "Maintenu"
+    },
+    "resolvedBy": "résolu par",
+    "resolutionNote": "Note de résolution",
+    "resolveFlag": "Résoudre le signalement",
+    "resolutionOutcome": "Issue",
+    "validation": {
+      "resolutionNoteRequired": "Une note de résolution est requise.",
+      "noteRequired": "Une note est requise.",
+      "decisionRequired": "Un énoncé de décision est requis.",
+      "uncertaintyRequired": "Un énoncé d’incertitude ou de limites est requis."
+    },
+    "error": {
+      "flagFailed": "Impossible d’ouvrir le signalement. Veuillez réessayer.",
+      "resolveFailed": "Impossible de résoudre le signalement. Veuillez réessayer.",
+      "noteFailed": "Impossible d’ajouter la note d’examen. Veuillez réessayer.",
+      "decisionFailed": "Impossible de créer le dossier de décision. Veuillez réessayer."
+    },
+    "addReviewNote": "Ajouter une note d’examen",
+    "humanAuthoredHint": "Une note d’examen est une observation humaine. Elle n’approuve pas de preuve et ne consigne pas de décision.",
+    "reviewer": "Examinateur",
+    "noteType": "Type de note",
+    "noteDoesNotDecide": "Consigner une note n’approuve pas de preuve et ne constitue pas une décision.",
+    "humanAuthored": "Observation rédigée par une personne",
+    "recordedBy": "Consigné par",
+    "notesListLabel": "Notes d’examen",
+    "noNotes": "Aucune note d’examen consultable pour l’instant.",
+    "createDecision": "Créer un dossier de décision",
+    "humanDecisionHint": "Un dossier de décision est un jugement humain nommé. Les références aux preuves ne constituent pas une conclusion automatisée.",
+    "decisionStatement": "Énoncé de décision",
+    "rationale": "Justification",
+    "uncertainty": "Incertitude et limites",
+    "uncertaintyHelp": "Précisez ce qui demeure incertain ou hors de portée. Ce champ est requis.",
+    "reviewedEvidence": "Preuves examinées",
+    "relatedFlags": "Signalements de limites liés",
+    "humanDecisionRecord": "Dossier de décision humaine",
+    "decisionRecord": "Dossier de décision",
+    "evidenceNotAutomated": "Les références aux preuves ne constituent pas une conclusion automatisée.",
+    "noDecisions": "Aucun dossier de décision consultable pour l’instant.",
+    "decisionsListLabel": "Dossiers de décision",
+    "distinctions": {
+      "heading": "Preuve, examen, signalement et décision sont distincts",
+      "evidenceTerm": "Preuve",
+      "evidence": "Matériel factuel sourcé.",
+      "reviewTerm": "Note d’examen",
+      "review": "Une observation humaine nommée.",
+      "flagTerm": "Signalement de limite",
+      "flag": "Une préoccupation, une limite ou une condition d’examen.",
+      "decisionTerm": "Dossier de décision",
+      "decision": "Un jugement humain nommé et sa justification."
+    },
+    "targetWorkspace": "Espace de travail",
+    "targetSourcePrefix": "Source :",
+    "targetItemPrefix": "Élément :",
+    "permissionDenied": "Vous n’avez pas la permission pour cette action.",
+    "unableToLoad": "Impossible de charger l’examen et les décisions.",
+    "exportsTab": "Exportations contrôlées"
+  },
+  "sageExports": {
+    "title": "Exportations contrôlées",
+    "nav": {
+      "overview": "Aperçu",
+      "evidence": "Preuves",
+      "governance": "Examen et décisions"
+    },
+    "internalOnlyBanner": "Génération de trousses internes seulement. La livraison externe est désactivée.",
+    "sections": {
+      "requests": "Demandes d’exportation",
+      "packages": "Trousses générées"
+    },
+    "approvalQueue": "File d’approbation",
+    "requestExport": "Demander une exportation",
+    "requestedBy": "Demandé par",
+    "approvedBy": "Approuvé par",
+    "purpose": "Objet",
+    "packageType": "Type de trousse",
+    "selectedEvidence": "Preuves sélectionnées",
+    "selectedGovernance": "Dossiers de gouvernance sélectionnés",
+    "submitting": "Envoi en cours…",
+    "itemCount": "Éléments",
+    "excludedCount": "Exclus",
+    "noPurpose": "(aucun objet fourni)",
+    "cannotDecideOwn": "Vous ne pouvez pas approuver ni refuser votre propre demande.",
+    "scopeChanged": "La portée a changé; une nouvelle approbation est requise.",
+    "decisionRationale": "Justification de la décision",
+    "approvalRationale": "Justification de l’approbation",
+    "denialRationale": "Justification du refus",
+    "approveRequest": "Approuver la demande",
+    "denyRequest": "Refuser la demande",
+    "manifestHash": "Empreinte du manifeste",
+    "contentHash": "Empreinte du contenu",
+    "generatedBy": "Générée par",
+    "policyVersion": "Version de la politique",
+    "generatable": "Demandes approuvées prêtes à générer",
+    "generatePackage": "Générer la trousse",
+    "downloadInternal": "Télécharger la trousse interne",
+    "status": {
+      "requested": "Exportation demandée."
+    },
+    "statusLabel": {
+      "requested": "Demandée",
+      "approved": "Approuvée",
+      "denied": "Refusée",
+      "cancelled": "Annulée",
+      "generated": "Générée"
+    },
+    "empty": {
+      "requests": "Aucune demande d’exportation.",
+      "approvals": "Aucune approbation en attente.",
+      "packages": "Aucune trousse générée."
+    },
+    "validation": {
+      "purposeRequired": "Un objet est requis.",
+      "selectionRequired": "Sélectionnez au moins une ressource.",
+      "approvalRationaleRequired": "Une justification d’approbation est requise.",
+      "denialRationaleRequired": "Une justification de refus est requise."
+    },
+    "error": {
+      "requestFailed": "La demande d’exportation n’a pas pu être soumise.",
+      "decisionFailed": "La décision n’a pas pu être enregistrée.",
+      "generateFailed": "La trousse n’a pas pu être générée."
+    }
   }
 }

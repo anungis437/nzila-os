@@ -65,6 +65,7 @@ const EXEMPT_ROUTES = new Set([
   'whop/unauthenticated', // Payment-first checkout (no auth by design)
   'proof-center/public-key', // System-wide public key (not org-specific)
   'contact',        // Public contact/demo-request form (marketing)
+  'courtlens/public-intake', // ABR CourtLens — pseudonymous public intake (validated + rate-limited)
   'trial',          // Public Flow trial signup form
   'telemetry',      // Public marketing telemetry (anonymous page events)
   'metrics',        // Telemetry scrape endpoint (token-gated)
@@ -83,7 +84,7 @@ const EXEMPT_ROUTES = new Set([
 ])
 
 function isExemptRoute(filePath: string): boolean {
-  const rel = filePath.replace(/\\/g, '/')
+  const rel = filePath.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
   // Token-based public routes (e.g. quote/[token]/respond)
   if (rel.includes('[token]')) return true
   // Match both /api/EXEMPT and embedded /EXEMPT/ segments (e.g. /payments/webhooks/stripe)
@@ -109,6 +110,8 @@ describe('Org-scope enforcement patterns', () => {
         const hasOrgGuard =
           content.includes('withOrgScope') ||
           content.includes('requireOrgAccess') ||
+          content.includes('requireVerifiedOrgAccess') ||   // ABR CourtLens — Phase 2C.6
+          content.includes('requireVerifiedPermission') ||  // ABR CourtLens — Phase 2C.6
           content.includes('resolveOrgContext') ||
           content.includes('withApi(') ||
           content.includes('withApiAuth(') ||

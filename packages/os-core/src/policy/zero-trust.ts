@@ -189,7 +189,14 @@ export function authorizeZeroTrust(
 
 async function injectTraceId(result: AuthorizationResult): Promise<void> {
   try {
-    const { trace } = await import('@opentelemetry/api');
+    const { trace } = (await import('@opentelemetry/api')) as {
+      trace: {
+        getActiveSpan: () => null | {
+          spanContext: () => { traceId: string }
+          setAttribute: (key: string, value: string | number) => void
+        }
+      }
+    };
     const span = trace.getActiveSpan();
     if (span) {
       result.traceId = span.spanContext().traceId;

@@ -30,6 +30,7 @@ import {
   getSortedRowModel,
   useReactTable,
   Row,
+  Column,
 } from "@tanstack/react-table";
 import {
   ArrowUpDown,
@@ -142,15 +143,11 @@ export function DataTableAdvanced<TData, TValue>({
     if (format === "csv") {
       const headers = table
         .getAllColumns()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((col: any) => col.getIsVisible())
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((col: any) => col.id);
+        .filter((col) => col.getIsVisible())
+        .map((col) => col.id);
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rows = table.getFilteredRowModel().rows.map((row: any) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        headers.map((header: any) => {
+      const rows = table.getFilteredRowModel().rows.map((row) =>
+        headers.map((header) => {
           const value = row.getValue(header);
           return typeof value === "string" ? `"${value}"` : value;
         })
@@ -158,8 +155,7 @@ export function DataTableAdvanced<TData, TValue>({
 
       const csv = [
         headers.join(","),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...rows.map((row: any) => row.join(",")),
+        ...rows.map((row) => row.join(",")),
       ].join("\n");
 
       const blob = new Blob([csv], { type: "text/csv" });
@@ -211,10 +207,8 @@ export function DataTableAdvanced<TData, TValue>({
                 <DropdownMenuSeparator />
                 {table
                   .getAllColumns()
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  .filter((column: any) => column.getCanFilter())
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  .map((column: any) => {
+                  .filter((column) => column.getCanFilter())
+                  .map((column) => {
                     return (
                       <div key={column.id} className="px-2 py-1">
                         <Input
@@ -267,10 +261,8 @@ export function DataTableAdvanced<TData, TValue>({
               <DropdownMenuSeparator />
               {table
                 .getAllColumns()
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .filter((column: any) => column.getCanHide())
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .map((column: any) => {
+                .filter((column) => column.getCanHide())
+                .map((column) => {
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
@@ -309,11 +301,9 @@ export function DataTableAdvanced<TData, TValue>({
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {table.getHeaderGroups().map((headerGroup: any) => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {headerGroup.headers.map((header: any) => {
+                {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -330,8 +320,7 @@ export function DataTableAdvanced<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              table.getRowModel().rows.map((row: any) => (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -340,8 +329,7 @@ export function DataTableAdvanced<TData, TValue>({
                     onRowClick && "cursor-pointer hover:bg-gray-50"
                   )}
                 >
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {row.getVisibleCells().map((cell: any) => (
+                  {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -447,13 +435,12 @@ export function DataTableAdvanced<TData, TValue>({
 }
 
 // Helper: Sortable Column Header
-export function DataTableColumnHeader<_TData, _TValue>({
+export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any;
+  column: Column<TData, TValue>;
   title: string;
   className?: string;
 }) {

@@ -8,7 +8,6 @@
 import {
   type RevenueEvent,
   type RevenueSummary,
-  type UsageMetric,
   type BillingHook,
   type RevenueEventType,
   type UnifiedRevenueRecord,

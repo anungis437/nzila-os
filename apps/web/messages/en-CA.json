@@ -16,6 +16,7 @@
     "investors": "Investors",
     "contact": "Contact",
     "continuity": "Continuity",
+    "publicService": "Public Service",
     "unionEyes": "Union Eyes",
     "trust": "Trust",
     "insights": "Insights",
@@ -27,7 +28,6 @@
     "requestDemo": "Book Review",
     "apps": "Apps",
     "console": "Console",
-    "partnerPortal": "Partner Portal",
     "language": "Language"
   },
   "hero": {

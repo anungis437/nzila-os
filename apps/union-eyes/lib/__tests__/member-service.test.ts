@@ -44,17 +44,17 @@ vi.mock('@/db/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...a: unknown[]) => ({ _type: 'eq', _args: a })),
-  and: vi.fn((...a: unknown[]) => ({ _type: 'and', _args: a })),
-  or: vi.fn((...a: unknown[]) => ({ _type: 'or', _args: a })),
-  desc: vi.fn((c: unknown) => ({ _type: 'desc', _col: c })),
-  asc: vi.fn((c: unknown) => ({ _type: 'asc', _col: c })),
-  sql: Object.assign(vi.fn((...a: unknown[]) => ({ _type: 'sql', _args: a })), { raw: vi.fn() }),
+  eq: vi.fn((...a: any[]) => ({ _type: 'eq', _args: a })),
+  and: vi.fn((...a: any[]) => ({ _type: 'and', _args: a })),
+  or: vi.fn((...a: any[]) => ({ _type: 'or', _args: a })),
+  desc: vi.fn((c: any) => ({ _type: 'desc', _col: c })),
+  asc: vi.fn((c: any) => ({ _type: 'asc', _col: c })),
+  sql: Object.assign(vi.fn((...a: any[]) => ({ _type: 'sql', _args: a })), { raw: vi.fn() }),
   count: vi.fn(() => 'count_fn'),
-  gte: vi.fn((...a: unknown[]) => ({ _type: 'gte', _args: a })),
-  lte: vi.fn((...a: unknown[]) => ({ _type: 'lte', _args: a })),
-  like: vi.fn((...a: unknown[]) => ({ _type: 'like', _args: a })),
-  inArray: vi.fn((...a: unknown[]) => ({ _type: 'inArray', _args: a })),
+  gte: vi.fn((...a: any[]) => ({ _type: 'gte', _args: a })),
+  lte: vi.fn((...a: any[]) => ({ _type: 'lte', _args: a })),
+  like: vi.fn((...a: any[]) => ({ _type: 'like', _args: a })),
+  inArray: vi.fn((...a: any[]) => ({ _type: 'inArray', _args: a })),
 }));
 
 vi.mock('@/lib/logger', () => ({

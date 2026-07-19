@@ -19,12 +19,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+      },
     },
   ],
 
   webServer: {
-    command: process.env.CI ? 'pnpm build && pnpm start' : 'pnpm dev',
+    command: process.env.CI
+      ? 'DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/flow_test} AUTH_SECRET=${AUTH_SECRET:-playwright-test-secret} NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-playwright-test-secret} pnpm build && DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/flow_test} AUTH_SECRET=${AUTH_SECRET:-playwright-test-secret} NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-playwright-test-secret} pnpm start'
+      : 'DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/flow_test} AUTH_SECRET=${AUTH_SECRET:-playwright-test-secret} NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-playwright-test-secret} pnpm dev',
     port: 3003,
     reuseExistingServer: true,
     timeout: 120_000,

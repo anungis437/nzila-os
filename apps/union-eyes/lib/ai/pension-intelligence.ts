@@ -17,7 +17,7 @@
 
 import { db } from '@/db/db';
 import { eq, and, sum, count } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import {
   pensionPlans,
   pensionMembers,
@@ -140,6 +140,7 @@ export async function analyzePensionFunding(
   const ai = getAiClient();
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.PENSION_FUNDING_ANALYSIS,
     input: prompt,
@@ -218,6 +219,7 @@ export async function projectMemberBenefit(
   const ai = getAiClient();
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.PENSION_BENEFIT_PROJECTION,
     input: prompt,
@@ -298,6 +300,7 @@ export async function summarizeTrusteeReport(
   const ai = getAiClient();
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.PENSION_TRUSTEE_SUMMARY,
     input: prompt,

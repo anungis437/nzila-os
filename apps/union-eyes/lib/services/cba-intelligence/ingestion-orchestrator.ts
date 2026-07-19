@@ -56,6 +56,68 @@ export interface FullIngestionResult {
   results: IngestionRunResult[];
 }
 
+interface IngestionTuning {
+  sourceConcurrency: number;
+  documentConcurrency: number;
+  fetchTimeoutMs: number;
+  fetchRetries: number;
+}
+
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+}
+
+function getIngestionTuning(): IngestionTuning {
+  return {
+    // Defaults preserve current behavior unless explicitly configured.
+    sourceConcurrency: parsePositiveInt(process.env.CBA_INTEL_SOURCE_CONCURRENCY, 1),
+    documentConcurrency: parsePositiveInt(process.env.CBA_INTEL_DOCUMENT_CONCURRENCY, 1),
+    fetchTimeoutMs: parsePositiveInt(process.env.CBA_INTEL_FETCH_TIMEOUT_MS, 30_000),
+    fetchRetries: parsePositiveInt(process.env.CBA_INTEL_FETCH_RETRIES, 2),
+  };
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) return [];
+  const capped = Math.max(1, Math.min(concurrency, items.length));
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: capped }, async () => {
+    while (true) {
+      const idx = nextIndex;
+      nextIndex += 1;
+      if (idx >= items.length) break;
+      results[idx] = await worker(items[idx]);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
 // ---------------------------------------------------------------------------
 // Single-source ingestion
 // ---------------------------------------------------------------------------
@@ -63,6 +125,7 @@ export interface FullIngestionResult {
 async function ingestSource(source: CbaIntelSource): Promise<IngestionRunResult> {
   const startTime = Date.now();
   const errors: string[] = [];
+  const tuning = getIngestionTuning();
   const stats = {
     documentsFound: 0,
     documentsNew: 0,
@@ -118,50 +181,76 @@ async function ingestSource(source: CbaIntelSource): Promise<IngestionRunResult>
       count: discovered.length,
     });
 
-    // Phase 2: Fetch & persist each document
-    // Process sequentially to respect rate limits
-    for (const doc of discovered) {
-      try {
-        const fetched: FetchedContent = await adapter.fetch(doc.sourceUrl, config);
+    // Phase 2: Fetch & persist documents with bounded parallelism and retries.
+    await runWithConcurrency(
+      discovered,
+      tuning.documentConcurrency,
+      async (doc) => {
+        try {
+          let fetched: FetchedContent | null = null;
+          let lastError: any = null;
 
-        const contentHash = computeContentHash(fetched.rawContent);
+          for (let attempt = 1; attempt <= tuning.fetchRetries; attempt++) {
+            try {
+              fetched = await withTimeout(
+                adapter.fetch(doc.sourceUrl, config),
+                tuning.fetchTimeoutMs,
+              );
+              lastError = null;
+              break;
+            } catch (error) {
+              lastError = error;
+              if (attempt === tuning.fetchRetries) {
+                break;
+              }
+            }
+          }
 
-        const result = await upsertDocument({
-          sourceId: source.id,
-          sourceUrl: doc.sourceUrl,
-          title: doc.title ?? null,
-          documentType: (doc.documentType as "full_agreement") ?? "full_agreement",
-          rawContent: fetched.rawContent,
-          contentHash,
-          language: doc.language ?? "en",
-          jurisdiction: doc.jurisdiction ?? source.jurisdictions?.[0] ?? null,
-          wordCount: fetched.wordCount ?? null,
-          pageCount: fetched.pageCount ?? null,
-          processingStatus: "fetched",
-        });
+          if (!fetched) {
+            throw new Error(
+              lastError instanceof Error ? lastError.message : "Unknown fetch failure",
+            );
+          }
 
-        switch (result.action) {
-          case "created":
-            stats.documentsNew++;
-            break;
-          case "updated":
-            stats.documentsUpdated++;
-            break;
-          case "unchanged":
-            stats.documentsUnchanged++;
-            break;
+          const contentHash = computeContentHash(fetched.rawContent);
+
+          const result = await upsertDocument({
+            sourceId: source.id,
+            sourceUrl: doc.sourceUrl,
+            title: doc.title ?? null,
+            documentType: (doc.documentType as "full_agreement") ?? "full_agreement",
+            rawContent: fetched.rawContent,
+            contentHash,
+            language: doc.language ?? "en",
+            jurisdiction: doc.jurisdiction ?? source.jurisdictions?.[0] ?? null,
+            wordCount: fetched.wordCount ?? null,
+            pageCount: fetched.pageCount ?? null,
+            processingStatus: "fetched",
+          });
+
+          switch (result.action) {
+            case "created":
+              stats.documentsNew++;
+              break;
+            case "updated":
+              stats.documentsUpdated++;
+              break;
+            case "unchanged":
+              stats.documentsUnchanged++;
+              break;
+          }
+        } catch (fetchError) {
+          stats.documentsFailed++;
+          const msg =
+            fetchError instanceof Error ? fetchError.message : String(fetchError);
+          errors.push(`Failed to fetch ${doc.sourceUrl}: ${msg}`);
+          logger.warn("Ingestion: document fetch failed", {
+            sourceUrl: doc.sourceUrl,
+            error: msg,
+          });
         }
-      } catch (fetchError) {
-        stats.documentsFailed++;
-        const msg =
-          fetchError instanceof Error ? fetchError.message : String(fetchError);
-        errors.push(`Failed to fetch ${doc.sourceUrl}: ${msg}`);
-        logger.warn("Ingestion: document fetch failed", {
-          sourceUrl: doc.sourceUrl,
-          error: msg,
-        });
-      }
-    }
+      },
+    );
 
     // Phase 3: Complete job
     await completeIngestionJob(job.id, stats);
@@ -220,6 +309,7 @@ async function ingestSource(source: CbaIntelSource): Promise<IngestionRunResult>
 
 export async function runFullIngestion(): Promise<FullIngestionResult> {
   const startedAt = new Date().toISOString();
+  const tuning = getIngestionTuning();
   logger.info("Starting full CBA intelligence ingestion run");
 
   // Get all active sources
@@ -243,39 +333,42 @@ export async function runFullIngestion(): Promise<FullIngestionResult> {
   let sourcesFailed = 0;
   let totalDocumentsIngested = 0;
 
-  // Process sources sequentially to avoid hammering endpoints
-  for (const source of eligibleSources) {
-    try {
-      const result = await ingestSource(source);
-      results.push(result);
-
-      if (result.status === "failed") {
-        sourcesFailed++;
-      } else {
-        sourcesSucceeded++;
-        totalDocumentsIngested +=
-          result.documentsNew + result.documentsUpdated;
+  const sourceResults = await runWithConcurrency(
+    eligibleSources,
+    tuning.sourceConcurrency,
+    async (source) => {
+      try {
+        return await ingestSource(source);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        logger.error("Ingestion: source-level failure", {
+          sourceId: source.id,
+          error: msg,
+        });
+        return {
+          sourceId: source.id,
+          sourceName: source.name,
+          jobId: "",
+          status: "failed" as const,
+          documentsFound: 0,
+          documentsNew: 0,
+          documentsUpdated: 0,
+          documentsUnchanged: 0,
+          documentsFailed: 0,
+          durationMs: 0,
+          errors: [msg],
+        };
       }
-    } catch (error) {
+    },
+  );
+
+  for (const result of sourceResults) {
+    results.push(result);
+    if (result.status === "failed") {
       sourcesFailed++;
-      const msg = error instanceof Error ? error.message : String(error);
-      logger.error("Ingestion: source-level failure", {
-        sourceId: source.id,
-        error: msg,
-      });
-      results.push({
-        sourceId: source.id,
-        sourceName: source.name,
-        jobId: "",
-        status: "failed",
-        documentsFound: 0,
-        documentsNew: 0,
-        documentsUpdated: 0,
-        documentsUnchanged: 0,
-        documentsFailed: 0,
-        durationMs: 0,
-        errors: [msg],
-      });
+    } else {
+      sourcesSucceeded++;
+      totalDocumentsIngested += result.documentsNew + result.documentsUpdated;
     }
   }
 
@@ -319,3 +412,11 @@ export async function runSourceIngestion(
 
   return ingestSource(source);
 }
+
+export const __test__ = {
+  parsePositiveInt,
+  getIngestionTuning,
+  withTimeout,
+  runWithConcurrency,
+  ingestSource,
+};

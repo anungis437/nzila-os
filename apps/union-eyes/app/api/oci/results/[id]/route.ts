@@ -11,7 +11,7 @@ function unauthorized(): Response {
 	});
 }
 
-export async function GET(request: Request, context: unknown) {
+export async function GET(request: Request, context: any) {
 	if (!requireOrgAccess(request)) {
 		return unauthorized();
 	}

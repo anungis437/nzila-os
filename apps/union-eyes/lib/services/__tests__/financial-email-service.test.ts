@@ -54,6 +54,27 @@ describe('FinancialEmailService', () => {
       mocks.mockSendResendEmail.mockRejectedValue(new Error('Send failed'));
       await expect(FinancialEmailService.sendPaymentConfirmation(params)).rejects.toThrow('Send failed');
     });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'Downstream failure' });
+      await expect(FinancialEmailService.sendPaymentConfirmation(params)).rejects.toThrow('Downstream failure');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendPaymentConfirmation(params)).rejects.toThrow('Failed to send payment confirmation email');
+    });
+
+    it('includes invoice number and receipt URL in HTML when provided', async () => {
+      await FinancialEmailService.sendPaymentConfirmation({
+        ...params,
+        invoiceNumber: 'INV-999',
+        receiptUrl: 'https://receipts.example.com/r1',
+      });
+      const html: string = mocks.mockSendResendEmail.mock.calls[0][0].html;
+      expect(html).toContain('INV-999');
+      expect(html).toContain('https://receipts.example.com/r1');
+    });
   });
 
   describe('sendPaymentFailure', () => {
@@ -81,6 +102,25 @@ describe('FinancialEmailService', () => {
     it('throws on send failure', async () => {
       mocks.mockSendResendEmail.mockRejectedValue(new Error('API error'));
       await expect(FinancialEmailService.sendPaymentFailure(params)).rejects.toThrow('API error');
+    });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'Provider rejected message' });
+      await expect(FinancialEmailService.sendPaymentFailure(params)).rejects.toThrow('Provider rejected message');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendPaymentFailure(params)).rejects.toThrow('Failed to send payment failure email');
+    });
+
+    it('includes retry URL in HTML when provided', async () => {
+      await FinancialEmailService.sendPaymentFailure({
+        ...params,
+        retryUrl: 'https://pay.example.com/retry',
+      });
+      const html: string = mocks.mockSendResendEmail.mock.calls[0][0].html;
+      expect(html).toContain('https://pay.example.com/retry');
     });
   });
 
@@ -113,6 +153,25 @@ describe('FinancialEmailService', () => {
       await FinancialEmailService.sendInvoice(noAttach);
       expect(mocks.mockSendResendEmail).toHaveBeenCalled();
     });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'Invoice send failed' });
+      await expect(FinancialEmailService.sendInvoice(params)).rejects.toThrow('Invoice send failed');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendInvoice(params)).rejects.toThrow('Failed to send invoice email');
+    });
+
+    it('includes Pay Now button in HTML when paymentUrl provided', async () => {
+      await FinancialEmailService.sendInvoice({
+        ...params,
+        paymentUrl: 'https://pay.example.com/inv-001',
+      });
+      const html: string = mocks.mockSendResendEmail.mock.calls[0][0].html;
+      expect(html).toContain('https://pay.example.com/inv-001');
+    });
   });
 
   describe('sendReceipt', () => {
@@ -127,6 +186,48 @@ describe('FinancialEmailService', () => {
       });
       expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
         expect.objectContaining({ subject: 'Receipt #REC-001' }),
+        expect.anything(),
+      );
+    });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'Receipt send failed' });
+      await expect(FinancialEmailService.sendReceipt({
+        to: 'member@test.com',
+        memberName: 'Test User',
+        receiptNumber: 'REC-001',
+        amount: new Decimal('99.99'),
+        currency: 'CAD',
+        paymentDate: new Date('2026-03-01'),
+      })).rejects.toThrow('Receipt send failed');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendReceipt({
+        to: 'member@test.com',
+        memberName: 'Test User',
+        receiptNumber: 'REC-001',
+        amount: new Decimal('99.99'),
+        currency: 'CAD',
+        paymentDate: new Date('2026-03-01'),
+      })).rejects.toThrow('Failed to send receipt email');
+    });
+
+    it('attaches PDF when receiptPdfUrl is provided', async () => {
+      await FinancialEmailService.sendReceipt({
+        to: 'member@test.com',
+        memberName: 'Test User',
+        receiptNumber: 'REC-002',
+        amount: new Decimal('50.00'),
+        currency: 'CAD',
+        paymentDate: new Date('2026-03-01'),
+        receiptPdfUrl: 'https://storage.example.com/rec.pdf',
+      });
+      expect(mocks.mockSendResendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachments: expect.arrayContaining([expect.objectContaining({ filename: 'receipt-REC-002.pdf' })]),
+        }),
         expect.anything(),
       );
     });
@@ -168,6 +269,32 @@ describe('FinancialEmailService', () => {
         expect.anything(),
       );
     });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'Reminder send failed' });
+      await expect(FinancialEmailService.sendPaymentReminder({
+        to: 'member@test.com',
+        memberName: 'Late Payer',
+        dueAmount: new Decimal('200.00'),
+        currency: 'CAD',
+        dueDate: new Date('2026-02-01'),
+        daysOverdue: 15,
+        paymentUrl: 'https://pay.example.com/pay',
+      })).rejects.toThrow('Reminder send failed');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendPaymentReminder({
+        to: 'member@test.com',
+        memberName: 'Late Payer',
+        dueAmount: new Decimal('200.00'),
+        currency: 'CAD',
+        dueDate: new Date('2026-02-01'),
+        daysOverdue: 15,
+        paymentUrl: 'https://pay.example.com/pay',
+      })).rejects.toThrow('Failed to send payment reminder email');
+    });
   });
 
   describe('sendAutopayConfirmation', () => {
@@ -187,6 +314,30 @@ describe('FinancialEmailService', () => {
         expect.anything(),
       );
     });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'AutoPay confirmation failed' });
+      await expect(FinancialEmailService.sendAutopayConfirmation({
+        to: 'member@test.com',
+        memberName: 'Auto Payer',
+        frequency: 'monthly',
+        amount: new Decimal('50.00'),
+        currency: 'CAD',
+        nextChargeDate: new Date('2026-04-01'),
+      })).rejects.toThrow('AutoPay confirmation failed');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendAutopayConfirmation({
+        to: 'member@test.com',
+        memberName: 'Auto Payer',
+        frequency: 'monthly',
+        amount: new Decimal('50.00'),
+        currency: 'CAD',
+        nextChargeDate: new Date('2026-04-01'),
+      })).rejects.toThrow('Failed to send autopay confirmation email');
+    });
   });
 
   describe('sendAutopayDisabled', () => {
@@ -204,6 +355,28 @@ describe('FinancialEmailService', () => {
         }),
         expect.anything(),
       );
+    });
+
+    it('throws when provider returns a failure object', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false, error: 'AutoPay disabled failed' });
+      await expect(FinancialEmailService.sendAutopayDisabled({
+        to: 'member@test.com',
+        memberName: 'Failed Payer',
+        failureCount: 3,
+        lastFailureReason: 'Card expired',
+        updatePaymentUrl: 'https://pay.example.com/update',
+      })).rejects.toThrow('AutoPay disabled failed');
+    });
+
+    it('uses fallback message when provider returns no error string', async () => {
+      mocks.mockSendResendEmail.mockResolvedValue({ success: false });
+      await expect(FinancialEmailService.sendAutopayDisabled({
+        to: 'member@test.com',
+        memberName: 'Failed Payer',
+        failureCount: 3,
+        lastFailureReason: 'Card expired',
+        updatePaymentUrl: 'https://pay.example.com/update',
+      })).rejects.toThrow('Failed to send autopay disabled email');
     });
   });
 });

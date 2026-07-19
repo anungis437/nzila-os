@@ -53,10 +53,10 @@ vi.mock("@/db/schema/domains/finance", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  gte: vi.fn((...a: unknown[]) => a),
-  lte: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  gte: vi.fn((...a: any[]) => a),
+  lte: vi.fn((...a: any[]) => a),
 }));
 
 vi.mock("@/lib/decimal-safe", () => ({

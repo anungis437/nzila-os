@@ -236,7 +236,7 @@ describe('Union Entity Schemas', () => {
 
     it('handles unknown minRole gracefully', () => {
       // Cast to bypass type check — tests runtime fallback
-      expect(hasRoleOrHigher('admin', 'nonexistent' as any)).toBe(true);
+      expect(hasRoleOrHigher('admin', 'nonexistent' as unknown)).toBe(true);
     });
   });
 });

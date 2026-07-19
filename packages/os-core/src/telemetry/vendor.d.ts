@@ -9,20 +9,20 @@
  */
 
 declare module '@opentelemetry/sdk-node' {
-  export const NodeSDK: any
+  export const NodeSDK: unknown
 }
 
 declare module '@opentelemetry/auto-instrumentations-node' {
-  export function getNodeAutoInstrumentations(config?: Record<string, unknown>): any
+  export function getNodeAutoInstrumentations(config?: Record<string, unknown>): unknown
 }
 
 declare module '@opentelemetry/exporter-trace-otlp-http' {
-  export const OTLPTraceExporter: any
+  export const OTLPTraceExporter: unknown
 }
 
 declare module '@opentelemetry/resources' {
-  export const Resource: any
-  export function resourceFromAttributes(attrs: Record<string, unknown>): any
+  export const Resource: unknown
+  export function resourceFromAttributes(attrs: Record<string, unknown>): unknown
 }
 
 declare module '@opentelemetry/semantic-conventions' {
@@ -33,7 +33,7 @@ declare module '@opentelemetry/semantic-conventions' {
 }
 
 declare module '@opentelemetry/api' {
-  export const trace: any
-  export const context: any
+  export const trace: unknown
+  export const context: unknown
   export const SpanStatusCode: { OK: number; ERROR: number; UNSET: number }
 }

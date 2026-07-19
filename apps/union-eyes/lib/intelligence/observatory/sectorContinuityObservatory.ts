@@ -24,18 +24,11 @@
  */
 
 import type {
-  ContinuityDebtEvolutionRecord,
   ContinuityDebtTrend,
   ContinuityTrajectoryBand,
-  ContinuityTrajectoryRecord,
   GovernanceDriftBand,
-  GovernanceEntropyDriftRecord,
   IntelligenceSector,
   SectorBaselineEnvelope,
-  StewardshipEvolutionBand,
-  StewardshipEvolutionRecord,
-  SurvivabilityProgressionBand,
-  SurvivabilityProgressionRecord,
 } from '../contracts/intelligenceContracts';
 import {
   composeSectorBaseline,

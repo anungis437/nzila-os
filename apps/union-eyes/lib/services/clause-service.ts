@@ -27,6 +27,8 @@ import { logger } from "@/lib/logger";
 
 export type NewClause = typeof cbaClause.$inferInsert;
 export type Clause = typeof cbaClause.$inferSelect;
+
+type ClauseTypeValue = (typeof cbaClause.clauseType)['_']['data'];
 export type NewWageProgression = typeof wageProgressions.$inferInsert;
 export type WageProgression = typeof wageProgressions.$inferSelect;
 export type NewBenefitComparison = typeof benefitComparisons.$inferInsert;
@@ -134,8 +136,7 @@ export async function listClauses(
     }
 
     if (filters.clauseType && filters.clauseType.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as any));
+      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as ClauseTypeValue[]));
     }
 
     if (filters.articleNumber) {
@@ -292,8 +293,7 @@ export async function searchClauses(
     ];
 
     if (filters.clauseType && filters.clauseType.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as any));
+      conditions.push(inArray(cbaClause.clauseType, filters.clauseType as ClauseTypeValue[]));
     }
 
     if (filters.cbaId) {
@@ -327,8 +327,7 @@ export async function getClausesByType(
     const clauses = await db
       .select()
       .from(cbaClause)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(eq(cbaClause.clauseType, clauseType as any))
+      .where(eq(cbaClause.clauseType, clauseType as ClauseTypeValue))
       .orderBy(desc(cbaClause.createdAt))
       .limit(limit);
 
@@ -446,17 +445,14 @@ export async function saveClauseComparison(
   clauseIds: string[],
   organizationId: string,
   createdBy: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  analysisResults?: any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+  analysisResults?: (typeof clauseComparisons.$inferInsert)['analysisResults']
+): Promise<typeof clauseComparisons.$inferSelect> {
   try {
     const [comparison] = await db
       .insert(clauseComparisons)
       .values({
         comparisonName,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        clauseType: clauseType as any,
+        clauseType: clauseType as (typeof clauseComparisons.$inferInsert)['clauseType'],
         clauseIds,
         organizationId,
         createdBy,
@@ -555,17 +551,18 @@ export async function getMostViewedClauses(
   cbaId?: string
 ): Promise<Clause[]> {
   try {
-    let query = db
-      .select()
-      .from(cbaClause)
-      .orderBy(desc(cbaClause.viewCount));
-
-    if (cbaId) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = query.where(eq(cbaClause.cbaId, cbaId)) as any;
-    }
-
-    const clauses = await query.limit(limit);
+    const clauses = cbaId
+      ? await db
+          .select()
+          .from(cbaClause)
+          .where(eq(cbaClause.cbaId, cbaId))
+          .orderBy(desc(cbaClause.viewCount))
+          .limit(limit)
+      : await db
+          .select()
+          .from(cbaClause)
+          .orderBy(desc(cbaClause.viewCount))
+          .limit(limit);
 
     return clauses;
   } catch (error) {

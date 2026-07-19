@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { SummaryCard } from "@/components/ui/summary-card";
 import { Shield, FileCheck, Clock, Database, Workflow } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import Link from "next/link";
 import {
   getGovernanceStatusData,
   getGovernanceTimeline,
@@ -188,6 +189,35 @@ async function GovernanceContent() {
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-lg border border-border bg-card p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-2">
+          Decision Intelligence Operations
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Institutional reasoning surfaces for situation appraisal, problem analysis, decision matrices, pre-mortem risk analysis, and continuity drift intelligence.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+          <Link href="/governance/decision-intelligence" className="rounded-md border border-border p-3 text-sm font-medium text-foreground hover:bg-muted/40">
+            Decision Intelligence
+          </Link>
+          <Link href="/governance/problem-analysis" className="rounded-md border border-border p-3 text-sm font-medium text-foreground hover:bg-muted/40">
+            Problem Analysis
+          </Link>
+          <Link href="/governance/decision-matrices" className="rounded-md border border-border p-3 text-sm font-medium text-foreground hover:bg-muted/40">
+            Decision Matrices
+          </Link>
+          <Link href="/governance/risk-analysis" className="rounded-md border border-border p-3 text-sm font-medium text-foreground hover:bg-muted/40">
+            Risk Analysis
+          </Link>
+          <Link href="/governance/continuity-drift" className="rounded-md border border-border p-3 text-sm font-medium text-foreground hover:bg-muted/40">
+            Continuity Drift
+          </Link>
+          <Link href="/governance/replay" className="rounded-md border border-border p-3 text-sm font-medium text-foreground hover:bg-muted/40">
+            Governance Replay
+          </Link>
         </div>
       </div>
     </>

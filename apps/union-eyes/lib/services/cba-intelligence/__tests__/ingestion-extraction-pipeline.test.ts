@@ -23,6 +23,8 @@ const mocks = vi.hoisted(() => ({
   mockCreateExtractionRun: vi.fn(),
   mockCompleteExtractionRun: vi.fn(),
   mockCreateFindingsBatch: vi.fn(),
+  // Review service
+  mockFlagForFollowupReview: vi.fn(),
   // Document service (for extraction)
   mockUpdateDocumentStatus: vi.fn(),
   // DB
@@ -82,6 +84,10 @@ vi.mock("@/lib/services/cba-intelligence/extraction-service", () => ({
   listAgreements: vi.fn(),
 }));
 
+vi.mock("@/lib/services/cba-intelligence/review-service", () => ({
+  flagForFollowupReview: mocks.mockFlagForFollowupReview,
+}));
+
 vi.mock("@/db/db", () => ({
   db: {
     select: mocks.mockDbSelect,
@@ -96,8 +102,8 @@ vi.mock("@/db/schema", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((_col: unknown, val: unknown) => ({ eq: val })),
-  and: vi.fn((...args: unknown[]) => ({ and: args })),
+  eq: vi.fn((_col: any, val: any) => ({ eq: val })),
+  and: vi.fn((...args: any[]) => ({ and: args })),
   desc: vi.fn(),
   ilike: vi.fn(),
   relations: vi.fn(() => ({})),
@@ -278,6 +284,31 @@ describe("CBA Intelligence — Ingestion Pipeline Integration", () => {
     expect(sr.documentsFailed).toBe(0);
     expect(result.totalDocumentsIngested).toBe(2); // new + updated
   });
+
+  it("retries transient fetch failures before marking document failed", async () => {
+    process.env.CBA_INTEL_FETCH_RETRIES = "2";
+    process.env.CBA_INTEL_DOCUMENT_CONCURRENCY = "1";
+
+    const flakyAdapter = {
+      discover: vi.fn().mockResolvedValue([testDiscoveredDoc]),
+      fetch: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("upstream timeout"))
+        .mockResolvedValueOnce(testFetchedContent),
+    };
+    mocks.mockGetAdapter.mockReturnValue(flakyAdapter);
+    mocks.mockUpsertDocument.mockResolvedValue({ action: "created", id: "doc-001" });
+
+    const { runFullIngestion } = await import("@/lib/services/cba-intelligence/ingestion-orchestrator");
+    const result = await runFullIngestion();
+
+    expect(flakyAdapter.fetch).toHaveBeenCalledTimes(2);
+    expect(result.results[0].documentsFailed).toBe(0);
+    expect(result.results[0].documentsNew).toBe(1);
+
+    delete process.env.CBA_INTEL_FETCH_RETRIES;
+    delete process.env.CBA_INTEL_DOCUMENT_CONCURRENCY;
+  });
 });
 
 describe("CBA Intelligence — Extraction Pipeline Integration", () => {
@@ -301,7 +332,14 @@ describe("CBA Intelligence — Extraction Pipeline Integration", () => {
     // Extraction run lifecycle
     mocks.mockCreateExtractionRun.mockResolvedValue({ id: "run-001" });
     mocks.mockCompleteExtractionRun.mockResolvedValue(undefined);
-    mocks.mockCreateFindingsBatch.mockResolvedValue(undefined);
+    mocks.mockCreateFindingsBatch.mockImplementation(async (records) =>
+      // Simulate DB insert returning generated IDs and preserving confidence.
+      records.map((r: { confidence: string }, idx: number) => ({
+        id: `finding-${idx + 1}`,
+        confidence: r.confidence,
+      }))
+    );
+    mocks.mockFlagForFollowupReview.mockResolvedValue(undefined);
     mocks.mockUpdateDocumentStatus.mockResolvedValue(undefined);
   });
 
@@ -329,9 +367,11 @@ describe("CBA Intelligence — Extraction Pipeline Integration", () => {
     expect(mocks.mockCreateFindingsBatch).toHaveBeenCalled();
     const findings = mocks.mockCreateFindingsBatch.mock.calls[0][0];
     expect(findings.length).toBeGreaterThan(0);
+    expect(findings.some((f: { findingType: string }) => f.findingType === "clause_classification")).toBe(true);
 
     // Extraction confidence metrics emitted
     expect(mocks.mockMetricObserve).toHaveBeenCalled();
+    expect(mocks.mockFlagForFollowupReview).toHaveBeenCalled();
   });
 
   it("handles document-not-found gracefully", async () => {

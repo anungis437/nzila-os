@@ -41,7 +41,12 @@ export type StructuralPatternId =
   // onboarding inheritance
   | 'onboarding_structured_inheritance'
   | 'onboarding_observational'
-  | 'onboarding_self_directed';
+  | 'onboarding_self_directed'
+  // governance decision replay (reconstruction from records alone)
+  | 'decision_replay_self_sufficient'
+  | 'decision_replay_mostly'
+  | 'decision_replay_people_dependent'
+  | 'decision_replay_not_reconstructible';
 
 export interface StructuralContinuitySignal {
   pattern: StructuralPatternId;
@@ -84,6 +89,11 @@ const PATTERN_ARCHETYPES: Record<StructuralPatternId, ContinuityArchetypeId[]> =
   onboarding_structured_inheritance: ['onboarding_survivability', 'operational_continuity'],
   onboarding_observational: ['onboarding_survivability'],
   onboarding_self_directed: ['institutional_memory_dependency'],
+
+  decision_replay_self_sufficient: ['operational_continuity'],
+  decision_replay_mostly: ['operational_continuity'],
+  decision_replay_people_dependent: ['institutional_memory_dependency', 'stewardship_concentration'],
+  decision_replay_not_reconstructible: ['institutional_memory_dependency', 'governance_fragmentation'],
 };
 
 /**
@@ -127,6 +137,12 @@ export const QUESTION_OPTION_PATTERNS: Record<string, Record<string, StructuralP
     committee_alignment: 'authority_committee_alignment',
     executive_override: 'authority_executive_override',
     ad_hoc_negotiation: 'authority_ad_hoc_negotiation',
+  },
+  et_07: {
+    records_self_sufficient: 'decision_replay_self_sufficient',
+    records_mostly: 'decision_replay_mostly',
+    people_dependent: 'decision_replay_people_dependent',
+    not_reconstructible: 'decision_replay_not_reconstructible',
   },
 };
 

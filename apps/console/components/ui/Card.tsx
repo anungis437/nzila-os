@@ -24,7 +24,7 @@ export function Card({
 }
 
 export function CardHeader({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-5 pb-3', className)} {...rest} />
+  return <div className={cn('p-6 pb-0', className)} {...rest} />
 }
 
 export function CardTitle({ className, ...rest }: React.HTMLAttributes<HTMLHeadingElement>) {
@@ -38,13 +38,13 @@ export function CardDescription({ className, ...rest }: React.HTMLAttributes<HTM
 }
 
 export function CardBody({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-5 pt-0', className)} {...rest} />
+  return <div className={cn('p-6', className)} {...rest} />
 }
 
 export function CardFooter({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('p-5 pt-3 border-t border-gray-100 flex items-center justify-end gap-2', className)}
+      className={cn('p-6 pt-4 border-t border-gray-100 flex items-center justify-end gap-2', className)}
       {...rest}
     />
   )

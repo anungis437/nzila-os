@@ -133,8 +133,7 @@ export interface StandardizedError {
 /**
  * Standard success response format
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface StandardizedSuccess<T = any> {
+export interface StandardizedSuccess<T = unknown> {
   /** Indicates successful operation */
   success: true;
   
@@ -412,16 +411,16 @@ export function fromError(error: unknown): NextResponse<StandardizedError> {
  *   return standardSuccessResponse(data);
  * });
  */
-export function withStandardizedErrors<T extends (...args: unknown[]) => Promise<NextResponse>>(
+export function withStandardizedErrors<T extends (...args: never[]) => Promise<NextResponse>>(
   handler: T
 ): T {
   return (async (...args: unknown[]) => {
     try {
-      return await handler(...args);
+      return await handler(...(args as never[]));
     } catch (error) {
       return fromError(error);
     }
-  }) as T;
+  }) as unknown as T;
 }
 
 /**

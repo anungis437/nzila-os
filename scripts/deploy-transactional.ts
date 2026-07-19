@@ -44,7 +44,13 @@ type ParsedArgs = {
   healthTimeoutMs: number
   evidenceOut: string
   fallbackTargetsJson?: string
+  requireDigestPinned: boolean
 }
+
+// BR-5 defense-in-depth: a production deploy target must reference an immutable
+// image digest, never a mutable tag. This mirrors the workflow-level gate so the
+// promotion script is fail-closed even if invoked directly.
+const DIGEST_PINNED_RE = /@sha256:[0-9a-f]{64}$/
 
 function parseArgs(argv: string[]): ParsedArgs {
   const args: Record<string, string> = {}
@@ -65,6 +71,13 @@ function parseArgs(argv: string[]): ParsedArgs {
     throw new Error('Missing --resource-group (or AZURE_RESOURCE_GROUP env var)')
   }
 
+  // Require immutable digest pinning when explicitly requested, or by default
+  // whenever the target resource group is a production group. Opt-out is only
+  // possible by passing --require-digest-pinned false for a non-production group.
+  const requireFlag = args['require-digest-pinned']
+  const isProdGroup = /(^|[-_])prod($|[-_])/i.test(resourceGroup)
+  const requireDigestPinned = requireFlag !== undefined ? requireFlag === 'true' : isProdGroup
+
   return {
     manifest: resolve(args.manifest ?? 'staging-artifacts/artifact-manifest.json'),
     resourceGroup,
@@ -73,6 +86,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     healthTimeoutMs: Number(args['health-timeout-ms'] ?? 15000),
     evidenceOut: resolve(args['evidence-out'] ?? `ops/deploy-evidence/production-${new Date().toISOString().replace(/[:.]/g, '-')}.json`),
     fallbackTargetsJson: args['fallback-targets-json'] ?? process.env.PRODUCTION_DEPLOY_TARGETS_JSON,
+    requireDigestPinned,
   }
 }
 
@@ -82,7 +96,7 @@ function ensure(condition: unknown, message: string): asserts condition {
   }
 }
 
-function runJsonCommand(command: string): any {
+function runJsonCommand(command: string): unknown {
   const output = execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   return JSON.parse(output)
 }
@@ -91,7 +105,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms))
 }
 
-function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string): DeployTarget[] {
+function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string, requireDigestPinned = false): DeployTarget[] {
   const manifestRaw = readFileSync(manifestPath, 'utf8')
   const manifest = JSON.parse(manifestRaw) as { deployTargets?: unknown[]; apps?: unknown[] }
   const rawTargets = Array.isArray(manifest.deployTargets)
@@ -114,6 +128,11 @@ function parseManifestTargets(manifestPath: string, fallbackTargetsJson?: string
     const image = String(raw.image ?? raw.imageRef ?? raw.digest ?? '').trim()
     ensure(appName.length > 0, `Deploy target missing containerAppName/app/name: ${JSON.stringify(raw)}`)
     ensure(image.length > 0, `Deploy target ${appName} missing image/imageRef/digest`)
+    ensure(
+      !requireDigestPinned || DIGEST_PINNED_RE.test(image),
+      `BR-5: deploy target ${appName} image '${image}' is not pinned to an immutable @sha256 digest. ` +
+        `A mutable tag is not accepted for production promotion. Provide an @sha256-pinned image reference.`,
+    )
 
     targets.push({
       containerAppName: appName,
@@ -208,7 +227,7 @@ function rollback(updatedStates: TargetState[], resourceGroup: string): void {
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
-  const targets = parseManifestTargets(args.manifest, args.fallbackTargetsJson)
+  const targets = parseManifestTargets(args.manifest, args.fallbackTargetsJson, args.requireDigestPinned)
 
   const evidence: Record<string, unknown> = {
     mode: 'transactional-production-promotion',

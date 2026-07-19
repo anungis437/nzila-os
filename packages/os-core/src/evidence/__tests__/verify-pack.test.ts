@@ -4,8 +4,8 @@ const mockExistsSync = vi.fn()
 const mockReadFileSync = vi.fn()
 
 vi.mock('node:fs', () => ({
-  existsSync: (...args: any[]) => mockExistsSync(...args),
-  readFileSync: (...args: any[]) => mockReadFileSync(...args),
+  existsSync: (...args: unknown[]) => mockExistsSync(...args),
+  readFileSync: (...args: unknown[]) => mockReadFileSync(...args),
 }))
 
 import { verifyPackIndex } from '../verify-pack'
@@ -55,7 +55,7 @@ describe('verify-pack', () => {
       artifacts: [{ sha256: 'abc', type: 'audit' }],
     }
     const sealed = { ...packIndex, seal: generateSeal(packIndex) }
-    ;(sealed as any).orgId = 'tampered-org'
+    ;(sealed as unknown as { orgId: string }).orgId = 'tampered-org'
 
     mockExistsSync.mockImplementation((p: string) => p === '/tmp/pack.json')
     mockReadFileSync.mockReturnValue(JSON.stringify(sealed))

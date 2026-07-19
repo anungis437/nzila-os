@@ -188,7 +188,7 @@ return null;
   private static calculateTieredDues(
     rule: typeof duesRules.$inferSelect,
     memberData?: DuesCalculationParams['memberData']
-  ): { amount: number; breakdown: unknown } {
+  ): { amount: number; breakdown: any } {
     if (!rule.tierStructure || !Array.isArray(rule.tierStructure)) {
       return { amount: 0, breakdown: {} };
     }

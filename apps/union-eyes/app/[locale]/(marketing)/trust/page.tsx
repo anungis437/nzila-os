@@ -14,6 +14,7 @@
  * Canadian positioning: Canadian-hosted, bilingual-first, sovereignty-conscious
  * organizational trust for democratic infrastructure.
  */
+import type { Metadata } from 'next';
 /**
  * Trust & Compliance page.
  * Accessible at /{locale}/trust — fully translated.
@@ -24,7 +25,6 @@
  */
 export const dynamic = 'force-dynamic';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import {

@@ -37,6 +37,6 @@ export const GET = withApi(
       throw ApiError.notFound('Batch not found');
     }
 
-    return detail as unknown as Record<string, unknown>;
+    return detail as any as Record<string, unknown>;
   },
 );

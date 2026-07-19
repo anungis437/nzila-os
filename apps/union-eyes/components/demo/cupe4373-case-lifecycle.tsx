@@ -39,19 +39,23 @@ export function Cupe4373CaseLifecycle({ demoCase }: { demoCase: DemoCase }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY(demoCase.id));
-      if (raw) {
-        const parsed = JSON.parse(raw) as { stage: LifecycleStage; history: Entry[] };
-        if (parsed?.stage && STAGE_ORDER.includes(parsed.stage)) {
-          setStage(parsed.stage);
-          setHistory(parsed.history ?? []);
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY(demoCase.id));
+        if (raw) {
+          const parsed = JSON.parse(raw) as { stage: LifecycleStage; history: Entry[] };
+          if (parsed?.stage && STAGE_ORDER.includes(parsed.stage)) {
+            setStage(parsed.stage);
+            setHistory(parsed.history ?? []);
+          }
         }
+      } catch {
+        // ignore — fall back to derived stage
       }
-    } catch {
-      // ignore — fall back to derived stage
-    }
-    setHydrated(true);
+      setHydrated(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [demoCase.id]);
 
   useEffect(() => {

@@ -21,7 +21,7 @@ vi.mock("@/db/db", () => {
     }
 
     // Make the chain thenable so `await db.select().from(x).where(y)` resolves
-    chain.then = (resolve: (v: unknown[]) => void) => {
+    chain.then = (resolve: (v: any[]) => void) => {
       resolve([]);
       return Promise.resolve([]);
     };
@@ -45,10 +45,10 @@ vi.mock("@/db/schema/domains/agreements/collective-agreements", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  ilike: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  ilike: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   sql: vi.fn(),
 }));
 

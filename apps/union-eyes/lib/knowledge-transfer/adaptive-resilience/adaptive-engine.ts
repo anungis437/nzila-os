@@ -65,9 +65,6 @@ export async function computeAdaptiveResilience(
   const mitigationEntries = store.entries.filter(
     (e) => e.memoryType === 'mitigation_comparison' || e.memoryType === 'continuity_assessment',
   );
-  const governanceEntries = store.entries.filter(
-    (e) => e.memoryType === 'governance_reasoning' || e.memoryType === 'decision_brief',
-  );
 
   // Identify periods of resilience improvement
   const timeline = store.resilienceTimeline;

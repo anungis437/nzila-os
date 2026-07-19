@@ -10,12 +10,15 @@
  */
 
 import { sql, SQL } from 'drizzle-orm';
-import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { safeColumnName } from '@/lib/safe-sql-identifiers';
 
 // ============================================================================
 // Type Definitions
 // ============================================================================
+
+/** Row shape returned by raw `tx.execute(sql\`...\`)` queries. */
+type SqlRow = Record<string, unknown>;
 
 export interface DateRange {
   startDate: Date;
@@ -197,8 +200,7 @@ export async function getMonthlyTrends(
     ORDER BY month DESC
   `));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return trends.map((row: any) => ({
+  return trends.map((row: SqlRow) => ({
     period: row.period,
     value: Number(row.value),
     change: 0, // Will be calculated from change_percentage
@@ -285,22 +287,17 @@ export async function getClaimsAnalytics(
 
   return {
     totalClaims: Number(metrics[0]?.total_claims || 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    claimsByStatus: Object.fromEntries(statusBreakdown.map((r: any) => [r.status, Number(r.count)])),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    claimsByType: Object.fromEntries(typeBreakdown.map((r: any) => [r.claim_type, Number(r.count)])),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    claimsByPriority: Object.fromEntries(priorityBreakdown.map((r: any) => [r.priority, Number(r.count)])),
+    claimsByStatus: Object.fromEntries(statusBreakdown.map((r: SqlRow) => [String(r.status), Number(r.count)])),
+    claimsByType: Object.fromEntries(typeBreakdown.map((r: SqlRow) => [String(r.claim_type), Number(r.count)])),
+    claimsByPriority: Object.fromEntries(priorityBreakdown.map((r: SqlRow) => [String(r.priority), Number(r.count)])),
     avgResolutionDays: Number(metrics[0]?.avg_resolution_days || 0),
     medianResolutionDays: Number(metrics[0]?.median_resolution_days || 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolutionTrend: resolutionTrend.map((r: any) => ({
+    resolutionTrend: resolutionTrend.map((r: SqlRow) => ({
       date: r.date,
       count: Number(r.count),
       avgDays: Number(r.avg_days || 0),
     })),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    topStewards: topStewards.map((r: any) => ({
+    topStewards: topStewards.map((r: SqlRow) => ({
       id: r.id,
       name: r.name,
       caseload: Number(r.caseload),
@@ -321,8 +318,7 @@ export async function getClaimsByDateRange(
     priority?: string[];
     assignedTo?: string;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any[]> {
+): Promise<SqlRow[]> {
   const { startDate, endDate } = dateRange;
   
   let query = sql`
@@ -363,8 +359,7 @@ export async function getClaimsByDateRange(
   query = sql`${query} ORDER BY c.created_at DESC`;
 
   const result = await withRLSContext(async (tx) => tx.execute(query));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as SqlRow[];
 }
 
 // ============================================================================
@@ -451,17 +446,14 @@ export async function getMemberAnalytics(
     newMembers30Days: Number(memberCounts[0]?.new_members_30_days || 0),
     retentionRate: Number(retention[0]?.avg_retention_rate || 0),
     avgClaimsPerMember: Number(avgClaims[0]?.avg_claims || 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    engagementDistribution: Object.fromEntries(engagementDist.map((r: any) => [r.engagement_level, Number(r.count)])),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    topMembers: topMembers.map((r: any) => ({
+    engagementDistribution: Object.fromEntries(engagementDist.map((r: SqlRow) => [String(r.engagement_level), Number(r.count)])),
+    topMembers: topMembers.map((r: SqlRow) => ({
       id: r.id,
       name: r.name,
       claimsCount: Number(r.claims_count),
       winRate: Number(r.win_rate || 0),
     })),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cohortAnalysis: cohortAnalysis.map((r: any) => ({
+    cohortAnalysis: cohortAnalysis.map((r: SqlRow) => ({
       cohortMonth: r.cohort_month,
       size: Number(r.size),
       retentionRate: Number(r.retention_rate || 0),
@@ -534,14 +526,12 @@ export async function getDeadlineAnalytics(
     avgDaysOverdue: Number(metrics[0]?.avg_days_overdue || 0),
     criticalOverdueCount: Number(metrics[0]?.critical_overdue_count || 0),
     extensionApprovalRate: Number(extensionMetrics[0]?.approval_rate || 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    complianceTrend: complianceTrend.map((r: any) => ({
+    complianceTrend: complianceTrend.map((r: SqlRow) => ({
       date: r.date,
       onTimeRate: Number(r.on_time_rate || 0),
       overdueCount: Number(r.overdue_count || 0),
     })),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    deadlinesByPriority: Object.fromEntries(priorityBreakdown.map((r: any) => [r.priority, Number(r.count)])),
+    deadlinesByPriority: Object.fromEntries(priorityBreakdown.map((r: SqlRow) => [String(r.priority), Number(r.count)])),
   };
 }
 
@@ -616,17 +606,15 @@ export async function getFinancialAnalytics(
     avgSettlement: Number(metrics[0]?.avg_settlement || 0),
     costPerClaim: Number(metrics[0]?.cost_per_claim || 0),
     recoveryRate: Number(metrics[0]?.recovery_rate || 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    financialTrend: financialTrend.map((r: any) => ({
+    financialTrend: financialTrend.map((r: SqlRow) => ({
       date: r.date,
       claimValue: Number(r.claim_value || 0),
       settlements: Number(r.settlements || 0),
       costs: Number(r.costs || 0),
     })),
     outcomeDistribution: Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      outcomeDistribution.map((r: any) => [
-        r.outcome,
+      outcomeDistribution.map((r: SqlRow) => [
+        String(r.outcome),
         { count: Number(r.count), value: Number(r.value || 0) }
       ])
     ),
@@ -652,8 +640,7 @@ export async function getWeeklyActivityHeatmap(organizationId: string): Promise<
     ORDER BY day_of_week, hour_of_day
   `));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return heatmapData.map((r: any) => ({
+  return heatmapData.map((r: SqlRow) => ({
     dayOfWeek: Number(r.day_of_week),
     hourOfDay: Number(r.hour_of_day),
     activityScore: Number(r.activity_score),
@@ -669,8 +656,7 @@ export async function getWeeklyActivityHeatmap(organizationId: string): Promise<
  * Get all reports for an organization (Legacy version - replaced by enhanced getReports below)
  * Kept for backwards compatibility if needed
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getReportsLegacy(organizationId: string, userId?: string): Promise<any[]> {
+export async function getReportsLegacy(organizationId: string, userId?: string): Promise<SqlRow[]> {
   let query = sql`
     SELECT 
       r.id,
@@ -699,8 +685,7 @@ export async function getReportsLegacy(organizationId: string, userId?: string):
   query = sql`${query} ORDER BY r.updated_at DESC`;
 
   const result = await withRLSContext(async (tx) => tx.execute(query));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return result as any[];
+  return result as SqlRow[];
 }
 
 /**
@@ -714,14 +699,12 @@ export async function createReportLegacy(
     description?: string;
     reportType: string;
     category?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    config: any;
+    config: unknown;
     isPublic?: boolean;
     isTemplate?: boolean;
     templateId?: string;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<SqlRow> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO reports (
       organization_id, name, description, report_type, category, config, 
@@ -765,8 +748,7 @@ export async function createExportJob(
     scheduleId?: string;
     exportType: string;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<SqlRow> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO export_jobs (organization_id, report_id, schedule_id, export_type, created_by)
     VALUES (${organizationId}, ${exportData.reportId || null}, ${exportData.scheduleId || null}, 
@@ -818,8 +800,7 @@ export async function updateExportJobStatus(
 /**
  * Get export job by ID
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getExportJob(jobId: string): Promise<any> {
+export async function getExportJob(jobId: string): Promise<SqlRow> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM export_jobs WHERE id = ${jobId}
   `));
@@ -829,8 +810,7 @@ export async function getExportJob(jobId: string): Promise<any> {
 /**
  * Get user's export jobs
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getUserExportJobs(organizationId: string, userId: string): Promise<any[]> {
+export async function getUserExportJobs(organizationId: string, userId: string): Promise<SqlRow[]> {
   return await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       ej.*,
@@ -851,16 +831,14 @@ export async function getUserExportJobs(organizationId: string, userId: string):
 /**
  * Refresh all analytics materialized views
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function refreshAnalyticsViews(): Promise<any[]> {
+export async function refreshAnalyticsViews(): Promise<SqlRow[]> {
   return await withRLSContext(async (tx) => tx.execute(sql`SELECT * FROM refresh_analytics_views()`));
 }
 
 /**
  * Get last refresh time for materialized views
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getViewRefreshStats(): Promise<any[]> {
+export async function getViewRefreshStats(): Promise<SqlRow[]> {
   return await withRLSContext(async (tx) => tx.execute(sql`
     SELECT 
       schemaname,
@@ -889,10 +867,8 @@ export async function getReports(
     isPublic?: boolean;
     search?: string;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [sql`r.tenant_id = ${organizationId}`];
+): Promise<SqlRow[]> {
+  const conditions: SQL[] = [sql`r.tenant_id = ${organizationId}`];
 
   // Add filters
   if (filters?.category) {
@@ -927,9 +903,7 @@ export async function getReports(
     GROUP BY r.id
     ORDER BY r.updated_at DESC
   `));
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return reports as any[];
+  return reports as SqlRow[];
 }
 
 /**
@@ -938,8 +912,7 @@ export async function getReports(
 export async function getReportById(
   reportId: string,
   organizationId: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any | null> {
+): Promise<SqlRow | null> {
   const reports = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT r.*
     FROM reports r
@@ -960,14 +933,12 @@ export async function createReport(
     description?: string;
     reportType: string;
     category?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    config: any;
+    config: unknown;
     isPublic?: boolean;
     isTemplate?: boolean;
     templateId?: string;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<SqlRow> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO reports (
       tenant_id, name, description, report_type, category, config,
@@ -993,12 +964,10 @@ export async function updateReport(
   data: {
     name?: string;
     description?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    config?: any;
+    config?: unknown;
     isPublic?: boolean;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<SqlRow> {
   const setClauses: SQL[] = [];
 
   // Build SET clauses using safe column names and parameterized values
@@ -1056,8 +1025,7 @@ export async function logReportExecution(
   userId: string,
   data: {
     format: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parameters?: any;
+    parameters?: unknown;
     resultCount?: number;
     executionTimeMs: number;
     fileUrl?: string;
@@ -1065,8 +1033,7 @@ export async function logReportExecution(
     status: string;
     errorMessage?: string;
   }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<SqlRow> {
   const result = await withRLSContext(async (tx) => tx.execute(sql`
     INSERT INTO report_executions (
       report_id, tenant_id, executed_by, format, parameters,
@@ -1099,8 +1066,7 @@ export async function getReportExecutions(
   reportId: string,
   organizationId: string,
   limit: number = 50
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any[]> {
+): Promise<SqlRow[]> {
   const executions = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT re.*, u.email as executed_by_email
     FROM report_executions re
@@ -1109,9 +1075,7 @@ export async function getReportExecutions(
     ORDER BY re.executed_at DESC
     LIMIT ${limit}
   `));
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return executions as any[];
+  return executions as SqlRow[];
 }
 
 /**
@@ -1120,10 +1084,8 @@ export async function getReportExecutions(
 export async function getReportTemplates(
   organizationId?: string,
   category?: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [sql`rt.is_active = true`];
+): Promise<SqlRow[]> {
+  const conditions: SQL[] = [sql`rt.is_active = true`];
 
   // Include system templates and tenant-specific templates
   if (organizationId) {
@@ -1144,9 +1106,7 @@ export async function getReportTemplates(
     WHERE ${whereClause}
     ORDER BY rt.name ASC
   `));
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return templates as any[];
+  return templates as SqlRow[];
 }
 
 /**
@@ -1157,8 +1117,7 @@ export async function createReportFromTemplate(
   organizationId: string,
   userId: string,
   name: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> {
+): Promise<SqlRow> {
   // Get template
   const template = await withRLSContext(async (tx) => tx.execute(sql`
     SELECT * FROM report_templates WHERE id = ${templateId}

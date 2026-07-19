@@ -221,7 +221,7 @@ describe('Logger', () => {
     });
 
     it('handles non-Error objects', () => {
-      loggerModule.logger.error('Bad thing', 'string-error' as unknown as Error);
+      loggerModule.logger.error('Bad thing', 'string-error' as any as Error);
       expect(stderrSpy).toHaveBeenCalledWith(
         expect.stringContaining('Bad thing')
       );
@@ -263,8 +263,8 @@ describe('Logger', () => {
     });
 
     it('warn method routes through Sentry warning path on server side', async () => {
-      const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
-      delete (globalThis as unknown as Record<string, unknown>).window;
+      const originalWindow = (globalThis as any as Record<string, unknown>).window;
+      delete (globalThis as any as Record<string, unknown>).window;
       const sentry = await import('@sentry/nextjs');
       vi.mocked(sentry.captureMessage).mockClear();
 
@@ -272,7 +272,7 @@ describe('Logger', () => {
       await Promise.resolve();
 
       expect(vi.mocked(sentry.captureMessage)).toHaveBeenCalled();
-      (globalThis as unknown as Record<string, unknown>).window = originalWindow;
+      (globalThis as any as Record<string, unknown>).window = originalWindow;
     });
 
     it('handles missing Sentry module instance in browser warn path', async () => {
@@ -307,8 +307,8 @@ describe('Logger', () => {
     });
 
     it('swallows async Sentry callback failures', async () => {
-      const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
-      delete (globalThis as unknown as Record<string, unknown>).window;
+      const originalWindow = (globalThis as any as Record<string, unknown>).window;
+      delete (globalThis as any as Record<string, unknown>).window;
       const sentry = await import('@sentry/nextjs');
       vi.mocked(sentry.captureException).mockImplementation(() => {
         throw new Error('sentry-fail');
@@ -318,7 +318,7 @@ describe('Logger', () => {
       await Promise.resolve();
 
       vi.mocked(sentry.captureException).mockImplementation(() => undefined);
-      (globalThis as unknown as Record<string, unknown>).window = originalWindow;
+      (globalThis as any as Record<string, unknown>).window = originalWindow;
     });
 
     it('covers singleton getInstance when instance already exists', async () => {
@@ -343,7 +343,7 @@ describe('Logger', () => {
       mod.__loggerTestInternals.setSentryLoaderOverride(async () => ({
         captureMessage,
         captureException: vi.fn(),
-      } as unknown as typeof import('@sentry/nextjs')));
+      } as any as typeof import('@sentry/nextjs')));
 
       mod.logger.warn('warn-with-sentry');
       await Promise.resolve();

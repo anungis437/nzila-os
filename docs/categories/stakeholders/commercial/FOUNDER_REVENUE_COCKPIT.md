@@ -2,7 +2,7 @@
 
 > **Operating manual for the founder-led revenue motion.**
 > Version 1.0 — live data drawn from `@nzila/platform-growth-os` and `@nzila/deal-engine`.
-> Null state rule: any metric with no recorded activity shows **"Awaiting activity data"** — never zero, never estimated.
+> Null state rule: unknown metric with no recorded activity shows **"Awaiting activity data"** — never zero, never estimated.
 
 ---
 

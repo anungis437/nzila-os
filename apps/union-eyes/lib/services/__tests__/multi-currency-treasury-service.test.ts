@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => ({
   mockInsertValues: vi.fn(),
 }));
 
-function sfwol(data: unknown[] = []) {
+function sfwol(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn(() => ({
@@ -28,7 +28,7 @@ function sfwol(data: unknown[] = []) {
     })),
   };
 }
-function sfwNoOrder(data: unknown[] = []) {
+function sfwNoOrder(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn().mockResolvedValue(data),
@@ -66,11 +66,11 @@ vi.mock("@/db/schema/domains/infrastructure", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((c: unknown) => c),
-  lte: vi.fn((...a: unknown[]) => a),
-  gte: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  desc: vi.fn((c: any) => c),
+  lte: vi.fn((...a: any[]) => a),
+  gte: vi.fn((...a: any[]) => a),
 }));
 
 vi.mock("@/lib/logger", () => ({

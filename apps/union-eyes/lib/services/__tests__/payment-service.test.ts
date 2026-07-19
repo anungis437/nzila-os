@@ -18,8 +18,8 @@ const mockDbUpdate = vi.fn();
 
 vi.mock('@/db', () => ({
   db: {
-    select: (...a: unknown[]) => mockDbSelect(...a),
-    update: (...a: unknown[]) => mockDbUpdate(...a),
+    select: (...a: any[]) => mockDbSelect(...a),
+    update: (...a: any[]) => mockDbUpdate(...a),
   },
 }));
 
@@ -40,8 +40,8 @@ vi.mock('@/db/schema-organizations', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => ({ type: 'eq', args })),
-  and: vi.fn((...args: unknown[]) => ({ type: 'and', args })),
+  eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
+  and: vi.fn((...args: any[]) => ({ type: 'and', args })),
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -51,21 +51,21 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@react-pdf/renderer', () => ({
   Document: 'Document',
   Page: 'Page',
-  StyleSheet: { create: vi.fn((s: unknown) => s) },
+  StyleSheet: { create: vi.fn((s: any) => s) },
   Text: 'Text',
   pdf: vi.fn(() => ({ toBuffer: vi.fn().mockResolvedValue(Buffer.from('fake-pdf')) })),
 }));
 
 vi.mock('react', () => ({
-  default: { createElement: vi.fn((...args: unknown[]) => ({ type: args[0], props: args[1] })) },
-  createElement: vi.fn((...args: unknown[]) => ({ type: args[0], props: args[1] })),
+  default: { createElement: vi.fn((...args: any[]) => ({ type: args[0], props: args[1] })) },
+  createElement: vi.fn((...args: any[]) => ({ type: args[0], props: args[1] })),
 }));
 
 const mockStripeCheckoutCreate = vi.fn();
 vi.mock('@nzila/payments-stripe', () => ({
   getStripeClient: vi.fn(() => ({
     checkout: {
-      sessions: { create: (...a: unknown[]) => mockStripeCheckoutCreate(...a) },
+      sessions: { create: (...a: any[]) => mockStripeCheckoutCreate(...a) },
     },
   })),
 }));
@@ -304,5 +304,39 @@ describe('PaymentService.generateReceipt', () => {
     await expect(
       PaymentService.generateReceipt('txn-1'),
     ).rejects.toThrow('Transaction not paid: txn-1');
+  });
+});
+
+// ─── getTransactionBySessionId ───────────────────────────────────────────────
+
+describe('PaymentService.getTransactionBySessionId', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('returns matching transaction by stripeSessionId in metadata', async () => {
+    const txns = [
+      { id: 'txn-1', processorType: 'stripe', metadata: { stripeSessionId: 'cs_abc' } },
+      { id: 'txn-2', processorType: 'stripe', metadata: { stripeSessionId: 'cs_xyz' } },
+    ];
+    mockDbSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(txns),
+      }),
+    });
+
+    const result = await PaymentService.getTransactionBySessionId('cs_abc');
+    expect(result).toMatchObject({ id: 'txn-1' });
+  });
+
+  it('returns null when no transaction matches session ID', async () => {
+    mockDbSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([
+          { id: 'txn-1', processorType: 'stripe', metadata: { stripeSessionId: 'cs_other' } },
+        ]),
+      }),
+    });
+
+    const result = await PaymentService.getTransactionBySessionId('cs_missing');
+    expect(result).toBeNull();
   });
 });

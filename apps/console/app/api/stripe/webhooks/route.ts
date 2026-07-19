@@ -47,8 +47,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await handleStripeEvent(event)
   } catch (err) {
     logger.error(`[stripe/webhooks] Error handling event ${event.type}:`, err instanceof Error ? err : { detail: err })
-    // Return 200 to prevent Stripe from retrying for handler errors (not sig errors)
-    return NextResponse.json({ received: true, error: 'Handler error' })
+    // Return non-2xx to trigger Stripe retries for transient handler failures.
+    return NextResponse.json({ received: false, error: 'Handler error' }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })

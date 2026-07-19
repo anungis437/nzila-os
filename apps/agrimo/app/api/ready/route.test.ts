@@ -62,4 +62,45 @@ describe('Agrimo ready route authority posture', () => {
     expect(body.status).toBe('ready')
     expect(body.checks.thirdParty.status).toBe('ok')
   })
+
+  it('derives authority health url from AGRIMO_DJANGO_BASE_URL', async () => {
+    delete process.env.AGRIMO_DJANGO_AUTHORITY_HEALTH_URL
+    process.env.AGRIMO_DJANGO_BASE_URL = 'https://authority.example/'
+
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { GET } = await import('./route')
+    const response = await GET()
+    const body = (await response.json()) as {
+      ready: boolean
+      checks: { thirdParty: { status: string } }
+    }
+
+    expect(response.status).toBe(200)
+    expect(body.ready).toBe(true)
+    expect(body.checks.thirdParty.status).toBe('ok')
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://authority.example/api/auth/health/',
+      expect.objectContaining({ method: 'GET' }),
+    )
+  })
+
+  it('fails closed when authority is unreachable', async () => {
+    process.env.AGRIMO_DJANGO_AUTHORITY_HEALTH_URL = 'https://authority.example/api/auth/health/'
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')))
+
+    const { GET } = await import('./route')
+    const response = await GET()
+    const body = (await response.json()) as {
+      ready: boolean
+      status: string
+      checks: { thirdParty: { reason?: string } }
+    }
+
+    expect(response.status).toBe(503)
+    expect(body.ready).toBe(false)
+    expect(body.status).toBe('not_ready')
+    expect(body.checks.thirdParty.reason).toBe('authority_unreachable')
+  })
 })

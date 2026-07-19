@@ -11,6 +11,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: mocks.mockGetAiClient,
+  buildOrgAiTrace: vi.fn(() => ({
+    component: 'test',
+    action: 'mock',
+  })),
   UE_APP_KEY: 'test-app-key',
   UE_PROFILES: {
     CLAUSE_EXTRACTION: 'clause-extraction',
@@ -36,9 +40,9 @@ vi.mock('@/db/schema', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
-  sql: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  or: vi.fn((...args: unknown[]) => args),
+  sql: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
+  or: vi.fn((...args: any[]) => args),
   SQL: vi.fn(),
 }));
 

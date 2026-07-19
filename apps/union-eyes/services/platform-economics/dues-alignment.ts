@@ -149,7 +149,7 @@ export async function getLocalDuesSnapshots(
       OR o.id = ${organizationId}
   `);
 
-  return (rows as unknown as Array<Record<string, unknown>>).map((row) => ({
+  return (rows as any as Array<Record<string, unknown>>).map((row) => ({
     localId: String(row.local_id),
     memberCount: Number(row.member_count),
     activeMembers: Number(row.active_members),

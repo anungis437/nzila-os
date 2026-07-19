@@ -45,8 +45,8 @@ vi.mock("@/db/schema", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
-  or: vi.fn((...a: unknown[]) => ({ _type: "or", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
+  or: vi.fn((...a: any[]) => ({ _type: "or", a })),
   like: vi.fn((_c, v) => ({ _type: "like", v })),
   desc: vi.fn((c) => ({ _type: "desc", c })),
   asc: vi.fn((c) => ({ _type: "asc", c })),
@@ -118,7 +118,7 @@ describe("cba-service", () => {
 
   // ── listCBAs ─────────────────────────────────────────────────────────────
   describe("listCBAs", () => {
-    function setupListMock(countVal: number, rows: unknown[]) {
+    function setupListMock(countVal: number, rows: any[]) {
       const countFrom = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([{ count: countVal }]) });
       const dataOffset = vi.fn().mockResolvedValue(rows);
       const dataLimit = vi.fn().mockReturnValue({ offset: dataOffset });

@@ -53,8 +53,31 @@ function addMsIso(ms: number): string {
   return new Date(Date.now() + ms).toISOString()
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function dbRowToRecord(row: any): CommandRecord {
+type AutomationCommandRow = {
+  id: string
+  orgId: string
+  correlationId: string
+  idempotencyKey: string
+  playbook: CommandRecord['playbook']
+  status: CommandStatus
+  version: number
+  attemptCount: number
+  dryRun: boolean
+  requestedBy: string
+  args: unknown
+  runId: string | null
+  runUrl: string | null
+  errorMessage: string | null
+  executionOwner: string | null
+  leaseExpiresAt: unknown
+  lastHeartbeatAt: unknown
+  startedAt: unknown
+  completedAt: unknown
+  createdAt: unknown
+  updatedAt: unknown
+}
+
+function dbRowToRecord(row: AutomationCommandRow): CommandRecord {
   return {
     id: row.id,
     org_id: row.orgId,
@@ -66,7 +89,7 @@ function dbRowToRecord(row: any): CommandRecord {
     attempt_count: row.attemptCount,
     dry_run: row.dryRun,
     requested_by: row.requestedBy,
-    args: row.args as Record<string, unknown>,
+    args: (row.args ?? {}) as Record<string, unknown>,
     run_id: row.runId,
     run_url: row.runUrl,
     error_message: row.errorMessage,
@@ -123,7 +146,6 @@ export async function createCommand(
         idempotencyKey: full.idempotency_key,
         playbook: full.playbook,
         status: full.status,
-        version: full.version,
         attemptCount: full.attempt_count,
         dryRun: full.dry_run,
         requestedBy: full.requested_by,
@@ -187,7 +209,7 @@ export async function getCommand(correlationId: string): Promise<CommandRecord |
       .where(eq(schema.automationCommands.correlationId, correlationId))
       .limit(1)
     if (rows.length === 0) return undefined
-    return dbRowToRecord(rows[0])
+    return dbRowToRecord(rows[0] as AutomationCommandRow)
   }
   if (!canUseMemoryStore()) {
     throw new Error('In-memory orchestrator store is allowed only in development without DATABASE_URL')
@@ -204,7 +226,7 @@ export async function getCommandById(id: string): Promise<CommandRecord | undefi
       .where(eq(schema.automationCommands.id, id))
       .limit(1)
     if (rows.length === 0) return undefined
-    return dbRowToRecord(rows[0])
+    return dbRowToRecord(rows[0] as AutomationCommandRow)
   }
   if (!canUseMemoryStore()) {
     throw new Error('In-memory orchestrator store is allowed only in development without DATABASE_URL')
@@ -229,7 +251,7 @@ export async function getCommandByOrgAndIdempotency(
       )
       .limit(1)
     if (rows.length === 0) return undefined
-    return dbRowToRecord(rows[0])
+    return dbRowToRecord(rows[0] as AutomationCommandRow)
   }
 
   if (!canUseMemoryStore()) {
@@ -265,7 +287,7 @@ export async function listCommands(
       .orderBy(desc(schema.automationCommands.createdAt))
       .limit(limit)
 
-    return rows.map(dbRowToRecord)
+    return rows.map((row) => dbRowToRecord(row as AutomationCommandRow))
   }
 
   let rows = [...memStore.byId.values()]
@@ -348,7 +370,7 @@ export async function updateCommandById(params: {
       return { conflict: true }
     }
 
-    const next = dbRowToRecord(nextRows[0])
+    const next = dbRowToRecord(nextRows[0] as AutomationCommandRow)
 
     await db.insert(schema.automationEvents).values({
       commandId: next.id,

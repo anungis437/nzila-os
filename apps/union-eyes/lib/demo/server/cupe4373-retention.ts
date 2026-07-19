@@ -78,7 +78,7 @@ async function loadActiveCaseFilesPolicy(): Promise<PolicyRow | null> {
         AND status = 'active'
       ORDER BY effective_date DESC
       LIMIT 1;
-    `)) as unknown as PolicyRow[];
+    `)) as any as PolicyRow[];
     return rows[0] ?? null;
   } catch (err) {
     log.warn('policy lookup failed', { error: err });

@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockEmbed = vi.fn();
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: vi.fn(() => ({ embed: mockEmbed })),
+  buildOrgAiTrace: vi.fn(() => ({
+    component: 'test',
+    action: 'mock',
+  })),
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { EMBEDDINGS: 'ue-embeddings' },
   UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',

@@ -100,6 +100,6 @@ const { PATCH, DELETE } = crudRoutes({
   readRole: 'member',
   writeRole: 'steward',
   blockedPatchFields: ['status'],
-}) as unknown as { PATCH: typeof GET; DELETE: typeof GET };
+}) as any as { PATCH: typeof GET; DELETE: typeof GET };
 
 export { GET, PATCH, DELETE };

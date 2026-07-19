@@ -43,8 +43,7 @@ describe('initObservability', () => {
   })
 
   it('uses ConsoleExporter when no exporter provided', () => {
-    const sink = vi.fn()
-    const logger = initObservability({ serviceName: 'test' })
+    initObservability({ serviceName: 'test' })
     // Logger should have been created — just verify it works
     expect(isObservabilityInitialized()).toBe(true)
   })

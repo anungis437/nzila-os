@@ -16,11 +16,11 @@ vi.mock('@opentelemetry/api', () => ({
   trace: {
     getTracer: vi.fn(() => mockTracer),
     getActiveSpan: vi.fn(() => null),
-    setSpan: vi.fn((_ctx: unknown, span: unknown) => span),
+    setSpan: vi.fn((_ctx: any, span: any) => span),
   },
   context: {
     active: vi.fn(() => ({})),
-    with: vi.fn((_ctx: unknown, fn: () => unknown) => fn()),
+    with: vi.fn((_ctx: any, fn: () => unknown) => fn()),
   },
   propagation: {
     inject: vi.fn(),

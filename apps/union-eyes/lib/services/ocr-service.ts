@@ -17,6 +17,109 @@
 import { createWorker } from "tesseract.js";
 import { logger } from "@/lib/logger";
 
+interface ProgressMessage {
+  status?: string;
+  progress?: number;
+}
+
+interface OCRWordData {
+  text: string;
+  confidence: number;
+  bbox: { x0: number; y0: number; x1: number; y1: number };
+}
+
+interface OCRLineData {
+  text: string;
+  confidence: number;
+  words: OCRWordData[];
+}
+
+interface TextractLineBlock {
+  BlockType?: string;
+  Text?: string;
+  Confidence?: number;
+}
+
+interface GoogleVisionVertex {
+  x?: number;
+  y?: number;
+}
+
+interface _GoogleVisionDetection {
+  description?: string;
+  boundingPoly?: {
+    vertices?: GoogleVisionVertex[];
+  };
+}
+
+interface AzureReadWord {
+  text?: string;
+}
+
+interface AzureReadLine {
+  text?: string;
+  confidence?: number;
+  words?: AzureReadWord[];
+}
+
+interface AzureReadPage {
+  lines?: AzureReadLine[];
+}
+
+type PdfParseResult = { text?: string };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function readNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  return isRecord(error) ? readString(error.code) : undefined;
+}
+
+function toOCRWord(value: unknown): OCRWordData {
+  const record = isRecord(value) ? value : {};
+  const bboxRecord = isRecord(record.bbox) ? record.bbox : {};
+
+  return {
+    text: readString(record.text) ?? "",
+    confidence: readNumber(record.confidence) ?? 0,
+    bbox: {
+      x0: readNumber(bboxRecord.x0) ?? 0,
+      y0: readNumber(bboxRecord.y0) ?? 0,
+      x1: readNumber(bboxRecord.x1) ?? 0,
+      y1: readNumber(bboxRecord.y1) ?? 0,
+    },
+  };
+}
+
+function toOCRLine(value: unknown): OCRLineData {
+  const record = isRecord(value) ? value : {};
+  const words = Array.isArray(record.words) ? record.words.map(toOCRWord) : [];
+
+  return {
+    text: readString(record.text) ?? "",
+    confidence: readNumber(record.confidence) ?? 0,
+    words,
+  };
+}
+
+function toProgressMessage(value: unknown): ProgressMessage {
+  return isRecord(value)
+    ? {
+        status: readString(value.status),
+        progress: readNumber(value.progress),
+      }
+    : {};
+}
+
 export interface OCRResult {
   text: string;
   confidence: number;
@@ -87,35 +190,31 @@ async function processTesseractOCR(
   language: string
 ): Promise<OCRResult> {
   const worker = await createWorker(language, 1, {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    logger: (m: any) => {
-      if (m.status === "recognizing text") {
-        logger.debug("OCR progress", { percent: Math.round(m.progress * 100) });
+    logger: (m: unknown) => {
+      const message = toProgressMessage(m);
+      if (message.status === "recognizing text") {
+        logger.debug("OCR progress", { percent: Math.round((message.progress ?? 0) * 100) });
       }
     },
   });
 
   try {
     const { data } = await worker.recognize(imageBuffer);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dataAny = data as any;
+    const dataRecord: Record<string, unknown> = isRecord(data) ? data : {};
+    const rawWords = Array.isArray(dataRecord.words) ? dataRecord.words : [];
+    const rawLines = Array.isArray(dataRecord.lines) ? dataRecord.lines : [];
 
-    // Extract word-level details
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const words = dataAny.words.map((word: any) => ({
-      text: word.text,
-      confidence: word.confidence,
-      bbox: word.bbox,
-    }));
-
-    // Extract line-level details
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lines = dataAny.lines.map((line: any) => ({
-      text: line.text,
-      confidence: line.confidence,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      words: line.words.map((w: any) => w.text),
-    }));
+    const words = rawWords.map(toOCRWord);
+    const lines = rawLines
+      .map((line: unknown) => {
+          const normalizedLine = toOCRLine(line);
+          return {
+            text: normalizedLine.text,
+            confidence: normalizedLine.confidence,
+            words: normalizedLine.words.map((word) => word.text),
+          };
+        })
+      ;
 
     await worker.terminate();
 
@@ -163,21 +262,23 @@ async function processAWSTextractOCR(
     const response = await client.send(command);
 
     // Extract text and confidence
-    const blocks = response.Blocks || [];
+    const blocks: TextractLineBlock[] = (response.Blocks || []).map((block) => ({
+      BlockType: block.BlockType,
+      Text: block.Text,
+      Confidence: block.Confidence,
+    }));
     const lines = blocks
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((block: any) => block.BlockType === "LINE")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((block: any) => ({
+      .filter((block) => block.BlockType === "LINE")
+      .map((block) => ({
         text: block.Text || "",
         confidence: block.Confidence || 0,
         words: block.Text?.split(" ") || [],
       }));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const text = lines.map((line: any) => line.text).join("\n");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const confidence = lines.reduce((sum: any, line: any) => sum + line.confidence, 0) / lines.length;
+    const text = lines.map((line) => line.text).join("\n");
+    const confidence = lines.length > 0
+      ? lines.reduce((sum, line) => sum + line.confidence, 0) / lines.length
+      : 0;
 
     return {
       text,
@@ -220,9 +321,7 @@ async function processGoogleVisionOCR(
     // First annotation contains full text
     const fullText = detections[0].description || "";
     
-    // Extract word-level details
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const words = detections.slice(1).map((detection: any) => {
+    const words = detections.slice(1).map((detection) => {
       const vertices = detection.boundingPoly?.vertices || [];
       return {
         text: detection.description || "",
@@ -290,23 +389,25 @@ async function processAzureOCR(
     }
 
     // Extract text from pages
-    const pages = readResult.analyzeResult?.readResults || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lines = pages.flatMap((page: any) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (page.lines || []).map((line: any) => ({
+    const pages: AzureReadPage[] = (readResult.analyzeResult?.readResults || []).map((page) => ({
+      lines: page.lines?.map((line) => ({
         text: line.text,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        confidence: (line as any).confidence || 95,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        words: line.words?.map((w: any) => w.text) || [],
+        confidence: readNumber((line as unknown as Record<string, unknown>).confidence) ?? undefined,
+        words: line.words?.map((word) => ({ text: word.text })),
+      })),
+    }));
+    const lines = pages.flatMap((page) =>
+      (page.lines || []).map((line) => ({
+        text: line.text || "",
+        confidence: line.confidence || 95,
+        words: line.words?.map((w) => w.text || "") || [],
       }))
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const text = lines.map((line: any) => line.text).join("\n");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const confidence = lines.reduce((sum: any, line: any) => sum + line.confidence, 0) / lines.length;
+    const text = lines.map((line) => line.text).join("\n");
+    const confidence = lines.length > 0
+      ? lines.reduce((sum, line) => sum + line.confidence, 0) / lines.length
+      : 0;
 
     return {
       text,
@@ -336,8 +437,9 @@ export async function processPDFOCR(
   _options: OCROptions = {}
 ): Promise<{ pages: OCRResult[]; fullText: string }> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfParse = (await import("pdf-parse")) as any;
+    const pdfParseModule = await import("pdf-parse");
+    const pdfParseExport = "default" in pdfParseModule ? pdfParseModule.default : pdfParseModule;
+    const pdfParse = pdfParseExport as (buffer: Buffer) => Promise<PdfParseResult>;
     
     // First try to extract text directly from PDF
     const pdfData = await pdfParse(pdfBuffer);
@@ -358,8 +460,7 @@ export async function processPDFOCR(
     throw new Error("Scanned PDF OCR requires pdf2pic or similar library. Please install: npm install pdf2pic");
     
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if (getErrorCode(error) === "MODULE_NOT_FOUND") {
       throw new Error("PDF parsing library not installed. Run: npm install pdf-parse");
     }
     throw error;
@@ -379,16 +480,13 @@ export async function preprocessImage(
   try {
     const sharp = await import("sharp");
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return await (sharp.default(imageBuffer) as any)
+    return await sharp.default(imageBuffer)
       .grayscale()
       .normalize() // Enhance contrast
-      .median(3) // Reduce noise
       .sharpen()
       .toBuffer();
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((error as any).code === "MODULE_NOT_FOUND") {
+    if (getErrorCode(error) === "MODULE_NOT_FOUND") {
       logger.warn("Sharp not installed. Image preprocessing disabled. Run: npm install sharp");
       return imageBuffer;
     }

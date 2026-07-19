@@ -30,9 +30,9 @@ vi.mock("@/db/schema/domains/agreements/collective-agreements", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
   ilike: vi.fn((_c, v) => ({ _type: "ilike", v })),
-  or: vi.fn((...a: unknown[]) => ({ _type: "or", a })),
+  or: vi.fn((...a: any[]) => ({ _type: "or", a })),
   sql: vi.fn(),
 }));
 vi.mock("@/db/schema/domains/claims/grievances", () => ({
@@ -49,14 +49,14 @@ import {
 /* ── Helpers: drizzle-style mock chains ────────────────────────────────── */
 
 /** select → from → where (terminal) */
-function chain_sfw(data: unknown) {
+function chain_sfw(data: any) {
   const where = vi.fn().mockResolvedValue(data);
   const from = vi.fn().mockReturnValue({ where });
   return { from, where };
 }
 
 /** select → from → where → limit (terminal) */
-function chain_sfwl(data: unknown) {
+function chain_sfwl(data: any) {
   const limit = vi.fn().mockResolvedValue(data);
   const where = vi.fn().mockReturnValue({ limit });
   const from = vi.fn().mockReturnValue({ where });
@@ -64,9 +64,9 @@ function chain_sfwl(data: unknown) {
 }
 
 /** select → from (terminal thenable — no .where()) */
-function chain_sf(data: unknown) {
+function chain_sf(data: any) {
   const thenable = {
-    then: (resolve: (v: unknown) => void, reject?: (e: unknown) => void) =>
+    then: (resolve: (v: any) => void, reject?: (e: any) => void) =>
       Promise.resolve(data).then(resolve, reject),
   };
   const from = vi.fn().mockReturnValue(thenable);

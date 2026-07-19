@@ -19,7 +19,7 @@ import {
   governedPolicies,
   type GovernedPolicyRow,
 } from '@nzila/db/schema'
-import { eq, and, lt, lte, isNull, or, sql } from 'drizzle-orm'
+import { eq, and, lt, lte, or } from 'drizzle-orm'
 
 const logger = createLogger('control-plane:authority:policy-deprecation-service')
 
@@ -188,7 +188,7 @@ export interface ScheduleDeprecationInput {
 export async function scheduleDeprecation(
   input: ScheduleDeprecationInput,
   db: AnyDB,
-  correlationId?: string,
+  _correlationId?: string,
 ): Promise<GovernedPolicyRow> {
   const [updated] = await db
     .update(governedPolicies)

@@ -44,7 +44,7 @@ export class GovernanceService {
   }) {
     const [share] = await db.insert(goldenShares).values({
       certificateNumber: data.certificateNumber,
-      issueDate: data.issueDate.toISOString().split('T')[0] as any,
+      issueDate: data.issueDate.toISOString().split('T')[0] as unknown,
       councilMembers: data.councilMembers,
       status: 'active',
       sunsetClauseActive: true,
@@ -116,7 +116,7 @@ export class GovernanceService {
     description: string;
     proposedBy: string;
     votingDeadline: Date;
-    matterDetails: any;
+    matterDetails: unknown;
     classATotalVotes: number;
   }) {
     const [vote] = await db.insert(reservedMatterVotes).values({
@@ -219,7 +219,7 @@ export class GovernanceService {
       .update(reservedMatterVotes)
       .set({
         finalDecision,
-        status: status as any,
+        status: status as unknown,
         decisionDate: new Date(),
       })
       .where(eq(reservedMatterVotes.id, data.voteId));
@@ -346,7 +346,7 @@ export class GovernanceService {
       .update(goldenShares)
       .set({
         status: 'sunset_triggered',
-        sunsetTriggeredDate: sunsetDate.toISOString().split('T')[0] as any,
+        sunsetTriggeredDate: sunsetDate.toISOString().split('T')[0] as unknown,
       })
       .where(eq(goldenShares.id, goldenShareId));
     
@@ -376,7 +376,7 @@ export class GovernanceService {
       .update(goldenShares)
       .set({
         status: 'converted',
-        conversionDate: conversionDate.toISOString().split('T')[0] as any,
+        conversionDate: conversionDate.toISOString().split('T')[0] as unknown,
       })
       .where(eq(goldenShares.id, goldenShareId));
     
@@ -520,7 +520,7 @@ export class GovernanceService {
    */
   isReservedMatter(proposal: {
     type: string;
-    details: any;
+    details: unknown;
   }): { isReserved: boolean; reason?: string } {
     // Mission change: Any alteration to union-serving mission
     if (proposal.type === 'mission_change') {

@@ -33,6 +33,7 @@ import {
   stage as stageFromBarrel,
   pipeline as pipelineFromBarrel,
 } from '../index';
+import type { createPlatformEvent } from '@nzila/platform-events';
 
 // ── Test fixtures ───────────────────────────────────────────────────────
 
@@ -444,8 +445,8 @@ describe('events bridge', () => {
     const ctx = makeCtx();
     const result = await runPipeline(def, ctx);
 
-    const started = pipelineStartedEvent(def, ctx, createEvent as any);
-    const completed = pipelineCompletedEvent(result, ctx.source, createEvent as any);
+    const started = pipelineStartedEvent(def, ctx, createEvent as unknown as typeof createPlatformEvent);
+    const completed = pipelineCompletedEvent(result, ctx.source, createEvent as unknown as typeof createPlatformEvent);
 
     expect(started.type).toBe('ingestion.pipeline.started');
     expect((started.payload as { pipelineName: string }).pipelineName).toBe('doc-ingest');
@@ -469,7 +470,7 @@ describe('events bridge', () => {
     const ctx = makeCtx();
     const result = await runPipeline(def, ctx);
 
-    const both = pipelineEventsFromResult(def, ctx, result, createEvent as any);
+    const both = pipelineEventsFromResult(def, ctx, result, createEvent as unknown as typeof createPlatformEvent);
     expect((both.completed.payload as { failedStage: string | null }).failedStage).toBe('kaboom');
     expect((both.completed.metadata as { causationId: string }).causationId).toBe(
       both.started.id,

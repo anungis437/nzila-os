@@ -42,8 +42,8 @@ vi.mock("@/db/schema", () => ({
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
-  and: vi.fn((...a: unknown[]) => ({ _type: "and", a })),
-  or: vi.fn((...a: unknown[]) => ({ _type: "or", a })),
+  and: vi.fn((...a: any[]) => ({ _type: "and", a })),
+  or: vi.fn((...a: any[]) => ({ _type: "or", a })),
   gte: vi.fn((_c, v) => ({ _type: "gte", v })),
   lte: vi.fn((_c, v) => ({ _type: "lte", v })),
   desc: vi.fn((c) => ({ _type: "desc", c })),
@@ -60,14 +60,14 @@ vi.mock("@/lib/logger", () => ({
 /* ── helpers ────────────────────────────────────────────────────────────── */
 
 /** select → from → where (terminal) */
-function sfw(data: unknown) {
+function sfw(data: any) {
   const where = vi.fn().mockResolvedValue(data);
   const from = vi.fn().mockReturnValue({ where });
   return { from, where };
 }
 
 /** select → from → where → orderBy → limit → offset (terminal) */
-function sfwolo(data: unknown) {
+function sfwolo(data: any) {
   const offset = vi.fn().mockResolvedValue(data);
   const limit = vi.fn().mockReturnValue({ offset });
   const orderBy = vi.fn().mockReturnValue({ limit });
@@ -77,14 +77,14 @@ function sfwolo(data: unknown) {
 }
 
 /** insert → values → returning (terminal) */
-function ivr(data: unknown) {
+function ivr(data: any) {
   const returning = vi.fn().mockResolvedValue(data);
   const values = vi.fn().mockReturnValue({ returning });
   return { values, returning };
 }
 
 /** update → set → where → returning (terminal) */
-function uswr(data: unknown) {
+function uswr(data: any) {
   const returning = vi.fn().mockResolvedValue(data);
   const where = vi.fn().mockReturnValue({ returning });
   const set = vi.fn().mockReturnValue({ where });

@@ -1,0 +1,11 @@
+{
+  "sampledAt": "2026-06-07T21:18:58Z",
+  "totalUserCount": 50,
+  "activeAdminCount": 4,
+  "privilegedRoleCount": 2,
+  "dormantElevatedAccounts": 2,
+  "orphanedAdmins": 0,
+  "noSignInDataPrivilegedCount": 0,
+  "ssoScimMismatches": 0,
+  "crossOrgAnomalies": 0
+}

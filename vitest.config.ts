@@ -155,6 +155,11 @@ export default defineConfig({
       'packages/decision-core',
       'packages/nar',
       'packages/decision-intelligence',
+      'packages/decision-intelligence-engine',
+      'packages/decision-evidence',
+      'packages/governance-rationale',
+      'packages/continuity-analysis',
+      'packages/institutional-intelligence',
       'packages/policy-intelligence',
       // AI contract types
       'packages/platform-ai-contract',
@@ -163,6 +168,7 @@ export default defineConfig({
       // Governance packages
       'packages/observability',
       'packages/audit',
+      'packages/sage-core',
       'packages/ai-control',
       'packages/contracts',
       'packages/events',

@@ -37,7 +37,7 @@ function isIso8601(s: string): boolean {
   return !Number.isNaN(d.getTime()) && /T/.test(s);
 }
 
-function nonEmpty(s: unknown): s is string {
+function nonEmpty(s: any): s is string {
   return typeof s === 'string' && s.length > 0;
 }
 

@@ -14,7 +14,7 @@
 export interface ClientLogger {
   info(msg: string, meta?: Record<string, unknown>): void;
   warn(msg: string, meta?: Record<string, unknown>): void;
-  error(msg: string, meta?: unknown): void;
+  error(msg: string, meta?: any): void;
   debug(msg: string, meta?: Record<string, unknown>): void;
 }
 

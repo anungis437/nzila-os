@@ -55,7 +55,7 @@ describe('CoraGov Ingestion — rejection scenarios', () => {
 
   it('buildCoraGovPayload rejects reports failing canonical validation', () => {
     const badReport = { report_id: '', metrics: [] } as unknown
-    const result = buildCoraGovPayload(SourceApp.CORA, [badReport as any])
+    const result = buildCoraGovPayload(SourceApp.CORA, [badReport as unknown])
     expect(result.accepted).toBe(false)
     if (!result.accepted) {
       expect(result.errors).toBeDefined()

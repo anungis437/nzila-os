@@ -44,10 +44,10 @@ export const platformEvents = pgTable(
 
 // ── Store Types ─────────────────────────────────────────────────────────────
 
-/** Drizzle DB instance type — accepts any Drizzle PG instance */
+/** Drizzle DB instance type — accepts a Drizzle PG instance */
 type DrizzleDb = {
   insert: (table: typeof platformEvents) => {
-    values: (data: Record<string, unknown>) => Promise<unknown>
+    values: (data: Record<string, unknown>) => Promise<void>
   }
   select: () => {
     from: (table: typeof platformEvents) => {

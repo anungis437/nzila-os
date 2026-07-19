@@ -7,7 +7,14 @@
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { GraphQuery, QueryResult, QueryFinding } from './query-models';
-import type { DependencyNode, DependencyEdge } from '../propagation/propagation-models';
+import type { PropagationMap } from '../propagation/propagation-models';
+
+type QueryResponse = {
+  findings: QueryFinding[];
+  summary: string;
+  significance: string;
+  recommendations: string[];
+};
 
 export async function executeGraphQuery(orgId: string, query: GraphQuery): Promise<QueryResult> {
   // Build the dependency graph
@@ -63,26 +70,21 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
 }
 
 function queryIsolatedKnowledge(
-  propagationMap: any,
+  propagationMap: PropagationMap,
   query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
-  const isolatedNodes = propagationMap.nodes.filter((n: any) => n.isSingleSource);
+): QueryResponse {
+  let isolatedNodes = propagationMap.nodes.filter((node) => node.isSingleSource);
 
   if (query.filters?.minimumRiskLevel) {
     const riskOrder = { low: 0, medium: 1, high: 2, critical: 3 };
-    isolatedNodes.filter((n: any) => {
-      const nodeRisk = riskOrder[n.continuitySensitivity as keyof typeof riskOrder] ?? 0;
+    isolatedNodes = isolatedNodes.filter((node) => {
+      const nodeRisk = riskOrder[node.continuitySensitivity as keyof typeof riskOrder] ?? 0;
       const filterRisk = riskOrder[query.filters!.minimumRiskLevel as keyof typeof riskOrder] ?? 0;
       return nodeRisk >= filterRisk;
     });
   }
 
-  const findings: QueryFinding[] = isolatedNodes.map((node: any) => ({
+  const findings: QueryFinding[] = isolatedNodes.map((node) => ({
     entityId: node.id,
     label: node.label,
     entityType: 'node',
@@ -111,32 +113,27 @@ function queryIsolatedKnowledge(
 }
 
 function queryContinuityBottlenecks(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
-  const bottlenecks = propagationMap.bottlenecks.map((b: any) => {
-    const node = propagationMap.nodes.find((n: any) => n.id === b.nodeId);
-    const impact = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === b.nodeId);
-    return { ...b, node, impact };
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
+  const bottlenecks = propagationMap.bottlenecks.map((bottleneck) => {
+    const node = propagationMap.nodes.find((graphNode) => graphNode.id === bottleneck.nodeId);
+    const impact = propagationMap.downstreamImpacts.find((downstreamImpact) => downstreamImpact.nodeId === bottleneck.nodeId);
+    return { ...bottleneck, node, impact };
   });
 
-  const findings: QueryFinding[] = bottlenecks.map((b: any) => ({
-    entityId: b.nodeId,
-    label: b.node?.label || 'unknown',
+  const findings: QueryFinding[] = bottlenecks.map((bottleneck) => ({
+    entityId: bottleneck.nodeId,
+    label: bottleneck.node?.label || 'unknown',
     entityType: 'node',
-    significance: `Critical continuity bottleneck: ${b.impact?.allAffectedNodes.length || 0} processes depend on this. If lost, ${b.impact?.totalExposureScore || 0}% of operations affected.`,
-    riskLevel: 'critical',
-    affectedAreas: b.affectedRoles,
-    mitigation: b.node?.category === 'vendor' ? 'Establish alternative vendor relationships' : 'Document and cross-train',
+    significance: `Critical continuity bottleneck: ${bottleneck.impact?.allAffectedNodes.length || 0} processes depend on this. If lost, ${bottleneck.impact?.totalExposureScore || 0}% of operations affected.`,
+    riskLevel: bottleneck.riskLevel,
+    affectedAreas: bottleneck.affectedRoles,
+    mitigation: bottleneck.node?.category === 'vendor' ? 'Establish alternative vendor relationships' : 'Document and cross-train',
     evidenceChain: [
-      `Reason: ${b.reason}`,
-      `Directly affects: ${b.impact?.directDependents.length || 0} processes`,
-      `Transitively affects: ${b.impact?.allAffectedNodes.length || 0} operational areas`,
+      `Reason: ${bottleneck.reason}`,
+      `Directly affects: ${bottleneck.impact?.directDependents.length || 0} processes`,
+      `Transitively affects: ${bottleneck.impact?.allAffectedNodes.length || 0} operational areas`,
     ],
   }));
 
@@ -154,19 +151,14 @@ function queryContinuityBottlenecks(
 }
 
 function queryGovernanceDependencies(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
   const governanceNodes = propagationMap.nodes.filter(
-    (n: any) => n.category === 'governance' || n.category === 'compliance',
+    (node) => node.category === 'governance' || node.category === 'compliance',
   );
 
-  const findings: QueryFinding[] = governanceNodes.map((node: any) => ({
+  const findings: QueryFinding[] = governanceNodes.map((node) => ({
     entityId: node.id,
     label: node.label,
     entityType: 'node',
@@ -195,19 +187,14 @@ function queryGovernanceDependencies(
 }
 
 function queryFragileOperations(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
   const fragileNodes = propagationMap.nodes.filter(
-    (n: any) => n.continuitySensitivity === 'critical' || n.continuitySensitivity === 'high',
+    (node) => node.continuitySensitivity === 'critical' || node.continuitySensitivity === 'high',
   );
 
-  const findings: QueryFinding[] = fragileNodes.map((node: any) => ({
+  const findings: QueryFinding[] = fragileNodes.map((node) => ({
     entityId: node.id,
     label: node.label,
     entityType: 'node',
@@ -236,18 +223,13 @@ function queryFragileOperations(
 }
 
 function queryVendorConcentration(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
-  const vendorNodes = propagationMap.nodes.filter((n: any) => n.category === 'vendor');
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
+  const vendorNodes = propagationMap.nodes.filter((node) => node.category === 'vendor');
 
-  const findings: QueryFinding[] = vendorNodes.map((node: any) => {
-    const impact = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === node.id);
+  const findings: QueryFinding[] = vendorNodes.map((node) => {
+    const impact = propagationMap.downstreamImpacts.find((downstreamImpact) => downstreamImpact.nodeId === node.id);
     return {
       entityId: node.id,
       label: node.label,
@@ -278,39 +260,37 @@ function queryVendorConcentration(
 }
 
 function queryUndocumentedChains(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
   // Approximation: find single-source nodes and their propagation chains
   const undocumentedChains = propagationMap.nodes
-    .filter((n: any) => n.isSingleSource)
-    .map((node: any) => {
-      const impact = propagationMap.downstreamImpacts.find((d: any) => d.nodeId === node.id);
+    .filter((node) => node.isSingleSource)
+    .map((node) => {
+      const impact = propagationMap.downstreamImpacts.find((downstreamImpact) => downstreamImpact.nodeId === node.id);
       return {
         chainId: `chain_${node.id}`,
         label: `Undocumented workflow involving ${node.label}`,
-        nodes: [node, ...(impact?.allAffectedNodes || [])],
+        nodeIds: [node.id, ...(impact?.allAffectedNodes || [])],
         riskLevel: node.continuitySensitivity,
       };
     });
 
-  const findings: QueryFinding[] = undocumentedChains.map((chain: any) => ({
+  const findings: QueryFinding[] = undocumentedChains.map((chain) => ({
     entityId: chain.chainId,
     label: chain.label,
-    entityType: 'chain',
+    entityType: 'path',
     significance: 'Undocumented workflow chain: if key person leaves, entire process sequence could be lost.',
     riskLevel: chain.riskLevel,
-    affectedAreas: chain.nodes.flatMap((n: any) => n.associatedRoles),
+    affectedAreas: Array.from(new Set(chain.nodeIds.flatMap((nodeId) => {
+      const graphNode = propagationMap.nodes.find((node) => node.id === nodeId);
+      return graphNode?.associatedRoles ?? [];
+    }))),
     mitigation: 'Immediately document all steps in this workflow',
     evidenceChain: [
-      `Chain length: ${chain.nodes.length} connected steps`,
+      `Chain length: ${chain.nodeIds.length} connected steps`,
       `Single source: the first step is only known to one person`,
-      `Documentation status: unknown/likely informal`,
+      `Documentation status: any/likely informal`,
     ],
   }));
 
@@ -328,18 +308,13 @@ function queryUndocumentedChains(
 }
 
 function queryPropagationPaths(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
   // Collect all propagation paths from downstream impacts
-  const allPaths = propagationMap.downstreamImpacts.flatMap((impact: any) => impact.propagationPaths);
+  const allPaths = propagationMap.downstreamImpacts.flatMap((impact) => impact.propagationPaths);
 
-  const findings: QueryFinding[] = allPaths.slice(0, 10).map((path: any) => ({
+  const findings: QueryFinding[] = allPaths.slice(0, 10).map((path) => ({
     entityId: `path_${path.chainPath.join('_')}`,
     label: `Propagation chain (${path.chainDepth} steps, impact: ${path.disruptionScope})`,
     entityType: 'path',
@@ -356,7 +331,7 @@ function queryPropagationPaths(
 
   return {
     findings,
-    summary: `Found ${findings.length} propagation path(s) where failure cascades. Longest chain: ${allPaths.reduce((max: any, p: any) => Math.max(max, p.chainDepth), 0)} steps.`,
+    summary: `Found ${findings.length} propagation path(s) where failure cascades. Longest chain: ${allPaths.reduce((max, path) => Math.max(max, path.chainDepth), 0)} steps.`,
     significance: 'Propagation paths show how isolated failures become organizational crises. Long chains mean crisis amplification.',
     recommendations: [
       'Map all propagation paths for critical nodes',
@@ -368,26 +343,21 @@ function queryPropagationPaths(
 }
 
 function queryResilienceWeaknesses(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
-  const findings: QueryFinding[] = propagationMap.bottlenecks.map((b: any) => ({
-    entityId: b.nodeId,
-    label: b.nodeId,
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
+  const findings: QueryFinding[] = propagationMap.bottlenecks.map((bottleneck) => ({
+    entityId: bottleneck.nodeId,
+    label: bottleneck.nodeId,
     entityType: 'node',
-    significance: `Resilience weakness: ${b.reason}. Exposes organization to ${b.riskLevel} continuity impact.`,
-    riskLevel: b.riskLevel,
-    affectedAreas: b.affectedRoles,
+    significance: `Resilience weakness: ${bottleneck.reason}. Exposes organization to ${bottleneck.riskLevel} continuity impact.`,
+    riskLevel: bottleneck.riskLevel,
+    affectedAreas: bottleneck.affectedRoles,
     mitigation: 'Address through redundancy, documentation, or system redesign',
     evidenceChain: [
-      `Weakness type: ${b.reason}`,
-      `Risk level: ${b.riskLevel}`,
-      `Affected roles: ${b.affectedRoles.join(', ')}`,
+      `Weakness type: ${bottleneck.reason}`,
+      `Risk level: ${bottleneck.riskLevel}`,
+      `Affected roles: ${bottleneck.affectedRoles.join(', ')}`,
     ],
   }));
 
@@ -405,16 +375,11 @@ function queryResilienceWeaknesses(
 }
 
 function queryKnowledgeRedundancy(
-  propagationMap: any,
-  query: GraphQuery,
-): {
-  findings: QueryFinding[];
-  summary: string;
-  significance: string;
-  recommendations: string[];
-} {
-  const wellCovered = propagationMap.nodes.filter((n: any) => n.frequency >= 4).length;
-  const atRisk = propagationMap.nodes.filter((n: any) => n.frequency === 1).length;
+  propagationMap: PropagationMap,
+  _query: GraphQuery,
+): QueryResponse {
+  const wellCovered = propagationMap.nodes.filter((node) => node.frequency >= 4).length;
+  const atRisk = propagationMap.nodes.filter((node) => node.frequency === 1).length;
 
   const findings: QueryFinding[] = [
     {
@@ -428,7 +393,7 @@ function queryKnowledgeRedundancy(
         `Total knowledge areas: ${propagationMap.nodes.length}`,
         `Well-covered (3+ sources): ${wellCovered}`,
         `At-risk single-source: ${atRisk}`,
-        `Average coverage: ${(propagationMap.nodes.reduce((sum: any, n: any) => sum + n.frequency, 0) / propagationMap.nodes.length).toFixed(1)} interviews`,
+        `Average coverage: ${(propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0) / propagationMap.nodes.length).toFixed(1)} interviews`,
       ],
     },
   ];
@@ -446,9 +411,9 @@ function queryKnowledgeRedundancy(
   };
 }
 
-function calculateConfidenceScore(propagationMap: any, findings: QueryFinding[]): number {
+function calculateConfidenceScore(propagationMap: PropagationMap, findings: QueryFinding[]): number {
   // Confidence based on data quality
-  const interviewCount = propagationMap.nodes.reduce((sum: any, n: any) => sum + n.frequency, 0);
+  const interviewCount = propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0);
   let confidence = Math.min(interviewCount * 10, 80); // Max 80% without additional validation
 
   if (findings.length > 0) confidence += 10; // More findings = more confidence

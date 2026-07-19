@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../organization-middleware', () => ({
-  withOrganizationAuth: vi.fn((handler: (...args: unknown[]) => unknown) => {
+  withOrganizationAuth: vi.fn((handler: (...args: any[]) => unknown) => {
     return async (req: NextRequest) => {
       const ctx = mocks.mockWithOrgAuth();
       return handler(req, ctx);
@@ -36,7 +36,7 @@ vi.mock('@/db/db', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  sql: (..._a: unknown[]) => 'query',
+  sql: (..._a: any[]) => 'query',
 }));
 
 vi.mock('../logger', () => ({

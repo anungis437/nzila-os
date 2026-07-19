@@ -30,7 +30,7 @@ Concretely:
 
 ### 2.1 Governance telemetry
 
-- Read: any canonical entity, via governed query layers.
+- Read: unknown canonical entity, via governed query layers.
 - Write: `ue_telemetry.*` only.
 - Lifecycle: bounded retention, periodic rollup; never authoritative.
 

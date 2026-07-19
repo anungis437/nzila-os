@@ -30,6 +30,7 @@ describe("HtmlBulletinAdapter", () => {
     const fakeHtml = `
       <html><body>
         <a href="/docs/collective-agreement-2026.pdf">Collective Agreement – CUPE Local 200</a>
+        <a href="">Collective Agreement Empty Link</a>
         <a href="/contact">Contact Us</a>
         <a href="/docs/wage-settlement-report.html">Wage Settlement Report 2026</a>
         <a href="#top">Back to top</a>
@@ -57,7 +58,7 @@ describe("HtmlBulletinAdapter", () => {
   it("detects French language from link text", async () => {
     const fakeHtml = `
       <html><body>
-        <a href="/fr/convention-collective">Convention collective – SCFP 200</a>
+        <a href="/fr/convention-negociation">Convention négociation travail emploi</a>
       </body></html>
     `;
 
@@ -67,10 +68,47 @@ describe("HtmlBulletinAdapter", () => {
 
     const docs = await adapter.discover({ baseUrl: "https://example.ca" });
     expect(docs.length).toBe(1);
-    // "convention" and "collective" appear as both FR indicators and EN indicators → bilingual
-    expect(["fr", "bilingual"]).toContain(docs[0].language);
+    expect(docs[0].language).toBe("fr");
 
     fetchSpy.mockRestore();
+  });
+
+  it("detects English-only language from link text", async () => {
+    const fakeHtml = `
+      <html><body>
+        <a href="/en/agreement-settlement">Agreement Wage Settlement Union</a>
+      </body></html>
+    `;
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(fakeHtml, { status: 200 }),
+    );
+
+    const docs = await adapter.discover({ baseUrl: "https://example.ca" });
+    expect(docs).toHaveLength(1);
+    expect(docs[0].language).toBe("en");
+
+    fetchSpy.mockRestore();
+  });
+
+  it("rethrows and logs discover failures", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(new Error("network fail"));
+
+    await expect(adapter.discover({ baseUrl: "https://example.ca" })).rejects.toThrow("network fail");
+
+    fetchSpy.mockRestore();
+  });
+
+  it("skips empty href CBA links during list parsing", () => {
+    const parsed = (adapter as any as {
+      parseListPage: (html: string, baseUrl: string, config: Record<string, unknown>) => any[];
+    }).parseListPage(
+      '<a href="">Collective Agreement Empty Link</a><a href="#top">Collective Agreement Anchor Link</a><a href="javascript:void(0)">Collective Agreement Script Link</a>',
+      "https://example.ca",
+      {},
+    );
+
+    expect(parsed).toEqual([]);
   });
 
   it("fetches and returns normalized content", async () => {

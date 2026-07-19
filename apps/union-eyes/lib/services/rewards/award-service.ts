@@ -168,8 +168,7 @@ export async function issueAward(
     const creditAmount = awardType.defaultCreditAmount;
 
     // Apply ledger entry (earn credits)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ledgerEntry = await applyLedgerEntry(tx as any, {
+    const ledgerEntry = await applyLedgerEntry(tx, {
       orgId: award.orgId,
       userId: award.recipientUserId,
       eventType: 'earn',

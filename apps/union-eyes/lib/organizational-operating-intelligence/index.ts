@@ -51,7 +51,7 @@ export async function runFoundationalInstitutionalCognition(
 ): Promise<OrchestrationResult> {
   return orchestrateCognition({
     organizationId,
-    steps: FOUNDATIONAL_ORCHESTRATION_STEPS as unknown as Parameters<
+    steps: FOUNDATIONAL_ORCHESTRATION_STEPS as any as Parameters<
       typeof orchestrateCognition
     >[0]['steps'],
   });
@@ -66,7 +66,7 @@ export async function runFullInstitutionalCognition(
 ): Promise<OrchestrationResult> {
   return orchestrateCognition({
     organizationId,
-    steps: ALL_ORCHESTRATION_STEPS as unknown as Parameters<
+    steps: ALL_ORCHESTRATION_STEPS as any as Parameters<
       typeof orchestrateCognition
     >[0]['steps'],
   });

@@ -77,7 +77,7 @@ export async function addTimelineEntry(
     }
 
     // Get existing status history (stored in timeline jsonb column)
-    const statusHistory: TimelineStatusEntry[] = (grievance.timeline as unknown as TimelineStatusEntry[]) || [];
+    const statusHistory: TimelineStatusEntry[] = (grievance.timeline as any as TimelineStatusEntry[]) || [];
 
     // Add new entry
     const newEntry: TimelineStatusEntry = {
@@ -99,7 +99,7 @@ export async function addTimelineEntry(
       .update(grievances)
       .set({
         status: newStatus as string as (typeof grievances.status.enumValues)[number],
-        timeline: statusHistory as unknown as Array<{ date: string; action: string; actor: string; notes?: string }>,
+        timeline: statusHistory as any as Array<{ date: string; action: string; actor: string; notes?: string }>,
         updatedAt: new Date(),
       })
       .where(eq(grievances.id, claimId));
@@ -158,7 +158,7 @@ export async function getEnrichedTimeline(
       return { success: false, error: 'Case not found' };
     }
 
-    const statusHistory: TimelineStatusEntry[] = (grievance.timeline as unknown as TimelineStatusEntry[]) || [];
+    const statusHistory: TimelineStatusEntry[] = (grievance.timeline as any as TimelineStatusEntry[]) || [];
 
     // Enrich each entry with human-readable message
     const enrichedTimeline = statusHistory.map((entry, index) => {

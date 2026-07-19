@@ -33,3 +33,25 @@ export {
   selectOptedIn,
 } from './aggregateIntelligence';
 export type { AggregationOptions } from './aggregateIntelligence';
+
+export {
+  BENCHMARK_PUBLICATION_GUARD_VERSION,
+  COHORT_MINIMUM,
+  FORBIDDEN_CLAIM_FORMS,
+  MIN_TREND_PERIODS,
+  SAFE_CLAIM_FORMS,
+  guardBenchmarkClaim,
+  guardBenchmarkClaims,
+  isPublishable,
+} from './publicationGuard';
+export type {
+  BenchmarkClaim,
+  BenchmarkClaimForm,
+  BenchmarkClaimKind,
+  CohortDescriptor,
+  GuardViolation,
+  PublicationDecision,
+  PublicationVerdict,
+  TrendPeriod,
+  ViolationCode,
+} from './publicationGuard';

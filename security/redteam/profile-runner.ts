@@ -102,7 +102,7 @@ function runProfile(profileName: string, files: string[], seed: number): Profile
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 120_000,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     exitCode = err.status ?? 1
     rawOutput = err.stdout ?? ''
   }
@@ -172,10 +172,10 @@ function main() {
   for (const [name, def] of profilesToRun) {
     if (!jsonOnly) {
       console.log(`\n🔴 Running red-team profile: ${name as string}`)
-      console.log(`   ${(def as any).description}`)
+      console.log(`   ${(def as unknown).description}`)
       console.log(`   Seed: ${seed}\n`)
     }
-    const report = runProfile(name as string, (def as any).files, seed)
+    const report = runProfile(name as string, (def as unknown).files, seed)
     reports.push(report)
   }
 

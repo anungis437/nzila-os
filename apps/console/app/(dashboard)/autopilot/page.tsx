@@ -13,8 +13,11 @@ import { generateAutopilotRecommendations } from '@/lib/autopilot-engine'
 import { getWeeklyBriefingData } from '@/lib/executive-intelligence'
 import { getDataFreshnessSummary } from '@/lib/data-freshness'
 import { CommandPageShell } from '@/components/command-page-shell'
+import { createLogger } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
+
+const logger = createLogger('console.autopilot')
 
 const ALLOWED_CATEGORIES = new Set(['sales', 'capital', 'hiring', 'product', 'risk'])
 const ALLOWED_URGENCIES = new Set(['critical', 'high', 'medium'])
@@ -51,45 +54,54 @@ async function approveAutopilotAction(formData: FormData) {
   dueDate.setDate(dueDate.getDate() + dueDays)
   const dueDateIso = dueDate.toISOString().slice(0, 10)
 
-  const initiative = await platformDb
-    .insert(executionInitiatives)
-    .values({
-      orgId,
-      title: `[Autopilot] ${title}`,
-      venture: ventureId,
-      zone: category,
-      owner,
-      dueDate: dueDateIso,
-      status: 'not-started',
-      urgent: priority === 'p0',
-    })
-    .returning({ id: executionInitiatives.id })
+  try {
+    const initiative = await platformDb
+      .insert(executionInitiatives)
+      .values({
+        orgId,
+        title: `[Autopilot] ${title}`,
+        venture: ventureId,
+        zone: category,
+        owner,
+        dueDate: dueDateIso,
+        status: 'not-started',
+        urgent: priority === 'p0',
+      })
+      .returning({ id: executionInitiatives.id })
 
-  const decision = await platformDb
-    .insert(executiveDecisions)
-    .values({
+    const decision = await platformDb
+      .insert(executiveDecisions)
+      .values({
+        orgId,
+        title,
+        rationale,
+        ventureId,
+        category,
+        priority,
+        owner,
+        dueDate: dueDateIso,
+        status: 'approved',
+        linkedInitiativeId: initiative[0]?.id,
+      })
+      .returning({ id: executiveDecisions.id })
+
+    if (decision[0]?.id) {
+      await platformDb.insert(decisionScorebacks).values({
+        orgId,
+        decisionId: decision[0].id,
+        expectedResult: expectedUpside,
+        confidenceAtDecision: Number.isFinite(confidence) ? confidence : 0.7,
+        expectedByDate: dueDateIso,
+        outcomeStatus: 'pending',
+      })
+    }
+  } catch (error) {
+    logger.warn('approve autopilot action failed; skipping write', {
       orgId,
       title,
-      rationale,
-      ventureId,
-      category,
-      priority,
-      owner,
-      dueDate: dueDateIso,
-      status: 'approved',
-      linkedInitiativeId: initiative[0]?.id,
+      error: error instanceof Error ? error.message : String(error),
     })
-    .returning({ id: executiveDecisions.id })
-
-  if (decision[0]?.id) {
-    await platformDb.insert(decisionScorebacks).values({
-      orgId,
-      decisionId: decision[0].id,
-      expectedResult: expectedUpside,
-      confidenceAtDecision: Number.isFinite(confidence) ? confidence : 0.7,
-      expectedByDate: dueDateIso,
-      outcomeStatus: 'pending',
-    })
+    return
   }
 
   revalidatePath('/autopilot')

@@ -212,7 +212,7 @@ jobs:
             echo "- Demo profile: $DEMO_PROFILE ($DEMO_ORG_SLUG)" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ "$DEPLOY_ENV" = "production" ]; then
-            echo "- Note: production currently runs in staging-named Azure infrastructure; this workflow preserves that live topology intentionally." >> "$GITHUB_STEP_SUMMARY"
+            echo "- Note: production runs in dedicated infrastructure (nzila-canada-prod-rg / nzila-canada-prod-env) on a dedicated production database; the hard guard above fails the deploy if prod ever resolves to staging/demo/pilot infra. (Live-verified 2026-06-28, Runtime Separation Wave Phase A.1.)" >> "$GITHUB_STEP_SUMMARY"
           fi
 
   pre-deploy-gates:
@@ -377,18 +377,55 @@ jobs:
           path: release-attestation.json
           retention-days: 90
 
-  build-and-deploy:
+  # BR-5: image BUILD/PUSH authority, separated from environment DEPLOY
+  # authority. This job runs under the dedicated `build` GitHub Environment so
+  # `azure/login` resolves the `nzila-os-build` OIDC identity, which holds
+  # AcrPush on nzilacanadaacr ONLY and has NO Contributor on any deploy RG. It
+  # builds and pushes the frontend + backend images to the shared registry,
+  # then resolves and emits the immutable @sha256 digests consumed by the
+  # env-scoped `deploy` job. The per-environment deploy identities remain
+  # AcrPull-only and never push.
+  build-push:
     runs-on: ubuntu-latest
     needs: [plan, pre-deploy-gates]
-    name: Build & Deploy UnionEyes
-    environment: ${{ needs.plan.outputs.environment }}
+    name: Build & Push UnionEyes images (build authority)
+    environment: build
+    outputs:
+      frontend_digest: ${{ steps.digests.outputs.frontend_digest }}
+      backend_digest: ${{ steps.digests.outputs.backend_digest }}
     steps:
       - uses: actions/checkout@v5
 
-      - name: Azure Login
+      - name: Assert build identity is configured (fail-closed)
+        env:
+          BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          BUILD_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BUILD_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_CLIENT_ID}" ] || [ -z "${BUILD_TENANT_ID}" ] || [ -z "${BUILD_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No dedicated build identity configured on the 'build' GitHub Environment (BR-5). Expected AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID for nzila-os-build. Environment deploy identities are AcrPull-only and MUST NOT be used to push. Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, build identity)
         uses: azure/login@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify authenticated identity is the build identity (fail-closed)
+        env:
+          EXPECTED_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          ACTUAL=$(az account show --query user.name -o tsv)
+          if [ "$ACTUAL" != "$EXPECTED_CLIENT_ID" ]; then
+            echo "::error::Authenticated identity ($ACTUAL) is not the expected build identity. Refusing to push (BR-5)."
+            exit 1
+          fi
+          echo "Build identity verified."
 
       - name: ACR login
         run: az acr login --name ${{ needs.plan.outputs.acr_name }}
@@ -424,12 +461,120 @@ jobs:
 
       - name: Build & push backend image
         run: |
-          az acr build \
-            --registry ${{ needs.plan.outputs.acr_name }} \
-            --image nzila-os-union-eyes-backend:${{ github.sha }} \
-            --image nzila-os-union-eyes-backend:latest \
+          # BR-5: backend uses runner-side docker build + push (NOT `az acr
+          # build`). The AcrPush role lacks Microsoft.ContainerRegistry/
+          # registries/scheduleRun/action, so the build identity cannot run a
+          # server-side ACR build; runner-side push needs only AcrPush.
+          docker build \
             --file apps/union-eyes/backend/Dockerfile \
+            -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.BACKEND_IMAGE }}:latest \
             apps/union-eyes/backend
+          docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Resolve immutable image digests (BR-5 promotion evidence)
+        id: digests
+        run: |
+          set -euo pipefail
+          ACR='${{ needs.plan.outputs.acr_name }}'
+          FRONTEND_DIGEST=$(az acr repository show \
+            --name "$ACR" \
+            --image "nzila-os-union-eyes:${{ github.sha }}" \
+            --query digest -o tsv)
+          BACKEND_DIGEST=$(az acr repository show \
+            --name "$ACR" \
+            --image "nzila-os-union-eyes-backend:${{ github.sha }}" \
+            --query digest -o tsv)
+          if [ -z "${FRONTEND_DIGEST:-}" ] || [ -z "${BACKEND_DIGEST:-}" ]; then
+            echo "::error::Failed to resolve immutable @sha256 digest for pushed images (frontend='${FRONTEND_DIGEST:-}' backend='${BACKEND_DIGEST:-}'). Refusing to promote a mutable-only tag (BR-5)."
+            exit 1
+          fi
+          case "$FRONTEND_DIGEST" in sha256:*) : ;; *) echo "::error::frontend digest is not a sha256 reference: $FRONTEND_DIGEST"; exit 1 ;; esac
+          case "$BACKEND_DIGEST" in sha256:*) : ;; *) echo "::error::backend digest is not a sha256 reference: $BACKEND_DIGEST"; exit 1 ;; esac
+          echo "frontend_digest=$FRONTEND_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "backend_digest=$BACKEND_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "Resolved frontend digest: $FRONTEND_DIGEST"
+          echo "Resolved backend digest: $BACKEND_DIGEST"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [plan, pre-deploy-gates, build-push]
+    name: Deploy UnionEyes (env-scoped, digest-pinned)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # BR-4: environment-scoped deployment identity. This job sets
+      # `environment: ${{ needs.plan.outputs.environment }}`, so the
+      # GitHub Environment-scoped secrets below resolve to a DISTINCT
+      # federated identity per environment (production/staging/demo/pilot).
+      # No shared AZURE_CREDENTIALS password is used; we fail closed if the
+      # per-environment identity is not configured.
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}'. Configure AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID on the '${{ needs.plan.outputs.environment }}' GitHub Environment (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # BR-4 fail-closed boundary gate: each environment may target ONLY its own
+      # resource group. A staging/demo/pilot run that somehow resolves a prod RG
+      # (or vice versa) is refused before any image push or container update.
+      - name: Deployment identity boundary gate (fail-closed)
+        run: |
+          set -euo pipefail
+          DEPLOY_ENV="${{ needs.plan.outputs.environment }}"
+          TARGET_RG="${{ needs.plan.outputs.resource_group }}"
+          case "$DEPLOY_ENV" in
+            production) EXPECT='nzila-canada-prod-rg' ;;
+            staging)    EXPECT='nzila-canada-staging-rg' ;;
+            demo)       EXPECT='nzila-canada-demo-rg' ;;
+            pilot)      EXPECT='nzila-canada-pilot-rg' ;;
+            *) echo "::error::Unknown deploy environment '$DEPLOY_ENV'."; exit 1 ;;
+          esac
+          if [ "$TARGET_RG" != "$EXPECT" ]; then
+            echo "::error::Environment '$DEPLOY_ENV' resolved to resource group '$TARGET_RG' but may only deploy to '$EXPECT'. Failing closed (BR-4 boundary)."
+            exit 1
+          fi
+          if ! az account show --output none 2>/dev/null; then
+            echo "::error::Azure CLI is not authenticated via the environment-scoped OIDC identity."
+            exit 1
+          fi
+          echo "Boundary OK: env=$DEPLOY_ENV rg=$TARGET_RG"
+
+      # BR-5 fail-closed image-immutability gate: this env-scoped deploy
+      # identity is AcrPull-only and must consume an immutable, pre-approved
+      # image produced by the separate `build-push` (build authority) job.
+      # Production refuses to proceed without a resolved @sha256 digest; a
+      # mutable tag (:sha / :environment / :latest) is NOT accepted as
+      # production promotion evidence.
+      - name: Image immutability gate (fail-closed, BR-5)
+        env:
+          FRONTEND_DIGEST: ${{ needs.build-push.outputs.frontend_digest }}
+          BACKEND_DIGEST: ${{ needs.build-push.outputs.backend_digest }}
+          DEPLOY_ENV: ${{ needs.plan.outputs.environment }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FRONTEND_DIGEST:-}" ] || [ -z "${BACKEND_DIGEST:-}" ]; then
+            echo "::error::Missing immutable image digest from build-push job (frontend='${FRONTEND_DIGEST:-}' backend='${BACKEND_DIGEST:-}'). Refusing to deploy a mutable-only image (BR-5)."
+            exit 1
+          fi
+          case "$FRONTEND_DIGEST" in sha256:*) : ;; *) echo "::error::frontend image source is not an immutable @sha256 digest: $FRONTEND_DIGEST"; exit 1 ;; esac
+          case "$BACKEND_DIGEST" in sha256:*) : ;; *) echo "::error::backend image source is not an immutable @sha256 digest: $BACKEND_DIGEST"; exit 1 ;; esac
+          echo "Image immutability OK (env=$DEPLOY_ENV): frontend=$FRONTEND_DIGEST backend=$BACKEND_DIGEST"
 
       - name: Ensure target Container App exists
         run: |
@@ -444,7 +589,7 @@ jobs:
 
           # Pre-flight: confirm we have an authenticated Azure context.
           if ! az account show --output none 2>/dev/null; then
-            echo "::error::Azure CLI is not authenticated. Check the 'Azure Login' step and AZURE_CREDENTIALS secret."
+            echo "::error::Azure CLI is not authenticated. Check the environment-scoped OIDC login (BR-4) and the per-environment AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID GitHub Environment secrets."
             exit 1
           fi
 
@@ -484,7 +629,7 @@ jobs:
             --name "$TARGET_APP" \
             --resource-group "$TARGET_RG" \
             --environment "$TARGET_ENV" \
-            --image ${{ env.IMAGE }}:${{ github.sha }} \
+            --image ${{ env.IMAGE }}@${{ needs.build-push.outputs.frontend_digest }} \
             --ingress external \
             --target-port 3000 \
             --cpu 1.0 \
@@ -565,7 +710,7 @@ jobs:
             --resource-group "$TARGET_RG" \
             --set-env-vars "${FRONTEND_ENV_VARS[@]}" \
             --container-name "$TARGET_APP" \
-            --image ${{ env.IMAGE }}:${{ github.sha }}
+            --image ${{ env.IMAGE }}@${{ needs.build-push.outputs.frontend_digest }}
 
           # Ensure backend secretref aliases exist: some environments seed
           # secrets with an environment suffix (e.g. auth-webhook-secret-demo)
@@ -610,8 +755,56 @@ jobs:
           PGSSLMODE_VAL=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGSSLMODE") | .value // empty' | head -n1)
           PGPASSWORD_SECRET=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="PGPASSWORD") | .secretRef // empty' | head -n1)
 
+          # Frontends commonly carry a single DATABASE_URL connection string
+          # (secretref) instead of discrete PG* vars. Derive the backend's PG*
+          # from that secret so Django doesn't fall back to localhost — and so
+          # this deploy doesn't hard-fail on environments that only set DATABASE_URL.
           if [ -z "$PGHOST_VAL" ] || [ -z "$PGUSER_VAL" ] || [ -z "$PGDATABASE_VAL" ]; then
-            echo "::error::Missing PGHOST/PGUSER/PGDATABASE on frontend container env; refusing backend update to avoid localhost DB fallback."
+            DB_URL_SECRET=$(echo "$FRONTEND_ENV_JSON" | jq -r '.[] | select(.name=="DATABASE_URL") | .secretRef // empty' | head -n1)
+            if [ -n "$DB_URL_SECRET" ]; then
+              DB_URL=$(az containerapp secret show \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secret-name "$DB_URL_SECRET" \
+                --query value -o tsv)
+              # Parse postgres://user:pass@host:port/db?params with pure bash.
+              # Credentials are percent-encoded in the URL, so splitting on ':'
+              # and '@' is safe; decode after splitting.
+              urldecode() { local d="${1//+/ }"; printf '%b' "${d//%/\\x}"; }
+              UE_REST="${DB_URL#*://}"
+              UE_CREDS="${UE_REST%%@*}"
+              UE_HOSTPART="${UE_REST#*@}"
+              UE_HOSTPORTDB="${UE_HOSTPART%%\?*}"
+              UE_HOSTPORT="${UE_HOSTPORTDB%%/*}"
+              URL_PGHOST="${UE_HOSTPORT%%:*}"
+              URL_PGPORT="${UE_HOSTPORT##*:}"
+              [ "$URL_PGPORT" = "$UE_HOSTPORT" ] && URL_PGPORT="5432"
+              URL_PGDATABASE="${UE_HOSTPORTDB#*/}"
+              URL_PGUSER=$(urldecode "${UE_CREDS%%:*}")
+              URL_PGPASSWORD=$(urldecode "${UE_CREDS#*:}")
+              URL_PGSSLMODE=$(printf '%s' "$DB_URL" | grep -oE 'sslmode=[A-Za-z-]+' | head -n1 | cut -d= -f2)
+              [ -z "$URL_PGSSLMODE" ] && URL_PGSSLMODE="require"
+
+              [ -z "$PGHOST_VAL" ] && PGHOST_VAL="$URL_PGHOST"
+              [ -z "$PGUSER_VAL" ] && PGUSER_VAL="$URL_PGUSER"
+              [ -z "$PGDATABASE_VAL" ] && PGDATABASE_VAL="$URL_PGDATABASE"
+              [ -z "$PGPORT_VAL" ] && PGPORT_VAL="$URL_PGPORT"
+              [ -z "$PGSSLMODE_VAL" ] && PGSSLMODE_VAL="$URL_PGSSLMODE"
+              # Mirror the parsed password into a db-password secret for the
+              # backend's PGPASSWORD secretref (idempotent overwrite).
+              if [ -z "$PGPASSWORD_SECRET" ]; then
+                az containerapp secret set \
+                  --name "$TARGET_APP" \
+                  --resource-group "$TARGET_RG" \
+                  --secrets "db-password=$URL_PGPASSWORD" >/dev/null
+                PGPASSWORD_SECRET="db-password"
+              fi
+              echo "::notice::Derived backend PG* from DATABASE_URL secret ($DB_URL_SECRET)."
+            fi
+          fi
+
+          if [ -z "$PGHOST_VAL" ] || [ -z "$PGUSER_VAL" ] || [ -z "$PGDATABASE_VAL" ]; then
+            echo "::error::Missing PGHOST/PGUSER/PGDATABASE on frontend container env (and no DATABASE_URL secret to derive from); refusing backend update to avoid localhost DB fallback."
             exit 1
           fi
 
@@ -652,7 +845,7 @@ jobs:
               "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
               "DJANGO_MIGRATE_EXTRA_ARGS=$DJANGO_MIGRATE_EXTRA_ARGS" \
               "DJANGO_SKIP_MIGRATIONS=$DJANGO_SKIP_MIGRATIONS" \
-            --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+            --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
 
       - name: Custom domain smoke checks
         shell: bash

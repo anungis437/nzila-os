@@ -23,7 +23,7 @@ import {
 import { eq, and, desc, sql } from "drizzle-orm";
 import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
-import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
 
@@ -36,12 +36,14 @@ import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
  */
 async function aiGenerate(
   messages: Array<{ role: string; content: string }>,
+  organizationId?: string,
   _options?: { temperature?: number; maxTokens?: number; model?: string },
 ): Promise<{ content: string; tokensUsed: number; model: string }> {
   const ai = getAiClient();
   const input = messages.map(m => ({ role: m.role as 'system' | 'user' | 'assistant', content: m.content }));
   const response = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
+    trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.CHATBOT,
     input,
@@ -54,7 +56,7 @@ async function aiGenerate(
   };
 }
 
-async function aiEmbed(text: string): Promise<number[]> {
+async function aiEmbed(text: string, organizationId?: string): Promise<number[]> {
   // Check cache first
   const cachedEmbedding = await embeddingCache.getCachedEmbedding(text, 'ai-sdk');
   if (cachedEmbedding) {
@@ -102,8 +104,7 @@ export class ChatSessionManager {
         userId: data.userId,
         organizationId: data.organizationId,
         title: data.title || "New conversation",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        aiProvider: (data.aiProvider as any) || "openai",
+        aiProvider: (data.aiProvider as (typeof chatSessions.aiProvider)['_']['data']) || "openai",
         model: data.model || "gpt-4",
         contextTags: data.contextTags,
         relatedEntityType: data.relatedEntityType,
@@ -144,8 +145,7 @@ export class ChatSessionManager {
       conditions.push(eq(chatSessions.organizationId, options.organizationId));
     }
     if (options.status) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      conditions.push(eq(chatSessions.status, options.status as any));
+      conditions.push(eq(chatSessions.status, options.status as (typeof chatSessions.status)['_']['data']));
     }
 
     const results = await db
@@ -218,10 +218,8 @@ export class RAGService {
     await db.insert(knowledgeBase).values({
       ...data,
       organizationId: data.organizationId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      documentType: data.documentType as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      embedding: JSON.stringify(embedding) as any,
+      documentType: data.documentType as (typeof knowledgeBase.documentType)['_']['data'],
+      embedding: JSON.stringify(embedding) as unknown as (typeof knowledgeBase.$inferInsert)['embedding'],
       embeddingModel: "text-embedding-ada-002",
     });
   }
@@ -403,7 +401,7 @@ export class ChatbotService {
     // Get AI response
     let response: { content: string; tokensUsed: number; model: string };
     try {
-      response = await aiGenerate(conversationMessages, {
+      response = await aiGenerate(conversationMessages, session.organizationId, {
         temperature: parseFloat(session.temperature || "0.7"),
         model: session.model,
       });
@@ -441,8 +439,7 @@ export class ChatbotService {
         modelUsed: response.model,
         tokensUsed: response.tokensUsed,
         responseTimeMs: responseTime,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        retrievedDocuments: retrievedDocs.length > 0 ? retrievedDocs as any : undefined,
+        retrievedDocuments: retrievedDocs.length > 0 ? (retrievedDocs as (typeof chatMessages.$inferInsert)['retrievedDocuments']) : undefined,
       })
       .returning();
     

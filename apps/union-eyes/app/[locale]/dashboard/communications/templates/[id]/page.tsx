@@ -680,7 +680,7 @@ export default function TemplateDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('deleteDialogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {/* eslint-disable-next-line react/no-unescaped-entities */}
+              { }
               {t('deleteDialogDescription', { name: template.name })}
               {template.isActive && (
                 <div className="mt-2 text-amber-600">

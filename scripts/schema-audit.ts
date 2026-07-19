@@ -88,7 +88,7 @@ function extractDrizzleTables(schemaExports: Record<string, unknown>): DrizzleTa
   for (const [exportName, value] of Object.entries(schemaExports)) {
     if (!is(value, PgTable)) continue;
 
-    const tbl = value as PgTable<any>;
+    const tbl = value as PgTable<unknown>;
     const tableName = getTableName(tbl);
 
     // Detect schema — check for Symbol with schema info
@@ -96,7 +96,7 @@ function extractDrizzleTables(schemaExports: Record<string, unknown>): DrizzleTa
     const symbols = Object.getOwnPropertySymbols(tbl);
     const schemaSym = symbols.find(s => s.toString().includes('Schema'));
     if (schemaSym) {
-      const schemaVal = (tbl as any)[schemaSym];
+      const schemaVal = (tbl as unknown)[schemaSym];
       if (schemaVal && typeof schemaVal === 'string') dbSchema = schemaVal;
       else if (schemaVal && typeof schemaVal === 'object' && schemaVal.schemaName) dbSchema = schemaVal.schemaName;
     }
@@ -109,7 +109,7 @@ function extractDrizzleTables(schemaExports: Record<string, unknown>): DrizzleTa
     const columns = new Map<string, { name: string; columnType: string; notNull: boolean; hasDefault: boolean }>();
 
     for (const [jsName, col] of Object.entries(drizzleCols)) {
-      const c = col as any;
+      const c = col as unknown;
       columns.set(c.name, {
         name: c.name,
         columnType: c.columnType,

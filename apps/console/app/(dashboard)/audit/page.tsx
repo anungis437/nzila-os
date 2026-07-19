@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Badge } from '@/components/ui/Badge'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,10 @@ export default function AuditPage() {
     <main className="space-y-6 p-6">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-wider text-slate-500">Decision Proof Ledger</p>
-        <h1 className="text-3xl font-semibold text-slate-900">Audit Records</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-semibold text-slate-900">Audit Records</h1>
+          <Badge tone="amber">Illustrative · chain explainer</Badge>
+        </div>
         <p className="max-w-3xl text-sm text-slate-600">
           This surface exposes the non-bypassable decision audit APIs managed by Control Plane.
           This record is immutable and independently verifiable.

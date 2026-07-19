@@ -3,7 +3,7 @@
  * panel for the weekly briefing: top-ranked recommendations, what changed
  * vs the previous snapshot, and a quiet "one thing to ignore".
  */
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import { platformDb } from '@nzila/db/platform'
 import {
   executiveRecommendations,

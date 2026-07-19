@@ -59,7 +59,7 @@ export interface OrganizationContextValue {
   loadOrganizationTree: () => Promise<void>;
 }
 
-function normalizeOrganization(raw: unknown): Organization | null {
+function normalizeOrganization(raw: any): Organization | null {
   if (!raw || typeof raw !== 'object') {
     return null;
   }
@@ -178,7 +178,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
 
       const data = await response.json();
       let organizations = (data.organizations || [])
-        .map((org: unknown) => normalizeOrganization(org))
+        .map((org: any) => normalizeOrganization(org))
         .filter((org: Organization | null): org is Organization => org !== null);
       const memberships = data.memberships || [];
 

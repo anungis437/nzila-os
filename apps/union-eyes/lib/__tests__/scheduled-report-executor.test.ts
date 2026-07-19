@@ -16,7 +16,7 @@ vi.mock('@/db', () => ({
 
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign(
-    (strings: TemplateStringsArray, ...vals: unknown[]) => ({
+    (strings: TemplateStringsArray, ...vals: any[]) => ({
       queryChunks: [strings.join('?')],
       values: vals,
     }),
@@ -228,6 +228,107 @@ describe('scheduled-report-executor', () => {
       const result = await executeScheduledReport(makeSchedule({ format: 'docx' }));
       expect(result.success).toBe(false);
       expect(result.error).toContain('Unsupported export format');
+    });
+
+    it('succeeds with excel format (falls back to CSV if exceljs unavailable)', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'claims' } }])
+        .mockResolvedValueOnce([{ claim_number: '001', status: 'open', priority: 'high' }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/report.xlsx' });
+
+      const result = await executeScheduledReport(makeSchedule({ format: 'excel' }));
+      expect(result.success).toBe(true);
+    });
+
+    it('succeeds with xlsx format', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'default' } }])
+        .mockResolvedValueOnce([{ id: '1', status: 'open', priority: 'low' }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/report.xlsx' });
+
+      const result = await executeScheduledReport(makeSchedule({ format: 'xlsx' }));
+      expect(result.success).toBe(true);
+    });
+
+    it('succeeds with pdf format (falls back to text if jspdf unavailable)', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'claims' } }])
+        .mockResolvedValueOnce([{ claim_number: 'CN-001', status: 'open', priority: 'high' }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/report.pdf' });
+
+      const result = await executeScheduledReport(makeSchedule({ format: 'pdf' }));
+      expect(result.success).toBe(true);
+    });
+
+    it('handles custom query with empty query (falls to default)', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'custom' } }]) // no query field
+        .mockResolvedValueOnce([{ id: '1', status: 'open' }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/report.csv' });
+
+      const result = await executeScheduledReport(makeSchedule());
+      expect(result.success).toBe(true);
+    });
+
+    it('handles custom query with member_stats key', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'custom', queryKey: 'member_stats', query: 'x' } }])
+        .mockResolvedValueOnce([{ total: 5, unique_orgs: 2 }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/member.csv' });
+
+      const result = await executeScheduledReport(makeSchedule());
+      expect(result.success).toBe(true);
+    });
+
+    it('handles custom query with recent_claims key', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'custom', queryKey: 'recent_claims', query: 'x' } }])
+        .mockResolvedValueOnce([{ id: 'cl1', claim_number: 'CN-1', status: 'open', claim_amount: 100, created_at: new Date() }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/recent.csv' });
+
+      const result = await executeScheduledReport(makeSchedule());
+      expect(result.success).toBe(true);
+    });
+
+    it('CSV: escapes values with commas and quotes', async () => {
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'claims' } }])
+        .mockResolvedValueOnce([{ claim_number: 'CN-001', status: 'injured, and hurt', note: 'he said "it hurts"' }])
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/report.csv' });
+
+      const result = await executeScheduledReport(makeSchedule({ format: 'csv' }));
+      expect(result.success).toBe(true);
+    });
+
+    it('pdf format triggers new page when data has many rows', async () => {
+      const manyRows = Array.from({ length: 40 }, (_, i) => ({
+        claim_number: `CN-${i}`, status: 'open', priority: 'high',
+        claim_type: 'injury', description: `Row ${i}`,
+      }));
+      mocks.mockExecute
+        .mockResolvedValueOnce([{ id: 'job-1' }])
+        .mockResolvedValueOnce([{ config: { reportType: 'claims' } }])
+        .mockResolvedValueOnce(manyRows)
+        .mockResolvedValueOnce(undefined);
+      mocks.mockUpload.mockResolvedValue({ url: 'https://storage/multi-page.pdf' });
+
+      const result = await executeScheduledReport(makeSchedule({ format: 'pdf' }));
+      expect(result.success).toBe(true);
+      expect(result.rowCount).toBe(40);
     });
   });
 

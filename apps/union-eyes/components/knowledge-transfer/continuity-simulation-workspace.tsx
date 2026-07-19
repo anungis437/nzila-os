@@ -13,7 +13,7 @@
  * All analysis is organizational — not individual/workforce evaluation.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CognitionGraphViz, type CognitionGraph } from './cognition-graph/cognition-graph-viz';
 import { PropagationPlayback, type PropagationPlaybackData } from './propagation-playback/propagation-playback';
 import { GovernanceImpactExplorer, type GovernanceImpactData } from './governance-impact/governance-impact-explorer';
@@ -39,6 +39,127 @@ interface MitigationScenariosData {
     impactDeltas: Array<{ domainName: string; exposureReduction: number }>;
   }>;
   recommendation: string;
+}
+
+interface RawPropagationNode {
+  id: string;
+  label: string;
+  nodeType?: string;
+  category?: string;
+  continuitySensitivity?: 'low' | 'medium' | 'high';
+  isSingleSource?: boolean;
+  frequency?: number;
+}
+
+interface RawPropagationEdge {
+  sourceId: string;
+  targetId: string;
+  weight?: number;
+  strength?: number;
+  edgeType?: 'dependency' | 'governance' | 'operational';
+}
+
+interface RawPropagationPath {
+  path?: string[];
+  impactScore?: number;
+  disruptionScope?: string;
+}
+
+interface RawPropagationBottleneck {
+  nodeId?: string;
+  id?: string;
+}
+
+interface PropagationResponse {
+  data?: {
+    nodes?: RawPropagationNode[];
+    edges?: RawPropagationEdge[];
+    propagationPaths?: RawPropagationPath[];
+    bottlenecks?: Array<string | RawPropagationBottleneck>;
+  };
+}
+
+interface RawGovernanceNode {
+  id?: string;
+  name?: string;
+  label?: string;
+  type?: 'compliance' | 'regulatory' | 'procedural' | 'decision_authority';
+  isSingleSource?: boolean;
+  dependsOn?: string[];
+  downstreamProcesses?: string[];
+  downstream?: string[];
+  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+  continuityImplication?: string;
+  description?: string;
+}
+
+interface RawCascadeRisk {
+  triggerNode?: string;
+  trigger?: string;
+  cascadedProcesses?: string[];
+  cascade?: string[];
+  severity?: 'low' | 'medium' | 'high';
+  description?: string;
+}
+
+interface GovernanceResponse {
+  data?: {
+    totalGovernanceNodes?: number;
+    singleSourceGovernanceNodes?: number;
+    criticalGaps?: string[];
+    governanceNodes?: RawGovernanceNode[];
+    cascadeRisks?: RawCascadeRisk[];
+  };
+}
+
+interface RawTimelinePoint {
+  week: number;
+  operationalCapacity?: number;
+  affectedDomains?: string[];
+  criticalFailures?: string[];
+  recoveryProgress?: number;
+}
+
+interface RawWeaknessIndicator {
+  area?: string;
+}
+
+interface SimulationResponse {
+  data?: {
+    durationWeeks?: number;
+    degradationTimeline?: RawTimelinePoint[];
+    weaknessIndicators?: RawWeaknessIndicator[];
+    estimatedRecoveryWeeks?: number | null;
+  };
+}
+
+interface RawImpactDelta {
+  domainName?: string;
+  exposureReduction?: number;
+}
+
+interface RawMitigationResult {
+  scenario?: {
+    mitigationType?: string;
+    investmentLevel?: 'low' | 'medium' | 'high';
+    durationWeeks?: number;
+    label?: string;
+  };
+  projectedGain?: {
+    resilienceScoreGain?: number;
+  };
+  impactDelta?: {
+    perDomainDeltas?: RawImpactDelta[];
+  };
+}
+
+interface MitigationComparisonResponse {
+  data?: {
+    results?: RawMitigationResult[];
+    topRecommendation?: {
+      mitigationType?: string;
+    };
+  };
 }
 
 function LoadingState({ message }: { message: string }) {
@@ -88,12 +209,12 @@ export function ContinuitySimulationWorkspace() {
       setPropagationError(null);
       const res = await fetch('/api/exit-interviews/propagation');
       if (!res.ok) throw new Error('Failed to load propagation data');
-      const json = await res.json();
+      const json = (await res.json()) as PropagationResponse;
       const raw = json.data;
 
       // Map raw propagation map to CognitionGraph shape
       const graph: CognitionGraph = {
-        nodes: (raw.nodes ?? []).map((n: any) => ({
+        nodes: (raw?.nodes ?? []).map((n) => ({
           id: n.id,
           label: n.label,
           nodeType: n.nodeType ?? 'expertise',
@@ -102,18 +223,20 @@ export function ContinuitySimulationWorkspace() {
           isSingleSource: n.isSingleSource ?? false,
           frequency: n.frequency ?? 1,
         })),
-        edges: (raw.edges ?? []).map((e: any) => ({
+        edges: (raw?.edges ?? []).map((e) => ({
           sourceId: e.sourceId,
           targetId: e.targetId,
           strength: e.weight ?? e.strength ?? 1,
           edgeType: e.edgeType ?? 'dependency',
         })),
-        propagationPaths: (raw.propagationPaths ?? []).map((p: any) => ({
+        propagationPaths: (raw?.propagationPaths ?? []).map((p) => ({
           path: p.path ?? [],
           impactScore: p.impactScore ?? 0,
           disruptionScope: p.disruptionScope ?? '',
         })),
-        bottlenecks: (raw.bottlenecks ?? []).map((b: any) => (typeof b === 'string' ? b : b.nodeId ?? b.id ?? '')),
+        bottlenecks: (raw?.bottlenecks ?? []).map((b) =>
+          typeof b === 'string' ? b : b.nodeId ?? b.id ?? '',
+        ),
       };
       setPropagationData(graph);
     } catch {
@@ -123,23 +246,23 @@ export function ContinuitySimulationWorkspace() {
     }
   };
 
-  const fetchGovernance = async () => {
+  const fetchGovernance = useCallback(async () => {
     if (governanceData) return;
     try {
       setGovernanceLoading(true);
       const res = await fetch('/api/exit-interviews/cascade-analysis');
       if (!res.ok) throw new Error('Failed to load governance data');
-      const json = await res.json();
+      const json = (await res.json()) as GovernanceResponse;
       const raw = json.data;
 
       // Map cascade analysis to GovernanceImpactData
       const mapped: GovernanceImpactData = {
-        totalGovernanceProcesses: raw.totalGovernanceNodes ?? 0,
-        singleSourceProcesses: raw.singleSourceGovernanceNodes ?? 0,
-        criticalGovernanceGaps: raw.criticalGaps ?? [],
-        nodes: (raw.governanceNodes ?? []).map((n: any) => ({
-          id: n.id ?? n.name,
-          name: n.name ?? n.label,
+        totalGovernanceProcesses: raw?.totalGovernanceNodes ?? 0,
+        singleSourceProcesses: raw?.singleSourceGovernanceNodes ?? 0,
+        criticalGovernanceGaps: raw?.criticalGaps ?? [],
+        nodes: (raw?.governanceNodes ?? []).map((n) => ({
+          id: n.id ?? n.name ?? n.label ?? '',
+          name: n.name ?? n.label ?? n.id ?? '',
           type: n.type ?? 'procedural',
           isSingleSource: n.isSingleSource ?? false,
           dependsOn: n.dependsOn ?? [],
@@ -147,7 +270,7 @@ export function ContinuitySimulationWorkspace() {
           riskLevel: n.riskLevel ?? 'medium',
           continuityImplication: n.continuityImplication ?? n.description ?? '',
         })),
-        cascadeRisks: (raw.cascadeRisks ?? []).map((r: any) => ({
+        cascadeRisks: (raw?.cascadeRisks ?? []).map((r) => ({
           triggerNode: r.triggerNode ?? r.trigger ?? '',
           cascadedProcesses: r.cascadedProcesses ?? r.cascade ?? [],
           severity: r.severity ?? 'medium',
@@ -160,7 +283,7 @@ export function ContinuitySimulationWorkspace() {
     } finally {
       setGovernanceLoading(false);
     }
-  };
+  }, [governanceData]);
 
   const fetchSimulation = async (scenario: SimulationScenario) => {
     try {
@@ -175,14 +298,14 @@ export function ContinuitySimulationWorkspace() {
         }),
       });
       if (!res.ok) throw new Error('Failed to run simulation');
-      const json = await res.json();
+      const json = (await res.json()) as SimulationResponse;
       const raw = json.data;
 
       const pb: PropagationPlaybackData = {
         scenarioName: scenario.label,
         disruptionType: scenario.type,
-        totalWeeks: raw.durationWeeks ?? scenario.duration,
-        timeline: (raw.degradationTimeline ?? []).map((t: any) => ({
+        totalWeeks: raw?.durationWeeks ?? scenario.duration,
+        timeline: (raw?.degradationTimeline ?? []).map((t) => ({
           week: t.week,
           operationalCapacity: t.operationalCapacity ?? 100,
           affectedDomains: t.affectedDomains ?? [],
@@ -190,8 +313,8 @@ export function ContinuitySimulationWorkspace() {
           recoveryProgress: t.recoveryProgress ?? 0,
         })),
         mitigationReplays: [],
-        bottlenecksExposed: raw.weaknessIndicators?.map((w: any) => w.area ?? '') ?? [],
-        recoveryWeek: raw.estimatedRecoveryWeeks ?? null,
+        bottlenecksExposed: raw?.weaknessIndicators?.map((w) => w.area ?? '') ?? [],
+        recoveryWeek: raw?.estimatedRecoveryWeeks ?? null,
       };
       setPlaybackData(pb);
     } catch {
@@ -201,7 +324,7 @@ export function ContinuitySimulationWorkspace() {
     }
   };
 
-  const fetchMitigationComparison = async () => {
+  const fetchMitigationComparison = useCallback(async () => {
     if (mitigationData) return;
     try {
       setMitigationLoading(true);
@@ -217,37 +340,41 @@ export function ContinuitySimulationWorkspace() {
         }),
       });
       if (!res.ok) throw new Error('Failed to load mitigation comparison');
-      const json = await res.json();
+      const json = (await res.json()) as MitigationComparisonResponse;
       const raw = json.data;
       setMitigationData({
-        scenarios: (raw.results ?? []).map((r: any) => ({
+        scenarios: (raw?.results ?? []).map((r) => ({
           mitigationType: r.scenario?.mitigationType ?? '',
           investmentLevel: r.scenario?.investmentLevel ?? 'medium',
           durationWeeks: r.scenario?.durationWeeks ?? 12,
           label: r.scenario?.label ?? r.scenario?.mitigationType ?? '',
           projectedResilienceGain: r.projectedGain?.resilienceScoreGain ?? 0,
-          impactDeltas: (r.impactDelta?.perDomainDeltas ?? []).map((d: any) => ({
+          impactDeltas: (r.impactDelta?.perDomainDeltas ?? []).map((d) => ({
             domainName: d.domainName ?? '',
             exposureReduction: d.exposureReduction ?? 0,
           })),
         })),
-        recommendation: raw.topRecommendation?.mitigationType ?? '',
+        recommendation: raw?.topRecommendation?.mitigationType ?? '',
       });
     } catch {
       // Leave null
     } finally {
       setMitigationLoading(false);
     }
-  };
+  }, [mitigationData]);
 
   useEffect(() => {
     fetchPropagation();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'governance') fetchGovernance();
-    if (activeTab === 'comparison') fetchMitigationComparison();
-  }, [activeTab]);
+    if (activeTab === 'governance') {
+      void fetchGovernance();
+    }
+    if (activeTab === 'comparison') {
+      void fetchMitigationComparison();
+    }
+  }, [activeTab, fetchGovernance, fetchMitigationComparison]);
 
   const PRESET_SCENARIOS: SimulationScenario[] = [
     { id: 'retirement_wave', type: 'retirement_wave', affectedNodes: [], duration: 24, label: 'Retirement Wave' },

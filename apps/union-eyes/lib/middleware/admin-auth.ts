@@ -172,7 +172,7 @@ export function withAdminAuth<P extends Record<string, unknown>>(
   Component: React.ComponentType<P & { userId: string; organizationId?: string }>
 ): React.ComponentType<P> {
   // Type-only placeholder - actual implementation would require .tsx file
-  return Component as unknown as React.ComponentType<P>;
+  return Component as any as React.ComponentType<P>;
 }
 
 /**

@@ -1,8 +1,11 @@
 import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './lib/locales'
+
+type ProxyRequest = NextRequest & { auth?: unknown }
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -15,13 +18,13 @@ const publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health'
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const proxy = auth((request: any) => {
+export const proxy = auth((request: unknown) => {
+  const req = request as ProxyRequest
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      req.headers.get('x-real-ip') ??
       'unknown'
     const rl = checkRateLimit(ip, {
       max: RATE_LIMIT_MAX,
@@ -39,22 +42,22 @@ export const proxy = auth((request: any) => {
   }
 
   // ── Authentication ────────────────────────────────────────────────────────────────────
-  const isPublic = publicPaths.some(p => request.nextUrl.pathname.startsWith(p))
-  if (!isPublic && !request.auth) {
-    return NextResponse.redirect(new URL('/sign-in', request.url))
+  const isPublic = publicPaths.some(p => req.nextUrl.pathname.startsWith(p))
+  if (!isPublic && !req.auth) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
   // ── Internationalisation ──────────────────────────────────────────────
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(request)
-    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  if (!req.nextUrl.pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(req)
+    const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
     intlResponse.headers.set('x-request-id', requestId)
     return intlResponse
   }
 
   // ── Request-ID propagation ────────────────────────────────────────────
   const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
+    req.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response

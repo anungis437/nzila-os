@@ -138,7 +138,7 @@ The top-nav label now matches `footer.platform: "Capabilities"`, which was alrea
 
 As of W18.1, warning-tier violations are **0**. The accurate-noun contexts that previously held the count at 50 are now codified as scanner-level exceptions on the `platform` term (§2.6), and the last two structural-label hits (`marketing.navigation.platform`) were eliminated by aligning the top-nav label with the footer (§3.1).
 
-The warning tier remains fully active: any _new_ `platform` usage outside the documented structural-noun allowlist will trigger a warning, as will any of the other 30 warning-tier terms in customer-facing prose. The tier now functions as a true drift detector — silent on accurate noun-language, loud on new marketing positioning.
+The warning tier remains fully active: unknown _new_ `platform` usage outside the documented structural-noun allowlist will trigger a warning, as will any of the other 30 warning-tier terms in customer-facing prose. The tier now functions as a true drift detector — silent on accurate noun-language, loud on new marketing positioning.
 
 ### 4.1 W18.0 → W18.1 residual reclassification
 

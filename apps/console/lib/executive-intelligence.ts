@@ -28,6 +28,7 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm'
 interface CatalogProduct {
   id: string
   name: string
+  status?: string
   category: string
   deployment_status: string
   monetization_status: string
@@ -36,6 +37,16 @@ interface CatalogProduct {
   code_presence?: string
   evidence_status?: string
   readiness_tier?: string
+  priority?: string
+  deployment?: string
+  proof_level?: string
+  gtm_posture?: string
+  runway_priority?: number
+  pilots?: number
+  customers?: number
+  monthly_revenue?: number
+  annual_recurring_revenue?: number
+  pipeline_value?: number
 }
 
 interface ProductCatalog {
@@ -128,6 +139,17 @@ export interface CapitalPriorityRow {
   rationale: string
 }
 
+export interface AttributionDiagnostics {
+  quoteAttributionRate: number
+  invoiceAttributionRate: number
+  unattributedPipelineUsd: number
+  unattributedPaidRevenueUsd: number
+  unattributedQuoteCount: number
+  unattributedPaidInvoiceCount: number
+  sampleUnattributedQuotes: Array<{ ref: string; totalUsd: number; status: string }>
+  sampleUnattributedInvoices: Array<{ ref: string; totalUsd: number; status: string }>
+}
+
 export interface WeeklyBriefingData {
   executiveOrgId: string | null
   improved: string[]
@@ -211,6 +233,10 @@ function normalizeValue(value: string): string {
   return value.toLowerCase().replace(/[_\s]+/g, '-').trim()
 }
 
+function compactToken(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '')
+}
+
 function buildVentureAliasMap(ventures: Set<string>): Map<string, string> {
   const aliasMap = new Map<string, string>()
   for (const venture of ventures) {
@@ -221,6 +247,7 @@ function buildVentureAliasMap(ventures: Set<string>): Map<string, string> {
   const defaults: Record<string, string> = {
     unioneyes: 'union-eyes',
     'union-eyes': 'union-eyes',
+    ue: 'union-eyes',
     unioneyesapp: 'union-eyes',
     flowapp: 'flow',
     controlplane: 'control-plane',
@@ -237,13 +264,53 @@ function buildVentureAliasMap(ventures: Set<string>): Map<string, string> {
 
 function extractMetadataCandidates(metadata: unknown): string[] {
   if (!metadata || typeof metadata !== 'object') return []
-  const record = metadata as Record<string, unknown>
-  const keys = ['ventureId', 'venture', 'appId', 'appScope', 'productApp', 'productCategory', 'category']
+
+  const keys = [
+    'ventureId',
+    'venture_id',
+    'venture',
+    'ventureSlug',
+    'appId',
+    'app_id',
+    'appScope',
+    'app_scope',
+    'productApp',
+    'product_app',
+    'productCategory',
+    'product_category',
+    'productKey',
+    'product_key',
+    'productId',
+    'product_id',
+    'product',
+    'category',
+  ]
+
+  const queue: unknown[] = [metadata]
   const candidates: string[] = []
-  for (const key of keys) {
-    const value = record[key]
-    if (typeof value === 'string' && value.trim().length > 0) candidates.push(value)
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (!current) continue
+
+    if (Array.isArray(current)) {
+      for (const value of current) queue.push(value)
+      continue
+    }
+
+    if (typeof current !== 'object') continue
+    const record = current as Record<string, unknown>
+
+    for (const key of keys) {
+      const value = record[key]
+      if (typeof value === 'string' && value.trim().length > 0) candidates.push(value)
+    }
+
+    for (const value of Object.values(record)) {
+      if (typeof value === 'object' && value !== null) queue.push(value)
+    }
   }
+
   return candidates
 }
 
@@ -254,12 +321,24 @@ function inferVentureId(params: {
   ref?: string | null
   category?: string | null
   productName?: string | null
+  productId?: string | null
 }): string | null {
+  const knownVenturesByCompact = new Map<string, string>()
+  for (const venture of params.knownVentures) {
+    knownVenturesByCompact.set(compactToken(venture), venture)
+  }
+
+  const aliasesByCompact = new Map<string, string>()
+  for (const [alias, venture] of params.aliasMap.entries()) {
+    aliasesByCompact.set(compactToken(alias), venture)
+  }
+
   const probes = [
     ...extractMetadataCandidates(params.metadata),
     params.ref ?? '',
     params.category ?? '',
     params.productName ?? '',
+    params.productId ?? '',
   ]
 
   for (const probe of probes) {
@@ -268,8 +347,22 @@ function inferVentureId(params: {
     if (params.knownVentures.has(normalized)) return normalized
     const directAlias = params.aliasMap.get(normalized)
     if (directAlias) return directAlias
+
+    const compact = compactToken(normalized)
+    const compactVenture = knownVenturesByCompact.get(compact)
+    if (compactVenture) return compactVenture
+    const compactAlias = aliasesByCompact.get(compact)
+    if (compactAlias) return compactAlias
+
+    for (const token of normalized.split(/[^a-z0-9-]+/).filter(Boolean)) {
+      const directTokenAlias = params.aliasMap.get(token)
+      if (directTokenAlias) return directTokenAlias
+      const compactTokenAlias = aliasesByCompact.get(compactToken(token))
+      if (compactTokenAlias) return compactTokenAlias
+    }
+
     for (const [alias, venture] of params.aliasMap.entries()) {
-      if (normalized.includes(alias)) return venture
+      if (alias.length >= 4 && normalized.includes(alias)) return venture
     }
   }
 
@@ -288,6 +381,78 @@ function safeNumber(value: unknown): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
+}
+
+function resolveCommercialPriority(product: CatalogProduct): number {
+  if (typeof product.commercial_priority === 'number' && Number.isFinite(product.commercial_priority)) {
+    return product.commercial_priority
+  }
+
+  const mappedPriority: Record<string, number> = {
+    critical: 1,
+    high: 2,
+    medium: 3,
+    low: 4,
+  }
+  const fromPriority = product.priority ? mappedPriority[product.priority.toLowerCase()] : undefined
+  if (fromPriority) return fromPriority
+
+  if (typeof product.runway_priority === 'number' && Number.isFinite(product.runway_priority)) {
+    // New schema uses 1..10 (10 = highest urgency). Convert to 1..5 where 1 is highest priority.
+    return clamp(Math.round((11 - product.runway_priority) / 2), 1, 5)
+  }
+
+  return 99
+}
+
+function resolveDeploymentStatus(product: CatalogProduct): string {
+  return (product.deployment_status || product.deployment || '').toLowerCase()
+}
+
+function resolveCodePresence(product: CatalogProduct): string {
+  if (product.code_presence) return product.code_presence.toLowerCase()
+
+  const proof = (product.proof_level || '').toLowerCase()
+  if (proof.includes('production')) return 'full'
+  if (proof.includes('pilot') || proof.includes('internal') || proof.includes('customer')) return 'partial'
+
+  const status = (product.status || '').toLowerCase()
+  if (status === 'live' || status === 'ga') return 'full'
+  if (status === 'pilot') return 'partial'
+  if (status === 'incubating') return 'scaffold'
+
+  return 'scaffold'
+}
+
+function resolveEvidenceStatus(product: CatalogProduct): string {
+  if (product.evidence_status) return product.evidence_status.toLowerCase()
+
+  const proof = (product.proof_level || '').toLowerCase()
+  if (proof.includes('production') || proof.includes('customer')) return 'complete'
+  if (proof.includes('pilot') || proof.includes('internal') || proof.includes('demo')) return 'partial'
+
+  return 'none'
+}
+
+function resolveGtmPosture(product: CatalogProduct): string {
+  return (product.gtm_posture || '').toLowerCase()
+}
+
+function gtmMomentumScore(posture: string): number {
+  if (posture === 'sell-now') return 90
+  if (posture === 'maintain') return 65
+  if (posture === 'internal-only') return 45
+  if (posture === 'hold') return 30
+  if (posture === 'sunset') return 10
+  return 35
+}
+
+function proofReadinessScore(proofLevel?: string): number {
+  const proof = (proofLevel || '').toLowerCase()
+  if (proof.includes('pilot')) return 80
+  if (proof.includes('internal')) return 55
+  if (proof.includes('customer') || proof.includes('production')) return 90
+  return 20
 }
 
 function startOfWeek(date = new Date()): Date {
@@ -410,6 +575,7 @@ async function loadRawSignals() {
     platformDb
       .select({
         quoteId: commerceQuoteLines.quoteId,
+        productId: commerceQuoteLines.productId,
         quoteRef: commerceQuotes.ref,
         lineTotal: commerceQuoteLines.lineTotal,
         quoteMetadata: commerceQuotes.metadata,
@@ -502,6 +668,7 @@ async function loadRawSignals() {
         ref: row.quoteRef,
         category: row.productCategory,
         productName: row.productName,
+        productId: row.productId,
       })
       if (!ventureId) continue
       const amount = safeNumber(row.lineTotal)
@@ -655,14 +822,28 @@ function buildCapitalPriorityRowsFromSignals(signals: Awaited<ReturnType<typeof 
 
   return signals.catalog
     .map((product) => {
-      const priority = product.commercial_priority ?? 99
+      const priority = resolveCommercialPriority(product)
       const ventureId = product.id ?? product.name
+      const catalogPilots = safeNumber(product.pilots)
+      const catalogMonthlyRevenue = safeNumber(product.monthly_revenue) || safeNumber(product.annual_recurring_revenue) / 12
+      const catalogPipeline = safeNumber(product.pipeline_value)
       const ventureHours = logHoursByVenture.get(ventureId) ?? 0
-      const ventureActivePilots = activePilots.get(ventureId) ?? 0
+      const ventureActivePilots = Math.max(activePilots.get(ventureId) ?? 0, catalogPilots)
       const ventureProspectPilots = prospectPilots.get(ventureId) ?? 0
       const ventureCost = costByVenture.get(ventureId) ?? 0
-      const ventureRevenue = signals.revenueByVenture[ventureId] ?? 0
-      const venturePipeline = signals.pipelineByVenture[ventureId] ?? 0
+      const ventureRevenueLive = signals.revenueByVenture[ventureId] ?? 0
+      const venturePipelineLive = signals.pipelineByVenture[ventureId] ?? 0
+      const ventureRevenue = ventureRevenueLive > 0 ? ventureRevenueLive : catalogMonthlyRevenue
+      const venturePipeline = venturePipelineLive > 0 ? venturePipelineLive : catalogPipeline
+      const codePresence = resolveCodePresence(product)
+      const evidenceStatus = resolveEvidenceStatus(product)
+      const deploymentStatus = resolveDeploymentStatus(product)
+      const gtmPosture = resolveGtmPosture(product)
+      const commercialIntent = clamp(
+        gtmMomentumScore(gtmPosture) * 0.6 + proofReadinessScore(product.proof_level) * 0.4,
+        0,
+        100,
+      )
       const revenueTraction = clamp(
         ventureRevenue > 0
           ? (ventureRevenue / 5000) * 100 + ventureActivePilots * 10
@@ -688,15 +869,15 @@ function buildCapitalPriorityRowsFromSignals(signals: Awaited<ReturnType<typeof 
       )
       const strategicValue = clamp(110 - priority * 15, 10, 100)
       const deliveryConfidence = clamp(
-        (product.code_presence === 'full' ? 45 : product.code_presence === 'partial' ? 28 : product.code_presence === 'scaffold' ? 10 : 0) +
-          (product.evidence_status === 'complete' ? 35 : product.evidence_status === 'partial' ? 18 : 0) +
-          (product.deployment_status === 'pilot' ? 20 : product.deployment_status === 'internal' ? 10 : 6),
+        (codePresence === 'full' ? 45 : codePresence === 'partial' ? 28 : codePresence === 'scaffold' ? 10 : 0) +
+          (evidenceStatus === 'complete' ? 35 : evidenceStatus === 'partial' ? 18 : 0) +
+          (deploymentStatus === 'pilot' ? 20 : deploymentStatus === 'internal' ? 10 : 6),
         0,
         100,
       )
       const riskBurden = clamp(
-        (product.evidence_status === 'none' ? 35 : product.evidence_status === 'partial' ? 18 : 5) +
-          (product.code_presence === 'scaffold' ? 30 : product.code_presence === 'partial' ? 15 : 5) +
+        (evidenceStatus === 'none' ? 35 : evidenceStatus === 'partial' ? 18 : 5) +
+          (codePresence === 'scaffold' ? 30 : codePresence === 'partial' ? 15 : 5) +
           (priority <= 2 && ventureActivePilots === 0 ? 25 : 0) +
           (signals.pendingApprovals >= 5 ? 10 : 0),
         0,
@@ -704,15 +885,18 @@ function buildCapitalPriorityRowsFromSignals(signals: Awaited<ReturnType<typeof 
       )
       const costShare = totalCost > 0 ? ventureCost / totalCost : 0
       const capitalIntensity = clamp(100 - costShare * 140, 20, 100)
-      const score = Math.round(
+      const baselineScore =
         revenueTraction * 0.22 +
-          pipelineMomentum * 0.18 +
-          founderEfficiency * 0.16 +
-          strategicValue * 0.16 +
-          deliveryConfidence * 0.14 +
-          (100 - riskBurden) * 0.08 +
-          capitalIntensity * 0.06,
-      )
+        pipelineMomentum * 0.18 +
+        founderEfficiency * 0.16 +
+        strategicValue * 0.16 +
+        deliveryConfidence * 0.14 +
+        (100 - riskBurden) * 0.08 +
+        capitalIntensity * 0.06
+
+      // Blend live telemetry with catalog-intent signals so ventures are not
+      // uniformly penalized when pipeline/revenue attribution is sparse.
+      const score = Math.round(baselineScore * 0.65 + commercialIntent * 0.35)
       const action: CapitalPriorityRow['action'] =
         score >= 75 ? 'Double down' : score >= 60 ? 'Maintain' : score >= 45 ? 'Hold' : 'Cut review'
       const rationale =
@@ -746,6 +930,49 @@ function buildCapitalPriorityRowsFromSignals(signals: Awaited<ReturnType<typeof 
 export async function getCapitalPriorityRows(): Promise<CapitalPriorityRow[]> {
   const signals = await loadRawSignals()
   return buildCapitalPriorityRowsFromSignals(signals)
+}
+
+export async function getAttributionDiagnostics(): Promise<AttributionDiagnostics> {
+  const signals = await loadRawSignals()
+
+  const attributableQuotes = signals.quotes.filter((quote) => ATTRIBUTABLE_QUOTE_STATUSES.includes(quote.status))
+  const paidInvoices = signals.invoices.filter((invoice) => invoice.status === 'paid')
+
+  const attributedQuoteUsd = attributableQuotes
+    .filter((quote) => Boolean(quote.ventureId))
+    .reduce((sum, quote) => sum + quote.total, 0)
+  const unattributedQuotes = attributableQuotes.filter((quote) => !quote.ventureId)
+  const unattributedPipelineUsd = unattributedQuotes.reduce((sum, quote) => sum + quote.total, 0)
+  const totalAttributableQuoteUsd = attributedQuoteUsd + unattributedPipelineUsd
+
+  const attributedInvoiceUsd = paidInvoices
+    .filter((invoice) => Boolean(invoice.ventureId))
+    .reduce((sum, invoice) => sum + invoice.total, 0)
+  const unattributedInvoices = paidInvoices.filter((invoice) => !invoice.ventureId)
+  const unattributedPaidRevenueUsd = unattributedInvoices.reduce((sum, invoice) => sum + invoice.total, 0)
+  const totalPaidInvoiceUsd = attributedInvoiceUsd + unattributedPaidRevenueUsd
+
+  const quoteAttributionRate = totalAttributableQuoteUsd > 0 ? attributedQuoteUsd / totalAttributableQuoteUsd : 1
+  const invoiceAttributionRate = totalPaidInvoiceUsd > 0 ? attributedInvoiceUsd / totalPaidInvoiceUsd : 1
+
+  return {
+    quoteAttributionRate,
+    invoiceAttributionRate,
+    unattributedPipelineUsd,
+    unattributedPaidRevenueUsd,
+    unattributedQuoteCount: unattributedQuotes.length,
+    unattributedPaidInvoiceCount: unattributedInvoices.length,
+    sampleUnattributedQuotes: unattributedQuotes.slice(0, 5).map((quote) => ({
+      ref: quote.ref,
+      totalUsd: quote.total,
+      status: quote.status,
+    })),
+    sampleUnattributedInvoices: unattributedInvoices.slice(0, 5).map((invoice) => ({
+      ref: invoice.ref,
+      totalUsd: invoice.total,
+      status: invoice.status,
+    })),
+  }
 }
 
 export async function getFounderFocusData(): Promise<FounderFocusData> {

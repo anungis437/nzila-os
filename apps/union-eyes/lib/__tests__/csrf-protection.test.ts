@@ -25,7 +25,7 @@ vi.mock('@upstash/redis', () => ({
 vi.mock('next/server', () => ({
   NextRequest: class {},
   NextResponse: {
-    json: vi.fn((body: unknown, init?: ResponseInit) => ({
+    json: vi.fn((body: any, init?: ResponseInit) => ({
       body, status: init?.status || 200,
     })),
   },

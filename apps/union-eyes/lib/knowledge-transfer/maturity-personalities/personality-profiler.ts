@@ -91,7 +91,7 @@ function resolvePersonality(
   mitCount: number,
   totalInteractions: number,
   sessionCount: number,
-  latestScore: number | null,
+  _latestScore: number | null,
 ): GovernancePersonalityType {
   if (totalInteractions < 2) return 'resilience_fragile';
 
@@ -177,7 +177,6 @@ export async function profileGovernancePersonality(orgId: string): Promise<Gover
   ).length;
 
   const scores = timeline.map((t) => t.resilienceScore);
-  const mean = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
   const volatility = computeVolatility(scores);
   const consistency = scores.length > 0 ? Math.max(0, 100 - volatility * 2) : 0;
   const delta = scores.length >= 2 ? scores[scores.length - 1] - scores[0] : 0;

@@ -108,7 +108,7 @@ export async function listReasoningSessions(
     ORDER BY updated_at DESC
     LIMIT ${options.limit ?? 20}
   `);
-  return (rows as unknown as Record<string, unknown>[]).map(rowToSession);
+  return (rows as any as Record<string, unknown>[]).map(rowToSession);
 }
 
 /** Get a single reasoning session. */
@@ -122,7 +122,7 @@ export async function getReasoningSession(
     WHERE id = ${sessionId} AND org_id = ${orgId}
     LIMIT 1
   `);
-  const result = rows as unknown as Record<string, unknown>[];
+  const result = rows as any as Record<string, unknown>[];
   if (result.length === 0) return null;
   return rowToSession(result[0]);
 }

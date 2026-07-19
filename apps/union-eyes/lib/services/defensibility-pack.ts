@@ -124,7 +124,7 @@ export interface DefensibilityPack {
 /**
  * Calculate SHA-256 hash of data for integrity verification
  */
-function calculateHash(data: unknown): string {
+function calculateHash(data: any): string {
   const json = JSON.stringify(data, null, 0); // Canonical format (no whitespace)
   return createHash('sha256').update(json).digest('hex');
 }

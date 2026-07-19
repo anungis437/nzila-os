@@ -13,11 +13,76 @@ import {
 } from '@/db/schema/recognition-rewards-schema';
 import { logger } from '@/lib/logger';
 
+type CsvRow = Record<string, unknown>;
+
+interface AwardExportRow {
+  id: string;
+  created_at: Date | string;
+  status: string;
+  award_type: string | null;
+  program: string | null;
+  recipient_name: string | null;
+  recipient_email: string | null;
+  issuer_name: string | null;
+  issuer_email: string | null;
+  message: string | null;
+  credits_awarded: number | null;
+  approved_at: Date | string | null;
+  approver_name: string | null;
+  issued_at: Date | string | null;
+  revoked_at: Date | string | null;
+  rejected_at: Date | string | null;
+}
+
+interface LedgerExportRow {
+  id: string;
+  created_at: Date | string;
+  event_type: string;
+  amount: number;
+  balance_after: number;
+  user_name: string | null;
+  email: string | null;
+  source_type: string | null;
+  source_id: string | null;
+  description: string | null;
+}
+
+interface BudgetExportRow {
+  id: string;
+  budget_name: string;
+  program_name: string | null;
+  scope_type: string;
+  total_credits: number;
+  used_credits: number;
+  starts_at: Date | string;
+  ends_at: Date | string;
+  created_at: Date | string;
+}
+
+interface RedemptionExportRow {
+  id: string;
+  created_at: Date | string;
+  status: string;
+  user_name: string | null;
+  email: string | null;
+  credits_redeemed: number;
+  cancelled_at: Date | string | null;
+  cancellation_reason: string | null;
+  provider: string | null;
+}
+
+interface AnalyticsExportRow {
+  date: Date | string;
+  awards_issued: number;
+  unique_recipients: number;
+  unique_issuers: number;
+  total_credits: number | null;
+}
+
 /**
  * Convert array of objects to CSV string
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function arrayToCSV(data: any[], headers: string[]): string {
+function arrayToCSV(data: CsvRow[], headers: string[]): string {
   const csvRows: string[] = [];
   
   // Add header row
@@ -106,8 +171,7 @@ export async function exportAwardsToCSV(
     `;
     
     const result = await db.execute(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const awards = (result as any[]).map((row: any) => ({
+    const awards = (result as unknown as AwardExportRow[]).map((row) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
       status: row.status,
@@ -200,8 +264,7 @@ export async function exportLedgerToCSV(
     `;
     
     const result = await db.execute(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const entries = (result as any[]).map((row: any) => ({
+    const entries = (result as unknown as LedgerExportRow[]).map((row) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
       event_type: row.event_type,
@@ -273,8 +336,7 @@ export async function exportBudgetsToCSV(
     `;
     
     const result = await db.execute(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const budgets = (result as any[]).map((row: any) => {
+    const budgets = (result as unknown as BudgetExportRow[]).map((row) => {
       const usagePercent = (row.used_credits / row.total_credits) * 100;
       return {
         id: row.id,
@@ -355,8 +417,7 @@ export async function exportRedemptionsToCSV(
     `;
     
     const result = await db.execute(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const redemptions = (result as any[]).map((row: any) => ({
+    const redemptions = (result as unknown as RedemptionExportRow[]).map((row) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
       status: row.status,
@@ -413,8 +474,7 @@ export async function exportAnalyticsToCSV(
     `;
     
     const result = await db.execute(statsQuery);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stats = (result as any[]).map((row: any) => ({
+    const stats = (result as unknown as AnalyticsExportRow[]).map((row) => ({
       date: new Date(row.date).toISOString().split('T')[0],
       awards_issued: row.awards_issued,
       unique_recipients: row.unique_recipients,

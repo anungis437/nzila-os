@@ -170,7 +170,7 @@ describe('createIntegrationHandler', () => {
     const handler = createIntegrationHandler(dispatcher)
     await handler(
       createAgriEvent(
-        'agri.unknown.event' as any,
+        'agri.unknown.event' as Parameters<typeof createAgriEvent>[0],
         { value: 1 },
         { orgId: 'org-3', actorId: 'actor-3', correlationId: 'corr-5' },
       ),

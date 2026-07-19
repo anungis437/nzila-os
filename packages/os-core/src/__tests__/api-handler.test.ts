@@ -205,6 +205,6 @@ describe('apiHandler', () => {
 
     await handler(createRequest())
     expect(receivedLogger).toBeTruthy()
-    expect(typeof (receivedLogger as any).info).toBe('function')
+    expect(typeof (receivedLogger as { info?: unknown }).info).toBe('function')
   })
 })

@@ -267,13 +267,13 @@ class DistributedTracing {
 // Decorator for automatic tracing
 export function trace(spanName?: string) {
   return function (
-    target: unknown,
+    target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
     
-    descriptor.value = function (...args: unknown[]) {
+    descriptor.value = function (...args: any[]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const name = spanName || `${(target as any).constructor.name}.${propertyKey}`;
       const tracing = tracingService;
@@ -286,7 +286,7 @@ export function trace(spanName?: string) {
         // Handle async
         if (result && typeof result.then === 'function') {
           return result
-            .then((value: unknown) => {
+            .then((value: any) => {
               tracing.endSpan(undefined, 'ok');
               return value;
             })

@@ -169,7 +169,7 @@ async function ingestGrievanceRecord(
       RETURNING id
     `);
 
-    const grievanceId = (insertResult as unknown as Array<{ id: string }>)[0]?.id;
+    const grievanceId = (insertResult as any as Array<{ id: string }>)[0]?.id;
     if (!grievanceId) {
       return { status: 'failed', error: 'No grievance ID returned from upsert' };
     }

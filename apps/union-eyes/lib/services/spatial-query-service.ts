@@ -21,6 +21,14 @@ export interface GeofenceBoundary {
   points?: Point[]; // for polygon
 }
 
+interface NearbyLocationRow {
+  user_id: string;
+  latitude: number;
+  longitude: number;
+  distance_meters: number;
+  timestamp: Date | string;
+}
+
 /**
  * Check if a point is within a geofence using PostGIS
  * Falls back to Haversine for circular geofences
@@ -109,7 +117,7 @@ export async function findNearbyLocations(
     `);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return result.map((row: any) => ({
+    return (result as any as NearbyLocationRow[]).map((row) => ({
       userId: row.user_id,
       latitude: row.latitude,
       longitude: row.longitude,

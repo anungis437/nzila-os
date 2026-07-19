@@ -9914,6 +9914,7 @@
     "filters": {
       "jurisdictionPlaceholder": "Juridiction",
       "allJurisdictions": "Toutes les juridictions",
+      "sectorPlaceholder": "Filtre de secteur...",
       "reviewPlaceholder": "Révision",
       "allReviews": "Toutes les révisions"
     },
@@ -9935,6 +9936,9 @@
     "loading": "Chargement des accords...",
     "errorLoad": "Échec du chargement des accords",
     "empty": "Aucun accord trouvé",
+    "actions": {
+      "exportCsv": "Exporter CSV"
+    },
     "pagination": {
       "count": "{count} accord",
       "countPlural": "{count} accords",

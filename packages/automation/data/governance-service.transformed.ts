@@ -92,7 +92,7 @@ export class GovernanceService {
     description: string;
     proposedBy: string;
     votingDeadline: Date;
-    matterDetails: any;
+    matterDetails: unknown;
     classATotalVotes: number;
   }) {
     const response = await fetch(
@@ -169,7 +169,7 @@ export class GovernanceService {
    */
   isReservedMatter(proposal: {
     type: string;
-    details: any;
+    details: unknown;
   }): { isReserved: boolean; reason?: string } {
     // Mission change: Any alteration to union-serving mission
     if (proposal.type === 'mission_change') {

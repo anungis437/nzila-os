@@ -23,13 +23,14 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveUeAreaDir } from './lib/ue-doc-paths.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
 
-const navRoot = path.join(repoRoot, 'docs', 'union-eyes', 'navigation-monetization-matrix');
-const ueRoot = path.join(repoRoot, 'docs', 'union-eyes', 'institutional-operating-infrastructure');
+const navRoot = resolveUeAreaDir(repoRoot, 'navigation-monetization-matrix');
+const ueRoot = resolveUeAreaDir(repoRoot, 'institutional-operating-infrastructure');
 const rootPackageJson = path.join(repoRoot, 'package.json');
 
 const requiredNavDocs = [
@@ -189,7 +190,7 @@ async function main() {
   // ── 2. Required upstream anchor docs still present ───────────────
   const missingUpstream = [];
   for (const [dir, name] of requiredUpstreamAnchors) {
-    const full = path.join(repoRoot, 'docs', 'union-eyes', dir, name);
+    const full = path.join(resolveUeAreaDir(repoRoot, dir), name);
     if (!(await exists(full))) missingUpstream.push(rel(full));
   }
   if (missingUpstream.length > 0) {

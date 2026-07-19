@@ -56,6 +56,50 @@ param enableMultiRegion bool = false
 @description('Database administrator password')
 param dbAdminPassword string = ''
 
+@description('Object ID of an Entra ID principal to add as PostgreSQL AAD administrator. Leave empty to skip AAD admin setup.')
+param aadAdminObjectId string = ''
+
+@description('Principal name for the AAD administrator (e.g. user UPN or SP display name).')
+param aadAdminPrincipalName string = ''
+
+@allowed(['User', 'Group', 'ServicePrincipal'])
+param aadAdminPrincipalType string = 'ServicePrincipal'
+
+var appDatabaseName = 'nzila'
+var pgAdminLogin = 'nzilaadmin'
+var managedIdentityName = 'nzila-${env}-aca-mi'
+var vnetName = 'nzila-${env}-vnet'
+// Built-in role: Key Vault Secrets User
+var kvSecretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6'
+// Built-in role: AcrPull
+var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+
+@description('Container image tag deployed to every Container App. Override per release.')
+param imageTag string = 'latest'
+
+@description('Expiration applied to Key Vault connection secrets, as Unix epoch seconds. Defaults to two years from deployment time.')
+param secretExpiryEpoch int = dateTimeToEpoch(dateTimeAdd(utcNow(), 'P2Y'))
+
+// ── Network (VNet + delegated subnets + private DNS) ────────────────────
+module network 'modules/network.bicep' = {
+  name: 'network-${env}'
+  params: {
+    vnetName: vnetName
+    location: location
+    env: env
+  }
+}
+
+// ── User-assigned managed identity used by all Container Apps for KV access ───
+resource acaIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: managedIdentityName
+  location: location
+  tags: {
+    environment: env
+    service: 'nzila-os'
+  }
+}
+
 // ── Container Registry ────────────────────────────────────────────────────
 module acr 'modules/container-registry.bicep' = {
   name: 'acr-${env}'
@@ -74,6 +118,43 @@ module keyvault 'modules/keyvault.bicep' = {
     location: location
     enableAutoRotation: env == 'prod'
     rotationIntervalDays: 90
+    // Allow the Container Apps infrastructure subnet to reach KV through its
+    // Microsoft.KeyVault service endpoint so platform MI can resolve secrets.
+    allowedSubnetIds: [network.outputs.acaSubnetId]
+  }
+}
+
+// Grant the shared ACA managed identity 'Key Vault Secrets User' on the vault
+// so Container Apps can resolve KV-backed secrets at deploy and refresh time.
+resource kvExisting 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: kv_name
+  dependsOn: [keyvault]
+}
+
+resource acaKvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: kvExisting
+  name: guid(kvExisting.id, acaIdentity.id, kvSecretsUserRoleId)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
+    principalId: acaIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Grant the shared ACA managed identity 'AcrPull' on the registry so Container
+// Apps can pull images without admin credentials.
+resource acrExisting 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing = {
+  name: acr_name
+  dependsOn: [acr]
+}
+
+resource acaAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: acrExisting
+  name: guid(acrExisting.id, acaIdentity.id, acrPullRoleId)
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acrPullRoleId)
+    principalId: acaIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
@@ -100,7 +181,7 @@ module waf 'modules/waf.bicep' = {
   }
 }
 
-// ── Container Apps Environment (W1-1: mTLS) ──────────────────────────────
+// ── Container Apps Environment (W1-1: mTLS, VNet-integrated) ─────────────
 module containerApps 'modules/container-apps.bicep' = {
   name: 'container-apps-${env}'
   params: {
@@ -114,10 +195,18 @@ module containerApps 'modules/container-apps.bicep' = {
     containerCpu: containerCpu
     containerMemory: containerMemory
     httpConcurrency: scaleConcurrency
+    infrastructureSubnetId: network.outputs.acaSubnetId
+    userAssignedIdentityId: acaIdentity.id
+    keyVaultUri: keyvault.outputs.vaultUri
+    databaseUrlSecretName: 'database-url'
+    databaseReadUrlSecretName: dbReadReplicas > 0 ? 'database-read-url' : ''
+    acrLoginServer: acr.outputs.loginServer
+    imageTag: imageTag
   }
+  dependsOn: [acaKvSecretsUser, dbUrlSecret]
 }
 
-// ── PostgreSQL with PgBouncer + Read Replicas ────────────────────────────
+// ── PostgreSQL with PgBouncer + Read Replicas (VNet-integrated) ──────────
 module database 'modules/postgres.bicep' = if (dbAdminPassword != '') {
   name: 'postgres-${env}'
   params: {
@@ -134,8 +223,56 @@ module database 'modules/postgres.bicep' = if (dbAdminPassword != '') {
     pgBouncerDefaultPoolSize: env == 'prod' ? 100 : 20
     pgBouncerMinPoolSize: env == 'prod' ? 10 : 0
     readReplicaCount: dbReadReplicas
+    adminLogin: pgAdminLogin
     adminPassword: dbAdminPassword
+    appDatabaseName: appDatabaseName
+    delegatedSubnetResourceId: network.outputs.pgSubnetId
+    privateDnsZoneResourceId: network.outputs.privateDnsZoneId
+    aadAdminObjectId: aadAdminObjectId
+    aadAdminPrincipalName: aadAdminPrincipalName
+    aadAdminPrincipalType: aadAdminPrincipalType
   }
+}
+
+// ── Write database connection secrets to Key Vault ───────────────────────
+var pgFqdn = database.?outputs.?serverFqdn ?? ''
+var pgPort = database.?outputs.?connectionPort ?? 5432
+var pgReplicas = database.?outputs.?replicaFqdns ?? []
+var pgReadFqdn = !empty(pgReplicas) ? pgReplicas[0] : pgFqdn
+var databaseUrl = 'postgresql://${pgAdminLogin}:${uriComponent(dbAdminPassword)}@${pgFqdn}:${pgPort}/${appDatabaseName}?sslmode=require'
+var databaseReadUrl = 'postgresql://${pgAdminLogin}:${uriComponent(dbAdminPassword)}@${pgReadFqdn}:${pgPort}/${appDatabaseName}?sslmode=require'
+
+module pgPasswordSecret 'modules/keyvault-secret.bicep' = if (dbAdminPassword != '') {
+  name: 'kv-secret-pg-password-${env}'
+  params: {
+    keyVaultName: kv_name
+    secretName: 'pg-admin-password'
+    secretValue: dbAdminPassword
+    expiryEpoch: secretExpiryEpoch
+  }
+  dependsOn: [keyvault, database]
+}
+
+module dbUrlSecret 'modules/keyvault-secret.bicep' = if (dbAdminPassword != '') {
+  name: 'kv-secret-database-url-${env}'
+  params: {
+    keyVaultName: kv_name
+    secretName: 'database-url'
+    secretValue: databaseUrl
+    expiryEpoch: secretExpiryEpoch
+  }
+  dependsOn: [keyvault, database]
+}
+
+module dbReadUrlSecret 'modules/keyvault-secret.bicep' = if (dbAdminPassword != '' && dbReadReplicas > 0) {
+  name: 'kv-secret-database-read-url-${env}'
+  params: {
+    keyVaultName: kv_name
+    secretName: 'database-read-url'
+    secretValue: databaseReadUrl
+    expiryEpoch: secretExpiryEpoch
+  }
+  dependsOn: [keyvault, database]
 }
 
 // ── Azure Monitor Alerts (operational health) ────────────────────────────
@@ -165,6 +302,13 @@ module containerAppsSecondary 'modules/container-apps.bicep' = if (enableMultiRe
     containerCpu: containerCpu
     containerMemory: containerMemory
     httpConcurrency: scaleConcurrency
+    infrastructureSubnetId: network.outputs.acaSubnetId
+    userAssignedIdentityId: acaIdentity.id
+    keyVaultUri: keyvault.outputs.vaultUri
+    databaseUrlSecretName: 'database-url'
+    databaseReadUrlSecretName: dbReadReplicas > 0 ? 'database-read-url' : ''
+    acrLoginServer: acr.outputs.loginServer
+    imageTag: imageTag
   }
 }
 

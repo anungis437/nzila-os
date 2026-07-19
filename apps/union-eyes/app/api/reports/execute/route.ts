@@ -141,7 +141,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       rowCount: result.rowCount,
       executionTime: result.executionTimeMs,
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
       userId: userId || 'unknown',

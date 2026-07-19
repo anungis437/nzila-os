@@ -95,7 +95,23 @@ const defaultAuditEmitter: AuditEmitter = async (event) => {
     const { eq, desc } = await import('drizzle-orm')
 
     // Fetch latest hash for chain continuity
-    const [latest] = await (db as any)
+    type DbSelectQuery = {
+      from: (table: unknown) => {
+        where: (clause: unknown) => {
+          orderBy: (ordering: unknown) => { limit: (count: number) => Promise<Array<{ hash?: string | null }>> }
+        }
+      }
+    }
+    type DbInsertQuery = {
+      values: (value: Record<string, unknown>) => Promise<unknown>
+    }
+    type RuntimeDb = {
+      select: (fields: Record<string, unknown>) => DbSelectQuery
+      insert: (table: unknown) => DbInsertQuery
+    }
+    const runtimeDb = db as unknown as RuntimeDb
+
+    const [latest] = await runtimeDb
       .select({ hash: auditEvents.hash })
       .from(auditEvents)
       .where(eq(auditEvents.orgId, event.orgId))
@@ -116,7 +132,7 @@ const defaultAuditEmitter: AuditEmitter = async (event) => {
 
     const hash = computeEntryHash(payload, previousHash)
 
-    await (db as any)
+    await runtimeDb
       .insert(auditEvents)
       .values({
         orgId: event.orgId,
@@ -157,9 +173,10 @@ const defaultAuditEmitter: AuditEmitter = async (event) => {
 function resolveTableName(table: PgTable<TableConfig>): string {
   // Drizzle stores table name in Symbol.for('drizzle:Name') or table._.name
   const sym = Symbol.for('drizzle:Name')
+  const tableRecord = table as unknown as Record<PropertyKey, unknown>
   const name =
-    (table as any)[sym] ??
-    (table as any)['_']?.name ??
+    tableRecord[sym] ??
+    (tableRecord['_'] as { name?: string } | undefined)?.name ??
     'unknown_table'
   return String(name)
 }
@@ -193,6 +210,9 @@ export function withAudit(
   }
 
   const correlationId = context.correlationId ?? randomUUID()
+
+  type ThenHandler = (onFulfilled?: unknown, onRejected?: unknown) => unknown
+  type ThenableLike = { then?: ThenHandler }
 
   function buildAuditEvent(
     table: PgTable<TableConfig>,
@@ -237,9 +257,12 @@ export function withAudit(
       })
       const result = scopedDb.insert(table, values)
       // Attach audit promise to result chain so consumers must await audit completion
-      const originalThen = (result as any).then?.bind(result)
+      const thenableResult = result as unknown as ThenableLike
+      const originalThen = typeof thenableResult.then === 'function'
+        ? (thenableResult.then.bind(result) as ThenHandler)
+        : undefined
       if (originalThen) {
-        ;(result as any).then = (onFulfilled: any, onRejected: any) =>
+        thenableResult.then = (onFulfilled: unknown, onRejected: unknown) =>
           auditPromise.then(() => originalThen(onFulfilled, onRejected))
       }
       return result
@@ -255,9 +278,12 @@ export function withAudit(
         )
       })
       const result = scopedDb.update(table, values, extraWhere)
-      const originalThen = (result as any).then?.bind(result)
+      const thenableResult = result as unknown as ThenableLike
+      const originalThen = typeof thenableResult.then === 'function'
+        ? (thenableResult.then.bind(result) as ThenHandler)
+        : undefined
       if (originalThen) {
-        ;(result as any).then = (onFulfilled: any, onRejected: any) =>
+        thenableResult.then = (onFulfilled: unknown, onRejected: unknown) =>
           auditPromise.then(() => originalThen(onFulfilled, onRejected))
       }
       return result
@@ -273,9 +299,12 @@ export function withAudit(
         )
       })
       const result = scopedDb.delete(table, extraWhere)
-      const originalThen = (result as any).then?.bind(result)
+      const thenableResult = result as unknown as ThenableLike
+      const originalThen = typeof thenableResult.then === 'function'
+        ? (thenableResult.then.bind(result) as ThenHandler)
+        : undefined
       if (originalThen) {
-        ;(result as any).then = (onFulfilled: any, onRejected: any) =>
+        thenableResult.then = (onFulfilled: unknown, onRejected: unknown) =>
           auditPromise.then(() => originalThen(onFulfilled, onRejected))
       }
       return result

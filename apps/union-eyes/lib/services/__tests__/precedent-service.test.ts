@@ -30,7 +30,7 @@ const mocks = vi.hoisted(() => {
 });
 
 /* chain helpers */
-function sfwol(data: unknown[] = []) {
+function sfwol(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn(() => ({
@@ -43,7 +43,7 @@ function sfwol(data: unknown[] = []) {
     })),
   };
 }
-function sfwolNoOffset(data: unknown[] = []) {
+function sfwolNoOffset(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn(() => ({
@@ -54,14 +54,14 @@ function sfwolNoOffset(data: unknown[] = []) {
     })),
   };
 }
-function sfw(data: unknown[] = []) {
+function sfw(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn().mockResolvedValue(data),
     })),
   };
 }
-function sfol(data: unknown[] = []) {
+function sfol(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       orderBy: vi.fn(() => ({
@@ -70,7 +70,7 @@ function sfol(data: unknown[] = []) {
     })),
   };
 }
-function _sfwool(data: unknown[] = []) {
+function _sfwool(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn(() => ({
@@ -83,7 +83,7 @@ function _sfwool(data: unknown[] = []) {
     })),
   };
 }
-function sfg(data: unknown[] = []) {
+function sfg(data: any[] = []) {
   return {
     from: vi.fn(() => ({
       groupBy: vi.fn().mockResolvedValue(data),
@@ -137,16 +137,16 @@ vi.mock("@/db/schema", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-  eq: vi.fn((...a: unknown[]) => a),
-  and: vi.fn((...a: unknown[]) => a),
-  or: vi.fn((...a: unknown[]) => a),
-  like: vi.fn((...a: unknown[]) => a),
-  desc: vi.fn((c: unknown) => c),
-  asc: vi.fn((c: unknown) => c),
-  sql: Object.assign(vi.fn((...a: unknown[]) => a), { raw: vi.fn() }),
-  inArray: vi.fn((...a: unknown[]) => a),
-  gte: vi.fn((...a: unknown[]) => a),
-  lte: vi.fn((...a: unknown[]) => a),
+  eq: vi.fn((...a: any[]) => a),
+  and: vi.fn((...a: any[]) => a),
+  or: vi.fn((...a: any[]) => a),
+  like: vi.fn((...a: any[]) => a),
+  desc: vi.fn((c: any) => c),
+  asc: vi.fn((c: any) => c),
+  sql: Object.assign(vi.fn((...a: any[]) => a), { raw: vi.fn() }),
+  inArray: vi.fn((...a: any[]) => a),
+  gte: vi.fn((...a: any[]) => a),
+  lte: vi.fn((...a: any[]) => a),
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -609,7 +609,7 @@ describe("precedent-service", () => {
 });
 
 /* sf: select→from (no where/orderBy) */
-function sf(data: unknown[] = []) {
+function sf(data: any[] = []) {
   return {
     from: vi.fn().mockResolvedValue(data),
   };

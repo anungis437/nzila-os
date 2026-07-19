@@ -66,6 +66,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/shopify\/webhook/,   // Shopify webhook (HMAC-verified)
       /\/api\/zoho\/webhook/,      // Zoho webhook (token-verified)
       /\/api\/contact/,             // Public contact/demo-request forms
+      /\/api\/courtlens\/public-intake/, // ABR CourtLens — pseudonymous public intake (validated + rate-limited)
       /\/api\/pilot\/apply/,        // Public pilot application form
       /\/api\/trial(?:\/|$)/,       // Public Flow trial signup form
       /\/api\/telemetry/,            // Public marketing telemetry (anonymous page events)
@@ -81,6 +82,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/icra(?:\/|$)/,          // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated) [legacy alias]
       /\/api\/ocra(?:\/|$)/,          // OCRA — canonical alias of /api/icra (OCI↔OCRA convergence Phase 2)
       /\/api\/workbook(?:\/|$)/,      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential, claim route enforces auth() at runtime, Stripe webhook signature-verified)
+      /\/api\/delivery(?:\/|$)/,      // SAGE Phase 8A recipient delivery — grant-scoped session-token flow; X-Delivery-Session verified server-side, never org-scope guard
       /\/_perf\//,                   // Web vitals beacon endpoint (anonymous sendBeacon, size-capped)
     ]
 
@@ -91,6 +93,8 @@ describe('API Authorization Contract (INV-04)', () => {
       /getAuth\(/,
       /currentUser\(\)/,
       /requireOrgAccess\(/,
+      /requireVerifiedOrgAccess\(/,  // ABR CourtLens — session/DB membership verification (Phase 2C.6)
+      /requireVerifiedPermission\(/, // ABR CourtLens — server-derived RBAC (Phase 2C.6)
       /verifyWebhookSignature\(/,
       /authenticateUser\(/,
       /requirePlatformRole\(/,
@@ -116,7 +120,7 @@ describe('API Authorization Contract (INV-04)', () => {
         continue
       }
       if (!MUTATION_EXPORTS.test(content)) continue
-      const routeNorm = route.replace(/\\/g, '/')
+      const routeNorm = route.replace(/\\/g, '/').replace(/%5F/gi, '_')  // decode URL-encoded underscore so _perf/_telemetry routes match
       const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => p.test(routeNorm))
       if (isPublic) continue
       const hasAuth = AUTH_PATTERNS.some((p) => p.test(content))

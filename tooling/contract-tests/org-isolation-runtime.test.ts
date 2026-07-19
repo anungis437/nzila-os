@@ -57,6 +57,8 @@ function allApiRoutes(): string[] {
 // Auth guard patterns recognised as org-boundary enforcement
 const ORG_GUARD_PATTERNS = [
   /requireOrgAccess\s*\(/,
+  /requireVerifiedOrgAccess\s*\(/,   // ABR CourtLens — session/DB membership verification (Phase 2C.6)
+  /requireVerifiedPermission\s*\(/,  // ABR CourtLens — server-derived RBAC (Phase 2C.6)
   /authorizeOrgAccess\s*\(/,
   /authenticateUser\s*\(/,
   /withAuth\s*\(/,
@@ -108,6 +110,7 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/zoho/webhook',        // Zoho webhook (token-verified)
   '/api/control-plane/architecture', // Internal diagnostics (GET-only)
   '/api/contact',                    // Public contact/demo-request form (marketing)
+  '/api/courtlens/public-intake',    // ABR CourtLens — pseudonymous public intake (validated + rate-limited)
   '/api/trial',                      // Public Flow trial signup form
   '/api/telemetry',                  // Public marketing telemetry (anonymous page events)
   '/api/metrics',                    // Telemetry scrape endpoint (token-gated via METRICS_BEARER_TOKEN)
@@ -123,11 +126,13 @@ const PUBLIC_ROUTE_SEGMENTS = [
   '/api/icra',                       // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated) [legacy alias]
   '/api/ocra',                       // OCRA — canonical alias of /api/icra (OCI↔OCRA convergence Phase 2)
   '/api/workbook',                   // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential, claim route enforces auth() at runtime)
+  '/api/delivery',                   // SAGE Phase 8A recipient delivery — grant-scoped X-Delivery-Session token, no org scope; recipient routes intentionally bypass withOrgScope
   '/_perf/',                         // Web vitals sendBeacon (anonymous, no org context)
 ]
 
 function isPublicRoute(path: string): boolean {
-  return PUBLIC_ROUTE_SEGMENTS.some((seg) => path.replace(/\\/g, '/').includes(seg))
+  // decode URL-encoded underscore (%5F) so _perf/_telemetry routes match
+  return PUBLIC_ROUTE_SEGMENTS.some((seg) => path.replace(/\\/g, '/').replace(/%5F/gi, '_').includes(seg))
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

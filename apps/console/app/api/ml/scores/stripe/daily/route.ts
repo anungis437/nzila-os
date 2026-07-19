@@ -5,7 +5,7 @@
  * Returns Stripe daily anomaly scores for a date range.
  *
  * RBAC:
- *   - View scores: any active entity member
+ *   - View scores: unknown active entity member
  *   - includeFeatures=true: org_admin only
  *
  * Query params:

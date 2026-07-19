@@ -92,7 +92,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    const profile = profileRow.profilePayload as unknown as InstitutionalContinuityProfile;
+    const profile = profileRow.profilePayload as any as InstitutionalContinuityProfile;
     const orgContext = mapCtxToOrganizationContext(
       assessment.organizationContext as Record<string, unknown> | OrganizationContext | null,
     );

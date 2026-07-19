@@ -112,7 +112,7 @@ function buildQueryParams(schema: z.ZodTypeAny) {
       in: 'query' as const,
       required: !isOptional,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      schema: zodToOpenAPI(zodField as z.ZodType<unknown>) as any,
+      schema: zodToOpenAPI(zodField as z.ZodType<any>) as any,
     };
   });
 }

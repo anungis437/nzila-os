@@ -56,7 +56,7 @@ async function verifyPayPalWebhook(
   }
 
   const token = await getPayPalAccessToken(clientId, clientSecret, baseUrl);
-  let event: unknown;
+  let event: any;
   try {
     event = JSON.parse(payload);
   } catch {

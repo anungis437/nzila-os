@@ -198,8 +198,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ind-eoc/wages/v1?${queryString.toString()}`;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawData = await this.fetch<any[]>(endpoint);
+    const rawData = await this.fetch<unknown[]>(endpoint);
     
     const results = rawData.map(record => {
       try {
@@ -285,8 +284,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/labour-union-density/v1?${queryString.toString()}`;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawData = await this.fetch<any[]>(endpoint);
+    const rawData = await this.fetch<unknown[]>(endpoint);
     
     const results = rawData.map(record => {
       try {
@@ -331,13 +329,12 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ind-econ/cola/v1?${queryParams.toString()}`;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rawData = await this.fetch<any[]>(endpoint);
+    const rawData = await this.fetch<Record<string, unknown>[]>(endpoint);
     
     return rawData.map(item => ({
-      year: item.year,
-      inflationRate: item.inflationRate,
-      cpi: item.cpi,
+      year: Number(item.year),
+      inflationRate: Number(item.inflationRate),
+      cpi: Number(item.cpi),
       region: geography,
     }));
   }
@@ -357,14 +354,13 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ins-ei/contributions/v1?year=${year}`;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await this.fetch<any>(endpoint);
+    const data = await this.fetch<Record<string, unknown>>(endpoint);
     
     return {
-      year: data.year,
-      employeeRate: data.employeeRate,
-      employerRate: data.employerRate,
-      maxInsurableEarnings: data.maxInsurableEarnings,
+      year: Number(data.year),
+      employeeRate: Number(data.employeeRate),
+      employerRate: Number(data.employerRate),
+      maxInsurableEarnings: Number(data.maxInsurableEarnings),
     };
   }
 
@@ -384,15 +380,14 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ins-cpp/contributions/v1?year=${year}`;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await this.fetch<any>(endpoint);
+    const data = await this.fetch<Record<string, unknown>>(endpoint);
     
     return {
-      year: data.year,
-      employeeRate: data.employeeRate,
-      employerRate: data.employerRate,
-      exemptionLimit: data.exemptionLimit,
-      maximumContribution: data.maximumContribution,
+      year: Number(data.year),
+      employeeRate: Number(data.employeeRate),
+      employerRate: Number(data.employerRate),
+      exemptionLimit: Number(data.exemptionLimit),
+      maximumContribution: Number(data.maximumContribution),
     };
   }
 

@@ -15,7 +15,7 @@ import {
   type PaymentCapture,
 } from './types'
 import { PayoutStatus } from './types'
-import type { WalletOperationResult, CreditParams, DebitParams } from './wallet'
+import type { WalletOperationResult, CreditParams, DebitParams, Wallet } from './wallet'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -55,7 +55,18 @@ function makeWalletResult(overrides?: Partial<WalletOperationResult>): WalletOpe
   return {
     success: true,
     transactionId: 'wtx-1',
-    wallet: {} as any,
+    wallet: {
+      id: 'wallet-1',
+      orgId: 'org-1',
+      ownerId: 'user-1',
+      ownerType: 'creator',
+      currency: 'USD',
+      balance: 0,
+      holdBalance: 0,
+      status: 'active',
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01'),
+    } as Wallet,
     error: null,
     ...overrides,
   }

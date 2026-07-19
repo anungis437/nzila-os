@@ -46,8 +46,8 @@ vi.mock('../statcan-client', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
   relations: vi.fn(() => ({})),
 }));

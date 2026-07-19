@@ -184,4 +184,6 @@ Then revert ALIAS/CNAME records to previous values or remove them. Continue acce
 
 ## Operational Risk Note
 
-Production currently runs in staging-named Azure infrastructure (resource group and environment). This is intentionally preserved to avoid disruption but should be tracked as a naming and governance risk.
+> **Corrected 2026-06-28 (Runtime Separation Wave Phase A.1, live-verified):** Production does **not** run in staging-named infrastructure. UE production runs in the dedicated `nzila-canada-prod-rg` / `nzila-canada-prod-env` on a dedicated production database. The prior "runs in staging-named infrastructure" statement below was stale documentation drift. See [reports/governance/runtime-separation-wave-phaseA1-live-verification-2026-06-28.md](../../../../reports/governance/runtime-separation-wave-phaseA1-live-verification-2026-06-28.md).
+
+~~Production currently runs in staging-named Azure infrastructure (resource group and environment). This is intentionally preserved to avoid disruption but should be tracked as a naming and governance risk.~~ (superseded — see correction above)

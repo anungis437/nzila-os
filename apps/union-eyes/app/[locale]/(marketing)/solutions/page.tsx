@@ -20,7 +20,6 @@
  * Enterprise IA: Solutions hub surfacing each stakeholder journey.
  * Hides operating-architecture sophistication. Exposes organizational outcomes.
  */
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Users,

@@ -28,13 +28,14 @@ export default async function PilotGovernancePage() {
   const env = registry.environments.pilot;
   const lastPromotion = ledger.promotions[0] ?? null;
   const lastRollback = ledger.rollbacks[0] ?? null;
+  const referenceTimestamp = lastRollback?.timestamp ?? lastPromotion?.timestamp ?? null;
 
   let stabilizingMinutesRemaining = 0;
   if (lastPromotion && env.continuity_window_minutes > 0) {
     const remainingMs =
       Date.parse(lastPromotion.timestamp) +
       env.continuity_window_minutes * 60_000 -
-      Date.now();
+      Date.parse(referenceTimestamp ?? lastPromotion.timestamp);
     if (remainingMs > 0)
       stabilizingMinutesRemaining = Math.ceil(remainingMs / 60_000);
   }

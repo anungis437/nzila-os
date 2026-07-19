@@ -226,8 +226,8 @@ export const POST = withApi(
         scope: "employee_item";
         subjectId: string;
         field: string;
-        originalValue: unknown;
-        replayValue: unknown;
+        originalValue: any;
+        replayValue: any;
         causeType: "input_change" | "rule_change" | "engine_change" | "derived_change";
         causeDetail: string;
         originalRulePath?: string[];

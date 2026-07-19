@@ -21,8 +21,8 @@ vi.mock('@/db/schema/organization-members-schema', () => ({
   },
 }));
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
+  eq: vi.fn((...args: any[]) => args),
+  and: vi.fn((...args: any[]) => args),
 }));
 
 import {

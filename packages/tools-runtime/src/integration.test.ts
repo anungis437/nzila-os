@@ -164,7 +164,7 @@ describe('Stripe tool idempotency', () => {
     }
 
     // First call generates new reports
-    const result1 = await generateMonthlyReports(proposal as any, 'user_abc')
+    const result1 = await generateMonthlyReports(proposal as unknown, 'user_abc')
     expect(result1.idempotencyKey).toBe(
       '00000000-0000-0000-0000-111111111111::2026-01::payout_recon,revenue_summary::all',
     )

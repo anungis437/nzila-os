@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createSubscription } from '@nzila/payments-stripe/primitives'
-import { authenticateUser } from '@/lib/api-guards'
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
@@ -42,6 +42,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const input = parsed.data
+
+  const orgAccess = await requireOrgAccess(input.orgId, {
+    minRole: 'org_secretary',
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
 
   try {
     const result = await createSubscription({
@@ -109,6 +115,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (!orgId) {
     return NextResponse.json({ error: 'orgId is required' }, { status: 400 })
   }
+
+  const orgAccess = await requireOrgAccess(orgId, {
+    platformBypass: ['platform_admin', 'studio_admin'],
+  })
+  if (!orgAccess.ok) return orgAccess.response
 
   try {
     const subs = await platformDb

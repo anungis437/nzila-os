@@ -127,12 +127,16 @@ export function Cupe4373PrioritiesPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const raw = window.sessionStorage.getItem(STORAGE_KEY);
-      if (raw) setMetIds(new Set(JSON.parse(raw) as string[]));
-    } catch {
-      /* no-op */
-    }
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const raw = window.sessionStorage.getItem(STORAGE_KEY);
+        if (raw) setMetIds(new Set(JSON.parse(raw) as string[]));
+      } catch {
+        /* no-op */
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   function persist(next: Set<string>) {
@@ -179,7 +183,7 @@ export function Cupe4373PrioritiesPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Priorities</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
           Every commitment a steward owes to a member, an employer, or the executive — grouped
-          by when it's due. Cadence-first, so nothing slips between cycles.
+          by when it&apos;s due. Cadence-first, so nothing slips between cycles.
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -284,7 +288,7 @@ export function Cupe4373PrioritiesPage() {
       </div>
 
       <p className="text-[11px] leading-5 text-slate-500">
-        Demo-only: "Mark met" persists in this browser session. In production it writes to the
+        Demo-only: &quot;Mark met&quot; persists in this browser session. In production it writes to the
         operating record with attribution and stays on the case chronology.
       </p>
 

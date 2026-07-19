@@ -8,7 +8,7 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
 
 vi.mock('next/server', () => ({
   NextRequest: vi.fn(),
-  NextResponse: { json: vi.fn((b: unknown, i?: { status?: number }) => ({ body: b, status: i?.status || 200 })), redirect: vi.fn() },
+  NextResponse: { json: vi.fn((b: any, i?: { status?: number }) => ({ body: b, status: i?.status || 200 })), redirect: vi.fn() },
 }));
 
 vi.mock('next/headers', () => ({

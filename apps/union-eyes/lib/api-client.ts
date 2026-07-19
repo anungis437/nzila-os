@@ -49,7 +49,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface ApiError extends Error {
   status?: number;
-  response?: unknown;
+  response?: any;
   isTimeout?: boolean;
 }
 
@@ -205,7 +205,7 @@ export function createApiClient(name: string, config: ApiClientConfig = {}) {
      */
     post<T = unknown>(
       path: string,
-      body?: unknown,
+      body?: any,
       options?: RequestInit
     ): Promise<ApiResponse<T>> {
       return request<T>('POST', path, {
@@ -219,7 +219,7 @@ export function createApiClient(name: string, config: ApiClientConfig = {}) {
      */
     put<T = unknown>(
       path: string,
-      body?: unknown,
+      body?: any,
       options?: RequestInit
     ): Promise<ApiResponse<T>> {
       return request<T>('PUT', path, {
@@ -233,7 +233,7 @@ export function createApiClient(name: string, config: ApiClientConfig = {}) {
      */
     patch<T = unknown>(
       path: string,
-      body?: unknown,
+      body?: any,
       options?: RequestInit
     ): Promise<ApiResponse<T>> {
       return request<T>('PATCH', path, {

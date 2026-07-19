@@ -164,7 +164,7 @@ interface ApprovalPanelProps {
   isSaving: boolean;
 }
 
-function ApprovalPanel({ rec, approval, onUpdate, isSaving }: ApprovalPanelProps) {
+function ApprovalPanel({ rec: _rec, approval, onUpdate, isSaving }: ApprovalPanelProps) {
   const [localStatus, setLocalStatus] = useState<ApprovalStatus>(approval.status);
   const [localNotes, setLocalNotes] = useState(approval.notes);
 

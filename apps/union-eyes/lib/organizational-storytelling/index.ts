@@ -123,7 +123,7 @@ function anchorsForDomain(domain: CognitionDomain): SemanticTaxonomyNode[] {
 
 function chapterFromNarrative(
   narrative: InstitutionalNarrative,
-  envelope: InstitutionalExplainabilityEnvelope<unknown>,
+  envelope: InstitutionalExplainabilityEnvelope<any>,
 ): InstitutionalStoryChapter {
   const anchors = anchorsForDomain(envelope.domain).map((n) => ({ id: n.id, label: n.label }));
   return {
@@ -161,7 +161,7 @@ function buildExecutiveSummary(
 
 export interface StorybookInput {
   readonly organizationId: string;
-  readonly envelopes: ReadonlyArray<InstitutionalExplainabilityEnvelope<unknown>>;
+  readonly envelopes: ReadonlyArray<InstitutionalExplainabilityEnvelope<any>>;
 }
 
 /**
@@ -179,7 +179,7 @@ export function composeInstitutionalStorybook(
   const narrativesByEngine = narrationResult.narratives;
 
   // Group envelopes by domain.
-  const envelopesByDomain = new Map<CognitionDomain, InstitutionalExplainabilityEnvelope<unknown>[]>();
+  const envelopesByDomain = new Map<CognitionDomain, InstitutionalExplainabilityEnvelope<any>[]>();
   for (const env of input.envelopes) {
     const list = envelopesByDomain.get(env.domain) ?? [];
     list.push(env);

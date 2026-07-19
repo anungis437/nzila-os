@@ -275,7 +275,7 @@ export async function analyzeGovernanceCulture(orgId: string): Promise<Governanc
   const trend = resilienceTrend(scores);
 
   // Discipline profile
-  let engagementConsistency: GovernanceDisciplineProfile['engagementConsistency'] =
+  const engagementConsistency: GovernanceDisciplineProfile['engagementConsistency'] =
     avgDays === null ? 'irregular' :
     avgDays <= 7 ? 'high' :
     avgDays <= 21 ? 'moderate' :

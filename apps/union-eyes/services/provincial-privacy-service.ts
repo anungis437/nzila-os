@@ -403,8 +403,13 @@ export class ProvincialPrivacyService {
     status: "in_progress" | "completed" | "denied",
     assignedTo?: string
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = { status, updatedAt: new Date() };
+    const updateData: {
+      status: "in_progress" | "completed" | "denied";
+      updatedAt: Date;
+      assignedTo?: string;
+      respondedAt?: Date;
+      deadlineMet?: boolean;
+    } = { status, updatedAt: new Date() };
     if (assignedTo) updateData.assignedTo = assignedTo;
 
     if (status === "completed") {
