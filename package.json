@@ -321,7 +321,7 @@
     "lefthook": "^2.1.1",
     "jszip": "^3.10.1",
     "prettier": "^3.4.2",
-    "tailwindcss": "^4.2.0",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.19.3",
     "turbo": "^2.9.14",
     "typescript": "^6",
