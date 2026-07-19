@@ -314,7 +314,7 @@ jobs:
           echo "DNS provider preflight passed for $DNS_ZONE_NAME"
 
       - name: Restore turbo cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: node_modules/.cache/turbo
           key: turbo-deploy-ue-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
