@@ -384,7 +384,9 @@
       "icu-minify": ">=4.9.2",
       "ip-address": ">=10.1.1",
       "next": ">=16.2.6",
-      "@opentelemetry/exporter-prometheus": ">=0.217.0"
+      "@opentelemetry/exporter-prometheus": ">=0.217.0",
+      "websocket-driver": ">=0.7.5",
+      "adm-zip": ">=0.6.0"
     }
   },
   "dependencies": {}
