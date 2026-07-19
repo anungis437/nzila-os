@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-15T00:00:00.000Z",
+  "generatedAt": "2026-07-19T00:00:00.000Z",
   "appCount": 26,
   "packageCount": 222,
   "workspacePackageCount": 254,
   "workflowCount": 52,
   "contractTestCount": 272,
-  "tsTestFileCount": 2461,
+  "tsTestFileCount": 2466,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -36,7 +36,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 287
+      "codeFileCount": 296
     },
     {
       "name": "agrimo",
