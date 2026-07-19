@@ -11,6 +11,17 @@ export default defineProject({
   },
   test: {
     name: "abr",
+    include: [
+      '**/*.test.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',
+      '**/*.spec.{ts,tsx,js,jsx,mts,cts,cjs}',
+    ],
+    exclude: [
+      'e2e/**',
+      '**/*.spec.mjs',
+      'artifacts/**',
+      '.next/**',
+      'node_modules/**',
+    ],
     environmentMatchGlobs: [
       ['**/*.test.tsx', 'jsdom'],
     ],

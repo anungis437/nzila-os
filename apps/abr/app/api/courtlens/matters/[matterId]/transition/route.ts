@@ -83,7 +83,7 @@ export async function POST(
         );
       }
 
-      logAuditEvent({
+      await logAuditEvent({
         action: 'courtlens.matter.transition',
         actorUserId: authz.context.userId,
         orgId: authz.context.orgId,

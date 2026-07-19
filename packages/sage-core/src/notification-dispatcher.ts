@@ -61,6 +61,14 @@ export interface NotificationDispatcherConfig {
    * Identifier for this dispatcher instance (for logging and lease ownership).
    */
   dispatcherInstanceId?: string
+
+  /**
+   * Injectable clock. Defaults to `() => new Date()`. Tests should override this
+   * so the invitation-expiry check compares against a frozen test time rather
+   * than real wall time (otherwise long-lived test fixtures drift past the TTL
+   * and dispatch is short-circuited to dead-letter).
+   */
+  now?: () => Date
 }
 
 const DEFAULT_CONFIG: Required<NotificationDispatcherConfig> = {
@@ -70,6 +78,7 @@ const DEFAULT_CONFIG: Required<NotificationDispatcherConfig> = {
   baseDelayMs: 1_000, // 1 second
   maxDelayMs: 60_000, // 1 minute
   dispatcherInstanceId: `dispatcher-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+  now: () => new Date(),
 }
 
 export class NotificationDispatcher {
@@ -158,7 +167,7 @@ export class NotificationDispatcher {
         return { success: false, error }
       }
 
-      if (Date.parse(payload.expiresAt) <= Date.now()) {
+      if (Date.parse(payload.expiresAt) <= this.config.now().getTime()) {
         const error = 'Invitation expired before notification dispatch'
         await this.repo.markNotificationDeadLetter({
           id: notification.id,

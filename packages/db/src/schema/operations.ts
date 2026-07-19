@@ -188,6 +188,17 @@ export const auditEvents = pgTable('audit_events', {
   afterJson: jsonb('after_json'),
   hash: text('hash').notNull(),
   previousHash: text('previous_hash'),
+  // Exact ISO-8601 timestamp the writer generated and included in the canonical
+  // hash payload. Distinct from createdAt (server-side clock at INSERT time)
+  // — this is what is fed into SHA-256, so it must be persisted verbatim to
+  // allow independent hash recomputation. See apps/abr/lib/audit-log.ts.
+  occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+  // Canonicalisation format version for the payload that produced `hash`.
+  //   'canonical-v1'    — repaired writer, full recomputation supported.
+  //   'linkage-only-v0' — legacy writer, chain linkage only; recomputation
+  //                       does not apply because the hashed timestamp was
+  //                       not persisted.
+  hashVersion: text('hash_version').notNull().default('linkage-only-v0'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

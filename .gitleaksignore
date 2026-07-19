@@ -1,0 +1,32 @@
+# Gitleaks fingerprint allowlist for known-safe findings.
+#
+# Format (gitleaks 8.x): {filepath}:{rule-id}:{line}
+#
+# Each entry MUST be reviewed and documented. Do NOT add fingerprints without
+# a security review comment explaining why the finding is a false positive.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# apps/abr/e2e/courtlens-review-packet.spec.mjs:33
+# Rule: nzila-database-url-with-password
+# Match: <REDACTED — see referenced file line 33 for the local-dev fallback URL>
+# Justification: The rule description explicitly states "not localhost"; the
+#   regex is broader than the description and flags the local-dev fallback used
+#   only when DATABASE_URL is unset. No real secret is exposed — the literal
+#   is a well-known development password published in dev.ps1 / docker-compose.
+#   Comment intentionally redacted to prevent Gitleaks from self-matching this
+#   file (Phase 0 CI incident 2026-07-19).
+# Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
+apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:33
+
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitleaksignore:11 (historical, commit d94ef09b1)
+# Rule: nzila-database-url-with-password
+# Justification: The prior justification comment for the entry above (line 11)
+#   previously quoted the exact literal it was allowlisting, which caused
+#   Gitleaks to re-flag the .gitleaksignore file itself. That comment was
+#   redacted in commit 4abe95f54, but the historical scan range still hits
+#   the introducing commit d94ef09b1. This fingerprint allowlists the
+#   historical occurrence on that specific path+rule+line. No secret is
+#   exposed — see the entry above for the underlying dev-only fallback.
+# Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
+.gitleaksignore:nzila-database-url-with-password:11

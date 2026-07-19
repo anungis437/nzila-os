@@ -206,6 +206,20 @@
       "groupTransition": "Statut du dossier (ABR FSM)",
       "transitionReason": "L’intervenant a fait avancer le dossier"
     },
+    "reviewPacketExport": {
+      "title": "Exporter le dossier d’examen",
+      "subtitle": "Exportez un dossier d’examen sûr pour l’intervenant dans un format déterministe.",
+      "jsonLabel": "JSON",
+      "markdownLabel": "Markdown",
+      "packetUnavailable": "L’exportation du dossier d’examen n’est pas disponible avec votre niveau d’accès actuel.",
+      "packetNotExternalizable": "Le dossier d’examen ne peut pas être exporté tant que l’approbation humaine n’est pas terminée.",
+      "exportFailed": "L’exportation du dossier d’examen a échoué. Veuillez réessayer.",
+      "exportSuccess": "L’exportation du dossier d’examen est prête.",
+      "loading": "Préparation de l’exportation…",
+      "generatedTimestamp": "Généré",
+      "packetVersion": "Version du dossier",
+      "legalBoundaryNotice": "Cet export est une infrastructure opérationnelle et non un avis juridique."
+    },
     "errors": {
       "publicIntakeInvalid": "Certaines informations sont manquantes ou incorrectes. Veuillez vérifier le formulaire et le soumettre à nouveau.",
       "publicIntakeRateLimit": "Trop de soumissions. Veuillez patienter un moment et réessayer.",

@@ -74,7 +74,7 @@ export async function GET(
       return NextResponse.json({ error: 'Not found', code: 'INCIDENT_NOT_FOUND' }, { status: 404 });
     }
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'incident.get',
       actorUserId: authz.userId,
       orgId: authz.orgId,
@@ -112,7 +112,7 @@ export async function PATCH(
       await addIncidentNote(authz.orgId, id, authz.userId, parsed.note.visibilityScope, parsed.note.content);
     }
 
-    logAuditEvent({
+    await logAuditEvent({
       action: 'incident.patch',
       actorUserId: authz.userId,
       orgId: authz.orgId,
