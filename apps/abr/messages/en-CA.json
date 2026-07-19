@@ -198,6 +198,95 @@
       "fieldConsent": "Consent: ",
       "noRiskIndicators": "No risk indicators recorded."
     },
+    "badges": {
+      "urgency": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Standard"
+      },
+      "status": {
+        "new": "New intake",
+        "triage": "Triage",
+        "assigned": "Assigned to reviewer",
+        "investigating": "Under review",
+        "action_planning": "Review packet ready",
+        "monitoring": "Accepted for review",
+        "resolved": "Referred / completed",
+        "closed": "Closed",
+        "archived": "Archived"
+      },
+      "aiSummary": {
+        "ai_draft": "AI draft — needs review",
+        "needs_verification": "Needs verification",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "revised_by_human": "Revised by human"
+      },
+      "practiceArea": {
+        "housing": "Housing",
+        "employment": "Employment",
+        "debt": "Consumer debt",
+        "unknown": "Unspecified"
+      }
+    },
+    "riskPanel": {
+      "harmSignalLevel": "Harm-signal level",
+      "harmSignalDescription": "Current urgency: {level}. This level is derived from intake risk indicators and reviewer input.",
+      "detectedHarmSignals": "Detected harm signals ({count})",
+      "noHarmSignals": "No harm signals detected on this matter.",
+      "flagsAutoDetected": "Flags are auto-detected from intake fields and remain visible for reviewer context.",
+      "flags": {
+        "risk_lockout": "Illegal lockout",
+        "risk_eviction": "Eviction risk",
+        "risk_utility_shutoff": "Utility shut-off",
+        "risk_safety": "Personal safety",
+        "risk_homelessness": "Homelessness risk",
+        "risk_income_loss": "Income loss",
+        "risk_unsafe_work": "Unsafe work conditions",
+        "risk_retaliation": "Retaliation",
+        "risk_garnishment": "Wage garnishment",
+        "risk_bank_freeze": "Bank account freeze",
+        "risk_identity_theft": "Identity theft",
+        "risk_essential_services": "Loss of essential services",
+        "risk_harassment": "Harassment"
+      },
+      "flagDescriptions": {
+        "risk_lockout": "Landlord has changed locks or is denying entry without a court order.",
+        "risk_eviction": "Formal or informal eviction proceedings are pending or threatened.",
+        "risk_utility_shutoff": "Electricity, gas, water, or heat is shut off or scheduled for termination.",
+        "risk_safety": "Physical safety of the client or dependants is at immediate risk.",
+        "risk_homelessness": "Client faces imminent loss of shelter with no alternate housing.",
+        "risk_income_loss": "Client has lost or is losing their primary source of income.",
+        "risk_unsafe_work": "Working conditions place health or safety at risk.",
+        "risk_retaliation": "Employer or landlord has retaliated against the client.",
+        "risk_garnishment": "Wages are being or will be garnished by a creditor.",
+        "risk_bank_freeze": "Bank account has been frozen or a levy is pending.",
+        "risk_identity_theft": "Personal identifying information has been compromised.",
+        "risk_essential_services": "Client is losing access to healthcare, transit, or other essential services.",
+        "risk_harassment": "Ongoing harassment is reported by the client."
+      }
+    },
+    "caseTimeline": {
+      "title": "Case timeline",
+      "description": "Chronological audit trail of CourtLens events for this matter.",
+      "filterLabel": "Filter by event",
+      "filterAll": "All events ({count})",
+      "noEntries": "No timeline entries match the current filter.",
+      "actor": "By: {id}",
+      "types": {
+        "created": "Intake created",
+        "assignment_changed": "Assignment changed",
+        "status_changed": "Status changed",
+        "note_added": "Note added",
+        "evidence_added": "Evidence added",
+        "remediation_created": "Remediation created",
+        "remediation_status_changed": "Remediation updated",
+        "due_date_changed": "Due date changed",
+        "closed": "Matter closed",
+        "courtlens_event": "CourtLens event"
+      }
+    },
     "reviewerActions": {
       "sectionTitle": "Reviewer actions",
       "sectionHint": "Actions record audited CourtLens events. AI review packet approval requires human sign-off.",
