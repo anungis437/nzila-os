@@ -70,7 +70,17 @@ for (const [lintRoot, filePaths] of filesByLintRoot.entries()) {
   const result = spawnSync('pnpm', ['exec', 'eslint', ...dedupedFiles], {
     cwd: lintRoot,
     stdio: 'inherit',
+    // shell:true is required on Windows so that Node can locate the `pnpm.cmd`
+    // shim on PATH. Without it, spawnSync fails with ENOENT before ESLint runs
+    // and the hook exits 1 with no diagnostic output.
+    shell: process.platform === 'win32',
   });
+
+  if (result.error) {
+    console.error(`lint-staged-eslint: failed to spawn ESLint in ${lintRoot}: ${result.error.message}`);
+    exitCode = 1;
+    continue;
+  }
 
   if (result.status !== 0) {
     exitCode = result.status ?? 1;
