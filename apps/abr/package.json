@@ -31,7 +31,7 @@
     "@nzila/platform-performance": "workspace:*",
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
-    "axios": "^1.15.0",
+    "axios": "^1.18.0",
     "clsx": "^2.1.0",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^11.3.30",
