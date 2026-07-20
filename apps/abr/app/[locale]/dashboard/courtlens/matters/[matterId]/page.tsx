@@ -7,8 +7,10 @@ import { Card } from '@nzila/ui';
 import { verifyAbrOrgMembership } from '@/lib/trusted-auth';
 import { hasPermission, type AbrPermission } from '@/lib/rbac';
 import { getMatterDetail, buildMatterDetailView } from '@/modules/incidents/matter-service';
+import { CaseTimelinePanel } from './CaseTimelinePanel';
 import { ReviewerActions } from './ReviewerActions';
 import { ReviewPacketExportControls } from './ReviewPacketExportControls';
+import { RiskPanel } from './RiskPanel';
 
 /**
  * CourtLens tenant matter detail page — Phase 2D (read-only) + Phase 2E (reviewer actions).
@@ -102,7 +104,7 @@ export default async function CourtLensMatterDetailPage({
             <div>
               <dt className="font-medium text-navy">{t('fieldAiPacket')}</dt>
               <dd data-testid="detail-ai-status">
-                {view.aiSummaryStatus.replaceAll('_', ' ')}
+                {view.aiSummaryStatus.replaceAll('_', ' ')}{' '}
                 {view.isPacketExternalizable ? '' : t('fieldAiPacketDraftSuffix')}
               </dd>
             </div>
@@ -152,18 +154,15 @@ export default async function CourtLensMatterDetailPage({
 
       {view.riskFlags && (
         <Card>
-          <div className="space-y-3 p-6 text-sm" data-testid="matter-risk-flags">
-            <h3 className="font-poppins text-base font-semibold text-navy">{t('sectionRiskFlags')}</h3>
-            <ul className="space-y-1">
-              {Object.entries(view.riskFlags)
-                .filter(([, v]) => v === true)
-                .map(([k]) => (
-                  <li key={k}>{k.replace(/^risk_/, '').replaceAll('_', ' ')}</li>
-                ))}
-              {Object.values(view.riskFlags).every((v) => !v) && (
-                <li className="text-slate-500">{t('noRiskIndicators')}</li>
-              )}
-            </ul>
+          <div className="p-6" data-testid="matter-risk-flags">
+            <h3 className="mb-3 font-poppins text-base font-semibold text-navy">
+              {t('sectionRiskFlags')}
+            </h3>
+            <RiskPanel
+              urgencyLabel={view.urgencyLabel}
+              urgencyLevel={result.matter.severity}
+              riskFlags={view.riskFlags}
+            />
           </div>
         </Card>
       )}
@@ -214,6 +213,12 @@ export default async function CourtLensMatterDetailPage({
         <div className="space-y-2 p-6 text-xs text-slate-600" data-testid="legal-boundary-notice">
           <p className="font-medium text-navy">{t('sectionLegal')}</p>
           <p>{view.legalBoundaryNotice}</p>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="p-6" data-testid="matter-timeline">
+          <CaseTimelinePanel timeline={view.timeline} />
         </div>
       </Card>
 
