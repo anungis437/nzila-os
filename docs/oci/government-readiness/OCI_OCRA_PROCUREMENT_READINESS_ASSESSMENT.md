@@ -40,10 +40,13 @@ Legend: ✅ strong · ◐ partial · ○ gap
 | Auditability | ◐ | ◐ | ○ | ◐ | ◐ | strong trace; needs chain-integrity attestation |
 | Security posture | ◐ | ◐ | ◐ | ◐ | ◐ | platform-level; not yet packaged for gov review |
 
-**Reading:** the **deterministic, fairness, privacy, and AI-governance columns are
-already procurement-grade.** The gaps cluster in exactly the areas the
-government-readiness layer addresses: obligation traceability, explainability
-finding artifacts, consequence framing, benchmark publication rules, and IRR.
+**Reading:** the deterministic, fairness, privacy, and AI-governance columns are
+the strongest components of the architecture today; empirical calibration and
+external attestations remain to be earned. The gaps cluster in exactly the areas
+the government-readiness layer addresses: obligation traceability, explainability
+finding artifacts, consequence framing, benchmark publication rules, and IRR —
+plus the security, legal, and pilot items tracked in
+[IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md).
 
 ---
 
@@ -155,12 +158,16 @@ therefore the **last** to fully mature — set expectations accordingly.
 
 ## 7. Executive verdict
 
-> OCI/OCRA is **already procurement-grade on the hardest-to-fake dimensions** —
-> determinism, fairness, privacy, and AI governance. Its gaps are **additive and
-> well-scoped**: obligation traceability, a finding-level explainability contract,
-> a consequence model, codified benchmark publication rules, and a measured IRR
-> program. None require touching the validated scoring core. With the
-> government-readiness layer in place, OCI/OCRA can credibly enter Advisory, Crown
-> Corporation, Municipal, and Pilot procurement now, with Regulator endorsement
-> following the IRR program. The honest framing — strong core, named gaps, clear
+> OCI/OCRA is a **candidate for procurement-oriented validation on the
+> hardest-to-fake architectural dimensions** — determinism, fairness, privacy,
+> and AI governance. Its gaps are **additive and well-scoped**: obligation
+> traceability, a finding-level explainability contract, a consequence model,
+> codified benchmark publication rules, a measured IRR program, verified
+> source instruments, a certified assessor corps, externally attested
+> security controls, a legal/commercial packet, and an executed pilot. None
+> require touching the scoring core. With the government-readiness layer in
+> place and those gates closing in sequence, OCI/OCRA can credibly enter
+> Advisory, Crown Corporation, Municipal, and Pilot procurement-oriented
+> conversations now, with Regulator endorsement following the IRR program.
+> The honest framing — strong core, named gaps, clear
 > roadmap — is itself a procurement advantage in public-sector evaluation.

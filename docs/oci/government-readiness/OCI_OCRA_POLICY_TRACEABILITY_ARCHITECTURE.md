@@ -11,7 +11,8 @@
 
 Public-sector scrutiny is not "is the number right?" — it is **"can you
 reconstruct how you got here, and would an independent reviewer get there too?"**
-A government-grade assessment must answer, for *any* finding:
+An assessment designed for public-sector scrutiny must answer, for *any*
+finding:
 
 1. What evidence was observed?
 2. What finding did that evidence produce?

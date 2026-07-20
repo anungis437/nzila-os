@@ -9,7 +9,9 @@
  *
  * INTEGRITY INVARIANTS (enforced by no-orphan-recommendations.test.ts):
  *   - Every finding is evidence-linked, confidence-bounded, obligation-mapped.
- *   - Every recommendation resolves to ≥1 finding (no orphan recommendations).
+ *   - Every finding carries ≥ 1 recommendation reference (no dead-end findings).
+ *   - When a surfaced-recommendation set is supplied, every surfaced
+ *     recommendation resolves to ≥ 1 finding (no orphan recommendations).
  *   - `intact` must be true before a report may render findings.
  */
 
@@ -29,13 +31,34 @@ export interface ChainIntegrity {
   readonly everyFindingHasEvidence: boolean;
   readonly everyFindingHasConfidence: boolean;
   readonly everyFindingHasObligation: boolean;
+  /**
+   * Every finding references ≥ 1 recommendation id in its `recommendationRefs`.
+   * This proves findings are recommendation-linked; it does NOT by itself prove
+   * that every recommendation actually surfaced in a report is backed by a
+   * finding. Use `everySurfacedRecommendationHasFinding` for that guarantee.
+   */
+  readonly everyFindingHasRecommendationRef: boolean;
+  /**
+   * DEPRECATED alias for `everyFindingHasRecommendationRef`. Retained for
+   * backward compatibility with existing tests and documentation; the name is
+   * historically misleading (it proves finding-side completeness, not that no
+   * recommendation is orphaned). Prefer `everySurfacedRecommendationHasFinding`.
+   * @deprecated
+   */
   readonly everyRecommendationHasFinding: boolean;
+  /**
+   * When the caller supplies the set of recommendation ids actually surfaced
+   * in the report, this asserts each one resolves to ≥ 1 finding. When no
+   * surfaced set is supplied, this is `null` (undetermined) and must not be
+   * treated as `true` for gating.
+   */
+  readonly everySurfacedRecommendationHasFinding: boolean | null;
   /**
    * Phase G: no citation is `asserted` below its instrument's evidence floor
    * (e.g. a statute is never asserted on less than VERIFIED evidence).
    */
   readonly everyAssertedCitationMeetsEvidenceFloor: boolean;
-  /** AND of the above — gate for rendering findings. */
+  /** AND of the enforceable checks above — gate for rendering findings. */
   readonly intact: boolean;
 }
 
@@ -48,6 +71,7 @@ export interface FindingCitations {
 export interface TraceabilityRecord {
   readonly assessmentId: string;
   readonly scoringVersion: string;
+  readonly questionBankVersion: number;
   readonly obligationTaxonomyVersion: string;
   readonly consequenceModelVersion: string;
   readonly sourceInstrumentCatalogueVersion: string;
@@ -58,7 +82,7 @@ export interface TraceabilityRecord {
 }
 
 /**
- * Resolve the set of recommendation ids known to be backed by ≥1 finding.
+ * Resolve the set of recommendation ids known to be backed by ≥ 1 finding.
  * Used to assert no recommendation is surfaced without a finding behind it.
  */
 export function recommendationsWithFinding(
@@ -89,13 +113,23 @@ export function deriveFindingCitations(
 function computeChainIntegrity(
   findings: readonly Finding[],
   findingCitations: readonly FindingCitations[],
+  surfacedRecommendationIds: ReadonlySet<string> | null,
 ): ChainIntegrity {
   const everyFindingHasEvidence = findings.every((f) => f.evidenceLevel != null);
   const everyFindingHasConfidence = findings.every((f) => f.confidence != null);
   const everyFindingHasObligation = findings.every((f) => f.obligationClasses.length >= 1);
-  const everyRecommendationHasFinding = findings.every(
+  const everyFindingHasRecommendationRef = findings.every(
     (f) => f.recommendationRefs.length >= 1,
   );
+
+  // True no-orphan-recommendation invariant: only computable when the caller
+  // supplies the actual set of surfaced recommendation ids. When absent, we
+  // cannot claim this property is proven.
+  const backed = recommendationsWithFinding(findings);
+  const everySurfacedRecommendationHasFinding: boolean | null =
+    surfacedRecommendationIds == null
+      ? null
+      : Array.from(surfacedRecommendationIds).every((id) => backed.has(id));
 
   // Phase G invariant: any citation presented as `asserted` must clear its
   // instrument kind's evidence floor. Vacuously true when there are no asserted
@@ -115,35 +149,53 @@ function computeChainIntegrity(
     everyFindingHasEvidence,
     everyFindingHasConfidence,
     everyFindingHasObligation,
-    everyRecommendationHasFinding,
+    everyFindingHasRecommendationRef,
+    // Backward-compat alias — same semantics, historically misleading name.
+    everyRecommendationHasFinding: everyFindingHasRecommendationRef,
+    everySurfacedRecommendationHasFinding,
     everyAssertedCitationMeetsEvidenceFloor,
     intact:
       everyFindingHasEvidence &&
       everyFindingHasConfidence &&
       everyFindingHasObligation &&
-      everyRecommendationHasFinding &&
-      everyAssertedCitationMeetsEvidenceFloor,
+      everyFindingHasRecommendationRef &&
+      everyAssertedCitationMeetsEvidenceFloor &&
+      // If the caller supplied a surfaced set, it must also pass. If null,
+      // we do not use it to weaken `intact` — but the field is null so callers
+      // can see the property was not proven.
+      (everySurfacedRecommendationHasFinding !== false),
   });
 }
 
 /**
  * Build a version-pinned, append-only traceability record from a scoring trace
  * and its derived findings. Pure and deterministic; contains no PII.
+ *
+ * @param surfacedRecommendationIds Optional set of recommendation ids actually
+ * surfaced in the report. When supplied, enables the true
+ * `everySurfacedRecommendationHasFinding` invariant. When omitted, that
+ * invariant is reported as `null` (undetermined).
  */
 export function buildTraceabilityRecord(
   assessmentId: string,
   trace: ScoringTrace,
   findings: readonly Finding[],
+  surfacedRecommendationIds?: ReadonlySet<string>,
 ): TraceabilityRecord {
   const findingCitations = deriveFindingCitations(findings);
   return Object.freeze({
     assessmentId,
     scoringVersion: trace.scoringVersion,
+    questionBankVersion: trace.questionBankVersion,
     obligationTaxonomyVersion: OBLIGATION_TAXONOMY_VERSION,
     consequenceModelVersion: CONSEQUENCE_MODEL_VERSION,
     sourceInstrumentCatalogueVersion: SOURCE_INSTRUMENT_CATALOGUE_VERSION,
     findings,
     findingCitations,
-    chainIntegrity: computeChainIntegrity(findings, findingCitations),
+    chainIntegrity: computeChainIntegrity(
+      findings,
+      findingCitations,
+      surfacedRecommendationIds ?? null,
+    ),
   });
 }

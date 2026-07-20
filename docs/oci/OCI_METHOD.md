@@ -6,6 +6,12 @@
 
 **Convention used in this document:** "the method" refers to the OCI Method™ as a whole. "the pilot" refers to a specific institutional engagement run under the method. "the institution" refers to any organisation engaging the method.
 
+> **Public-service front door.** For public-service audiences, the OCI Method is presented
+> through **CIVIC by Nzila** (framing) and **CLEAR** (evidence discipline articulation).
+> CIVIC/CLEAR are not a different method — they are how this same method reads on first
+> touch to a public-service leader. See [CIVIC ↔ OCI Alignment](../CIVIC_OCI_ALIGNMENT.md)
+> and [`docs/public-service/civic-thesis.md`](../public-service/civic-thesis.md).
+
 ---
 
 ## 1. Purpose of the method

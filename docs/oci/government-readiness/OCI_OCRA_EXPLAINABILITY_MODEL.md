@@ -10,9 +10,9 @@
 
 ## 1. The explainability standard
 
-A government-grade finding is not explainable because it has a paragraph of prose.
-It is explainable when, for **every** finding, the system can answer seven
-questions deterministically and identically on re-run:
+A finding designed for public-sector scrutiny is not explainable because it has
+a paragraph of prose. It is explainable when, for **every** finding, the system
+can answer seven questions deterministically and identically on re-run:
 
 1. **What evidence was observed?**
 2. **What finding did it produce?**

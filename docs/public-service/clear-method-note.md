@@ -4,7 +4,10 @@ CLEAR = Continuity, Legitimacy, Evidence, Accountability, and Readiness.
 
 ## Positioning
 
-CLEAR is the evidence discipline behind CIVIC.
+CLEAR is the public-service articulation of the evidence discipline that sits behind
+CIVIC — which is itself the public-service front door for OCI. The five CLEAR pillars
+map to OCI's scoring dimensions and evidence ladder via the
+[CIVIC ↔ OCI alignment Rosetta table](../CIVIC_OCI_ALIGNMENT.md#4-rosetta-table--how-the-five-pillars-line-up).
 
 CLEAR is not presented here as a product to buy, a booking flow, or a first-touch paid assessment.
 

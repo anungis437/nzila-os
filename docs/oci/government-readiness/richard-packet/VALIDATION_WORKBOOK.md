@@ -4,7 +4,8 @@
 > **Pairs with:** [RICHARD_VALIDATION_PACKET.md](./RICHARD_VALIDATION_PACKET.md)
 > · [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](../RICHARD_SHARPE_VALIDATION_PROTOCOL.md)
 > **Output target:** verdicts feed
-> [GOVERNMENT_VALIDATION_REPORT_V1.md](../GOVERNMENT_VALIDATION_REPORT_V1.md)
+> [INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md](../INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md)
+> *(internal red-team pre-mortem — the validator's own workbook overrides it)*
 
 This workbook is a structured worksheet. Each objective has a fixed format:
 **Claim → Challenge → Evidence → Verdict → Conditions.** Verdicts are one of:
@@ -122,8 +123,8 @@ program blocker.
   evidence-gated *citation*. The seed catalogue is wholly `UNVERIFIED`: clause
   references and effective dates are `null`; **no citation is defensible** until a
   validator confirms the instrument and the evidence clears the assertion floor.
-- **Challenge:** *"Show me the specific authority behind this finding — and prove
-  the system isn't inventing a statute or a section number."*
+- **Challenge:** *"Show me the candidate source-instrument record behind this
+  finding — and prove the system isn't inventing a statute or a section number."*
 - **Evidence:** [Source Instrument Traceability](../OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md);
   packet Part 3B; `source-instrument-traceability.test.ts`;
   `source-instrument-authority.test.ts`.

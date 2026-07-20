@@ -40,6 +40,30 @@ export interface ComputeProfileInput {
   answers: Answer[]
 }
 
+/**
+ * Build an `Answer` from a `Question` and its raw response value.
+ *
+ * @param question   The scoring question being answered.
+ * @param rawValue   The reviewer's response value.
+ * @param note       Optional reviewer note. **SENSITIVE FREE TEXT.**
+ *
+ *   `note` is not covered by the *"PII-free by construction"* property of the
+ *   derived scoring/finding/traceability artifacts (see
+ *   `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1).
+ *   Callers **must** treat any string passed here as potentially personal,
+ *   confidential, or otherwise sensitive material and are responsible for:
+ *
+ *   1. **Disabling capture** in engagements that cannot accept free-text; or
+ *   2. **Ephemeralizing** the field (do not persist the `Answer` beyond the
+ *      score computation, or drop `answer.note` immediately after scoring); or
+ *   3. **Routing** any retained value into a separately-secured evidence
+ *      repository outside the derived-artifact estate.
+ *
+ *   This value is intentionally read only by the caller who supplies it; it
+ *   is not used by any scoring, obligation, consequence, confidence, or
+ *   traceability logic in this package and is not surfaced by the government-
+ *   readiness layer.
+ */
 export function buildAnswer(question: Question, rawValue: string | number, note?: string): Answer {
   return {
     questionId: question.id,
@@ -48,6 +72,7 @@ export function buildAnswer(question: Question, rawValue: string | number, note?
     normalizedScore: normalizeQuestionScore(question, rawValue),
     weightsSnapshot: { ...question.weights },
     riskInverted: question.riskInverted ?? false,
+    // SENSITIVE FREE TEXT — see docblock above. Not PII-safe by construction.
     note: note?.trim() || undefined,
     answeredAt: new Date().toISOString(),
   }

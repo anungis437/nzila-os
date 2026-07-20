@@ -157,7 +157,7 @@ maintenance, and creates drift risk between overlays. The system already resists
 this by keeping context in **interpretation**, not **numerics**. Overlays would
 reverse that discipline.
 
-### Q5 — What is the minimum architecture change necessary to achieve government-grade credibility?
+### Q5 — What is the minimum architecture change necessary for public-sector scrutiny?
 
 **A traceability and evidence-governance layer that sits *above* the unchanged
 scoring core** — not a new scoring path. Concretely:
@@ -270,11 +270,15 @@ Position OCI/OCRA purely as an input to an external certified process.
 
 ### 4.3 Why this is minimal
 
-Every government-grade property (defensible, explainable, auditable,
-benchmarkable, procurement-ready) is achieved by **making the existing
-deterministic outputs legible and obligation-aware** — not by adding a second
-way to compute a number. The number is the one thing public-sector scrutiny
-attacks hardest; freezing it is the strongest possible posture.
+Every property required for public-sector scrutiny (defensible, explainable,
+auditable, benchmarkable, procurement-review-ready) is architected by **making
+the existing deterministic outputs legible and obligation-aware** — not by
+adding a second way to compute a number. Achieving those properties in
+practice further requires the empirical, operational, legal, and external-
+validation gates that remain open (see
+[IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md)); this decision covers
+the architecture, not those gates. The number is the one thing public-sector
+scrutiny attacks hardest; freezing it is the strongest possible posture.
 
 ---
 

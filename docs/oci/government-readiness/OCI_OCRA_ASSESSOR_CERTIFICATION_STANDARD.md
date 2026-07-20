@@ -47,7 +47,7 @@ level to conduct a live assessment **independently** is **Level 3**.
 
 ---
 
-## 2. The calibration gate (reuses the IRR thresholds)
+## 2. The calibration gate (reuses the IRR thresholds — with a stated caveat)
 
 An assessor is certified only after **measured agreement against a versioned
 calibration reference set** clears every threshold. Critically, these are the
@@ -66,6 +66,40 @@ never drift:
 **An unmeasured facet is a shortfall, not a pass.** You cannot certify on
 agreement you did not measure (`null` → fails the gate). `evaluateCalibration`
 returns every shortfall, never a single pass/fail with no reason.
+
+### 2.1 Methodological caveat — κ, ICC, and Fleiss κ are cohort/system metrics
+
+> **Honest limitation.** Cohen's κ, Fleiss' κ, and the intraclass correlation
+> coefficient (ICC) are, in their standard formulations, **inter-rater
+> reliability statistics for a rater group or a rater–system pair over a shared
+> set of items** — not, on their own, well-defined characterisations of an
+> **individual** assessor's competence in isolation. Using program-level κ/ICC
+> thresholds as an *individual* certification gate is deliberate (it prevents
+> the personal bar from drifting below the program bar), but it is not the
+> primary evidence a review body should rely on for individual certification.
+>
+> Individual certification is therefore additionally evaluated on measurements
+> that are meaningful at the person level:
+>
+> - **Agreement with a gold-standard adjudicated key** on the same reference
+>   set (percentage of answers matching adjudicator, banded exact agreement,
+>   and confusion patterns).
+> - **Critical-error rate** — the rate at which the assessor emits findings
+>   the adjudicator would suppress (over-claim), or suppresses findings the
+>   adjudicator would surface (under-claim), stratified by obligation class.
+> - **False-assertion rate under evidence discipline** — the rate at which
+>   the assessor asserts an obligation (especially `Statutory`) below its
+>   evidence floor.
+> - **Adjudicated review of a stratified live-work sample** by a Level 4/5
+>   assessor once independent scoring authority is granted.
+>
+> The κ/ICC/band-exact numbers above remain gate conditions (an assessor
+> **cannot** be certified if their contribution would degrade cohort-level
+> κ/ICC below the program bar), but the *primary* individual evidence is the
+> gold-standard, critical-error, and false-assertion set. This calibration
+> program will publish, alongside any κ/ICC value, the sample size, the
+> adjudicator, and the confidence interval, in line with the reliability
+> reporting posture in the [IRR Model](./OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md).
 
 ---
 

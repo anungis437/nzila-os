@@ -2,28 +2,45 @@
 
 > **Status:** Procurement-facing brief — describes the as-built security and
 > data-handling posture of the OCI/OCRA assessment and its additive
-> Government-Readiness Layer.
+> Government-Readiness Layer. **Read alongside** the authoritative
+> [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md); where any claim below
+> drifts from that matrix, the matrix wins.
 > **Audience:** Municipal evaluators, public-sector pilot sponsors, Crown
-> corporation risk officers, government advisory buyers, and the external
-> validator (Richard Sharpe).
+> corporation risk officers, government advisory buyers, and independent
+> external reviewers.
 > **Companion to:** [Procurement Readiness Assessment](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md),
 > [Richard Validation Packet](./richard-packet/RICHARD_VALIDATION_PACKET.md).
-> **Doctrine version:** 1.0.0 · **As of:** 2026-06-14
+> **Doctrine version:** 1.0.0 · **As of:** 2026-07-20
+>
+> **Scope caveat.** This brief documents the *data-handling* and *derived-
+> artifact privacy* posture. It is **not** a complete public-sector security
+> assurance package. It does not yet establish encryption/key-management
+> attestations, tenant-isolation attestations, MFA enforcement evidence, SIEM
+> retention terms, vulnerability-management SLAs, penetration-test results,
+> backup/restoration drills, disaster-recovery RTO/RPO, incident-notification
+> timelines, subprocessor register, hosting-provider disclosure, security
+> certifications, or a bilingual/accessibility conformance report. See
+> [IMPLEMENTATION_STATUS.md §3](./IMPLEMENTATION_STATUS.md#3-security-privacy-and-data-handling)
+> for the honest status of each of those items.
 
 ---
 
 ## 0. One-paragraph summary (for evaluators in a hurry)
 
 OCI/OCRA is a **deterministic, explainable institutional-continuity assessment**.
-It scores an institution's *posture*, never its people. The scoring core is frozen
-and reproducible; the new Government-Readiness Layer is **read-only** over that
+It scores an institution's *posture*, never its people. The scoring core is
+deterministic; the new Government-Readiness Layer is **read-only** over that
 core and adds traceability, evidence-bounded confidence, and a chain-integrity
-gate. Persisted artifacts — scoring traces, findings, and traceability records —
-**contain no personal information by construction**, a property enforced by
-automated regression tests, not by policy alone. AI is never in the scoring path.
-The sections below state exactly what is and is not collected, where it lives,
-how long it is kept, who can reach it, how it is anonymized, and how an
-institution can withdraw, export, or delete its data.
+gate. The **derived** persisted artifacts — scoring traces, findings, and
+traceability records — are **designed to exclude direct personal identifiers by
+schema**, and this is enforced by automated regression tests over their
+surfaced content. The complete assessment data flow (including the source
+`Answer` model, which still carries an optional free-text `note` field) remains
+subject to a full data inventory and privacy validation — see §2 below. AI is
+never in the scoring path. The sections below state exactly what is and is not
+collected, where it lives, how long it is kept, who can reach it, how it is
+anonymized, how an institution can withdraw/export/delete its data, and what
+this brief does **not** yet establish.
 
 ---
 
@@ -48,30 +65,76 @@ reconstructed from these tokens without ever needing a name, an email, or a free
 
 ---
 
-## 2. Data NOT collected
+## 2. Data NOT collected (in the derived scoring/finding/traceability artifacts)
 
-By construction, the assessment and its persisted artifacts do **not** contain:
+By schema, the **derived** artifacts (scoring trace, findings, traceability
+record) do **not** contain:
 
-- **No personal identifiers** — no names, emails, phone numbers, employee ids,
-  or role-holder identities in scoring traces, findings, or traceability records.
-- **No free-text narrative** in the scored/persisted path. Finding statements are
+- **No personal identifiers** in the derived structures — no names, emails,
+  phone numbers, employee ids, or role-holder identities in scoring traces,
+  findings, or traceability records (asserted for surfaced finding statements
+  by the PII-marker regression test).
+- **No free-text narrative in the finding catalogue.** Finding statements are
   drawn from a fixed, PII-free catalogue (e.g., *"Succession authority is not
-  documented as a governance instrument."*), never composed from individual data.
+  documented as a governance instrument."*), never composed from individual
+  data.
 - **No surveillance of individuals.** OCI/OCRA assesses the *institution's*
   posture; it never profiles, ranks, or scores a person.
 - **No covert telemetry.** Operational telemetry is enum-only and passes an
   allow-list; PII-shaped keys (email, orgName, etc.) are rejected.
-- **No raw answers in benchmarks.** Published aggregates never include a single
-  institution's responses.
+- **No raw answers in benchmarks.** Published aggregates never include a
+  single institution's responses.
 
-**Enforcement, not promise.** These are guarded by automated tests, including:
+### 2.1 Known free-text hole: `Answer.note` on the source model
+
+> **Honest correction.** The `Answer` model at the *source* of the assessment
+> (before scoring) currently accepts an optional free-text `note?: string`
+> field via `buildAnswer(question, rawValue, note)`. That field is trimmed and
+> persisted on the answer. It is **not** part of the derived scoring trace or
+> finding catalogue, but if answers are persisted or exported it *can* travel
+> with them, and a reviewer *could* place personal, confidential, or
+> otherwise-sensitive content there.
+>
+> Therefore the claim *"no free-text narrative enters the scored or persisted
+> path"* is **incorrect while `Answer.note` exists as a free-text field.**
+>
+> Interim posture (as of 2026-07-20):
+>
+> - `Answer.note` is classified as **sensitive free text** and is **not
+>   covered** by *"PII-free by construction."*
+> - Pilot engagements must either (a) disable capture of `Answer.note`
+>   entirely, (b) treat it as ephemeral and refuse to persist it, or (c)
+>   route it into a separately-secured evidence repository outside the
+>   PII-free derived-artifact estate.
+> - A follow-on change will either remove `note` from the assessment model,
+>   restrict it to an enumerated code, or ephemeralize it. Tracked in
+>   [IMPLEMENTATION_STATUS.md §S5](./IMPLEMENTATION_STATUS.md#3-security-privacy-and-data-handling).
+
+### 2.2 What the PII regression test does — and does not — prove
+
+The finding-completeness test scans surfaced finding statements for a small
+regex vocabulary (`@`, `Mr.`, `Mrs.`, `email`). This is a **smoke test**, not
+a PII guarantee. It does **not** detect:
+
+- names, phone numbers, employee ids, addresses, union positions;
+- French honorifics, Indigenous identifiers, unusual job titles;
+- small-cell identifiers or protected operational details.
+
+The defensible property today is: **the finding catalogue is a fixed,
+reviewer-authored set of institutional statements with a passing PII-marker
+regression test.** A full field-level privacy assessment and a data-inventory
+review are still required before this can be presented as a comprehensive
+privacy guarantee.
+
+**Enforcement, not promise (for what it does cover).** The following tests are
+run in CI:
 
 - A privacy regression suite that forbids PII-shaped telemetry keys
   (`adaptiveTelemetryPrivacyRegression.test.ts`).
 - A routing-explainability snapshot test asserting enum-only, no-PII output
   (`routingExplainabilitySnapshot.test.ts`).
 - The Government-Readiness finding-completeness test, which asserts surfaced
-  finding statements contain **no PII markers**
+  finding statements contain no PII markers (from the regex vocabulary above)
   (`__tests__/government-readiness/finding-completeness.test.ts`).
 
 ---
@@ -131,16 +194,20 @@ By construction, the assessment and its persisted artifacts do **not** contain:
 
 ## 6. Anonymization
 
-- **PII-free by construction** (Section 2), verified by tests.
+- **Derived scoring/finding/traceability artifacts are designed to exclude
+  direct personal identifiers by schema.** The complete assessment data flow
+  — including the source `Answer.note` free-text field — remains subject to
+  a data-inventory and privacy validation (see §2.1).
 - **Pseudonymous assessment ids.** The assessment handle is opaque and is
   anonymized further upstream before any cross-assessment aggregation.
 - **k-anonymity K = 5 for any published aggregate.** No benchmark or cohort
   statistic is published unless **≥ 5 institutions** are in the cohort — a
-  re-identification floor inherited from the OCI intelligence-ethics doctrine and
-  codified in the [benchmark governance review](./OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md).
-- **No rankings, refusal-first.** The observatory posture is opt-in, publishes no
-  institutional leaderboards, and refuses to emit a statistic it cannot publish
-  safely.
+  re-identification floor inherited from the OCI intelligence-ethics doctrine
+  and codified in the
+  [benchmark governance review](./OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md).
+- **No rankings, refusal-first.** The observatory posture is opt-in, publishes
+  no institutional leaderboards, and refuses to emit a statistic it cannot
+  publish safely.
 
 ---
 
@@ -194,22 +261,33 @@ OCI/OCRA's AI posture is **structural**, not promissory:
 
 These properties make the output **defensible** to an auditor or regulator:
 
-- **Determinism.** Identical inputs yield byte-identical scores; proven by the
-  backward-compatibility test across multiple postures.
-- **Non-regression.** The additive layer **never mutates** the scoring trace and
-  **never changes** any score; proven by deep-clone comparison in the
+- **Determinism (canonical payload).** Identical substantive inputs yield a
+  byte-identical *canonical scoring payload* (defined in
+  [`canonicalScoringPayload.ts`](../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts))
+  and an identical SHA-256 reproducibility hash. Wall-clock metadata
+  (`scoredAt`, `generatedAt`, `answeredAt`) is deliberately excluded from the
+  canonical payload so it cannot mask substantive drift and so the hash is
+  stable across runs. The *full* scoring outputs are **not** byte-identical
+  because they contain those timestamps. See
+  [IMPLEMENTATION_STATUS.md §C3](./IMPLEMENTATION_STATUS.md#1-core-scoring--determinism).
+- **Non-regression.** The additive layer **never mutates** the scoring trace
+  and **never changes** any score; proven by deep-clone comparison in the
   backward-compatibility test.
 - **Seven-answer completeness.** No finding is surfaced unless it carries
   evidence, a statement, an obligation mapping, a dimension contribution, a
   confidence envelope, a consequence, and at least one recommendation. Partial
   findings are **suppressed, never shown**.
-- **Evidence floor on confidence.** A finding's confidence can never exceed what
-  its evidence supports (`VERBAL` is never `HIGH`/`MODERATE`; `NONE` is
+- **Evidence floor on confidence.** A finding's confidence can never exceed
+  what its evidence supports (`VERBAL` is never `HIGH`/`MODERATE`; `NONE` is
   `INSUFFICIENT`) — no amount of corroboration or sample size can lift it.
 - **Chain integrity gate.** A report may render findings only when the
-  traceability record's `intact` flag is true: every finding is evidence-linked,
-  confidence-bounded, obligation-mapped, and every recommendation resolves to a
-  finding (**no orphan recommendations**).
+  traceability record's `intact` flag is true: every finding is
+  evidence-linked, confidence-bounded, obligation-mapped, and carries at
+  least one recommendation reference. The stronger *no-orphan-recommendation*
+  invariant — that every rendered recommendation resolves to a finding — is
+  computed at the record layer when the caller supplies the surfaced
+  recommendation set (see
+  [IMPLEMENTATION_STATUS.md §G6](./IMPLEMENTATION_STATUS.md#2-additive-government-readiness-layer)).
 
 All five guarantees are covered by the non-regression suite (26 tests) and run
 green alongside the full ICRA suite (479 tests). See the
@@ -219,39 +297,75 @@ green alongside the full ICRA suite (479 tests). See the
 
 ## 10. Incident handling
 
-- **Containment posture.** Because the scoring path is offline (no third-party
-  scoring calls) and persisted artifacts are PII-free, the blast radius of a data
-  incident is structurally limited: there is no personal data in the scoring/
-  finding/traceability artifacts to exfiltrate.
+- **Containment posture (derived-artifact scope only).** The scoring path is
+  offline (no third-party scoring calls) and the *derived* persisted artifacts
+  are designed to exclude direct personal identifiers, so the personal-data
+  blast radius of a data incident affecting the scoring/finding/traceability
+  estate is structurally limited. This is **not** a broad statement that an
+  OCI/OCRA assessment carries no sensitive content: an assessment can contain
+  highly sensitive **institutional** information even without PII — governance
+  weaknesses, delegation gaps, continuity vulnerabilities, legal-compliance
+  concerns, labour-relations strategy, cabinet or board confidences,
+  solicitor-client privileged material, and commercially sensitive operational
+  dependencies. That information warrants protection even when no individual is
+  identified.
 - **Detection.** Privacy regression tests act as a **build-time tripwire**: a
   change that would route PII into telemetry, findings, or snapshots fails the
   test suite before it can ship.
 - **Response, per pilot.** For a public-sector pilot, incident response roles,
-  notification timelines, and contact paths are agreed in the engagement and
-  inherit the platform's security operations process. This brief documents the
-  *data-handling* properties that bound an incident; the *operational* runbook is
-  attached per engagement.
-- **Reproducibility aids forensics.** Version-pinned, deterministic artifacts let
-  an investigator reconstruct exactly what was computed, from which inputs, under
-  which logic version.
+  notification timelines, and contact paths must be agreed in the engagement
+  and inherit the platform's security operations process. This brief documents
+  the *data-handling* properties that bound an incident; the *operational*
+  runbook is attached per engagement and is not yet independently attested
+  (see [IMPLEMENTATION_STATUS.md §S11](./IMPLEMENTATION_STATUS.md#3-security-privacy-and-data-handling)).
+- **Reproducibility aids forensics.** Version-pinned, deterministic canonical
+  payloads let an investigator reconstruct exactly what was computed, from
+  which inputs, under which logic version.
 
 ---
 
 ## 11. What this brief does NOT yet claim (honest gaps)
 
-Consistent with the [Procurement Readiness Assessment](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md),
+Consistent with the [Procurement Readiness Assessment](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md)
+and the authoritative [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md),
 the following remain open and are **not** asserted here:
 
-- **Inter-rater reliability (IRR) is unmeasured.** The confidence model consumes a
-  reviewer-variance signal, but no IRR coefficient from paired raters has been
-  collected yet. This is the primary gate for the **Regulator** archetype.
+- **Inter-rater reliability (IRR) is unmeasured.** The confidence model
+  consumes a reviewer-variance signal, but no IRR coefficient from paired
+  raters has been collected yet (G9). This is the primary gate for the
+  **Regulator** archetype.
 - **External validation is pending.** This brief is self-attested against the
-  codebase; independent sign-off (Richard Sharpe) is the next gate.
-- **Benchmark publication enforcement** (cohort-minimum guard in code) is
-  specified but not yet enforced programmatically; it is required before any
-  public benchmark report, not before a first validation conversation.
-- **Coefficient calibration** remains practitioner-informed pending a calibration
-  roadmap.
+  codebase. The document historically titled *"Government Validation Report
+  V1"* has been renamed
+  [INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md](./INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md)
+  to clarify that it is an internal red-team pre-mortem, not external
+  validation.
+- **Benchmark publication enforcement.** The cohort-minimum guard is
+  `INTERNALLY_TESTED` in code (G10, S3); no benchmark has been published
+  against a real cohort yet.
+- **Coefficient calibration** remains practitioner-informed pending a
+  calibration roadmap.
+- **Security-assurance items not yet established.** Encryption in transit and
+  at rest, key management, secret management, tenant isolation, privileged-
+  access management, MFA enforcement, logging and SIEM retention,
+  vulnerability management, secure development lifecycle, penetration testing,
+  dependency/supply-chain security attestations, backup and restoration
+  drills, disaster recovery (RTO/RPO), incident severity and notification
+  timelines, subprocessor register, hosting-provider disclosure, actual
+  Canadian residency attestation, breach history, deletion from backups/logs/
+  exports/observability tools, audit-log immutability, and formal security
+  certifications or control mappings — all `PROPOSED` per-engagement, not
+  independently attested. See
+  [IMPLEMENTATION_STATUS.md §3 (S6–S14)](./IMPLEMENTATION_STATUS.md#3-security-privacy-and-data-handling).
+- **Legal, procurement, and commercial packet.** Liability, insurance and
+  indemnification; IP ownership; buyer's right to audit; service levels and
+  support; exit support; subprocessor register; appeal/correction/
+  reconsideration mechanism; records-management (ATIP/FOI, litigation hold,
+  discovery); conflict-of-interest controls; Indigenous data-sovereignty
+  posture — all `PROPOSED`. See
+  [IMPLEMENTATION_STATUS.md §4](./IMPLEMENTATION_STATUS.md#4-legal-procurement-and-commercial).
+- **Bilingual (EN/FR) & WCAG accessibility conformance** on the OCI/OCRA
+  surfaces is `PROPOSED`; no conformance report is attached (S14).
 
 ---
 
@@ -267,13 +381,17 @@ the following remain open and are **not** asserted here:
 
 ---
 
-## 13. For the validation session (Richard)
+## 13. For an external validation session
 
-This brief lets the Richard packet say, credibly:
+This brief lets the packet say, credibly:
 
-> *The core is deterministic and non-regressive. The new layer is traceable and
-> evidence-bounded. Here is exactly how data is handled, what is not collected,
-> and where the remaining validation gates (IRR, external sign-off) are.*
+> *The core is deterministic (canonical payload, hash-stable) and
+> non-regressive. The new layer is traceable and evidence-bounded. Here is
+> exactly how derived data is handled, what the derived artifacts do and do
+> not contain, and where the remaining validation gates (IRR, external
+> sign-off, security-assurance attestations, legal/commercial packet, real
+> pilot execution) are.*
 
 Cross-reference: [Richard Validation Packet](./richard-packet/RICHARD_VALIDATION_PACKET.md)
-· [Validation Workbook](./richard-packet/VALIDATION_WORKBOOK.md).
+· [Validation Workbook](./richard-packet/VALIDATION_WORKBOOK.md)
+· [Implementation Status Matrix](./IMPLEMENTATION_STATUS.md).

@@ -36,7 +36,7 @@ the **test suite** so a skeptical reviewer can run it.
 | V5 | **Benchmark governance** — cohort floors, no rankings, honesty clause | [Benchmark Governance](./OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md) | `lib/oci/benchmark/__tests__/publicationGuard.test.ts` | Baselines characteristic, not normative |
 | V6 | **Confidence** — evidence-fed, ordinal, never inflated | [Confidence Architecture](./OCI_OCRA_CONFIDENCE_ARCHITECTURE.md) | `government-readiness/confidence-evidence-floor.test.ts` | — |
 | V7 | **Inter-rater reliability** — agreement is measurable (κ/ICC/band) | [IRR Model](./OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md) | `government-readiness/inter-rater-reliability.test.ts` | Harness built; **empirical study pending real reviewer corps** |
-| V8 | **Source-instrument traceability** — findings trace to a specific authority | [Source Instrument Traceability](./OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md) | `government-readiness/source-instrument-traceability.test.ts`; `…/source-instrument-authority.test.ts` | Seed catalogue **UNVERIFIED**; no citation defensible until validated |
+| V8 | **Source-instrument traceability** — findings trace to a candidate source-instrument record | [Source Instrument Traceability](./OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md) | `government-readiness/source-instrument-traceability.test.ts`; `…/source-instrument-authority.test.ts` | Seed catalogue **UNVERIFIED**; no citation defensible until validated |
 | V9 | **Catalogue governance** — who decides which legislation counts | [Source Instrument Traceability §6a](./OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md) | `government-readiness/catalogue-governance.test.ts` | — |
 | V10 | **Assessor governance** — who may conduct OCI/OCRA, and stay current | [Assessor Certification Standard](./OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md) | `government-readiness/assessor-governance.test.ts` | Levels/cadence are policy; real certifications pending corps |
 | V11 | **Security & data handling** — collected/not, residency, retention, AI boundary | [Security Brief](./SECURITY_AND_DATA_HANDLING_BRIEF.md) | k-anonymity K=5 enforced in `lib/oci/benchmark/aggregateIntelligence.ts` | — |
@@ -122,14 +122,60 @@ corporation, regulator) against the evidence above.
 
 ---
 
-## 3. The single honest limit that remains
+## 3. Open limits (what this binder does **not** yet establish)
 
-Every architectural gap is closed. The **one** thing no architecture can supply is
-**measured real-world inter-rater reliability data** and **external validation.**
-That is why the regulator archetype sits at 9.5/10, not 10 — the final half-point
-is earned in the field, with real assessors and a real calibration set, not in a
-document. This binder is honest about that boundary, which is itself a
-procurement asset.
+> **Authoritative status matrix:** [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md).
+> Where any wording below drifts from that matrix, the matrix wins.
+
+The principal architecture components are implemented and internally tested.
+The binder is deliberately **not** claiming that "every gap is closed" — the
+following operational, empirical, legal, and external-validation gaps remain
+open and must be closed before OCI/OCRA can be positioned as procurement-ready
+in a regulated public-sector context:
+
+1. **No empirically-measured inter-rater reliability.** The harness is
+   `INTERNALLY_TESTED`; no κ, ICC, or band-agreement value has been observed
+   against a real reviewer panel (G9).
+2. **No verified legal-instrument catalogue.** The seed catalogue is entirely
+   `UNVERIFIED`; no citation is defensible until real instruments,
+   jurisdictions, dates, clauses, and applicability logic are populated and
+   confirmed by qualified counsel (G7).
+3. **No certified assessor corps.** Zero certified assessors exist today; the
+   assessor governance standard is `PROPOSED`, not operational (G8).
+4. **No external security-control evidence.** Encryption, key management,
+   tenant isolation, MFA, SIEM retention, backup/restoration, incident
+   response, and residency are `PROPOSED` per-engagement, not independently
+   attested (S6–S13).
+5. **Free-text `Answer.note` is not PII-safe.** The scoring/finding/trace
+   *derived* structures exclude direct personal identifiers by schema, but the
+   source `Answer` still carries an optional free-text `note` field that can
+   contain personal, confidential, or protected content. This must be
+   reconciled with the security brief (S5).
+6. **No executed pilot.** Two priority archetypes are named (P1); no concrete
+   pilot has been scoped or run (P2).
+7. **No commercial/legal packet.** Liability, insurance, IP ownership, audit
+   rights, service levels, exit support, subprocessor register, appeal
+   mechanism, records-management, conflict-of-interest controls, and Indigenous
+   data-sovereignty posture are all `PROPOSED` (L1–L9).
+8. **No externally validated architecture review.** The OCI/OCRA
+   government-readiness architecture has **not** been reviewed by a party
+   independent of Nzila. The document historically titled *"Government
+   Validation Report V1"* has been renamed
+   [INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md](./INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md)
+   to clarify that it is an internal red-team pre-mortem — not an external
+   validation.
+
+Any single one of items 2, 3, 4, 6, or 8 is sufficient to preclude a
+*"procurement-grade"* claim. In combination, they define the honest current
+disposition:
+
+> **Candidate for structured public-sector validation.** The architecture is
+> designed for public-sector scrutiny and is entering external review; it is
+> not yet procurement-grade, government-grade, or defensible for autonomous
+> institutional action.
+
+The prior wording that framed IRR and external validation as *"the single
+remaining limit"* has been retired.
 
 ---
 
@@ -149,6 +195,10 @@ procurement asset.
 12. [Non-Regression Test Specification](./implementation/NON_REGRESSION_TEST_SPECIFICATION.md)
 13. [Richard Validation Packet](./richard-packet/RICHARD_VALIDATION_PACKET.md) · [Validation Workbook](./richard-packet/VALIDATION_WORKBOOK.md)
 
-> With these in hand, the validator is no longer reviewing a methodology. He is
-> reviewing a **governable assessment program** — one a Crown corporation,
-> ministry, regulator, or municipality can procure and defend.
+> With these in hand, an external reviewer is looking at a **candidate
+> assessment program under structured public-sector validation** — with an
+> explicit register of what is implemented, what is internally tested, and
+> what remains to be measured, attested, or piloted (see
+> [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md)). It is not yet a
+> program a Crown corporation, ministry, regulator, or municipality can
+> procure and defend without those open items closing first.

@@ -1,10 +1,24 @@
-# Government Validation Report — V1
+# Internal Pre-Mortem — Hypothetical Reviewer Challenges
 
-> **Status:** Blueprint — Architecture Review Only (no implementation)
-> **Validator:** Richard Sharpe (senior public-sector validator, simulated review)
-> **Protocol:** [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md)
-> **Disposition:** This is a *planning-stage* validation against the proposed
-> architecture, not a certification of a shipped system.
+> **⚠️ NOT FOR EXTERNAL DISTRIBUTION.** This is an *internal* pre-mortem
+> exercise, written by the Nzila team to stress-test the OCI/OCRA
+> government-readiness architecture against the questions a senior
+> public-sector reviewer would plausibly raise. **It does not represent the
+> views of, and has not been reviewed by, any external validator (named or
+> unnamed).**
+>
+> **Status:** Internal red-team exercise — architecture pre-mortem only.
+> **Author:** Nzila platform team (self-critique, not external validation).
+> **Protocol authored against:** [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md).
+> **Disposition:** Internal planning artifact against the *proposed*
+> architecture; not a certification of a shipped system and not an
+> endorsement by any external party.
+>
+> The verdicts below are the Nzila team's own self-assessed dispositions,
+> written in the voice of a hypothetical senior public-sector reviewer as a
+> disciplined red-team exercise. External validation is a separate,
+> not-yet-completed track — see
+> [external-send/](./richard-packet/external-send/).
 
 ---
 
@@ -12,7 +26,8 @@
 
 The OCI/OCRA government-readiness architecture is **fundamentally sound and
 defensible**, conditional on building the additive traceability/obligation/
-consequence/IRR layer it specifies. The validator's central conclusion mirrors the
+consequence/IRR layer it specifies. The hypothetical reviewer's central
+conclusion (as imagined by the Nzila team in this pre-mortem) mirrors the
 architecture decision: **the strength is the frozen, deterministic, fair core;
 government readiness is a legibility and evidence-governance problem, not a scoring
 problem.**
