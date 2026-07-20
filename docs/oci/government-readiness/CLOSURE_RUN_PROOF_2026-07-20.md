@@ -21,11 +21,12 @@ that a reviewer can reproduce from a clean checkout at
 | Item | Value | Evidence |
 |---|---|---|
 | Convention used across `docs/**` | `Sharpe` (with `e`) | 12 occurrences of `Sharpe`, 0 occurrences of `Sharp` (without `e`). |
-| Recipient salutation in external-send cover email | `Dear [Name]` (placeholder) | [`richard-packet/external-send/01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md) — greeting must be personalised by a human at send time. |
-| **Send-time gate** | Human personalisation of `[Name]` required before the packet is transmitted. |
+| Recipient (confirmed by human operator on 2026-07-20) | **Richard D. Sharpe**, Ontario Public Service | Existence confirmed by user; existence-verification method and Info-GO ministry/title lookup are the sender's responsibility and are not encoded here. |
+| Recipient salutation in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md) | `Dear Richard Sharpe,` (resolved from `Dear [Name],`) | Committed at HEAD; see §12 for remaining sender-side gates. |
 
-**Verdict:** convention consistent; final personalisation is a
-human-side operation and is intentionally not encoded in the packet.
+**Verdict:** convention consistent; recipient name resolved to
+`Richard Sharpe`; further identity verification (ministry, title,
+email-address ownership) is a sender-side operation.
 
 ---
 
@@ -270,7 +271,7 @@ Highlights of the last-mile items closed in this run:
 
 ## 12. Final send / no-send verdict
 
-**Verdict: `SEND` — conditional on two human-side gates only.**
+**Verdict: `SEND` — conditional on the remaining sender-side gates in §12.**
 
 Automated gates: **all green.**
 
@@ -285,16 +286,15 @@ Automated gates: **all green.**
   prohibition context.
 - Evidence manifest binds to real SHAs and the real canonical hash.
 
-**Human-side gates before transmission:**
+**Human-side gates before transmission** — status at HEAD:
 
-1. **Personalise `[Name]` in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md)** —
-   agent does not know the recipient's given name.
-2. **Confirm surname spelling with the recipient.** Repository
-   convention is `Sharpe` (with `e`) — this proof file does not attest
-   the recipient's own spelling.
+1. ~~Personalise `[Name]` in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md)~~ — **RESOLVED**: greeting now reads `Dear Richard Sharpe,`.
+2. ~~Confirm surname spelling with the recipient~~ — **RESOLVED**: repository convention `Sharpe` (with `e`) matches the name confirmed by the human operator.
+3. **Sender identity block** in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md) — the placeholders `\[Sender\]` and `\[Role, Nzila\]` still require the sender to fill in their own name and role.
+4. **Recipient email address ownership.** The agent has *not* verified the recipient's OPS email address (`@ontario.ca`) or Info-GO ministry/title. This verification is the sender's responsibility and should be logged out-of-band before the message is transmitted.
 
-Once both human gates are satisfied, the packet is send-ready at
-Final send-time SHA `3e362bcd2cc81a08a90305e35f75f0b08ea464ca`.
+Once gates 3 and 4 are satisfied by the sender, the packet is
+send-ready at Final send-time SHA `3e362bcd2cc81a08a90305e35f75f0b08ea464ca`.
 
 ---
 

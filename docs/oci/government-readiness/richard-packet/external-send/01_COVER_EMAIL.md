@@ -5,7 +5,7 @@
 **Subject:** Request for independent public-sector judgment on an
 institutional-continuity assessment architecture
 
-Dear \[Name\],
+Dear Richard Sharpe,
 
 I'm writing to ask for something narrow and specific: your **independent
 judgment** — not your endorsement — on the shape of a public-sector
