@@ -35,6 +35,22 @@ export const SCORING_VERSION = '1.0.0'
 
 const RISK_DIMENSIONS: Set<DimensionId> = new Set(['governance_fragility', 'trust_debt'])
 
+/**
+ * Public-sector kill switch for the free-text `note` field on `Answer`.
+ *
+ * When `OCI_PUBLIC_SECTOR_MODE=1` (or `=true`, case-insensitive) is set in the
+ * process environment, `buildAnswer` throws if a non-empty `note` is supplied.
+ * This turns the documented "callers must disable free text" posture in
+ * `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1
+ * into an enforced runtime control at the single source-of-entry for answers.
+ */
+export function isPublicSectorModeEnabled(): boolean {
+  const raw = process.env.OCI_PUBLIC_SECTOR_MODE
+  if (raw === undefined) return false
+  const normalized = raw.trim().toLowerCase()
+  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on'
+}
+
 export interface ComputeProfileInput {
   assessmentId: string
   answers: Answer[]
@@ -63,8 +79,24 @@ export interface ComputeProfileInput {
  *   is not used by any scoring, obligation, consequence, confidence, or
  *   traceability logic in this package and is not surfaced by the government-
  *   readiness layer.
+ *
+ * @throws {Error}
+ *   When `OCI_PUBLIC_SECTOR_MODE=1` (or `=true`) is set in the process
+ *   environment and a non-empty `note` is supplied. This is the deployment-
+ *   time kill switch that turns the documented "callers must disable" posture
+ *   into a hard runtime control for public-sector engagements. Set the flag
+ *   at process start (e.g. Container App env var) to guarantee that no
+ *   free-text sneaks in through this call site regardless of caller
+ *   discipline.
  */
 export function buildAnswer(question: Question, rawValue: string | number, note?: string): Answer {
+  if (note !== undefined && note.trim() !== '' && isPublicSectorModeEnabled()) {
+    throw new Error(
+      'buildAnswer: free-text `note` is not permitted when OCI_PUBLIC_SECTOR_MODE is enabled. ' +
+        'Disable note capture, ephemeralize the field, or route it to a separately-secured evidence repository. ' +
+        'See docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md §2.1.',
+    )
+  }
   return {
     questionId: question.id,
     questionVersion: QUESTION_BANK_VERSION,

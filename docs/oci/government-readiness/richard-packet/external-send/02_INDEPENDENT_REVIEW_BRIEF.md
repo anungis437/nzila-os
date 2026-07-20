@@ -58,7 +58,7 @@ Five properties define the shape:
    byte-identical and SHA-256-identical across runs. (The full scoring
    outputs are *not* byte-identical because they contain `scoredAt`
    timestamps — see the honest limit in
-   [`../../IMPLEMENTATION_STATUS.md` §C3](../../IMPLEMENTATION_STATUS.md#1-core-scoring--determinism).)
+   [`../../IMPLEMENTATION_STATUS.md` §C3](../../IMPLEMENTATION_STATUS.md#1-core-scoring-determinism).)
 2. **Additive, read-only Government-Readiness Layer.** Every property
    below sits *above* the scoring core and never mutates it or changes any
    score. Proven by a deep-clone non-regression test.
@@ -109,7 +109,7 @@ in CI against the implementation. `INTERNALLY_TESTED` is **not** validation.
 
 - Deterministic 5-dimension scoring engine + maturity band resolver.
 - Deterministic canonical scoring payload with SHA-256 hash
-  ([test](../../../../apps/union-eyes/lib/icra/__tests__/government-readiness/canonical-scoring-payload.test.ts)).
+  ([test](../../../../../apps/union-eyes/lib/icra/__tests__/government-readiness/canonical-scoring-payload.test.ts)).
 - Fairness invariant: context changes labels, never numbers.
 - Additive non-regression: the government-readiness layer never mutates the
   scoring trace and never changes any score.

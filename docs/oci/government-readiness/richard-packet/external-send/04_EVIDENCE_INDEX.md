@@ -62,9 +62,9 @@
 ## Tests
 
 - Government-readiness suite:
-  [`apps/union-eyes/lib/icra/__tests__/government-readiness/`](../../../../apps/union-eyes/lib/icra/__tests__/government-readiness/).
+  [`apps/union-eyes/lib/icra/__tests__/government-readiness/`](../../../../../apps/union-eyes/lib/icra/__tests__/government-readiness/).
 - `@nzila/oci-confidence` package tests:
-  [`packages/oci-confidence/`](../../../../packages/oci-confidence/).
+  [`packages/oci-confidence/`](../../../../../packages/oci-confidence/).
 
 ## Internal-only (**not for external distribution**)
 
