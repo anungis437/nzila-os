@@ -55,5 +55,6 @@ honest read of whether this architecture, as designed and as honestly
 qualified, is a defensible foundation for public-sector use.
 
 With respect,
-\[Sender\]
-\[Role, Nzila\]
+Aubert Nungisa
+Founder, Product, Technology & Commercialization
+Nzila Ventures

@@ -290,11 +290,11 @@ Automated gates: **all green.**
 
 1. ~~Personalise `[Name]` in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md)~~ — **RESOLVED**: greeting now reads `Dear Richard Sharpe,`.
 2. ~~Confirm surname spelling with the recipient~~ — **RESOLVED**: repository convention `Sharpe` (with `e`) matches the name confirmed by the human operator.
-3. **Sender identity block** in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md) — the placeholders `\[Sender\]` and `\[Role, Nzila\]` still require the sender to fill in their own name and role.
+3. ~~Sender identity block in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md)~~ — **RESOLVED**: signature now reads `Aubert Nungisa` / `Founder, Product, Technology & Commercialization` / `Nzila Ventures`.
 4. **Recipient email address ownership.** The agent has *not* verified the recipient's OPS email address (`@ontario.ca`) or Info-GO ministry/title. This verification is the sender's responsibility and should be logged out-of-band before the message is transmitted.
 
-Once gates 3 and 4 are satisfied by the sender, the packet is
-send-ready at Final send-time SHA `3e362bcd2cc81a08a90305e35f75f0b08ea464ca`.
+Once gate 4 is satisfied by the sender, the packet is send-ready at
+Final send-time SHA `3e362bcd2cc81a08a90305e35f75f0b08ea464ca`.
 
 ---
 
