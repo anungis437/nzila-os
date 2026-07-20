@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-19T11:34:31.100Z",
-  "filesScanned": 2179,
-  "totalFindings": 2720,
+  "generatedAt": "2026-07-20T21:44:08.570Z",
+  "filesScanned": 2187,
+  "totalFindings": 2722,
   "findingsByRule": {
-    "stale-reference": 1032,
+    "stale-reference": 1033,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1494,
+    "naming-inconsistency": 1495,
     "stale-date": 15,
     "missing-package-readme": 111
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1211,
-    "info": 1509
+    "warning": 1212,
+    "info": 1510
   },
   "findings": [
     {
@@ -5992,6 +5992,13 @@
       "file": "docs/INDEX.md",
       "line": 175,
       "message": "Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md",
+      "line": 266,
+      "message": "Possible broken link: [`canonicalScoringPayload.ts`](../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts)"
     },
     {
       "rule": "stale-package-ref",
@@ -15734,7 +15741,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 972,
+      "line": 973,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16692,6 +16699,13 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/oci/government-readiness/EVIDENCE_MANIFEST.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md",
       "line": 10,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -16707,7 +16721,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/oci/OCI_METHOD.md",
-      "line": 321,
+      "line": 327,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16924,14 +16938,14 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/clear-method-canonical.md",
-      "line": 112,
+      "line": 119,
       "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/clear-method-canonical.md",
-      "line": 379,
+      "line": 386,
       "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
     },
     {
@@ -18178,105 +18192,105 @@
       "severity": "info",
       "file": "AWS_ZONGA_SETUP.md",
       "line": 432,
-      "message": "Document date \"2026-04-19\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-19\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
       "line": 343,
-      "message": "Document date \"2026-04-08\" is 102 days old — may be stale"
+      "message": "Document date \"2026-04-08\" is 103 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/ownership-registry.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md",
       "line": 3,
-      "message": "Document date \"2026-04-13\" is 97 days old — may be stale"
+      "message": "Document date \"2026-04-13\" is 98 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md",
       "line": 10,
-      "message": "Document date \"2026-04-14\" is 96 days old — may be stale"
+      "message": "Document date \"2026-04-14\" is 97 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/buyer-faq.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/deployment-models.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/integration-readiness-matrix.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/pilot-readiness-checklist.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/product-capability-matrix.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/sla-support-model.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/INDEX.md",
       "line": 179,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",

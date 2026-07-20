@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-19T11:34:38.320Z",
-  "overallScore": 7.8,
+  "generatedAt": "2026-07-20T21:44:13.200Z",
+  "overallScore": 7.9,
   "categories": {
     "runtime_proof": {
-      "score": 8,
+      "score": 9,
       "findings": [
-        "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+        "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
       ]
     },
     "duplication": {
@@ -27,8 +27,10 @@
       "findings": []
     },
     "docs_truth": {
-      "score": 9,
-      "findings": []
+      "score": 8.9,
+      "findings": [
+        "1 indexed documents are stale by repo-mtime policy (>90 days)."
+      ]
     },
     "naming_consistency": {
       "score": 10,
@@ -63,7 +65,7 @@
   "improvementBacklog": [
     {
       "category": "runtime_proof",
-      "finding": "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+      "finding": "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
     },
     {
       "category": "duplication",
@@ -80,6 +82,10 @@
     {
       "category": "script_sprawl",
       "finding": "Root command surface is still dense and benefits from continued pruning."
+    },
+    {
+      "category": "docs_truth",
+      "finding": "1 indexed documents are stale by repo-mtime policy (>90 days)."
     },
     {
       "category": "ci_efficiency",

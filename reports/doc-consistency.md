@@ -1,28 +1,28 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-07-19T11:34:31.100Z
+> Generated: 2026-07-20T21:44:08.570Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2179 |
-| Total Findings | 2720 |
+| Files Scanned | 2187 |
+| Total Findings | 2722 |
 | Errors | 0 |
-| Warnings | 1211 |
-| Info | 1509 |
+| Warnings | 1212 |
+| Info | 1510 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1494 |
-| stale-reference | 1032 |
+| naming-inconsistency | 1495 |
+| stale-reference | 1033 |
 | missing-package-readme | 111 |
 | stale-package-ref | 68 |
 | stale-date | 15 |
 
-## stale-reference (1032)
+## stale-reference (1033)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -814,6 +814,7 @@
 - 🟡 `docs/INDEX.md:167` — Possible broken link: [platform/COVERAGE_REPORTING.md](platform/COVERAGE_REPORTING.md)
 - 🟡 `docs/INDEX.md:174` — Possible broken link: [proof-center/union-eyes-proof.md](proof-center/union-eyes-proof.md)
 - 🟡 `docs/INDEX.md:175` — Possible broken link: [proof-center/flow-proof.md](proof-center/flow-proof.md)
+- 🟡 `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md:266` — Possible broken link: [`canonicalScoringPayload.ts`](../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts)
 - 🟡 `docs/README.md:3` — Possible broken link: [archive/iterations](archive/iterations/)
 - 🟡 `docs/README.md:18` — Possible broken link: [Union Eyes](buyers/union-eyes-buyer-pack.md)
 - 🟡 `docs/README.md:18` — Possible broken link: [Flow](buyers/flow-buyer-pack.md)
@@ -1128,7 +1129,7 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 
-## naming-inconsistency (1494)
+## naming-inconsistency (1495)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2275,7 +2276,7 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:972` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:973` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:164` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:123` — "evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:153` — "Evidence bundle" should be "evidence pack" (evidence artifact)
@@ -2412,9 +2413,10 @@
 - ℹ️ `docs/nzila-tier2-hardening/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md:62` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier3-operating-infrastructure/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/government-readiness/EVIDENCE_MANIFEST.md:20` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md:118` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/OCI_METHOD.md:321` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/OCI_METHOD.md:327` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2445,8 +2447,8 @@
 - ℹ️ `docs/platform/portfolio-matrix.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/procurement-pack.md:4` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/proof-center/portfolio-proof-index.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/public-service/clear-method-canonical.md:112` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/public-service/clear-method-canonical.md:379` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/public-service/clear-method-canonical.md:119` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/public-service/clear-method-canonical.md:386` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/clear-method-one-page-summary.md:41` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:178` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/public-service/sage-workspace-canonical.md:213` — "evidence package" should be "evidence pack" (evidence artifact)
@@ -2627,21 +2629,21 @@
 
 ## stale-date (15)
 
-- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 91 days old — may be stale
-- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 102 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 90 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 90 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 90 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 90 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 97 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 96 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 93 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 93 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 93 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 93 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 93 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 93 days old — may be stale
-- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 90 days old — may be stale
+- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 92 days old — may be stale
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 103 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 91 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 91 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 91 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 91 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 98 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 97 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 94 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 94 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 94 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 94 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 94 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 94 days old — may be stale
+- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 91 days old — may be stale
 
 ## missing-package-readme (111)
 
