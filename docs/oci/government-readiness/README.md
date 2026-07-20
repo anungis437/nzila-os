@@ -51,7 +51,8 @@ external-validation gates recorded in
 | [Consequence Model](./OCI_OCRA_CONSEQUENCE_MODEL.md) | 7 | Six consequence classes; "avoided consequences" |
 | [Benchmark Governance](./OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md) | 8 | Cohort floors; safe vs unsafe claims — **publication guard implemented** (suppress-by-default cohort/form/honesty gate) |
 | [Inter-Rater Reliability](./OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md) | 9 | IRR strategy, calibration — **measurement harness implemented** (κ/ICC/band-agreement + study verdicts), empirical study pending data |
-| [Procurement Readiness](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md) | 10 | Five-archetype readiness, gaps, roadmap || [Source Instrument Traceability](./OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md) | Phase G | Finding → Obligation → **Source Instrument → Citation**; evidence-gated, UNVERIFIED-by-default, validator-promoted; **+ catalogue governance** (lifecycle, role-gated versioning, jurisdiction selection, conflict handling) |
+| [Procurement Readiness](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md) | 10 | Five-archetype readiness, gaps, roadmap |
+| [Source Instrument Traceability](./OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md) | Phase G | Finding → Obligation → **Source Instrument → Citation**; evidence-gated, UNVERIFIED-by-default, validator-promoted; **+ catalogue governance** (lifecycle, role-gated versioning, jurisdiction selection, conflict handling) |
 | [Assessor Certification & Governance Standard](./OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md) | Gap 2 | Five assessor levels, calibration gate (reuses IRR thresholds), recertification cadence, suspend-by-default standing |
 | [Validation Binder](./OCI_OCRA_VALIDATION_BINDER.md) | Gap 3 | Single assembled evidence index — every claim mapped to its spec + executable test suite |
 | [Sharpe Validation Protocol](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md) | 11 | Senior public-sector validation protocol |
