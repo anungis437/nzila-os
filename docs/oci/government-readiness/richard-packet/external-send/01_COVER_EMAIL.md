@@ -2,6 +2,7 @@
 
 > **Template.** Personalise before sending. Send to a single addressee.
 
+**To:** Richard Sharpe &lt;richard.sharpe@ontario.ca&gt;
 **Subject:** Request for independent public-sector judgment on an
 institutional-continuity assessment architecture
 

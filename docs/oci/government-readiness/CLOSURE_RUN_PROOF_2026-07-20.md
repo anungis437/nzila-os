@@ -271,7 +271,7 @@ Highlights of the last-mile items closed in this run:
 
 ## 12. Final send / no-send verdict
 
-**Verdict: `SEND` — conditional on the remaining sender-side gates in §12.**
+**Verdict: `SEND-READY` — all four human-side gates in §12 are RESOLVED. Mail-client transmission remains a human operation.**
 
 Automated gates: **all green.**
 
@@ -291,10 +291,26 @@ Automated gates: **all green.**
 1. ~~Personalise `[Name]` in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md)~~ — **RESOLVED**: greeting now reads `Dear Richard Sharpe,`.
 2. ~~Confirm surname spelling with the recipient~~ — **RESOLVED**: repository convention `Sharpe` (with `e`) matches the name confirmed by the human operator.
 3. ~~Sender identity block in [`01_COVER_EMAIL.md`](./richard-packet/external-send/01_COVER_EMAIL.md)~~ — **RESOLVED**: signature now reads `Aubert Nungisa` / `Founder, Product, Technology & Commercialization` / `Nzila Ventures`.
-4. **Recipient email address ownership.** The agent has *not* verified the recipient's OPS email address (`@ontario.ca`) or Info-GO ministry/title. This verification is the sender's responsibility and should be logged out-of-band before the message is transmitted.
+4. ~~Recipient email address ownership & Info-GO ministry/title verification~~ — **RESOLVED** by the human operator on 2026-07-20 via the Ontario Public Service Info-GO directory (<https://www.infogo.gov.on.ca/>):
 
-Once gate 4 is satisfied by the sender, the packet is send-ready at
-Final send-time SHA `3e362bcd2cc81a08a90305e35f75f0b08ea464ca`.
+   | Field | Value |
+   |---|---|
+   | Full name | Richard Sharpe |
+   | Title | Director |
+   | Ministry / division path | Treasury Board Secretariat → Centre for People, Culture and Talent → People and Culture Division → Black Equity Branch |
+   | Work email | `richard.sharpe@ontario.ca` |
+   | Work phone | 437-239-6481 |
+   | Primary / mailing address | 2, 315 Front St W, Toronto, Ontario, M7A 0B8 |
+   | Info-GO record last updated | 2022-12-01 |
+   | Verified by | Aubert Nungisa (human operator) |
+   | Verified on | 2026-07-20 |
+   | Method | Info-GO directory lookup, keyword `richard d sharpe`, 4 org affiliations returned |
+
+   **Freshness caveat.** The Info-GO record was last updated 2022-12-01 (≈ 3.6 years before send date). Info-GO is the authoritative OPS directory, but role currency should still be confirmed inside the opening sentences of any follow-up if the recipient replies with a different title, ministry, or division.
+
+**All four human-side gates are RESOLVED.** The packet is send-ready
+at Final send-time SHA `3e362bcd2cc81a08a90305e35f75f0b08ea464ca` —
+with the mail-client action itself remaining a human operation.
 
 ---
 
