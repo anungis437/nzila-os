@@ -11,13 +11,14 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@nzila/os-core/telemetry', () => ({ createLogger: m.createLogger }));
+vi.mock('@/lib/dashboard/role-experience', () => ({ isCupe4373DemoRuntime: () => true }));
 vi.mock('@/lib/demo/server/cupe4373-governance', () => ({
   logCaseDecision: m.logCaseDecision,
   mapUrgencyToPriority: m.mapUrgencyToPriority,
 }));
 
 async function loadRoute() {
-  return import('../cases/[caseId]/decision/route');
+  return import('../cases/[caseId]/(demo)/decision/route');
 }
 
 describe('cases/[caseId]/decision route', () => {

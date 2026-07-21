@@ -72,19 +72,25 @@ describe('CUPE4373 demo hygiene', () => {
 
   it('keeps CUPE4373 dashboard routes implemented (page files exist)', () => {
     const required = [
+      // Root dashboard + communications hub are mixed-mode (executive + demo
+      // via dynamic import), so they remain at the flat path.
       'app/[locale]/dashboard/page.tsx',
-      'app/[locale]/dashboard/inbox/page.tsx',
-      'app/[locale]/dashboard/priorities/page.tsx',
-      'app/[locale]/dashboard/cases/page.tsx',
-      'app/[locale]/dashboard/grievances/page.tsx',
-      'app/[locale]/dashboard/documents/page.tsx',
-      'app/[locale]/dashboard/members/page.tsx',
       'app/[locale]/dashboard/communications/page.tsx',
-      'app/[locale]/dashboard/governance/page.tsx',
+      // All other CUPE4373 demo dashboard pages live under the (demo) route
+      // group with a server-side notFound() gate. Route groups do not affect
+      // the URL — /dashboard/inbox etc. are still the URLs, but the physical
+      // file is at (demo)/inbox/page.tsx.
+      'app/[locale]/dashboard/(demo)/inbox/page.tsx',
+      'app/[locale]/dashboard/(demo)/priorities/page.tsx',
+      'app/[locale]/dashboard/(demo)/cases/page.tsx',
+      'app/[locale]/dashboard/(demo)/grievances/page.tsx',
+      'app/[locale]/dashboard/(demo)/documents/page.tsx',
+      'app/[locale]/dashboard/(demo)/members/page.tsx',
+      'app/[locale]/dashboard/(demo)/governance/page.tsx',
       'app/[locale]/dashboard/reports/page.tsx',
-      'app/[locale]/dashboard/agreements/page.tsx',
-      'app/[locale]/dashboard/calendar/page.tsx',
-      'app/[locale]/dashboard/work/page.tsx',
+      'app/[locale]/dashboard/(demo)/agreements/page.tsx',
+      'app/[locale]/dashboard/(demo)/calendar/page.tsx',
+      'app/[locale]/dashboard/(demo)/work/page.tsx',
     ]
     const missing = required.filter((rel) => !fs.existsSync(path.join(APP_ROOT, rel)))
     expect(missing, `Missing demo route files: ${missing.join(', ')}`).toEqual([])

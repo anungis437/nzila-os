@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/demo/server/cupe4373-cases-repo', () => ({ getDemoCaseFromDb: m.getDemoCaseFromDb }));
 vi.mock('@/lib/demo/server/cupe4373-governance', () => ({ listDecisionsForCase: m.listDecisionsForCase }));
+vi.mock('@/lib/dashboard/role-experience', () => ({ isCupe4373DemoRuntime: () => true }));
 vi.mock('node:fs/promises', () => ({
   readdir: m.readdir,
   stat: m.stat,
@@ -19,7 +20,7 @@ vi.mock('node:fs/promises', () => ({
 }));
 
 async function loadRoute() {
-  return import('../cases/[caseId]/proof-pack/route');
+  return import('../cases/[caseId]/(demo)/proof-pack/route');
 }
 
 describe('cases/[caseId]/proof-pack route', () => {
