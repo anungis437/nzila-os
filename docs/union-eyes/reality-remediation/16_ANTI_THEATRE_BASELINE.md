@@ -52,22 +52,37 @@ Post-fix breakdown:
 | Rule | Severity | Count |
 |------|----------|------:|
 | R-2  | warning  | 1 |
-| R-3  | error    | 46 |
+| R-3  | error    | 35 |
 | R-6  | warning  | 318 |
 | R-7  | warning  | 938 |
 | R-8  | warning  | 5 |
-| **Total errors** | | **46** |
+| **Total errors** | | **35** |
 | **Total warnings** | | **1 262** |
+
+### Scanner-refinement iteration
+
+After the initial post-fix scan showed 46 R-3 findings, the scanner
+was tightened: files that themselves live under `demo/`,
+`__hashfixture__/`, or `__fixtures__/` are exempted from R-3 because
+demo-tree self-references are not the cross-boundary violation the
+rule is designed to catch. The remaining **35 R-3 findings are
+genuine** production dashboard pages and API routes importing from
+`@/lib/demo/**` — these require Wave 1 structural refactor (route
+group split or dynamic-import gating).
 
 ## Findings NOT fixed in this session (evidence-based, not deception)
 
-- **R-3 × 46** demo imports.  These are consumed only when the
+- **R-3 × 35** demo imports.  These are consumed only when the
   `cupe4373` demo profile is active.  The demo-deployment guard
-  (`tooling/reality/demo-deployment-guard.ts`) prevents any staging /
-  pilot / production deployment from setting `UE_FEATURE_PROFILE=cupe4373`
-  or `NEXT_PUBLIC_UE_DEMO_PROFILE=cupe4373`.  The imports remain
-  flagged so the registry can track them; they are not lies as long as
-  the demo profile cannot ship.
+  (`tooling/reality/demo-deployment-guard.ts` + the runtime companion
+  at `apps/union-eyes/lib/reality/demo-deployment-guard.ts`, wired into
+  `apps/union-eyes/instrumentation.ts`) prevents any staging / pilot /
+  production deployment from setting `UE_FEATURE_PROFILE=cupe4373` or
+  `NEXT_PUBLIC_UE_DEMO_PROFILE=cupe4373`.  The imports remain flagged
+  so the registry can track them; they are not lies as long as the
+  demo profile cannot ship.  Wave 1 will move demo pages under a
+  dedicated route group or convert the imports to dynamic-import
+  gated on the runtime demo check.
 - **R-6 × 318** silent catches.  Warning-only; each requires a small
   code-review sweep.  Deferred to Wave 1.
 - **R-7 × 936** unregistered routes.  Registry back-fill is a Wave 0

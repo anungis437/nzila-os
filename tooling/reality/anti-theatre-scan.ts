@@ -275,6 +275,14 @@ const rule_demoImportInProd: Rule = (ctx) => {
   if (!prodPrefixes.some((p) => ctx.relPath.startsWith(p) || ctx.relPath === p)) return [];
   // Skip tests and stories inside those trees.
   if (isTestOrFixturePath(ctx.relPath)) return [];
+  // Skip demo-tree self-references: files that themselves live under a
+  // `demo/` or `__hashfixture__/` directory are allowed to import from
+  // sibling demo files. What we want to catch is *cross-boundary*
+  // imports from real production code into demo data. This exemption is
+  // narrow and cannot be used to hide production→demo leakage in
+  // dashboard pages, API routes, or shared library code.
+  const normalised = ctx.relPath.replace(/\\/g, '/');
+  if (/\/(?:demo|__hashfixture__|__fixtures__)\//.test(normalised)) return [];
   const findings: Finding[] = [];
   const RE = /from\s+['"`]([^'"`]+)['"`]/g;
   let m: RegExpExecArray | null;

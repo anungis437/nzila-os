@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T01:21:17.942Z",
-  "scannedFiles": 4840,
+  "generatedAt": "2026-07-21T01:30:07.247Z",
+  "scannedFiles": 4844,
   "rulesRun": [
     "R-1",
     "R-2",
@@ -12,7 +12,7 @@
     "R-8"
   ],
   "totals": {
-    "errors": 46,
+    "errors": 35,
     "warnings": 1262
   },
   "findings": [
@@ -302,94 +302,6 @@
       "line": 25,
       "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard.",
       "evidence": "@/lib/demo/server/cupe4373-governance",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/cupe4373-cognition-core.ts",
-      "line": 9,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/cupe4373-lifecycle.ts",
-      "line": 12,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/cupe4373-member-view.ts",
-      "line": 22,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/cupe4373-members.ts",
-      "line": 1,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-members-console`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-members-console",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/server/cupe4373-cases-repo.ts",
-      "line": 29,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/server/cupe4373-cognition.ts",
-      "line": 14,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/server/cupe4373-cognition.ts",
-      "line": 25,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-cognition-core`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-cognition-core",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/server/cupe4373-cognition.ts",
-      "line": 30,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-cognition-core`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-cognition-core",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/server/cupe4373-cognition.ts",
-      "line": 34,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-cognition-core`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-cognition-core",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/demo/server/cupe4373-retention.ts",
-      "line": 21,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/lib/icra/traceability/__hashfixture__/computeIllustrativeHash.ts",
-      "line": 12,
-      "message": "Production code imports from a demo/fixtures path: `../../../integration/__fixtures__/ociFixtures`. Move behind a demo-profile guard.",
-      "evidence": "../../../integration/__fixtures__/ociFixtures",
       "severity": "error"
     },
     {
@@ -2211,7 +2123,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/instrumentation.ts",
-      "line": 26,
+      "line": 64,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -2219,7 +2131,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/instrumentation.ts",
-      "line": 34,
+      "line": 72,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
