@@ -1,0 +1,14 @@
+{
+  "app": {
+    "name": "Union Eyes Demo",
+    "tagline": "Synthetic-data demonstration environment"
+  },
+  "banner": {
+    "synthetic": "SYNTHETIC DATA — this environment does not contain real member records. External integrations are disabled.",
+    "target": "Environment: demo"
+  },
+  "dashboard": {
+    "title": "Demo dashboard",
+    "welcome": "Welcome to the CUPE 4373 demonstration workspace."
+  }
+}

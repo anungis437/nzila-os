@@ -2958,6 +2958,12 @@ importers:
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       dotenv:
         specifier: ^17.3.1
         version: 17.4.0
@@ -2982,6 +2988,12 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@4.2.2)
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -2989,6 +3001,9 @@ importers:
       '@nzila/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.2.2
       '@types/archiver':
         specifier: ^6.0.3
         version: 6.0.4
@@ -3001,6 +3016,9 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
+      tailwindcss:
+        specifier: ^4
+        version: 4.2.2
       typescript:
         specifier: ^6
         version: 6.0.3

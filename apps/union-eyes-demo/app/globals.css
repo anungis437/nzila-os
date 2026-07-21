@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/* ═══════════════════════════════════════════════════════
+   Union Eyes Demo — minimal shadcn/Radix token surface.
+   Kept intentionally small: the demo does not ship the full
+   operational brand system. If you need to add tokens here,
+   confirm they are demo-only and never re-exported from
+   packages/union-eyes-ui.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --background: 40 24% 97%;
+  --foreground: 210 33% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 9%;
+  --primary: 221 83% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 9%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;
+  --radius: 0.5rem;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
