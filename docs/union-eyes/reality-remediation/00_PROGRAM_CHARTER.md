@@ -1,8 +1,30 @@
 # Union Eyes — Reality & World-Class Remediation Programme
 
-**Status:** Wave 0 in progress (P0 truth fixes landing).
+**Programme status:** `PARTIALLY_IMPLEMENTED` — Wave 0 containment landed, verification incomplete.
+**Wave 0 status:** `PARTIALLY_IMPLEMENTED` (see §Wave 0 open items below).
+**Wave 1+ status:** `NOT_STARTED`.
 **Branch:** `fix/union-eyes-reality-remediation`
 **Owner:** Platform Reliability & Reality.
+
+Only the evidence-backed states below may be used in this programme:
+`NOT_STARTED`, `IN_PROGRESS`, `PARTIALLY_IMPLEMENTED`, `IMPLEMENTED_NOT_PROVEN`,
+`PROVEN_IN_STAGING`, `BLOCKED`, `CLOSED`. The words "complete", "green",
+"ready", or "delivered" MUST NOT be used unless every listed proof is on file.
+
+## Wave 0 open items (blocking Wave 0 → `IMPLEMENTED_NOT_PROVEN`)
+
+- Repository-wide capability inventory (registry currently a seed of 8 entries).
+- Claim-to-runtime inventory for every claim in `docs/` and `readme` surface.
+- Independent verification of every original adversarial finding against
+  current code (25+ findings — see `04_FINDINGS_AND_DISPOSITIONS.md`).
+- Anti-theatre CI gate wired into `pnpm` and CI workflow.
+- Demo-profile deployment guard enforced at build, deploy, and runtime layers.
+- Runtime capability-state enforcement (routes must consult the registry).
+- Full baseline validation matrix (not just three targeted test files).
+- Infrastructure and dependency inventory (Container App, DB, Redis, Django,
+  ClamAV, SMTP/SMS/payment/monitoring providers, backups).
+- Current staging configuration attestation (see `15_STAGING_ATTESTATION.md`).
+- Readiness-document reconciliation against the capability registry.
 
 ## Purpose
 
@@ -38,6 +60,10 @@ The single machine-readable source of truth is
    capabilities.** Enforced by CI against the capability registry.
 
 ## Wave structure
+
+Waves are analytic groupings — they are NOT commit or PR boundaries.
+An item labelled "Wave N" may land in the same branch as Wave 0 work.
+The programme continues until every P0 finding is `CLOSED` or `BLOCKED`.
 
 | Wave | Focus                                                                                     |
 |------|-------------------------------------------------------------------------------------------|
