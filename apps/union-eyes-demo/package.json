@@ -1,0 +1,12 @@
+{
+  "name": "@nzila/union-eyes-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Union Eyes CUPE 4373 demo artifact — separately-built app that ships demo pages, fixture data, and fixture-backed API handlers. See docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md.",
+  "scripts": {
+    "typecheck": "echo 'TODO: wire per-app tsc — see 20_SEMANTIC_ISOLATION.md'",
+    "build": "echo 'TODO: wire next build — see 20_SEMANTIC_ISOLATION.md'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

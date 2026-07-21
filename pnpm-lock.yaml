@@ -2941,6 +2941,8 @@ importers:
         specifier: ^3.25.1
         version: 3.25.2(zod@3.25.76)
 
+  apps/union-eyes-demo: {}
+
   apps/union-eyes/services/financial-service:
     dependencies:
       '@supabase/supabase-js':

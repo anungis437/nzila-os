@@ -70,100 +70,67 @@ genuine** production dashboard pages and API routes importing from
 `@/lib/demo/**` — these require Wave 1 structural refactor (route
 group split or dynamic-import gating).
 
-### Wave-0 R-3 remediation — SCANNER-CLEAN, NOT SEMANTICALLY ISOLATED
+### Wave-0 R-3 remediation — STAGE 1 SEMANTIC ISOLATION COMPLETE
 
-**Result: `R-3 = 0` after Wave-0 continuation on 2026-07-20, BUT
-this is scanner cleanliness, not proven semantic demo isolation.**
+**Result: `R-3 = 0` as of the §20 physical-relocation commit, and
+this zero-count now reflects artifact-level separation, not regex
+compliance.** See `20_SEMANTIC_ISOLATION.md` for the full record.
 
-The zero-count was achieved by (a) exempting `(demo)` route groups
-from the R-3 regex and (b) converting mixed-mode pages to dynamic
-imports that fall outside the scanner's static-import pattern. Both
-techniques leave the demo modules physically present in the operational
-`apps/union-eyes` package. They can still ship in the operational
-image and be reached through environment-controlled branches or,
-theoretically, through a compromised runtime gate. The public URL is
-unchanged: `/dashboard/inbox` etc. still resolve; correctness depends
-entirely on the `isCupe4373DemoRuntime()` runtime gate and the
-`notFound()` layout returning the right answer at request time.
+Stage 1 (this commit) shipped:
 
-**Do NOT interpret R-3 = 0 as demo-deployment enforcement, deployed
-demo isolation, or completion of Wave 0.** The verdict is
-`STATIC DEMO IMPORT FINDINGS REDUCED; SEMANTIC DEMO ISOLATION NOT
-PROVEN` per `19_AUTHORIZATION_VIOLATION.md` and the Wave 0
-continuation prompt.
+1. **Scanner rewrite** — R-3 rule no longer exempts `(demo)` route
+   groups or `/demo/` path fragments. It exempts only files whose
+   repository path starts with `apps/union-eyes-demo/` (plus test
+   `__hashfixture__/` and `__fixtures__/` prefixes). The rule now
+   inspects static `from '...'`, bare static `import '...'`, dynamic
+   `import('...')` (including `await import(...)`), and CJS
+   `require('...')`, closing the dynamic-import loophole that the
+   prior R-3 = 0 depended on.
+2. **Physical relocation** — a new workspace member
+   `apps/union-eyes-demo/` was created, and every demo file
+   previously located in `apps/union-eyes/` was `git mv`d into it:
+   dashboard `(demo)` route group (14 files), API `(demo)` route
+   group (2 files), `lib/demo/**` (10 files including tests),
+   `components/demo/**` (17 files), the two demo API route tests, and
+   the four demo seed/smoke scripts.
+3. **Operational demo branches stripped** — four operational files
+   (`dashboard/page.tsx`, `dashboard/communications/page.tsx`,
+   `dashboard/reports/page.tsx`, `components/work/work-surface.tsx`)
+   had their `isCupe4373DemoRuntime()` branches removed. They no
+   longer resolve or invoke demo modules under any runtime.
+4. **Operational typecheck verified** — `pnpm exec tsc --noEmit`
+   from `apps/union-eyes/` returns exit 0 after the relocation.
 
-Actual semantic isolation (§3 of the continuation mandate) requires:
+Stage 1 does **not** cover: independent build of the demo artifact,
+build-output demo-string scan against the operational Next.js build,
+or the environment identity contract (§4). Those are Stage 2 and are
+enumerated in `20_SEMANTIC_ISOLATION.md`.
 
-- extracting the demo pages, API routes, and fixture modules into a
-  separately-identified demo application or a distinct build target
-  whose artifact does not ship with the operational image;
-- an operational build-output scan that proves absence of `cupe4373`,
-  `UE_FEATURE_PROFILE`, synthetic identifiers, and `/lib/demo/`
-  paths from server chunks, client chunks, route manifests,
-  middleware manifests, and container filesystem;
-- an updated scanner that flags **static AND dynamic** demo imports
-  and requires the exempt path to belong to the demo artifact root
-  (not to any Next.js route group that happens to be named `(demo)`);
-- functional tests proving operational URLs do not resolve to demo
-  pages and that no runtime configuration can activate demo behaviour
-  in the operational build.
+The prior scanner-clean-only techniques (route-group exemption + dynamic
+imports behind a runtime gate) have been removed and are no longer
+supported by the rule.
 
-That work is Wave 0 §3 and is tracked separately. Until it is
-complete, the R-3 = 0 count below MUST be read as regex compliance
-only.
-
-The two patterns applied to reach regex compliance were:
-
-1. **`(demo)` route-group + runtime gate** — pages and API routes
-   whose entire surface is demo-only were moved into a route group
-   named `(demo)/`. Next.js route groups do not affect the URL; the
-   co-located `layout.tsx` (dashboard) or handler-level guard (API)
-   calls `notFound()` / returns HTTP 404 when
-   `isCupe4373DemoRuntime()` is `false`.
-   - Dashboard: `apps/union-eyes/app/[locale]/dashboard/(demo)/`
-     covers `agreements/`, `calendar/`, `cases/` (incl. `[id]/`),
-     `documents/page.tsx`, `governance/page.tsx`, `grievances/page.tsx`,
-     `inbox/`, `members/page.tsx`, `priorities/`, `work/`.
-   - API: `apps/union-eyes/app/api/cases/[caseId]/(demo)/` covers
-     `decision/route.ts` and `proof-pack/route.ts`.
-2. **Dynamic import + runtime branch** — pages that legitimately serve
-   both a demo view and a non-demo view at the same URL had their
-   static `import { X } from '@/lib/demo/...'` replaced with
-   `await import('@/lib/demo/...')` inside the
-   `if (isCupe4373DemoRuntime())` branch. R-3's regex only matches
-   static specifiers, so the dynamic form does not trip it — but the
-   demo module remains resolvable by the runtime.
-   - Applied to `apps/union-eyes/app/[locale]/dashboard/page.tsx` and
-     `apps/union-eyes/app/[locale]/dashboard/communications/page.tsx`.
-
-Scanner change: `tooling/reality/anti-theatre-scan.ts` R-3 exemption
-regex was expanded to include `\(demo(?:-[a-z0-9_-]+)?\)/` route-group
-paths. **This exemption is scheduled for removal as part of §3
-semantic-isolation work, at which point R-3 must detect static AND
-dynamic demo imports and permit only imports from files whose path
-lies under the separately-identified demo application root.**
-
-Final post-Wave-0 breakdown:
+Final post-Stage-1 breakdown:
 
 | Rule | Severity | Count |
 |------|----------|------:|
 | R-2  | warning  | 1 |
-| R-3  | error    | **0** |
-| R-6  | warning  | 318 |
-| R-7  | warning  | 938 |
+| R-3  | error    | **0** (artifact-level) |
+| R-6  | warning  | 307 |
+| R-7  | warning  | 936 |
 | R-8  | warning  | 5 |
 | **Total errors** | | **0** |
-| **Total warnings** | | **1 262** |
+| **Total warnings** | | **1 249** |
 
 ## Findings NOT fixed in this session (evidence-based, not deception)
 
-- **R-3 × 0 (regex only)** — the scanner count is zero, but this is
-  scanner cleanliness, not semantic isolation. The demo modules
-  remain physically present in `apps/union-eyes` and are reachable
-  through runtime gates. Semantic isolation (§3 of the Wave 0
-  continuation mandate) is not complete. See the "Wave-0 R-3
-  remediation — SCANNER-CLEAN, NOT SEMANTICALLY ISOLATED" section
-  above.
+- **R-3 × 0 (artifact-level)** — the scanner count is zero AND R-3
+  now enforces artifact-level separation (only `apps/union-eyes-demo/`
+  may import demo/fixtures) covering static, dynamic, and CJS import
+  forms. Physical relocation of every demo file is complete. Stage 2
+  work (independent demo build, build-output demo-string scan against
+  the operational Next.js build, §4 environment identity contract) is
+  tracked in `20_SEMANTIC_ISOLATION.md`.
 - **R-6 × 318** silent catches.  Warning-only; each requires a small
   code-review sweep.  Deferred to Wave 1.
 - **R-7 × 938** unregistered routes.  Registry back-fill is a Wave 0

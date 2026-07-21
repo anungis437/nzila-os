@@ -260,9 +260,52 @@ const rule_hardcodedReadiness: Rule = (ctx) => {
   return findings;
 };
 
-/** R-3: production code imports demo/fixtures. */
+/**
+ * R-3: production code imports from a demo/fixtures path.
+ *
+ * ARTIFACT-LEVEL ISOLATION (post 2026-07-21 correction):
+ *
+ * The prior version of this rule exempted `(demo)` Next.js route
+ * groups and `/demo/`-prefixed directories as "structural declarations
+ * that this file participates in the demo bundle". That was scanner
+ * cleanliness, not semantic isolation — Next.js route groups do not
+ * change URLs, the exempted files still shipped in the operational
+ * build, and dynamic `await import('@/lib/demo/...')` was outside the
+ * static-import regex entirely.
+ *
+ * The corrected rule enforces ARTIFACT-LEVEL separation:
+ *
+ * - Only files whose path lies under an enumerated demo-artifact
+ *   root (currently `apps/union-eyes-demo/`) are permitted to import
+ *   demo modules. Everything else in `apps/union-eyes` MUST NOT.
+ * - Both STATIC imports (`from '...'` and bare `import '...'`) and
+ *   DYNAMIC imports (`import('...')`, `require('...')`) are detected.
+ * - The `__hashfixture__/` and `__fixtures__/` self-references remain
+ *   exempt because those directories are unit-test scaffolding, not
+ *   deployable demo surfaces.
+ * - `apps/union-eyes/lib/feature-flags.ts` (and equivalents that only
+ *   *detect* the demo profile without importing demo *data*) are
+ *   allowed because the string `/demo/` does not appear in their
+ *   import specifiers.
+ *
+ * See `docs/union-eyes/reality-remediation/19_AUTHORIZATION_VIOLATION.md`
+ * and §3 of the Wave 0 continuation mandate for the motivation.
+ */
+const DEMO_ARTIFACT_ROOTS: readonly string[] = [
+  'apps/union-eyes-demo/',
+];
+
+/** Demo-specifier patterns to match against BOTH static and dynamic imports. */
+function isDemoSpecifier(spec: string): boolean {
+  return (
+    /(?:^|\/)demo\//i.test(spec)
+    || /(?:^|\/)fixtures?\//i.test(spec)
+    || /(?:^|\/)__fixtures__\//.test(spec)
+  );
+}
+
 const rule_demoImportInProd: Rule = (ctx) => {
-  // Only care about production surfaces: app/, actions/, services/, lib/, db/, workers/.
+  // Only care about production surfaces: app/, actions/, services/, lib/, db/, workers/, middleware.
   const prodPrefixes = [
     'apps/union-eyes/app/',
     'apps/union-eyes/actions/',
@@ -272,57 +315,63 @@ const rule_demoImportInProd: Rule = (ctx) => {
     'apps/union-eyes/workers/',
     'apps/union-eyes/middleware.ts',
   ];
-  if (!prodPrefixes.some((p) => ctx.relPath.startsWith(p) || ctx.relPath === p)) return [];
+  const normalised = ctx.relPath.replace(/\\/g, '/');
+  if (!prodPrefixes.some((p) => normalised.startsWith(p) || normalised === p)) return [];
   // Skip tests and stories inside those trees.
   if (isTestOrFixturePath(ctx.relPath)) return [];
-  // Skip demo-tree self-references: files that themselves live under a
-  // `demo/`, `(demo)` / `(demo-*)` route group, `__hashfixture__/`, or
-  // `__fixtures__/` directory are allowed to import from sibling demo
-  // files. What we want to catch is *cross-boundary* imports from real
-  // production code into demo data. This exemption is narrow and cannot
-  // be used to hide production→demo leakage in dashboard pages, API
-  // routes, or shared library code that has NOT been explicitly placed
-  // inside a demo scope.
-  //
-  // Route-group exemption note: Next.js route groups written as
-  // `(demo)` or `(demo-XXX)` do not affect URLs. Placing a file under
-  // one is a structural declaration that "this file participates in
-  // the demo bundle" — but it does NOT prevent runtime access unless
-  // a corresponding server-side gate is present. The Wave 0 layout
-  // at `apps/union-eyes/app/[locale]/dashboard/(demo)/layout.tsx`
-  // (and the per-route API guards) provide that gate. If a new
-  // `(demo-*)` group is created WITHOUT an accompanying gate, the
-  // security posture regresses silently. The scanner cannot detect
-  // that regression — it must be caught in code review.
-  const normalised = ctx.relPath.replace(/\\/g, '/');
-  if (
-    /\/(?:demo|__hashfixture__|__fixtures__)\//.test(normalised)
-    || /\/\(demo(?:-[a-z0-9_-]+)?\)\//.test(normalised)
-  ) {
-    return [];
-  }
+  // Exempt files that live under an enumerated demo-artifact root. There
+  // is currently ONE such root (`apps/union-eyes-demo/`). If a new root
+  // is added, add its prefix to `DEMO_ARTIFACT_ROOTS` above AND update
+  // §16 baseline documentation.
+  if (DEMO_ARTIFACT_ROOTS.some((r) => normalised.startsWith(r))) return [];
+  // Retain a narrow test-scaffolding exemption: `__fixtures__/` and
+  // `__hashfixture__/` are for unit tests and do not ship in any
+  // deployable image.
+  if (/\/(?:__hashfixture__|__fixtures__)\//.test(normalised)) return [];
+
   const findings: Finding[] = [];
-  const RE = /from\s+['"`]([^'"`]+)['"`]/g;
+
+  const emit = (spec: string, matchIndex: number, formName: string) => {
+    if (!isDemoSpecifier(spec)) return;
+    const line = ctx.content.slice(0, matchIndex).split(/\r?\n/).length;
+    findings.push({
+      rule: 'R-3',
+      file: ctx.relPath,
+      line,
+      message: `Production code ${formName} from a demo/fixtures path: \`${spec}\`. Move the calling file under an enumerated demo-artifact root (currently \`apps/union-eyes-demo/\`) or remove the import.`,
+      evidence: spec,
+      severity: 'error',
+    });
+  };
+
+  // 1. Static `from '...'` specifiers.
+  const RE_STATIC_FROM = /from\s+['"`]([^'"`]+)['"`]/g;
   let m: RegExpExecArray | null;
-  while ((m = RE.exec(ctx.content)) !== null) {
-    const spec = m[1];
-    if (/\/demo\//i.test(spec) || /\/fixtures?\//i.test(spec) || /\/__fixtures__\//.test(spec)) {
-      // Exclude the demo package itself (union-eyes demo feature-flag helper is currently at
-      // `lib/feature-flags.ts` — it does not import demo data, it merely detects the profile).
-      // But if a route/service imports a `demo-data` module, that is flagged.
-      const line = ctx.content.slice(0, m.index).split(/\r?\n/).length;
-      findings.push({
-        rule: 'R-3',
-        file: ctx.relPath,
-        line,
-        message: `Production code imports from a demo/fixtures path: \`${spec}\`. Move behind a demo-profile guard.`,
-        evidence: spec,
-        severity: 'error',
-      });
-    }
+  while ((m = RE_STATIC_FROM.exec(ctx.content)) !== null) {
+    emit(m[1], m.index, 'statically imports');
   }
+  // 2. Bare static `import '...';` specifiers (side-effect imports).
+  const RE_BARE_IMPORT = /\bimport\s+['"`]([^'"`]+)['"`]/g;
+  while ((m = RE_BARE_IMPORT.exec(ctx.content)) !== null) {
+    emit(m[1], m.index, 'statically imports (bare)');
+  }
+  // 3. Dynamic `import('...')` calls (including `await import(...)`).
+  //    Deliberately excludes template-literal specifiers because the
+  //    literal contents are not statically known — those should be
+  //    caught by code review.
+  const RE_DYNAMIC = /\bimport\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  while ((m = RE_DYNAMIC.exec(ctx.content)) !== null) {
+    emit(m[1], m.index, 'dynamically imports');
+  }
+  // 4. `require('...')` calls (CommonJS interop).
+  const RE_REQUIRE = /\brequire\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  while ((m = RE_REQUIRE.exec(ctx.content)) !== null) {
+    emit(m[1], m.index, 'requires');
+  }
+
   return findings;
 };
+
 
 /** R-4: demo profile in non-development env. */
 const rule_demoProfileInProdEnv: Rule = (ctx) => {

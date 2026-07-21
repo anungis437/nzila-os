@@ -21,12 +21,13 @@ import { db } from "@/db";
 import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns } from "@/db/schema";
 import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
-// NOTE: `Cupe4373CommunicationsPage` is loaded via a runtime-gated dynamic
-// import inside the `isCupe4373DemoRuntime()` branch below. Keeping the
-// import dynamic keeps the demo module out of the executive / pilot static
-// import graph (anti-theatre rule R-3). See
-// `apps/union-eyes/app/[locale]/dashboard/page.tsx` for the sibling pattern.
+// NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
+// contained a runtime-gated branch that dynamically imported
+// `@/components/demo/cupe4373-communications-page` when
+// `isCupe4373DemoRuntime()` returned true. Both the demo component and
+// the runtime gate have been removed from the operational build. Demo
+// behaviour now lives exclusively in the `@nzila/union-eyes-demo`
+// artifact (`apps/union-eyes-demo/`).
 
 /** Fetch all hub metrics in parallel */
 async function getHubMetrics(orgId: string) {
@@ -139,15 +140,6 @@ export default async function CommunicationsDashboard({
     user = await requireUser();
   } catch {
     redirect(`/${locale}/login`);
-  }
-
-  if (isCupe4373DemoRuntime()) {
-    // Dynamic import: demo module loaded only when the runtime gate has
-    // already selected the demo profile. See top-of-file note.
-    const { Cupe4373CommunicationsPage } = await import(
-      "@/components/demo/cupe4373-communications-page"
-    );
-    return <Cupe4373CommunicationsPage />;
   }
 
   if (!(await hasMinRole("steward"))) {

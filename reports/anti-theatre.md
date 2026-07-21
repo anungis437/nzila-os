@@ -1,10 +1,10 @@
 # Anti-Theatre Scan Report
 
-- Generated: 2026-07-21T02:15:08.272Z
-- Files scanned: 4844
+- Generated: 2026-07-21T09:00:36.952Z
+- Files scanned: 4800
 - Rules: R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8
 - **Errors: 0**
-- Warnings: 1262
+- Warnings: 1249
 
 ## Findings
 
@@ -42,7 +42,6 @@
 | warning | R-6 | `apps/union-eyes/app/[locale]/page.tsx` | 46 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/admin/pki/signatures/[id]/sign/route.ts` | 88 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts` | 64 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/app/api/cases/[caseId]/(demo)/proof-pack/route.ts` | 66 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts` | 97 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/compliance/validate/route.ts` | 89 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/exit-interviews/[id]/publish/route.ts` | 126 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -110,16 +109,6 @@
 | warning | R-6 | `apps/union-eyes/components/dashboards/union-dashboard.tsx` | 333 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/dashboards/union-dashboard.tsx` | 359 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/dashboards/union-dashboard.tsx` | 402 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-case-lifecycle.tsx` | 52 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-case-lifecycle.tsx` | 68 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-case-lifecycle.tsx` | 94 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-communications-page.tsx` | 93 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-communications-page.tsx` | 106 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-governance-page.tsx` | 85 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-governance-page.tsx` | 98 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-new-case-button.tsx` | 51 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-priorities-page.tsx` | 134 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/demo/cupe4373-priorities-page.tsx` | 147 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/documents/advanced-search.tsx` | 141 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/documents/advanced-search.tsx` | 152 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/documents/document-browser.tsx` | 205 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -510,3 +499,14 @@
 | warning | R-7 | `apps/union-eyes/app/api/bargaining/proposals/route.ts` | 1 | Production API route `app/api/bargaining/proposals/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/bargaining/tentative-agreements/route.ts` | 1 | Production API route `app/api/bargaining/tentative-agreements/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts` | 1 | Production API route `app/api/billing/batch-status/[jobId]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/credits/check-expired/route.ts` | 1 | Production API route `app/api/billing/credits/check-expired/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/invoices/route.ts` | 1 | Production API route `app/api/billing/invoices/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/replay-invoice/route.ts` | 1 | Production API route `app/api/billing/replay-invoice/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/send-batch/route.ts` | 1 | Production API route `app/api/billing/send-batch/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/send-invoice/route.ts` | 1 | Production API route `app/api/billing/send-invoice/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts` | 1 | Production API route `app/api/billing/subscriptions/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/subscriptions/route.ts` | 1 | Production API route `app/api/billing/subscriptions/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/validate/route.ts` | 1 | Production API route `app/api/billing/validate/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/breaks/[id]/route.ts` | 1 | Production API route `app/api/breaks/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/breaks/compliance/route.ts` | 1 | Production API route `app/api/breaks/compliance/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/breaks/policies/[id]/route.ts` | 1 | Production API route `app/api/breaks/policies/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |

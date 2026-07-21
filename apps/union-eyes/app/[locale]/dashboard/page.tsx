@@ -1,20 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@nzila/platform-auth/entra/server";
-// NOTE: `Cupe4373OperationsDashboard` is loaded via a runtime-gated dynamic
-// import inside the `isCupe4373DemoRuntime()` branch below (see the demo
-// return statement).  Keeping the import dynamic prevents the demo module
-// from being present in the static import graph of the executive / pilot
-// build, which the anti-theatre R-3 rule requires. The dynamic form is not
-// matched by the R-3 regex (`from '...'`), which is intentional because the
-// runtime gate guarantees the module is only ever loaded when the demo
-// profile is active.
+// NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
+// dynamically imported `@/components/demo/cupe4373-operations-dashboard`
+// inside an `isCupe4373DemoRuntime()` branch below. Both the demo module
+// and the runtime branch have been removed from the operational build.
+// Demo behaviour lives exclusively in the `@nzila/union-eyes-demo`
+// artifact (`apps/union-eyes-demo/`) and is not reachable from any code
+// path in this application.
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { UserRole } from "@/lib/auth/roles";
 import {
-  isCupe4373DemoRuntime,
   getRoleLandingPath,
-  getDashboardExperience,
 } from "@/lib/dashboard/role-experience";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
@@ -28,12 +25,6 @@ type DashboardRootPageProps = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  if (isCupe4373DemoRuntime()) {
-    return {
-      title: "Steward Operations Center | UnionEyes",
-      description: "CUPE Local 4373 continuity-focused steward operations demo.",
-    };
-  }
   return {
     title: "Dashboard | UnionEyes",
     description: "Union operations dashboard.",
@@ -50,54 +41,6 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
       locale,
     });
     redirect("/login");
-  }
-
-  if (isCupe4373DemoRuntime()) {
-    // Demo runtime: scope landing by role so members don't see the steward
-    // operations console. Stewards / officers / executives / admins keep the
-    // CUPE 4373 ops dashboard; members land on their intake inbox (which is in
-    // their 4-item nav: Dashboard, Inbox, My Cases, Documents).
-    let demoOrganizationId: string = DEFAULT_ORGANIZATION_ID;
-    try {
-      demoOrganizationId = await getOrganizationIdForUser(userId);
-    } catch (error) {
-      logger.warn("[dashboard:root] demo getOrganizationIdForUser threw — using default org", {
-        stage: "demo-organization",
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-
-    let demoUserRole: UserRole = UserRole.MEMBER;
-    try {
-      demoUserRole = await getUserRole(userId, demoOrganizationId);
-    } catch (error) {
-      logger.warn("[dashboard:root] demo getUserRole threw — falling back to member role", {
-        stage: "demo-role",
-        userId,
-        organizationId: demoOrganizationId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-
-    const demoExperience = getDashboardExperience(demoUserRole);
-    if (demoExperience === 'member') {
-      logger.info("[dashboard:root] demo member — redirecting to intake inbox", {
-        stage: "demo-redirect",
-        userId,
-        organizationId: demoOrganizationId,
-        userRole: demoUserRole,
-        locale,
-      });
-      redirect(`/${locale}/dashboard/inbox`);
-    }
-
-    // Dynamic import: the demo module is only loaded when the runtime gate
-    // has already selected the demo profile. See top-of-file note.
-    const { Cupe4373OperationsDashboard } = await import(
-      "@/components/demo/cupe4373-operations-dashboard"
-    );
-    return <Cupe4373OperationsDashboard locale={locale} />;
   }
 
   let organizationId: string = DEFAULT_ORGANIZATION_ID;
