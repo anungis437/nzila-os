@@ -1,0 +1,81 @@
+name: Reality Anti-Theatre
+
+# Runs the union-eyes reality anti-theatre scanner and demo-deployment
+# guard on every pull request, and on pushes to the reality-remediation
+# branches.
+#
+# The scanner fails the job (exit 1) if it finds any error-severity
+# violations of rules R-1..R-8 documented in
+# docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md.
+#
+# The demo-deployment guard proves that the current combination of
+# UE_FEATURE_PROFILE + target environment is safe. On CI we assert that
+# `target=production` + no demo profile passes, i.e. shipping code cannot
+# accidentally carry the cupe4373 demo flag through.
+
+on:
+  push:
+    branches:
+      - main
+      - fix/union-eyes-reality-remediation
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  anti-theatre:
+    runs-on: ubuntu-latest
+    name: Anti-theatre scanner + inventory + demo guard
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Anti-theatre scan
+        # Fails (exit 1) on any error-severity finding. Warnings are
+        # emitted to stdout but do not fail the job during Wave 0 while
+        # the capability registry is being back-filled.
+        run: pnpm reality:anti-theatre
+
+      - name: Capability inventory
+        # Never fails the job; the report is the artefact.
+        run: pnpm reality:inventory || true
+
+      - name: Demo deployment guard (production-safe assertion)
+        # Asserts that the current worktree is safe to ship to
+        # production with the demo profile unset. If someone tries to
+        # commit `UE_FEATURE_PROFILE=cupe4373` in an env file that ends
+        # up in a production deploy, R-4 in the scanner catches it and
+        # this guard fails.
+        env:
+          TARGET_ENVIRONMENT: production
+        run: pnpm reality:demo-guard
+
+      - name: Upload reality reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: union-eyes-reality-reports-${{ github.sha }}
+          path: |
+            reports/anti-theatre.json
+            reports/anti-theatre.md
+            reports/union-eyes-capability-inventory.json
+            reports/union-eyes-capability-inventory.md
+          if-no-files-found: warn
+          retention-days: 30

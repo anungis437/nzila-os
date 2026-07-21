@@ -21,6 +21,13 @@ import { createLogger } from '@nzila/os-core';
 import { sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { buildPilotStatus, type PilotConfiguration } from '@/lib/pilot-admin';
+import {
+  probePostgresPing,
+  probeSecretPresence,
+  probeDemoProfileEnforcement,
+  unmeasuredProbes,
+  type OperationalHealthCheck,
+} from '@/lib/pilot-admin-operational';
 import type { CaseRow } from '@/lib/dashboard-metrics';
 import { auth } from '@nzila/platform-auth/entra/server';
 
@@ -113,12 +120,88 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
 
     const status = buildPilotStatus(config, cases);
 
+    // -----------------------------------------------------------------
+    // Wave 0 §7 expansion: operational probes.
+    // Each probe reports capabilityId + state + evidenceReference +
+    // remediationGuidance. Probes that cannot be measured against the
+    // deployed runtime today MUST return `state: 'unknown'` — the mandate
+    // is explicit that `unknown` ≠ `healthy` and MUST propagate.
+    // -----------------------------------------------------------------
+    const operational: OperationalHealthCheck[] = [];
+
+    // Postgres ping — reuses the existing `db` instance.
+    operational.push(
+      await probePostgresPing(async () => {
+        const rows = await db.execute(sql`SELECT 1 AS ok`);
+        const ok = (rows as unknown as Array<{ ok: number }>)[0]?.ok;
+        if (ok !== 1) throw new Error('SELECT 1 did not return 1');
+      }),
+    );
+
+    // Demo profile enforcement — mirrors the boot-time guard.
+    operational.push(
+      probeDemoProfileEnforcement({
+        targetEnvironment: process.env.TARGET_ENVIRONMENT,
+        ueFeatureProfile: process.env.UE_FEATURE_PROFILE,
+        publicDemoProfile: process.env.NEXT_PUBLIC_UE_DEMO_PROFILE,
+      }),
+    );
+
+    // Secret presence probes — NEVER emit the secret value, only its presence.
+    operational.push(
+      probeSecretPresence(
+        'DATABASE_URL',
+        'UE-SECRET-DATABASE-URL',
+        'DATABASE_URL secret presence',
+        'Add DATABASE_URL to Key Vault nzila-staging-kv and reference from Container App.',
+      ),
+      probeSecretPresence(
+        'AUTH_SECRET',
+        'UE-SECRET-AUTH',
+        'AUTH_SECRET secret presence',
+        'AUTH_SECRET is used by @nzila/platform-auth session cookies; must be present in every environment.',
+      ),
+      probeSecretPresence(
+        'AZURE_AD_TENANT_ID',
+        'UE-SECRET-ENTRA-TENANT',
+        'AZURE_AD_TENANT_ID secret presence',
+        'Required for Entra SSO fallback path in @nzila/platform-auth.',
+      ),
+    );
+
+    // Unmeasured probes — Wave 0 stubs that MUST NOT default to `pass`.
+    operational.push(...unmeasuredProbes());
+
+    // Extend the top-level status object with operational checks and
+    // recompute rollup severity: any `fail` demotes to `critical`; any
+    // `unknown` demotes to at least `remediation_in_progress`.
+    const opHasFail = operational.some((c) => c.state === 'fail');
+    const opHasUnknown = operational.some((c) => c.state === 'unknown');
+    let overall = status.health.status;
+    if (opHasFail && overall !== 'critical') overall = 'critical';
+    else if (opHasUnknown && overall === 'healthy') overall = 'remediation_in_progress';
+
+    const enriched = {
+      ...status,
+      health: {
+        ...status.health,
+        status: overall,
+      },
+      operational,
+      capabilityRegistrySnapshot: {
+        source: 'apps/union-eyes/lib/reality/capability-registry.ts',
+        note: 'Operational probes cross-reference capabilityId in the registry. Missing entries are tracked as R-7 warnings by tooling/reality/anti-theatre-scan.ts.',
+      },
+    };
+
     logger.info('pilot status check', {
-      overall: status.health.status,
+      overall,
       unmeasured: status.health.checks.filter((c) => c.status === 'unknown').map((c) => c.name),
+      operationalUnknown: operational.filter((c) => c.state === 'unknown').map((c) => c.capabilityId),
+      operationalFail: operational.filter((c) => c.state === 'fail').map((c) => c.capabilityId),
     });
 
-    return NextResponse.json(status);
+    return NextResponse.json(enriched);
   } catch (error) {
     logger.error('[/api/admin/pilot-status] Error:', error);
     return NextResponse.json(

@@ -3,6 +3,44 @@ export async function register() {
   // IMPORTANT: OpenTelemetry must be initialized FIRST, before any other imports
   // This ensures auto-instrumentation can wrap all modules correctly
   if (process.env.NEXT_RUNTIME === 'nodejs' && process.env.NEXT_PHASE !== 'phase-production-build') {
+    // ------------------------------------------------------------------
+    // Reality containment: demo-deployment guard.
+    //
+    // Fail-closed at boot if the current combination of
+    // UE_FEATURE_PROFILE / NEXT_PUBLIC_UE_DEMO_PROFILE and target
+    // environment is unsafe (e.g. `cupe4373` in staging/pilot/production).
+    // Skipping this check is intentional inside `next build` (above) so
+    // container images can still be built. This runs on real process
+    // start only.
+    //
+    // See:
+    //   apps/union-eyes/lib/reality/demo-deployment-guard.ts
+    //   tooling/reality/demo-deployment-guard.ts  (CLI companion)
+    //   docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md
+    // ------------------------------------------------------------------
+    try {
+      const { evaluateDemoGuard } = await import('./lib/reality/demo-deployment-guard');
+      const verdict = evaluateDemoGuard({
+        targetEnvironment: process.env.TARGET_ENVIRONMENT,
+        ueFeatureProfile: process.env.UE_FEATURE_PROFILE,
+        publicDemoProfile: process.env.NEXT_PUBLIC_UE_DEMO_PROFILE,
+        nodeEnv: process.env.NODE_ENV,
+      });
+      if (!verdict.ok) {
+        const reason = `[demo-deployment-guard] REFUSED: ${verdict.reason ?? 'unsafe environment'}`;
+        console.error(reason);
+        // Hard-fail the process. A pilot-facing container must not stay
+        // up while claiming to serve real data with the demo profile on.
+        process.exit(1);
+      }
+    } catch (error) {
+      // If the guard itself is broken we prefer to fail closed rather
+      // than silently continue.
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('[demo-deployment-guard] failed to evaluate; refusing to start:', message);
+      process.exit(1);
+    }
+
     // Initialize distributed tracing via @nzila/os-core/telemetry (must be first!)
     try {
       const { initOtel } = await import('@nzila/os-core/telemetry');
