@@ -174,6 +174,53 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'Deployment guard blocking UE_FEATURE_PROFILE=cupe4373 outside development is pending Wave 6. ' +
       'DO NOT promote this capability to REAL without that guard in place.',
   },
+
+  // ------------------------------------------------------------------------
+  // Dashboard surfaces returning HTTP 404 (Wave 0 §7 reconciliation)
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-DASH-REPORTS-INDEX',
+    title: 'Reports dashboard index (/dashboard/reports)',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'app/[locale]/dashboard/reports/page.tsx',
+      'app/[locale]/dashboard/reports/layout.tsx',
+    ],
+    evidence: [
+      'app/[locale]/dashboard/reports/page.tsx — unconditional notFound() call in ReportsPage; renders HTTP 404',
+      'app/[locale]/dashboard/reports/layout.tsx — server-side auth guard preserved so 404 is emitted only after auth passes',
+      'docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md — enumerated nav references still pointing here (5 files, 12 refs)',
+    ],
+    targetWave: 5,
+    notes:
+      'The demo variant lives in `apps/union-eyes-demo/` and is no longer reachable from the operational build. ' +
+      'Navigation entries in role-experience.ts, portal-home.tsx, federation-dashboard.tsx, and sidebar.tsx still ' +
+      'reference /dashboard/reports; they are intentionally left in place so the entry re-appears automatically ' +
+      'the moment the target-wave implementation lands. See §7 route reconciliation for the enforced invariant.',
+  },
+  {
+    id: 'UE-DASH-DEBUG',
+    title: 'Developer debug page (/dashboard/debug) — dev-only',
+    state: 'DISABLED',
+    ownedBy: ['app/[locale]/dashboard/debug/page.tsx'],
+    evidence: [
+      'app/[locale]/dashboard/debug/page.tsx:26 — process.env.NODE_ENV === "production" → notFound() (HTTP 404)',
+      'app/[locale]/dashboard/debug/layout.tsx — auth guard requires System Admin (level 200) even in dev',
+    ],
+    targetWave: 0,
+    notes: 'Deliberately never advertised in navigation. HTTP 404 in every deployed environment.',
+  },
+  {
+    id: 'UE-DEV-SENTRY-EXAMPLE',
+    title: 'Sentry example page (/sentry-example-page) — dev-only',
+    state: 'DISABLED',
+    ownedBy: ['app/sentry-example-page/page.tsx'],
+    evidence: [
+      'app/sentry-example-page/page.tsx:26 — process.env.NODE_ENV === "production" → notFound() (HTTP 404)',
+    ],
+    targetWave: 0,
+    notes: 'Ships in the bundle but is unreachable in staging/pilot/production. Kept only for local Sentry SDK validation.',
+  },
 ] as const;
 
 /**
@@ -190,4 +237,55 @@ export function getCapability(id: string): Capability | undefined {
  */
 export function capabilitiesInState(state: CapabilityState): readonly Capability[] {
   return CAPABILITY_REGISTRY.filter((c) => c.state === state);
+}
+
+/**
+ * Wave 0 §7 — Route reconciliation invariant.
+ *
+ * Return the set of dashboard route paths (as they appear in navigation
+ * items — always beginning with `/dashboard/…`) whose owning capability
+ * is `NOT_IMPLEMENTED` AND owns an `app/[locale]/dashboard/**` page.
+ * These surfaces are guaranteed to render HTTP 404 in every deployed
+ * environment (the page body reduces to `notFound()`).
+ *
+ * Consumers use this to enforce the §7 invariant: no navigation surface
+ * may advertise an unconditional-404 route unless that route is
+ * registry-tracked here.
+ *
+ * `DISABLED` routes are intentionally NOT included: they are only 404
+ * in production (gated by `process.env.NODE_ENV === 'production'`) and
+ * remain reachable in local dev. Use {@link getConditionalProduction404DashboardRoutes}
+ * for that case.
+ *
+ * The returned strings are `/dashboard/…` prefixed and do NOT include
+ * the `[locale]` segment (matches how navigation items are authored).
+ */
+export function getRegistryTracked404DashboardRoutes(): readonly string[] {
+  return collectDashboardRoutesForStates(['NOT_IMPLEMENTED']);
+}
+
+/**
+ * Return dashboard routes whose owning capability is `DISABLED` (i.e.
+ * always 404 in production but reachable in local dev). Kept separate
+ * from the NOT_IMPLEMENTED set because the two carry different
+ * invariants: NOT_IMPLEMENTED pages MUST have a body of only
+ * `notFound()`, while DISABLED pages have a real body guarded by a
+ * `process.env.NODE_ENV === 'production'` check.
+ */
+export function getConditionalProduction404DashboardRoutes(): readonly string[] {
+  return collectDashboardRoutesForStates(['DISABLED']);
+}
+
+function collectDashboardRoutesForStates(states: readonly CapabilityState[]): readonly string[] {
+  const result: string[] = [];
+  for (const cap of CAPABILITY_REGISTRY) {
+    if (!states.includes(cap.state)) continue;
+    for (const owned of cap.ownedBy) {
+      const m = owned.match(/^app\/\[locale\]\/(dashboard\/[^/]+(?:\/[^/]+)*)\/(?:page|layout)\.tsx$/);
+      if (!m) continue;
+      const route = `/${m[1]}`;
+      if (!result.includes(route)) result.push(route);
+    }
+  }
+  return result;
 }
