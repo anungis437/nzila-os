@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core/telemetry';
+import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 import {
   logCaseDecision,
   mapUrgencyToPriority,
@@ -54,6 +55,14 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
+  // Runtime gate: this handler is only reachable when the CUPE 4373 demo
+  // profile is active. In executive / pilot / production runtimes we return
+  // a bare 404 so no demo surface leaks — matching the dashboard `(demo)`
+  // route-group behaviour.
+  if (!isCupe4373DemoRuntime()) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(

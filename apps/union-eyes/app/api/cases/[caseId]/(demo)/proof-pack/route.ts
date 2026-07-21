@@ -24,6 +24,7 @@ import archiver from 'archiver';
 import { getDemoCaseFromDb } from '@/lib/demo/server/cupe4373-cases-repo';
 import { listDecisionsForCase } from '@/lib/demo/server/cupe4373-governance';
 import { auth } from '@nzila/platform-auth/entra/server';
+import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -85,6 +86,14 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ caseId: string }> },
 ) {
+  // Runtime gate: this handler is only reachable when the CUPE 4373 demo
+  // profile is active. In executive / pilot / production runtimes we return
+  // a bare 404 so no demo surface leaks — matching the dashboard `(demo)`
+  // route-group behaviour.
+  if (!isCupe4373DemoRuntime()) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(

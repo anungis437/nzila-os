@@ -25,7 +25,7 @@ console logs are cross-referenced by commit `515d146db`.
 
 | # | Command | Scope | Exit | Duration | Result | Failure class | Notes |
 |---|---------|-------|-----:|---------:|--------|---------------|-------|
-| 1 | `pnpm reality:anti-theatre` | repo | 1 | ~7 s | PASS_WITH_WARNINGS | policy_gate | 35 errors (R-3 demo imports — all documented in `04_FINDINGS_AND_DISPOSITIONS.md` as Wave 1 structural work) + 1 262 warnings. Intentionally exits 1 to fail CI on unresolved errors; this is desired containment behaviour. |
+| 1 | `pnpm reality:anti-theatre` | repo | 0 | ~7 s | PASS | policy_gate | 0 errors, 1 262 warnings (R-6 × 318, R-7 × 938, R-8 × 5, R-2 × 1). R-3 was driven from 35 → 0 on 2026-07-20 by moving demo-only surfaces into `(demo)` route groups with `notFound()` gates, and converting mixed-mode pages (`dashboard/page.tsx`, `dashboard/communications/page.tsx`) to dynamic-import their demo branch. See §16 baseline doc "Wave-0 R-3 remediation — driven to zero". |
 | 2 | `pnpm reality:inventory` | repo | 0 | 1 956 ms | PASS | n/a | 1 714 surfaces discovered; 1 707 missing registry entries → tracked as R-7 warnings and Wave 0 back-fill work. |
 | 3 | `pnpm --filter @nzila/union-eyes typecheck` | `apps/union-eyes` | 0 | 59 154 ms | PASS | n/a | `tsc --noEmit`; clean. |
 | 4 | `pnpm --filter @nzila/union-eyes lint` | `apps/union-eyes` | 0 | 125 250 ms | PASS_WITH_WARNINGS | style | 0 errors, 2 431 warnings (mostly `@typescript-eslint/no-explicit-any` in `services/platform-economics/**` and legacy DTOs). Warnings are not merge-blocking per repo policy. |

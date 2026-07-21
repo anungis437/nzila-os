@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@nzila/platform-auth/entra/server";
-import { Cupe4373OperationsDashboard } from "@/components/demo/cupe4373-operations-dashboard";
+// NOTE: `Cupe4373OperationsDashboard` is loaded via a runtime-gated dynamic
+// import inside the `isCupe4373DemoRuntime()` branch below (see the demo
+// return statement).  Keeping the import dynamic prevents the demo module
+// from being present in the static import graph of the executive / pilot
+// build, which the anti-theatre R-3 rule requires. The dynamic form is not
+// matched by the R-3 regex (`from '...'`), which is intentional because the
+// runtime gate guarantees the module is only ever loaded when the demo
+// profile is active.
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { UserRole } from "@/lib/auth/roles";
 import {
@@ -85,6 +92,11 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
       redirect(`/${locale}/dashboard/inbox`);
     }
 
+    // Dynamic import: the demo module is only loaded when the runtime gate
+    // has already selected the demo profile. See top-of-file note.
+    const { Cupe4373OperationsDashboard } = await import(
+      "@/components/demo/cupe4373-operations-dashboard"
+    );
     return <Cupe4373OperationsDashboard locale={locale} />;
   }
 

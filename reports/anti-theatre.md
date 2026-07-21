@@ -1,9 +1,9 @@
 # Anti-Theatre Scan Report
 
-- Generated: 2026-07-21T01:30:07.251Z
+- Generated: 2026-07-21T02:15:08.272Z
 - Files scanned: 4844
 - Rules: R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8
-- **Errors: 35**
+- **Errors: 0**
 - Warnings: 1262
 
 ## Findings
@@ -11,41 +11,6 @@
 | Severity | Rule | File | Line | Message |
 |----------|------|------|------|---------|
 | warning | R-2 | `apps/union-eyes/app/api/admin/database/health/route.ts` | 39 | Handler literally returns `status: "healthy"`. Verify this is derived from real measurements, not a placeholder. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/agreements/agreements-page.tsx` | 7 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-section-nav`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/agreements/agreements-page.tsx` | 8 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/calendar/page.tsx` | 6 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-section-nav`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/calendar/page.tsx` | 7 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-calendar-grid`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/calendar/page.tsx` | 8 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 22 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-section-nav`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 23 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-case-actions`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 24 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-case-lifecycle`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 25 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 26 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cases-repo`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 27 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 28 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-retention`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 32 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cognition`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx` | 45 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/page.tsx` | 9 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-cases-console`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/page.tsx` | 10 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-member-views`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/page.tsx` | 15 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cases-repo`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/cases/page.tsx` | 19 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/communications/page.tsx` | 25 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-communications-page`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/documents/page.tsx` | 9 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-documents-page`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/documents/page.tsx` | 10 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-member-views`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/documents/page.tsx` | 18 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/governance/page.tsx` | 12 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-governance-page`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/grievances/page.tsx` | 8 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-grievances-page`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/inbox/page.tsx` | 23 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-inbox-page`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/inbox/page.tsx` | 24 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-member-views`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/inbox/page.tsx` | 29 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/members/page.tsx` | 8 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-members-console`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/members/page.tsx` | 9 | Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-members`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/page.tsx` | 4 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-operations-dashboard`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/priorities/page.tsx` | 18 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-priorities-page`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/[locale]/dashboard/work/page.tsx` | 16 | Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-cases-console`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/api/cases/[caseId]/decision/route.ts` | 24 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts` | 24 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cases-repo`. Move behind a demo-profile guard. |
-| error | R-3 | `apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts` | 25 | Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard. |
 | warning | R-6 | `apps/union-eyes/app/[locale]/calendar/page.tsx` | 99 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/[locale]/calendar/page.tsx` | 112 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/[locale]/dashboard/admin/organizations/[id]/edit/page.tsx` | 136 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -77,7 +42,7 @@
 | warning | R-6 | `apps/union-eyes/app/[locale]/page.tsx` | 46 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/admin/pki/signatures/[id]/sign/route.ts` | 88 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts` | 64 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts` | 65 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/app/api/cases/[caseId]/(demo)/proof-pack/route.ts` | 66 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts` | 97 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/compliance/validate/route.ts` | 89 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/exit-interviews/[id]/publish/route.ts` | 126 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -510,3 +475,38 @@
 | warning | R-7 | `apps/union-eyes/app/api/arbitrations/route.ts` | 1 | Production API route `app/api/arbitrations/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/arrears/case/[memberId]/route.ts` | 1 | Production API route `app/api/arrears/case/[memberId]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/arrears/cases/route.ts` | 1 | Production API route `app/api/arrears/cases/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/arrears/create-payment-plan/route.ts` | 1 | Production API route `app/api/arrears/create-payment-plan/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/arrears/escalate/[caseId]/route.ts` | 1 | Production API route `app/api/arrears/escalate/[caseId]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/arrears/log-contact/route.ts` | 1 | Production API route `app/api/arrears/log-contact/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/arrears/resolve/[caseId]/route.ts` | 1 | Production API route `app/api/arrears/resolve/[caseId]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/audits/[id]/route.ts` | 1 | Production API route `app/api/audits/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/audits/route.ts` | 1 | Production API route `app/api/audits/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth_core/health/route.ts` | 1 | Production API route `app/api/auth_core/health/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/[...nextauth]/route.ts` | 1 | Production API route `app/api/auth/[...nextauth]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/forgot-password/route.ts` | 1 | Production API route `app/api/auth/forgot-password/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/invite/accept/route.ts` | 1 | Production API route `app/api/auth/invite/accept/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/invite/create/route.ts` | 1 | Production API route `app/api/auth/invite/create/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/login/route.ts` | 1 | Production API route `app/api/auth/login/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/logout/route.ts` | 1 | Production API route `app/api/auth/logout/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/magic-link/request/route.ts` | 1 | Production API route `app/api/auth/magic-link/request/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/magic-link/verify/route.ts` | 1 | Production API route `app/api/auth/magic-link/verify/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/me/route.ts` | 1 | Production API route `app/api/auth/me/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/methods/route.ts` | 1 | Production API route `app/api/auth/methods/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/mfa/challenge/route.ts` | 1 | Production API route `app/api/auth/mfa/challenge/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/mfa/disable/route.ts` | 1 | Production API route `app/api/auth/mfa/disable/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/mfa/enroll/route.ts` | 1 | Production API route `app/api/auth/mfa/enroll/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/mfa/status/route.ts` | 1 | Production API route `app/api/auth/mfa/status/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/mfa/verify-enroll/route.ts` | 1 | Production API route `app/api/auth/mfa/verify-enroll/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/policy/route.ts` | 1 | Production API route `app/api/auth/policy/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/reset-password/route.ts` | 1 | Production API route `app/api/auth/reset-password/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/role/route.ts` | 1 | Production API route `app/api/auth/role/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/signup/route.ts` | 1 | Production API route `app/api/auth/signup/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/auth/user-role/route.ts` | 1 | Production API route `app/api/auth/user-role/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining-notes/[id]/route.ts` | 1 | Production API route `app/api/bargaining-notes/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining-notes/route.ts` | 1 | Production API route `app/api/bargaining-notes/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining/negotiations/[id]/route.ts` | 1 | Production API route `app/api/bargaining/negotiations/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining/negotiations/route.ts` | 1 | Production API route `app/api/bargaining/negotiations/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts` | 1 | Production API route `app/api/bargaining/proposals/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining/proposals/route.ts` | 1 | Production API route `app/api/bargaining/proposals/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining/tentative-agreements/route.ts` | 1 | Production API route `app/api/bargaining/tentative-agreements/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/billing/batch-status/[jobId]/route.ts` | 1 | Production API route `app/api/billing/batch-status/[jobId]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |

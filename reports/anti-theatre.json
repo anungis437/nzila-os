@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T01:30:07.247Z",
+  "generatedAt": "2026-07-21T02:15:08.268Z",
   "scannedFiles": 4844,
   "rulesRun": [
     "R-1",
@@ -12,7 +12,7 @@
     "R-8"
   ],
   "totals": {
-    "errors": 35,
+    "errors": 0,
     "warnings": 1262
   },
   "findings": [
@@ -23,286 +23,6 @@
       "message": "Handler literally returns `status: \"healthy\"`. Verify this is derived from real measurements, not a placeholder.",
       "evidence": "status: 'healthy',",
       "severity": "warning"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/agreements/agreements-page.tsx",
-      "line": 7,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-section-nav`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-section-nav",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/agreements/agreements-page.tsx",
-      "line": 8,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/calendar/page.tsx",
-      "line": 6,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-section-nav`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-section-nav",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/calendar/page.tsx",
-      "line": 7,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-calendar-grid`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-calendar-grid",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/calendar/page.tsx",
-      "line": 8,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 22,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-section-nav`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-section-nav",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 23,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-case-actions`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-case-actions",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 24,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-case-lifecycle`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-case-lifecycle",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 25,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-demo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-demo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 26,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cases-repo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-cases-repo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 27,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-governance",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 28,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-retention`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-retention",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 32,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cognition`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-cognition",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/[id]/page.tsx",
-      "line": 45,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-member-view",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/page.tsx",
-      "line": 9,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-cases-console`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-cases-console",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/page.tsx",
-      "line": 10,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-member-views`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-member-views",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/page.tsx",
-      "line": 15,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cases-repo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-cases-repo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/cases/page.tsx",
-      "line": 19,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-member-view",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/communications/page.tsx",
-      "line": 25,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-communications-page`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-communications-page",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/documents/page.tsx",
-      "line": 9,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-documents-page`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-documents-page",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/documents/page.tsx",
-      "line": 10,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-member-views`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-member-views",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/documents/page.tsx",
-      "line": 18,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-member-view",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/governance/page.tsx",
-      "line": 12,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-governance-page`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-governance-page",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/grievances/page.tsx",
-      "line": 8,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-grievances-page`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-grievances-page",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/inbox/page.tsx",
-      "line": 23,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-inbox-page`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-inbox-page",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/inbox/page.tsx",
-      "line": 24,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-member-views`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-member-views",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/inbox/page.tsx",
-      "line": 29,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-member-view`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-member-view",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/members/page.tsx",
-      "line": 8,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-members-console`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-members-console",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/members/page.tsx",
-      "line": 9,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/cupe4373-members`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/cupe4373-members",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/page.tsx",
-      "line": 4,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-operations-dashboard`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-operations-dashboard",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/priorities/page.tsx",
-      "line": 18,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-priorities-page`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-priorities-page",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/[locale]/dashboard/work/page.tsx",
-      "line": 16,
-      "message": "Production code imports from a demo/fixtures path: `@/components/demo/cupe4373-cases-console`. Move behind a demo-profile guard.",
-      "evidence": "@/components/demo/cupe4373-cases-console",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/api/cases/[caseId]/decision/route.ts",
-      "line": 24,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-governance",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts",
-      "line": 24,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-cases-repo`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-cases-repo",
-      "severity": "error"
-    },
-    {
-      "rule": "R-3",
-      "file": "apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts",
-      "line": 25,
-      "message": "Production code imports from a demo/fixtures path: `@/lib/demo/server/cupe4373-governance`. Move behind a demo-profile guard.",
-      "evidence": "@/lib/demo/server/cupe4373-governance",
-      "severity": "error"
     },
     {
       "rule": "R-6",
@@ -554,8 +274,8 @@
     },
     {
       "rule": "R-6",
-      "file": "apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts",
-      "line": 65,
+      "file": "apps/union-eyes/app/api/cases/[caseId]/(demo)/proof-pack/route.ts",
+      "line": 66,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -4546,6 +4266,22 @@
     },
     {
       "rule": "R-7",
+      "file": "apps/union-eyes/app/api/cases/[caseId]/(demo)/decision/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/cases/[caseId]/(demo)/decision/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/cases/[caseId]/(demo)/decision/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
+      "file": "apps/union-eyes/app/api/cases/[caseId]/(demo)/proof-pack/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/cases/[caseId]/(demo)/proof-pack/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/cases/[caseId]/(demo)/proof-pack/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
       "file": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
       "line": 1,
       "message": "Production API route `app/api/cases/[caseId]/assign/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
@@ -4558,14 +4294,6 @@
       "line": 1,
       "message": "Production API route `app/api/cases/[caseId]/audit/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/cases/[caseId]/audit/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
-      "file": "apps/union-eyes/app/api/cases/[caseId]/decision/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/cases/[caseId]/decision/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/cases/[caseId]/decision/route.ts",
       "severity": "warning"
     },
     {
@@ -4606,14 +4334,6 @@
       "line": 1,
       "message": "Production API route `app/api/cases/[caseId]/notes/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/cases/[caseId]/notes/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
-      "file": "apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/cases/[caseId]/proof-pack/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/cases/[caseId]/proof-pack/route.ts",
       "severity": "warning"
     },
     {

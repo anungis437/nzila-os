@@ -22,7 +22,11 @@ import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns 
 import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
-import { Cupe4373CommunicationsPage } from "@/components/demo/cupe4373-communications-page";
+// NOTE: `Cupe4373CommunicationsPage` is loaded via a runtime-gated dynamic
+// import inside the `isCupe4373DemoRuntime()` branch below. Keeping the
+// import dynamic keeps the demo module out of the executive / pilot static
+// import graph (anti-theatre rule R-3). See
+// `apps/union-eyes/app/[locale]/dashboard/page.tsx` for the sibling pattern.
 
 /** Fetch all hub metrics in parallel */
 async function getHubMetrics(orgId: string) {
@@ -138,6 +142,11 @@ export default async function CommunicationsDashboard({
   }
 
   if (isCupe4373DemoRuntime()) {
+    // Dynamic import: demo module loaded only when the runtime gate has
+    // already selected the demo profile. See top-of-file note.
+    const { Cupe4373CommunicationsPage } = await import(
+      "@/components/demo/cupe4373-communications-page"
+    );
     return <Cupe4373CommunicationsPage />;
   }
 

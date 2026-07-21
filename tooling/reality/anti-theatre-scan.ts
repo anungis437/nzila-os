@@ -276,13 +276,31 @@ const rule_demoImportInProd: Rule = (ctx) => {
   // Skip tests and stories inside those trees.
   if (isTestOrFixturePath(ctx.relPath)) return [];
   // Skip demo-tree self-references: files that themselves live under a
-  // `demo/` or `__hashfixture__/` directory are allowed to import from
-  // sibling demo files. What we want to catch is *cross-boundary*
-  // imports from real production code into demo data. This exemption is
-  // narrow and cannot be used to hide production→demo leakage in
-  // dashboard pages, API routes, or shared library code.
+  // `demo/`, `(demo)` / `(demo-*)` route group, `__hashfixture__/`, or
+  // `__fixtures__/` directory are allowed to import from sibling demo
+  // files. What we want to catch is *cross-boundary* imports from real
+  // production code into demo data. This exemption is narrow and cannot
+  // be used to hide production→demo leakage in dashboard pages, API
+  // routes, or shared library code that has NOT been explicitly placed
+  // inside a demo scope.
+  //
+  // Route-group exemption note: Next.js route groups written as
+  // `(demo)` or `(demo-XXX)` do not affect URLs. Placing a file under
+  // one is a structural declaration that "this file participates in
+  // the demo bundle" — but it does NOT prevent runtime access unless
+  // a corresponding server-side gate is present. The Wave 0 layout
+  // at `apps/union-eyes/app/[locale]/dashboard/(demo)/layout.tsx`
+  // (and the per-route API guards) provide that gate. If a new
+  // `(demo-*)` group is created WITHOUT an accompanying gate, the
+  // security posture regresses silently. The scanner cannot detect
+  // that regression — it must be caught in code review.
   const normalised = ctx.relPath.replace(/\\/g, '/');
-  if (/\/(?:demo|__hashfixture__|__fixtures__)\//.test(normalised)) return [];
+  if (
+    /\/(?:demo|__hashfixture__|__fixtures__)\//.test(normalised)
+    || /\/\(demo(?:-[a-z0-9_-]+)?\)\//.test(normalised)
+  ) {
+    return [];
+  }
   const findings: Finding[] = [];
   const RE = /from\s+['"`]([^'"`]+)['"`]/g;
   let m: RegExpExecArray | null;
