@@ -30,11 +30,11 @@ console logs are cross-referenced by commit `515d146db`.
 | 3 | `pnpm --filter @nzila/union-eyes typecheck` | `apps/union-eyes` | 0 | 59 154 ms | PASS | n/a | `tsc --noEmit`; clean. |
 | 4 | `pnpm --filter @nzila/union-eyes lint` | `apps/union-eyes` | 0 | 125 250 ms | PASS_WITH_WARNINGS | style | 0 errors, 2 431 warnings (mostly `@typescript-eslint/no-explicit-any` in `services/platform-economics/**` and legacy DTOs). Warnings are not merge-blocking per repo policy. |
 | 5 | `pnpm --filter @nzila/union-eyes test --run` | `apps/union-eyes` | 0 | 109.6 s | PASS | n/a | 15 977 tests / 1 098 files after fixing `app/api/__tests__/admin-pilot-status.route.test.ts` to reflect the added operational probes (see §7). |
-| 6 | `pnpm lint` (repo-wide) | repo | — | — | NOT_RUN | scope | Package-scoped lint (row 4) passed. Repo-wide run deferred to CI to avoid cross-package churn eating this session's budget. Row 4 is the actual gate on this PR. |
-| 7 | `pnpm typecheck` (repo-wide) | repo | — | — | NOT_RUN | scope | Same rationale as row 6. CI will run the full matrix. |
-| 8 | `pnpm test:fast` (repo-wide) | repo | — | — | NOT_RUN | scope | Same rationale. Row 5 is the actual gate for the affected package. |
-| 9 | `pnpm validate:docs` | repo | — | — | NOT_RUN | scope | Deferred; last successful run was pre-branch on `main`. Docs modified in this branch are:<br>- `docs/union-eyes/reality-remediation/{04,16,17}*.md` — no cross-doc references introduced. |
-| 10 | `pnpm governance:audit` | repo | — | — | NOT_RUN | scope | Deferred to CI. |
+| 6 | `pnpm lint` (repo-wide) | repo | 0 | 236 s | PASS_WITH_WARNINGS | style | 170 tasks succeeded (all cached from Turbo cache). 0 errors, 2 432 warnings across the whole workspace. Warnings are mostly `@typescript-eslint/no-explicit-any` in legacy DTO shims (`types/action-dtos.ts`, `types/organization.ts`, e2e test fixtures) and are not merge-blocking per repo policy. |
+| 7 | `pnpm typecheck` (repo-wide) | repo | — | — | NOT_RUN | scope | Package-scoped typecheck (row 3) passed. Repo-wide typecheck deferred to CI. |
+| 8 | `pnpm test:fast` (repo-wide) | repo | — | — | NOT_RUN | scope | Row 5 is the actual gate for the affected package. Repo-wide test:fast deferred to CI. |
+| 9 | `pnpm validate:docs` | repo | 0 | ~30 s | PASS | n/a | 2 207 files scanned. 0 errors, 1 212 warnings, 1 534 info. Reports at `reports/doc-consistency.{json,md}`. Both files modified in this branch (`16_ANTI_THEATRE_BASELINE.md`, `17_VALIDATION_MATRIX.md`) are clean. |
+| 10 | `pnpm governance:audit` | repo | 0 | ~4 min | PASS | n/a | Full governance pipeline: doc consistency (0 errors), governance manifest audit (passed:true), financial-service health (typecheck+lint+test 541/541 pass). |
 | 11 | `pnpm verify:migrations` | repo | — | — | NOT_RUN | scope | No migration files changed in this branch. |
 | 12 | `pnpm contract-tests` | repo | — | — | NOT_RUN | scope | No contract files changed in this branch. |
 | 13 | `pnpm build --filter @nzila/union-eyes` | `apps/union-eyes` | — | — | NOT_RUN | scope | Skipped this session: instrumentation.ts sanity-checked via typecheck (row 3) and next-build phase-check ensures the demo guard is not evaluated during build. Full build will run in CI. |

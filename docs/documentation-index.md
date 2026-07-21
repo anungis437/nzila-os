@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-07-20T21:44:10.379Z
+Generated: 2026-07-21T02:27:49.462Z
 
-Total documents indexed: 1519
+Total documents indexed: 1539
 Stale documents (>90 days since repo validation): 1
 
 ## Category Summary
@@ -34,7 +34,7 @@ Stale documents (>90 days since repo validation): 1
 | nzila-sovereignty-proving | 9 | 0 |
 | nzila-tier2-hardening | 9 | 0 |
 | nzila-tier3-operating-infrastructure | 2 | 0 |
-| oci | 159 | 0 |
+| oci | 160 | 0 |
 | ops | 8 | 0 |
 | platform | 5 | 0 |
 | procurement-pack.md | 1 | 0 |
@@ -45,7 +45,7 @@ Stale documents (>90 days since repo validation): 1
 | root | 4 | 1 |
 | runbooks | 2 | 0 |
 | sred | 87 | 0 |
-| union-eyes | 29 | 0 |
+| union-eyes | 48 | 0 |
 | zonga | 2 | 0 |
 
 ## Documents
@@ -1066,7 +1066,7 @@ Stale documents (>90 days since repo validation): 1
 | [docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/README.md](docs/doctrine/whitepapers/README.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-07-20 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-07-21 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/gates/gate-taxonomy.md](docs/governance/gates/gate-taxonomy.md) | governance | 2026-07-18 | current |
 | [docs/governance/owner-operated-review-model.md](docs/governance/owner-operated-review-model.md) | governance | 2026-07-18 | current |
@@ -1191,6 +1191,7 @@ Stale documents (>90 days since repo validation): 1
 | [docs/oci/compliance/OCI_ISO31000_CROSSWALK.md](docs/oci/compliance/OCI_ISO31000_CROSSWALK.md) | oci | 2026-07-18 | current |
 | [docs/oci/compliance/OCI_ISO37000_CROSSWALK.md](docs/oci/compliance/OCI_ISO37000_CROSSWALK.md) | oci | 2026-07-18 | current |
 | [docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md](docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md) | oci | 2026-07-18 | current |
+| [docs/oci/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md](docs/oci/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md) | oci | 2026-07-20 | current |
 | [docs/oci/government-readiness/EVIDENCE_MANIFEST.md](docs/oci/government-readiness/EVIDENCE_MANIFEST.md) | oci | 2026-07-20 | current |
 | [docs/oci/government-readiness/GOVERNMENT_READINESS_ARCHITECTURE_DECISION.md](docs/oci/government-readiness/GOVERNMENT_READINESS_ARCHITECTURE_DECISION.md) | oci | 2026-07-20 | current |
 | [docs/oci/government-readiness/IMPLEMENTATION_STATUS.md](docs/oci/government-readiness/IMPLEMENTATION_STATUS.md) | oci | 2026-07-20 | current |
@@ -1320,8 +1321,8 @@ Stale documents (>90 days since repo validation): 1
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-07-18 | current |
 | [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-22 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-07-18 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-07-20 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-07-20 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-07-21 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-07-21 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-07-18 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |
@@ -1555,6 +1556,25 @@ Stale documents (>90 days since repo validation): 1
 | [docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md](docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md) | union-eyes | 2026-07-18 | current |
 | [docs/union-eyes/qa/rbac-reality-map.md](docs/union-eyes/qa/rbac-reality-map.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/qa/user-story-coverage-matrix.md](docs/union-eyes/qa/user-story-coverage-matrix.md) | union-eyes | 2026-05-11 | current |
+| [docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md](docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/01_BASELINE_AND_SCOPE.md](docs/union-eyes/reality-remediation/01_BASELINE_AND_SCOPE.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/02_CAPABILITY_REALITY_REGISTER.md](docs/union-eyes/reality-remediation/02_CAPABILITY_REALITY_REGISTER.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/03_THREAT_AND_IMPACT_MODEL.md](docs/union-eyes/reality-remediation/03_THREAT_AND_IMPACT_MODEL.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md](docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md](docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/06_ANTI_THEATRE_CI_CHECKS.md](docs/union-eyes/reality-remediation/06_ANTI_THEATRE_CI_CHECKS.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/07_DEPLOYMENT_GUARDS.md](docs/union-eyes/reality-remediation/07_DEPLOYMENT_GUARDS.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md](docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md](docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md](docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md](docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md](docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md](docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md](docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/15_REMEDIATION_BASELINE.md](docs/union-eyes/reality-remediation/15_REMEDIATION_BASELINE.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md](docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md](docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md) | union-eyes | 2026-07-21 | current |
 | [docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md](docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/runtime-convergence/fsm-pilot-module-runtime-reconvergence.md](docs/union-eyes/runtime-convergence/fsm-pilot-module-runtime-reconvergence.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md](docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md) | union-eyes | 2026-05-11 | current |

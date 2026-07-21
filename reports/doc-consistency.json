@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-20T21:44:08.570Z",
-  "filesScanned": 2187,
-  "totalFindings": 2722,
+  "generatedAt": "2026-07-21T02:27:47.519Z",
+  "filesScanned": 2207,
+  "totalFindings": 2746,
   "findingsByRule": {
     "stale-reference": 1033,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1495,
+    "naming-inconsistency": 1519,
     "stale-date": 15,
     "missing-package-readme": 111
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1212,
-    "info": 1510
+    "info": 1534
   },
   "findings": [
     {
@@ -16699,6 +16699,13 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/oci/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md",
+      "line": 4,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/oci/government-readiness/EVIDENCE_MANIFEST.md",
       "line": 20,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
@@ -17798,6 +17805,167 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md",
+      "line": 82,
+      "message": "\"evidence bundle\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md",
+      "line": 146,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 13,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 14,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 16,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 32,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 33,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 34,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 35,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 36,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 39,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 40,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 43,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 47,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 50,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 122,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 126,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 129,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 144,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 148,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 171,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 229,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "line": 230,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md",
       "line": 11,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
@@ -18192,105 +18360,105 @@
       "severity": "info",
       "file": "AWS_ZONGA_SETUP.md",
       "line": 432,
-      "message": "Document date \"2026-04-19\" is 92 days old — may be stale"
+      "message": "Document date \"2026-04-19\" is 93 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
       "line": 343,
-      "message": "Document date \"2026-04-08\" is 103 days old — may be stale"
+      "message": "Document date \"2026-04-08\" is 104 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/ownership-registry.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 92 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md",
       "line": 3,
-      "message": "Document date \"2026-04-13\" is 98 days old — may be stale"
+      "message": "Document date \"2026-04-13\" is 99 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md",
       "line": 10,
-      "message": "Document date \"2026-04-14\" is 97 days old — may be stale"
+      "message": "Document date \"2026-04-14\" is 98 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/buyer-faq.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/deployment-models.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/integration-readiness-matrix.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/pilot-readiness-checklist.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/product-capability-matrix.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/sla-support-model.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 94 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 95 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/INDEX.md",
       "line": 179,
-      "message": "Document date \"2026-04-20\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 92 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",

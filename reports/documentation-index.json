@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T21:44:10.379Z",
-  "totalDocuments": 1519,
+  "generatedAt": "2026-07-21T02:27:49.462Z",
+  "totalDocuments": 1539,
   "staleDocuments": 1,
   "categories": [
     {
@@ -130,7 +130,7 @@
     },
     {
       "category": "oci",
-      "count": 159,
+      "count": 160,
       "staleCount": 0
     },
     {
@@ -185,7 +185,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 29,
+      "count": 48,
       "staleCount": 0
     },
     {
@@ -6282,7 +6282,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-07-21",
       "stale": false
     },
     {
@@ -7027,6 +7027,12 @@
       "path": "docs/oci/compliance/OCI_PROCUREMENT_POSITIONING.md",
       "category": "oci",
       "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/oci/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md",
+      "category": "oci",
+      "lastValidated": "2026-07-20",
       "stale": false
     },
     {
@@ -7806,13 +7812,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-07-21",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-07-21",
       "stale": false
     },
     {
@@ -9211,6 +9217,120 @@
       "path": "docs/union-eyes/qa/user-story-coverage-matrix.md",
       "category": "union-eyes",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/01_BASELINE_AND_SCOPE.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/02_CAPABILITY_REALITY_REGISTER.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/03_THREAT_AND_IMPACT_MODEL.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/06_ANTI_THEATRE_CI_CHECKS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/07_DEPLOYMENT_GUARDS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/15_REMEDIATION_BASELINE.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
       "stale": false
     },
     {
