@@ -1,5 +1,16 @@
 # Wave 0 §9 — Build Isolation Proof: Operational vs. CUPE 4373 Demo
 
+> **⚠️ SUPERSEDED — DO NOT RELY ON THIS DOCUMENT.**
+>
+> The two builds captured below both invoked `pnpm --filter @nzila/union-eyes build`. The `@nzila/union-eyes-demo` package was never built. The distinct BUILD_IDs observed do not demonstrate artifact isolation; they only demonstrate that the operational app produces a different BUILD_ID when demo env vars are set.
+>
+> The correct artifact-to-artifact proof lives in [`wave-0-artifact-proof.md`](wave-0-artifact-proof.md).
+> The reversed verdict and remediation plan live in [`../docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md`](../docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md).
+>
+> This file is retained unmodified below for historical traceability.
+
+---
+
 **Milestone**: Wave 0 §9 (build isolation proof)
 **Branch**: `fix/union-eyes-reality-remediation`
 **Generated**: See per-build timestamps in the JSON artifacts.

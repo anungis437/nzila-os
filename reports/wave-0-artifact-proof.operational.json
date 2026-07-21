@@ -1,0 +1,25 @@
+{
+  "artifact": "operational",
+  "package": "@nzila/union-eyes",
+  "command": "pnpm --filter @nzila/union-eyes build",
+  "envOverrides": {
+    "UE_DEPLOYMENT_TYPE": "(unset)",
+    "UE_FEATURE_PROFILE": "(unset)",
+    "NEXT_PUBLIC_UE_FEATURE_PROFILE": "(unset)",
+    "UE_DEMO_PROFILE": "(unset)",
+    "NEXT_PUBLIC_UE_DEMO_PROFILE": "(unset)"
+  },
+  "commit": "de263958a",
+  "recordedAt": "2026-07-21",
+  "buildId": "1784633120903",
+  "routes": { "static": 711, "dynamic": 575, "total": 1286 },
+  "outputDir": "apps/union-eyes/.next",
+  "outputSizeMB": 612.19,
+  "buildDurationSeconds": 119.21,
+  "exitCode": 0,
+  "bundleDemoTokenScan": {
+    "pattern": "cupe\\s*[-_]?\\s*4373|cupe\\s*local\\s*4373|CUPE4373_",
+    "filesWithHits": 72,
+    "verdict": "CONTAMINATION_PRESENT — operational bundle still contains CUPE-specific runtime code (gated by isCupe4373DemoRuntime but bundled)."
+  }
+}

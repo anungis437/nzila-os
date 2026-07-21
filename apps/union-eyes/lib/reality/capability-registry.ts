@@ -199,12 +199,13 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'tooling/reality/operational-build-scan.ts + operational-build-demo-allowlist.json — anti-theatre scanner enforces that every demo-token reference in operational source has a truthful classification and reason, with per-file maxHits ceilings',
       'reports/operational-build-demo-scan.md — current baseline: 29 source files / 97 hits, 0 errors',
     ],
-    targetWave: 6,
+    targetWave: 0,
     notes:
-      'Operational bundle currently embeds CUPE 4373 demo constants (persona picker, demo navigation, demo document titles) and JSX branches. ' +
-      'All rendering paths are gated by isCupe4373DemoRuntime() and remain dead code when no demo env vars are set. ' +
-      'Wave 5/6 will dynamically-import the demo-only modules (persona picker, demo dashboards, demo navigation) so the operational bundle no longer contains any demo strings. ' +
-      'Until then, the operational-build-scan gate (`pnpm reality:build-scan`) ensures the demo-string surface cannot silently grow, and the allowlist documents every legitimate reference.',
+      'CORRECTED 2026-07-21 (see docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md). ' +
+      'Prior text framed the 72 demo-tainted files in the operational bundle as an informational metric deferred to Wave 5/6. That framing is withdrawn. ' +
+      'Operational bundle currently embeds CUPE 4373 demo constants (persona picker, demo navigation, demo document titles) and JSX branches. Gating by isCupe4373DemoRuntime() removes them from execution paths but not from the bundle, and env-var overrides on the operational package flip the gates. ' +
+      'Correct remediation: DELETE the CUPE-specific modules from the operational package (they already have counterparts in apps/union-eyes-demo/), replace CUPE-specific env-schema literals with a generic demo class the operational app refuses, and drop the allowlist model in favour of near-zero source hits. ' +
+      'targetWave lowered from 6 to 0 — this is a Wave 0 exit requirement, not a deferred cleanup.',
   },
 
   // ------------------------------------------------------------------------

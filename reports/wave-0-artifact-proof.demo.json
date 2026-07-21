@@ -1,0 +1,21 @@
+{
+  "artifact": "demo",
+  "package": "@nzila/union-eyes-demo",
+  "command": "pnpm --filter @nzila/union-eyes-demo build",
+  "envOverrides": {
+    "TARGET_ENVIRONMENT": "(uses demo default)"
+  },
+  "commit": "de263958a",
+  "recordedAt": "2026-07-21",
+  "buildId": "dyG6B6BsIlZuIJTU8ebYp",
+  "routes": { "static": 2, "dynamic": 14, "total": 16 },
+  "outputDir": "apps/union-eyes-demo/.next",
+  "outputSizeMB": 21.11,
+  "buildDurationSeconds": 17.5,
+  "exitCode": 0,
+  "bundleDemoTokenScan": {
+    "pattern": "cupe\\s*[-_]?\\s*4373|cupe\\s*local\\s*4373|CUPE4373_",
+    "filesWithHits": 116,
+    "verdict": "EXPECTED — this artifact IS the CUPE 4373 demo. Demo content is legitimate here."
+  }
+}

@@ -1,5 +1,9 @@
 # 22 — Wave 0 Programme Summary (§14 — abridged, executed within blocker constraints)
 
+> **⚠️ SUPERSEDED.** This summary claims Wave 0 §1–§10 are delivered. That is incorrect: §8 accepts contamination via allowlist and §9 never touched the demo package. See [`23_WAVE_0_CORRECTION.md`](23_WAVE_0_CORRECTION.md) for the reversed verdict and remediation plan. Retained unmodified below for traceability.
+
+---
+
 **Branch:** `fix/union-eyes-reality-remediation` @ `4c2fd5b4a` (post-§10)
 **Recorded:** at the end of the Wave 0 executable-work session.
 

@@ -1,5 +1,9 @@
 # 21 — Wave 0 Validation Matrix (§10)
 
+> **⚠️ SUPERSEDED.** Row 4 (source scan) and row 5 (bundle scan) misclassify allowlisted contamination as PASS. Rows 6/7/8 (build isolation) are invalid — both builds used `@nzila/union-eyes`, not the two actual packages. The reversed verdict lives in [`23_WAVE_0_CORRECTION.md`](23_WAVE_0_CORRECTION.md). The correct artifact-to-artifact proof lives in [`../../../reports/wave-0-artifact-proof.md`](../../../reports/wave-0-artifact-proof.md). This file is retained unmodified for traceability.
+
+---
+
 **Milestone:** Wave 0 §10 — consolidated validation matrix
 **Branch:** `fix/union-eyes-reality-remediation` @ `d9b32eaeb` (post-§9)
 **Recorded:** During Wave 0 continuation, immediately after §9 commit.
