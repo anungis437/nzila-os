@@ -27,12 +27,29 @@ async function loadRoute() {
 }
 
 describe('admin/pilot-status route', () => {
+  const originalEnv = { ...process.env };
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset env each test so secret-presence probes are deterministic.
+    process.env = { ...originalEnv };
+    process.env.DATABASE_URL = 'postgres://test';
+    process.env.AUTH_SECRET = 'test-secret';
+    process.env.AZURE_AD_TENANT_ID = 'test-tenant';
+    delete process.env.UE_FEATURE_PROFILE;
+    delete process.env.NEXT_PUBLIC_UE_DEMO_PROFILE;
+    process.env.TARGET_ENVIRONMENT = 'development';
+
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
     m.hasMinRole.mockResolvedValue(true);
     m.auth.mockResolvedValue({ orgId: 'org-abc' });
-    m.dbExecute.mockResolvedValue([{ n: 3 }]);
+    // Return SELECT 1's shape for the postgres-ping probe and COUNT's
+    // shape for the users/worksites queries. The mock sql template is
+    // stringified via its `strings` array; inspect it to decide.
+    m.dbExecute.mockImplementation(async (arg: any) => {
+      const raw = Array.isArray(arg?.strings) ? arg.strings.join(' ') : String(arg);
+      if (/SELECT 1/i.test(raw)) return [{ ok: 1 }];
+      return [{ n: 3 }];
+    });
     m.buildPilotStatus.mockReturnValue({
       health: { status: 'remediation_in_progress', checks: [] },
       configuration: {},
@@ -56,7 +73,19 @@ describe('admin/pilot-status route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ health: { status: 'remediation_in_progress' } });
-    expect(m.dbExecute).toHaveBeenCalledTimes(2);
+    // dbExecute is now called 3x: users, worksites, and the postgres
+    // ping probe (SELECT 1).
+    expect(m.dbExecute).toHaveBeenCalledTimes(3);
+    // The route MUST emit an `operational` array with the mandated
+    // shape. Every entry needs capabilityId/state/severity/etc.
+    expect(Array.isArray(payload.operational)).toBe(true);
+    expect(payload.operational.length).toBeGreaterThanOrEqual(20);
+    for (const check of payload.operational) {
+      expect(check.capabilityId).toBeTruthy();
+      expect(['pass', 'warn', 'fail', 'unknown']).toContain(check.state);
+      expect(check.evidenceReference).toBeTruthy();
+      expect(check.remediationGuidance).toBeTruthy();
+    }
     // buildPilotStatus must receive `null` for every unmeasured flag —
     // never a fabricated `true`.
     expect(m.buildPilotStatus).toHaveBeenCalledWith(
