@@ -71,7 +71,6 @@ function IconForItem({ item }: { item: NavigationItem }) {
     "/dashboard/work": BriefcaseBusiness,
     "/dashboard/agreements": BookOpen,
     "/dashboard/calendar": CalendarDays,
-    "/dashboard/reports": BarChart3,
   };
   const Icon = item.icon
     ? iconsByKey[item.icon]

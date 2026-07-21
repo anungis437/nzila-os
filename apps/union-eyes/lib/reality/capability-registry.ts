@@ -215,23 +215,25 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   // ------------------------------------------------------------------------
   {
     id: 'UE-DASH-REPORTS-INDEX',
-    title: 'Reports dashboard index (/dashboard/reports)',
-    state: 'NOT_IMPLEMENTED',
-    ownedBy: [
-      'app/[locale]/dashboard/reports/page.tsx',
-      'app/[locale]/dashboard/reports/layout.tsx',
-    ],
+    title: 'Reports dashboard index (/dashboard/reports) — REMOVED',
+    state: 'REMOVED',
+    ownedBy: [],
     evidence: [
-      'app/[locale]/dashboard/reports/page.tsx — unconditional notFound() call in ReportsPage; renders HTTP 404',
-      'app/[locale]/dashboard/reports/layout.tsx — server-side auth guard preserved so 404 is emitted only after auth passes',
-      'docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md — enumerated nav references still pointing here (5 files, 12 refs)',
+      'app/[locale]/dashboard/reports/page.tsx — DELETED (Wave 0 Task G)',
+      'app/[locale]/dashboard/reports/layout.tsx — DELETED (Wave 0 Task G)',
+      'lib/dashboard/role-experience.ts — three "Institutional Intelligence Reports" nav entries REMOVED (staff/executive/governance) plus three /dashboard/reports allowed-prefix entries REMOVED',
+      'components/sidebar.tsx — /dashboard/reports iconsByHref entry REMOVED',
+      'components/dashboards/federation-dashboard.tsx — Reports quick-action tile REMOVED',
+      'apps/union-eyes/lib/reality/__tests__/route-reconciliation.test.ts — new Task G invariant asserts no advertised nav href resolves to a pure notFound() page',
     ],
     targetWave: 5,
     notes:
-      'The demo variant lives in `apps/union-eyes-demo/` and is no longer reachable from the operational build. ' +
-      'Navigation entries in role-experience.ts, portal-home.tsx, federation-dashboard.tsx, and sidebar.tsx still ' +
-      'reference /dashboard/reports; they are intentionally left in place so the entry re-appears automatically ' +
-      'the moment the target-wave implementation lands. See §7 route reconciliation for the enforced invariant.',
+      'CORRECTED 2026-07-21 (Wave 0 Task G, see docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md §4). ' +
+      'The prior policy left the nav entries in place so the surface would "re-appear the moment the target-wave ' +
+      'implementation lands". That policy created a permanent dead-link in every staff/executive/governance ' +
+      'dashboard. Task G reverses it: no dead nav, no dead page. When the reports surface returns in a later wave ' +
+      'it MUST be re-added by adding both the page file and the nav entries in the same commit, gated by a Task G ' +
+      'invariant that forbids advertising a route whose page body reduces to notFound().',
   },
   {
     id: 'UE-DASH-DEBUG',

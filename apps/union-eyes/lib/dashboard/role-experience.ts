@@ -113,7 +113,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Members', href: '/dashboard/members', group: 'Operations' },
       { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
       { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/reports', group: 'Institutional Intelligence' },
       { label: 'Notifications', href: '/dashboard/notifications', group: 'Operations' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
@@ -128,7 +127,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Governance Continuity', href: '/dashboard/governance-center', group: 'Governance Continuity' },
       { label: 'Operations Outcomes (Member Outcomes Ledger)', href: '/dashboard/outcomes', group: 'Operations' },
       { label: 'Onboarding Survivability (Leadership Continuity)', href: '/dashboard/leadership', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/reports', group: 'Institutional Intelligence' },
       { label: 'Governance Trust & Oversight', href: '/dashboard/trust', group: 'Governance Continuity' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
@@ -143,7 +141,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Governance Policy Continuity', href: '/dashboard/governance', group: 'Governance Continuity' },
       { label: 'OCRA Continuity Signals', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
       { label: 'Governance Audit & Evidence', href: '/dashboard/audits', group: 'Governance Continuity' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/reports', group: 'Institutional Intelligence' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
@@ -183,7 +180,6 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/members',
     '/dashboard/documents',
     '/dashboard/correspondence',
-    '/dashboard/reports',
     '/dashboard/notifications',
     '/dashboard/settings',
     '/dashboard/profile',
@@ -198,7 +194,6 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/governance-center',
     '/dashboard/outcomes',
     '/dashboard/leadership',
-    '/dashboard/reports',
     '/dashboard/trust',
     '/dashboard/settings',
     '/dashboard/profile',
@@ -211,7 +206,6 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/workbench',
     '/dashboard/continuity-intelligence',
     '/dashboard/audits',
-    '/dashboard/reports',
     '/dashboard/settings',
     '/dashboard/profile',
   ],

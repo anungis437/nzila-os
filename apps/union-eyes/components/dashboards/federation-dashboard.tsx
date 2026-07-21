@@ -20,7 +20,6 @@ import {
   DollarSign,
   BarChart3,
   Scale,
-  FileBarChart,
   TrendingUp,
   ArrowRight,
   MapPin,
@@ -118,7 +117,6 @@ export default function FederationDashboard({ isPlatformViewer = false }: Federa
     { title: t("actions.precedents.title"), description: t("actions.precedents.description"), href: `/${locale}/dashboard/precedents`, icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
     { title: t("actions.clauses.title"), description: t("actions.clauses.description"), href: `/${locale}/dashboard/clause-library`, icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
     { title: t("actions.calendar.title"), description: t("actions.calendar.description"), href: `/${locale}/dashboard/calendar`, icon: <Calendar size={24} />, color: "from-violet-500 to-violet-600" },
-    { title: t("actions.reports.title"), description: t("actions.reports.description"), href: `/${locale}/dashboard/reports`, icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
   ];
 
   if (!mounted || !user) {

@@ -170,10 +170,34 @@ describe('Wave 0 §7 — route reconciliation invariant', () => {
     ).toEqual([]);
   });
 
-  it('exposes the /dashboard/reports index as the canonical §7 example', () => {
-    // Explicit assertion so a future regression that silently drops the
-    // registry entry produces a clear failure right here.
-    const tracked = getRegistryTracked404DashboardRoutes();
-    expect(tracked).toContain('/dashboard/reports');
+  it('Task G — every advertised dashboard href resolves to a real (non-404) page', () => {
+    // Task G invariant (Wave 0 §G / docs/23_WAVE_0_CORRECTION.md): the
+    // operational build MUST NOT advertise a nav href whose page body
+    // reduces to a bare `notFound()` call. This is strictly stronger
+    // than the §7 reconciliation invariant above — that one permits
+    // dead nav so long as the registry acknowledges it; Task G forbids
+    // dead nav altogether.
+    //
+    // If a route is genuinely not yet implemented, remove it from the
+    // nav sources until the implementation lands. The registry entry
+    // may remain (state = NOT_IMPLEMENTED or REMOVED) to preserve the
+    // audit trail, but no navigation surface may point at it.
+    const dead: { file: string; href: string }[] = [];
+    for (const rel of NAV_SOURCE_FILES) {
+      const src = readFileSync(resolve(APP_ROOT, rel), 'utf8');
+      const hrefs = extractDashboardHrefs(src);
+      for (const href of hrefs) {
+        if (isUnconditional404(href)) dead.push({ file: rel, href });
+      }
+    }
+    expect(
+      dead,
+      dead.length === 0
+        ? ''
+        : `Task G violation: dead navigation links detected. Either implement the ` +
+          `target surface (page body must be more than a bare notFound()) or ` +
+          `remove the nav reference:\n` +
+          dead.map((d) => `  - ${d.file}: ${d.href}`).join('\n'),
+    ).toEqual([]);
   });
 });

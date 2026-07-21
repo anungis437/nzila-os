@@ -126,7 +126,9 @@ export function probeDemoProfileEnforcement(env: {
 }): OperationalHealthCheck {
   const now = new Date().toISOString();
   const target = (env.targetEnvironment ?? 'production').toLowerCase();
-  const demoValues = ['demo', 'sample', 'placeholder', 'fixture'];
+  // Task H (Wave 0 §H): generic sentinel list only — never customer names.
+  // Any additions here must remain generic (concept-level, not tenant-level).
+  const demoValues = ['demo', 'sample', 'placeholder', 'fixture', 'synthetic'];
   const demoActive =
     demoValues.includes((env.ueFeatureProfile ?? '').toLowerCase()) ||
     demoValues.includes((env.publicDemoProfile ?? '').toLowerCase());

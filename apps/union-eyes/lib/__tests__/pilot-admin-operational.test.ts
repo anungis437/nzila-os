@@ -87,6 +87,32 @@ describe('pilot-admin-operational: probeDemoProfileEnforcement', () => {
     });
     expect(check.state).toBe('fail');
   });
+
+  it.each(['demo', 'sample', 'placeholder', 'fixture', 'synthetic'])(
+    'fails in staging when generic sentinel %s is active (Task H)',
+    (sentinel) => {
+      const check = probeDemoProfileEnforcement({
+        targetEnvironment: 'staging',
+        ueFeatureProfile: sentinel,
+      });
+      expect(check.state).toBe('fail');
+    },
+  );
+
+  it.each(['cupe4373', 'cupe-4373', 'CUPE4373', 'acme', 'nzila'])(
+    'does NOT treat customer-name token %s as a demo sentinel (Task H generic-only)',
+    (customerName) => {
+      const check = probeDemoProfileEnforcement({
+        targetEnvironment: 'staging',
+        ueFeatureProfile: customerName,
+      });
+      // Customer-name tokens must NOT trigger the demo guard — the guard is
+      // for generic concept-level markers only. Boot-time env validation
+      // (env-validation.ts z.never()) is the barrier for tenant-specific
+      // fixtures, not this probe.
+      expect(check.state).toBe('pass');
+    },
+  );
 });
 
 describe('pilot-admin-operational: unmeasuredProbes', () => {
