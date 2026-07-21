@@ -1,0 +1,24 @@
+# ACR Task file — enables BuildKit for the union-eyes stage
+# az acr build uses a legacy builder that rejects --mount=type=bind / cache
+# in the root Dockerfile. This task runs `docker build` inside the ACR
+# runner, where BuildKit is available.
+version: v1.1.0
+stepTimeout: 3600
+steps:
+  - build: >-
+      --file Dockerfile
+      --target union-eyes
+      --platform linux/amd64
+      --tag {{.Run.Registry}}/nzila-os-union-eyes:{{.Values.tag}}
+      --tag {{.Run.Registry}}/nzila-os-union-eyes:staging-latest
+      --build-arg GITHUB_SHA={{.Values.sha}}
+      --build-arg BUILD_TIME={{.Values.buildTime}}
+      --build-arg ARTIFACT_ID={{.Values.tag}}
+      --build-arg RELEASE_ID=wave0-task-j
+      --build-arg TURBO_FILTER=--filter=@nzila/union-eyes
+      .
+    env:
+      - DOCKER_BUILDKIT=1
+  - push:
+      - "{{.Run.Registry}}/nzila-os-union-eyes:{{.Values.tag}}"
+      - "{{.Run.Registry}}/nzila-os-union-eyes:staging-latest"
