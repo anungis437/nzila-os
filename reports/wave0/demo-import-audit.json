@@ -1,6 +1,6 @@
 {
-  "scannedFiles": 715,
-  "uniqueImports": 529,
+  "scannedFiles": 719,
+  "uniqueImports": 530,
   "buckets": {
     "ui-primitives": [],
     "demo-local-components": [
@@ -354,6 +354,7 @@
       "../chunks/vm.BThCzidc.js",
       "../cupe4373-cases-repo",
       "../db/db",
+      "../inert",
       "../lib/demo/cupe4373-cognition-core",
       "../lib/demo/cupe4373-demo",
       "../path.js",
