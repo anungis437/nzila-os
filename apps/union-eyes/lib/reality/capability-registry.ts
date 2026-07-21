@@ -156,56 +156,58 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   },
 
   // ------------------------------------------------------------------------
-  // Demo profile
+  // Demo profile (physically separated as of Wave 0 §3 remediation)
   // ------------------------------------------------------------------------
   {
-    id: 'UE-DEMO-CUPE4373',
-    title: 'CUPE 4373 demo profile',
-    state: 'DEMO_ONLY',
+    id: 'UE-DEMO-SEPARATE-PACKAGE',
+    title: 'Demo runtime is a separate npm package',
+    state: 'REAL',
     ownedBy: [
-      'lib/feature-flags.ts',
-      '.env.local',
+      'apps/union-eyes-demo/',
+      'apps/union-eyes/lib/config/env-validation.ts',
+      'apps/union-eyes/lib/runtime/environment.ts',
     ],
     evidence: [
-      'lib/feature-flags.ts — isCupe4373DemoRuntime reads NEXT_PUBLIC_UE_DEMO_PROFILE and UE_FEATURE_PROFILE',
+      'apps/union-eyes/lib/config/env-validation.ts — UE_DEMO_PROFILE, NEXT_PUBLIC_UE_DEMO_PROFILE, UE_DEMO_ORG_ID, NEXT_PUBLIC_UE_DEMO_ORG_SLUG all typed z.never().optional(); operational package refuses to boot when any is set',
+      'apps/union-eyes/lib/runtime/environment.ts — UeEnvironment omits "demo"; UeDeploymentType omits "cupe4373-demo"; UeFeatureProfile omits "cupe4373"',
+      'apps/union-eyes/app/api/health/route.ts — checkBackend() honours only generic demo/deployment tokens; no customer-branded feature-profile match',
     ],
-    targetWave: 6,
+    targetWave: 0,
     notes:
-      'Deployment guard blocking UE_FEATURE_PROFILE=cupe4373 outside development is pending Wave 6. ' +
-      'DO NOT promote this capability to REAL without that guard in place.',
+      'The operational package (@nzila/union-eyes) contains no customer-specific demo code. Demo fixtures, personas, ' +
+      'navigation, and reference templates live exclusively in @nzila/union-eyes-demo. Boundary enforcement is the ' +
+      'zod env schema (fail-closed at process start).',
   },
 
   // ------------------------------------------------------------------------
-  // Build-time isolation (Wave 0 §8)
+  // Build-time isolation (Wave 0 §8 — physically separated as of §3 remediation)
   // ------------------------------------------------------------------------
   {
     id: 'UE-BUILD-OPERATIONAL-ISOLATION',
-    title: 'Operational-build isolation from CUPE 4373 demo content',
-    state: 'LIMITED',
+    title: 'Operational build carries no customer-specific demo content',
+    state: 'REAL',
     ownedBy: [
-      'lib/dashboard/role-experience.ts',
-      'components/auth/cupe4373-persona-picker.tsx',
-      'app/[locale]/dashboard/layout.tsx',
-      'components/home/portal-home.tsx',
-      'components/sidebar.tsx',
-      'components/documents/documents-console.tsx',
+      'apps/union-eyes/lib/dashboard/role-experience.ts',
+      'apps/union-eyes/lib/config/env-validation.ts',
+      'apps/union-eyes/lib/runtime/environment.ts',
+      'apps/union-eyes/components/sidebar.tsx',
+      'apps/union-eyes/app/[locale]/dashboard/layout.tsx',
       'tooling/reality/operational-build-scan.ts',
-      'tooling/reality/operational-build-demo-allowlist.json',
     ],
     evidence: [
-      'lib/dashboard/role-experience.ts:129 — isCupe4373DemoRuntime() reads four env vars (NEXT_PUBLIC_UE_DEMO_PROFILE, NEXT_PUBLIC_UE_FEATURE_PROFILE, UE_FEATURE_PROFILE, UE_DEPLOYMENT_TYPE=cupe4373-demo); operational builds set none of these so the gate returns false',
-      'app/[locale]/dashboard/layout.tsx:35,296 — "CUPE Local 4373 demo" JSX is inside `{isCupeDemo ? … : <OrganizationBreadcrumb />}` and unreachable when isCupeDemo=false',
-      'components/sidebar.tsx:135,151 — getCupe4373DemoNavigation / getCupe4373DemoGroups are called only inside the isCupeDemo branch',
-      'tooling/reality/operational-build-scan.ts + operational-build-demo-allowlist.json — anti-theatre scanner enforces that every demo-token reference in operational source has a truthful classification and reason, with per-file maxHits ceilings',
-      'reports/operational-build-demo-scan.md — current baseline: 29 source files / 97 hits, 0 errors',
+      'apps/union-eyes/lib/dashboard/role-experience.ts — CUPE4373_DEMO_* constants, readRuntimeMarker, isCupe4373DemoRuntime, and demo-branch helpers removed. Navigation returns only the operational default.',
+      'apps/union-eyes/components/sidebar.tsx / app/[locale]/dashboard/layout.tsx — no isCupeDemo prop, no demo badge, no demo navigation branches.',
+      'apps/union-eyes/components/auth/cupe4373-persona-picker.tsx and components/home/portal-home.tsx — DELETED.',
+      'apps/union-eyes/lib/config/env-validation.ts — UE_DEMO_* env vars typed z.never().optional(); boot fails if any is set.',
+      'apps/union-eyes/lib/runtime/environment.ts — UeEnvironment, UeDeploymentType, UeFeatureProfile enums omit demo/cupe4373 members.',
+      'reports/wave-0-artifact-proof.operational.json / wave-0-artifact-proof.md — physical proof of the two-package split.',
     ],
     targetWave: 0,
     notes:
       'CORRECTED 2026-07-21 (see docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md). ' +
-      'Prior text framed the 72 demo-tainted files in the operational bundle as an informational metric deferred to Wave 5/6. That framing is withdrawn. ' +
-      'Operational bundle currently embeds CUPE 4373 demo constants (persona picker, demo navigation, demo document titles) and JSX branches. Gating by isCupe4373DemoRuntime() removes them from execution paths but not from the bundle, and env-var overrides on the operational package flip the gates. ' +
-      'Correct remediation: DELETE the CUPE-specific modules from the operational package (they already have counterparts in apps/union-eyes-demo/), replace CUPE-specific env-schema literals with a generic demo class the operational app refuses, and drop the allowlist model in favour of near-zero source hits. ' +
-      'targetWave lowered from 6 to 0 — this is a Wave 0 exit requirement, not a deferred cleanup.',
+      'The prior allowlist model has been retired. Operational package now physically excludes customer-specific ' +
+      'demo modules and rejects UE_DEMO_* env vars at boot via the zod schema. Any regression is caught at the ' +
+      'boundary (env validation) or at compile time (removed types), not by a runtime scanner allowlist.',
   },
 
   // ------------------------------------------------------------------------

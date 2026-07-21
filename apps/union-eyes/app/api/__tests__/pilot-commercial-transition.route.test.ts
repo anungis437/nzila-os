@@ -246,7 +246,6 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
       body: JSON.stringify({
         targetState: 'contract_sent',
         allowSkip: true,
-        applyReferenceTemplate: 'CUPE4373',
         reason: 'pilot uplift',
         source: 'test-suite',
       }),

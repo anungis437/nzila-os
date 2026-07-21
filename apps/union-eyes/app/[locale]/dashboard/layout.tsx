@@ -14,7 +14,6 @@ import { OrganizationBreadcrumb } from "@/components/organization/organization-b
 import LanguageSwitcher from "@/components/language-switcher";
 import { HeaderActions } from "@/components/header-actions";
 import RoleExperienceGuard from "@/components/dashboard/role-experience-guard";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 import { PilotModeProvider } from "@/contexts/pilot-mode-context";
 import { FeatureFlagProvider } from "@/lib/hooks/use-feature-flags";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
@@ -32,7 +31,6 @@ import { QcBilingualBanner } from "@/components/compliance/qc-bilingual-banner";
 // import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const isCupeDemo = isCupe4373DemoRuntime();
   // Fetch user profile once at the layout level
   const { userId } = await auth();
 
@@ -282,7 +280,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           whopYearlyPlanId={process.env.WHOP_PLAN_ID_YEARLY || ''}
           userRole={userRole}
           platformOrgId={DEFAULT_ORGANIZATION_ID}
-          isCupeDemo={isCupeDemo}
         />
         
         {/* Main content area with organization selector */}
@@ -291,16 +288,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <QcBilingualBanner province={organizationProvince} />
           {/* Organization selector and breadcrumb in header - sticky at top */}
           <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 pl-16 md:pl-6 pr-3 md:pr-6 py-2.5 md:py-4 flex justify-between items-center gap-2 min-h-12 md:min-h-15">
-            {isCupeDemo ? (
-              <div className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700">
-                CUPE Local 4373 demo
-              </div>
-            ) : (
-              <OrganizationBreadcrumb />
-            )}
+            <OrganizationBreadcrumb />
             <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
               <LanguageSwitcher />
-              {!isCupeDemo && <OrganizationSelector />}
+              <OrganizationSelector />
               <HeaderActions />
             </div>
           </div>
@@ -308,7 +299,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           {/* Page content */}
           <main className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
             <FeatureFlagProvider>
-              {!isCupeDemo && <RoleExperienceGuard userRole={userRole} />}
+              <RoleExperienceGuard userRole={userRole} />
               {children}
             </FeatureFlagProvider>
           </main>

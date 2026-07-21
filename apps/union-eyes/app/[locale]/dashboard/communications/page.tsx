@@ -22,10 +22,9 @@ import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns 
 import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 // NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
-// contained a runtime-gated branch that dynamically imported
-// `@/components/demo/cupe4373-communications-page` when
-// `isCupe4373DemoRuntime()` returned true. Both the demo component and
-// the runtime gate have been removed from the operational build. Demo
+// contained a runtime-gated branch that dynamically imported a demo
+// communications page from `@/components/demo/*`. Both the demo component
+// and the runtime gate have been removed from the operational build. Demo
 // behaviour now lives exclusively in the `@nzila/union-eyes-demo`
 // artifact (`apps/union-eyes-demo/`).
 

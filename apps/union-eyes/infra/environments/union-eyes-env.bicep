@@ -245,13 +245,11 @@ resource ueApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'UE_ENVIRONMENT', value: environment == 'prod' ? 'production' : environment }
             { name: 'NEXT_PUBLIC_APP_ENV', value: environment == 'prod' ? 'production' : environment }
             { name: 'NZILA_MODE', value: environment == 'prod' ? 'production' : environment }
-            { name: 'UE_DEPLOYMENT_TYPE', value: environment == 'demo' ? 'cupe4373-demo' : environment }
-            { name: 'UE_FEATURE_PROFILE', value: environment == 'demo' ? 'cupe4373' : (environment == 'prod' || environment == 'pilot' ? 'executive' : 'internal') }
-            { name: 'NEXT_PUBLIC_UE_FEATURE_PROFILE', value: environment == 'demo' ? 'cupe4373' : (environment == 'prod' || environment == 'pilot' ? 'executive' : 'internal') }
-            { name: 'UE_DEMO_PROFILE', value: environment == 'demo' ? 'cupe4373' : '' }
-            { name: 'NEXT_PUBLIC_UE_DEMO_PROFILE', value: environment == 'demo' ? 'cupe4373' : '' }
-            { name: 'UE_DEMO_ORG_ID', value: environment == 'demo' ? 'cupe-local-4373' : '' }
-            { name: 'NEXT_PUBLIC_UE_DEMO_ORG_SLUG', value: environment == 'demo' ? 'cupe-local-4373' : '' }
+            // Operational package deployment types only. Demo runtime lives in a
+            // separate app (@nzila/union-eyes-demo) with its own Bicep template.
+            { name: 'UE_DEPLOYMENT_TYPE', value: environment }
+            { name: 'UE_FEATURE_PROFILE', value: (environment == 'prod' || environment == 'pilot') ? 'executive' : 'internal' }
+            { name: 'NEXT_PUBLIC_UE_FEATURE_PROFILE', value: (environment == 'prod' || environment == 'pilot') ? 'executive' : 'internal' }
             { name: 'PGHOST', value: pg.properties.fullyQualifiedDomainName }
             { name: 'PGUSER', value: 'nzilaadmin' }
             { name: 'PGDATABASE', value: dbName }

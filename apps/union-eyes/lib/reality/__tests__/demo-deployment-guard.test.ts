@@ -11,7 +11,7 @@ describe('lib/reality/demo-deployment-guard (runtime)', () => {
   it('allows demo profile in development', () => {
     const v = evaluateDemoGuard({
       targetEnvironment: 'development',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
     });
     expect(v.ok).toBe(true);
     expect(v.demoProfileDetected).toBe(true);
@@ -20,22 +20,22 @@ describe('lib/reality/demo-deployment-guard (runtime)', () => {
   it('rejects demo profile in staging', () => {
     const v = evaluateDemoGuard({
       targetEnvironment: 'staging',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
     });
     expect(v.ok).toBe(false);
-    expect(v.reason).toMatch(/cupe4373/);
+    expect(v.reason).toMatch(/demo/);
   });
 
   it('rejects demo via NEXT_PUBLIC var in pilot', () => {
     const v = evaluateDemoGuard({
       targetEnvironment: 'pilot',
-      publicDemoProfile: 'cupe4373',
+      publicDemoProfile: 'demo',
     });
     expect(v.ok).toBe(false);
   });
 
   it('fail-closed when target env missing (treats as production)', () => {
-    const v = evaluateDemoGuard({ ueFeatureProfile: 'cupe4373' });
+    const v = evaluateDemoGuard({ ueFeatureProfile: 'demo' });
     expect(v.ok).toBe(false);
     expect(v.resolvedEnvironment).toBe('production');
   });
@@ -44,7 +44,7 @@ describe('lib/reality/demo-deployment-guard (runtime)', () => {
     expect(() =>
       assertDemoDeploymentGuard({
         targetEnvironment: 'production',
-        ueFeatureProfile: 'cupe4373',
+        ueFeatureProfile: 'demo',
       }),
     ).toThrow(/\[demo-deployment-guard\]/);
   });

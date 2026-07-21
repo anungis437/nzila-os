@@ -32,8 +32,6 @@ import type { SelectProfile } from "@/db/schema/domains/member";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import {
-  getCupe4373DemoGroups,
-  getCupe4373DemoNavigation,
   getDashboardExperience,
   getNavigationForExperience,
   type NavigationGroup,
@@ -47,7 +45,6 @@ interface SidebarProps {
   whopYearlyPlanId: string;
   userRole?: string;
   platformOrgId?: string;
-  isCupeDemo?: boolean;
 }
 
 const LS_COLLAPSED = "ue-sidebar-collapsed";
@@ -87,7 +84,6 @@ export default function Sidebar({
   userEmail,
   userRole,
   platformOrgId,
-  isCupeDemo = false,
 }: SidebarProps) {
   const locale = useLocale();
   const pathname = usePathname();
@@ -132,12 +128,11 @@ export default function Sidebar({
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
   const items = useMemo<NavigationItem[]>(() => {
-    if (isCupeDemo) return getCupe4373DemoNavigation(userRole);
     const nav = getNavigationForExperience(experience);
     if (!isPilotMode) return nav;
     const pilotAllowed = new Set(nav.map((entry) => entry.href));
     return nav.filter((entry) => pilotAllowed.has(entry.href));
-  }, [experience, isPilotMode, isCupeDemo, userRole]);
+  }, [experience, isPilotMode]);
 
   // Build ordered groups from the nav. Use demo-defined order when available;
   // otherwise derive groups from the items themselves in encounter order.
@@ -147,11 +142,9 @@ export default function Sidebar({
       return [{ group: { key: "__flat", label: "" }, items }];
     }
 
-    const order = isCupeDemo
-      ? getCupe4373DemoGroups()
-      : Array.from(
-          new Set(items.map((i) => i.group).filter(Boolean) as string[]),
-        ).map((key) => ({ key, label: key }));
+    const order = Array.from(
+      new Set(items.map((i) => i.group).filter(Boolean) as string[]),
+    ).map((key) => ({ key, label: key }));
 
     const orderMap = new Map(order.map((g, i) => [g.key, i]));
     const byKey = new Map<string, NavigationItem[]>();
@@ -173,7 +166,7 @@ export default function Sidebar({
       }
     }
     return result;
-  }, [items, isCupeDemo]);
+  }, [items]);
 
   const identityLabel = userEmail || profile?.email || "User";
 

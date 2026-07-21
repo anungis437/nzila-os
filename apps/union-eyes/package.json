@@ -22,7 +22,6 @@
     "clean": "rm -rf .next .turbo node_modules",
     "db:generate": "drizzle-kit generate",
     "seed:test-env": "tsx scripts/seed-test-env.ts",
-    "seed:cupe4373-members": "tsx scripts/seed-cupe4373-members.ts",
     "db:bootstrap": "node ../../tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
     "db:align": "tsx scripts/align-org-schema.ts",
     "db:migrate": "node ../../tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",

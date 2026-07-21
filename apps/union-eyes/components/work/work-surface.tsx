@@ -18,11 +18,11 @@ import { useLocale } from "next-intl";
 import Link from "next/link";
 
 // NOTE (Wave 0 §3 — semantic demo isolation): the prior implementation
-// short-circuited to `Cupe4373CasesConsole` from `@/components/demo/*`
-// when `isCupe4373DemoRuntime()` returned true. Both the demo component
-// and the runtime gate have been removed from the operational build.
-// Demo behaviour lives exclusively in the `@nzila/union-eyes-demo`
-// artifact (`apps/union-eyes-demo/`).
+// short-circuited to a demo cases console from `@/components/demo/*`
+// under a runtime gate. Both the demo component and the runtime gate
+// have been removed from the operational build. Demo behaviour lives
+// exclusively in the `@nzila/union-eyes-demo` artifact
+// (`apps/union-eyes-demo/`).
 
 export function WorkSurface() {
   const t = useTranslations();

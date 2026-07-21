@@ -64,26 +64,26 @@ describe('pilot-admin-operational: probeDemoProfileEnforcement', () => {
     expect(check.state).toBe('pass');
   });
 
-  it('fails when cupe4373 profile is active in staging', () => {
+  it('fails when a demo profile is active in staging', () => {
     const check = probeDemoProfileEnforcement({
       targetEnvironment: 'staging',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
     });
     expect(check.state).toBe('fail');
     expect(check.severity).toBe('critical');
   });
 
-  it('passes when cupe4373 profile is active in development', () => {
+  it('passes when a demo profile is active in development', () => {
     const check = probeDemoProfileEnforcement({
       targetEnvironment: 'development',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
     });
     expect(check.state).toBe('pass');
   });
 
   it('fail-closed default (missing target env is treated as production)', () => {
     const check = probeDemoProfileEnforcement({
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
     });
     expect(check.state).toBe('fail');
   });

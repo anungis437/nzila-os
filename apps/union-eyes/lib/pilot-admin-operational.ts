@@ -126,7 +126,7 @@ export function probeDemoProfileEnforcement(env: {
 }): OperationalHealthCheck {
   const now = new Date().toISOString();
   const target = (env.targetEnvironment ?? 'production').toLowerCase();
-  const demoValues = ['cupe4373', 'demo', 'sample', 'placeholder'];
+  const demoValues = ['demo', 'sample', 'placeholder', 'fixture'];
   const demoActive =
     demoValues.includes((env.ueFeatureProfile ?? '').toLowerCase()) ||
     demoValues.includes((env.publicDemoProfile ?? '').toLowerCase());

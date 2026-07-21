@@ -29,13 +29,16 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_URL_STAGING: z.string().url('Invalid staging APP_URL').optional(),
   NEXT_PUBLIC_SITE_URL_STAGING: z.string().url('Invalid staging SITE_URL').optional(),
   UE_ENVIRONMENT: z.enum(['development', 'staging', 'demo', 'pilot', 'production', 'test']).optional(),
-  UE_DEPLOYMENT_TYPE: z.enum(['staging', 'cupe4373-demo', 'clc-demo', 'pilot', 'prod']).optional(),
-  UE_FEATURE_PROFILE: z.enum(['internal', 'cupe4373', 'clc', 'executive']).optional(),
-  NEXT_PUBLIC_UE_FEATURE_PROFILE: z.enum(['internal', 'cupe4373', 'clc', 'executive']).optional(),
-  UE_DEMO_PROFILE: z.enum(['cupe4373']).optional(),
-  NEXT_PUBLIC_UE_DEMO_PROFILE: z.enum(['cupe4373']).optional(),
-  UE_DEMO_ORG_ID: z.string().optional(),
-  NEXT_PUBLIC_UE_DEMO_ORG_SLUG: z.string().optional(),
+  // Operational deployment types only. The operational package MUST NOT accept a
+  // customer-branded demo type here — the demo application is a separate package
+  // (@nzila/union-eyes-demo) with its own env schema.
+  UE_DEPLOYMENT_TYPE: z.enum(['staging', 'pilot', 'prod']).optional(),
+  UE_FEATURE_PROFILE: z.enum(['internal', 'executive']).optional(),
+  NEXT_PUBLIC_UE_FEATURE_PROFILE: z.enum(['internal', 'executive']).optional(),
+  UE_DEMO_PROFILE: z.never().optional(),
+  NEXT_PUBLIC_UE_DEMO_PROFILE: z.never().optional(),
+  UE_DEMO_ORG_ID: z.never().optional(),
+  NEXT_PUBLIC_UE_DEMO_ORG_SLUG: z.never().optional(),
   UE_MARKETING_URL: z.string().url('Invalid UE_MARKETING_URL').optional(),
   UE_APP_URL: z.string().url('Invalid UE_APP_URL').optional(),
   NEXT_RUNTIME: z.string().optional(),

@@ -39,10 +39,10 @@ export type DeployedTarget = (typeof DEPLOYED_TARGETS)[number];
 
 /** Recognised values for the demo-profile env vars. */
 export const DEMO_PROFILE_VALUES = [
-  'cupe4373',
   'demo',
   'sample',
   'placeholder',
+  'fixture',
 ] as const;
 export type DemoProfileValue = (typeof DEMO_PROFILE_VALUES)[number];
 

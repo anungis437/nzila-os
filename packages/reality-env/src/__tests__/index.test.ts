@@ -64,7 +64,7 @@ describe('detectDemoProfile', () => {
   });
 
   it('is case-insensitive and trims', () => {
-    expect(detectDemoProfile('  CUPE4373 ', undefined)).toBe('cupe4373');
+    expect(detectDemoProfile('  DEMO ', undefined)).toBe('demo');
   });
 
   it('returns null when neither slot matches', () => {
@@ -73,7 +73,7 @@ describe('detectDemoProfile', () => {
   });
 
   it('prefers UE_FEATURE_PROFILE over NEXT_PUBLIC_ when both set', () => {
-    expect(detectDemoProfile('cupe4373', 'demo')).toBe('cupe4373');
+    expect(detectDemoProfile('demo', 'sample')).toBe('demo');
   });
 });
 
@@ -82,10 +82,10 @@ describe('resolveEnvIdentity', () => {
     for (const t of DEPLOYED_TARGETS) {
       const id = resolveEnvIdentity({
         targetEnvironment: t,
-        ueFeatureProfile: 'cupe4373',
+        ueFeatureProfile: 'demo',
       });
       expect(id.target).toBe(t);
-      expect(id.demoProfile).toBe('cupe4373');
+      expect(id.demoProfile).toBe('demo');
       expect(id.forbiddenDemoInDeployed).toBe(true);
     }
   });
@@ -94,14 +94,14 @@ describe('resolveEnvIdentity', () => {
     for (const t of DEV_TARGETS) {
       const id = resolveEnvIdentity({
         targetEnvironment: t,
-        ueFeatureProfile: 'cupe4373',
+        ueFeatureProfile: 'demo',
       });
       expect(id.forbiddenDemoInDeployed).toBe(false);
     }
   });
 
   it('fails closed when target missing', () => {
-    const id = resolveEnvIdentity({ ueFeatureProfile: 'cupe4373' });
+    const id = resolveEnvIdentity({ ueFeatureProfile: 'demo' });
     expect(id.target).toBe('production');
     expect(id.forbiddenDemoInDeployed).toBe(true);
   });
@@ -157,8 +157,8 @@ describe('assertTargetEnvironmentIs', () => {
 
 describe('forbiddenDemoReason', () => {
   it('contains both profile and target', () => {
-    const r = forbiddenDemoReason('cupe4373', 'staging');
-    expect(r).toContain('cupe4373');
+    const r = forbiddenDemoReason('demo', 'staging');
+    expect(r).toContain('demo');
     expect(r).toContain('staging');
     expect(r).toMatch(/UE_FEATURE_PROFILE/);
   });

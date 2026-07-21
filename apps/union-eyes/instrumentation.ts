@@ -8,7 +8,7 @@ export async function register() {
     //
     // Fail-closed at boot if the current combination of
     // UE_FEATURE_PROFILE / NEXT_PUBLIC_UE_DEMO_PROFILE and target
-    // environment is unsafe (e.g. `cupe4373` in staging/pilot/production).
+    // environment is unsafe (e.g. `demo` in staging/pilot/production).
     // Skipping this check is intentional inside `next build` (above) so
     // container images can still be built. This runs on real process
     // start only.

@@ -39,7 +39,6 @@ const APP_ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)), '../../..
 const NAV_SOURCE_FILES = [
   'lib/dashboard/role-experience.ts',
   'components/dashboards/federation-dashboard.tsx',
-  'components/home/portal-home.tsx',
   'components/sidebar.tsx',
 ] as const;
 

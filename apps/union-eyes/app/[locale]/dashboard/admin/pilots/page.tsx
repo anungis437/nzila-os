@@ -336,7 +336,7 @@ export default function AdminPilotApplicationsPage() {
     }
   }
 
-  async function downloadCupePilotPackage() {
+  async function downloadPilotPackageExport() {
     if (!selected) return;
     try {
       const response = await fetch(`/api/pilot/apply/${selected.id}/package-export`, { cache: 'no-store' });
@@ -388,35 +388,8 @@ export default function AdminPilotApplicationsPage() {
     }
   }
 
-  async function applyCupeReferenceTemplate() {
-    if (!selected) return;
-    setSavingCommercialId(selected.id);
-    try {
-      const response = await fetch(`/api/pilot/apply/${selected.id}/commercial-transition`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          targetState: 'qualified',
-          source: 'admin-ui',
-          applyReferenceTemplate: 'CUPE4373',
-          allowSkip: true,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.error || `Unable to apply CUPE template (${response.status})`);
-      }
-
-      await loadApplications();
-      setOperationalRefresh((value) => value + 1);
-      toast.success('CUPE4373 reference template applied');
-    } catch (error) {
-      toast.error((error as Error).message || 'Unable to apply CUPE template');
-    } finally {
-      setSavingCommercialId(null);
-    }
-  }
+  // Reference-template application intentionally removed from the operational
+  // package. Customer-specific pilot fixtures live in @nzila/union-eyes-demo.
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -567,14 +540,6 @@ export default function AdminPilotApplicationsPage() {
                         onClick={() => updateCommercialState(nextCommercialState(selectedCommercialState))}
                       >
                         Move forward
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={!selected || savingCommercialId === selected.id}
-                        onClick={applyCupeReferenceTemplate}
-                      >
-                        Apply CUPE4373 template
                       </Button>
                     </div>
                   </div>
@@ -727,8 +692,8 @@ export default function AdminPilotApplicationsPage() {
                 <Button variant="outline" onClick={downloadProposalPackage} disabled={!selected}>
                   Download package
                 </Button>
-                <Button variant="outline" onClick={downloadCupePilotPackage} disabled={!selected}>
-                  Export CUPE4373 package
+                <Button variant="outline" onClick={downloadPilotPackageExport} disabled={!selected}>
+                  Export pilot package
                 </Button>
                 <Button
                   variant="outline"

@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@nzila/platform-auth/entra/server";
 // NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
-// dynamically imported `@/components/demo/cupe4373-operations-dashboard`
-// inside an `isCupe4373DemoRuntime()` branch below. Both the demo module
-// and the runtime branch have been removed from the operational build.
-// Demo behaviour lives exclusively in the `@nzila/union-eyes-demo`
-// artifact (`apps/union-eyes-demo/`) and is not reachable from any code
-// path in this application.
+// dynamically imported a demo operations dashboard from `@/components/demo/*`
+// inside a runtime-gate branch below. Both the demo module and the runtime
+// branch have been removed from the operational build. Demo behaviour lives
+// exclusively in the `@nzila/union-eyes-demo` artifact
+// (`apps/union-eyes-demo/`) and is not reachable from any code path in this
+// application.
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { UserRole } from "@/lib/auth/roles";
 import {

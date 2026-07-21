@@ -4,7 +4,7 @@ import { bootstrapE2EAuth, loginAsRole } from './helpers/auth';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === 'true';
 
-test.describe('CUPE pilot journey', () => {
+test.describe('Union pilot journey', () => {
   test.skip(!isTestAuth, 'Requires PLAYWRIGHT_TEST_AUTH=true');
 
   test.beforeAll(async ({ request }) => {
@@ -70,7 +70,7 @@ test.describe('CUPE pilot journey', () => {
           priority: 'critical',
           incidentDate: '2026-04-18',
           location: 'Toronto yard',
-          description: 'Detailed intake description for the CUPE pilot path.',
+          description: 'Detailed intake description for the union pilot path.',
           desiredOutcome: 'Resolution requested for: Unsafe overtime denial',
           witnesses: 'Pat Doe',
           isAnonymous: true,
