@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T11:00:49.648Z",
+  "generatedAt": "2026-07-21T11:06:58.994Z",
   "workspace": "C:/APPS/nzila-automation",
   "patterns": [
     "cupe\\s*[-_]?\\s*4373|cupe\\s*local\\s*4373|CUPE4373_"
@@ -245,8 +245,8 @@
   },
   "build": {
     "scannedFiles": 22068,
-    "filesWithHits": 72,
-    "totalHits": 73,
+    "filesWithHits": 71,
+    "totalHits": 71,
     "buildDir": "C:\\APPS\\nzila-automation\\apps\\union-eyes\\.next"
   },
   "errors": []

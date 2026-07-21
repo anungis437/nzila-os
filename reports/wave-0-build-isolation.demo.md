@@ -1,14 +1,14 @@
 # Operational Build Demo-Content Scan (Wave 0 §8)
 
-- Generated: 2026-07-21T11:00:49.648Z
+- Generated: 2026-07-21T11:06:58.994Z
 - Patterns: cupe\s*[-_]?\s*4373|cupe\s*local\s*4373|CUPE4373_
 - Source files scanned: 5301
 - Source files with hits: 29
 - Total source hits: 104
 - Build directory: `C:\APPS\nzila-automation\apps\union-eyes\.next`
 - Build files scanned: 22068
-- Build files with hits: 72
-- Total build hits: 73
+- Build files with hits: 71
+- Total build hits: 71
 - Errors: **0**
 
 ## Source hits by file
