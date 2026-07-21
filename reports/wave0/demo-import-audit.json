@@ -1,6 +1,6 @@
 {
   "scannedFiles": 719,
-  "uniqueImports": 530,
+  "uniqueImports": 531,
   "buckets": {
     "ui-primitives": [],
     "demo-local-components": [
@@ -50,6 +50,7 @@
       "@nzila/os-core/telemetry",
       "@nzila/platform-auth/entra/server",
       "@nzila/platform-auth/password",
+      "@nzila/reality-env",
       "@nzila/union-eyes-ui/badge",
       "@nzila/union-eyes-ui/button",
       "@nzila/union-eyes-ui/card",

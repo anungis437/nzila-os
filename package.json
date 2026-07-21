@@ -319,6 +319,7 @@
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-rfp-generator": "workspace:*",
     "@nzila/platform-utils": "workspace:*",
+    "@nzila/reality-env": "workspace:*",
     "@tailwindcss/oxide": "^4.2.0",
     "fast-check": "^4.6.0",
     "lefthook": "^2.1.1",

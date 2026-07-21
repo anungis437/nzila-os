@@ -105,6 +105,7 @@
     "@nzila/platform-shell": "workspace:*",
     "@nzila/policies": "workspace:*",
     "@nzila/oci-confidence": "workspace:*",
+    "@nzila/reality-env": "workspace:*",
     "@nzila/stabilization-signals": "workspace:*",
     "@nzila/ue-cognition": "workspace:*",
     "@nzila/ui": "workspace:*",

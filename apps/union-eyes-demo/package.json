@@ -13,6 +13,7 @@
   "dependencies": {
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/reality-env": "workspace:*",
     "@nzila/union-eyes-ui": "workspace:*",
     "@sentry/nextjs": "^10.30.0",
     "archiver": "^7.0.1",

@@ -1,18 +1,26 @@
 /**
  * Runtime companion to `tooling/reality/demo-deployment-guard.ts`.
  *
- * The tooling module is a CLI + pure function used by CI. This file
- * mirrors the same pure logic so `apps/union-eyes/instrumentation.ts`
- * can fail-closed at process start without pulling a cross-package
- * relative import through Turbopack.
+ * Wave 0 §5: this file now delegates to `@nzila/reality-env`, the
+ * single authoritative env-identity contract. Both this runtime
+ * helper and the CLI/tooling helper share the exact same
+ * classification rules.
  *
- * KEEP THIS FILE IN SYNC with `tooling/reality/demo-deployment-guard.ts`.
- * Both are covered by tests:
- *  - `tooling/reality/__tests__/demo-deployment-guard.test.ts`
- *  - `apps/union-eyes/lib/reality/__tests__/demo-deployment-guard.test.ts`
+ * This module is imported from `apps/union-eyes/instrumentation.ts`
+ * so the running server fails-closed at boot if a demo profile is
+ * detected in staging / pilot / production.
+ *
+ * The historical result shape (with a boolean `demoProfileDetected`)
+ * is preserved for backwards compatibility with existing callers and
+ * tests.
  *
  * See docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md.
  */
+import {
+  detectDemoProfile,
+  isDevTarget,
+  normalizeTargetEnvironment,
+} from '@nzila/reality-env';
 
 export interface DemoGuardEnv {
   targetEnvironment?: string;
@@ -28,25 +36,19 @@ export interface DemoGuardResult {
   demoProfileDetected: boolean;
 }
 
-const DEV_TARGETS = new Set(['development', 'local', 'test']);
-const DEMO_VALUES = new Set(['cupe4373', 'demo', 'sample', 'placeholder']);
-
-function isDemoProfile(value: string | undefined): boolean {
-  if (!value) return false;
-  return DEMO_VALUES.has(value.trim().toLowerCase());
-}
-
 export function evaluateDemoGuard(env: DemoGuardEnv): DemoGuardResult {
-  // Fail-closed default: if the caller did not specify a target, treat
-  // this as production.
-  const resolvedEnvironment = (env.targetEnvironment ?? 'production').trim().toLowerCase();
-  const demoProfileDetected = isDemoProfile(env.ueFeatureProfile) || isDemoProfile(env.publicDemoProfile);
+  const resolvedEnvironment = normalizeTargetEnvironment(env.targetEnvironment);
+  const demoProfile = detectDemoProfile(
+    env.ueFeatureProfile,
+    env.publicDemoProfile,
+  );
+  const demoProfileDetected = demoProfile !== null;
 
   if (!demoProfileDetected) {
     return { ok: true, resolvedEnvironment, demoProfileDetected: false };
   }
 
-  if (DEV_TARGETS.has(resolvedEnvironment)) {
+  if (isDevTarget(resolvedEnvironment)) {
     return { ok: true, resolvedEnvironment, demoProfileDetected: true };
   }
 
