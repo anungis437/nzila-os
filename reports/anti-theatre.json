@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T09:00:36.942Z",
-  "scannedFiles": 4800,
+  "generatedAt": "2026-07-21T10:08:23.385Z",
+  "scannedFiles": 4798,
   "rulesRun": [
     "R-1",
     "R-2",
@@ -13,7 +13,7 @@
   ],
   "totals": {
     "errors": 0,
-    "warnings": 1249
+    "warnings": 1264
   },
   "findings": [
     {
@@ -36,6 +36,22 @@
       "rule": "R-6",
       "file": "apps/union-eyes/app/[locale]/calendar/page.tsx",
       "line": 112,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/app/[locale]/dashboard/admin/dues/reports/page.tsx",
+      "line": 91,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/app/[locale]/dashboard/admin/dues/reports/page.tsx",
+      "line": 111,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -2228,6 +2244,110 @@
       "rule": "R-6",
       "file": "apps/union-eyes/lib/middleware/request-validation.ts",
       "line": 269,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 159,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 199,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 233,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 271,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 327,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 355,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 463,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 506,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 548,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 595,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/data-integrity.ts",
+      "line": 635,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/rollback.ts",
+      "line": 117,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/migrations/tenant-to-org-mapper.ts",
+      "line": 461,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"

@@ -138,6 +138,33 @@ Final post-Stage-1 breakdown:
 - **R-8 × 5** empty payload success returns.  Individual investigation
   required per route — see follow-up in `04_FINDINGS_AND_DISPOSITIONS.md`.
 
+## §6 scanner hardening (this commit)
+
+Two silent false-negatives were closed:
+
+1. **Root-only markers.** `reports/`, `artifacts/`, `proof-artifacts/`,
+   and `migrations/` were previously matched substring-anywhere inside
+   `isTestOrFixturePath`, which silently exempted legitimate nested
+   production surfaces such as `apps/union-eyes/app/api/reports/**`
+   and `apps/union-eyes/app/[locale]/dashboard/reports/**` from every
+   rule. Those markers are now bound to the workspace root only.
+2. **Comment-aware R-3.** The four import-form regexes now run against
+   a comment-stripped copy of each file. JSDoc / block / line comments
+   that document *removed* demo imports no longer trigger false
+   positives (previously the operational
+   `apps/union-eyes/app/[locale]/dashboard/reports/page.tsx`
+   docstring produced a spurious R-3 error).
+
+Regression coverage: `tooling/reality/__tests__/anti-theatre-scan.test.ts`
+now contains 13 new §6 scenarios (12 R-3 evasion forms + 1 comment
+false-positive) alongside the 26 pre-existing tests — 39 total.
+Real-repo scan post-hardening: **0 errors, 1264 warnings**
+(warning count grew by +15 vs. the Stage 1 tally because nested
+`reports/`, `artifacts/`, `proof-artifacts/`, `migrations/` surfaces
+inside `apps/union-eyes/**` are no longer silently exempted from R-6
+/ R-7 / R-8; every new warning represents a previously-hidden real
+finding, not a regression. R-3 remains at zero after the fix).
+
 ## Verification method
 
 ```powershell

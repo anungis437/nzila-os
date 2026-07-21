@@ -89,10 +89,22 @@ const DEFAULT_TEST_PATH_MARKERS: readonly string[] = [
   `${sep}build${sep}`,
   `${sep}.next${sep}`,
   `${sep}node_modules${sep}`,
-  `${sep}artifacts${sep}`,
-  `${sep}reports${sep}`,
-  `${sep}proof-artifacts${sep}`,
-  `${sep}migrations${sep}`,
+];
+
+/**
+ * Markers that must ONLY match at the START of the relative path
+ * (i.e. top-level build/output dumps). Historically these were part of
+ * `DEFAULT_TEST_PATH_MARKERS`, which meant any nested directory of the
+ * same name (e.g. `apps/union-eyes/app/api/reports/*` — a real production
+ * API surface) was silently exempted from R-3. §6 of the Reality &
+ * World-Class Remediation Programme requires each of these markers to
+ * bind only at the workspace root.
+ */
+const ROOT_ONLY_TEST_PATH_MARKERS: readonly string[] = [
+  `artifacts${sep}`,
+  `reports${sep}`,
+  `proof-artifacts${sep}`,
+  `migrations${sep}`,
 ];
 
 const TEST_FILE_SUFFIXES: readonly string[] = [
@@ -119,6 +131,13 @@ export function isTestOrFixturePath(
     ...(options.extraAllowlist ?? []).map((m) => m.split('/').join(sep)),
   ];
   if (markers.some((m) => normalised.includes(m))) return true;
+  // Root-only markers: `reports/`, `artifacts/`, `proof-artifacts/`,
+  // `migrations/` must match ONLY at the START of the relative path.
+  // This preserves the intent of exempting top-level dump directories
+  // while allowing legitimate nested API surfaces such as
+  // `apps/union-eyes/app/api/reports/*` to be scanned. See §6 of the
+  // Reality & World-Class Remediation Programme.
+  if (ROOT_ONLY_TEST_PATH_MARKERS.some((m) => normalised.startsWith(m))) return true;
   return TEST_FILE_SUFFIXES.some((s) => normalised.endsWith(s));
 }
 
@@ -331,6 +350,13 @@ const rule_demoImportInProd: Rule = (ctx) => {
 
   const findings: Finding[] = [];
 
+  // §6 hardening: strip line- and block-comments before matching import
+  // forms. Prior versions produced false positives when a docstring
+  // referenced a demo path (e.g. `* rendered from `@/components/demo/*`.`).
+  // The comments must be replaced with equal-length whitespace so that
+  // `matchIndex` still resolves to the correct line number.
+  const contentNoComments = stripCommentsPreservingOffsets(ctx.content);
+
   const emit = (spec: string, matchIndex: number, formName: string) => {
     if (!isDemoSpecifier(spec)) return;
     const line = ctx.content.slice(0, matchIndex).split(/\r?\n/).length;
@@ -347,12 +373,12 @@ const rule_demoImportInProd: Rule = (ctx) => {
   // 1. Static `from '...'` specifiers.
   const RE_STATIC_FROM = /from\s+['"`]([^'"`]+)['"`]/g;
   let m: RegExpExecArray | null;
-  while ((m = RE_STATIC_FROM.exec(ctx.content)) !== null) {
+  while ((m = RE_STATIC_FROM.exec(contentNoComments)) !== null) {
     emit(m[1], m.index, 'statically imports');
   }
   // 2. Bare static `import '...';` specifiers (side-effect imports).
   const RE_BARE_IMPORT = /\bimport\s+['"`]([^'"`]+)['"`]/g;
-  while ((m = RE_BARE_IMPORT.exec(ctx.content)) !== null) {
+  while ((m = RE_BARE_IMPORT.exec(contentNoComments)) !== null) {
     emit(m[1], m.index, 'statically imports (bare)');
   }
   // 3. Dynamic `import('...')` calls (including `await import(...)`).
@@ -360,17 +386,74 @@ const rule_demoImportInProd: Rule = (ctx) => {
   //    literal contents are not statically known — those should be
   //    caught by code review.
   const RE_DYNAMIC = /\bimport\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
-  while ((m = RE_DYNAMIC.exec(ctx.content)) !== null) {
+  while ((m = RE_DYNAMIC.exec(contentNoComments)) !== null) {
     emit(m[1], m.index, 'dynamically imports');
   }
   // 4. `require('...')` calls (CommonJS interop).
   const RE_REQUIRE = /\brequire\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
-  while ((m = RE_REQUIRE.exec(ctx.content)) !== null) {
+  while ((m = RE_REQUIRE.exec(contentNoComments)) !== null) {
     emit(m[1], m.index, 'requires');
   }
 
   return findings;
 };
+
+/**
+ * Replace every line-comment (`// ...`) and block-comment (`/* ... *\/`)
+ * range in `src` with equal-length whitespace, preserving offsets so
+ * that regex `matchIndex` still resolves to correct line numbers via
+ * `src.slice(0, matchIndex).split(/\r?\n/).length`.
+ *
+ * NOTE: This is a lightweight tokeniser — not a full TS parser. It
+ * intentionally does NOT understand string literals, template literals,
+ * or regex literals. For the current call-site (R-3 import-form
+ * detection) this trade-off is acceptable because the four regexes
+ * ignore anything that is not literally `from '...'`, `import '...'`,
+ * `import('...')`, or `require('...')`. Widening the caller is fine
+ * only after this function grows string-literal awareness.
+ */
+function stripCommentsPreservingOffsets(src: string): string {
+  const out = src.split('');
+  let i = 0;
+  const n = src.length;
+  while (i < n) {
+    const c = src[i];
+    const c2 = src[i + 1];
+    if (c === '/' && c2 === '/') {
+      // Line comment: consume until newline (exclusive).
+      let j = i + 2;
+      while (j < n && src[j] !== '\n' && src[j] !== '\r') {
+        out[j] = ' ';
+        j++;
+      }
+      out[i] = ' ';
+      out[i + 1] = ' ';
+      i = j;
+      continue;
+    }
+    if (c === '/' && c2 === '*') {
+      // Block comment: consume until */, preserving newlines.
+      let j = i + 2;
+      out[i] = ' ';
+      out[i + 1] = ' ';
+      while (j < n) {
+        if (src[j] === '*' && src[j + 1] === '/') {
+          out[j] = ' ';
+          out[j + 1] = ' ';
+          j += 2;
+          break;
+        }
+        // Preserve newlines so line numbers stay accurate.
+        if (src[j] !== '\n' && src[j] !== '\r') out[j] = ' ';
+        j++;
+      }
+      i = j;
+      continue;
+    }
+    i++;
+  }
+  return out.join('');
+}
 
 
 /** R-4: demo profile in non-development env. */

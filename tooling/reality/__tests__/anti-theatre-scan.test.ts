@@ -253,3 +253,230 @@ describe('anti-theatre scanner — R-8 (empty authoritative success)', () => {
     expect(r8.length).toBe(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// §6 Anti-theatre scanner expansion — 12 additional R-3 boundary scenarios
+//
+// These scenarios exercise the concrete evasion paths that a naïve
+// static-import regex would miss. Each scenario asserts the scanner's
+// current behaviour so any future regression (e.g. someone tightens or
+// relaxes one of the four import-form regexes, or the artifact-root
+// exemption list drifts) fails CI.
+// ---------------------------------------------------------------------------
+describe('anti-theatre scanner — R-3 §6 expansion', () => {
+  let root: string;
+  beforeEach(async () => { root = await seedRoot(); });
+  afterEach(async () => { await cleanup(root); });
+
+  // 1. Dynamic import from a demo path in production code.
+  it('flags dynamic `await import(...)` from a demo path', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/lazy-loader.ts'),
+      `export async function load() {\n  const mod = await import('../demo/fixtures/cupe');\n  return mod;\n}\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+    expect(r3[0].severity).toBe('error');
+    expect(r3[0].message).toContain('dynamically imports');
+  });
+
+  // 2. CJS require from a demo path.
+  it('flags a `require(...)` call resolving into a demo path', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/cjs-loader.ts'),
+      `export function load() {\n  const mod = require('../demo/fixtures/cupe');\n  return mod;\n}\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+    expect(r3[0].message).toContain('requires');
+  });
+
+  // 3. Bare side-effect import.
+  it('flags a bare side-effect `import "..."` from a demo path', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/lib/side-effect.ts'),
+      `import '../demo/register';\nexport const marker = 1;\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+    expect(r3[0].message).toContain('statically imports (bare)');
+  });
+
+  // 4. Alias bypass via `@/lib/demo/...`.
+  it('flags an `@/lib/demo/...` alias import in a production service', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/via-alias.ts'),
+      `import { fixture } from '@/lib/demo/cupe';\nexport const f = fixture;\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+    expect(r3[0].evidence).toBe('@/lib/demo/cupe');
+  });
+
+  // 5. Artifact-root exemption — union-eyes-demo may import demo freely.
+  it('does NOT flag imports from a file that lives under the demo artifact root', async () => {
+    await seedRegistry(root, []);
+    await mkdir(resolve(root, 'apps/union-eyes-demo/lib'), { recursive: true });
+    await writeFile(
+      resolve(root, 'apps/union-eyes-demo/lib/demo-only.ts'),
+      `import { fixture } from '@/lib/demo/cupe';\nexport const f = fixture;\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(0);
+  });
+
+  // 6. Relative traversal `../../demo/...` from a nested `app/` page file
+  //    whose directory name (`reports`) collides with the scanner's own
+  //    output-dump marker. Prior to §6 this was a silent false-negative
+  //    because `${sep}reports${sep}` was in DEFAULT_TEST_PATH_MARKERS and
+  //    matched substring-anywhere. §6 tightened that marker to root-only.
+  it('flags a relative traversal `../../demo/...` from an app/reports page file', async () => {
+    await seedRegistry(root, []);
+    await mkdir(resolve(root, 'apps/union-eyes/app/reports'), { recursive: true });
+    await writeFile(
+      resolve(root, 'apps/union-eyes/app/reports/page.ts'),
+      `import { fixture } from '../../demo/cupe';\nexport default function P() { return null; }\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+    expect(r3[0].file).toContain('reports/page.ts');
+  });
+
+  // 7. Barrel re-export — `export { X } from '@/lib/demo/...'` must be caught.
+  it('flags a barrel `export { X } from "@/lib/demo/..."`', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/lib/barrel.ts'),
+      `export { fixture } from '@/lib/demo/cupe';\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+    expect(r3[0].evidence).toBe('@/lib/demo/cupe');
+  });
+
+  // 8. Barrel `export * from '...'` re-export.
+  it('flags an `export * from` barrel that re-exports a demo path', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/lib/star-barrel.ts'),
+      `export * from '@/lib/demo/cupe';\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+  });
+
+  // 9. `fixtures/` (no leading demo) must also be flagged in prod.
+  it('flags an import from a bare `fixtures/` path in production', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/from-fixtures.ts'),
+      `import { seed } from '@/fixtures/currency';\nexport const s = seed;\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+  });
+
+  // 10. `__fixtures__/` inside a production import specifier must be flagged.
+  it('flags an import from a `__fixtures__/` path from production code', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/from-underscored.ts'),
+      `import { seed } from '@/__fixtures__/currency';\nexport const s = seed;\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(1);
+  });
+
+  // 11. `__fixtures__/` in the caller's file path is exempt (test scaffolding).
+  it('does NOT flag a file under `__fixtures__/` importing from a demo path', async () => {
+    await seedRegistry(root, []);
+    await mkdir(resolve(root, 'apps/union-eyes/lib/__fixtures__'), { recursive: true });
+    await writeFile(
+      resolve(root, 'apps/union-eyes/lib/__fixtures__/scaffold.ts'),
+      `import { fixture } from '@/lib/demo/cupe';\nexport const f = fixture;\n`,
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(0);
+  });
+
+  // 12. Multiple import-forms on the same file should each be flagged
+  //     separately — proves the four regexes do not clobber each other.
+  it('flags every demo-touching import form on the same production file', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/multi-form.ts'),
+      [
+        `import { a } from '@/lib/demo/one';`,
+        `import '@/lib/demo/two';`,
+        `export async function load() {`,
+        `  const m = await import('@/lib/demo/three');`,
+        `  const n = require('@/lib/demo/four');`,
+        `  return [m, n];`,
+        `}`,
+        ``,
+      ].join('\n'),
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    // 4 distinct forms → 4 findings.
+    expect(r3.length).toBe(4);
+    const evidence = r3.map((f) => f.evidence).sort();
+    expect(evidence).toEqual([
+      '@/lib/demo/four',
+      '@/lib/demo/one',
+      '@/lib/demo/three',
+      '@/lib/demo/two',
+    ]);
+  });
+
+  // 13. §6 hardening: docstring references to demo paths must NOT be
+  //     flagged. Prior to comment-stripping the scanner false-positived
+  //     on JSDoc comments that documented removed imports.
+  it('does NOT flag a demo path that only appears inside a JSDoc comment', async () => {
+    await seedRegistry(root, []);
+    await writeFile(
+      resolve(root, 'apps/union-eyes/services/documented.ts'),
+      [
+        `/**`,
+        ` * Historical note: this file previously imported`,
+        ` * \`Cupe4373ReportsPage\` from \`@/components/demo/*\`. That`,
+        ` * import has been removed; the operational surface now returns 404.`,
+        ` */`,
+        `export const inertMarker = 1;`,
+        `// This line comment also mentions @/lib/demo/foo just to be sure.`,
+        ``,
+      ].join('\n'),
+      'utf8',
+    );
+    const res = await runScan({ root });
+    const r3 = res.findings.filter((f) => f.rule === 'R-3');
+    expect(r3.length).toBe(0);
+  });
+});
