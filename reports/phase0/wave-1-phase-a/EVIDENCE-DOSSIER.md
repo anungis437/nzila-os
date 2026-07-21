@@ -1,5 +1,74 @@
 # Wave 1 Phase A — Deadline Engine Evidence Dossier
 
+> ## SUPERSEDED — Wave 1 Phase A is IN_PROGRESS, NOT complete
+>
+> **Correction issued 2026-07-21** by Aubert Nungisa's directive after
+> reviewing the run below. The dossier's original conclusions overstated
+> the scope of what the 2026-07-21 staging run actually proved.
+>
+> **What the run actually established (narrow slice):**
+> - Immutable image build + deployment by digest to staging revision --0000092
+> - Cron endpoint authentication (401 on wrong secret, 200 with correct)
+> - Reminder-worker due-row claim under `FOR UPDATE SKIP LOCKED`
+> - Execution row persistence (append-only)
+> - Provider request acceptance via Resend (message IDs captured)
+> - Immediate dead-letter transition on synchronous permanent failure
+>   with `max_attempts=1`
+>
+> **What the run did NOT prove (still unproven in staging):**
+> - Real deadline creation via the application service path — the D1/D2/D3
+>   scenarios inserted rows directly into `deadline_reminders` and used
+>   random UUIDs for `source_deadline_id` (no corresponding grievance,
+>   grievance_deadline, or deadline calculation was involved)
+> - Reminder scheduling / calculation / rescheduling / cancellation /
+>   stale-suppression / timezone / DST / calculation-version preservation
+> - Overdue processor transitioning an ACTIVE deadline to OVERDUE
+>   (the run manually inserted a row with `reminder_kind='overdue'`)
+> - Recipient resolution (email fields were set by hand — no tenant-scoped
+>   owner / steward / officer / escalation-role lookup)
+> - Retry classification and exponential backoff, dead-letter after
+>   exhaustion of multiple attempts, manual replay
+> - Concurrent-claim safety across 2+ workers racing the same row
+>   (two reminders in one batch is not a concurrency test)
+> - Lease expiry recovery, restart recovery
+> - Bounce webhook reconciliation — `bounced@resend.dev` was accepted
+>   synchronously by the provider; no webhook was verified, no delivery
+>   state reconciled, no recipient suppressed
+> - Tenant isolation via application identities — the run used a privileged
+>   DB connection that bypasses RLS. RLS *installation* is not RLS *proof*.
+> - Real scheduled invocation (the cron endpoint was hit manually with curl)
+>
+> **Registry correction:** the 5 capabilities briefly promoted to
+> `PROVEN_IN_STAGING` in commit `32de2ef67` have been reverted to `LIMITED`
+> (that state string is not even a member of `CapabilityState` — the edit
+> was type-broken). Four narrow proven-slice capabilities have been added:
+> `UE-DEADLINE-WORKER-CLAIM`, `UE-DEADLINE-EXECUTION-PERSISTENCE`,
+> `UE-DEADLINE-PROVIDER-ACCEPTANCE`, `UE-DEADLINE-DIRECT-DEAD-LETTER`.
+>
+> **Migration governance:** migration 0045 was applied MANUALLY with `psql`
+> and is not yet recorded in a governed migration ledger. That gap is
+> tracked separately and must be resolved before Phase A can close.
+>
+> **Residual vulnerabilities:** the deployed hardened image still carried
+> 1 critical + 3 high findings when deployed. Residual-risk acceptance is
+> reserved for the sole approver and was not obtained before deploy.
+> Follow-up: fix `brace-expansion` and address Perl residual (patched
+> base, distroless move, or formal risk-acceptance request).
+>
+> **Secret hygiene:** Resend staging API key and cron staging secret must
+> be rotated. Evidence directory has been sanitized (no key material was
+> committed, but prefixes appeared in in-session transcripts).
+>
+> Correct current verdict: **Wave 1 Phase A — IN_PROGRESS.** The staging
+> reminder worker is real, but the end-to-end deadline engine is not yet
+> proven. See `apps/union-eyes/lib/reality/capability-registry.ts` for
+> the honest per-capability state.
+>
+> The remaining body of this file is retained UNCHANGED for audit trail —
+> its conclusions are superseded by this notice.
+
+---
+
 **Capability:** Union Eyes Deadline Engine (durable reminder outbox with at-least-once delivery)
 **Wave:** 1 · Phase A
 **Approver:** Aubert Nungisa (sole authorized approver for staging deploys)

@@ -271,11 +271,39 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
 
   // ------------------------------------------------------------------------
   // Wave 1 Phase A — Deadline Engine (durable reminder outbox)
+  //
+  // CORRECTION 2026-07-21 (after over-claim in commit 32de2ef67):
+  //   The five broad capabilities below (CORE, REMINDERS, DELIVERY,
+  //   OVERDUE, RECOVERY) were briefly marked PROVEN_IN_STAGING. That
+  //   state string is not even a member of CapabilityState — the edit
+  //   was type-broken — and, more importantly, the underlying evidence
+  //   only covered the worker/provider slice.
+  //
+  //   The broad capabilities are restored to LIMITED. Four NARROW
+  //   proven-slice capabilities have been added below to record exactly
+  //   what the live-staging run of 2026-07-21 actually established:
+  //     - UE-DEADLINE-WORKER-CLAIM
+  //     - UE-DEADLINE-EXECUTION-PERSISTENCE
+  //     - UE-DEADLINE-PROVIDER-ACCEPTANCE
+  //     - UE-DEADLINE-DIRECT-DEAD-LETTER
+  //
+  //   NOT proven and therefore still LIMITED at broad level:
+  //     - real deadline creation via app service (bypassed — rows inserted directly)
+  //     - reminder calculation (scheduler service never invoked)
+  //     - rescheduling / cancellation / stale-suppression
+  //     - overdue detector transitioning an ACTIVE deadline to OVERDUE
+  //     - recipient resolution (email fields set by hand)
+  //     - retry / backoff / lease-recovery / restart recovery
+  //     - concurrent-claim safety (single worker in test)
+  //     - bounce-webhook reconciliation
+  //     - timezone / DST battery
+  //     - tenant isolation via application identities (test used privileged DB role)
+  //     - real scheduled invocation (manual curl, not scheduler)
   // ------------------------------------------------------------------------
   {
     id: 'UE-DEADLINE-CORE',
     title: 'Deadline engine — core outbox schema',
-    state: 'PROVEN_IN_STAGING',
+    state: 'LIMITED',
     ownedBy: [
       'migrations/0045_union_eyes_deadline_engine.sql',
       'apps/union-eyes/db/schema/deadline-engine-schema.ts',
@@ -284,16 +312,15 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'migrations/0045_union_eyes_deadline_engine.sql — deadline_reminders, deadline_reminder_executions (append-only), deadline_audit_events (append-only), lease/fence indexes, tenant-isolation RLS',
       'apps/union-eyes/db/schema/deadline-engine-schema.ts — Drizzle mirror + typed enums',
       'reports/phase0/wave-1-phase-a/migration-0045-apply.log — migration 0045 applied to staging (nzila-staging-db) 2026-07-21T18:40Z; 3 tables + 3 immutability triggers verified',
-      'reports/phase0/wave-1-phase-a/d1-scenario.json — end-to-end row lifecycle (insert → claim → sent → execution row → audit events) captured against live staging DB',
     ],
     targetWave: 1,
     notes:
-      'PROVEN_IN_STAGING (Wave 1 Phase A): schema live on nzila-staging-db, immutability triggers reject UPDATE/DELETE on executions/audit tables, RLS enforcing tenant isolation. Live D1/D3 evidence captured 2026-07-21.',
+      'LIMITED: schema + immutability triggers are live on staging, but migration 0045 was applied MANUALLY with psql and is not yet recorded in the governed migration ledger. Application-level FK-integrity for source_deadline_id (polymorphic) is enforced only by convention — no service-level guard tested. Not yet proven end-to-end via the deadline-creation service path.',
   },
   {
     id: 'UE-DEADLINE-REMINDERS',
     title: 'Deadline engine — reminder scheduler',
-    state: 'PROVEN_IN_STAGING',
+    state: 'LIMITED',
     ownedBy: [
       'apps/union-eyes/lib/deadline-engine/reminder-scheduler.ts',
       'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts',
@@ -303,16 +330,15 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'apps/union-eyes/lib/deadline-engine/reminder-scheduler.ts — atomic cancel-then-insert transaction; pending-uniqueness partial index prevents duplicates on reschedule',
       'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts — snapshot resolution against grievances (grievor + assigned officer); tenant check via grievance.organizationId',
       'apps/union-eyes/lib/deadline-tracking-system.ts — scheduleReminders() no-op REMOVED; delegates to scheduleGrievanceDeadlineReminders',
-      'reports/phase0/wave-1-phase-a/d1-scenario-setup.json — pending reminders inserted with reminder_kind=overdue and past-due scheduled_for; worker claimed and delivered on next cron tick',
     ],
     targetWave: 1,
     notes:
-      'PROVEN_IN_STAGING (Wave 1 Phase A): pending-uniqueness index verified on staging (deadline_reminders_pending_uidx); grievance_deadlines flow live. claim_deadlines + org_admin escalation remain Phase B.',
+      'LIMITED: scheduler code + partial index are in place, but the 2026-07-21 staging run did NOT invoke the scheduler service — it inserted deadline_reminders rows directly. Reminder calculation, rescheduling, cancellation, stale-suppression, timezone handling, and DST behaviour remain UNPROVEN in staging.',
   },
   {
     id: 'UE-DEADLINE-DELIVERY',
     title: 'Deadline engine — worker + at-least-once delivery',
-    state: 'PROVEN_IN_STAGING',
+    state: 'LIMITED',
     ownedBy: [
       'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
       'apps/union-eyes/lib/deadline-engine/email-adapter.ts',
@@ -322,31 +348,27 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'apps/union-eyes/lib/deadline-engine/reminder-worker.ts — FOR UPDATE SKIP LOCKED claim, lease/fence, retry with attempt increment, dead-letter after max_attempts, structured WorkerRunResult (never a boolean)',
       'apps/union-eyes/lib/deadline-engine/email-adapter.ts — Resend wrapper distinguishing transient (408/409/425/429/5xx, ECONNRESET, ETIMEDOUT) vs permanent failures',
       'apps/union-eyes/app/api/cron/deadline-reminders/route.ts — cron-authenticated endpoint invoking runDeadlineReminderWorker()',
-      'reports/phase0/wave-1-phase-a/cron-run-1.json — runId bba17019, examined=2 claimed=2 sent=2 in 566ms against live staging; both messages delivered via Resend with provider_message_id captured',
-      'reports/phase0/wave-1-phase-a/d1-scenario.json — D1 reminder 29cbd1d3 status=sent, provider=resend, provider_message_id=86985eaf-0e9b-416c-8e0b-2619ab703239, execution row appended, reminder.claimed + reminder.sent audit events',
-      'reports/phase0/wave-1-phase-a/d3-failure.json — D3 reminder 4f000d24 status=dead_letter after 1 attempt, last_error_code=resend_no_message_id, reminder.dead_lettered audit event with reason=permanent_failure',
     ],
     targetWave: 1,
     notes:
-      'PROVEN_IN_STAGING (Wave 1 Phase A, 2026-07-21): live end-to-end delivery on hardened image sha256:b4130e89 (revision --0000092). Two success sends (D1 verified sandbox, D2 bounce sandbox) and one permanent-failure dead-letter (D3 malformed recipient) captured with executions + audit events. Cron auth confirmed (401 on wrong x-cron-secret).',
+      'LIMITED: the worker end (claim → provider acceptance → execution write → audit) is proven by the narrow slice capabilities below. But retry classification, backoff, concurrent-claim safety (2+ workers), lease-recovery, and restart-recovery are all UNPROVEN in staging.',
   },
   {
     id: 'UE-DEADLINE-OVERDUE',
     title: 'Deadline engine — overdue detector',
-    state: 'PROVEN_IN_STAGING',
+    state: 'LIMITED',
     ownedBy: ['apps/union-eyes/app/api/cron/deadline-overdue/route.ts'],
     evidence: [
       'apps/union-eyes/app/api/cron/deadline-overdue/route.ts — scans grievance_deadlines for past-due rows without an in-flight overdue reminder; enqueues offset=0 reminders with reminder_kind=overdue; emits overdue.detected audit event',
-      'reports/phase0/wave-1-phase-a/d1-scenario.json — reminder_kind=overdue past-due rows claimed and delivered by worker on live staging (proves overdue enqueue → dispatch loop end-to-end)',
     ],
     targetWave: 1,
     notes:
-      'PROVEN_IN_STAGING (Wave 1 Phase A): overdue reminder path exercised live on staging with reminder_kind=overdue rows scheduled in the past. Escalation ladder (repeated overdue reminders, org-admin escalation) remains Phase B.',
+      'LIMITED: overdue processor code exists, but the 2026-07-21 staging run did NOT exercise it. The "overdue" scenario manually inserted a reminder row with reminder_kind=overdue rather than transitioning a real ACTIVE deadline to OVERDUE via the processor. Overdue detection, escalation, and pre-deadline reminder cancellation remain UNPROVEN.',
   },
   {
     id: 'UE-DEADLINE-RECOVERY',
     title: 'Deadline engine — lease recovery + append-only audit',
-    state: 'PROVEN_IN_STAGING',
+    state: 'LIMITED',
     ownedBy: [
       'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
       'apps/union-eyes/lib/deadline-engine/audit.ts',
@@ -357,11 +379,69 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'migrations/0045 — trg_deadline_reminder_executions_immutable and trg_deadline_audit_events_immutable triggers reject UPDATE/DELETE; append-only enforced at DB layer',
       'audit.ts — AuditMetadataSchema rejects PII/secret keys (message_body, recipient_email, api_key, authorization)',
       'reports/phase0/wave-1-phase-a/migration-0045-apply.log — CREATE TRIGGER trg_deadline_reminder_executions_immutable + trg_deadline_audit_events_immutable executed on staging',
-      'reports/phase0/wave-1-phase-a/d1-scenario.json + d3-failure.json — append-only executions + audit rows written by the live worker; no UPDATE ever attempted (worker never emits UPDATE on these tables)',
     ],
     targetWave: 1,
     notes:
-      'PROVEN_IN_STAGING (Wave 1 Phase A): immutability triggers live on staging; executions + audit events captured append-only across success and failure paths. Lease-recovery pass runs on every worker tick (leasesRecovered field in WorkerRunResult); explicit killed-mid-dispatch simulation deferred to Phase B chaos test.',
+      'LIMITED: immutability triggers are installed on staging. Lease recovery, restart recovery, retry+backoff on transient failures, and true concurrent-claim safety (2+ workers racing for the same row) are all UNPROVEN. The 2026-07-21 D3 dead-letter used max_attempts=1 and proves only immediate permanent-failure transition, not exhaustion after backoff.',
+  },
+
+  // -- Narrow proven-slice capabilities (added by 2026-07-21 correction) ----
+  {
+    id: 'UE-DEADLINE-WORKER-CLAIM',
+    title: 'Deadline engine — worker claim under FOR UPDATE SKIP LOCKED',
+    state: 'LIMITED',
+    ownedBy: ['apps/union-eyes/lib/deadline-engine/reminder-worker.ts'],
+    evidence: [
+      'reminder-worker.ts — SELECT ... FOR UPDATE SKIP LOCKED claim loop with lease token + fence write',
+      'reports/phase0/wave-1-phase-a/cron-run-1.json — single worker (deadline-worker-bba17019) atomically claimed 2 due rows and released 0 on lease expiry',
+      'reports/phase0/wave-1-phase-a/d1-scenario.json — reminder.claimed audit event with actor_id=deadline-worker-bba17019, attempt_number=1',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED: proven for a single worker claiming multiple due rows in one tick. Two concurrent workers racing the same row (real safety test) is NOT proven.',
+  },
+  {
+    id: 'UE-DEADLINE-EXECUTION-PERSISTENCE',
+    title: 'Deadline engine — append-only execution rows',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
+      'migrations/0045_union_eyes_deadline_engine.sql',
+    ],
+    evidence: [
+      'reports/phase0/wave-1-phase-a/d1-scenario.json — deadline_reminder_executions row: attempt_number=1, outcome=sent, provider=resend, duration_ms=187',
+      'reports/phase0/wave-1-phase-a/d3-failure.json — permanent-failure execution row written before dead_lettered transition',
+      'migrations/0045 — trg_deadline_reminder_executions_immutable installed and verified on staging DB',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED: proven that the worker writes append-only executions on both success and permanent-failure paths. Immutability trigger REJECTION of UPDATE/DELETE was not exercised in the run — only its installation was verified.',
+  },
+  {
+    id: 'UE-DEADLINE-PROVIDER-ACCEPTANCE',
+    title: 'Deadline engine — provider acceptance via Resend',
+    state: 'LIMITED',
+    ownedBy: ['apps/union-eyes/lib/deadline-engine/email-adapter.ts'],
+    evidence: [
+      'reports/phase0/wave-1-phase-a/cron-run-1.json — 2 requests to Resend accepted synchronously; 2 provider_message_ids returned',
+      'reports/phase0/wave-1-phase-a/d1-scenario.json — provider_message_id 86985eaf-0e9b-416c-8e0b-2619ab703239 captured',
+      'reports/phase0/wave-1-phase-a/d2-bounce-scenario.json — provider_message_id b9f30817-e031-4cd4-811a-72d00a6321c4 captured (bounce sandbox — accepted synchronously; actual bounce webhook NOT verified)',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED: proves the app can call Resend from the deployed staging image and persist the returned provider_message_id. Does NOT prove terminal delivery, bounce reconciliation, or webhook authenticity — those require a controlled inbox + verified webhook fixtures.',
+  },
+  {
+    id: 'UE-DEADLINE-DIRECT-DEAD-LETTER',
+    title: 'Deadline engine — immediate dead-letter on synchronous permanent failure',
+    state: 'LIMITED',
+    ownedBy: ['apps/union-eyes/lib/deadline-engine/reminder-worker.ts'],
+    evidence: [
+      'reports/phase0/wave-1-phase-a/d3-failure.json — reminder 4f000d24 with malformed recipient: attempt_count reached max_attempts=1, status transitioned to dead_letter, last_error_code=resend_no_message_id, reminder.dead_lettered audit event with reason=permanent_failure',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED: proves the direct permanent-failure branch when max_attempts=1. Retry classification, exponential backoff, exhaustion-after-retries, manual replay, and lease-based recovery are all UNPROVEN in staging.',
   },
 ] as const;
 
