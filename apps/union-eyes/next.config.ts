@@ -310,6 +310,19 @@ const nextConfig: NextConfig = {
   // Disabled on Windows dev builds: Turbopack generates filenames with colons
   // (e.g. node:crypto) which are invalid on NTFS. CI/Docker builds run on Linux.
   output: process.platform === 'win32' ? undefined : 'standalone',
+
+  // Wave 0 Task F — hard-exclude the sibling demo package from output file
+  // tracing. The @nzila/union-eyes-demo package is a physically separate
+  // artifact and MUST NOT appear in this package's `.nft.json` traces or
+  // standalone output. Without this, pnpm workspace symlinks cause
+  // @vercel/nft to walk into ../union-eyes-demo/ and list its
+  // customer-fixture files as traced dependencies of operational pages.
+  outputFileTracingExcludes: {
+    '*': [
+      '../union-eyes-demo/**',
+      '**/apps/union-eyes-demo/**',
+    ],
+  },
   
   // Skip API route static analysis during build (speeds up Docker builds)
   // API routes are inherently dynamic and don't need static generation

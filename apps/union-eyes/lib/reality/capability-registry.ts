@@ -201,13 +201,17 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'apps/union-eyes/lib/config/env-validation.ts — UE_DEMO_* env vars typed z.never().optional(); boot fails if any is set.',
       'apps/union-eyes/lib/runtime/environment.ts — UeEnvironment, UeDeploymentType, UeFeatureProfile enums omit demo/cupe4373 members.',
       'reports/wave-0-artifact-proof.operational.json / wave-0-artifact-proof.md — physical proof of the two-package split.',
+      'apps/union-eyes/next.config.ts — outputFileTracingExcludes hard-blocks @vercel/nft from walking into the sibling union-eyes-demo package via pnpm workspace symlinks (Wave 0 Task F).',
+      'reports/operational-build-demo-scan.json / .md — Wave 0 Task F verification: production build (`pnpm --filter @nzila/union-eyes build` after removing demo env pollution from .env.local) scanned with `pnpm reality:build-scan:with-bundle` produces 0 bundle hits (down from 6 pre-fix).',
     ],
     targetWave: 0,
     notes:
       'CORRECTED 2026-07-21 (see docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md). ' +
       'The prior allowlist model has been retired. Operational package now physically excludes customer-specific ' +
       'demo modules and rejects UE_DEMO_* env vars at boot via the zod schema. Any regression is caught at the ' +
-      'boundary (env validation) or at compile time (removed types), not by a runtime scanner allowlist.',
+      'boundary (env validation) or at compile time (removed types), not by a runtime scanner allowlist. ' +
+      'Task F (bundle proof) additionally verified via next.config outputFileTracingExcludes plus a clean ' +
+      '`pnpm reality:build-scan:with-bundle` after a full production build.',
   },
 
   // ------------------------------------------------------------------------
