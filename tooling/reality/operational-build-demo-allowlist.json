@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "updated": "2026-07-22",
+  "notes": [
+    "Wave 0 §8 — operational-build demo-content allowlist.",
+    "Every source file that legitimately contains the demo-identifier",
+    "pattern (`cupe4373`, `CUPE 4373`, `CUPE Local 4373`, `CUPE4373_`)",
+    "in operational source MUST have an entry here with a truthful",
+    "classification and reason. Unallowlisted hits are hard failures.",
+    "Tests, fixtures, snapshots, scripts, and per-app reports/ dirs are",
+    "excluded by the scanner itself (they are not bundled into the build).",
+    "Full architecture: docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md."
+  ],
+  "patterns": [
+    "cupe\\s*[-_]?\\s*4373|cupe\\s*local\\s*4373|CUPE4373_"
+  ],
+  "classifications": {
+    "env-schema": "Zod enum / TypeScript union type discriminant that MUST list the demo profile literal.",
+    "runtime-detector": "Runtime code that inspects env vars and matches the demo profile string.",
+    "demo-component": "Component whose contents ARE the demo UX. Imported by an operational-mode page but only rendered when isCupe4373DemoRuntime() is true.",
+    "gated-render": "Operational surface that references demo strings inside an isCupe4373Demo… branch.",
+    "registry-evidence": "capability-registry.ts entry text.",
+    "code-comment": "Comment-only reference (e.g. explaining a former demo import).",
+    "build-config": "Infra/CI files that reference the profile (Bicep, Docker, package.json scripts). Not shipped in the runtime bundle.",
+    "report-artifact": "Auto-generated report under reports/ that names the profile.",
+    "test-fixture": "Test/spec/fixture."
+  },
+  "entries": [
+    {
+      "file": "apps/union-eyes/app/[locale]/(auth)/login/[[...login]]/page.tsx",
+      "classification": "gated-render",
+      "reason": "Login page imports Cupe4373PersonaPicker and renders it only when isCupe4373DemoRuntime() is true.",
+      "maxHits": 4,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/(auth)/sign-in/[[...sign-in]]/page.tsx",
+      "classification": "gated-render",
+      "reason": "Sign-in landing branches on isCupe4373DemoRuntime() to surface the CUPE Local 4373 marketing copy.",
+      "maxHits": 3,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/admin/pilots/page.tsx",
+      "classification": "gated-render",
+      "reason": "Admin pilots surface lets operators apply/export the CUPE4373 reference template; the string is a legitimate template identifier surfaced to admins.",
+      "maxHits": 4,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/communications/page.tsx",
+      "classification": "code-comment",
+      "reason": "Two adjacent comments explain the former demo import path (@/components/demo/cupe4373-communications-page).",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/documents/layout.tsx",
+      "classification": "runtime-detector",
+      "reason": "Documents dashboard layout redirects to /dashboard when isCupe4373DemoRuntime() is false (demo-only surface).",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/layout.tsx",
+      "classification": "gated-render",
+      "reason": "Dashboard shell binds isCupeDemo = isCupe4373DemoRuntime() and renders a 'CUPE Local 4373 demo' badge inside the demo branch.",
+      "maxHits": 3,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/page.tsx",
+      "classification": "code-comment",
+      "reason": "Two comments document the deleted @/components/demo/cupe4373-operations-dashboard dynamic import.",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/reports/page.tsx",
+      "classification": "code-comment",
+      "reason": "Comment names the former Cupe4373ReportsPage demo module for traceability of the /dashboard/reports NOT_IMPLEMENTED capability (see UE-DASH-REPORTS-INDEX).",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/page.tsx",
+      "classification": "runtime-detector",
+      "reason": "Root landing page inspects isCupe4373DemoRuntime() to route demo users to /dashboard.",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/api/health/route.ts",
+      "classification": "runtime-detector",
+      "reason": "Health endpoint reports whether the featureProfile matches the cupe4373 demo token.",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts",
+      "classification": "runtime-detector",
+      "reason": "Commercial-transition validator asserts featureProfile ≠ cupe4373 to block accidental production use of the demo profile.",
+      "maxHits": 3,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/api/pilot/apply/[id]/package-export/route.ts",
+      "classification": "runtime-detector",
+      "reason": "Package-export validator asserts featureProfile ≠ cupe4373 before publishing an exportable package.",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/app/login/page.tsx",
+      "classification": "runtime-detector",
+      "reason": "Legacy /login route uses isCupe4373DemoRuntime() to select the post-login redirect path.",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/auth/cupe4373-persona-picker.tsx",
+      "classification": "demo-component",
+      "reason": "The CUPE 4373 demo persona picker itself — hardcoded persona emails, one-click demo login. Rendered only when isCupe4373DemoRuntime() is true.",
+      "maxHits": 20,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/auth/login-form.tsx",
+      "classification": "runtime-detector",
+      "reason": "Login form falls back to /dashboard when isCupe4373DemoRuntime() is true (else /dashboard/priorities).",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/documents/documents-console.tsx",
+      "classification": "gated-render",
+      "reason": "Documents console displays a CUPE 4373 CBA sample entry when the demo runtime is active.",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/home/portal-home.tsx",
+      "classification": "gated-render",
+      "reason": "Portal home embeds a CUPE 4373 CBA document title inside a mock document list rendered only for the demo runtime.",
+      "maxHits": 3,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/onboarding/onboarding-provider.tsx",
+      "classification": "runtime-detector",
+      "reason": "Onboarding provider suppresses the standard onboarding flow when isCupe4373DemoRuntime() is true.",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/sidebar.tsx",
+      "classification": "gated-render",
+      "reason": "Sidebar imports getCupe4373DemoNavigation / getCupe4373DemoGroups and returns them inside the isCupeDemo branch.",
+      "maxHits": 4,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/components/work/work-surface.tsx",
+      "classification": "code-comment",
+      "reason": "Two adjacent comments document the removed Cupe4373CasesConsole demo module short-circuit.",
+      "maxHits": 2,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/infra/environments/union-eyes-env.bicep",
+      "classification": "build-config",
+      "reason": "Bicep template enumerates UE_DEPLOYMENT_TYPE / UE_FEATURE_PROFILE / *_DEMO_PROFILE values including 'cupe4373-demo' and 'cupe4373' for the demo environment. Not shipped in the runtime bundle.",
+      "maxHits": 10,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/instrumentation.ts",
+      "classification": "code-comment",
+      "reason": "Instrumentation entry-point comment mentions the cupe4373 demo profile as an example of an unsafe misdeploy.",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/lib/config/env-validation.ts",
+      "classification": "env-schema",
+      "reason": "Zod enums literally enumerate 'cupe4373-demo' and 'cupe4373' as valid values for UE_DEPLOYMENT_TYPE, UE_FEATURE_PROFILE, NEXT_PUBLIC_UE_FEATURE_PROFILE, UE_DEMO_PROFILE, NEXT_PUBLIC_UE_DEMO_PROFILE.",
+      "maxHits": 5,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "classification": "runtime-detector",
+      "reason": "Owns isCupe4373DemoRuntime(), CUPE4373_DEMO_PROFILE constant, CUPE4373_DEMO_NAVIGATION, CUPE4373_DEMO_GROUPS, CUPE4373_DEMO_MEMBER_NAVIGATION, CUPE4373_DEMO_ALLOWED_PREFIXES, and the getCupe4373Demo* helpers.",
+      "maxHits": 25,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/lib/dashboard/require-dashboard-access.ts",
+      "classification": "runtime-detector",
+      "reason": "Dashboard access guard reads UE_FEATURE_PROFILE to gate CUPE-specific behaviour.",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/lib/pilot-admin-operational.ts",
+      "classification": "runtime-detector",
+      "reason": "Anti-theatre sentinel list ('cupe4373', 'demo', 'sample', 'placeholder') used to detect placeholder pilot values in operational mode.",
+      "maxHits": 1,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "classification": "registry-evidence",
+      "reason": "UE-DEMO-CUPE4373 capability entry evidence/notes text and the new UE-BUILD-OPERATIONAL-ISOLATION notes reference the profile name.",
+      "maxHits": 15,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/lib/runtime/environment.ts",
+      "classification": "env-schema",
+      "reason": "TypeScript union types (UeDeploymentType, UeFeatureProfile) literally list 'cupe4373-demo' and 'cupe4373'.",
+      "maxHits": 10,
+      "targetWave": 6
+    },
+    {
+      "file": "apps/union-eyes/package.json",
+      "classification": "build-config",
+      "reason": "package.json includes the `seed:cupe4373-members` script — command-line only, not in bundle.",
+      "maxHits": 1,
+      "targetWave": 6
+    }
+  ]
+}

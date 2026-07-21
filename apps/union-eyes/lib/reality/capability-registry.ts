@@ -176,6 +176,38 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   },
 
   // ------------------------------------------------------------------------
+  // Build-time isolation (Wave 0 §8)
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-BUILD-OPERATIONAL-ISOLATION',
+    title: 'Operational-build isolation from CUPE 4373 demo content',
+    state: 'LIMITED',
+    ownedBy: [
+      'lib/dashboard/role-experience.ts',
+      'components/auth/cupe4373-persona-picker.tsx',
+      'app/[locale]/dashboard/layout.tsx',
+      'components/home/portal-home.tsx',
+      'components/sidebar.tsx',
+      'components/documents/documents-console.tsx',
+      'tooling/reality/operational-build-scan.ts',
+      'tooling/reality/operational-build-demo-allowlist.json',
+    ],
+    evidence: [
+      'lib/dashboard/role-experience.ts:129 — isCupe4373DemoRuntime() reads four env vars (NEXT_PUBLIC_UE_DEMO_PROFILE, NEXT_PUBLIC_UE_FEATURE_PROFILE, UE_FEATURE_PROFILE, UE_DEPLOYMENT_TYPE=cupe4373-demo); operational builds set none of these so the gate returns false',
+      'app/[locale]/dashboard/layout.tsx:35,296 — "CUPE Local 4373 demo" JSX is inside `{isCupeDemo ? … : <OrganizationBreadcrumb />}` and unreachable when isCupeDemo=false',
+      'components/sidebar.tsx:135,151 — getCupe4373DemoNavigation / getCupe4373DemoGroups are called only inside the isCupeDemo branch',
+      'tooling/reality/operational-build-scan.ts + operational-build-demo-allowlist.json — anti-theatre scanner enforces that every demo-token reference in operational source has a truthful classification and reason, with per-file maxHits ceilings',
+      'reports/operational-build-demo-scan.md — current baseline: 29 source files / 97 hits, 0 errors',
+    ],
+    targetWave: 6,
+    notes:
+      'Operational bundle currently embeds CUPE 4373 demo constants (persona picker, demo navigation, demo document titles) and JSX branches. ' +
+      'All rendering paths are gated by isCupe4373DemoRuntime() and remain dead code when no demo env vars are set. ' +
+      'Wave 5/6 will dynamically-import the demo-only modules (persona picker, demo dashboards, demo navigation) so the operational bundle no longer contains any demo strings. ' +
+      'Until then, the operational-build-scan gate (`pnpm reality:build-scan`) ensures the demo-string surface cannot silently grow, and the allowlist documents every legitimate reference.',
+  },
+
+  // ------------------------------------------------------------------------
   // Dashboard surfaces returning HTTP 404 (Wave 0 §7 reconciliation)
   // ------------------------------------------------------------------------
   {

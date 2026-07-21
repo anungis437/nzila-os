@@ -205,6 +205,8 @@
     "reality:inventory": "tsx tooling/reality/capability-inventory.ts",
     "reality:anti-theatre": "tsx tooling/reality/anti-theatre-scan.ts",
     "reality:demo-guard": "tsx tooling/reality/demo-deployment-guard.ts",
+    "reality:build-scan": "tsx tooling/reality/operational-build-scan.ts",
+    "reality:build-scan:with-bundle": "tsx tooling/reality/operational-build-scan.ts --build-dir apps/union-eyes/.next",
     "validate:labor-continuity": "node tooling/scripts/validate-labor-continuity-governance.mjs",
     "validate:cognition": "node tooling/scripts/validate-institutional-cognition-convergence.mjs",
     "validate:maturity-elevation": "node tooling/scripts/validate-maturity-convergence.mjs",
