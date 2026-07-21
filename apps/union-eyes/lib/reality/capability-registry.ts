@@ -268,6 +268,92 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     targetWave: 0,
     notes: 'Ships in the bundle but is unreachable in staging/pilot/production. Kept only for local Sentry SDK validation.',
   },
+
+  // ------------------------------------------------------------------------
+  // Wave 1 Phase A — Deadline Engine (durable reminder outbox)
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-DEADLINE-CORE',
+    title: 'Deadline engine — core outbox schema',
+    state: 'LIMITED',
+    ownedBy: [
+      'migrations/0045_union_eyes_deadline_engine.sql',
+      'apps/union-eyes/db/schema/deadline-engine-schema.ts',
+    ],
+    evidence: [
+      'migrations/0045_union_eyes_deadline_engine.sql — deadline_reminders, deadline_reminder_executions (append-only), deadline_audit_events (append-only), lease/fence indexes, tenant-isolation RLS',
+      'apps/union-eyes/db/schema/deadline-engine-schema.ts — Drizzle mirror + typed enums',
+    ],
+    targetWave: 1,
+    notes:
+      'PARTIALLY_IMPLEMENTED: schema + service + tests landed Wave 1 Phase A; awaiting live staging proof (D1 scenario) before promotion to PROVEN_IN_STAGING.',
+  },
+  {
+    id: 'UE-DEADLINE-REMINDERS',
+    title: 'Deadline engine — reminder scheduler',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/deadline-engine/reminder-scheduler.ts',
+      'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts',
+      'apps/union-eyes/lib/deadline-tracking-system.ts',
+    ],
+    evidence: [
+      'apps/union-eyes/lib/deadline-engine/reminder-scheduler.ts — atomic cancel-then-insert transaction; pending-uniqueness partial index prevents duplicates on reschedule',
+      'apps/union-eyes/lib/deadline-engine/recipient-resolver.ts — snapshot resolution against grievances (grievor + assigned officer); tenant check via grievance.organizationId',
+      'apps/union-eyes/lib/deadline-tracking-system.ts — scheduleReminders() no-op REMOVED; delegates to scheduleGrievanceDeadlineReminders',
+    ],
+    targetWave: 1,
+    notes:
+      'PARTIALLY_IMPLEMENTED: grievance_deadlines flow wired; claim_deadlines + org_admin escalation are Phase B. Awaiting live staging proof for PROVEN_IN_STAGING.',
+  },
+  {
+    id: 'UE-DEADLINE-DELIVERY',
+    title: 'Deadline engine — worker + at-least-once delivery',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
+      'apps/union-eyes/lib/deadline-engine/email-adapter.ts',
+      'apps/union-eyes/app/api/cron/deadline-reminders/route.ts',
+    ],
+    evidence: [
+      'apps/union-eyes/lib/deadline-engine/reminder-worker.ts — FOR UPDATE SKIP LOCKED claim, lease/fence, retry with attempt increment, dead-letter after max_attempts, structured WorkerRunResult (never a boolean)',
+      'apps/union-eyes/lib/deadline-engine/email-adapter.ts — Resend wrapper distinguishing transient (408/409/425/429/5xx, ECONNRESET, ETIMEDOUT) vs permanent failures',
+      'apps/union-eyes/app/api/cron/deadline-reminders/route.ts — cron-authenticated endpoint invoking runDeadlineReminderWorker()',
+    ],
+    targetWave: 1,
+    notes:
+      'PARTIALLY_IMPLEMENTED: worker code + cron route land Phase A; awaiting live staging proof of end-to-end delivery (real Resend send + sent status + execution row + audit event).',
+  },
+  {
+    id: 'UE-DEADLINE-OVERDUE',
+    title: 'Deadline engine — overdue detector',
+    state: 'LIMITED',
+    ownedBy: ['apps/union-eyes/app/api/cron/deadline-overdue/route.ts'],
+    evidence: [
+      'apps/union-eyes/app/api/cron/deadline-overdue/route.ts — scans grievance_deadlines for past-due rows without an in-flight overdue reminder; enqueues offset=0 reminders with reminder_kind=overdue; emits overdue.detected audit event',
+    ],
+    targetWave: 1,
+    notes:
+      'PARTIALLY_IMPLEMENTED: detector runs at cron cadence; escalation ladder (repeated overdue reminders, org-admin escalation) is Phase B.',
+  },
+  {
+    id: 'UE-DEADLINE-RECOVERY',
+    title: 'Deadline engine — lease recovery + append-only audit',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
+      'apps/union-eyes/lib/deadline-engine/audit.ts',
+      'migrations/0045_union_eyes_deadline_engine.sql',
+    ],
+    evidence: [
+      'reminder-worker.ts — recovery pass: claimed rows whose lease_expires_at has passed transition back to pending with attempt_count preserved; emits reminder.lease_recovered',
+      'migrations/0045 — trg_deadline_reminder_executions_immutable and trg_deadline_audit_events_immutable triggers reject UPDATE/DELETE; append-only enforced at DB layer',
+      'audit.ts — AuditMetadataSchema rejects PII/secret keys (message_body, recipient_email, api_key, authorization)',
+    ],
+    targetWave: 1,
+    notes:
+      'PARTIALLY_IMPLEMENTED: lease recovery + immutability triggers in place; awaiting live staging proof that a killed worker mid-dispatch recovers cleanly on next run.',
+  },
 ] as const;
 
 /**
