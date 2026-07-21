@@ -203,6 +203,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'reports/wave-0-artifact-proof.operational.json / wave-0-artifact-proof.md — physical proof of the two-package split.',
       'apps/union-eyes/next.config.ts — outputFileTracingExcludes hard-blocks @vercel/nft from walking into the sibling union-eyes-demo package via pnpm workspace symlinks (Wave 0 Task F).',
       'reports/operational-build-demo-scan.json / .md — Wave 0 Task F verification: production build (`pnpm --filter @nzila/union-eyes build` after removing demo env pollution from .env.local) scanned with `pnpm reality:build-scan:with-bundle` produces 0 bundle hits (down from 6 pre-fix).',
+      'reports/phase0/task-j/smoke.json — Wave 0 Task J live proof: image nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:73b4b7bd61909a7f8e484b5244840a2ea05a62838e9494b41a859df46e8aa811 (tags task-j-b328b38c4, staging-latest) built via ACR run cx6x with DOCKER_BUILDKIT=1, deployed to Container App nzila-os-union-eyes-staging revision --0000090 (Active, Healthy, Running). Live /api/version reports gitSha=b328b38c4b1e…, releaseId=wave0-task-j, demoProfile=null, featureProfile=internal.',
+      'reports/phase0/task-j/README.md — full Task J trail (§11 build, §12 proof, §13 staging baseline, §14 deploy).',
     ],
     targetWave: 0,
     notes:
@@ -211,7 +213,11 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'demo modules and rejects UE_DEMO_* env vars at boot via the zod schema. Any regression is caught at the ' +
       'boundary (env validation) or at compile time (removed types), not by a runtime scanner allowlist. ' +
       'Task F (bundle proof) additionally verified via next.config outputFileTracingExcludes plus a clean ' +
-      '`pnpm reality:build-scan:with-bundle` after a full production build.',
+      '`pnpm reality:build-scan:with-bundle` after a full production build. ' +
+      'Task J (2026-07-21) closes the loop end-to-end: the operational image was rebuilt cleanly in ACR (run ' +
+      'cx6x, digest sha256:73b4b7bd6190…) and deployed to nzila-os-union-eyes-staging revision --0000090. ' +
+      'The live /api/version endpoint reports gitSha=b328b38c4b1e…, featureProfile=internal, demoProfile=null — ' +
+      'proving the runtime environment on staging carries no customer-fixture footprint.',
   },
 
   // ------------------------------------------------------------------------
