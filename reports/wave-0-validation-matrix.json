@@ -1,0 +1,34 @@
+{
+  "milestone": "wave-0-section-10-validation-matrix",
+  "branch": "fix/union-eyes-reality-remediation",
+  "commitAtCapture": "d9b32eaeb",
+  "recordedAt": "2026-07-21T07:12:00Z",
+  "rows": [
+    { "id": 1, "gate": "anti-theatre scanner", "command": "pnpm reality:anti-theatre", "exit": 0, "result": "PASS_WITH_WARNINGS", "detail": "0 errors / 1264 warnings / 4799 files" },
+    { "id": 2, "gate": "capability inventory", "command": "pnpm reality:inventory", "exit": 0, "result": "PASS", "detail": "reports/union-eyes-capability-inventory.json" },
+    { "id": 3, "gate": "route reconciliation tests", "command": "pnpm --filter @nzila/union-eyes exec vitest run lib/reality/__tests__/route-reconciliation.test.ts", "exit": 0, "result": "PASS", "detail": "4/4 tests / 749 ms" },
+    { "id": 4, "gate": "operational build source scan", "command": "pnpm reality:build-scan", "exit": 0, "result": "PASS", "detail": "29 files / 104 hits / 0 errors" },
+    { "id": 5, "gate": "operational build bundle scan", "command": "pnpm reality:build-scan:with-bundle", "exit": 0, "result": "PASS_INFORMATIONAL", "detail": "source 29f/104h + bundle 72f/73h" },
+    { "id": 6, "gate": "operational build (no demo env vars)", "command": "pnpm --filter @nzila/union-eyes build", "exit": 0, "result": "PASS", "detail": "BUILD_ID=1784631287250" },
+    { "id": 7, "gate": "demo build (with demo env vars)", "command": "UE_FEATURE_PROFILE=cupe4373 UE_DEPLOYMENT_TYPE=cupe4373-demo NEXT_PUBLIC_UE_FEATURE_PROFILE=cupe4373 NEXT_PUBLIC_UE_DEMO_PROFILE=1 pnpm --filter @nzila/union-eyes build", "exit": 0, "result": "PASS", "detail": "BUILD_ID=1784631671586; bundle 71f/71h" },
+    { "id": 8, "gate": "build-isolation verdict", "command": "diff wave-0-build-isolation.{operational,demo}.json", "exit": null, "result": "PASS", "detail": "distinct BUILD_IDs, bundle delta -1f/-2h" },
+    { "id": 9, "gate": "union-eyes typecheck", "command": "pnpm --filter @nzila/union-eyes typecheck", "exit": 0, "result": "PASS", "detail": "clean at §7 commit a3cb3df92" },
+    { "id": 10, "gate": "union-eyes tests", "command": "pnpm --filter @nzila/union-eyes test --run", "exit": 0, "result": "PASS", "detail": "15977 tests / 1098 files at §7 commit a3cb3df92" },
+    { "id": 11, "gate": "repo lint", "command": "pnpm lint", "exit": 0, "result": "PASS_WITH_WARNINGS", "detail": "0 errors / 2432 warnings at §6 commit 53a7a2290" },
+    { "id": 12, "gate": "repo typecheck", "command": "pnpm typecheck", "exit": null, "result": "NOT_RUN", "detail": "deferred to CI" },
+    { "id": 13, "gate": "repo fast tests", "command": "pnpm test:fast", "exit": null, "result": "NOT_RUN", "detail": "deferred to CI" },
+    { "id": 14, "gate": "doc validation", "command": "pnpm validate:docs", "exit": 0, "result": "PASS", "detail": "at §6 push" },
+    { "id": 15, "gate": "governance audit", "command": "pnpm governance:audit", "exit": 0, "result": "PASS", "detail": "at §6 push" },
+    { "id": 16, "gate": "container build (§11)", "command": "docker build -f apps/union-eyes/Dockerfile ...", "exit": null, "result": "NOT_EXECUTABLE_HERE", "detail": "blocker: no session-verified ACR credentials" },
+    { "id": 17, "gate": "staging deploy (§12)", "command": "az containerapp update ...", "exit": null, "result": "NOT_EXECUTABLE_HERE", "detail": "blocker: staging Azure RBAC not re-verified this session" },
+    { "id": 18, "gate": "post-deploy verification (§13)", "command": "curl / probes", "exit": null, "result": "NOT_EXECUTABLE_HERE", "detail": "depends on §12" },
+    { "id": 19, "gate": "programme summary (§14)", "command": "author docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md", "exit": null, "result": "NOT_STARTED", "detail": "depends on §13" }
+  ],
+  "blockers": [
+    "container build (§11): no session-verified ACR credentials on this host",
+    "staging deploy (§12): staging Azure RBAC not re-verified; AGENTS.md prohibits destructive Azure ops without approval",
+    "post-deploy verification (§13): depends on §12",
+    "programme summary (§14): depends on §13"
+  ],
+  "verdict": "Wave 0 §1–§10 delivered and evidenced. Wave 0 §11–§14 blocked pending authorized container build + staging deploy."
+}
