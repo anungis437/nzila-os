@@ -240,6 +240,20 @@ COPY --from=builder /app/apps/union-eyes/messages ./apps/union-eyes/messages
 COPY --from=builder /app/docs/oci/whitepapers ./docs/oci/whitepapers
 COPY --from=builder /app/content ./content
 
+# Runtime hardening: remove build-time package managers baked into node:20-slim.
+# The container CMD is `node apps/union-eyes/server.js`; neither npm, corepack,
+# nor pnpm are invoked at runtime. Removing them eliminates their bundled
+# vulnerable transitive deps (tar, sigstore, glob, minimatch, brace-expansion,
+# cross-spawn, ...) from the runtime attack surface (Wave 1 Phase A hardening).
+RUN rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/lib/node_modules/corepack \
+           /usr/local/lib/node_modules/pnpm \
+           /usr/local/bin/npm \
+           /usr/local/bin/npx \
+           /usr/local/bin/corepack \
+           /usr/local/bin/pnpm \
+           /usr/local/bin/pnpx
+
 # Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 --no-create-home nextjs && \
