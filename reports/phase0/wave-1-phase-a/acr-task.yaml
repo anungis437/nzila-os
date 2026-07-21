@@ -14,6 +14,7 @@ steps:
       --build-arg ARTIFACT_ID={{.Values.tag}}
       --build-arg RELEASE_ID=wave1-phase-a
       --build-arg TURBO_FILTER=--filter=@nzila/union-eyes
+      --build-arg NODE_MAX_OLD_SPACE=3584
       .
     env:
       - DOCKER_BUILDKIT=1

@@ -128,7 +128,10 @@ ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
 # Build only apps that have deps installed in the Docker image (turbo filters)
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
 ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga --filter=@nzila/flow --filter=@nzila/agrimo --filter=@nzila/cora --filter=@nzila/trade --filter=@nzila/mobility --filter=@nzila/mobility-client-portal --filter=@nzila/control-plane --filter=@nzila/platform-admin --filter=@nzila/nacp-exams"
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+# Node heap ceiling for the build step. Overridable via --build-arg for constrained
+# runners (e.g. ACR Basic SKU quick-build agents ~4 GB). Local/full CI builds keep 8192.
+ARG NODE_MAX_OLD_SPACE=8192
+ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE}"
 # Build-time placeholder only. Real auth secret is injected at runtime via ACA secret refs.
 RUN AUTH_SECRET=${BUILD_AUTH_PLACEHOLDER} pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
