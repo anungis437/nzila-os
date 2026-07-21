@@ -24,15 +24,15 @@ import {
   MessageSquare,
   ShieldCheck,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Button } from "@nzila/union-eyes-ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@nzila/union-eyes-ui/card";
 import type { DemoCase, DemoDocument, InboxItem } from "@/lib/demo/cupe4373-demo";
 import type { DemoMemberPersona } from "@/lib/demo/cupe4373-member-view";
 

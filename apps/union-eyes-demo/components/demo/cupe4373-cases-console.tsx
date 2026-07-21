@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { CalendarClock, FileText, Search, ShieldCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Button } from "@nzila/union-eyes-ui/button";
+import { Card, CardContent } from "@nzila/union-eyes-ui/card";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
 import {
   Cupe4373NewCaseButton,

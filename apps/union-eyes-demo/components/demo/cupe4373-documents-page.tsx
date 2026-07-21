@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { FileText, FolderOpen, Lock, Search, ShieldCheck, Users, FileCheck, FileDown, type LucideIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Button } from "@nzila/union-eyes-ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nzila/union-eyes-ui/card";
 import {
   Sheet,
   SheetContent,
@@ -13,7 +13,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@nzila/union-eyes-ui/sheet";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
 import { demoDocuments, type DemoDocument } from "@/lib/demo/cupe4373-demo";
 

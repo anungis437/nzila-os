@@ -208,7 +208,7 @@ export async function getDemoCasesFromDb(): Promise<DemoCase[]> {
       .where(eq(grievances.organizationId, FOUNDATION_ORG_ID))
       .orderBy(desc(grievances.priority), desc(grievances.responseDeadline));
     if (rows.length === 0) return staticDemoCases;
-    return rows.map(reconstructDemoCase);
+    return (rows as GrievanceRow[]).map(reconstructDemoCase);
   } catch (err) {
     log.warn('DB read failed, falling back to static', { error: err });
     return staticDemoCases;
@@ -233,7 +233,7 @@ export async function getDemoCaseFromDb(id: string): Promise<DemoCase | null> {
     if (rows.length === 0) {
       return staticDemoCases.find((c) => c.id === id) ?? null;
     }
-    return reconstructDemoCase(rows[0]);
+    return reconstructDemoCase(rows[0] as GrievanceRow);
   } catch (err) {
     log.warn('DB read failed for case', { caseId: id, error: err });
     return staticDemoCases.find((c) => c.id === id) ?? null;

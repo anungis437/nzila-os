@@ -18,9 +18,9 @@ import {
   RotateCcw,
   Target,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Button } from "@nzila/union-eyes-ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nzila/union-eyes-ui/card";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
 import { Cupe4373DoctrineFooter } from "@/components/demo/cupe4373-doctrine-footer";
 import {

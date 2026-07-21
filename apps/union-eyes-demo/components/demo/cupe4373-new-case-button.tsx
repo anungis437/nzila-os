@@ -12,7 +12,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@nzila/union-eyes-ui/button";
 import {
   Sheet,
   SheetContent,
@@ -20,9 +20,9 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@nzila/union-eyes-ui/sheet";
+import { Label } from "@nzila/union-eyes-ui/label";
+import { Textarea } from "@nzila/union-eyes-ui/textarea";
 import type { DemoCase } from "@/lib/demo/cupe4373-demo";
 
 export type NewDemoCase = Pick<

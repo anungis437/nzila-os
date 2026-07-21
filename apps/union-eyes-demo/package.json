@@ -4,9 +4,32 @@
   "private": true,
   "description": "Union Eyes CUPE 4373 demo artifact — separately-built app that ships demo pages, fixture data, and fixture-backed API handlers. See docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md.",
   "scripts": {
-    "typecheck": "echo 'TODO: wire per-app tsc — see 20_SEMANTIC_ISOLATION.md'",
+    "typecheck": "tsc --noEmit",
     "build": "echo 'TODO: wire next build — see 20_SEMANTIC_ISOLATION.md'"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "@nzila/union-eyes-ui": "workspace:*",
+    "@sentry/nextjs": "^10.30.0",
+    "archiver": "^7.0.1",
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.2",
+    "lucide-react": "^0.576.0",
+    "next": "16.2.6",
+    "next-intl": "^4.9.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@types/archiver": "^6.0.3",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^6",
+    "vitest": "^3.2.4"
+  }
 }

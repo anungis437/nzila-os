@@ -11,9 +11,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CheckCircle2, FileWarning, Flame } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Button } from "@nzila/union-eyes-ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nzila/union-eyes-ui/card";
 import {
   STAGE_ORDER,
   STAGE_LABEL,

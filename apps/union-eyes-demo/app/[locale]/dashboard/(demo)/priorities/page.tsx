@@ -12,9 +12,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
-import { PrioritiesConsole } from "@/components/priorities/priorities-console";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import { requireUser } from "@/lib/api-auth-guard";
 import { Cupe4373PrioritiesPage } from "@/components/demo/cupe4373-priorities-page";
 
 export const dynamic = "force-dynamic";
@@ -33,15 +31,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PrioritiesPage() {
-  const user = await requireUser();
-  if (!user) redirect("/sign-in");
-
-  if (isCupe4373DemoRuntime()) {
-    return <Cupe4373PrioritiesPage />;
+  try {
+    await requireUser();
+  } catch {
+    redirect("/login");
   }
-
-  const authorized = await hasMinRole("steward");
-  if (!authorized) redirect("/dashboard/inbox");
-
-  return <PrioritiesConsole />;
+  // Demo build: every authenticated user sees the demo priorities page.
+  return <Cupe4373PrioritiesPage />;
 }

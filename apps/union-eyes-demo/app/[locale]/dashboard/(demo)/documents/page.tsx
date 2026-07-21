@@ -5,13 +5,9 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { auth, currentUser } from '@nzila/platform-auth/entra/server';
 import { requireUser } from '@/lib/api-auth-guard';
-import { DocumentsConsole } from '@/components/documents/documents-console';
 import { Cupe4373DocumentsPage } from '@/components/demo/cupe4373-documents-page';
 import { Cupe4373MemberDocumentsPage } from '@/components/demo/cupe4373-member-views';
-import {
-  isCupe4373DemoRuntime,
-  getDashboardExperience,
-} from '@/lib/dashboard/role-experience';
+import { getDashboardExperience } from '@/lib/dashboard/role-experience';
 import {
   resolveDemoMemberPersona,
   getMemberDocuments,
@@ -42,44 +38,42 @@ export default async function DocumentsPage({ params }: PageProps) {
     redirect('/login');
   }
 
-  if (isCupe4373DemoRuntime()) {
-    // Members see only documents marked public_internal (collective agreement,
-    // public minutes, etc.) — not steward-restricted or privileged files.
-    const { userId } = await auth();
-    let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
-    try {
-      if (userId) demoOrgId = await getOrganizationIdForUser(userId);
-    } catch (error) {
-      logger.warn('[dashboard:documents] demo getOrganizationIdForUser threw', {
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-    let role: UserRole = UserRole.MEMBER;
-    try {
-      if (userId) role = await getUserRole(userId, demoOrgId);
-    } catch (error) {
-      logger.warn('[dashboard:documents] demo getUserRole threw — defaulting to member', {
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-    if (getDashboardExperience(role) === 'member') {
-      const user = await currentUser();
-      const persona = resolveDemoMemberPersona({
-        fullName: user?.fullName ?? null,
-        firstName: user?.firstName ?? null,
-        email: user?.emailAddresses?.[0]?.emailAddress ?? null,
-      });
-      return (
-        <Cupe4373MemberDocumentsPage
-          persona={persona}
-          documents={getMemberDocuments()}
-        />
-      );
-    }
-    return <Cupe4373DocumentsPage locale={locale} />;
+  // Demo build: members see only documents marked public_internal (collective
+  // agreement, public minutes, etc.) — not steward-restricted or privileged
+  // files. Stewards / officers / admins see the full demo documents page. No
+  // operational fallback exists here.
+  const { userId } = await auth();
+  let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
+  try {
+    if (userId) demoOrgId = await getOrganizationIdForUser(userId);
+  } catch (error) {
+    logger.warn('[dashboard:documents] demo getOrganizationIdForUser threw', {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
-
-  return <DocumentsConsole />;
+  let role: UserRole = UserRole.MEMBER;
+  try {
+    if (userId) role = await getUserRole(userId, demoOrgId);
+  } catch (error) {
+    logger.warn('[dashboard:documents] demo getUserRole threw — defaulting to member', {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+  if (getDashboardExperience(role) === 'member') {
+    const user = await currentUser();
+    const persona = resolveDemoMemberPersona({
+      fullName: user?.fullName ?? null,
+      firstName: user?.firstName ?? null,
+      email: user?.emailAddresses?.[0]?.emailAddress ?? null,
+    });
+    return (
+      <Cupe4373MemberDocumentsPage
+        persona={persona}
+        documents={getMemberDocuments()}
+      />
+    );
+  }
+  return <Cupe4373DocumentsPage locale={locale} />;
 }

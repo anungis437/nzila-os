@@ -15,11 +15,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth, currentUser } from "@nzila/platform-auth/entra/server";
-import { InboxConsole } from "@/components/inbox/inbox-console";
-import {
-  isCupe4373DemoRuntime,
-  getDashboardExperience,
-} from "@/lib/dashboard/role-experience";
+import { getDashboardExperience } from "@/lib/dashboard/role-experience";
 import { Cupe4373InboxPage } from "@/components/demo/cupe4373-inbox-page";
 import { Cupe4373MemberInboxPage } from "@/components/demo/cupe4373-member-views";
 import {
@@ -52,46 +48,42 @@ export default async function InboxPage() {
     redirect("/login");
   }
 
-  if (isCupe4373DemoRuntime()) {
-    // Scope inbox by role in demo mode: members see only their own messages
-    // and case-update alerts; stewards / officers / admins see the full
-    // organizational intake console.
-    const { userId } = await auth();
-    let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
-    try {
-      if (userId) demoOrgId = await getOrganizationIdForUser(userId);
-    } catch (error) {
-      logger.warn("[dashboard:inbox] demo getOrganizationIdForUser threw", {
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-    let role: UserRole = UserRole.MEMBER;
-    try {
-      if (userId) role = await getUserRole(userId, demoOrgId);
-    } catch (error) {
-      logger.warn("[dashboard:inbox] demo getUserRole threw — defaulting to member", {
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-    if (getDashboardExperience(role) === "member") {
-      const user = await currentUser();
-      const persona = resolveDemoMemberPersona({
-        fullName: user?.fullName ?? null,
-        firstName: user?.firstName ?? null,
-        email: user?.emailAddresses?.[0]?.emailAddress ?? null,
-      });
-      return (
-        <Cupe4373MemberInboxPage
-          persona={persona}
-          items={getMemberInboxItems(persona)}
-          memberCases={getMemberCases(persona)}
-        />
-      );
-    }
-    return <Cupe4373InboxPage />;
+  // Demo build: scope inbox by role in demo mode. Members see only their
+  // own messages and case-update alerts; stewards / officers / admins see
+  // the full demo intake console. No operational fallback exists here.
+  const { userId } = await auth();
+  let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
+  try {
+    if (userId) demoOrgId = await getOrganizationIdForUser(userId);
+  } catch (error) {
+    logger.warn("[dashboard:inbox] demo getOrganizationIdForUser threw", {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
-
-  return <InboxConsole />;
+  let role: UserRole = UserRole.MEMBER;
+  try {
+    if (userId) role = await getUserRole(userId, demoOrgId);
+  } catch (error) {
+    logger.warn("[dashboard:inbox] demo getUserRole threw — defaulting to member", {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+  if (getDashboardExperience(role) === "member") {
+    const user = await currentUser();
+    const persona = resolveDemoMemberPersona({
+      fullName: user?.fullName ?? null,
+      firstName: user?.firstName ?? null,
+      email: user?.emailAddresses?.[0]?.emailAddress ?? null,
+    });
+    return (
+      <Cupe4373MemberInboxPage
+        persona={persona}
+        items={getMemberInboxItems(persona)}
+        memberCases={getMemberCases(persona)}
+      />
+    );
+  }
+  return <Cupe4373InboxPage />;
 }

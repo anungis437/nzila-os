@@ -20,10 +20,10 @@ import {
   Sparkles,
   Vote,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Button } from "@nzila/union-eyes-ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nzila/union-eyes-ui/card";
+import { Label } from "@nzila/union-eyes-ui/label";
 import {
   Sheet,
   SheetContent,
@@ -32,8 +32,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
+} from "@nzila/union-eyes-ui/sheet";
+import { Textarea } from "@nzila/union-eyes-ui/textarea";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
 import { Cupe4373DoctrineFooter } from "@/components/demo/cupe4373-doctrine-footer";
 import {

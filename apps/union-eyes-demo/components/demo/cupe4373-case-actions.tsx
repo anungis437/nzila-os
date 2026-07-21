@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FileDown, Gavel, NotebookPen, Package } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@nzila/union-eyes-ui/button";
 import {
   Sheet,
   SheetContent,
@@ -11,10 +11,10 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@nzila/union-eyes-ui/sheet";
+import { Textarea } from "@nzila/union-eyes-ui/textarea";
+import { Input } from "@nzila/union-eyes-ui/input";
+import { Label } from "@nzila/union-eyes-ui/label";
 import type { DemoCase } from "@/lib/demo/cupe4373-demo";
 
 type DecisionPriority = "p0" | "p1" | "p2" | "p3";

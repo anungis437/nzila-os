@@ -16,15 +16,15 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Card, CardContent } from "@nzila/union-eyes-ui/card";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
+} from "@nzila/union-eyes-ui/sheet";
+import { Separator } from "@nzila/union-eyes-ui/separator";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
 import Link from "next/link";
 import { demoCases } from "@/lib/demo/cupe4373-demo";

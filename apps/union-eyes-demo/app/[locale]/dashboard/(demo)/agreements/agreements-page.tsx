@@ -2,8 +2,8 @@
 
 import { BookOpen, CalendarDays, FileText, Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@nzila/union-eyes-ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@nzila/union-eyes-ui/card";
 import { Cupe4373SectionNav } from "@/components/demo/cupe4373-section-nav";
 import { agreements } from "@/lib/demo/cupe4373-demo";
 
