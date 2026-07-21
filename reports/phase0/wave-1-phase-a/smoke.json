@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-07-21T18:52:53.3474876Z",
+  "target": {
+    "image_digest": "sha256:b4130e8961e019bdd900fa863859c0ce6f6cb748f0362261344b997a5c7ae48d",
+    "fqdn": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "revision": "nzila-os-union-eyes-staging--0000091",
+    "git_sha": "4341f2f7025000e026f8d6848ecef18d0f44e17a",
+    "artifact_id": "wave1a-4341f2f70250",
+    "release_id": "wave1-phase-a"
+  },
+  "endpoints": {
+    "health": {
+      "ok": true,
+      "status": "degraded",
+      "app": "union-eyes",
+      "environment": "production",
+      "timestamp": "2026-07-21T18:52:54.047Z",
+      "version": "0.0.0",
+      "checks": {
+        "process": {
+          "status": "ok"
+        },
+        "database": {
+          "status": "ok",
+          "critical": true,
+          "ms": 147
+        },
+        "auth": {
+          "status": "ok",
+          "critical": true
+        },
+        "redis": {
+          "status": "ok",
+          "ms": 61
+        },
+        "backend": {
+          "status": "degraded",
+          "note": "unreachable"
+        }
+      }
+    },
+    "version": {
+      "app": "union-eyes",
+      "environment": "production",
+      "gitSha": "4341f2f7025000e026f8d6848ecef18d0f44e17a",
+      "buildTimestamp": "2026-07-21T18:51:40.7955894Z",
+      "artifactId": "wave1a-4341f2f70250",
+      "releaseId": "wave1-phase-a",
+      "appVersion": "0.0.0",
+      "timestamp": "2026-07-21T18:52:50.972Z",
+      "configuredEnvironment": "production",
+      "surfaceEnvironment": "staging",
+      "runtimeEnvironment": "staging",
+      "deploymentType": "staging",
+      "featureProfile": "internal",
+      "demoProfile": null,
+      "requestHost": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
+    }
+  },
+  "verdict": "PASS"
+}

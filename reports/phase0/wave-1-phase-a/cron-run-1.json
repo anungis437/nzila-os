@@ -1,0 +1,1 @@
+{"runId":"bba17019-48c8-451d-a622-11c5e8d0e31c","workerInstance":"deadline-worker-bba17019","correlationId":"bba17019-48c8-451d-a622-11c5e8d0e31c","startedAt":"2026-07-21T19:00:30.477Z","finishedAt":"2026-07-21T19:00:31.043Z","durationMs":566,"examined":2,"claimed":2,"sent":2,"transientFailures":0,"permanentFailures":0,"deadLettered":0,"leasesRecovered":0,"cancelledSkipped":0}
