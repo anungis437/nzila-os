@@ -1,0 +1,24 @@
+[migrate] bootstrap: 1 artifact(s) discovered under packages/db/bootstrap/.
+[migrate]   ┬╖ 0000_platform_schema_prerequisites.sql  sha256=baf4b0a202fe...  PENDING
+[migrate]       -> would be APPLY-safe (5 present + 6 missing; no drift on present objects, baseline will create missing ones):
+[migrate]          - enum commerce_supplier_status does not exist
+[migrate]          - enum commerce_product_status does not exist
+[migrate]          - enum commerce_purchase_order_status does not exist
+[migrate]          - table commerce_suppliers does not exist
+[migrate]          - table commerce_products does not exist
+[migrate]          - table commerce_purchase_orders does not exist
+[migrate:fail] bootstrap-reconcile refused for 0000_platform_schema_prerequisites.sql: schema drift detected. No baseline row was recorded. Failures:
+  - enum commerce_supplier_status does not exist
+  - enum commerce_product_status does not exist
+  - enum commerce_purchase_order_status does not exist
+  - table commerce_suppliers does not exist
+  - table commerce_products does not exist
+  - table commerce_purchase_orders does not exist
+[migrate] bootstrap: 0000_platform_schema_prerequisites.sql target has 5 object(s) present and 6 missing; applying baseline to fill the gaps (existing objects are contract-compatible, IF NOT EXISTS is a no-op for them).
+[migrate] bootstrap: applying 0000_platform_schema_prerequisites.sql
+[migrate]   applied 0000_platform_schema_prerequisites.sql
+[migrate] bootstrap-apply complete. Executed 1 artifact(s).
+[migrate] bootstrap: 1 artifact(s) discovered under packages/db/bootstrap/.
+[migrate]   ┬╖ 0000_platform_schema_prerequisites.sql  sha256=baf4b0a202fe...  RECORDED
+[migrate] bootstrap: 0000_platform_schema_prerequisites.sql already recorded; skipping.
+[migrate] bootstrap-apply complete. Executed 0 artifact(s).

@@ -1,0 +1,5 @@
+[migrate] bootstrap: 1 artifact(s) discovered under packages/db/bootstrap/.
+[migrate]   ┬╖ 0000_platform_schema_prerequisites.sql  sha256=baf4b0a202fe...  PENDING
+[migrate]       -> would be RECONCILE-safe (all manifest objects present & compatible)
+[migrate] bootstrap: reconciled 0000_platform_schema_prerequisites.sql (all manifest objects present & compatible).
+[migrate] bootstrap-reconcile complete. Reconciled 1 artifact(s).

@@ -1,4 +1,7 @@
-[migrate] discovered 34 SQL files; 0 hashes already recorded; 34 pending.
+[migrate] bootstrap: applying 0000_platform_schema_prerequisites.sql
+[migrate]   applied 0000_platform_schema_prerequisites.sql
+[migrate] bootstrap-apply complete. Executed 1 artifact(s).
+[migrate] incrementals: 34 discovered; 0 already applied; 34 pending.
 [migrate] applying 0000_initial.sql
 [migrate]   applied 0000_initial.sql
 [migrate] applying 0001_solid_cargill.sql
@@ -14,4 +17,18 @@
 [migrate] applying 0006_idempotency_cache.sql
 [migrate]   applied 0006_idempotency_cache.sql
 [migrate] applying 0007_flow_domain_tables.sql
-[migrate:fail] failure applying 0007_flow_domain_tables.sql: relation "orgs" does not exist
+[migrate]   applied 0007_flow_domain_tables.sql
+[migrate] applying 0008_ai_governance_store.sql
+[migrate]   applied 0008_ai_governance_store.sql
+[migrate] applying 0009_pilot_metrics_layer.sql
+[migrate]   applied 0009_pilot_metrics_layer.sql
+[migrate] applying 0010_pilot_alerting_hardening.sql
+[migrate:warn] partial-apply tolerated for 0010_pilot_alerting_hardening.sql (known defect: PostgreSQL does not support `ADD CONSTRAINT IF NOT EXISTS`. The file aborts at that line after successfully executing the preceding ALTER TABLE (columns) and CREATE TABLE pilot_alert_rules. The remaining statements (FK constraint, indexes, pilot_alert_escalations, partial indexes) are reapplied by the healer.). Healer: 0033_fix_pilot_alerts_rule_fk.sql. Error: syntax error at or near "NOT"
+[migrate]   recorded 0010_pilot_alerting_hardening.sql (partial; healer 0033_fix_pilot_alerts_rule_fk.sql)
+[migrate] applying 0011_platform_integrations_connections.sql
+[migrate]   applied 0011_platform_integrations_connections.sql
+[migrate] applying 0012_platform_integrations_runtime.sql
+[migrate]   applied 0012_platform_integrations_runtime.sql
+[migrate] applying 0013_orchestrator_runtime_hardening.sql
+[migrate:fail] failure applying 0013_orchestrator_runtime_hardening.sql: cannot drop index automation_commands_correlation_id_unique because constraint automation_commands_correlation_id_unique on table automation_commands requires it. Statements executed prior to this error remain committed. Either patch the database manually, add a healer migration, or (only for genuinely known-broken historical files) add an entry to packages/db/drizzle/.known-partial-failures.json naming the healer migration.
+[migrate:fail] verify failed: pending artifact(s): incremental:0013_orchestrator_runtime_hardening.sql, incremental:0014_rename_actor_user_id.sql, incremental:0015_itsm_command_center.sql, incremental:0016_pipeline_alerts.sql, incremental:0017_trustcore_law25.sql, incremental:0018_trustcore_snapshots.sql, incremental:0019_trustcore_policies.sql, incremental:0020_trustcore_reminders.sql, incremental:0021_trustcore_subscriptions.sql, incremental:0022_trustcore_leads.sql, incremental:0023_trustcore_risks.sql, incremental:0024_trustops_foundations.sql, incremental:0025_trustcore_privacy_programs_org_name.sql, incremental:0026_healthcare_discovery_surveys.sql, incremental:0027_seed_healthcare_unit_92.sql, incremental:0028_policy_lifecycle_governance.sql, incremental:0029_itsm_automation_ticket_fields_entity_graph.sql, incremental:0030_console_schema_bootstrap.sql, incremental:0031_idempotency_reservation_lease.sql, incremental:0032_audit_events_canonical_hash.sql, incremental:0033_fix_pilot_alerts_rule_fk.sql
