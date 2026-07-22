@@ -1,0 +1,17 @@
+[migrate] discovered 34 SQL files; 0 hashes already recorded; 34 pending.
+[migrate] applying 0000_initial.sql
+[migrate]   applied 0000_initial.sql
+[migrate] applying 0001_solid_cargill.sql
+[migrate]   applied 0001_solid_cargill.sql
+[migrate] applying 0002_rich_marten_broadcloak.sql
+[migrate]   applied 0002_rich_marten_broadcloak.sql
+[migrate] applying 0003_redundant_starfox.sql
+[migrate]   applied 0003_redundant_starfox.sql
+[migrate] applying 0004_audit_events_immutable.sql
+[migrate]   applied 0004_audit_events_immutable.sql
+[migrate] applying 0005_ai_model_registry.sql
+[migrate]   applied 0005_ai_model_registry.sql
+[migrate] applying 0006_idempotency_cache.sql
+[migrate]   applied 0006_idempotency_cache.sql
+[migrate] applying 0007_flow_domain_tables.sql
+[migrate:fail] failure applying 0007_flow_domain_tables.sql: relation "orgs" does not exist
