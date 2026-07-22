@@ -180,7 +180,8 @@ export async function scheduleGrievanceDeadlineReminders(
           ${emailHash},
           ${p.recipient.locale}
         )
-        on conflict on constraint deadline_reminders_pending_uidx
+        on conflict (source_deadline_id, recipient_email_hash, offset_days, reminder_kind)
+        where status = 'pending'
         do nothing
         returning id, scheduled_for, offset_days, recipient_role, recipient_email_hash
       `);

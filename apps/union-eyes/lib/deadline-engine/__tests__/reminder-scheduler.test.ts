@@ -132,6 +132,11 @@ describe('reminder-scheduler', () => {
     expect(result.cancelledForReschedule).toEqual(['cancel-1', 'cancel-2']);
     // 1 cancel query + 4 insert queries = 5 tx.execute calls
     expect(mocks.txExecute).toHaveBeenCalledTimes(5);
+    const firstInsertSql = mocks.txExecute.mock.calls[1]?.[0]?.strings.join(' ').replace(/\s+/g, ' ');
+    expect(firstInsertSql).toContain(
+      "on conflict (source_deadline_id, recipient_email_hash, offset_days, reminder_kind) where status = 'pending'",
+    );
+    expect(firstInsertSql).not.toContain('on constraint deadline_reminders_pending_uidx');
 
     // Audit events: 2 cancellations + 4 scheduled + 1 summary (rescheduled because cancelledIds > 0)
     const eventTypes = mocks.audit.mock.calls.map(([arg]) => arg.eventType).sort();

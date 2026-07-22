@@ -29,10 +29,11 @@
  *   - Manifest checksum drift for 0045_union_eyes_deadline_engine.sql
  *
  * Usage:
- *   pnpm tsx scripts/wave1a/verify-deadline-engine-schema.ts
+ *   pnpm verify:deadline-engine-schema -- --static
+ *   pnpm verify:deadline-engine-schema
  *
  * Env:
- *   DATABASE_URL   required
+ *   DATABASE_URL   required unless --static is used
  *   MANIFEST_PATH  optional (defaults to migrations/migration-manifest.json)
  *   MIGRATIONS_DIR optional (defaults to migrations)
  */
@@ -56,6 +57,11 @@ const REQUIRED_TABLES = [
   'deadline_reminders',
   'deadline_reminder_executions',
   'deadline_audit_events',
+] as const;
+
+const REQUIRED_MIGRATIONS = [
+  '0045_union_eyes_deadline_engine.sql',
+  '0046_union_eyes_staging_proof_controls.sql',
 ] as const;
 
 const REQUIRED_COLUMNS: Record<string, string[]> = {
@@ -96,10 +102,12 @@ const REQUIRED_COLUMNS: Record<string, string[]> = {
     'provider',
     'provider_message_id',
     'provider_status_code',
-    'provider_response',
+    'error_code',
+    'error_message',
+    'duration_ms',
     'worker_instance',
-    'started_at',
-    'finished_at',
+    'correlation_id',
+    'attempted_at',
   ],
   deadline_audit_events: [
     'id',
@@ -134,8 +142,9 @@ const REQUIRED_TRIGGERS = [
 ];
 
 async function main(): Promise<void> {
+  const staticOnly = process.argv.includes('--static');
   const dbUrl = process.env.DATABASE_URL;
-  if (!dbUrl) {
+  if (!staticOnly && !dbUrl) {
     console.error('DATABASE_URL is required');
     process.exit(2);
   }
@@ -148,23 +157,25 @@ async function main(): Promise<void> {
   // 1. Manifest checksum for migration 0045.
   try {
     const manifest: Manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-    const entry = manifest.migrations.find((m) => m.file === '0045_union_eyes_deadline_engine.sql');
-    if (!entry) {
-      checks.push({ name: 'manifest registers migration 0045', passed: false, detail: 'entry missing' });
-    } else {
-      const contents = readFileSync(resolve(migrationsDir, entry.file));
+    for (const migrationFile of REQUIRED_MIGRATIONS) {
+      const entry = manifest.migrations.find((m) => m.file === migrationFile);
+      if (!entry) {
+        checks.push({ name: `manifest registers ${migrationFile}`, passed: false, detail: 'entry missing' });
+        continue;
+      }
+      const contents = readFileSync(resolve(migrationsDir, entry.file), 'utf8').replace(/\r\n/g, '\n');
       const actual = createHash('sha256').update(contents).digest('hex');
       checks.push({
-        name: 'manifest checksum matches file',
+        name: `manifest checksum matches ${migrationFile}`,
         passed: actual === entry.sha256,
         detail: actual !== entry.sha256 ? { expected: entry.sha256, actual } : undefined,
       });
-      checks.push({
-        name: 'manifest lockedThrough >= migration 0045',
-        passed: manifest.lockedThrough.startsWith('0045'),
-        detail: { lockedThrough: manifest.lockedThrough },
-      });
     }
+    checks.push({
+      name: 'manifest locked through staging proof controls',
+      passed: manifest.lockedThrough >= '0046_union_eyes_staging_proof_controls.sql',
+      detail: { lockedThrough: manifest.lockedThrough },
+    });
   } catch (err) {
     checks.push({
       name: 'manifest readable',
@@ -173,7 +184,14 @@ async function main(): Promise<void> {
     });
   }
 
-  const sql = postgres(dbUrl, { max: 2, ssl: 'require', prepare: false, idle_timeout: 5 });
+  if (staticOnly) {
+    const failed = checks.filter((check) => !check.passed);
+    console.log(JSON.stringify({ total: checks.length, passed: checks.length - failed.length, failed: failed.length, ok: failed.length === 0, checks }, null, 2));
+    if (failed.length) process.exit(1);
+    return;
+  }
+
+  const sql = postgres(dbUrl!, { max: 2, ssl: 'require', prepare: false, idle_timeout: 5 });
   try {
     // 2. Tables present.
     for (const t of REQUIRED_TABLES) {

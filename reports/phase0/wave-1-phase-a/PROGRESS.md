@@ -21,7 +21,7 @@ Last updated: 2026-07-21T20:50Z on branch `fix/union-eyes-reality-remediation`.
 | ----------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `3030b55e0` | Reality registry    | Reverts 5 caps from `PROVEN_IN_STAGING` (invalid state) to `LIMITED` with honest notes; adds 4 narrow proven-slice caps; supersedes evidence dossier with IN_PROGRESS banner without deleting original claims. |
 | `df9283163` | Migration ledger    | Registers migration `0045_union_eyes_deadline_engine.sql` in the immutability manifest so drift is now detectable in CI.         |
-| `bc89869e9` | Secret rotation     | Rotates cron secret (KV version `ef1405fa` → `9fb1a0b0a`), converts `cron-secret` and `resend-api-key` from inline container-app secrets to `keyvaultref` bindings via a new system-assigned managed identity. Proven live: old secret → HTTP 401, new secret → HTTP 200. Records only sha256 prefixes + KV version IDs; no values committed. |
+| `bc89869e9` | Secret rotation     | Rotates cron secret and converts `cron-secret` and `resend-api-key` from inline container-app secrets to `keyvaultref` bindings via a new system-assigned managed identity. Proven live: old secret → HTTP 401, new secret → HTTP 200. Evidence records secret names, Key Vault version IDs, rotation timestamps, and authentication outcomes; no values or fingerprints are committed. |
 
 Pending commits (in this working tree, to be added before push):
 - Staging-proof scenario route + schema-drift verifier + this doc.
@@ -36,11 +36,11 @@ Legend: ✅ done · 🟢 ready-to-execute (code landed, one action from evidence
 1. ✅ **Downgrade 5 over-promoted caps.** `apps/union-eyes/lib/reality/capability-registry.ts` (commit `3030b55e0`).
 2. ✅ **Split proven slices into narrow caps.** `UE-DEADLINE-WORKER-CLAIM`, `UE-DEADLINE-EXECUTION-PERSISTENCE`, `UE-DEADLINE-PROVIDER-ACCEPTANCE`, `UE-DEADLINE-DIRECT-DEAD-LETTER`.
 3. ✅ **Prepend SUPERSEDES banner to dossier without deleting original.** `reports/phase0/wave-1-phase-a/EVIDENCE-DOSSIER.md`.
-4. ✅ **Sanitize evidence tree.** Grep sweep of `reports/phase0/wave-1-phase-a/` found no live secrets (only hashes + KV version IDs).
+4. ✅ **Sanitize evidence tree.** Grep sweep of `reports/phase0/wave-1-phase-a/` found no live secrets or secret fingerprints.
 
 ### Track B — Secrets & governance
 
-5. ✅ **Rotate cron secret.** KV version `9fb1a0b0a1334901a5e916a0880d28fd`.
+5. ✅ **Rotate cron secret.** Evidence records the Key Vault secret identity and rotation outcome without secret-derived fingerprints.
 6. ✅ **Bind container-app secrets to KV references** via system-assigned MI (principal `20d5f517-1f03-4ced-ae19-cfc32c4c2c13`, role `Key Vault Secrets User` on `nzila-staging-kv`).
 7. ✅ **Prove rotation live.** Old value → HTTP 401, new → HTTP 200 on staging FQDN (revision `--kvrot-2607211642`).
 8. 🔴⚠️ **Rotate Resend API key.** Blocked on human — requires Resend dashboard access. Instructions in [reports/phase0/wave-1-phase-a/RESEND-ROTATION-REQUEST.md](reports/phase0/wave-1-phase-a/RESEND-ROTATION-REQUEST.md).
@@ -52,7 +52,7 @@ Legend: ✅ done · 🟢 ready-to-execute (code landed, one action from evidence
 
 ### Track D — Deadline lifecycle proofs (the hard part)
 
-11. 🟢 **Scenario runner shipped as code**: `apps/union-eyes/app/api/staging-proof/deadline-engine/scenario/route.ts` supports `schedule-basic`, `reschedule`, `cancel-on-completed`. Fails closed unless `STAGING_PROOFS_ENABLED === 'true'`. Auth-gated with `x-cron-secret`. Cleans up all seed rows in a finally block. **Needs**: image rebuild → deploy → set env var → execute 3 POSTs → archive JSON.
+11. 🟡 **Scenario runner is being hardened**: the source route is not live and must use a dedicated proof secret, environment identity gate, signed replay-protected requests, server-generated synthetic data, durable audit records, and verified cleanup before it may be deployed. **Needs**: complete hardening and tests → image rebuild → deploy → set proof-only environment variables → execute 3 POSTs → archive redacted JSON → disable the route.
 12. 🔴 **Overdue-transition scenario.** Not yet coded — requires a scenario that inserts a due-date-in-the-past deadline, invokes `/api/cron/deadline-overdue`, and asserts the state transition + `deadline.became_overdue` audit event.
 13. 🔴 **Retry classification scenario.** Requires an email-adapter shim that can inject transient/permanent provider failures and a scenario that fires the worker with an override, asserting attempt count grows for transient and freezes for permanent.
 14. 🔴 **Replay scenario.** Insert one reminder, run worker, then re-run worker with same lease — assert idempotent (no second provider call, executions table shows exactly one attempt).

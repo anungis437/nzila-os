@@ -202,6 +202,7 @@
     "validate:claims": "tsx packages/platform-validation/src/claim-verification.ts",
     "validate:docs": "tsx packages/platform-validation/src/doc-consistency.ts",
     "verify:migrations": "tsx tooling/db/migration-manifest.ts verify",
+    "verify:deadline-engine-schema": "tsx scripts/wave1a/verify-deadline-engine-schema.ts",
     "reality:inventory": "tsx tooling/reality/capability-inventory.ts",
     "reality:anti-theatre": "tsx tooling/reality/anti-theatre-scan.ts",
     "reality:demo-guard": "tsx tooling/reality/demo-deployment-guard.ts",
