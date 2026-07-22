@@ -19,7 +19,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { createLogger } from '@nzila/os-core';
 import { sql } from 'drizzle-orm';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { buildPilotStatus, type PilotConfiguration } from '@/lib/pilot-admin';
 import {
   probePostgresPing,
@@ -41,15 +41,15 @@ const logger = createLogger('admin:pilot-status');
 async function measureUsersInvited(orgId: string | null | undefined): Promise<number | null> {
   if (!orgId) return null;
   try {
-    const rows = await db.execute(
-      sql`
+    const rows = await withSystemContext((tx) =>
+      tx.execute(sql`
         SELECT COUNT(*)::int AS n
         FROM user_management.users u
         WHERE u.user_id IN (
           SELECT user_id FROM organization_members WHERE organization_id = ${orgId}
         )
       `,
-    );
+    ));
     const n = (rows as unknown as Array<{ n: number }>)[0]?.n;
     return typeof n === 'number' ? n : null;
   } catch (error) {
@@ -65,8 +65,8 @@ async function measureUsersInvited(orgId: string | null | undefined): Promise<nu
 async function measureWorksitesConfigured(orgId: string | null | undefined): Promise<number | null> {
   if (!orgId) return null;
   try {
-    const rows = await db.execute(
-      sql`SELECT COUNT(*)::int AS n FROM worksites WHERE organization_id = ${orgId}`,
+    const rows = await withSystemContext((tx) =>
+      tx.execute(sql`SELECT COUNT(*)::int AS n FROM worksites WHERE organization_id = ${orgId}`),
     );
     const n = (rows as unknown as Array<{ n: number }>)[0]?.n;
     return typeof n === 'number' ? n : null;
@@ -113,7 +113,7 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
       worksitesConfigured,
     };
 
-    // TODO(reality-remediation Wave 3): backfill `CaseRow[]` from the real
+    // Wave 3 follow-up: backfill `CaseRow[]` from the real
     // grievance-case table so SLA-compliance is computed against actual
     // open cases rather than an empty array.
     const cases: CaseRow[] = [];
@@ -131,11 +131,11 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
 
     // Postgres ping — reuses the existing `db` instance.
     operational.push(
-      await probePostgresPing(async () => {
-        const rows = await db.execute(sql`SELECT 1 AS ok`);
+      await probePostgresPing(() => withSystemContext(async (tx) => {
+        const rows = await tx.execute(sql`SELECT 1 AS ok`);
         const ok = (rows as unknown as Array<{ ok: number }>)[0]?.ok;
         if (ok !== 1) throw new Error('SELECT 1 did not return 1');
-      }),
+      })),
     );
 
     // Demo profile enforcement — mirrors the boot-time guard.

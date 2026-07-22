@@ -108,6 +108,7 @@
     "abr": "pilot",
     "flow": "pilot",
     "union-eyes": "pilot",
+    "union-eyes-demo": "incubating",
     "cfo": "pilot",
     "partners": "pilot",
     "console": "internal",
@@ -165,6 +166,17 @@
       "proof_level": "pilot-proof",
       "revenue_status": "pilot-contracting",
       "priority": "critical"
+    },
+    "union-eyes-demo": {
+      "registry_tier": "INCUBATING",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-demo",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
     },
     "cfo": {
       "registry_tier": "PILOT",

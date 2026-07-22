@@ -10,8 +10,8 @@
 import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
-import { db } from '@/db/db';
 import { withApi } from '@/lib/api/framework';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   scheduleGrievanceDeadlineReminders,
   writeDeadlineAuditEvent,
@@ -44,7 +44,7 @@ export const GET = withApi(
 
     // Find deadlines that are past due and don't yet have an overdue
     // reminder in flight (pending or sent within the last 24h).
-    const overdueRows = (await db.execute(sql`
+    const overdueRows = (await withSystemContext((tx) => tx.execute(sql`
       select
         gd.id                            as id,
         gd.grievance_id                  as grievance_id,
@@ -63,7 +63,7 @@ export const GET = withApi(
                   or (r.status = 'sent' and r.sent_at > now() - interval '24 hours'))
         )
       limit 200
-    `)) as unknown as OverdueRow[];
+    `))) as unknown as OverdueRow[];
 
     let scheduled = 0;
     let failed = 0;
