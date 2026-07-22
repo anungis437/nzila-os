@@ -1,0 +1,56 @@
+===== Phase 0A.1 · drizzle.__platform_migrations witness (probe DB after full clean replay + idempotency) · 2026-07-22T17:56:26.8549606-04:00 =====
+----- __platform_migrations (38 rows: 31 full-success + 7 approved-partial paired with healers 0034/0035/0036/0037) -----
+ id |                      filename                       | partial | sqlstate |               healer_filename                |  outcome_class   
+----+-----------------------------------------------------+---------+----------+----------------------------------------------+------------------
+  1 | 0000_initial.sql                                    | f       |          |                                              | full-success
+  2 | 0001_solid_cargill.sql                              | f       |          |                                              | full-success
+  3 | 0002_rich_marten_broadcloak.sql                     | f       |          |                                              | full-success
+  4 | 0003_redundant_starfox.sql                          | f       |          |                                              | full-success
+  5 | 0004_audit_events_immutable.sql                     | f       |          |                                              | full-success
+  6 | 0005_ai_model_registry.sql                          | f       |          |                                              | full-success
+  7 | 0006_idempotency_cache.sql                          | f       |          |                                              | full-success
+  8 | 0007_flow_domain_tables.sql                         | f       |          |                                              | full-success
+  9 | 0008_ai_governance_store.sql                        | f       |          |                                              | full-success
+ 10 | 0009_pilot_metrics_layer.sql                        | f       |          |                                              | full-success
+ 11 | 0010_pilot_alerting_hardening.sql                   | t       | 42601    | 0037_heal_pilot_alerting_hardening.sql       | approved-partial
+ 12 | 0011_platform_integrations_connections.sql          | f       |          |                                              | full-success
+ 13 | 0012_platform_integrations_runtime.sql              | f       |          |                                              | full-success
+ 14 | 0013_orchestrator_runtime_hardening.sql             | t       | 2BP01    | 0034_heal_orchestrator_runtime_hardening.sql | approved-partial
+ 15 | 0014_rename_actor_user_id.sql                       | f       |          |                                              | full-success
+ 16 | 0015_itsm_command_center.sql                        | f       |          |                                              | full-success
+ 17 | 0016_pipeline_alerts.sql                            | f       |          |                                              | full-success
+ 18 | 0017_trustcore_law25.sql                            | t       | 42601    | 0035_heal_trustcore_law25_chain.sql          | approved-partial
+ 19 | 0018_trustcore_snapshots.sql                        | f       |          |                                              | full-success
+ 20 | 0019_trustcore_policies.sql                         | t       | 42P01    | 0035_heal_trustcore_law25_chain.sql          | approved-partial
+ 21 | 0020_trustcore_reminders.sql                        | f       |          |                                              | full-success
+ 22 | 0021_trustcore_subscriptions.sql                    | f       |          |                                              | full-success
+ 23 | 0022_trustcore_leads.sql                            | f       |          |                                              | full-success
+ 24 | 0023_trustcore_risks.sql                            | f       |          |                                              | full-success
+ 25 | 0024_trustops_foundations.sql                       | f       |          |                                              | full-success
+ 26 | 0025_trustcore_privacy_programs_org_name.sql        | t       | 42P01    | 0035_heal_trustcore_law25_chain.sql          | approved-partial
+ 27 | 0026_healthcare_discovery_surveys.sql               | f       |          |                                              | full-success
+ 28 | 0027_seed_healthcare_unit_92.sql                    | f       |          |                                              | full-success
+ 29 | 0028_policy_lifecycle_governance.sql                | f       |          |                                              | full-success
+ 30 | 0029_itsm_automation_ticket_fields_entity_graph.sql | f       |          |                                              | full-success
+ 31 | 0030_console_schema_bootstrap.sql                   | f       |          |                                              | full-success
+ 32 | 0031_idempotency_reservation_lease.sql              | f       |          |                                              | full-success
+ 33 | 0032_audit_events_canonical_hash.sql                | t       | 42703    | 0036_heal_audit_events_canonical_hash.sql    | approved-partial
+ 34 | 0033_fix_pilot_alerts_rule_fk.sql                   | t       | 42P01    | 0037_heal_pilot_alerting_hardening.sql       | approved-partial
+ 35 | 0034_heal_orchestrator_runtime_hardening.sql        | f       |          |                                              | full-success
+ 36 | 0035_heal_trustcore_law25_chain.sql                 | f       |          |                                              | full-success
+ 37 | 0036_heal_audit_events_canonical_hash.sql           | f       |          |                                              | full-success
+ 38 | 0037_heal_pilot_alerting_hardening.sql              | f       |          |                                              | full-success
+(38 rows)
+
+
+----- __platform_bootstrap -----
+ERROR:  column "created_at" does not exist
+LINE 1: SELECT id, filename, hash, created_at FROM drizzle.__platfor...
+                                   ^
+
+----- __platform_bootstrap -----
+ id |                filename                | mode  |  recorded_at  
+----+----------------------------------------+-------+---------------
+  1 | 0000_platform_schema_prerequisites.sql | apply | 1784756949359
+(1 row)
+
