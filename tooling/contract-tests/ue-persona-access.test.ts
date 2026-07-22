@@ -104,9 +104,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   // ── Base pages (any authenticated user) ────────────────────────────────
   { path: 'page.tsx',                                    minRole: 'member',               description: 'Main dashboard' },
   { path: 'workspace/page.tsx',                          minRole: 'member',               description: 'Unified workspace shell (any authenticated member)' },
-  { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified inbox' },
-  { path: 'work/page.tsx',                               minRole: 'member',               description: 'Work surface' },
-  { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console' },
   { path: 'intelligence/page.tsx',                       minRole: 'member',               description: 'Intelligence shell' },
   { path: 'outcomes/page.tsx',                           minRole: 'member',               description: 'Outcomes console' },
   { path: 'knowledge/page.tsx',                          minRole: 'member',               description: 'Knowledge console' },
@@ -192,13 +189,11 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/rewards/shopify/page.tsx',              minRole: 'admin',                description: 'Shopify integration config' },
 
   // ── Member-facing pages (any authenticated member) ─────────────────────
-  { path: 'agreements/page.tsx',                         minRole: 'member',               description: 'Collective agreements browser' },
   { path: 'claims/page.tsx',                             minRole: 'member',               description: 'Claims list (active/historical)' },
   { path: 'claims/new/page.tsx',                         minRole: 'member',               description: 'File new claim' },
   { path: 'claims/[id]/page.tsx',                        minRole: 'member',               description: 'Claim detail view' },
   { path: 'compliance/page.tsx',                         minRole: 'member',               description: 'Compliance dashboard (client-side)' },
   { path: 'dispatch/page.tsx',                           minRole: 'member',               description: 'Dispatch requests (client-side)' },
-  { path: 'documents/page.tsx',                          minRole: 'member',               description: 'Document repository (client-side)' },
   { path: 'education/page.tsx',                          minRole: 'member',               description: 'Education & training portal' },
   { path: 'education/courses/page.tsx',                  minRole: 'member',               description: 'Course catalog' },
   { path: 'education/my-courses/page.tsx',               minRole: 'member',               description: 'Enrolled courses & progress' },
@@ -237,7 +232,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'voting/page.tsx',                             minRole: 'member',               description: 'Voting & elections (client-side)' },
   { path: 'organizer/impact/page.tsx',                   minRole: 'member',               description: 'Organizer impact dashboard (client-side)' },
   { path: 'ai-assistant/page.tsx',                       minRole: 'member',               description: 'AI Assistant chatbot (client-side)' },
-  { path: 'calendar/page.tsx',                           minRole: 'member',               description: 'Calendar & events (client-side)' },
   // deadlines/, insights/, messages/ pages do not exist on disk under app/[locale]/dashboard/
   { path: 'cognition/page.tsx',                          minRole: 'member',               description: 'Cognition operations dashboard' },
 
@@ -255,17 +249,12 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'communications/page.tsx',                     minRole: 'steward',              description: 'Communications hub' },
   { path: 'communications/sms/page.tsx',                 minRole: 'steward',              description: 'SMS communications' },
   { path: 'cross-union-analytics/page.tsx',              minRole: 'steward',              description: 'Cross-union analytics' },
-  { path: 'cases/page.tsx',                              minRole: 'steward',              description: 'Cases list (steward queue)' },
-  { path: 'grievances/page.tsx',                         minRole: 'steward',              description: 'Grievances list (steward queue)' },
   { path: 'grievances/[id]/page.tsx',                    minRole: 'steward',              description: 'Grievance detail' },
-  { path: 'members/page.tsx',                            minRole: 'steward',              description: 'Members directory' },
   { path: 'members/new/page.tsx',                        minRole: 'steward',              description: 'Create new member' },
   { path: 'members/[id]/page.tsx',                       minRole: 'steward',              description: 'Member detail' },
   { path: 'pension/admin/page.tsx',                      minRole: 'steward',              description: 'Pension admin console' },
   { path: 'precedents/page.tsx',                         minRole: 'steward',              description: 'Precedents library' },
-  { path: 'reports/page.tsx',                            minRole: 'steward',              description: 'Reports dashboard (client-side)' },
   { path: 'workbench/page.tsx',                          minRole: 'steward',              description: 'LRO workbench — case queue' },
-  { path: 'cases/[id]/page.tsx',                         minRole: 'steward',              description: 'Case detail view' },
   { path: 'cba-intelligence/page.tsx',                    minRole: 'health_safety_rep',    description: 'CBA intelligence (entitlement-gated, min H&S rep)' },
   { path: 'committees/page.tsx',                          minRole: 'member',               description: 'Committee management' },
   { path: 'committees/[id]/page.tsx',                     minRole: 'steward',              description: 'Committee workspace detail' },
@@ -274,7 +263,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },
-  { path: 'governance/page.tsx',                         minRole: 'steward',              description: 'Governance dashboard' },
   { path: 'pilot/page.tsx',                              minRole: 'officer',              description: 'Pilot program health metrics' },
   { path: 'trust/page.tsx',                              minRole: 'officer',              description: 'Trust & system integrity dashboard' },
 

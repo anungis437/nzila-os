@@ -22,11 +22,7 @@ function emit(level: 'debug' | 'info' | 'warn' | 'error', message: string, field
     ...(fields ?? {}),
   };
   const line = JSON.stringify(payload);
-  if (level === 'error' || level === 'warn') {
-    console.error(line);
-  } else {
-    console.log(line);
-  }
+  process.stdout.write(`${line}\n`);
 }
 
 export const logger = {

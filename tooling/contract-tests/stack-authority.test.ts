@@ -60,6 +60,7 @@ const TS_AUTHORITATIVE_APPS = [
   'nacp-exams',
   'trade',
   'union-eyes',
+  'union-eyes-demo',
   'zonga',
   'web',
   'weekone',

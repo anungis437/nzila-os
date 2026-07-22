@@ -91,6 +91,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     devPort: 3012,
     domains: ['labour', 'governance'],
     enabledCapabilities: ['auth', 'evidence', 'telemetry'],
+    governanceRequirements: [],
     integrationDependencies: [
       { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID', 'AZURE_AD_TENANT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },

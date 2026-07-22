@@ -29,6 +29,7 @@
  * same marker but returns `undefined` and never throws.
  */
 import 'server-only';
+import { logger } from '@/lib/logger';
 
 /**
  * The single wire-format tag every demo provider emits. Log scrapers,
@@ -102,8 +103,7 @@ export function failInert(
     timestamp: new Date().toISOString(),
   };
   recordCall(record);
-  // eslint-disable-next-line no-console
-  console.warn(
+  logger.warn(
     `[${DEMO_NO_EXTERNAL_SIDE_EFFECT}] category=${category} op=${operation} args=${record.argsSummary}`,
   );
   throw new Error(
@@ -127,8 +127,7 @@ export function noopInert(
     timestamp: new Date().toISOString(),
   };
   recordCall(record);
-  // eslint-disable-next-line no-console
-  console.warn(
+  logger.warn(
     `[${DEMO_NO_EXTERNAL_SIDE_EFFECT}] category=${category} op=${operation} args=${record.argsSummary}`,
   );
 }
