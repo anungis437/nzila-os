@@ -15,11 +15,28 @@ vi.mock('@nzila/os-core', () => ({ createLogger: vi.fn(() => m.logger) }));
 vi.mock('@/lib/pilot-admin', () => ({ buildPilotStatus: m.buildPilotStatus }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db', () => ({ db: { execute: m.dbExecute } }));
+// The route runs every measurement query and the postgres-ping probe
+// through `withSystemContext`, which wraps the operation in
+// `db.transaction(...)` so RLS session variables get cleared for system
+// context. The RLS mechanism itself is exercised by dedicated tests in
+// `apps/union-eyes/lib/db/__tests__/with-rls-context.test.ts`; here we
+// stub the wrapper to invoke the operation with a tx that delegates to
+// the same `dbExecute` mock, keeping the assertion on `dbExecute`
+// call-count meaningful while preserving the route's real code path
+// (measure users → measure worksites → probe postgres ping).
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (operation: any) => Promise.resolve(operation({ execute: m.dbExecute })),
+}));
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign(
     (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
     { raw: (v: unknown) => v },
   ),
+  // `db/schema-organizations.ts` (and other schema modules transitively
+  // imported by the route under test) call `relations(...)` at module
+  // load time. Stub it so schema init succeeds without pulling in the
+  // real drizzle runtime.
+  relations: vi.fn(() => ({})),
 }));
 
 async function loadRoute() {
