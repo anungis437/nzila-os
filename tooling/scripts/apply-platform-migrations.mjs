@@ -195,6 +195,17 @@ async function ensureTrackingTables(client) {
       created_at bigint NOT NULL
     )
   `);
+  // Phase 0A.1 · additive columns capturing partial-apply metadata.
+  // Older rows carry NULL for every added column and remain valid.
+  await client.query(`
+    ALTER TABLE drizzle.__platform_migrations
+      ADD COLUMN IF NOT EXISTS partial boolean NOT NULL DEFAULT false,
+      ADD COLUMN IF NOT EXISTS sqlstate text,
+      ADD COLUMN IF NOT EXISTS error_signature text,
+      ADD COLUMN IF NOT EXISTS statement_location text,
+      ADD COLUMN IF NOT EXISTS healer_filename text,
+      ADD COLUMN IF NOT EXISTS outcome_class text
+  `);
 }
 
 async function loadRecordedBootstrapHashes(client) {
@@ -536,7 +547,73 @@ async function main() {
         const parts = [bs, inc].filter(Boolean).join(' | ');
         fail(`verify failed: pending artifact(s): ${parts}`, 2);
       }
-      log('verify: bootstrap satisfied and no incremental migrations pending.');
+      // Phase 0A.1 closure enforcement.
+      const knownPartialFailures = loadKnownPartialFailures();
+      const problems = [];
+
+      // (a) Every allowlist entry MUST reference a healer that exists on disk.
+      for (const [filename, entry] of knownPartialFailures) {
+        const healerOnDisk = incrementalArtifacts.some((a) => a.name === entry.healer);
+        if (!healerOnDisk) {
+          problems.push(
+            `allowlist entry "${filename}" names healer "${entry.healer}" which is missing from packages/db/drizzle/`,
+          );
+        }
+      }
+
+      // (b) Every allowlisted file that has been recorded as partial MUST
+      //     have a paired healer row also recorded. And every non-partial
+      //     recorded row whose file is on the allowlist is a witness
+      //     mismatch (unwitnessed allowlist entry).
+      const rows = await client.query(
+        `SELECT filename, partial, healer_filename, outcome_class
+           FROM drizzle.__platform_migrations
+           ORDER BY id`,
+      );
+      const recordedByName = new Map();
+      for (const r of rows.rows) {
+        recordedByName.set(r.filename, r);
+      }
+      for (const [filename, entry] of knownPartialFailures) {
+        const row = recordedByName.get(filename);
+        if (!row) continue; // not yet applied to this DB — nothing to enforce
+        if (row.partial === false) {
+          problems.push(
+            `allowlist entry "${filename}" is recorded as full-success but the allowlist claims it partials — witness mismatch (unwitnessed allowlist entry). If the historical defect is truly gone, remove the allowlist entry.`,
+          );
+          continue;
+        }
+        if (!recordedByName.has(entry.healer)) {
+          problems.push(
+            `partial-apply of "${filename}" is not yet paired with an applied healer "${entry.healer}" — chain incomplete.`,
+          );
+        }
+      }
+
+      // (c) Healer hash-stability: recorded healer rows must still match the
+      //     healer file on disk. (Any recorded incremental row must match
+      //     the on-disk hash, because insertion enforces UNIQUE(hash); a
+      //     mismatch means the file was edited after being applied.)
+      const artifactHashByName = new Map(incrementalArtifacts.map((a) => [a.name, a.hash]));
+      const recordedHashRows = await client.query(
+        `SELECT filename, hash FROM drizzle.__platform_migrations`,
+      );
+      for (const r of recordedHashRows.rows) {
+        const onDisk = artifactHashByName.get(r.filename);
+        if (onDisk && onDisk !== r.hash) {
+          problems.push(
+            `applied-file hash drift for "${r.filename}": recorded=${r.hash.slice(0, 12)}... on-disk=${onDisk.slice(0, 12)}...`,
+          );
+        }
+      }
+
+      if (problems.length > 0) {
+        fail(
+          `verify failed (Phase 0A.1 closure enforcement):\n  - ${problems.join('\n  - ')}`,
+          2,
+        );
+      }
+      log('verify: bootstrap satisfied, no incremental migrations pending, every allowlisted partial is paired with an applied healer, no hash drift.');
       return;
     }
 
@@ -592,6 +669,19 @@ async function main() {
         await client.query(p.sql);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
+        const sqlstate =
+          (err && typeof err === 'object' && 'code' in err && typeof err.code === 'string' && err.code) || null;
+        const errPosition =
+          (err && typeof err === 'object' && 'position' in err && err.position != null && String(err.position)) || null;
+        const errWhere =
+          (err && typeof err === 'object' && 'where' in err && err.where != null && String(err.where)) || null;
+        const statementLocation = [
+          errPosition ? `position=${errPosition}` : null,
+          errWhere ? `where=${errWhere.split('\n')[0]}` : null,
+        ]
+          .filter(Boolean)
+          .join(' ') || null;
+        const errorSignature = message.split('\n')[0].slice(0, 500);
         const allow = knownPartialFailures.get(p.name);
         if (!allow) {
           fail(
@@ -614,16 +704,28 @@ async function main() {
               `safely record the partial failure.`,
           );
         }
-        partial = { message, healer: allow.healer };
+        partial = { message, healer: allow.healer, sqlstate, statementLocation, errorSignature };
         warn(
-          `partial-apply tolerated for ${p.name} (known defect: ${allow.reason}). ` +
+          `partial-apply tolerated for ${p.name} (SQLSTATE=${sqlstate ?? 'null'}; known defect: ${allow.reason}). ` +
             `Healer: ${allow.healer}. Error: ${message}`,
         );
       }
+      const outcomeClass = partial ? 'approved-partial' : 'full-success';
       await client.query(
-        `INSERT INTO drizzle.__platform_migrations (filename, hash, created_at)
-         VALUES ($1, $2, $3)`,
-        [p.name, p.hash, Date.now()],
+        `INSERT INTO drizzle.__platform_migrations
+           (filename, hash, created_at, partial, sqlstate, error_signature, statement_location, healer_filename, outcome_class)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [
+          p.name,
+          p.hash,
+          Date.now(),
+          Boolean(partial),
+          partial?.sqlstate ?? null,
+          partial?.errorSignature ?? null,
+          partial?.statementLocation ?? null,
+          partial?.healer ?? null,
+          outcomeClass,
+        ],
       );
       log(partial ? `  recorded ${p.name} (partial; healer ${partial.healer})` : `  applied ${p.name}`);
     }
