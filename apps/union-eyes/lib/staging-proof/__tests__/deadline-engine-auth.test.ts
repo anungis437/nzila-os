@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createProofCanonicalMessage,
   createProofSignature,
+  STAGING_PROOF_MAX_CLOCK_SKEW_MS,
   verifyProofAuthorization,
 } from '../deadline-engine-auth';
 
@@ -31,6 +33,11 @@ function request(overrides: Partial<{ timestamp: string; nonce: string; signatur
 }
 
 describe('deadline-engine staging proof authorization', () => {
+  it('uses the documented v1 UTF-8 newline-delimited canonical message', () => {
+    expect(createProofCanonicalMessage(TIMESTAMP, NONCE, 'schedule-basic')).toBe(
+      `v1\n2026-07-21T12:00:00.000Z\n${NONCE}\nschedule-basic`,
+    );
+  });
   it.each(['production', 'pilot', 'demo', '', 'unknown'])('rejects %s environment identity', (environment) => {
     expect(request({ env: { ...ENV, TARGET_ENVIRONMENT: environment } }).authorized).toBe(false);
   });
@@ -44,6 +51,9 @@ describe('deadline-engine staging proof authorization', () => {
     expect(request({ signature: '0'.repeat(64) }).authorized).toBe(false);
     expect(request({ timestamp: '2026-07-21T11:54:59.999Z' }).authorized).toBe(false);
     expect(request({ nonce: 'short' }).authorized).toBe(false);
+    expect(request({ timestamp: '2026-07-21T12:00:00Z' }).authorized).toBe(false);
+    expect(request({ timestamp: '2026-07-21 12:00:00.000Z' }).authorized).toBe(false);
+    expect(request({ timestamp: new Date(NOW.getTime() + STAGING_PROOF_MAX_CLOCK_SKEW_MS + 1).toISOString() }).authorized).toBe(false);
   });
 
   it('rejects an unsupported scenario', () => {

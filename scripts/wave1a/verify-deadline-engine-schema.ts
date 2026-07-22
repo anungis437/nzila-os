@@ -57,11 +57,15 @@ const REQUIRED_TABLES = [
   'deadline_reminders',
   'deadline_reminder_executions',
   'deadline_audit_events',
+  'staging_proof_nonce_uses',
+  'staging_proof_run_events',
+  'staging_proof_runs',
 ] as const;
 
 const REQUIRED_MIGRATIONS = [
   '0045_union_eyes_deadline_engine.sql',
   '0046_union_eyes_staging_proof_controls.sql',
+  '0047_union_eyes_staging_proof_runs.sql',
 ] as const;
 
 const REQUIRED_COLUMNS: Record<string, string[]> = {
@@ -122,6 +126,34 @@ const REQUIRED_COLUMNS: Record<string, string[]> = {
     'metadata',
     'occurred_at',
   ],
+  staging_proof_nonce_uses: [
+    'nonce',
+    'proof_run_id',
+    'expires_at',
+    'used_at',
+  ],
+  staging_proof_run_events: [
+    'id',
+    'proof_run_id',
+    'scenario',
+    'event_type',
+    'correlation_id',
+    'created_identifiers',
+    'expected_outcome',
+    'actual_outcome',
+    'cleanup_passed',
+    'occurred_at',
+  ],
+  staging_proof_runs: [
+    'id',
+    'nonce',
+    'scenario',
+    'correlation_id',
+    'status',
+    'cleanup_passed',
+    'created_at',
+    'finalized_at',
+  ],
 };
 
 const REQUIRED_INDEXES = [
@@ -133,12 +165,18 @@ const REQUIRED_POLICIES = [
   { table: 'deadline_reminders', policy: 'deadline_reminders_tenant_isolation' },
   { table: 'deadline_reminder_executions', policy: 'deadline_reminder_executions_read' },
   { table: 'deadline_audit_events', policy: 'deadline_audit_events_tenant_isolation' },
+  { table: 'staging_proof_nonce_uses', policy: 'staging_proof_nonce_uses_system_only' },
+  { table: 'staging_proof_run_events', policy: 'staging_proof_run_events_system_only' },
+  { table: 'staging_proof_runs', policy: 'staging_proof_runs_system_only' },
 ];
 
 const REQUIRED_TRIGGERS = [
   { table: 'deadline_reminders', trigger: 'trg_deadline_reminders_touch' },
   { table: 'deadline_reminder_executions', trigger: 'trg_deadline_reminder_executions_immutable' },
   { table: 'deadline_audit_events', trigger: 'trg_deadline_audit_events_immutable' },
+  { table: 'staging_proof_run_events', trigger: 'trg_staging_proof_run_events_immutable' },
+  { table: 'staging_proof_runs', trigger: 'trg_staging_proof_runs_immutable' },
+  { table: 'staging_proof_runs', trigger: 'trg_staging_proof_runs_finalize_guard' },
 ];
 
 async function main(): Promise<void> {
@@ -172,8 +210,8 @@ async function main(): Promise<void> {
       });
     }
     checks.push({
-      name: 'manifest locked through staging proof controls',
-      passed: manifest.lockedThrough >= '0046_union_eyes_staging_proof_controls.sql',
+      name: 'manifest locked through proof-run ledger',
+      passed: manifest.lockedThrough >= '0047_union_eyes_staging_proof_runs.sql',
       detail: { lockedThrough: manifest.lockedThrough },
     });
   } catch (err) {

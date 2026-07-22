@@ -8,9 +8,11 @@ export const STAGING_PROOF_SCENARIOS = [
 
 export type StagingProofScenario = (typeof STAGING_PROOF_SCENARIOS)[number];
 
-const MAX_REQUEST_AGE_MS = 5 * 60 * 1000;
+export const STAGING_PROOF_PROTOCOL_VERSION = 'v1';
+export const STAGING_PROOF_MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 const NONCE_PATTERN = /^[A-Za-z0-9_-]{24,128}$/;
 const SIGNATURE_PATTERN = /^[a-f0-9]{64}$/;
+const TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 export interface ProofRequestHeaders {
   timestamp: string | null;
@@ -40,6 +42,19 @@ export function isStagingProofScenario(value: string): value is StagingProofScen
   return (STAGING_PROOF_SCENARIOS as readonly string[]).includes(value);
 }
 
+/**
+ * Wire format v1: UTF-8 `v1\n<UTC ISO-8601 milliseconds>\n<nonce>\n<scenario>`.
+ * Fields cannot contain newlines because timestamp, nonce, and scenario are
+ * constrained before verification.
+ */
+export function createProofCanonicalMessage(
+  timestamp: string,
+  nonce: string,
+  scenario: StagingProofScenario,
+): string {
+  return `${STAGING_PROOF_PROTOCOL_VERSION}\n${timestamp}\n${nonce}\n${scenario}`;
+}
+
 export function createProofSignature(
   secret: string,
   timestamp: string,
@@ -47,7 +62,7 @@ export function createProofSignature(
   scenario: StagingProofScenario,
 ): string {
   return createHmac('sha256', secret)
-    .update(`${timestamp}.${nonce}.${scenario}`)
+    .update(`${STAGING_PROOF_PROTOCOL_VERSION}\n${timestamp}\n${nonce}\n${scenario}`, 'utf8')
     .digest('hex');
 }
 
@@ -62,13 +77,13 @@ export function verifyProofAuthorization(input: {
   }
 
   const { timestamp, nonce, signature } = input.headers;
-  if (!timestamp || !nonce || !signature || !NONCE_PATTERN.test(nonce) || !SIGNATURE_PATTERN.test(signature)) {
+  if (!timestamp || !nonce || !signature || !TIMESTAMP_PATTERN.test(timestamp) || !NONCE_PATTERN.test(nonce) || !SIGNATURE_PATTERN.test(signature)) {
     return { authorized: false };
   }
 
   const requestTime = new Date(timestamp);
   const now = input.now ?? new Date();
-  if (Number.isNaN(requestTime.getTime()) || Math.abs(now.getTime() - requestTime.getTime()) > MAX_REQUEST_AGE_MS) {
+  if (Number.isNaN(requestTime.getTime()) || requestTime.toISOString() !== timestamp || Math.abs(now.getTime() - requestTime.getTime()) > STAGING_PROOF_MAX_CLOCK_SKEW_MS) {
     return { authorized: false };
   }
 

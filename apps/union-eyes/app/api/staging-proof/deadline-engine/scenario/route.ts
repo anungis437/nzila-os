@@ -15,7 +15,6 @@
  * ---------------
  * - REFUSES to run unless `STAGING_PROOFS_ENABLED === 'true'`.
  *   Production must NEVER set that flag.
- * - Refuses to run against a database whose host resolves to `prod`.
  * - Every scenario runs inside a top-level try/finally that cleans up
  *   its seed rows regardless of assertion outcome, so leaks cannot
  *   accumulate across proof runs.
@@ -47,7 +46,7 @@
  */
 import { randomUUID, createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { and, eq, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db';
 import { grievances, grievanceDeadlines } from '@/db/schema/grievance-schema';
@@ -56,6 +55,7 @@ import {
   scheduleGrievanceDeadlineReminders,
   cancelGrievanceDeadlineReminders,
 } from '@/lib/deadline-engine';
+import { completeDeadline } from '@/lib/deadline-tracking-system';
 import { logger } from '@/lib/logger';
 import {
   isAuthorizedStagingProofEnvironment,
@@ -177,19 +177,101 @@ async function cleanup(deadlineId: string | null, grievanceId: string | null): P
   }
 }
 
-async function claimNonce(nonce: string, proofRunId: string): Promise<boolean> {
-  const rows = await db.execute(sql`insert into staging_proof_nonce_uses (nonce, proof_run_id, expires_at) values (${nonce}, ${proofRunId}::uuid, now() + interval '10 minutes') on conflict do nothing returning nonce`) as unknown as Array<{ nonce: string }>;
-  return rows.length === 1;
+async function createProofRun(input: {
+  proofRunId: string;
+  nonce: string;
+  scenario: z.infer<typeof ScenarioName>;
+  correlationId: string;
+}): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const nonceRows = (await tx.execute(sql`
+      insert into staging_proof_nonce_uses (nonce, proof_run_id, expires_at)
+      values (${input.nonce}, ${input.proofRunId}::uuid, now() + interval '10 minutes')
+      on conflict do nothing
+      returning nonce
+    `)) as unknown as Array<{ nonce: string }>;
+    if (nonceRows.length !== 1) return false;
+
+    await tx.execute(sql`
+      insert into staging_proof_runs (id, nonce, scenario, correlation_id, status)
+      values (${input.proofRunId}::uuid, ${input.nonce}, ${input.scenario}, ${input.correlationId}, 'started')
+    `);
+    await tx.execute(sql`
+      insert into staging_proof_run_events (
+        proof_run_id, scenario, event_type, correlation_id, expected_outcome
+      ) values (
+        ${input.proofRunId}::uuid, ${input.scenario}, 'started', ${input.correlationId},
+        ${JSON.stringify({ service_boundary: true, cleanup: true })}::jsonb
+      )
+    `);
+    return true;
+  });
 }
 
-async function recordProofEvent(input: { proofRunId: string; scenario: z.infer<typeof ScenarioName>; eventType: 'started' | 'completed' | 'failed' | 'cleanup_failed'; correlationId: string; createdIdentifiers?: Record<string, string>; actualOutcome?: Record<string, boolean>; cleanupPassed?: boolean }): Promise<void> {
-  await db.execute(sql`insert into staging_proof_run_events (proof_run_id, scenario, event_type, correlation_id, created_identifiers, expected_outcome, actual_outcome, cleanup_passed) values (${input.proofRunId}::uuid, ${input.scenario}, ${input.eventType}, ${input.correlationId}, ${JSON.stringify(input.createdIdentifiers ?? {})}::jsonb, ${JSON.stringify({ service_boundary: true, cleanup: true })}::jsonb, ${JSON.stringify(input.actualOutcome ?? {})}::jsonb, ${input.cleanupPassed ?? null})`);
+async function finalizeProofRun(input: {
+  proofRunId: string;
+  scenario: z.infer<typeof ScenarioName>;
+  eventType: 'completed' | 'failed' | 'cleanup_failed';
+  correlationId: string;
+  createdIdentifiers?: Record<string, string>;
+  actualOutcome: Record<string, boolean>;
+  cleanupPassed: boolean;
+}): Promise<void> {
+  await db.transaction(async (tx) => {
+    const finalized = (await tx.execute(sql`
+      update staging_proof_runs
+         set status = ${input.eventType},
+             cleanup_passed = ${input.cleanupPassed},
+             finalized_at = now()
+       where id = ${input.proofRunId}::uuid
+         and status = 'started'
+       returning id
+    `)) as unknown as Array<{ id: string }>;
+    if (finalized.length !== 1) {
+      throw new Error('deadline-proof: proof run is missing or already finalized');
+    }
+    await tx.execute(sql`
+      insert into staging_proof_run_events (
+        proof_run_id, scenario, event_type, correlation_id, created_identifiers,
+        expected_outcome, actual_outcome, cleanup_passed
+      ) values (
+        ${input.proofRunId}::uuid, ${input.scenario}, ${input.eventType}, ${input.correlationId},
+        ${JSON.stringify(input.createdIdentifiers ?? {})}::jsonb,
+        ${JSON.stringify({ service_boundary: true, cleanup: true })}::jsonb,
+        ${JSON.stringify(input.actualOutcome)}::jsonb, ${input.cleanupPassed}
+      )
+    `);
+  });
 }
 
 async function insertSyntheticOrganization(proofRunId: string): Promise<string> {
   const organizationId = randomUUID();
   await db.insert(organizations).values({ id: organizationId, name: `Staging Proof ${proofRunId}`, slug: `staging-proof-${proofRunId}`, organizationType: 'union', hierarchyPath: [organizationId], hierarchyLevel: 0, status: 'active', settings: { proof_run: true, cleanup_required: true } });
   return organizationId;
+}
+
+async function retireSyntheticOrganization(organizationId: string, proofRunId: string): Promise<void> {
+  await db
+    .update(organizations)
+    .set({
+      status: 'inactive',
+      settings: { proof_run: true, proof_run_id: proofRunId, retained_evidence_tenant: true },
+    })
+    .where(eq(organizations.id, organizationId));
+}
+
+async function fetchDeadline(deadlineId: string, expectedDueDate?: Date): Promise<{
+  status: string;
+  due_date_matches: boolean | null;
+} | null> {
+  const rows = (await db.execute(sql`
+    select status,
+           ${expectedDueDate?.toISOString() ?? null}::timestamptz is null
+             or due_date = ${expectedDueDate?.toISOString() ?? null}::timestamptz as due_date_matches
+      from grievance_deadlines
+     where id = ${deadlineId}::uuid
+  `)) as unknown as Array<{ status: string; due_date_matches: boolean | null }>;
+  return rows[0] ?? null;
 }
 
 interface Assertion {
@@ -290,6 +372,11 @@ async function runReschedule(input: RequestBodyT, correlationId: string) {
       actor: { type: 'system', id: null },
     });
 
+    await db
+      .update(grievanceDeadlines)
+      .set({ dueDate: newDueDate, notes: `Rescheduled by staging proof ${correlationId}` })
+      .where(eq(grievanceDeadlines.id, seedDeadline.deadlineId));
+
     const second = await scheduleGrievanceDeadlineReminders({
       sourceDeadlineId: seedDeadline.deadlineId,
       grievanceId: seedGrievance.grievanceId,
@@ -301,6 +388,7 @@ async function runReschedule(input: RequestBodyT, correlationId: string) {
     });
 
     const rows = await fetchReminders(seedDeadline.deadlineId);
+    const sourceDeadline = await fetchDeadline(seedDeadline.deadlineId, newDueDate);
     const cancelled = rows.filter((r) => r.status === 'cancelled');
     const pending = rows.filter((r) => r.status === 'pending');
     const expectedFirstCount = input.reminderOffsetsInDays.length;
@@ -308,6 +396,7 @@ async function runReschedule(input: RequestBodyT, correlationId: string) {
       assert('initial schedule created rows', first.scheduled.length === expectedFirstCount),
       assert('reschedule cancelled prior rows', second.cancelledForReschedule.length === expectedFirstCount),
       assert('reschedule created new rows', second.scheduled.length === expectedFirstCount),
+      assert('source deadline due date changed', sourceDeadline?.due_date_matches === true),
       assert('cancelled reason=rescheduled on all cancelled rows', cancelled.every((r) => r.cancelled_reason === 'rescheduled')),
       assert('pending rows use new due date', pending.every((r) => new Date(r.scheduled_for) < newDueDate)),
       assert('pending rows > cancelled rows in time', pending.every((r) => {
@@ -367,6 +456,16 @@ async function runCancel(input: RequestBodyT, correlationId: string) {
       actor: { type: 'system', id: null },
     });
 
+    const completion = await completeDeadline(
+      seedDeadline.deadlineId,
+      input.organizationId,
+      'staging-proof',
+      `Completed by staging proof ${correlationId}`,
+    );
+    if (!completion.success) {
+      throw new Error(`deadline-proof: source deadline completion failed: ${completion.error ?? 'unknown error'}`);
+    }
+
     const cancel = await cancelGrievanceDeadlineReminders({
       sourceDeadlineId: seedDeadline.deadlineId,
       organizationId: input.organizationId,
@@ -376,12 +475,14 @@ async function runCancel(input: RequestBodyT, correlationId: string) {
     });
 
     const rows = await fetchReminders(seedDeadline.deadlineId);
+    const sourceDeadline = await fetchDeadline(seedDeadline.deadlineId);
     const expectedCount = input.reminderOffsetsInDays.length;
     assertions = [
       assert('schedule created rows', schedule.scheduled.length === expectedCount),
       assert('cancel returned same row count', cancel.cancelledIds.length === expectedCount),
       assert('all rows now cancelled', rows.every((r) => r.status === 'cancelled')),
       assert('all rows have reason=completed', rows.every((r) => r.cancelled_reason === 'completed')),
+      assert('source deadline transitioned to completed', sourceDeadline?.status === 'completed'),
       assert(
         'audit contains deadline.completed event',
         await (async () => {
@@ -435,13 +536,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!authorization.authorized) return new NextResponse(null, { status: 404 });
 
   const proofRunId = randomUUID();
-  const correlationId = randomUUID();
-  if (!(await claimNonce(authorization.nonce, proofRunId))) return new NextResponse(null, { status: 404 });
+  const correlationId = proofRunId;
+  try {
+    if (!(await createProofRun({ proofRunId, nonce: authorization.nonce, scenario: parsed.data.scenario, correlationId }))) {
+      return new NextResponse(null, { status: 404 });
+    }
+  } catch {
+    return new NextResponse(null, { status: 404 });
+  }
 
   const startedAt = new Date().toISOString();
   let organizationId: string | null = null;
   try {
-    await recordProofEvent({ proofRunId, scenario: parsed.data.scenario, eventType: 'started', correlationId });
     organizationId = await insertSyntheticOrganization(proofRunId);
     const input: RequestBodyT = {
       ...parsed.data,
@@ -458,9 +564,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         ? await runReschedule(input, correlationId)
         : await runCancel(input, correlationId);
       const completedOrganizationId = organizationId;
-      await db.delete(organizations).where(eq(organizations.id, completedOrganizationId));
-    organizationId = null;
-    await recordProofEvent({
+      await retireSyntheticOrganization(completedOrganizationId, proofRunId);
+      await finalizeProofRun({
       proofRunId,
       scenario: parsed.data.scenario,
       eventType: 'completed',
@@ -472,21 +577,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ...result, proofRunId, startedAt, finishedAt: new Date().toISOString() });
   } catch (err) {
     let cleanupPassed = true;
+    let eventType: 'failed' | 'cleanup_failed' = 'failed';
     if (organizationId) {
       const cleanupOrganizationId = organizationId;
       try {
-        await db.delete(organizations).where(eq(organizations.id, cleanupOrganizationId));
+        await retireSyntheticOrganization(cleanupOrganizationId, proofRunId);
       } catch (cleanupError) {
         cleanupPassed = false;
-        await recordProofEvent({
-          proofRunId,
-          scenario: parsed.data.scenario,
-          eventType: 'cleanup_failed',
-          correlationId,
-          createdIdentifiers: { organizationId: cleanupOrganizationId },
-          actualOutcome: { passed: false },
-          cleanupPassed: false,
-        }).catch(() => undefined);
+        eventType = 'cleanup_failed';
         logger.error('deadline-proof: organization cleanup failed', {
           proofRunId,
           correlationId,
@@ -494,10 +592,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
       }
     }
-    await recordProofEvent({
+    await finalizeProofRun({
       proofRunId,
       scenario: parsed.data.scenario,
-      eventType: 'failed',
+      eventType,
       correlationId,
       createdIdentifiers: organizationId ? { organizationId } : {},
       actualOutcome: { passed: false },
