@@ -1,9 +1,17 @@
-# Phase 0 · Migration lineage gap · Diagnosis
+# Phase 0 · Migration lineage gap · Diagnosis + Phase 0A closure amendment
 
 **Discovered:** 2026-07-22
 **Branch/HEAD:** `fix/union-eyes-reality-remediation` @ `2349d497b` (+ uncommitted phase-0 work)
 **Owner (this diagnosis):** Phase 0 baseline stabilization
 **Owner (resolution):** Aubert to authorize; targeted implementation belongs in Phase 0 close or Phase 1 preamble depending on choice.
+
+---
+
+## AMENDMENT (2026-07-23) — Phase 0A decision recorded
+
+**Decision:** Aubert chose **Option A** (author a checked-in prerequisite baseline), executed as a separate **Phase 0A**.
+**Implementation:** See [migration-baseline-design.md](migration-baseline-design.md) and [migration-validation-summary.md](migration-validation-summary.md).
+**Outcome:** PH0-OPEN-001 (this lineage gap) is **CLOSED**. Three additional pre-existing defects (PH0-OPEN-006 / -007 / -008 — see §4 below) were surfaced by the end-to-end proof and are logged as follow-up items. Phase 0A overall closes **`AMBER — MIGRATION LINEAGE INCOMPLETE`** because the empty-DB chain cannot reach 0033 without a healer for each of those three defects, and the Phase 0A directive prohibits authoring any change to files 0000–0033 (healers must land in a follow-up phase).
 
 ---
 
@@ -149,3 +157,55 @@ However, the actual choice is Aubert's. This document identifies the gap, provid
 ## Closure classification for Phase 0 §3
 
 `AMBER — INCOMPLETE` on the sub-item "clean-migration proof". The runner and its contracts are `GREEN`. Overall §3 status is therefore governed by the sub-item: **AMBER — INCOMPLETE, pending decision from Aubert on Options A / B / C.**
+
+---
+
+## 4. Additional defects surfaced by Phase 0A empty-DB proof (2026-07-23)
+
+Phase 0A closed the lineage gap enumerated above (see AMENDMENT header). Running the runner end-to-end on a freshly-created database after `--bootstrap-apply` further surfaced three previously-undocumented defects in historical migration files. These are logged here for traceability; each requires a dedicated healer migration in a follow-up phase (Phase 0A directive prohibits any change to files 0000–0033).
+
+Evidence:
+[migration-clean-run.log](migration-clean-run.log),
+[migration-survey.log](migration-survey.log),
+[migration-validation-summary.md](migration-validation-summary.md#4-blockers-to-green-pre-existing-defects-not-caused-by-phase-0a).
+
+### PH0-OPEN-006 · `0013_orchestrator_runtime_hardening.sql`
+
+- **Fail line:** 34
+- **Error:** `cannot drop index "automation_commands_correlation_id_unique" because constraint "automation_commands_correlation_id_unique" on table "automation_commands" requires it`
+- **Root cause:** `0003_redundant_starfox.sql` creates the unique constraint via `CONSTRAINT "…_unique" UNIQUE("correlation_id")`. PostgreSQL implicitly creates a backing unique index with the same name, but that index cannot be dropped standalone via `DROP INDEX` — the operator must `ALTER TABLE … DROP CONSTRAINT` first. `0013` uses `DROP INDEX IF EXISTS "automation_commands_correlation_id_unique"` on line 34, which errors even though the object exists.
+- **Statements executed before the failure (still committed under `psql -f` semantics):** the eight `ADD COLUMN IF NOT EXISTS` clauses (org_id, idempotency_key, version, attempt_count, execution_owner, lease_expires_at, last_heartbeat_at, started_at, completed_at), the backfill `UPDATE`, and the two `ALTER COLUMN … SET NOT NULL` clauses.
+- **Statements skipped:** every subsequent statement in the file — the `CREATE INDEX` for `automation_commands_correlation_idx`, `automation_commands_org_idempotency_uidx`, `automation_commands_org_status_idx`, `automation_commands_status_updated_idx`, `automation_commands_lease_idx`, the `ALTER TABLE automation_events ADD COLUMN org_id`, its backfill, its `SET NOT NULL`, and the two `automation_events` indexes.
+- **Required healer:** a new migration (e.g. `0034_healer_automation_commands_correlation.sql`) that does `ALTER TABLE automation_commands DROP CONSTRAINT IF EXISTS automation_commands_correlation_id_unique;` and then reapplies every idempotent statement 0013 was supposed to leave behind.
+- **Impact if unhealed:** Any environment that runs the full chain from scratch (fresh dev checkout, CI ephemeral DB, DR restore) fails at 0013 with a schema in a partially-hardened state.
+
+### PH0-OPEN-007 · `0017_trustcore_law25.sql`
+
+- **Fail line:** 1
+- **Error:** `syntax error at or near "NOT"` (statement: `CREATE TYPE IF NOT EXISTS "public"."tc_program_status" …`)
+- **Root cause:** PostgreSQL does not support `IF NOT EXISTS` on `CREATE TYPE`. The idiom must be `DO $$ BEGIN CREATE TYPE …; EXCEPTION WHEN duplicate_object THEN NULL; END $$;`.
+- **Statements executed before the failure:** none (failure at line 1).
+- **Statements skipped:** the entire file, including `CREATE TABLE trustcore_privacy_programs` and every dependent create.
+- **Cascade (blocks 2 further files):**
+  - `0019_trustcore_policies.sql` — fails with `relation "trustcore_privacy_programs" does not exist` (needs the type-then-table sequence from 0017).
+  - `0025_trustcore_privacy_programs_org_name.sql` — same cause.
+- **Required healer:** a new migration that (a) creates each enum via the `DO $$ EXCEPTION WHEN duplicate_object $$` idiom, (b) creates `trustcore_privacy_programs` and its indexes, (c) reapplies the additive statements from 0019 and 0025.
+- **Impact if unhealed:** trustcore Law 25 domain is entirely absent on any fresh DB.
+
+### PH0-OPEN-008 · `0032_audit_events_canonical_hash.sql`
+
+- **Fail line:** 43
+- **Error:** `column "org_id" does not exist`
+- **Root cause:** file assumes an `org_id` column on some table (candidate: `audit_events`) that is not created by any prior migration reachable on a fresh chain. Exact column ownership requires further diagnosis in the follow-up phase.
+- **Statements executed before the failure:** whatever preceded line 43 in the file; not enumerated here because the file has not been sliced.
+- **Required healer:** add the missing column (with backfill and appropriate default) then reapply the post-line-43 statements.
+
+### Aggregate blocker summary
+
+| ID | File | Class | Documented healer needed |
+|----|------|-------|--------------------------|
+| PH0-OPEN-006 | 0013 | Constraint / index confusion | Yes — `ALTER TABLE … DROP CONSTRAINT` + reapply |
+| PH0-OPEN-007 | 0017 | Unsupported `CREATE TYPE IF NOT EXISTS` | Yes — `DO $$ EXCEPTION $$` + reapply (also unblocks 0019, 0025) |
+| PH0-OPEN-008 | 0032 | Missing column dependency | Yes — add column, backfill, reapply post-fail statements |
+
+None of these defects is introduced by Phase 0A. All three are pre-existing conditions on the untouched historical migration files, previously masked because no environment ever executed the full chain from scratch.
