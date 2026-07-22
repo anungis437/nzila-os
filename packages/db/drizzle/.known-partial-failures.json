@@ -1,0 +1,12 @@
+{
+  "$schema": "./known-partial-failures.schema.json",
+  "description": "Explicit allowlist of incremental migrations that are historically known to abort partway (usually a PostgreSQL syntax defect that the DB accepted as far as it could) and whose partial-apply behavior is intentionally relied on by a later catch-up migration. The runner records each listed file as applied even if it errors, so that the catch-up migration can heal the schema. This file is the ONLY sanctioned mechanism for tolerating a mid-file failure; any error on a file not listed here still hard-fails the runner. Never widen this list without a linked ledger entry and a matching healer migration.",
+  "entries": [
+    {
+      "filename": "0010_pilot_alerting_hardening.sql",
+      "reason": "PostgreSQL does not support `ADD CONSTRAINT IF NOT EXISTS`. The file aborts at that line after successfully executing the preceding ALTER TABLE (columns) and CREATE TABLE pilot_alert_rules. The remaining statements (FK constraint, indexes, pilot_alert_escalations, partial indexes) are reapplied by the healer.",
+      "healer": "0033_fix_pilot_alerts_rule_fk.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    }
+  ]
+}

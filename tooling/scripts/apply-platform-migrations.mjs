@@ -2,61 +2,78 @@
 /**
  * Platform migration runner.
  *
- * Applies every SQL file in `packages/db/drizzle/*.sql` (sorted lexicographically
- * by the leading 4-digit prefix) to the database identified by DATABASE_URL,
- * skipping files whose SHA-256 content hash is already recorded in
- * `drizzle.__drizzle_migrations`.
+ * Two-phase lifecycle:
  *
- * Why this exists
- * ---------------
- *   * `drizzle-kit migrate` reads only files journaled in
- *     `packages/db/drizzle/meta/_journal.json`. The journal in this repository
- *     covers only 5 of 34 platform migration files; the remaining 29 files were
- *     added by hand as raw SQL. Running `drizzle-kit migrate` against a fresh
- *     database therefore silently omits them.
- *   * The Union Eyes bootstrap
- *     (`tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs`) applies a
- *     different, Union-Eyes-scoped cache. It does not touch
- *     `packages/db/drizzle/`.
- *   * Every previous run assumed maintainers would apply platform migrations
- *     by hand with `psql -f`. Drift was silent by default.
+ *   Phase 1 · BOOTSTRAP  (checked-in prerequisite baseline)
+ *   ─────────────────────────────────────────────────────────
+ *   Artifacts under `packages/db/bootstrap/*.sql`, each accompanied by a
+ *   sibling `*.json` manifest. Each artifact materializes the minimum set
+ *   of tables/enums/extensions that the numbered incremental chain assumes
+ *   already exists. Bootstrap artifacts are tracked in
+ *   `drizzle.__platform_bootstrap` (distinct from the incremental tracker).
  *
- * Contract
- * --------
- *   * All SQL files under `packages/db/drizzle/` matching `[0-9]{4}_*.sql` are
- *     applied in ascending order of their 4-digit prefix.
- *   * Each file is executed in its own transaction. On error, the transaction
- *     is rolled back and the runner exits non-zero.
- *   * A row (`filename`, `hash`, `created_at`) is inserted into
- *     `drizzle.__platform_migrations` after a successful application. `hash`
- *     is the SHA-256 of the raw file bytes. This tracking table is deliberately
- *     separate from `drizzle.__drizzle_migrations`, which is owned by
- *     drizzle-kit and by the Union Eyes scoped bootstrap.
- *   * Files whose hash is already in `drizzle.__platform_migrations` are
- *     skipped (idempotent).
- *   * `--check` runs a dry-run: it reports the pending set without applying.
- *   * `--verify` fails if there is any pending migration. Intended for CI and
- *     for the `db:migration:safety` gate.
- *   * `--baseline` records every discovered file into
- *     `drizzle.__platform_migrations` as already-applied, without executing
- *     any SQL. This is the one-time transition path for databases whose
- *     platform migrations were previously applied by hand.
+ *   Phase 2 · INCREMENTAL  (per-feature numbered migrations)
+ *   ─────────────────────────────────────────────────────────
+ *   Artifacts under `packages/db/drizzle/*.sql`, tracked in
+ *   `drizzle.__platform_migrations`.
+ *
+ * Ordering is strict: no incremental artifact is executed until every
+ * bootstrap artifact is satisfied (applied or reconciled) on the target
+ * database.
+ *
+ * Modes
+ * -----
+ *   (default)              Apply any pending incremental migrations. Refuses
+ *                          to proceed if bootstrap is not satisfied.
+ *
+ *   --check                Dry run. Reports bootstrap status and pending
+ *                          incrementals without executing SQL.
+ *
+ *   --verify               Exits non-zero (code 2) if bootstrap is not
+ *                          satisfied or any incremental is pending. Intended
+ *                          for CI gates.
+ *
+ *   --baseline             Records every incremental file into
+ *                          `drizzle.__platform_migrations` as already
+ *                          applied, without executing SQL. Requires
+ *                          bootstrap to be satisfied first. This is the
+ *                          transition path for legacy environments whose
+ *                          incrementals were previously applied out-of-band.
+ *
+ *   --bootstrap-check      Dry run of Phase 1 only. Reports which
+ *                          bootstrap artifacts are recorded, missing, or
+ *                          would need reconciliation.
+ *
+ *   --bootstrap-apply      Executes every unrecorded bootstrap artifact
+ *                          (idempotent SQL). Only appropriate for empty or
+ *                          near-empty databases. Refuses if reconciliation
+ *                          detects incompatible existing objects.
+ *
+ *   --bootstrap-reconcile  For each bootstrap artifact whose manifest
+ *                          objects already exist on the target database,
+ *                          validate schema compatibility per the manifest,
+ *                          and — if compatible — record the artifact as
+ *                          satisfied without executing SQL. Refuses on
+ *                          drift.
+ *
+ * Reconciliation policy (per manifest reconciliationPolicy):
+ *   • Required checks: table exists; every documented column exists with
+ *     the declared data_type; nullability matches when notNull=true; primary
+ *     key columns match.
+ *   • Tolerated: extra columns, extra FKs, extra indexes, extra uniques.
+ *   • Drift → runner exits non-zero and lists every failed check.
  *
  * Non-goals
  * ---------
- *   * Does not modify historical migration files.
- *   * Does not touch `drizzle.__drizzle_migrations`.
- *   * Does not touch the Union Eyes scoped cache.
+ *   • Never modifies historical incremental files.
+ *   • Never touches `drizzle.__drizzle_migrations` (owned by drizzle-kit
+ *     and by the Union Eyes scoped bootstrap).
+ *   • Never uses `drizzle-kit push` as an authoritative source.
  *
- * Usage
- * -----
- *   node tooling/scripts/apply-platform-migrations.mjs             # apply pending
- *   node tooling/scripts/apply-platform-migrations.mjs --check     # dry run
- *   node tooling/scripts/apply-platform-migrations.mjs --verify    # fail if pending
- *   node tooling/scripts/apply-platform-migrations.mjs --baseline  # mark all as applied
- *
- *   DATABASE_URL must be set. .env.local at repo root and at
- *   apps/union-eyes/.env.local are consulted in that order for a fallback.
+ * Environment
+ * -----------
+ *   DATABASE_URL must be set. Falls back to `.env.local` at repo root, then
+ *   `apps/union-eyes/.env.local`.
  */
 
 import crypto from 'node:crypto';
@@ -69,9 +86,34 @@ import pg from 'pg';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
+const bootstrapDir = path.join(repoRoot, 'packages', 'db', 'bootstrap');
 const migrationsDir = path.join(repoRoot, 'packages', 'db', 'drizzle');
+const knownPartialFailuresPath = path.join(migrationsDir, '.known-partial-failures.json');
 
-const MIGRATION_FILE_RE = /^(\d{4})_[^/\\]+\.sql$/;
+const ARTIFACT_FILE_RE = /^(\d{4})_[^/\\]+\.sql$/;
+
+/**
+ * Load the checked-in allowlist of incremental migrations that are known to
+ * abort partway through execution and whose partial-apply behavior is
+ * intentionally relied on by a later catch-up (healer) migration.
+ * Returns a Map<filename, entry>. Absent file → empty map.
+ */
+function loadKnownPartialFailures() {
+  if (!fs.existsSync(knownPartialFailuresPath)) return new Map();
+  try {
+    const raw = fs.readFileSync(knownPartialFailuresPath, 'utf8');
+    const data = JSON.parse(raw);
+    const entries = Array.isArray(data.entries) ? data.entries : [];
+    return new Map(entries.map((e) => [e.filename, e]));
+  } catch (err) {
+    fail(
+      `failed to parse ${path.relative(repoRoot, knownPartialFailuresPath)}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return new Map(); // unreachable
+  }
+}
+
+// ── env / logging ──────────────────────────────────────────────────────────
 
 function loadDatabaseUrl() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
@@ -81,27 +123,70 @@ function loadDatabaseUrl() {
   return process.env.DATABASE_URL;
 }
 
-function listMigrationFiles() {
-  const files = fs
-    .readdirSync(migrationsDir, { withFileTypes: true })
-    .filter((e) => e.isFile() && MIGRATION_FILE_RE.test(e.name))
+function log(msg) {
+  process.stdout.write(`[migrate] ${msg}\n`);
+}
+function warn(msg) {
+  process.stderr.write(`[migrate:warn] ${msg}\n`);
+}
+function fail(msg, code = 1) {
+  process.stderr.write(`[migrate:fail] ${msg}\n`);
+  process.exit(code);
+}
+
+// ── artifact discovery ────────────────────────────────────────────────────
+
+function listSqlArtifacts(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isFile() && ARTIFACT_FILE_RE.test(e.name))
     .map((e) => e.name)
     .sort((a, b) => {
-      const ai = Number(a.match(MIGRATION_FILE_RE)[1]);
-      const bi = Number(b.match(MIGRATION_FILE_RE)[1]);
+      const ai = Number(a.match(ARTIFACT_FILE_RE)[1]);
+      const bi = Number(b.match(ARTIFACT_FILE_RE)[1]);
       if (ai !== bi) return ai - bi;
       return a.localeCompare(b);
     });
-  return files.map((name) => {
-    const full = path.join(migrationsDir, name);
+  return entries.map((name) => {
+    const full = path.join(dir, name);
     const sql = fs.readFileSync(full, 'utf8');
     const hash = crypto.createHash('sha256').update(sql).digest('hex');
     return { name, full, sql, hash };
   });
 }
 
-async function ensureTrackingTable(client) {
+function loadManifestFor(artifact) {
+  const manifestName = artifact.name.replace(/^(\d{4})_/, '').replace(/\.sql$/, '.json');
+  const manifestPath = path.join(bootstrapDir, manifestName);
+  if (!fs.existsSync(manifestPath)) {
+    fail(
+      `bootstrap artifact ${artifact.name} is missing its sibling manifest at ${path.relative(repoRoot, manifestPath)}. ` +
+        `Every bootstrap artifact must be paired with a manifest declaring its object contract.`,
+    );
+  }
+  try {
+    const raw = fs.readFileSync(manifestPath, 'utf8');
+    return { path: manifestPath, data: JSON.parse(raw) };
+  } catch (err) {
+    fail(`bootstrap manifest ${manifestName} is not valid JSON: ${err instanceof Error ? err.message : String(err)}`);
+    return null; // unreachable
+  }
+}
+
+// ── tracking tables ───────────────────────────────────────────────────────
+
+async function ensureTrackingTables(client) {
   await client.query('CREATE SCHEMA IF NOT EXISTS drizzle');
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS drizzle.__platform_bootstrap (
+      id SERIAL PRIMARY KEY,
+      filename text NOT NULL,
+      hash text NOT NULL UNIQUE,
+      mode text NOT NULL,
+      recorded_at bigint NOT NULL
+    )
+  `);
   await client.query(`
     CREATE TABLE IF NOT EXISTS drizzle.__platform_migrations (
       id SERIAL PRIMARY KEY,
@@ -112,110 +197,437 @@ async function ensureTrackingTable(client) {
   `);
 }
 
-async function loadAppliedHashes(client) {
+async function loadRecordedBootstrapHashes(client) {
+  const res = await client.query('SELECT hash FROM drizzle.__platform_bootstrap');
+  return new Set(res.rows.map((r) => r.hash));
+}
+
+async function loadAppliedIncrementalHashes(client) {
   const res = await client.query('SELECT hash FROM drizzle.__platform_migrations');
   return new Set(res.rows.map((r) => r.hash));
 }
 
-function log(msg) {
-  process.stdout.write(`[migrate] ${msg}\n`);
+// ── manifest-based reconciliation ─────────────────────────────────────────
+
+async function fetchTableColumns(client, tableName) {
+  const res = await client.query(
+    `SELECT column_name, data_type, is_nullable, udt_name
+       FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1`,
+    [tableName],
+  );
+  return new Map(
+    res.rows.map((r) => [
+      r.column_name,
+      {
+        dataType: r.data_type,
+        nullable: r.is_nullable === 'YES',
+        udtName: r.udt_name,
+      },
+    ]),
+  );
 }
 
-function warn(msg) {
-  process.stderr.write(`[migrate:warn] ${msg}\n`);
+async function fetchPrimaryKeyColumns(client, tableName) {
+  const res = await client.query(
+    `SELECT a.attname AS column_name
+       FROM pg_index i
+       JOIN pg_class c ON c.oid = i.indrelid
+       JOIN pg_namespace n ON n.oid = c.relnamespace
+       JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = ANY(i.indkey)
+      WHERE n.nspname = 'public' AND c.relname = $1 AND i.indisprimary
+      ORDER BY array_position(i.indkey, a.attnum)`,
+    [tableName],
+  );
+  return res.rows.map((r) => r.column_name);
 }
 
-function fail(msg, code = 1) {
-  process.stderr.write(`[migrate:fail] ${msg}\n`);
-  process.exit(code);
+async function fetchEnumValues(client, enumName) {
+  const res = await client.query(
+    `SELECT e.enumlabel AS value
+       FROM pg_type t
+       JOIN pg_enum e ON e.enumtypid = t.oid
+       JOIN pg_namespace n ON n.oid = t.typnamespace
+      WHERE n.nspname = 'public' AND t.typname = $1
+      ORDER BY e.enumsortorder`,
+    [enumName],
+  );
+  return res.rows.map((r) => r.value);
 }
+
+async function reconcileManifest(client, manifest) {
+  // Failures are categorized:
+  //   - missingFailures: object does not exist on the target. A subsequent
+  //     `--bootstrap-apply` will create it (baseline SQL is idempotent).
+  //   - driftFailures: object exists but does not match the declared contract
+  //     (missing column, wrong type, wrong nullability, wrong PK). This must
+  //     be resolved manually — the baseline SQL cannot ALTER an existing
+  //     object.
+  const missingFailures = [];
+  const driftFailures = [];
+  const partialPresence = { present: 0, missing: 0 };
+
+  for (const obj of manifest.data.objects) {
+    if (obj.type === 'enum') {
+      const values = await fetchEnumValues(client, obj.name);
+      if (values.length === 0) {
+        missingFailures.push(`enum ${obj.name} does not exist`);
+        partialPresence.missing += 1;
+        continue;
+      }
+      partialPresence.present += 1;
+      const expected = new Set(obj.values);
+      const missing = obj.values.filter((v) => !values.includes(v));
+      if (missing.length > 0) {
+        driftFailures.push(
+          `enum ${obj.name} is missing value(s): ${missing.join(', ')} (found: ${values.join(', ')})`,
+        );
+      }
+      const extra = values.filter((v) => !expected.has(v));
+      if (extra.length > 0) {
+        log(`  · enum ${obj.name} carries additive values: ${extra.join(', ')} (tolerated)`);
+      }
+      continue;
+    }
+
+    if (obj.type === 'table') {
+      const cols = await fetchTableColumns(client, obj.name);
+      if (cols.size === 0) {
+        missingFailures.push(`table ${obj.name} does not exist`);
+        partialPresence.missing += 1;
+        continue;
+      }
+      partialPresence.present += 1;
+
+      for (const expectedCol of obj.columns) {
+        const actual = cols.get(expectedCol.name);
+        if (!actual) {
+          driftFailures.push(`table ${obj.name}: column ${expectedCol.name} is missing`);
+          continue;
+        }
+        if (actual.dataType !== expectedCol.type) {
+          driftFailures.push(
+            `table ${obj.name}.${expectedCol.name}: expected data_type ${expectedCol.type}, found ${actual.dataType}`,
+          );
+        }
+        if (expectedCol.type === 'USER-DEFINED' && expectedCol.udtName && actual.udtName !== expectedCol.udtName) {
+          driftFailures.push(
+            `table ${obj.name}.${expectedCol.name}: expected udt ${expectedCol.udtName}, found ${actual.udtName}`,
+          );
+        }
+        if (expectedCol.notNull && actual.nullable) {
+          driftFailures.push(`table ${obj.name}.${expectedCol.name}: expected NOT NULL, found NULLABLE`);
+        }
+      }
+
+      const pkCols = await fetchPrimaryKeyColumns(client, obj.name);
+      const pkMatches =
+        pkCols.length === obj.primaryKey.length &&
+        pkCols.every((c, i) => c === obj.primaryKey[i]);
+      if (!pkMatches) {
+        driftFailures.push(
+          `table ${obj.name}: expected primary key (${obj.primaryKey.join(', ')}), found (${pkCols.join(', ')})`,
+        );
+      }
+      continue;
+    }
+
+    driftFailures.push(`unknown manifest object type: ${obj.type} for ${obj.name}`);
+  }
+
+  const failures = [...missingFailures, ...driftFailures];
+  return { failures, missingFailures, driftFailures, partialPresence };
+}
+
+// ── bootstrap orchestration ───────────────────────────────────────────────
+
+async function bootstrapCheck(client, artifacts) {
+  const recorded = await loadRecordedBootstrapHashes(client);
+  log(`bootstrap: ${artifacts.length} artifact(s) discovered under packages/db/bootstrap/.`);
+  for (const art of artifacts) {
+    const status = recorded.has(art.hash) ? 'RECORDED' : 'PENDING';
+    log(`  · ${art.name}  sha256=${art.hash.slice(0, 12)}...  ${status}`);
+    if (!recorded.has(art.hash)) {
+      const manifest = loadManifestFor(art);
+      const { driftFailures, missingFailures, partialPresence } = await reconcileManifest(client, manifest);
+      if (driftFailures.length === 0 && partialPresence.present > 0 && partialPresence.missing === 0) {
+        log('      -> would be RECONCILE-safe (all manifest objects present & compatible)');
+      } else if (partialPresence.present === 0) {
+        log('      -> would be APPLY-safe (no manifest objects present)');
+      } else if (driftFailures.length > 0) {
+        log('      -> DRIFT on existing objects — apply refused, fix manually:');
+        for (const f of driftFailures) log(`         - ${f}`);
+      } else {
+        log(
+          `      -> would be APPLY-safe (${partialPresence.present} present + ${partialPresence.missing} missing; ` +
+            `no drift on present objects, baseline will create missing ones):`,
+        );
+        for (const f of missingFailures) log(`         - ${f}`);
+      }
+    }
+  }
+  return recorded;
+}
+
+async function bootstrapApply(client, artifacts) {
+  const recorded = await loadRecordedBootstrapHashes(client);
+  let executed = 0;
+  for (const art of artifacts) {
+    if (recorded.has(art.hash)) {
+      log(`bootstrap: ${art.name} already recorded; skipping.`);
+      continue;
+    }
+    const manifest = loadManifestFor(art);
+    const { driftFailures, partialPresence } = await reconcileManifest(client, manifest);
+    if (driftFailures.length > 0) {
+      fail(
+        `bootstrap-apply refused for ${art.name}: schema drift detected on existing objects. ` +
+          `Baseline SQL creates missing objects idempotently but cannot ALTER existing ones. ` +
+          `Fix drift manually (add missing columns / correct types / correct NOT NULL) or use ` +
+          `--bootstrap-reconcile against a compatible database. Drift:\n  - ${driftFailures.join('\n  - ')}`,
+      );
+    }
+    if (partialPresence.present > 0 && partialPresence.missing > 0) {
+      log(
+        `bootstrap: ${art.name} target has ${partialPresence.present} object(s) present and ` +
+          `${partialPresence.missing} missing; applying baseline to fill the gaps ` +
+          `(existing objects are contract-compatible, IF NOT EXISTS is a no-op for them).`,
+      );
+    }
+    log(`bootstrap: applying ${art.name}`);
+    try {
+      await client.query('BEGIN');
+      await client.query(art.sql);
+      await client.query(
+        `INSERT INTO drizzle.__platform_bootstrap (filename, hash, mode, recorded_at)
+         VALUES ($1, $2, 'apply', $3)`,
+        [art.name, art.hash, Date.now()],
+      );
+      await client.query('COMMIT');
+      executed += 1;
+      log(`  applied ${art.name}`);
+    } catch (err) {
+      try {
+        await client.query('ROLLBACK');
+      } catch {
+        // ignore
+      }
+      fail(`bootstrap-apply failed for ${art.name}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  log(`bootstrap-apply complete. Executed ${executed} artifact(s).`);
+}
+
+async function bootstrapReconcile(client, artifacts) {
+  const recorded = await loadRecordedBootstrapHashes(client);
+  let reconciled = 0;
+  for (const art of artifacts) {
+    if (recorded.has(art.hash)) {
+      log(`bootstrap: ${art.name} already recorded; skipping.`);
+      continue;
+    }
+    const manifest = loadManifestFor(art);
+    const { failures, partialPresence } = await reconcileManifest(client, manifest);
+    if (partialPresence.present === 0) {
+      fail(
+        `bootstrap-reconcile refused for ${art.name}: none of the manifest objects exist on the target. ` +
+          `Use --bootstrap-apply against an empty database, not --bootstrap-reconcile.`,
+      );
+    }
+    if (failures.length > 0) {
+      fail(
+        `bootstrap-reconcile refused for ${art.name}: schema drift detected. ` +
+          `No baseline row was recorded. Failures:\n  - ${failures.join('\n  - ')}`,
+      );
+    }
+    await client.query(
+      `INSERT INTO drizzle.__platform_bootstrap (filename, hash, mode, recorded_at)
+       VALUES ($1, $2, 'reconcile', $3)`,
+      [art.name, art.hash, Date.now()],
+    );
+    reconciled += 1;
+    log(`bootstrap: reconciled ${art.name} (all manifest objects present & compatible).`);
+  }
+  log(`bootstrap-reconcile complete. Reconciled ${reconciled} artifact(s).`);
+}
+
+async function assertBootstrapReady(client, artifacts) {
+  const recorded = await loadRecordedBootstrapHashes(client);
+  const pending = artifacts.filter((a) => !recorded.has(a.hash));
+  if (pending.length === 0) return;
+  const names = pending.map((p) => p.name).join(', ');
+  fail(
+    `bootstrap not satisfied: ${pending.length} artifact(s) pending: ${names}. ` +
+      `Run --bootstrap-apply (empty DB) or --bootstrap-reconcile (existing DB) first.`,
+    3,
+  );
+}
+
+// ── main ──────────────────────────────────────────────────────────────────
 
 async function main() {
   const args = new Set(process.argv.slice(2));
-  const dryRun = args.has('--check');
-  const verify = args.has('--verify');
-  const baseline = args.has('--baseline');
-
-  const conflicting = [dryRun, verify, baseline].filter(Boolean).length;
-  if (conflicting > 1) {
-    fail('--check, --verify, and --baseline are mutually exclusive.');
+  const modes = [
+    'check',
+    'verify',
+    'baseline',
+    'bootstrap-check',
+    'bootstrap-apply',
+    'bootstrap-reconcile',
+  ];
+  const activeModes = modes.filter((m) => args.has(`--${m}`));
+  if (activeModes.length > 1) {
+    fail(`modes are mutually exclusive; got: ${activeModes.map((m) => `--${m}`).join(', ')}`);
   }
+  const mode = activeModes[0] ?? null;
 
   const databaseUrl = loadDatabaseUrl();
   if (!databaseUrl) {
     fail('DATABASE_URL is not set. Set it in the shell or in .env.local.');
   }
 
-  const files = listMigrationFiles();
-  if (files.length === 0) {
-    log('No migration files found under packages/db/drizzle/. Nothing to do.');
-    return;
+  const bootstrapArtifacts = listSqlArtifacts(bootstrapDir);
+  const incrementalArtifacts = listSqlArtifacts(migrationsDir);
+
+  if (bootstrapArtifacts.length === 0) {
+    fail(
+      `no bootstrap artifacts found under packages/db/bootstrap/. This runner requires at least one ` +
+        `checked-in bootstrap artifact. See Phase 0A · Migration Lineage Closure.`,
+    );
   }
 
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
-
   try {
-    await ensureTrackingTable(client);
-    const applied = await loadAppliedHashes(client);
+    await ensureTrackingTables(client);
 
-    const pending = files.filter((f) => !applied.has(f.hash));
-    log(`discovered ${files.length} SQL files; ${applied.size} hashes already recorded; ${pending.length} pending.`);
+    if (mode === 'bootstrap-check') {
+      await bootstrapCheck(client, bootstrapArtifacts);
+      return;
+    }
+    if (mode === 'bootstrap-apply') {
+      await bootstrapApply(client, bootstrapArtifacts);
+      return;
+    }
+    if (mode === 'bootstrap-reconcile') {
+      await bootstrapReconcile(client, bootstrapArtifacts);
+      return;
+    }
 
-    if (baseline) {
-      if (applied.size > 0) {
-        log('Baseline requested but tracking table is non-empty. Only new files will be recorded.');
+    if (mode === 'check') {
+      log('=== Phase 1 · bootstrap status ===');
+      await bootstrapCheck(client, bootstrapArtifacts);
+      log('=== Phase 2 · incremental status ===');
+      const applied = await loadAppliedIncrementalHashes(client);
+      const pending = incrementalArtifacts.filter((f) => !applied.has(f.hash));
+      log(`incrementals: ${incrementalArtifacts.length} discovered; ${applied.size} recorded; ${pending.length} pending.`);
+      for (const p of pending) log(`  - ${p.name}  sha256=${p.hash.slice(0, 12)}...`);
+      return;
+    }
+
+    if (mode === 'verify') {
+      const recorded = await loadRecordedBootstrapHashes(client);
+      const bootstrapPending = bootstrapArtifacts.filter((a) => !recorded.has(a.hash));
+      const applied = await loadAppliedIncrementalHashes(client);
+      const incrementalPending = incrementalArtifacts.filter((f) => !applied.has(f.hash));
+      if (bootstrapPending.length > 0 || incrementalPending.length > 0) {
+        const bs = bootstrapPending.map((p) => `bootstrap:${p.name}`).join(', ');
+        const inc = incrementalPending.map((p) => `incremental:${p.name}`).join(', ');
+        const parts = [bs, inc].filter(Boolean).join(' | ');
+        fail(`verify failed: pending artifact(s): ${parts}`, 2);
       }
-      let recorded = 0;
+      log('verify: bootstrap satisfied and no incremental migrations pending.');
+      return;
+    }
+
+    // Modes that require bootstrap to be satisfied:
+    await assertBootstrapReady(client, bootstrapArtifacts);
+
+    if (mode === 'baseline') {
+      const applied = await loadAppliedIncrementalHashes(client);
+      const pending = incrementalArtifacts.filter((f) => !applied.has(f.hash));
+      log(`baseline: recording ${pending.length} incremental file(s) as applied (no SQL executed).`);
       for (const p of pending) {
         await client.query(
-          'INSERT INTO drizzle.__platform_migrations (filename, hash, created_at) VALUES ($1, $2, $3) ON CONFLICT (hash) DO NOTHING',
+          `INSERT INTO drizzle.__platform_migrations (filename, hash, created_at)
+           VALUES ($1, $2, $3) ON CONFLICT (hash) DO NOTHING`,
           [p.name, p.hash, Date.now()],
         );
-        recorded += 1;
       }
-      log(`baselined ${recorded} file(s) without executing any SQL.`);
+      log('baseline complete.');
       return;
     }
+
+    // default mode: apply pending incrementals
+    const applied = await loadAppliedIncrementalHashes(client);
+    const pending = incrementalArtifacts.filter((f) => !applied.has(f.hash));
+    log(`incrementals: ${incrementalArtifacts.length} discovered; ${applied.size} already applied; ${pending.length} pending.`);
 
     if (pending.length === 0) {
-      log('All migrations already applied.');
+      log('All incremental migrations already applied.');
       return;
     }
 
-    if (verify) {
-      const list = pending.map((p) => p.name).join(', ');
-      fail(`verify failed: ${pending.length} pending migration(s): ${list}`, 2);
-    }
-
-    if (dryRun) {
-      log('Dry run. The following files would be applied in order:');
-      for (const p of pending) log(`  - ${p.name}  (sha256=${p.hash.slice(0, 12)}…)`);
-      return;
-    }
-
+    // Incremental migrations are executed WITHOUT explicit BEGIN/COMMIT so
+    // that PostgreSQL's simple-query protocol autocommits each statement
+    // independently, matching `psql -f` semantics. This is required to preserve
+    // the historical execution model that some catch-up migrations rely on
+    // (e.g. `0033_fix_pilot_alerts_rule_fk.sql` reapplies statements that
+    // `0010_pilot_alerting_hardening.sql` intentionally leaves half-applied
+    // after its known `ADD CONSTRAINT IF NOT EXISTS` syntax error).
+    //
+    // If a migration fails mid-file, statements that already ran remain
+    // committed. Behavior depends on the allowlist at
+    // `packages/db/drizzle/.known-partial-failures.json`:
+    //   • listed → runner warns, records the file as applied, continues.
+    //     The healer migration named in the allowlist entry is expected
+    //     later in the chain to catch the schema up.
+    //   • not listed → runner hard-fails without recording. Operator must
+    //     add an allowlist entry (with healer) or fix the DB manually.
+    const knownPartialFailures = loadKnownPartialFailures();
     for (const p of pending) {
       log(`applying ${p.name}`);
+      let partial = null;
       try {
-        await client.query('BEGIN');
         await client.query(p.sql);
-        await client.query(
-          'INSERT INTO drizzle.__platform_migrations (filename, hash, created_at) VALUES ($1, $2, $3)',
-          [p.name, p.hash, Date.now()],
-        );
-        await client.query('COMMIT');
-        log(`  applied ${p.name}`);
       } catch (err) {
-        try {
-          await client.query('ROLLBACK');
-        } catch {
-          // ignore
+        const message = err instanceof Error ? err.message : String(err);
+        const allow = knownPartialFailures.get(p.name);
+        if (!allow) {
+          fail(
+            `failure applying ${p.name}: ${message}. ` +
+              `Statements executed prior to this error remain committed. ` +
+              `Either patch the database manually, add a healer migration, ` +
+              `or (only for genuinely known-broken historical files) add an ` +
+              `entry to packages/db/drizzle/.known-partial-failures.json ` +
+              `naming the healer migration.`,
+          );
         }
-        fail(`failure applying ${p.name}: ${err instanceof Error ? err.message : String(err)}`);
+        // Verify the named healer exists in the incremental set; refuse to
+        // tolerate a partial failure whose healer is missing.
+        const healerPresent = incrementalArtifacts.some((a) => a.name === allow.healer);
+        if (!healerPresent) {
+          fail(
+            `failure applying ${p.name}: ${message}. ` +
+              `.known-partial-failures.json declares healer "${allow.healer}" ` +
+              `but that file is not present in packages/db/drizzle/. Cannot ` +
+              `safely record the partial failure.`,
+          );
+        }
+        partial = { message, healer: allow.healer };
+        warn(
+          `partial-apply tolerated for ${p.name} (known defect: ${allow.reason}). ` +
+            `Healer: ${allow.healer}. Error: ${message}`,
+        );
       }
+      await client.query(
+        `INSERT INTO drizzle.__platform_migrations (filename, hash, created_at)
+         VALUES ($1, $2, $3)`,
+        [p.name, p.hash, Date.now()],
+      );
+      log(partial ? `  recorded ${p.name} (partial; healer ${partial.healer})` : `  applied ${p.name}`);
     }
-
-    log(`Done. Applied ${pending.length} migration(s).`);
+    log(`Done. Applied ${pending.length} incremental migration(s).`);
   } finally {
     await client.end().catch(() => undefined);
   }
