@@ -7,6 +7,28 @@
 
 ---
 
+## AMENDMENT (2026-07-23) — Phase 0A.1 closure
+
+**Verdict:** `GREEN — MIGRATION LINEAGE CLOSED`.
+
+**All three historical defects surfaced by Phase 0A are now closed:**
+
+| Defect (Phase 0A) | Healer (Phase 0A.1) | Ledger fix ID |
+|---|---|---|
+| PH0-OPEN-006 · `0013_orchestrator_runtime_hardening.sql` | `0034_heal_orchestrator_runtime_hardening.sql` | PH0-FIX-005 |
+| PH0-OPEN-007 · `0017_trustcore_law25.sql` + `0019_trustcore_policies.sql` + `0025_trustcore_privacy_programs_org_name.sql` | `0035_heal_trustcore_law25_chain.sql` | PH0-FIX-006 |
+| PH0-OPEN-008 · `0032_audit_events_canonical_hash.sql` | `0036_heal_audit_events_canonical_hash.sql` | PH0-FIX-007 |
+
+**One additional defect surfaced under Phase 0A.1 (unforeseen — full disclosure):**
+
+| Defect (Phase 0A.1) | Healer | Ledger fix ID |
+|---|---|---|
+| PH0-OPEN-010 · `0010_pilot_alerting_hardening.sql` (parser rejection cascading into `0033_fix_pilot_alerts_rule_fk.sql` on empty DBs) | `0037_heal_pilot_alerting_hardening.sql` | PH0-FIX-008 |
+
+Empty-DB replay of baseline + 38 incrementals (34 historical + 4 healers) now succeeds end-to-end; `--verify` exits 0; idempotent second run applies zero pending. See [migration-validation-summary.md § 8](migration-validation-summary.md#8-phase-0a1-closure-block-2026-07-23), [migration-healer-design.md](migration-healer-design.md), [migration-healer-statement-map.md](migration-healer-statement-map.md), [migration-clean-run.log](migration-clean-run.log), [migration-healer-idempotency.log](migration-healer-idempotency.log), [migration-tracking-witness.txt](migration-tracking-witness.txt), [migration-schema-comparison.txt](migration-schema-comparison.txt).
+
+---
+
 ## AMENDMENT (2026-07-23) — Phase 0A decision recorded
 
 **Decision:** Aubert chose **Option A** (author a checked-in prerequisite baseline), executed as a separate **Phase 0A**.
