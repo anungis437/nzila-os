@@ -1,0 +1,421 @@
+
+Running 192 tests using 1 worker
+
+[1A[2K[1/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA
+
+
+[1A[2K[WebServer] Γ¥î [2026-07-23T18:55:33.486Z] [ERROR] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb] Γ¥î [ERROR] Environment validation failed
+[1A[2K[WebServer] Γ¥î [2026-07-23T18:55:33.486Z] [ERROR] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb]   1. NEXT_PUBLIC_APP_URL: Required
+[WebServer] ΓÜá∩╕Å [2026-07-23T18:55:33.487Z] [WARN] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb] ΓÜá∩╕Å  Continuing with missing env vars ΓÇö some features may be unavailable
+
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-23T18:55:33.492Z] [WARN] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb] [runtime-fail-closed] mode=advisory satisfied=false
+[WebServer]   - auth.django.secret: missing DJANGO_SECRET_KEY ΓåÆ fail-closed governance (boot refused under RUNTIME_FAIL_CLOSED=true)
+[WebServer]   - crypto.fallback: missing FALLBACK_ENCRYPTION_KEY ΓåÆ fail-closed governance (boot refused under RUNTIME_FAIL_CLOSED=true)
+[WebServer]   - auth.webhook.secret: missing AUTH_WEBHOOK_SECRET ΓåÆ bounded runtime (related surface disabled)
+[WebServer]   - crypto.pii: missing EVIDENCE_SEAL_KEY ΓåÆ bounded runtime (related surface disabled)
+[WebServer]   - identity.entra.client_id: missing AZURE_AD_CLIENT_ID ΓåÆ continuity-safe fallback (Entra path disabled)
+[WebServer]   - identity.entra.tenant_id: missing AZURE_AD_TENANT_ID ΓåÆ continuity-safe fallback (Entra path disabled)
+
+[WebServer]   - identity.entra.client_secret: missing AZURE_AD_CLIENT_SECRET ΓåÆ continuity-safe fallback (Entra path disabled)
+[WebServer]   - lineage.secret_topology: missing SECRET_TOPOLOGY ΓåÆ explicit degradation (lineage banner)
+[WebServer]   - lineage.secret_authority: missing SECRET_AUTHORITY ΓåÆ explicit degradation (lineage banner)
+[WebServer]   - lineage.environment_isolation: missing ENVIRONMENT_ISOLATION ΓåÆ explicit degradation (lineage banner)
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-23T18:55:33.492Z] [WARN] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb] NZILA_MODE is not set; pilot demo mutation routes will remain fail-closed
+[WebServer]   Context: {
+[WebServer]   "runtimeMode": null
+[WebServer] }
+
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-23T18:55:35.204Z] [WARN] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb] Missing critical database tables
+[WebServer]   Context: {
+[WebServer]   "missingTables": "[REDACTED]",
+[WebServer]   "message": "Database migrations may not be up to date"
+[WebServer] }
+
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-23T18:55:35.204Z] [WARN] [ebb9d90a-8462-4dc4-ad11-10d55c64fdbb] Database schema validation warnings detected
+[1A[2K  1) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/inbox" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:77
+
+      75 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+      76 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    > 77 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+         |                      ^
+      78 |   return landing;
+      79 | }
+      80 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:77:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-5378b-ralized-landing-and-role-IA-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-5378b-ralized-landing-and-role-IA-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-5378b-ralized-landing-and-role-IA-chromium\error-context.md
+
+
+[1A[2K[2/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: mobile landing keeps nav and primary action reachable
+[1A[2K  2) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-9dfe7-nd-primary-action-reachable-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-9dfe7-nd-primary-action-reachable-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-9dfe7-nd-primary-action-reachable-chromium\error-context.md
+
+
+[1A[2K[3/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: /dashboard redirects to centralized landing and role IA
+[1A[2K  3) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+       at e2e\helpers\navigation-assertions.ts:9
+
+       7 | export async function assertVisibleNavLabels(page: Page, labels: string[]): Promise<void> {
+       8 |   const nav = sidebarNav(page);
+    >  9 |   await expect(nav).toBeVisible();
+         |                     ^
+      10 |   for (const label of labels) {
+      11 |     await expect(nav.getByRole('link', { name: label }).first()).toBeVisible();
+      12 |   }
+        at assertVisibleNavLabels (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\navigation-assertions.ts:9:21)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:37:35
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-f084d-ralized-landing-and-role-IA-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-f084d-ralized-landing-and-role-IA-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-f084d-ralized-landing-and-role-IA-chromium\error-context.md
+
+
+[1A[2K[4/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: mobile landing keeps nav and primary action reachable
+[1A[2K  4) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-96944-nd-primary-action-reachable-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-96944-nd-primary-action-reachable-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-96944-nd-primary-action-reachable-chromium\error-context.md
+
+
+[1A[2K[5/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: /dashboard redirects to centralized landing and role IA
+[1A[2K  5) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+       at e2e\helpers\navigation-assertions.ts:9
+
+       7 | export async function assertVisibleNavLabels(page: Page, labels: string[]): Promise<void> {
+       8 |   const nav = sidebarNav(page);
+    >  9 |   await expect(nav).toBeVisible();
+         |                     ^
+      10 |   for (const label of labels) {
+      11 |     await expect(nav.getByRole('link', { name: label }).first()).toBeVisible();
+      12 |   }
+        at assertVisibleNavLabels (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\navigation-assertions.ts:9:21)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:37:35
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-c89bd-ralized-landing-and-role-IA-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-c89bd-ralized-landing-and-role-IA-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-c89bd-ralized-landing-and-role-IA-chromium\error-context.md
+
+
+[1A[2K[6/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: mobile landing keeps nav and primary action reachable
+[1A[2K  6) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-3eee6-nd-primary-action-reachable-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-3eee6-nd-primary-action-reachable-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-3eee6-nd-primary-action-reachable-chromium\error-context.md
+
+
+[1A[2K[7/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: /dashboard redirects to centralized landing and role IA
+[1A[2K  7) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/intelligence(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/intelligence" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:77
+
+      75 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+      76 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    > 77 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+         |                      ^
+      78 |   return landing;
+      79 | }
+      80 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:77:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-5c0d7-ralized-landing-and-role-IA-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-5c0d7-ralized-landing-and-role-IA-chromium\error-context.md
+
+
+[1A[2K[8/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: mobile landing keeps nav and primary action reachable
+[1A[2K[9/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: /dashboard redirects to centralized landing and role IA
+[1A[2K  8) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+       at e2e\helpers\navigation-assertions.ts:9
+
+       7 | export async function assertVisibleNavLabels(page: Page, labels: string[]): Promise<void> {
+       8 |   const nav = sidebarNav(page);
+    >  9 |   await expect(nav).toBeVisible();
+         |                     ^
+      10 |   for (const label of labels) {
+      11 |     await expect(nav.getByRole('link', { name: label }).first()).toBeVisible();
+      12 |   }
+        at assertVisibleNavLabels (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\navigation-assertions.ts:9:21)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:37:35
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-05e34-ralized-landing-and-role-IA-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-05e34-ralized-landing-and-role-IA-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-05e34-ralized-landing-and-role-IA-chromium\error-context.md
+
+
+[1A[2K[10/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: mobile landing keeps nav and primary action reachable
+[1A[2K  9) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-fbd9d-nd-primary-action-reachable-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-fbd9d-nd-primary-action-reachable-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-fbd9d-nd-primary-action-reachable-chromium\error-context.md
+
+
+[1A[2K[11/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: /dashboard redirects to centralized landing and role IA
+[1A[2K  10) [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/admin\/organizations(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:77
+
+      75 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+      76 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    > 77 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+         |                      ^
+      78 |   return landing;
+      79 | }
+      80 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:77:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-35ad3-ralized-landing-and-role-IA-chromium\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-35ad3-ralized-landing-and-role-IA-chromium\error-context.md
+
+
+[1A[2K[12/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: mobile landing keeps nav and primary action reachable
+[1A[2K[13/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/intelligence is blocked
+[1A[2K[14/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/governance is blocked
+[1A[2K[15/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: cross-role route /dashboard/admin/organizations is blocked
+[1A[2K[16/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: cross-role route /dashboard/admin/organizations is blocked
+[1A[2K[17/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: cross-role route /dashboard/claims/new is blocked
+[1A[2K[18/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/analytics-admin is blocked
+[1A[2K[19/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/billing-admin is blocked
+[1A[2K[20/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/compliance-admin is blocked
+[1A[2K[21/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/debug is blocked
+[1A[2K[22/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cross-union-analytics is blocked
+[1A[2K[23/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/sector-analytics is blocked
+[1A[2K[24/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/executive-operating-intelligence is blocked
+[1A[2K[25/192] [chromium] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/clc is blocked
+
+
+
+=================================================================
+PHASE 0C BASELINE - SAMPLING TERMINATION MARKER
+=================================================================
+Run terminated at test [25/192] under a documented sampling policy
+after all observed failures collapsed to three identical failure
+signatures (see phase-0c-baseline-evidence.md).
+
+Statistics: 25/192 started; Signature A (auth landing at helpers/auth.ts:77): 6; Signature B (aside nav visibility): 6; server boot warnings: 3.
+Continuing the remaining ~167 tests over an estimated ~90 additional minutes was rejected because no new classification would emerge. Full re-run under the deterministic lifecycle is Phase 0D §17.
+=================================================================

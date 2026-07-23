@@ -40,10 +40,10 @@ Notes:
 | Class | Meaning                                              | Spec files |
 | ----- | ---------------------------------------------------- | ---------: |
 | A     | Current baseline — must pass under Phase 0C lifecycle |         27 |
-| A/B (mixed) | Mixed: A for smoke/testid, B for hard-skipped deep-traversal | 1 (OCRA)  |
-| B     | Later-phase, deferred by explicit `test.skip(...)`   |          0 (as whole files) |
-| C     | Blocked by external dependency                       |          0 |
-| D     | Obsolete/duplicate — remove under §14                |          1 (duplicate `tests/e2e/ue-workflow.spec.ts`) |
+| MIXED_CANDIDATE + LATER_PHASE | 4 CURRENT_BASELINE_CANDIDATE + 5 LATER_PHASE (hard-skipped) | 1 (OCRA) |
+| LATER_PHASE               | Later-phase; deferred by explicit test.skip with governed reason                       |      0 (as whole files) |
+| EXTERNAL_DEPENDENCY       | Blocked by an external non-local service                                              |      0 |
+| OBSOLETE_DUPLICATE        | Superseded by another spec; delete under §12                                          |      1 (duplicate tests/e2e/ue-workflow.spec.ts) |
 
 The 5 tests inside `ocra-adaptive-flow.spec.ts` §3 are per-test Class B (hard
 skipped by `test.skip('...')`); the file overall is Class A because §1 (smoke)
@@ -55,43 +55,43 @@ and §2 (telemetry) are green targets.
 
 ### apps/union-eyes/e2e/ (16 files, public + role-authenticated UI)
 
-| File                                              | Tests | Auth mode                | Roles                                 | Prelim class | Skip mechanism                          |
+| File                                              | Tests | Auth mode                | Roles                                 | Preliminary class | Skip mechanism                          |
 | ------------------------------------------------- | ----: | ------------------------ | ------------------------------------- | ------------ | --------------------------------------- |
 | `authenticated-role-navigation.spec.ts`           |     3 | cookie inject             | member/steward/staff/executive/gov/admin (loop) | A | none at describe (assumes `PLAYWRIGHT_TEST_AUTH=true`) |
-| `cape-features.spec.ts`                           |    14 | cookie inject             | member/steward/executive              | A            | `test.skip(!isTestAuth)` × 6 describes  |
-| `cba-intelligence.spec.ts`                        |     2 | cookie inject             | executive                             | A            | `test.skip(!isTestAuth)`                |
-| `dashboard.spec.ts`                               |     3 | cookie inject             | member/steward/admin                  | A            | `test.skip(!isTestAuth)`                |
-| `empty-states.spec.ts`                            |     6 | cookie inject             | member/steward/admin                  | A            | `test.skip(!isTestAuth)` + dynamic 404 self-skip |
-| `governance/deployment-legitimacy-visibility.spec.ts` | 2 | public (no auth)         | —                                     | A            | none                                    |
-| `member-journey.spec.ts`                          |    12 | cookie inject             | member/governance                     | A            | `test.skip(!isTestAuth)` + one dynamic self-skip |
-| `missing-routes.spec.ts`                          |    10 | cookie inject             | admin/steward/member/governance       | A            | `test.skip(!isTestAuth)` + explicit `test.skip()` for pending routes |
+| `cape-features.spec.ts`                           |    14 | cookie inject             | member/steward/executive              | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)` × 6 describes  |
+| `cba-intelligence.spec.ts`                        |     2 | cookie inject             | executive                             | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)`                |
+| `dashboard.spec.ts`                               |     3 | cookie inject             | member/steward/admin                  | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)`                |
+| `empty-states.spec.ts`                            |     6 | cookie inject             | member/steward/admin                  | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)` + dynamic 404 self-skip |
+| `governance/deployment-legitimacy-visibility.spec.ts` | 2 | public (no auth)         | —                                     | CURRENT_BASELINE_CANDIDATE | none                                    |
+| `member-journey.spec.ts`                          |    12 | cookie inject             | member/governance                     | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)` + one dynamic self-skip |
+| `missing-routes.spec.ts`                          |    10 | cookie inject             | admin/steward/member/governance       | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)` + explicit `test.skip()` for pending routes |
 | `no-fsm-overexposure.spec.ts`                     |     1 (× 6 roles) | cookie inject   | member/steward/staff/executive/gov/admin (loop) | A | `test.skip(!isTestAuth)` |
-| `ocra-adaptive-flow.spec.ts`                      |     9 (4 A + 5 B) | public              | —                                     | mixed        | 5 hard `test.skip('...')` deep-traversal |
-| `permission-boundaries.spec.ts`                   |    16 | mix cookie/unauth         | member/steward/governance             | A            | `test.skip(!isTestAuth)` at describe    |
-| `pilot-journey.spec.ts`                           |     2 | cookie inject + API       | member/steward/staff                  | A            | `test.skip(!isTestAuth)`                |
-| `pilot-mode-gating.spec.ts`                       |     1 (× ≥5 roles) | cookie inject   | member/steward/executive/gov/admin    | A            | `test.skip(!isTestAuth)`                |
-| `smoke.spec.ts`                                   |     5 | public (no auth)          | —                                     | A            | none                                    |
+| `ocra-adaptive-flow.spec.ts`                      |     9 (4 A + 5 B) | public              | —                                     | MIXED        | 5 hard `test.skip('...')` deep-traversal |
+| `permission-boundaries.spec.ts`                   |    16 | mix cookie/unauth         | member/steward/governance             | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)` at describe    |
+| `pilot-journey.spec.ts`                           |     2 | cookie inject + API       | member/steward/staff                  | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)`                |
+| `pilot-mode-gating.spec.ts`                       |     1 (× ≥5 roles) | cookie inject   | member/steward/executive/gov/admin    | CURRENT_BASELINE_CANDIDATE | `test.skip(!isTestAuth)`                |
+| `smoke.spec.ts`                                   |     5 | public (no auth)          | —                                     | CURRENT_BASELINE_CANDIDATE | none                                    |
 | `stakeholder-demo-journeys.spec.ts`               |     8 | cookie inject + public    | executive/staff/governance/member/admin | A          | `test.skip(!isTestAuth)` at authenticated describes |
-| `ue-workflow.spec.ts`                             |     6 | real `/api/auth/login`    | steward/member                        | A            | `test.skip(dependabot only)` runtime guard |
+| `ue-workflow.spec.ts`                             |     6 | real `/api/auth/login`    | steward/member                        | CURRENT_BASELINE_CANDIDATE | `test.skip(dependabot only)` runtime guard |
 
 ### apps/union-eyes/tests/e2e/ (14 files, API-negative + workflow)
 
-| File                                     | Tests | Auth mode              | Roles                        | Prelim class | Skip mechanism           |
+| File                                     | Tests | Auth mode              | Roles                        | Preliminary class | Skip mechanism           |
 | ---------------------------------------- | ----: | ---------------------- | ---------------------------- | ------------ | ------------------------ |
-| `admin-assignment.spec.ts`               |     1 | real `/api/auth/login` | admin/member                 | A            | none                     |
-| `auditor-readonly.spec.ts`               |     1 | real `/api/auth/login` | auditor                      | A            | none                     |
-| `auth-failure-handling.spec.ts`          |     7 | mix                    | member/steward/admin/auditor | A            | none                     |
-| `auth-session-switch.spec.ts`            |     1 | real `/api/auth/login` | member/steward               | A            | none                     |
-| `case-escalation.spec.ts`                |     1 | real `/api/auth/login` | steward/member               | A            | none                     |
-| `case-resolution.spec.ts`                |     1 | real `/api/auth/login` | steward/member               | A            | none                     |
+| `admin-assignment.spec.ts`               |     1 | real `/api/auth/login` | admin/member                 | CURRENT_BASELINE_CANDIDATE | none                     |
+| `auditor-readonly.spec.ts`               |     1 | real `/api/auth/login` | auditor                      | CURRENT_BASELINE_CANDIDATE | none                     |
+| `auth-failure-handling.spec.ts`          |     7 | mix                    | member/steward/admin/auditor | CURRENT_BASELINE_CANDIDATE | none                     |
+| `auth-session-switch.spec.ts`            |     1 | real `/api/auth/login` | member/steward               | CURRENT_BASELINE_CANDIDATE | none                     |
+| `case-escalation.spec.ts`                |     1 | real `/api/auth/login` | steward/member               | CURRENT_BASELINE_CANDIDATE | none                     |
+| `case-resolution.spec.ts`                |     1 | real `/api/auth/login` | steward/member               | CURRENT_BASELINE_CANDIDATE | none                     |
 | `cross-org-block.spec.ts`                |     3 | real `/api/auth/login` | member (wrong-org), auditor (wrong-org) | A | none                     |
 | `evidence-misuse.spec.ts`                |     7 | mix                    | member/steward/member-secondary | A         | none                     |
-| `external-ux-tester.spec.ts`             |     2 | real `/api/auth/login` | externalTester               | A            | none                     |
-| `member-intake.spec.ts`                  |     2 | real `/api/auth/login` | member                       | A            | none                     |
-| `negative-workflow-transitions.spec.ts`  |     6 | mix                    | steward/member               | A            | none                     |
-| `org-isolation-negative.spec.ts`         |     8 | real `/api/auth/login` | member (wrong-org)           | A            | none                     |
-| `steward-review.spec.ts`                 |     3 | real `/api/auth/login` | steward                      | A            | none                     |
-| `ue-workflow.spec.ts`                    |     6 | real `/api/auth/login` | steward/member               | **D**        | `testIgnore` in playwright.config.ts — this is a duplicate of `apps/union-eyes/e2e/ue-workflow.spec.ts` |
+| `external-ux-tester.spec.ts`             |     2 | real `/api/auth/login` | externalTester               | CURRENT_BASELINE_CANDIDATE | none                     |
+| `member-intake.spec.ts`                  |     2 | real `/api/auth/login` | member                       | CURRENT_BASELINE_CANDIDATE | none                     |
+| `negative-workflow-transitions.spec.ts`  |     6 | mix                    | steward/member               | CURRENT_BASELINE_CANDIDATE | none                     |
+| `org-isolation-negative.spec.ts`         |     8 | real `/api/auth/login` | member (wrong-org)           | CURRENT_BASELINE_CANDIDATE | none                     |
+| `steward-review.spec.ts`                 |     3 | real `/api/auth/login` | steward                      | CURRENT_BASELINE_CANDIDATE | none                     |
+| `ue-workflow.spec.ts`                    |     6 | real `/api/auth/login` | steward/member               | **OBSOLETE_DUPLICATE** | `testIgnore` in playwright.config.ts — this is a duplicate of `apps/union-eyes/e2e/ue-workflow.spec.ts` |
 
 ---
 

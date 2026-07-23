@@ -23,10 +23,14 @@
     "The role_loop_expansion column is important: files iterating over multiple roles produce N × M tests at runtime; total_test_cases counts distinct test() invocations at the source level, not runtime expansions."
   ],
   "class_definitions": {
-    "A": "Current baseline — must pass under Phase 0C deterministic lifecycle.",
-    "B": "Later-phase — capability not yet built or graduated; must be skipped by mechanism, not by silent pass.",
-    "C": "Blocked by external dependency (network, third-party API, non-local service); must be marked clearly.",
-    "D": "Obsolete/duplicate — remove during §14 with rationale in phase-0c-failure-resolution-register.md."
+    "CURRENT_BASELINE_CANDIDATE": "Pre-execution: this test is expected to pass under the Phase 0C deterministic lifecycle. Not proven until executed.",
+    "CURRENT_BASELINE_PROVEN": "Post-execution: this test executed, passed without retry, under the deterministic fixture, and survived the 3-run flake analysis.",
+    "LATER_PHASE": "Capability not yet built or graduated; MUST be skipped by an explicit mechanism (test.skip with a governed reason), not by silent pass.",
+    "EXTERNAL_DEPENDENCY": "Blocked by an external dependency (network, third-party API, non-local service); MUST be marked clearly and cannot be part of the deterministic baseline.",
+    "OBSOLETE_DUPLICATE": "Superseded by another spec; will be deleted under §12 with rationale in phase-0c-failure-resolution-register.md.",
+    "INFRASTRUCTURE_BLOCKED": "Post-execution: failed for lifecycle/database/seed/auth reasons rather than product or test defect; blocked on §5-§9 completion.",
+    "PRODUCT_DEFECT": "Post-execution: failed because the product does not implement the asserted behavior correctly.",
+    "TEST_DEFECT": "Post-execution: failed because the test asserts on behavior the product never claimed, or contains a bug in the assertion itself."
   },
   "specs": [
     {
@@ -41,7 +45,7 @@
       "roles_covered": ["member", "steward", "staff", "executive", "governance", "admin"],
       "expected_runtime_seconds": 25,
       "ownership": "Union Eyes / role IA",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none at describe (relies on PLAYWRIGHT_TEST_AUTH cookie mode)",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -62,7 +66,7 @@
       "roles_covered": ["member", "steward", "executive"],
       "expected_runtime_seconds": 60,
       "ownership": "Union Eyes / CAPE features",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at every describe (6 describes)",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -94,7 +98,7 @@
       "roles_covered": ["executive"],
       "expected_runtime_seconds": 12,
       "ownership": "Union Eyes / continuity intelligence",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -114,7 +118,7 @@
       "roles_covered": ["member", "steward", "admin"],
       "expected_runtime_seconds": 12,
       "ownership": "Union Eyes / dashboard shell",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -135,7 +139,7 @@
       "roles_covered": ["member", "steward", "admin"],
       "expected_runtime_seconds": 25,
       "ownership": "Union Eyes / UX polish",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe + inline route-existence probing (dynamic test.skip when route 404s)",
       "closure_expectation": "green — some tests may self-skip when routes are unbuilt (route-existence probes remain valid)",
       "notes": ["Empty-states tests use test.skip() dynamically when routes return 404. Under §14 baseline repair, either remove the dynamic skip (route must exist) or reclassify to B."],
@@ -160,7 +164,7 @@
       "roles_covered": [],
       "expected_runtime_seconds": 6,
       "ownership": "Governance / deployment attestation",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — probes /api/health (or equivalent) for release-identity governance headers when bound",
       "tests": [
@@ -180,7 +184,7 @@
       "roles_covered": ["member", "governance"],
       "expected_runtime_seconds": 25,
       "ownership": "Union Eyes / member IA and role gate",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe; nested test.skip() when governance case detail route unreachable",
       "closure_expectation": "green — GAP-03 cross-member API scoping is Phase 0B regression territory",
       "tests": [
@@ -210,7 +214,7 @@
       "roles_covered": ["admin", "steward", "member", "governance"],
       "expected_runtime_seconds": 20,
       "ownership": "Union Eyes / route coverage & smoke",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) + explicit test.skip('until built') for known missing routes",
       "closure_expectation": "green for existing routes; missing routes remain deferred with test.skip() and are visible as pending",
       "notes": ["The 'Missing routes' describe intentionally skips at line 30 to keep pending routes visible. Do not reclassify those to B unless the skip is removed."],
@@ -239,7 +243,7 @@
       "roles_covered": ["member", "steward", "staff", "executive", "governance", "admin"],
       "expected_runtime_seconds": 20,
       "ownership": "Union Eyes / language hygiene",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe",
       "closure_expectation": "green — probes UI for raw FSM terms per role",
       "tests": [
@@ -258,19 +262,19 @@
       "roles_covered": [],
       "expected_runtime_seconds": 20,
       "ownership": "OCRA / assessment",
-      "current_classification_preliminary": "mixed (A for smoke/telemetry/testid; B for the 5 hard-skipped deep-traversal tests)",
+      "current_classification_preliminary": "MIXED_CANDIDATE_AND_LATER_PHASE",
       "skip_mechanism": "test.skip('...') hard skip for 5 deep-traversal placeholders in §3",
       "closure_expectation": "green for §1/§2 (smoke, fr-CA parity, telemetry privacy, testid coverage); the 5 §3 tests remain B until stable selectors land",
       "tests": [
-        { "title": "renders the consent step and exposes the assessment flow root", "line": 35, "class": "A" },
-        { "title": "fr-CA route renders the assessment flow", "line": 47, "class": "A" },
-        { "title": "telemetry POSTs never carry org names or free text", "line": 56, "class": "A" },
-        { "title": "per-question testid attributes are wired in the assessment flow source", "line": 87, "class": "A" },
-        { "title": "small local union: consent → org context → adaptive card → submit", "line": 105, "class": "B", "hard_skip": true },
-        { "title": "federated national union: distinct band assignment + distinct routed count", "line": 109, "class": "B", "hard_skip": true },
-        { "title": "healthcare authority — adaptive card reflects healthcare exposure band", "line": 113, "class": "B", "hard_skip": true },
-        { "title": "resume mid-flow restores adaptive context", "line": 117, "class": "B", "hard_skip": true },
-        { "title": "corrupted persisted state falls back to consent step gracefully", "line": 121, "class": "B", "hard_skip": true }
+        { "title": "renders the consent step and exposes the assessment flow root", "line": 35, "class": "CURRENT_BASELINE_CANDIDATE" },
+        { "title": "fr-CA route renders the assessment flow", "line": 47, "class": "CURRENT_BASELINE_CANDIDATE" },
+        { "title": "telemetry POSTs never carry org names or free text", "line": 56, "class": "CURRENT_BASELINE_CANDIDATE" },
+        { "title": "per-question testid attributes are wired in the assessment flow source", "line": 87, "class": "CURRENT_BASELINE_CANDIDATE" },
+        { "title": "small local union: consent → org context → adaptive card → submit", "line": 105, "class": "LATER_PHASE", "hard_skip": true },
+        { "title": "federated national union: distinct band assignment + distinct routed count", "line": 109, "class": "LATER_PHASE", "hard_skip": true },
+        { "title": "healthcare authority — adaptive card reflects healthcare exposure band", "line": 113, "class": "LATER_PHASE", "hard_skip": true },
+        { "title": "resume mid-flow restores adaptive context", "line": 117, "class": "LATER_PHASE", "hard_skip": true },
+        { "title": "corrupted persisted state falls back to consent step gracefully", "line": 121, "class": "LATER_PHASE", "hard_skip": true }
       ]
     },
     {
@@ -285,7 +289,7 @@
       "roles_covered": ["member", "steward", "governance"],
       "expected_runtime_seconds": 40,
       "ownership": "Union Eyes / role gate enforcement",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe",
       "closure_expectation": "green — this is the central role-boundary contract",
       "tests": [
@@ -319,7 +323,7 @@
       "roles_covered": ["member", "steward", "staff"],
       "expected_runtime_seconds": 15,
       "ownership": "Union Eyes / pilot journey",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -339,7 +343,7 @@
       "roles_covered": ["member", "steward", "executive", "governance", "admin"],
       "expected_runtime_seconds": 15,
       "ownership": "Union Eyes / pilot gating",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe (implicit via helper — verify in §5 review)",
       "closure_expectation": "green — this locks in the pilot-mode hard-gate contract",
       "tests": [
@@ -358,7 +362,7 @@
       "roles_covered": [],
       "expected_runtime_seconds": 15,
       "ownership": "Union Eyes / public smoke and a11y",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — public marketing/sign-in reachability + baseline a11y",
       "tests": [
@@ -381,7 +385,7 @@
       "roles_covered": ["executive", "staff", "governance", "member", "admin"],
       "expected_runtime_seconds": 35,
       "ownership": "Union Eyes / stakeholder demo IA + marketing continuity",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "test.skip(!isTestAuth) at describe (auth-required describes only)",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -407,7 +411,7 @@
       "roles_covered": ["steward", "member"],
       "expected_runtime_seconds": 20,
       "ownership": "Union Eyes / backend workflow API",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "runtime: test.skip(process.env.GITHUB_ACTOR === 'dependabot[bot]', ...) — 6 tests conditionally skipped only on dependabot runs",
       "closure_expectation": "green under deterministic lifecycle (dependabot condition is CI-only guard)",
       "notes": ["This file lives at apps/union-eyes/e2e/ue-workflow.spec.ts and DOES run. It imports helpers from ../tests/e2e/_helpers. The identically-named file at apps/union-eyes/tests/e2e/ue-workflow.spec.ts is testIgnore'd."],
@@ -432,7 +436,7 @@
       "roles_covered": ["admin", "member"],
       "expected_runtime_seconds": 8,
       "ownership": "Union Eyes / assignment authz",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -451,7 +455,7 @@
       "roles_covered": ["auditor (compliance_manager)"],
       "expected_runtime_seconds": 8,
       "ownership": "Union Eyes / read-only role authz",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -470,7 +474,7 @@
       "roles_covered": ["member", "steward", "admin", "auditor"],
       "expected_runtime_seconds": 25,
       "ownership": "Union Eyes / auth-and-session negative",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — dedicated negative-security coverage",
       "tests": [
@@ -495,7 +499,7 @@
       "roles_covered": ["member", "steward"],
       "expected_runtime_seconds": 6,
       "ownership": "Union Eyes / session integrity",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -514,7 +518,7 @@
       "roles_covered": ["steward", "member"],
       "expected_runtime_seconds": 6,
       "ownership": "Union Eyes / case workflow",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -533,7 +537,7 @@
       "roles_covered": ["steward", "member"],
       "expected_runtime_seconds": 6,
       "ownership": "Union Eyes / case workflow",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -552,7 +556,7 @@
       "roles_covered": ["member (wrong-org)", "auditor (wrong-org)"],
       "expected_runtime_seconds": 10,
       "ownership": "Union Eyes / cross-org containment",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — this is core Phase 0B regression coverage under §17",
       "tests": [
@@ -573,7 +577,7 @@
       "roles_covered": ["member", "steward", "member-secondary"],
       "expected_runtime_seconds": 25,
       "ownership": "Union Eyes / evidence containment",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — dedicated evidence-misuse negative-security coverage",
       "tests": [
@@ -598,7 +602,7 @@
       "roles_covered": ["externalTester"],
       "expected_runtime_seconds": 10,
       "ownership": "Union Eyes / sandbox containment",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -618,7 +622,7 @@
       "roles_covered": ["member"],
       "expected_runtime_seconds": 10,
       "ownership": "Union Eyes / intake flow",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -638,7 +642,7 @@
       "roles_covered": ["steward", "member"],
       "expected_runtime_seconds": 25,
       "ownership": "Union Eyes / FSM invariants",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — FSM-invariant negative coverage is core Phase 0B regression territory",
       "tests": [
@@ -662,7 +666,7 @@
       "roles_covered": ["member (wrong-org)"],
       "expected_runtime_seconds": 30,
       "ownership": "Union Eyes / cross-org containment",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green — core Phase 0B regression coverage; drives Phase 0C §16 cross-org security proof",
       "tests": [
@@ -688,7 +692,7 @@
       "roles_covered": ["steward"],
       "expected_runtime_seconds": 10,
       "ownership": "Union Eyes / steward review flow",
-      "current_classification_preliminary": "A",
+      "current_classification_preliminary": "CURRENT_BASELINE_CANDIDATE",
       "skip_mechanism": "none",
       "closure_expectation": "green under deterministic lifecycle",
       "tests": [
@@ -709,7 +713,7 @@
       "roles_covered": ["steward", "member"],
       "expected_runtime_seconds": 0,
       "ownership": "Union Eyes / workflow (duplicate)",
-      "current_classification_preliminary": "D",
+      "current_classification_preliminary": "OBSOLETE_DUPLICATE",
       "skip_mechanism": "testIgnore in playwright.config.ts",
       "closure_expectation": "REMOVE — this file is fully shadowed by apps/union-eyes/e2e/ue-workflow.spec.ts, which is nearly identical (differs only in a dependabot skip + assertRoleGatedReadStatus vs literal set on test 5). Deletion rationale to be recorded under phase-0c-failure-resolution-register.md.",
       "tests": [
