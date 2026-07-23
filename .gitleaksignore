@@ -50,3 +50,18 @@ apps/union-eyes/scripts/lifecycle/prove-db-allocator.ts:nzila-database-url-with-
 reports/audits/cupe-national-phase-0/phase-0c/phase-0c-database-fixture-proof.md:nzila-database-url-with-password:20
 apps/union-eyes/scripts/lifecycle/env.ts:nzila-database-url-with-password:75
 apps/union-eyes/scripts/lifecycle/env.ts:nzila-database-url-with-password:203
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 0C.2 §3 — one historical commit-scoped fingerprint.
+# Rule: nzila-database-url-with-password
+# Introduced by: commit edfdd1f02 (Phase 0C.2 §8 clean-DB proof harness) at
+#   apps/union-eyes/scripts/lifecycle/prove-phase-0c2-clean-migration.ts:195.
+# The literal was the standard local-dev fallback (nzila:nzila_dev on
+# localhost:5433) used prior to Phase 0C.2 §3 hardening. The current
+# lifecycle source no longer contains this fallback — see the resolveAdminUrl()
+# helper in allocate-db.ts and the loadGovernedE2EEnv() call at the top of
+# prove-phase-0c2-clean-migration.ts (both introduced in the §3 hardening
+# commit). This fingerprint is scoped to the introducing commit + exact line
+# so it will NOT silently allowlist any future occurrence.
+# Reviewed: Phase 0C.2 §3 gate (2026-07-23).
+edfdd1f02c178ed83dbeb70efe8b15813d73bf9e:apps/union-eyes/scripts/lifecycle/prove-phase-0c2-clean-migration.ts:nzila-database-url-with-password:195

@@ -69,6 +69,32 @@ function toAdminUrl(input: string): URL {
   return u
 }
 
+/**
+ * Resolve the admin URL, preferring the explicit option, then the
+ * `E2E_DB_ADMIN_URL` environment variable. Never falls back to a hardcoded
+ * literal — the deterministic test default lives ONLY in the governed env
+ * loader (`env.ts::DETERMINISTIC_TEST_DEFAULTS`) and callers of allocate-db
+ * are expected to route through `loadGovernedE2EEnv()` (see `run.ts`) or set
+ * `E2E_DB_ADMIN_URL` explicitly (see `.env.test` or CI). Throws with a
+ * diagnostic when neither is present.
+ *
+ * Phase 0C.2 §3 — removes the hardcoded fallback that was flagged by
+ * Gitleaks and would have required an ever-widening `.gitleaksignore`.
+ */
+function resolveAdminUrl(explicit: string | undefined, callerLabel: string): string {
+  const explicitTrim = explicit?.trim()
+  if (explicitTrim && explicitTrim.length > 0) return explicitTrim
+  const envTrim = process.env.E2E_DB_ADMIN_URL?.trim()
+  if (envTrim && envTrim.length > 0) return envTrim
+  throw new Error(
+    `[ue:e2e:allocate-db] ${callerLabel}: E2E_DB_ADMIN_URL is required. ` +
+      `Either export it in the environment (see apps/union-eyes/tests/e2e/.env.test), ` +
+      `call the governed env loader (loadGovernedE2EEnv from ./env), or pass ` +
+      `options.adminUrl explicitly. The hardcoded local-dev fallback was removed ` +
+      `in Phase 0C.2 §3 for supply-chain hygiene.`,
+  )
+}
+
 function buildDbUrl(adminUrl: string, dbName: string): string {
   const u = new URL(adminUrl)
   u.pathname = `/${dbName}`
@@ -100,10 +126,7 @@ function appendHistory(repoRoot: string, entry: Record<string, unknown>): void {
 export async function allocateDatabase(options: AllocateOptions = {}): Promise<AllocateResult> {
   const allowProdUrl =
     options.allowProdUrl ?? (process.env.QA_TEST_ENV_ALLOW_PROD_URL ?? '').toLowerCase() === 'true'
-  const adminUrlRaw =
-    options.adminUrl ??
-    process.env.E2E_DB_ADMIN_URL ??
-    'postgresql://nzila:nzila_dev@localhost:5433/postgres'
+  const adminUrlRaw = resolveAdminUrl(options.adminUrl, 'allocateDatabase')
   assertNotProductionUrl(adminUrlRaw, allowProdUrl)
 
   const nodeEnv = (process.env.NODE_ENV ?? '').toLowerCase()
@@ -279,10 +302,7 @@ export async function dropDatabase(
   allocation: AllocateResult,
   options: { adminUrl?: string; repoRoot?: string } = {},
 ): Promise<{ dropped: boolean; reason?: string }> {
-  const adminUrlRaw =
-    options.adminUrl ??
-    process.env.E2E_DB_ADMIN_URL ??
-    'postgresql://nzila:nzila_dev@localhost:5433/postgres'
+  const adminUrlRaw = resolveAdminUrl(options.adminUrl, 'dropDatabase')
   const adminUrl = toAdminUrl(adminUrlRaw).toString()
   const repoRoot = resolveRepoRoot(options.repoRoot)
 

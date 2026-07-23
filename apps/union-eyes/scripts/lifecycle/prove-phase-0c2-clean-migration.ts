@@ -17,6 +17,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { Client } from 'pg'
 import { allocateDatabase, dropDatabase } from './allocate-db'
+import { loadGovernedE2EEnv } from './env'
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..', '..')
 const OUT = path.join(
@@ -191,8 +192,11 @@ async function main() {
   log('')
   log('## Legacy-lineage untouched assertion')
   log('')
+  // Route through the governed env loader so this harness never re-embeds
+  // the local-dev admin URL literal — Phase 0C.2 §3.
+  const governedEnv = loadGovernedE2EEnv()
   const admin = new Client({
-    connectionString: process.env.E2E_DB_ADMIN_URL ?? 'postgresql://nzila:nzila_dev@localhost:5433/postgres',
+    connectionString: governedEnv.E2E_DB_ADMIN_URL,
   })
   await admin.connect()
   try {

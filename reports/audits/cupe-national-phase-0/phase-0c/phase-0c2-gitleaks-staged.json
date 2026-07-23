@@ -1,0 +1,90 @@
+[
+ {
+  "RuleID": "nzila-database-url-with-password",
+  "Description": "Database connection string with embedded password (not localhost)",
+  "StartLine": 40,
+  "EndLine": 40,
+  "StartColumn": 140,
+  "EndColumn": 183,
+  "Match": "postgresREDACTED://nzila:nzila_dev@localhost:5433/",
+  "Secret": "REDACTED",
+  "File": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 1,
+  "Author": "",
+  "Email": "",
+  "Date": "0001-01-01T00:00:00Z",
+  "Message": "",
+  "Tags": [
+   "database"
+  ],
+  "Fingerprint": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md:nzila-database-url-with-password:40"
+ },
+ {
+  "RuleID": "nzila-database-url-with-password",
+  "Description": "Database connection string with embedded password (not localhost)",
+  "StartLine": 41,
+  "EndLine": 41,
+  "StartColumn": 99,
+  "EndColumn": 142,
+  "Match": "postgresREDACTED://nzila:nzila_dev@localhost:5433/",
+  "Secret": "REDACTED",
+  "File": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 1,
+  "Author": "",
+  "Email": "",
+  "Date": "0001-01-01T00:00:00Z",
+  "Message": "",
+  "Tags": [
+   "database"
+  ],
+  "Fingerprint": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md:nzila-database-url-with-password:41"
+ },
+ {
+  "RuleID": "nzila-database-url-with-password",
+  "Description": "Database connection string with embedded password (not localhost)",
+  "StartLine": 42,
+  "EndLine": 42,
+  "StartColumn": 142,
+  "EndColumn": 185,
+  "Match": "postgresREDACTED://nzila:nzila_dev@localhost:5433/",
+  "Secret": "REDACTED",
+  "File": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 1,
+  "Author": "",
+  "Email": "",
+  "Date": "0001-01-01T00:00:00Z",
+  "Message": "",
+  "Tags": [
+   "database"
+  ],
+  "Fingerprint": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md:nzila-database-url-with-password:42"
+ },
+ {
+  "RuleID": "nzila-database-url-with-password",
+  "Description": "Database connection string with embedded password (not localhost)",
+  "StartLine": 219,
+  "EndLine": 219,
+  "StartColumn": 169,
+  "EndColumn": 212,
+  "Match": "postgresREDACTED://nzila:nzila_dev@localhost:5433/",
+  "Secret": "REDACTED",
+  "File": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md",
+  "SymlinkFile": "",
+  "Commit": "",
+  "Entropy": 1,
+  "Author": "",
+  "Email": "",
+  "Date": "0001-01-01T00:00:00Z",
+  "Message": "",
+  "Tags": [
+   "database"
+  ],
+  "Fingerprint": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-gitleaks-exception-review.md:nzila-database-url-with-password:219"
+ }
+]

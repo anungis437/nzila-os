@@ -1,0 +1,25 @@
+[
+ {
+  "RuleID": "nzila-database-url-with-password",
+  "Description": "Database connection string with embedded password (not localhost)",
+  "StartLine": 195,
+  "EndLine": 195,
+  "StartColumn": 57,
+  "EndColumn": 100,
+  "Match": "postgresREDACTED://nzila:nzila_dev@localhost:5433/",
+  "Secret": "REDACTED",
+  "File": "apps/union-eyes/scripts/lifecycle/prove-phase-0c2-clean-migration.ts",
+  "SymlinkFile": "",
+  "Commit": "edfdd1f02c178ed83dbeb70efe8b15813d73bf9e",
+  "Link": "https://github.com/anungis437/nzila-os/blob/edfdd1f02c178ed83dbeb70efe8b15813d73bf9e/apps/union-eyes/scripts/lifecycle/prove-phase-0c2-clean-migration.ts#L195",
+  "Entropy": 1,
+  "Author": "GitHub Copilot",
+  "Email": "copilot@github.com",
+  "Date": "2026-07-23T22:13:09Z",
+  "Message": "refactor(union-eyes/phase-0c2): allocator uses only compliant bootstrap; defensive guard on legacy replay; §8 clean-DB proof\n\nPhase 0C.2 §6+§7+§8:\n\n- allocate-db.ts: runMigrations() now invokes ONLY tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs (the compliant runner that enforces the freeze-contract). The legacy two-stage pipeline (bootstrap + ue-app-migrations) that replayed the frozen apps/union-eyes/db/migrations/ lineage is removed.\n\n- run-union-eyes-drizzle-migrate.mjs: added defensive replay-refusal guard requiring both UE_LINEAGE_REPLAY_OVERRIDE=1 and UE_LINEAGE_REPLAY_REASON (\u003e=16 chars). All three refusal paths verified (no env, override only, short reason).\n\n- §7 healer: NOT NEEDED — see phase-0c2-migration-0008-forensic-analysis.md §9. Migration 0008 remains bit-for-bit unchanged.\n\n- §8 clean-DB proof: prove-phase-0c2-clean-migration.ts allocates a fresh disposable DB via the compliant path, verifies contract completeness (4 schemas, 47 tables, 6 enums, all required core objects present), runs a second time to prove independence, and drops both. Result: PASS in 2.07s + 1.39s. Zero orphan ue_e2e_* DBs remain. Evidence: reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-clean-migration-proof.md\n\nValidation: 28/28 lifecycle vitest pass, pnpm --filter @nzila/union-eyes typecheck exit 0.\n\nGovernance: docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md §4 (replay prohibited) and §6 (replay-refusal contract).",
+  "Tags": [
+   "database"
+  ],
+  "Fingerprint": "edfdd1f02c178ed83dbeb70efe8b15813d73bf9e:apps/union-eyes/scripts/lifecycle/prove-phase-0c2-clean-migration.ts:nzila-database-url-with-password:195"
+ }
+]

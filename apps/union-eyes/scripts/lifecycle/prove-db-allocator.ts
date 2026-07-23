@@ -18,12 +18,20 @@ import {
   dropDatabase,
   type AllocateResult,
 } from './allocate-db'
+import { loadGovernedE2EEnv } from './env'
 
 const repoRoot = path.resolve(__dirname, '..', '..', '..', '..')
 
 ;(process.env as Record<string, string | undefined>).NODE_ENV = 'test'
-process.env.E2E_DB_ADMIN_URL =
-  process.env.E2E_DB_ADMIN_URL ?? 'postgresql://nzila:nzila_dev@localhost:5433/postgres'
+;(process.env as Record<string, string | undefined>).QA_TEST_ENV = 'true'
+// Route through the governed env loader — it applies the deterministic
+// test-only default for E2E_DB_ADMIN_URL from ONE authorized location
+// (env.ts::DETERMINISTIC_TEST_DEFAULTS) and enforces production-URL guards.
+// Then propagate the resolved URL to process.env so downstream lifecycle
+// functions (allocateDatabase, dropDatabase) can read it without re-embedding
+// any literal — Phase 0C.2 §3.
+const governedEnv = loadGovernedE2EEnv()
+process.env.E2E_DB_ADMIN_URL = governedEnv.E2E_DB_ADMIN_URL
 
 const startedAt = new Date().toISOString()
 const log: string[] = []
