@@ -1,0 +1,1512 @@
+{
+  "version": 1,
+  "generated_by": "scripts/audit/build-phase0b2-ownership-manifest.py",
+  "phase": "0B.2",
+  "architecture_decision": "Option D \u2014 Governed hybrid (see reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-architecture-approval.md)",
+  "allowed_ownership_values": [
+    "PLATFORM_OWNED_SHARED",
+    "PLATFORM_OWNED_EXCLUSIVE",
+    "UNION_EYES_OWNED_SHARED",
+    "UNION_EYES_OWNED_EXCLUSIVE",
+    "DJANGO_INTERNAL",
+    "LEGACY_DEPRECATE",
+    "SAME_NAME_DIFFERENT_MEANING",
+    "OWNERSHIP_UNRESOLVED"
+  ],
+  "allowed_ddl_owners": [
+    "platform",
+    "union_eyes",
+    "django_framework",
+    "shared_by_name_only",
+    "unresolved"
+  ],
+  "allowed_target_schemas": [
+    "public",
+    "union_eyes",
+    "both",
+    "unresolved"
+  ],
+  "closure_rules": {
+    "OWNERSHIP_UNRESOLVED_max": 0,
+    "no_duplicate_qualified_table": true,
+    "django_internal_must_not_target_public": true,
+    "shared_must_declare_ddl_owner": true
+  },
+  "counts": {
+    "total_tables_declared": 125,
+    "ownership": {
+      "UNION_EYES_OWNED_EXCLUSIVE": 96,
+      "PLATFORM_OWNED_SHARED": 4,
+      "DJANGO_INTERNAL": 9,
+      "PLATFORM_OWNED_EXCLUSIVE": 13,
+      "SAME_NAME_DIFFERENT_MEANING": 2,
+      "UNION_EYES_OWNED_SHARED": 1
+    },
+    "foundational_slice_size": 13
+  },
+  "foundational_slice": [
+    "audit_events",
+    "organization_members",
+    "organizations",
+    "orgs",
+    "pilot_definitions",
+    "pilot_metric_events",
+    "pilot_metric_rollups",
+    "ue_case_risk_snapshots",
+    "ue_cognition_audits",
+    "ue_engagement_snapshots",
+    "ue_kpi_snapshots",
+    "ue_precedent_matches",
+    "ue_workload_snapshots"
+  ],
+  "tables": [
+    {
+      "table": "ab_test_assignments",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ab_test_events",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ab_test_variants",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ab_tests",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "accessibility_audits",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "accessibility_issues",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "accessibility_test_suites",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "accessibility_user_testing",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "address_change_history",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "address_validation_cache",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ai_budgets",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ai_rate_limits",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ai_safety_filters",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+    },
+    {
+      "table": "ai_usage_metrics",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "analytics_metrics",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "analytics_scheduled_reports",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "arbitration_decisions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "arbitration_precedents",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "arbitrator_profiles",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "audit_events",
+      "ownership": "PLATFORM_OWNED_SHARED",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform-owned audit surface. Union Eyes writes through governed resolver; DDL owner = platform. Foundational rows only in Phase 0B.2."
+    },
+    {
+      "table": "auth_group",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "auth_group_permissions",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "auth_permission",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "auth_user",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "auth_user_groups",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "auth_user_user_permissions",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "bargaining_notes",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "bargaining_proposals",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "bargaining_team_members",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "benchmark_categories",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "benchmark_data",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "benefit_comparisons",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "cba_clauses",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "cba_contacts",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "cba_footnotes",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "cba_version_history",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "chat_messages",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "chat_sessions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "chatbot_analytics",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "chatbot_suggestions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "clause_comparisons",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "clause_comparisons_history",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "clause_library_tags",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "collective_agreements",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "commerce_customers",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+    },
+    {
+      "table": "commerce_orders",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+    },
+    {
+      "table": "commerce_products",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+    },
+    {
+      "table": "commerce_purchase_orders",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+    },
+    {
+      "table": "commerce_suppliers",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+    },
+    {
+      "table": "communication_analytics",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "comparative_analyses",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "contribution_rates",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "cost_of_living_data",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "country_address_formats",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+    },
+    {
+      "table": "cross_org_access_log",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "django_admin_log",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "django_content_type",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "django_migrations",
+      "ownership": "DJANGO_INTERNAL",
+      "ddl_owner": "django_framework",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+    },
+    {
+      "table": "documents",
+      "ownership": "SAME_NAME_DIFFERENT_MEANING",
+      "ddl_owner": "shared_by_name_only",
+      "target_schema": "both",
+      "foundational": false,
+      "platform_sources": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/operations.ts"
+      ],
+      "django_sources": [
+        "content/0001_initial.py"
+      ],
+      "rationale": "Same identifier, different domain object. public.documents = evidence/operations documents (packages/db/src/schema/operations.ts). union_eyes app-side content table (apps/union-eyes/backend/content/migrations/0001_initial.py). Resolution: Rename Django table to union_eyes.content_documents in a future wave; do not merge."
+    },
+    {
+      "table": "evidence_packs",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/operations.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+    },
+    {
+      "table": "external_data_sync_log",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "feature_flags",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "insight_recommendations",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "international_addresses",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "knowledge_base",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "kpi_configurations",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "member_consents",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "member_contact_preferences",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+    },
+    {
+      "table": "member_employment_details",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+    },
+    {
+      "table": "member_history_events",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "mfa_configurations",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ml_predictions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "model_metadata",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "negotiation_sessions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "negotiations",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "oauth_providers",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "organization_benchmark_snapshots",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "organization_members",
+      "ownership": "PLATFORM_OWNED_SHARED",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Essential org membership is a platform identity surface. Foundational rows materialised on platform side in Phase 0B.2. Django adopts via managed = False; full DDL migration deferred to a later wave (out of Phase 0B.2 scope)."
+    },
+    {
+      "table": "organization_relationships",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+    },
+    {
+      "table": "organization_sharing_grants",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "organization_sharing_settings",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "organization_users",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "organizations",
+      "ownership": "UNION_EYES_OWNED_SHARED",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Union Eyes owns the tenant organization row (union_eyes.organizations). Platform reads via cross-schema FK: union_eyes.organizations.platform_tenant_id \u2192 public.orgs(id) with CHECK (platform_tenant_id = id) enforcing 1:1 identity."
+    },
+    {
+      "table": "orgs",
+      "ownership": "PLATFORM_OWNED_SHARED",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": true,
+      "platform_sources": [
+        "packages/db/src/schema/orgs.ts"
+      ],
+      "django_sources": [],
+      "rationale": "Platform owns the canonical org identity (public.orgs). Union Eyes references it via cross-schema FK from union_eyes.organizations.platform_tenant_id."
+    },
+    {
+      "table": "page_analytics",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "pending_profiles",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "pilot_alert_escalations",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform pilot alert escalations; non-foundational in Phase 0B.2."
+    },
+    {
+      "table": "pilot_alert_rules",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform pilot alerting configuration; non-foundational in Phase 0B.2."
+    },
+    {
+      "table": "pilot_alerts",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform pilot alerting; non-foundational in Phase 0B.2 (no schema change required)."
+    },
+    {
+      "table": "pilot_definitions",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform Drizzle owns pilot definitions (packages/db/drizzle/*.sql, pilot_* series)."
+    },
+    {
+      "table": "pilot_health_scores",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform pilot health scoring; non-foundational in Phase 0B.2."
+    },
+    {
+      "table": "pilot_metric_events",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform-side pilot metric telemetry stream; Union Eyes does not define this table."
+    },
+    {
+      "table": "pilot_metric_rollups",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "Platform-side aggregated pilot metrics; Union Eyes reads via governed resolver only."
+    },
+    {
+      "table": "precedent_citations",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "precedent_tags",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "profiles",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+    },
+    {
+      "table": "report_delivery_history",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "report_executions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "report_shares",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "report_templates",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "reports",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "scheduled_reports",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "scim_configurations",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "scim_events_log",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "shared_clause_library",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "sso_providers",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "sso_sessions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "stripe_webhook_events",
+      "ownership": "PLATFORM_OWNED_SHARED",
+      "ddl_owner": "platform",
+      "target_schema": "public",
+      "foundational": false,
+      "platform_sources": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/payments.ts"
+      ],
+      "django_sources": [
+        "billing/0001_initial.py"
+      ],
+      "rationale": "Stripe billing events are a platform commerce surface. Platform (Drizzle) owns DDL; Django billing app adopts via `managed = False` and reads through the shared table."
+    },
+    {
+      "table": "tentative_agreements",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "trend_analyses",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "ue_case_risk_snapshots",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "UE Cognition telemetry table; text prefixed IDs promoted from uuid in Phase 0B.2 \u00a712."
+    },
+    {
+      "table": "ue_cognition_audits",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "UE Cognition audit telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+    },
+    {
+      "table": "ue_engagement_snapshots",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "UE Cognition engagement telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+    },
+    {
+      "table": "ue_kpi_snapshots",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "UE Cognition KPI snapshot telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+    },
+    {
+      "table": "ue_precedent_matches",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "UE Cognition precedent-matching telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+    },
+    {
+      "table": "ue_workload_snapshots",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": true,
+      "platform_sources": [],
+      "django_sources": [],
+      "rationale": "UE Cognition workload telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+    },
+    {
+      "table": "union_density",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "user_engagement_scores",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "user_sessions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "user_uuid_mapping",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "users",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "votes",
+      "ownership": "SAME_NAME_DIFFERENT_MEANING",
+      "ddl_owner": "shared_by_name_only",
+      "target_schema": "both",
+      "foundational": false,
+      "platform_sources": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/governance.ts"
+      ],
+      "django_sources": [
+        "unions/0001_initial.py"
+      ],
+      "rationale": "Same identifier, different domain object. public.votes = platform governance votes (packages/db/src/schema/governance.ts). Django union-membership votes (apps/union-eyes/backend/unions/migrations/0001_initial.py). Resolution: Rename Django table to union_eyes.union_votes in a future wave; do not merge."
+    },
+    {
+      "table": "wage_benchmarks",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "wage_progressions",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    },
+    {
+      "table": "wcag_success_criteria",
+      "ownership": "UNION_EYES_OWNED_EXCLUSIVE",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
+      "foundational": false,
+      "platform_sources": [],
+      "django_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+    }
+  ]
+}
