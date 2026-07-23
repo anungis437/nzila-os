@@ -1,0 +1,84 @@
+{
+  "phase": "0B.1",
+  "generated_from": [
+    "reports/audits/cupe-national-phase-0/phase-0b1/commit-1e5a6bd94-files.txt",
+    "reports/audits/cupe-national-phase-0/phase-0b1/commit-511c9c1cb-files.txt",
+    "reports/audits/cupe-national-phase-0/phase-0b1/commit-c40a3e33a-files.txt",
+    "reports/audits/cupe-national-phase-0/phase-0b1/commit-896a18e0c-files.txt",
+    "reports/audits/cupe-national-phase-0/phase-0b1/commit-7a1c90ab3-files.txt"
+  ],
+  "commits": [
+    {
+      "sha": "1e5a6bd94",
+      "files": 255,
+      "composition": {
+        "vitest_config_ts_files": 248,
+        "audit_ps1_scripts": 1,
+        "individual_test_files": 6
+      },
+      "classification": "Unrelated (repo-wide test-infra sweep)",
+      "clean_branch_action": "DROP",
+      "successor_branch": "chore/test-infrastructure-stabilization (future, out of scope for Phase 0B.1)"
+    },
+    {
+      "sha": "511c9c1cb",
+      "files": 3,
+      "paths": [
+        {"path": "packages/db/drizzle/0038_phase_0b_organization_and_kpi_integrity.sql", "classification": "Direct", "keep": true},
+        {"path": "reports/audits/cupe-national-phase-0/organization-model-decision.md", "classification": "Direct", "keep": true, "note": "wording review vs final architecture decision"},
+        {"path": "reports/audits/cupe-national-phase-0/organization-model-dependency-map.md", "classification": "Direct", "keep": true}
+      ],
+      "clean_branch_action": "RETAIN_ALL"
+    },
+    {
+      "sha": "c40a3e33a",
+      "files": 2,
+      "paths": [
+        {"path": "apps/union-eyes/lib/organizations/platform-tenant.ts", "classification": "Direct", "keep": true},
+        {"path": "apps/union-eyes/lib/__tests__/platform-tenant.test.ts", "classification": "Supporting", "keep": true}
+      ],
+      "clean_branch_action": "RETAIN + REQUIRE production_integration_commit",
+      "gap": "No baseline service currently calls getPlatformTenantId(...). See organization-resolver-integration-proof.md."
+    },
+    {
+      "sha": "896a18e0c",
+      "files": 1,
+      "paths": [
+        {"path": "packages/ue-cognition/src/schema.ts", "classification": "Direct-incomplete", "keep": true}
+      ],
+      "clean_branch_action": "RETAIN + REQUIRE companion_db_migration_commit",
+      "gap": "TypeScript schema changes 6 tables from uuid to text PK but no DB migration accompanies. See kpi-database-migration-proof.md."
+    },
+    {
+      "sha": "7a1c90ab3",
+      "files": 112,
+      "composition": {
+        "reports_directory": 57,
+        "docs_directory": 48,
+        "ops_directory": 5,
+        "gitignore": 1,
+        "apps_directory": 1
+      },
+      "clean_branch_action": "RETAIN_PHASE_0B_EVIDENCE_SUBSET_ONLY",
+      "explicit_include": [
+        "reports/audits/cupe-national-phase-0/** (Phase 0B evidence subset only)",
+        ".gitignore (allowlist Phase 0B logs)"
+      ],
+      "explicit_exclude": [
+        "docs/institutional-engineering/**",
+        "docs/nzila/**",
+        "docs/ops/**",
+        "docs/documentation-index.md",
+        "reports/*.md and reports/*.json (governance tool outputs — regenerate)",
+        "ops/outputs/**",
+        "apps/union-eyes/next-env.d.ts"
+      ]
+    }
+  ],
+  "retention_rule": "A change is retained on the clean branch only if it is directly required to test Phase 0B code AND the original configuration demonstrably prevents that Phase 0B test from running correctly AND the change is the narrowest valid correction.",
+  "non_actions": [
+    "The 5 pushed commits are NOT rewritten, deleted, or force-pushed.",
+    "fix/union-eyes-reality-remediation is preserved as historical record.",
+    "No environment is deployed from either branch during Phase 0B.1."
+  ]
+}
