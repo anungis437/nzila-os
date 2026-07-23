@@ -11,18 +11,18 @@
 | Ownership | Count |
 | --- | ---: |
 | `DJANGO_INTERNAL` | 9 |
-| `PLATFORM_OWNED_EXCLUSIVE` | 13 |
-| `PLATFORM_OWNED_SHARED` | 4 |
+| `PLATFORM_OWNED_EXCLUSIVE` | 14 |
+| `PLATFORM_OWNED_SHARED` | 2 |
 | `SAME_NAME_DIFFERENT_MEANING` | 2 |
 | `UNION_EYES_OWNED_EXCLUSIVE` | 96 |
-| `UNION_EYES_OWNED_SHARED` | 1 |
+| `UNION_EYES_OWNED_SHARED` | 2 |
 
 ## Foundational slice (Phase 0B.2 scope)
 
 | Table | Ownership | DDL owner | Target schema |
 | --- | --- | --- | --- |
-| `audit_events` | `PLATFORM_OWNED_SHARED` | `platform` | `public` |
-| `organization_members` | `PLATFORM_OWNED_SHARED` | `platform` | `public` |
+| `audit_events` | `PLATFORM_OWNED_EXCLUSIVE` | `platform` | `public` |
+| `organization_members` | `UNION_EYES_OWNED_SHARED` | `union_eyes` | `union_eyes` |
 | `organizations` | `UNION_EYES_OWNED_SHARED` | `union_eyes` | `union_eyes` |
 | `orgs` | `PLATFORM_OWNED_SHARED` | `platform` | `public` |
 | `pilot_definitions` | `PLATFORM_OWNED_EXCLUSIVE` | `platform` | `public` |
@@ -58,7 +58,7 @@
 | `arbitration_decisions` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
 | `arbitration_precedents` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
 | `arbitrator_profiles` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
-| `audit_events` | `PLATFORM_OWNED_SHARED` | `platform` | `public` | ✅ | Platform-owned audit surface. Union Eyes writes through governed resolver; DDL owner = platform. Foundational rows only in Phase 0B.2. |
+| `audit_events` | `PLATFORM_OWNED_EXCLUSIVE` | `platform` | `public` | ✅ | Platform-owned append-only audit surface with hash-chain immutability. DDL owner = platform (packages/db/src/schema/operations.ts §18; migrations 0000_initial.sql, 0004_audit_events_immutable.sql, 0032_audit_events_canonical_hash.sql, 0036_heal_audit_events_canonical_hash.sql; hash-chain trigger in packages/db/migrations/hash-chain-immutability-triggers.sql). Django has NO db_table binding to audit_events — the union-eyes app maintains its own separate hash-chained audit table (core.AuditLogs → audit_logs). Phase 0B.2R §5 reclassified this row from PLATFORM_OWNED_SHARED (fictional shared side) to PLATFORM_OWNED_EXCLUSIVE. UE reads/writes go through the platform emitter in packages/db/src/audit.ts. |
 | `auth_group` | `DJANGO_INTERNAL` | `django_framework` | `union_eyes` |  | Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`). |
 | `auth_group_permissions` | `DJANGO_INTERNAL` | `django_framework` | `union_eyes` |  | Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`). |
 | `auth_permission` | `DJANGO_INTERNAL` | `django_framework` | `union_eyes` |  | Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`). |
@@ -116,7 +116,7 @@
 | `negotiations` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
 | `oauth_providers` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
 | `organization_benchmark_snapshots` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
-| `organization_members` | `PLATFORM_OWNED_SHARED` | `platform` | `public` | ✅ | Essential org membership is a platform identity surface. Foundational rows materialised on platform side in Phase 0B.2. Django adopts via managed = False; full DDL migration deferred to a later wave (out of Phase 0B.2 scope). |
+| `organization_members` | `UNION_EYES_OWNED_SHARED` | `union_eyes` | `union_eyes` | ✅ | Union Eyes owns the DDL (apps/union-eyes/db/schema-organizations.ts). No platform Drizzle definition exists in packages/db/. Django adopts the same physical table via managed=False (auth_core.OrganizationMembers) with a state-only AlterModelTable in auth_core/migrations/0004_adopt_platform_organization_members.py. Phase 0B.2R §4 reclassifies this row from PLATFORM_OWNED_SHARED (fictional platform ownership) to UNION_EYES_OWNED_SHARED. Physical relocation from public → union_eyes deferred to CUPE Wave 1. |
 | `organization_relationships` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes. |
 | `organization_sharing_grants` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |
 | `organization_sharing_settings` | `UNION_EYES_OWNED_EXCLUSIVE` | `union_eyes` | `union_eyes` |  | Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 §8 for the foundational slice; non-foundational tables move in a later wave). |

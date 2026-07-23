@@ -36,18 +36,18 @@
     "total_tables_declared": 125,
     "ownership": {
       "UNION_EYES_OWNED_EXCLUSIVE": 96,
-      "PLATFORM_OWNED_SHARED": 4,
+      "PLATFORM_OWNED_EXCLUSIVE": 14,
       "DJANGO_INTERNAL": 9,
-      "PLATFORM_OWNED_EXCLUSIVE": 13,
       "SAME_NAME_DIFFERENT_MEANING": 2,
-      "UNION_EYES_OWNED_SHARED": 1
+      "UNION_EYES_OWNED_SHARED": 2,
+      "PLATFORM_OWNED_SHARED": 2
     },
     "foundational_slice_size": 13,
     "deferred_review_count": 90,
     "review_status": {
-      "HUMAN_REVIEWED": 14,
+      "HUMAN_REVIEWED": 16,
       "RULE_DERIVED_REVIEWED": 19,
-      "AUTO_CLASSIFIED_UNREVIEWED": 92,
+      "AUTO_CLASSIFIED_UNREVIEWED": 90,
       "OWNERSHIP_UNRESOLVED": 0
     }
   },
@@ -430,22 +430,35 @@
     },
     {
       "table": "audit_events",
-      "ownership": "PLATFORM_OWNED_SHARED",
+      "ownership": "PLATFORM_OWNED_EXCLUSIVE",
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": true,
-      "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Platform-owned audit surface. Union Eyes writes through governed resolver; DDL owner = platform. Foundational rows only in Phase 0B.2.",
-      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
-      "reviewed_by": "",
-      "reviewed_at": "",
-      "evidence_sources": [
-        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-ownership-review.md",
-        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md"
+      "platform_sources": [
+        "packages/db/src/schema/operations.ts",
+        "packages/db/src/audit.ts",
+        "packages/db/drizzle/0000_initial.sql",
+        "packages/db/drizzle/0004_audit_events_immutable.sql",
+        "packages/db/drizzle/0032_audit_events_canonical_hash.sql",
+        "packages/db/drizzle/0036_heal_audit_events_canonical_hash.sql"
       ],
-      "classification_method": "MANUAL",
-      "open_blocker_reason": "PLATFORM_OWNED_SHARED but no Django db_table binding exists in apps/union-eyes/backend. The 'shared' side is fictional. Requires \u00a75 outcome: either add explicit Django managed=False model with tests, or reclassify as PLATFORM_OWNED_EXCLUSIVE."
+      "django_sources": [],
+      "rationale": "Platform-owned append-only audit surface with hash-chain immutability. DDL owner = platform (packages/db/src/schema/operations.ts \u00a718; migrations 0000_initial.sql, 0004_audit_events_immutable.sql, 0032_audit_events_canonical_hash.sql, 0036_heal_audit_events_canonical_hash.sql; hash-chain trigger in packages/db/migrations/hash-chain-immutability-triggers.sql). Django has NO db_table binding to audit_events \u2014 the union-eyes app maintains its own separate hash-chained audit table (core.AuditLogs \u2192 audit_logs). Phase 0B.2R \u00a75 reclassified this row from PLATFORM_OWNED_SHARED (fictional shared side) to PLATFORM_OWNED_EXCLUSIVE. UE reads/writes go through the platform emitter in packages/db/src/audit.ts.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-audit-events-resolution.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/src/schema/operations.ts",
+        "packages/db/drizzle/0000_initial.sql",
+        "packages/db/drizzle/0004_audit_events_immutable.sql",
+        "packages/db/drizzle/0032_audit_events_canonical_hash.sql",
+        "packages/db/drizzle/0036_heal_audit_events_canonical_hash.sql",
+        "packages/db/migrations/hash-chain-immutability-triggers.sql",
+        "packages/db/src/audit.ts"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "auth_group",
@@ -1547,22 +1560,29 @@
     },
     {
       "table": "organization_members",
-      "ownership": "PLATFORM_OWNED_SHARED",
-      "ddl_owner": "platform",
-      "target_schema": "public",
+      "ownership": "UNION_EYES_OWNED_SHARED",
+      "ddl_owner": "union_eyes",
+      "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Essential org membership is a platform identity surface. Foundational rows materialised on platform side in Phase 0B.2. Django adopts via managed = False; full DDL migration deferred to a later wave (out of Phase 0B.2 scope).",
-      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
-      "reviewed_by": "",
-      "reviewed_at": "",
-      "evidence_sources": [
-        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-ownership-review.md",
-        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md"
+      "django_sources": [
+        "apps/union-eyes/backend/auth_core/models.py",
+        "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+        "apps/union-eyes/backend/auth_core/migrations/0004_adopt_platform_organization_members.py"
       ],
-      "classification_method": "MANUAL",
-      "open_blocker_reason": "PLATFORM_OWNED_SHARED but no platform DDL exists in packages/db/drizzle/. Django adoption at auth_core/0004 references a non-existent table. Requires \u00a74 outcome: (A) add platform DDL, (B) move to union_eyes, or (C) LEGACY_DEPRECATE."
+      "rationale": "Union Eyes owns the DDL (apps/union-eyes/db/schema-organizations.ts). No platform Drizzle definition exists in packages/db/. Django adopts the same physical table via managed=False (auth_core.OrganizationMembers) with a state-only AlterModelTable in auth_core/migrations/0004_adopt_platform_organization_members.py. Phase 0B.2R \u00a74 reclassifies this row from PLATFORM_OWNED_SHARED (fictional platform ownership) to UNION_EYES_OWNED_SHARED. Physical relocation from public \u2192 union_eyes deferred to CUPE Wave 1.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-organization-members-resolution.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "apps/union-eyes/db/schema-organizations.ts",
+        "apps/union-eyes/backend/auth_core/models.py",
+        "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+        "apps/union-eyes/backend/auth_core/migrations/0004_adopt_platform_organization_members.py"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "organization_relationships",

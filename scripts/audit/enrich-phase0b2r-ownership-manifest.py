@@ -24,9 +24,9 @@ the generator with EMPTY platform_sources and django_sources arrays get their
 sources populated per rule (Django framework tables, UE tables from Django
 migrations, platform foundational contract tables).
 
-Foundational rows with unresolved ownership (organization_members,
-audit_events) are marked AUTO_CLASSIFIED_UNREVIEWED, which the updated
-validator treats as a HARD FAIL. This forces §4 / §5 resolution before
+Foundational rows with unresolved ownership (audit_events after §4)
+are marked AUTO_CLASSIFIED_UNREVIEWED, which the updated
+validator treats as a HARD FAIL. This forces §5 resolution before
 GREEN closure.
 
 Usage:
@@ -102,6 +102,22 @@ FOUNDATIONAL_HUMAN_REVIEWED: dict[str, dict[str, list[str]]] = {
             "apps/union-eyes/backend/auth_core/migrations/0003_move_organizations_to_union_eyes.py",
         ],
     },
+    "organization_members": {
+        "evidence_sources": [
+            "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-organization-members-resolution.md",
+            "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+            "apps/union-eyes/db/schema-organizations.ts",
+            "apps/union-eyes/backend/auth_core/models.py",
+            "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+            "apps/union-eyes/backend/auth_core/migrations/0004_adopt_platform_organization_members.py",
+        ],
+        "platform_sources": [],
+        "django_sources": [
+            "apps/union-eyes/backend/auth_core/models.py",
+            "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+            "apps/union-eyes/backend/auth_core/migrations/0004_adopt_platform_organization_members.py",
+        ],
+    },
     "pilot_definitions": {
         "evidence_sources": [
             "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
@@ -132,6 +148,28 @@ FOUNDATIONAL_HUMAN_REVIEWED: dict[str, dict[str, list[str]]] = {
         "platform_sources": [
             "packages/db/src/schema/pilot.ts",
             "packages/db/drizzle/0033_pilot_metrics.sql",
+        ],
+        "django_sources": [],
+    },
+    "audit_events": {
+        "evidence_sources": [
+            "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-audit-events-resolution.md",
+            "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+            "packages/db/src/schema/operations.ts",
+            "packages/db/drizzle/0000_initial.sql",
+            "packages/db/drizzle/0004_audit_events_immutable.sql",
+            "packages/db/drizzle/0032_audit_events_canonical_hash.sql",
+            "packages/db/drizzle/0036_heal_audit_events_canonical_hash.sql",
+            "packages/db/migrations/hash-chain-immutability-triggers.sql",
+            "packages/db/src/audit.ts",
+        ],
+        "platform_sources": [
+            "packages/db/src/schema/operations.ts",
+            "packages/db/src/audit.ts",
+            "packages/db/drizzle/0000_initial.sql",
+            "packages/db/drizzle/0004_audit_events_immutable.sql",
+            "packages/db/drizzle/0032_audit_events_canonical_hash.sql",
+            "packages/db/drizzle/0036_heal_audit_events_canonical_hash.sql",
         ],
         "django_sources": [],
     },
@@ -205,20 +243,15 @@ FOUNDATIONAL_HUMAN_REVIEWED: dict[str, dict[str, list[str]]] = {
 
 # Foundational rows that are OPEN — enrichment marks these AUTO_CLASSIFIED_UNREVIEWED
 # so the updated validator fails until §4 / §5 resolve them.
-FOUNDATIONAL_OPEN_BLOCKERS: dict[str, str] = {
-    "organization_members": (
-        "PLATFORM_OWNED_SHARED but no platform DDL exists in packages/db/drizzle/. "
-        "Django adoption at auth_core/0004 references a non-existent table. "
-        "Requires §4 outcome: (A) add platform DDL, (B) move to union_eyes, or "
-        "(C) LEGACY_DEPRECATE."
-    ),
-    "audit_events": (
-        "PLATFORM_OWNED_SHARED but no Django db_table binding exists in "
-        "apps/union-eyes/backend. The 'shared' side is fictional. Requires §5 "
-        "outcome: either add explicit Django managed=False model with tests, or "
-        "reclassify as PLATFORM_OWNED_EXCLUSIVE."
-    ),
-}
+#
+# Phase 0B.2R closed both original entries:
+#   * organization_members — §4 (reclassified UNION_EYES_OWNED_SHARED)
+#   * audit_events         — §5 (reclassified PLATFORM_OWNED_EXCLUSIVE)
+#
+# The dict is intentionally left empty (rather than deleted) so any future
+# foundational-open-blocker can be re-added here without changing the
+# enrich_table() branching logic.
+FOUNDATIONAL_OPEN_BLOCKERS: dict[str, str] = {}
 
 # Django framework tables — well-known internal tables of django.contrib.*
 DJANGO_FRAMEWORK_SOURCES: dict[str, list[str]] = {
@@ -314,7 +347,9 @@ def enrich_table(row: dict, deferred_register: list[dict]) -> dict:
         row["review_status"] = "HUMAN_REVIEWED"
         row["reviewed_by"] = REVIEWED_BY_HUMAN
         row["reviewed_at"] = REVIEWED_AT
-        row["evidence_sources"] = list(FOUNDATIONAL_HUMAN_REVIEWED[name]["evidence_sources"])
+        row["evidence_sources"] = list(
+            FOUNDATIONAL_HUMAN_REVIEWED[name]["evidence_sources"]
+        )
         row["classification_method"] = "MANUAL"
     elif ownership == "SAME_NAME_DIFFERENT_MEANING":
         row["review_status"] = "HUMAN_REVIEWED"
@@ -335,7 +370,9 @@ def enrich_table(row: dict, deferred_register: list[dict]) -> dict:
         row["review_status"] = "RULE_DERIVED_REVIEWED"
         row["reviewed_by"] = REVIEWED_BY_HUMAN
         row["reviewed_at"] = REVIEWED_AT
-        row["evidence_sources"] = list(row["platform_sources"]) or ["packages/db/src/schema/"]
+        row["evidence_sources"] = list(row["platform_sources"]) or [
+            "packages/db/src/schema/"
+        ]
         row["classification_method"] = "RULE_BASED"
     elif ownership == "PLATFORM_OWNED_SHARED":
         # Only stripe_webhook_events remains here after the two open-blockers.
@@ -348,14 +385,18 @@ def enrich_table(row: dict, deferred_register: list[dict]) -> dict:
         row["review_status"] = "RULE_DERIVED_REVIEWED"
         row["reviewed_by"] = REVIEWED_BY_HUMAN
         row["reviewed_at"] = REVIEWED_AT
-        row["evidence_sources"] = list(row["django_sources"]) or [UE_DEFAULT_DJANGO_SOURCE]
+        row["evidence_sources"] = list(row["django_sources"]) or [
+            UE_DEFAULT_DJANGO_SOURCE
+        ]
         row["classification_method"] = "RULE_BASED"
     elif ownership == "UNION_EYES_OWNED_EXCLUSIVE":
         # 96 rows — auto-classified, deferred.
         row["review_status"] = "AUTO_CLASSIFIED_UNREVIEWED"
         row["reviewed_by"] = ""
         row["reviewed_at"] = ""
-        row["evidence_sources"] = list(row["django_sources"]) or [UE_DEFAULT_DJANGO_SOURCE]
+        row["evidence_sources"] = list(row["django_sources"]) or [
+            UE_DEFAULT_DJANGO_SOURCE
+        ]
         row["classification_method"] = "AUTOMATED_HEURISTIC"
         deferred_register.append(
             {
@@ -422,8 +463,14 @@ def format_manifest(manifest: dict) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true", help="Print summary and exit without writing")
-    parser.add_argument("--check", action="store_true", help="Fail if the on-disk manifest is not idempotent")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print summary and exit without writing"
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if the on-disk manifest is not idempotent",
+    )
     args = parser.parse_args()
 
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
@@ -440,9 +487,7 @@ def main() -> int:
     print(f"  deferred_review_register         {deferred:4}")
 
     open_blockers = [
-        r["table"]
-        for r in enriched["tables"]
-        if r.get("open_blocker_reason")
+        r["table"] for r in enriched["tables"] if r.get("open_blocker_reason")
     ]
     print(f"\nOpen foundational blockers ({len(open_blockers)}):")
     for name in open_blockers:
@@ -454,7 +499,9 @@ def main() -> int:
     if args.check:
         current = MANIFEST_PATH.read_text(encoding="utf-8")
         if current != output:
-            print("MANIFEST DRIFT DETECTED. Run without --check to write the enriched manifest.")
+            print(
+                "MANIFEST DRIFT DETECTED. Run without --check to write the enriched manifest."
+            )
             return 2
         print("OK: manifest is enrichment-idempotent.")
         return 0

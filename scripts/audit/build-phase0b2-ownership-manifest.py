@@ -99,6 +99,15 @@ UNION_EYES_OWNED_SHARED = {
         "Platform reads via cross-schema FK: union_eyes.organizations.platform_tenant_id → "
         "public.orgs(id) with CHECK (platform_tenant_id = id) enforcing 1:1 identity."
     ),
+    "organization_members": (
+        "Union Eyes owns the DDL (apps/union-eyes/db/schema-organizations.ts). No platform "
+        "Drizzle definition exists in packages/db/. Django adopts the same physical table via "
+        "managed=False (auth_core.OrganizationMembers) with a state-only AlterModelTable in "
+        "auth_core/migrations/0004_adopt_platform_organization_members.py. Phase 0B.2R §4 "
+        "reclassifies this row from PLATFORM_OWNED_SHARED (fictional platform ownership) to "
+        "UNION_EYES_OWNED_SHARED. Physical relocation from public → union_eyes deferred to "
+        "CUPE Wave 1."
+    ),
 }
 
 # Platform-owned SHARED (foundational) — orgs is the platform-side of the cross-schema
@@ -120,8 +129,9 @@ FOUNDATIONAL_SLICE = {
     # Cross-schema organization contract
     "orgs",
     "organizations",
-    # Platform-owned foundational identity/audit surfaces (foundational rows only,
-    # no full-table migration in Phase 0B.2).
+    # Foundational UE-owned identity surface. organization_members was originally
+    # classified PLATFORM_OWNED_SHARED but Phase 0B.2R §4 confirmed no platform
+    # DDL exists; DDL owner is Union Eyes. Django adopts via managed=False.
     "organization_members",
     # Pilot definitions/metrics (platform side)
     # Note: pilot_definitions and pilot_metrics are platform-only; they don't appear in the
@@ -191,11 +201,22 @@ EXTRA_MANIFEST_ENTRIES = [
     # Platform-owned foundational audit surface
     {
         "table": "audit_events",
-        "ownership": "PLATFORM_OWNED_SHARED",
+        "ownership": "PLATFORM_OWNED_EXCLUSIVE",
         "target_schema": "public",
         "ddl_owner": "platform",
         "foundational": True,
-        "rationale": "Platform-owned audit surface. Union Eyes writes through governed resolver; DDL owner = platform. Foundational rows only in Phase 0B.2.",
+        "rationale": (
+            "Platform-owned append-only audit surface with hash-chain immutability. "
+            "DDL owner = platform (packages/db/src/schema/operations.ts §18; migrations "
+            "0000_initial.sql, 0004_audit_events_immutable.sql, 0032_audit_events_canonical_hash.sql, "
+            "0036_heal_audit_events_canonical_hash.sql; hash-chain trigger in "
+            "packages/db/migrations/hash-chain-immutability-triggers.sql). Django has NO "
+            "db_table binding to audit_events — the union-eyes app maintains its own "
+            "separate hash-chained audit table (core.AuditLogs → audit_logs). Phase 0B.2R "
+            "§5 reclassified this row from PLATFORM_OWNED_SHARED (fictional shared side) "
+            "to PLATFORM_OWNED_EXCLUSIVE. UE reads/writes go through the platform emitter "
+            "in packages/db/src/audit.ts."
+        ),
     },
     # UE Cognition tables (text-ID promotion in Phase 0B.2 Section 12)
     {
@@ -323,19 +344,13 @@ def classify(entry: dict) -> dict:
             "rationale": PLATFORM_OWNED_SHARED_BOTH[name],
         }
 
-    # 7. Foundational platform-owned (organization_members etc.)
-    if name == "organization_members":
-        return {
-            "ownership": "PLATFORM_OWNED_SHARED",
-            "ddl_owner": "platform",
-            "target_schema": "public",
-            "foundational": True,
-            "rationale": (
-                "Essential org membership is a platform identity surface. Foundational rows "
-                "materialised on platform side in Phase 0B.2. Django adopts via managed = False; "
-                "full DDL migration deferred to a later wave (out of Phase 0B.2 scope)."
-            ),
-        }
+    # 7. Foundational — organization_members historically classified here.
+    # Phase 0B.2R §4 moved this into UNION_EYES_OWNED_SHARED above (rule 5)
+    # after evidence review found no platform DDL owner (packages/db/ has zero
+    # references to the table; DDL lives in apps/union-eyes/db/schema-organizations.ts).
+    # This branch is intentionally left as a no-op sentinel so future audits
+    # noting a "rule 7 organization_members" reference land at the correct
+    # explanation rather than a silent removal.
 
     # 8. Drizzle-only (no Django copy) → platform-owned exclusive
     if p_files and not d_files:
