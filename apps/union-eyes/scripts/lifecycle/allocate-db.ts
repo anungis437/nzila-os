@@ -151,8 +151,49 @@ export async function allocateDatabase(options: AllocateOptions = {}): Promise<A
   })
 
   if (!options.skipMigrations) {
-    runMigrations(repoRoot, url, runDir)
-    appendHistory(repoRoot, { event: 'migrated', runId, dbName })
+    try {
+      runMigrations(repoRoot, url, runDir)
+      appendHistory(repoRoot, { event: 'migrated', runId, dbName })
+    } catch (err) {
+      // Roll back the just-created DB so we don't leak orphan databases when
+      // the migration pipeline aborts mid-way.
+      appendHistory(repoRoot, {
+        event: 'migration-failed-rollback',
+        runId,
+        dbName,
+        error: err instanceof Error ? err.message : String(err),
+      })
+      const rollback = new Client({ connectionString: adminUrl })
+      try {
+        await rollback.connect()
+        await rollback.query(
+          `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()`,
+          [dbName],
+        )
+        await rollback.query(`DROP DATABASE IF EXISTS "${dbName}"`)
+        appendHistory(repoRoot, { event: 'rollback-dropped', runId, dbName })
+      } catch (dropErr) {
+        appendHistory(repoRoot, {
+          event: 'rollback-failed',
+          runId,
+          dbName,
+          error: dropErr instanceof Error ? dropErr.message : String(dropErr),
+        })
+        // eslint-disable-next-line no-console
+        console.error(
+          `[ue:e2e:allocate-db] Rollback drop failed for ${dbName}: ${
+            dropErr instanceof Error ? dropErr.message : dropErr
+          }. Manual cleanup required.`,
+        )
+      } finally {
+        try {
+          await rollback.end()
+        } catch {
+          /* ignore */
+        }
+      }
+      throw err
+    }
   }
 
   const preserved = (process.env.E2E_PRESERVE_DB ?? '').toLowerCase() === 'true'
@@ -160,29 +201,51 @@ export async function allocateDatabase(options: AllocateOptions = {}): Promise<A
   return { runId, dbName, url, runDir, preserved }
 }
 
-/** Invoke the canonical UE bootstrap orchestrator against the disposable DB. */
+/**
+ * Invoke the canonical UE migration pipeline against the disposable DB.
+ *
+ * Two-stage pipeline (both required for a Phase 0B-contract-complete DB):
+ *   1) Platform bootstrap  (extensions + scoped platform migrations)
+ *      → tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs
+ *   2) Union Eyes app migrations  (organization_members, voter_eligibility, …)
+ *      → tooling/scripts/run-union-eyes-drizzle-migrate.mjs
+ *
+ * Rationale: the platform bootstrap intentionally skips the "legacy lineage"
+ * (`db/migrations/*`) which is where UE app tables live. Production/demo
+ * environments restore a snapshot via UE_DB_RESTORE_SNAPSHOT_URL to get the
+ * baseline; disposable-DB E2E has no such snapshot, so we must apply the
+ * legacy migrator too. See phase-0c-lifecycle-design.md §7.
+ */
 function runMigrations(repoRoot: string, dbUrl: string, runDir: string): void {
-  const bootstrapScript = path.join(repoRoot, 'tooling', 'scripts', 'run-union-eyes-drizzle-bootstrap.mjs')
-  if (!fs.existsSync(bootstrapScript)) {
-    throw new Error(
-      `[ue:e2e:allocate-db] Migration bootstrap not found at ${bootstrapScript}. Cannot proceed.`,
-    )
-  }
+  const stages: Array<{ id: string; script: string }> = [
+    { id: 'bootstrap', script: path.join(repoRoot, 'tooling', 'scripts', 'run-union-eyes-drizzle-bootstrap.mjs') },
+    { id: 'ue-app-migrations', script: path.join(repoRoot, 'tooling', 'scripts', 'run-union-eyes-drizzle-migrate.mjs') },
+  ]
   const logFile = path.join(runDir, 'migrations.log')
-  const child = spawnSync('node', [bootstrapScript], {
-    cwd: repoRoot,
-    env: { ...process.env, DATABASE_URL: dbUrl },
-    encoding: 'utf8',
-    stdio: 'pipe',
-  })
-  const combined = `${child.stdout ?? ''}\n${child.stderr ?? ''}`
-  fs.writeFileSync(logFile, combined, 'utf8')
-  if (child.status !== 0) {
-    // eslint-disable-next-line no-console
-    console.error(combined)
-    throw new Error(
-      `[ue:e2e:allocate-db] Migration bootstrap failed (exit=${child.status}). See ${logFile}.`,
-    )
+  fs.writeFileSync(logFile, '', 'utf8')
+
+  for (const stage of stages) {
+    if (!fs.existsSync(stage.script)) {
+      throw new Error(
+        `[ue:e2e:allocate-db] Migration stage '${stage.id}' not found at ${stage.script}. Cannot proceed.`,
+      )
+    }
+    fs.appendFileSync(logFile, `\n===== stage: ${stage.id} (${stage.script}) =====\n`, 'utf8')
+    const child = spawnSync('node', [stage.script], {
+      cwd: repoRoot,
+      env: { ...process.env, DATABASE_URL: dbUrl },
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    const combined = `${child.stdout ?? ''}\n${child.stderr ?? ''}`
+    fs.appendFileSync(logFile, combined, 'utf8')
+    if (child.status !== 0) {
+      // eslint-disable-next-line no-console
+      console.error(`[ue:e2e:allocate-db] stage '${stage.id}' failed:\n${combined}`)
+      throw new Error(
+        `[ue:e2e:allocate-db] Migration stage '${stage.id}' failed (exit=${child.status}). See ${logFile}.`,
+      )
+    }
   }
 }
 

@@ -23,6 +23,7 @@
     "db:generate": "drizzle-kit generate",
     "seed:test-env": "tsx scripts/seed-test-env.ts",
     "lifecycle:prove-db": "tsx scripts/lifecycle/prove-db-allocator.ts",
+    "e2e:governed": "tsx scripts/lifecycle/run.ts",
     "db:bootstrap": "node ../../tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
     "db:align": "tsx scripts/align-org-schema.ts",
     "db:migrate": "node ../../tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
