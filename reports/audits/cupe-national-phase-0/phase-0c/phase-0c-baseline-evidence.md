@@ -1,4 +1,10 @@
-# Phase 0C — Baseline (Unmodified) Evidence
+# Phase 0C — Baseline (Unmodified) Evidence — `PRE_FIX_INFRASTRUCTURE_SAMPLE`
+
+> **Classification per Phase 0C.1 §3:** `PRE_FIX_INFRASTRUCTURE_SAMPLE`. Not a
+> completed baseline. Sufficient to establish the untouched harness is
+> infrastructure-blocked; insufficient to classify the 167 tests never executed
+> nor to prove absence of product defects, fixture defects, or flake. The
+> authoritative baseline is produced by Phase 0C.1 §14 after §4–§13 land.
 
 **Command executed:**
 ```

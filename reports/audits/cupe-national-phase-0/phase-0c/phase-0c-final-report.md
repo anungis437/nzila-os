@@ -1,4 +1,17 @@
-# Phase 0C — Final Report
+# Phase 0C — SUPERSEDED FINAL REPORT (design-only checkpoint)
+
+> **⚠️ SUPERSEDED by Phase 0C.1.** This report was originally written at commit
+> `8db1883c0` and closed Phase 0C as AMBER on design-only grounds. Aubert rejected
+> that closure. Phase 0C.1 continues on the same branch to implement §4–§20 and
+> execute the authoritative baseline. See
+> [phase-0c1-final-report.md](phase-0c1-final-report.md) for the authoritative
+> record.
+>
+> The historical content below is retained as pre-fix design evidence.
+
+---
+
+# Phase 0C — Design Checkpoint Report at commit `8db1883c0` (historical)
 
 **Mission (verbatim from mandate):** Convert the Union Eyes Playwright E2E suite into
 a deterministic, reproducible baseline through 25 governed sections, without applying

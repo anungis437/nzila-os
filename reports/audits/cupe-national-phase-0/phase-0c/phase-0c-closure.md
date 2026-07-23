@@ -1,6 +1,33 @@
-# Phase 0C — Closure Classification
+# Phase 0C — SUPERSEDED CLOSURE (design-only checkpoint)
 
-**Status:** AMBER — E2E INFRASTRUCTURE INCOMPLETE
+> **⚠️ SUPERSEDED by Phase 0C.1.** This document was originally written to close
+> Phase 0C at commit `8db1883c0` as `AMBER — E2E INFRASTRUCTURE INCOMPLETE` on the
+> basis of design work alone (§5–§11 designed but not implemented). Aubert rejected
+> that closure because:
+>
+> 1. **Phase 0C owns deterministic local/CI E2E infrastructure AND full baseline
+>    execution.** Deferring implementation to Phase 0D is not an authorized transfer.
+> 2. A 25-test sample cannot classify the unexecuted 167 tests.
+> 3. Repeated failures from a common infrastructure defect justify stopping the
+>    *untouched pre-fix run*, but not the *remediation phase*.
+> 4. "No source code changed" confirms Phase 0C implementation has not started.
+>
+> The correct status at commit `8db1883c0` is:
+> **AMBER — E2E INFRASTRUCTURE IMPLEMENTATION INCOMPLETE (design-only checkpoint).**
+>
+> Phase 0C.1 continues on the same branch (`fix/union-eyes-phase0c-e2e-stabilization`)
+> to implement the infrastructure and execute the authoritative baseline. See
+> [phase-0c1-final-report.md](phase-0c1-final-report.md) for the authoritative
+> Phase 0C.1 record.
+>
+> The historical content below is retained as pre-fix design evidence and MUST NOT
+> be read as a closure.
+
+---
+
+# Phase 0C — Design Checkpoint at commit `8db1883c0` (historical)
+
+**Historical Status (superseded):** AMBER — E2E INFRASTRUCTURE INCOMPLETE (design only)
 
 ## Rationale
 
@@ -87,18 +114,18 @@ deterministically knowable — is rejected as low information yield.
 - No force-push.
 - No cherry-pick from `fix/union-eyes-reality-remediation`.
 
-### Recommended next step (for the reader — NOT this session)
+### Recommended next step (superseded by Phase 0C.1)
 
-Open Phase 0D with a scope limited to implementing §5–§11 per the design document.
-The empirical baseline + failure register + classification are sufficient inputs;
-no additional investigation is required for Phase 0D scoping.
+The original text said: "Open Phase 0D with a scope limited to implementing §5–§11".
+That transfer was rejected. Phase 0C.1 opens on the same branch to complete the
+implementation and full baseline execution.
 
-### Explicit non-authorizations
+### Explicit non-authorizations (retained and reinforced)
 
 - **Do NOT interpret this AMBER as authorization for staging deployment.**
 - **Do NOT interpret this AMBER as authorization for Phase 1 CUPE features.**
 - **Do NOT interpret this AMBER as WCAG-2.1-AA certification.**
 - **Do NOT interpret this AMBER as bilingual production readiness.**
 - The Phase 0C mission — "converts the Union Eyes Playwright E2E suite into a
-  deterministic, reproducible baseline" — is NOT complete. The work is ROOT-CAUSED
-  and DESIGNED but not IMPLEMENTED.
+  deterministic, reproducible baseline" — is NOT complete at this checkpoint.
+  Phase 0C.1 continues on the same branch to complete it.
