@@ -214,7 +214,11 @@ class Organizations(BaseModel):
     )
 
     class Meta:
-        db_table = "organizations"
+        # Phase 0B.2 (Option D — governed hybrid): the Union-Eyes-owned
+        # ``organizations`` table lives in the ``union_eyes`` schema. See
+        # ``reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-schema-strategy.md``
+        # and migration ``auth_core/0003_move_organizations_to_union_eyes.py``.
+        db_table = 'union_eyes"."organizations'
         verbose_name = "Organization"
         verbose_name_plural = "Organizations"
         ordering = ["name"]
@@ -751,7 +755,10 @@ class OrganizationMembers(BaseModel):
     exemption_approved_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        db_table = "organization_members"
+        # Phase 0B.2 §9: PLATFORM_OWNED_SHARED — DDL owner is the platform
+        # (Drizzle). Django adopts the table read-only via ``managed = False``.
+        db_table = 'public"."organization_members'
+        managed = False
         verbose_name = "OrganizationMembers"
 
 
