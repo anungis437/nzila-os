@@ -15,6 +15,7 @@
  *   7.  Seed fixtures  (scripts/seed-test-env.ts against disposable DB)
  *   8.  Boot Next.js  (pnpm exec next dev --webpack --port <port>)
  *       + poll /api/health/readiness until 200 (120 s timeout)
+ *       + Phase 0C.2 §5 managed-server handshake (runId echo verification)
  *   9.  Generate auth states (scripts/lifecycle/generate-auth-states.ts)
  *   10. Execute Playwright
  *   11. Copy artifacts to run-artifacts/{runId}/
@@ -47,6 +48,11 @@ import {
   allocatePort,
   verifyPortRelease,
 } from './process'
+import {
+  MANAGED_SERVER_ENV_VAR,
+  MANAGED_SERVER_RUN_ID_ENV_VAR,
+  verifyManagedServer,
+} from './managed-server-handshake'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -231,7 +237,7 @@ async function main(): Promise<void> {
       return { detail: 'seed-test-env applied to disposable DB' }
     })
 
-    // Step 8 — Boot server + poll readiness
+    // Step 8 — Boot server + poll readiness + managed-server handshake (§5)
     boot = await withStep(steps, 8, 'boot-server', async () => {
       const merged: NodeJS.ProcessEnv = {
         ...process.env,
@@ -240,6 +246,11 @@ async function main(): Promise<void> {
         NEXT_PUBLIC_APP_URL: `http://localhost:${port}`,
         PORT: String(port),
         NODE_ENV: 'test',
+        // Phase 0C.2 §5 — Managed-server handshake. These MUST be present in
+        // the server's env so that /api/health/managed-server responds with
+        // the exact runId we later verify from the orchestrator side.
+        [MANAGED_SERVER_ENV_VAR]: 'true',
+        [MANAGED_SERVER_RUN_ID_ENV_VAR]: alloc!.runId,
       }
       // BootServerOptions.env requires Record<string,string>; strip undefined values.
       const serverEnv: Record<string, string> = {}
@@ -263,8 +274,23 @@ async function main(): Promise<void> {
           `readiness did not go green within 120s (attempts=${readiness.attempts}, lastStatus=${readiness.lastStatus ?? 'none'})`,
         )
       }
+      // Phase 0C.2 §5 — Handshake gate. Readiness only proves that SOME server
+      // returned 200 at the readiness path; the handshake proves that the
+      // server we're about to test is the one WE just booted (matching runId).
+      // If a stale dev server were squatting on this port, its runId would
+      // differ (or the endpoint would 404) and the orchestrator aborts before
+      // any test runs.
+      const handshake = await verifyManagedServer({
+        baseUrl: `http://localhost:${port}`,
+        expectedRunId: alloc!.runId,
+      })
+      if (!handshake.ok) {
+        throw new Error(
+          `managed-server handshake failed: reason=${handshake.reason} error=${handshake.error} actualRunId=${handshake.actualRunId ?? 'none'} actualApp=${handshake.actualApp ?? 'none'}`,
+        )
+      }
       return {
-        detail: `pid=${b.pid} port=${port} readyAfter=${readiness.elapsedMs}ms`,
+        detail: `pid=${b.pid} port=${port} readyAfter=${readiness.elapsedMs}ms handshakeRunId=${handshake.actualRunId}`,
         value: b,
       }
     }) as Awaited<ReturnType<typeof bootServer>>
@@ -300,7 +326,11 @@ async function main(): Promise<void> {
         ...process.env,
         UE_TEST_BASE_URL: `http://localhost:${port}`,
         PLAYWRIGHT_PORT: String(port),
-        NZILA_E2E_MANAGED_SERVER: 'true', // tells playwright.config.ts not to spawn its own webServer
+        // Phase 0C.2 §5 — tells playwright.config.ts NOT to spawn its own
+        // webServer AND lets any downstream code that cares consult the
+        // managed-server flag / runId.
+        [MANAGED_SERVER_ENV_VAR]: 'true',
+        [MANAGED_SERVER_RUN_ID_ENV_VAR]: alloc!.runId,
       }
       const res = spawnSync(
         'pnpm',

@@ -1,0 +1,39 @@
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0c
+
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö env-var contract (frozen constants) > MANAGED_SERVER_ENV_VAR is the canonical name 2ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö env-var contract (frozen constants) > MANAGED_SERVER_RUN_ID_ENV_VAR is the canonical name 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö env-var contract (frozen constants) > MANAGED_SERVER_ENDPOINT_PATH is the canonical path 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö env-var contract (frozen constants) > EXPECTED_APP_NAME is the canonical app name 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerMode > returns false when env var is absent 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerMode > returns true only for exact string "true" 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerMode > rejects truthy-looking non-"true" strings (fail-closed) 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerMode > rejects "false" and empty string 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isLoopbackUrl > accepts localhost with any port 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isLoopbackUrl > accepts IPv4 loopback 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isLoopbackUrl > accepts IPv6 loopback 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isLoopbackUrl > rejects any real hostname 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isLoopbackUrl > rejects unparseable URLs (fail-closed) 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerHandshakePayload > accepts a complete valid payload 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerHandshakePayload > rejects null / non-object 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerHandshakePayload > rejects payloads with missing fields 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerHandshakePayload > rejects payloads with managedServer !== true 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö isManagedServerHandshakePayload > rejects empty runId 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: baseUrl / expectedRunId guards > refuses non-loopback baseUrl WITHOUT ever calling fetch 1ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: baseUrl / expectedRunId guards > refuses empty expectedRunId WITHOUT ever calling fetch 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: happy path > returns ok when server echoes matching runId and app name 29ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects mismatched runId (stale/unrelated server on same port) 1ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects mismatched app name (unrelated Next.js app squatting on the port) 1ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects 404 (endpoint not present ΓÇö server was not booted with managed flag) 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects 500 (server misconfiguration) 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects non-JSON body 1ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects malformed JSON payload missing runId 1ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects malformed JSON payload missing managedServer flag 1ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > rejects fetch network errors (ECONNREFUSED, etc.) 0ms
+ Γ£ô |union-eyes| scripts/lifecycle/managed-server-handshake.test.ts > ┬º5 ΓÇö verifyManagedServer: server failure modes > reports timeout when AbortController fires 18ms
+
+ Test Files  1 passed (1)
+      Tests  30 passed (30)
+   Start at  19:57:21
+   Duration  506ms (transform 77ms, setup 0ms, import 101ms, tests 61ms, environment 0ms)
+

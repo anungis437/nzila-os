@@ -38,8 +38,21 @@ export default defineConfig({
     },
   ],
 
-  /* Start local dev server if not running in CI */
-  ...(process.env.CI
+  /*
+   * Start local dev server ONLY in standalone mode.
+   *
+   * Phase 0C.2 §5 — Managed-server handshake:
+   *   When `NZILA_E2E_MANAGED_SERVER=true` is set (governed lifecycle path,
+   *   see `scripts/lifecycle/run.ts`), the orchestrator has already booted
+   *   the Next.js server on the allocated port AND performed a runId
+   *   handshake against `/api/health/managed-server`. Playwright MUST NOT
+   *   spawn a second `pnpm dev` in that case — doing so would launch a
+   *   competing server on port 3002, corrupt the run, and (worse) attach
+   *   Playwright to the wrong DB.
+   *
+   *   CI is treated the same way: CI orchestrates its own webServer.
+   */
+  ...(process.env.CI || process.env.NZILA_E2E_MANAGED_SERVER === 'true'
     ? {}
     : {
         webServer: {

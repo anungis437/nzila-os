@@ -1,0 +1,133 @@
+{
+  "section": "Phase 0C.2 §5",
+  "title": "Managed-server handshake",
+  "verdict": "GREEN",
+  "generatedAt": "2026-04-26",
+  "summary": "Playwright cannot attach to any Next.js server other than the one the current governed lifecycle run just booted. Every reachable failure mode is exercised by unit tests.",
+  "envContract": {
+    "flagVar": "NZILA_E2E_MANAGED_SERVER",
+    "flagAcceptedValues": ["true"],
+    "runIdVar": "NZILA_E2E_RUN_ID",
+    "endpointPath": "/api/health/managed-server",
+    "expectedAppName": "union-eyes"
+  },
+  "failClosedGates": [
+    {
+      "reason": "non-loopback-base-url",
+      "trigger": "verifyManagedServer called with baseUrl whose hostname is not on the loopback allow-list",
+      "fetchCalled": false
+    },
+    {
+      "reason": "empty-expected-run-id",
+      "trigger": "verifyManagedServer called with empty or missing expectedRunId",
+      "fetchCalled": false
+    },
+    {
+      "reason": "fetch-failed",
+      "trigger": "fetch throws (e.g. ECONNREFUSED, DNS failure)",
+      "fetchCalled": true
+    },
+    {
+      "reason": "timeout",
+      "trigger": "AbortController fires before response arrives",
+      "fetchCalled": true
+    },
+    {
+      "reason": "non-200-status",
+      "trigger": "endpoint returns any status other than 200 (covers 404 = flag not set on target server, 500 = misconfiguration)",
+      "fetchCalled": true
+    },
+    {
+      "reason": "non-json-body",
+      "trigger": "response body does not parse as JSON",
+      "fetchCalled": true
+    },
+    {
+      "reason": "bad-payload-shape",
+      "trigger": "required fields missing or wrong primitive type (app, managedServer, runId, pid, uptimeSec)",
+      "fetchCalled": true
+    },
+    {
+      "reason": "app-mismatch",
+      "trigger": "response body reports a different app name (unrelated Next.js app squatting on the same port)",
+      "fetchCalled": true
+    },
+    {
+      "reason": "run-id-mismatch",
+      "trigger": "response body reports a different runId (stale server from a previous lifecycle run)",
+      "fetchCalled": true
+    }
+  ],
+  "refusalMatrix": [
+    { "id": 1,  "scenario": "Non-loopback baseUrl",                "expectedReason": "non-loopback-base-url", "expectOk": false },
+    { "id": 2,  "scenario": "Empty expected runId",                "expectedReason": "empty-expected-run-id", "expectOk": false },
+    { "id": 3,  "scenario": "Server unreachable (ECONNREFUSED)",   "expectedReason": "fetch-failed",          "expectOk": false },
+    { "id": 4,  "scenario": "Slow / hung server",                  "expectedReason": "timeout",               "expectOk": false },
+    { "id": 5,  "scenario": "Endpoint missing (404)",              "expectedReason": "non-200-status",        "expectOk": false },
+    { "id": 6,  "scenario": "Server errored (500)",                "expectedReason": "non-200-status",        "expectOk": false },
+    { "id": 7,  "scenario": "Non-JSON body",                       "expectedReason": "non-json-body",         "expectOk": false },
+    { "id": 8,  "scenario": "Missing runId in payload",            "expectedReason": "bad-payload-shape",     "expectOk": false },
+    { "id": 9,  "scenario": "Missing managedServer flag",          "expectedReason": "bad-payload-shape",     "expectOk": false },
+    { "id": 10, "scenario": "Wrong app name",                      "expectedReason": "app-mismatch",          "expectOk": false },
+    { "id": 11, "scenario": "Stale runId",                         "expectedReason": "run-id-mismatch",       "expectOk": false },
+    { "id": 12, "scenario": "Matching runId & app (happy path)",   "expectedReason": null,                    "expectOk": true  }
+  ],
+  "endpointBehaviour": {
+    "flagOff": {
+      "status": 404,
+      "body": { "error": "not found" },
+      "rationale": "Production and staging servers must not advertise the handshake endpoint at all."
+    },
+    "flagOnRunIdMissing": {
+      "status": 500,
+      "body": { "error": "NZILA_E2E_MANAGED_SERVER=true but NZILA_E2E_RUN_ID is missing — orchestrator misconfiguration" }
+    },
+    "flagOnHappyPath": {
+      "status": 200,
+      "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" },
+      "bodyFields": ["app", "managedServer", "runId", "pid", "uptimeSec"],
+      "bodyContainsNoSecrets": true
+    }
+  },
+  "configGate": {
+    "path": "apps/union-eyes/playwright.config.ts",
+    "before": "process.env.CI ? {} : { webServer: {...} }",
+    "after": "process.env.CI || process.env.NZILA_E2E_MANAGED_SERVER === 'true' ? {} : { webServer: {...} }",
+    "consequence": "Playwright is forbidden to spawn its own dev server when the orchestrator is in charge."
+  },
+  "orchestratorWiring": {
+    "file": "apps/union-eyes/scripts/lifecycle/run.ts",
+    "changes": [
+      "Step 8 boot-server: inject NZILA_E2E_MANAGED_SERVER=true and NZILA_E2E_RUN_ID=<runId> into Next.js child env",
+      "Step 8 boot-server: after pollReadiness succeeds, call verifyManagedServer(baseUrl=http://localhost:<port>, expectedRunId=<runId>); throw on any non-ok reason",
+      "Step 10 playwright: inject NZILA_E2E_MANAGED_SERVER=true and NZILA_E2E_RUN_ID=<runId> into Playwright child env"
+    ]
+  },
+  "tests": {
+    "file": "apps/union-eyes/scripts/lifecycle/managed-server-handshake.test.ts",
+    "vitestVersion": "v4.1.2",
+    "suites": 7,
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "durationMs": 73
+  },
+  "filesChanged": [
+    { "path": "apps/union-eyes/scripts/lifecycle/managed-server-handshake.ts",         "kind": "new" },
+    { "path": "apps/union-eyes/app/api/health/managed-server/route.ts",                "kind": "new" },
+    { "path": "apps/union-eyes/scripts/lifecycle/managed-server-handshake.test.ts",    "kind": "new" },
+    { "path": "apps/union-eyes/playwright.config.ts",                                  "kind": "modified" },
+    { "path": "apps/union-eyes/scripts/lifecycle/run.ts",                              "kind": "modified" },
+    { "path": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-managed-server-handshake-proof.md",   "kind": "new" },
+    { "path": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-managed-server-handshake-proof.json", "kind": "new" },
+    { "path": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-managed-server-handshake-tests.log",  "kind": "new" }
+  ],
+  "nonNegotiablesObserved": [
+    "Handshake helper is pure — does not read process.env; fetch is injectable.",
+    "Handshake helper does not retry — first failure aborts the run.",
+    "Route returns 404 when flag is off (endpoint invisible in production).",
+    "Response body contains no secrets, cookies, tokens, or DB URLs.",
+    "Handshake refuses non-loopback baseUrls without ever calling fetch.",
+    "Playwright config refuses to spawn its own webServer under managed-server mode."
+  ]
+}
