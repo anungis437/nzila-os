@@ -22,6 +22,7 @@ Ownership enum (must match tooling/checks/schema-ownership-validate.ts):
 
 from __future__ import annotations
 
+import importlib.util
 import json
 from collections import Counter
 from pathlib import Path
@@ -531,8 +532,25 @@ def write_markdown(manifest: dict) -> None:
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")
 
 
+def _load_enricher():
+    """Load the Phase 0B.2R enrichment module by path (hyphenated filename)."""
+    path = Path(__file__).parent / "enrich-phase0b2r-ownership-manifest.py"
+    spec = importlib.util.spec_from_file_location("enrich_phase0b2r", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Could not load enricher at {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def main() -> None:
     manifest = build_manifest()
+
+    # Phase 0B.2R: apply provenance enrichment so re-running the generator produces
+    # an already-enriched manifest (idempotent with enrich-phase0b2r-ownership-manifest.py).
+    enricher = _load_enricher()
+    manifest = enricher.enrich_manifest(manifest)
+
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(
         json.dumps(manifest, indent=2, sort_keys=False), encoding="utf-8"
@@ -544,6 +562,10 @@ def main() -> None:
     for k, v in sorted(manifest["counts"]["ownership"].items()):
         print(f"  {k:32s} {v:3d}")
     print(f"Foundational slice size: {manifest['counts']['foundational_slice_size']}")
+    if manifest.get("counts", {}).get("review_status"):
+        print("Review status distribution (Phase 0B.2R):")
+        for k, v in sorted(manifest["counts"]["review_status"].items()):
+            print(f"  {k:32s} {v:3d}")
 
 
 if __name__ == "__main__":

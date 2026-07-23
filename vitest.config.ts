@@ -139,6 +139,8 @@ export default defineConfig({
       'tooling/openapi-gen',
       // Contract tests (architectural invariants)
       'tooling/contract-tests',
+      // Ownership manifest validator
+      'tooling/checks',
       // Governance & AI intelligence packages
       'packages/platform-governance',
       'packages/platform-intelligence',

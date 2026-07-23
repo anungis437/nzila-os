@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "generated_by": "scripts/audit/build-phase0b2-ownership-manifest.py",
   "phase": "0B.2",
   "architecture_decision": "Option D \u2014 Governed hybrid (see reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-architecture-approval.md)",
@@ -42,7 +42,14 @@
       "SAME_NAME_DIFFERENT_MEANING": 2,
       "UNION_EYES_OWNED_SHARED": 1
     },
-    "foundational_slice_size": 13
+    "foundational_slice_size": 13,
+    "deferred_review_count": 90,
+    "review_status": {
+      "HUMAN_REVIEWED": 14,
+      "RULE_DERIVED_REVIEWED": 19,
+      "AUTO_CLASSIFIED_UNREVIEWED": 92,
+      "OWNERSHIP_UNRESOLVED": 0
+    }
   },
   "foundational_slice": [
     "audit_events",
@@ -70,7 +77,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ab_test_events",
@@ -82,7 +96,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ab_test_variants",
@@ -94,7 +115,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ab_tests",
@@ -106,7 +134,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "accessibility_audits",
@@ -118,7 +153,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "accessibility_issues",
@@ -130,7 +172,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "accessibility_test_suites",
@@ -142,7 +191,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "accessibility_user_testing",
@@ -154,7 +210,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "address_change_history",
@@ -166,7 +229,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "address_validation_cache",
@@ -178,7 +248,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ai_budgets",
@@ -190,7 +267,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ai_rate_limits",
@@ -202,7 +286,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ai_safety_filters",
@@ -211,8 +302,17 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ai_usage_metrics",
@@ -224,7 +324,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "analytics_metrics",
@@ -236,7 +343,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "analytics_scheduled_reports",
@@ -248,7 +362,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "arbitration_decisions",
@@ -260,7 +381,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "arbitration_precedents",
@@ -272,7 +400,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "arbitrator_profiles",
@@ -284,7 +419,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "audit_events",
@@ -294,7 +436,16 @@
       "foundational": true,
       "platform_sources": [],
       "django_sources": [],
-      "rationale": "Platform-owned audit surface. Union Eyes writes through governed resolver; DDL owner = platform. Foundational rows only in Phase 0B.2."
+      "rationale": "Platform-owned audit surface. Union Eyes writes through governed resolver; DDL owner = platform. Foundational rows only in Phase 0B.2.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-ownership-review.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md"
+      ],
+      "classification_method": "MANUAL",
+      "open_blocker_reason": "PLATFORM_OWNED_SHARED but no Django db_table binding exists in apps/union-eyes/backend. The 'shared' side is fictional. Requires \u00a75 outcome: either add explicit Django managed=False model with tests, or reclassify as PLATFORM_OWNED_EXCLUSIVE."
     },
     {
       "table": "auth_group",
@@ -303,8 +454,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.auth (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "auth_group_permissions",
@@ -313,8 +474,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.auth (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "auth_permission",
@@ -323,8 +494,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.auth (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "auth_user",
@@ -333,8 +514,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.auth (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "auth_user_groups",
@@ -343,8 +534,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.auth (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "auth_user_user_permissions",
@@ -353,8 +554,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.auth (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "bargaining_notes",
@@ -366,7 +577,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "bargaining_proposals",
@@ -378,7 +596,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "bargaining_team_members",
@@ -390,7 +615,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "benchmark_categories",
@@ -402,7 +634,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "benchmark_data",
@@ -414,7 +653,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "benefit_comparisons",
@@ -426,7 +672,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "cba_clauses",
@@ -438,7 +691,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "cba_contacts",
@@ -450,7 +710,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "cba_footnotes",
@@ -462,7 +729,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "cba_version_history",
@@ -474,7 +748,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "chat_messages",
@@ -486,7 +767,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "chat_sessions",
@@ -498,7 +786,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "chatbot_analytics",
@@ -510,7 +805,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "chatbot_suggestions",
@@ -522,7 +824,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "clause_comparisons",
@@ -534,7 +843,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "clause_comparisons_history",
@@ -546,7 +862,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "clause_library_tags",
@@ -558,7 +881,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "collective_agreements",
@@ -570,7 +900,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "commerce_customers",
@@ -582,7 +919,14 @@
         "packages/db/src/schema/commerce.ts"
       ],
       "django_sources": [],
-      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "commerce_orders",
@@ -594,7 +938,14 @@
         "packages/db/src/schema/commerce.ts"
       ],
       "django_sources": [],
-      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "commerce_products",
@@ -606,7 +957,14 @@
         "packages/db/src/schema/commerce.ts"
       ],
       "django_sources": [],
-      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "commerce_purchase_orders",
@@ -618,7 +976,14 @@
         "packages/db/src/schema/commerce.ts"
       ],
       "django_sources": [],
-      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "commerce_suppliers",
@@ -630,7 +995,14 @@
         "packages/db/src/schema/commerce.ts"
       ],
       "django_sources": [],
-      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "communication_analytics",
@@ -642,7 +1014,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "comparative_analyses",
@@ -654,7 +1033,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "contribution_rates",
@@ -666,7 +1052,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "cost_of_living_data",
@@ -678,7 +1071,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "country_address_formats",
@@ -687,8 +1087,17 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "cross_org_access_log",
@@ -700,7 +1109,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "django_admin_log",
@@ -709,8 +1125,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.admin (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "django_content_type",
@@ -719,8 +1145,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.contrib.contenttypes (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "django_migrations",
@@ -729,8 +1165,18 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`)."
+      "django_sources": [
+        "django.db.migrations (framework)"
+      ],
+      "rationale": "Django framework/contrib internal table. Owner = Django framework. MUST NOT be recreated by platform lineage; lives in the Django-managed `union_eyes` schema (not `public`).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "https://docs.djangoproject.com/en/stable/ref/contrib/",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "documents",
@@ -745,7 +1191,15 @@
       "django_sources": [
         "content/0001_initial.py"
       ],
-      "rationale": "Same identifier, different domain object. public.documents = evidence/operations documents (packages/db/src/schema/operations.ts). union_eyes app-side content table (apps/union-eyes/backend/content/migrations/0001_initial.py). Resolution: Rename Django table to union_eyes.content_documents in a future wave; do not merge."
+      "rationale": "Same identifier, different domain object. public.documents = evidence/operations documents (packages/db/src/schema/operations.ts). union_eyes app-side content table (apps/union-eyes/backend/content/migrations/0001_initial.py). Resolution: Rename Django table to union_eyes.content_documents in a future wave; do not merge.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-ownership-manifest.md",
+        "reports/audits/cupe-national-phase-0/phase-0b1/phase-0b1-pre-manifest-inventory.md"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "evidence_packs",
@@ -758,7 +1212,15 @@
         "packages/db/src/schema/operations.ts"
       ],
       "django_sources": [],
-      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public."
+      "rationale": "Table exists only in the platform Drizzle lineage. Union Eyes does not define or reference it. DDL owner = platform; target schema = public.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/operations.ts"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "external_data_sync_log",
@@ -770,7 +1232,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "feature_flags",
@@ -782,7 +1251,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "insight_recommendations",
@@ -794,7 +1270,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "international_addresses",
@@ -806,7 +1289,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "knowledge_base",
@@ -818,7 +1308,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "kpi_configurations",
@@ -830,7 +1327,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "member_consents",
@@ -842,7 +1346,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "member_contact_preferences",
@@ -851,8 +1362,17 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "member_employment_details",
@@ -861,8 +1381,17 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "member_history_events",
@@ -874,7 +1403,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "mfa_configurations",
@@ -886,7 +1422,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ml_predictions",
@@ -898,7 +1441,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "model_metadata",
@@ -910,7 +1460,14 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "negotiation_sessions",
@@ -922,7 +1479,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "negotiations",
@@ -934,7 +1498,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "oauth_providers",
@@ -946,7 +1517,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "organization_benchmark_snapshots",
@@ -958,7 +1536,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "organization_members",
@@ -968,7 +1553,16 @@
       "foundational": true,
       "platform_sources": [],
       "django_sources": [],
-      "rationale": "Essential org membership is a platform identity surface. Foundational rows materialised on platform side in Phase 0B.2. Django adopts via managed = False; full DDL migration deferred to a later wave (out of Phase 0B.2 scope)."
+      "rationale": "Essential org membership is a platform identity surface. Foundational rows materialised on platform side in Phase 0B.2. Django adopts via managed = False; full DDL migration deferred to a later wave (out of Phase 0B.2 scope).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-ownership-review.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md"
+      ],
+      "classification_method": "MANUAL",
+      "open_blocker_reason": "PLATFORM_OWNED_SHARED but no platform DDL exists in packages/db/drizzle/. Django adoption at auth_core/0004 references a non-existent table. Requires \u00a74 outcome: (A) add platform DDL, (B) move to union_eyes, or (C) LEGACY_DEPRECATE."
     },
     {
       "table": "organization_relationships",
@@ -977,8 +1571,17 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "organization_sharing_grants",
@@ -990,7 +1593,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "organization_sharing_settings",
@@ -1002,7 +1612,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "organization_users",
@@ -1014,7 +1631,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "organizations",
@@ -1022,9 +1646,24 @@
       "ddl_owner": "union_eyes",
       "target_schema": "union_eyes",
       "foundational": true,
-      "platform_sources": [],
-      "django_sources": [],
-      "rationale": "Union Eyes owns the tenant organization row (union_eyes.organizations). Platform reads via cross-schema FK: union_eyes.organizations.platform_tenant_id \u2192 public.orgs(id) with CHECK (platform_tenant_id = id) enforcing 1:1 identity."
+      "platform_sources": [
+        "packages/db/drizzle/0038_organization_cross_schema_contract.sql"
+      ],
+      "django_sources": [
+        "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+        "apps/union-eyes/backend/auth_core/migrations/0003_move_organizations_to_union_eyes.py"
+      ],
+      "rationale": "Union Eyes owns the tenant organization row (union_eyes.organizations). Platform reads via cross-schema FK: union_eyes.organizations.platform_tenant_id \u2192 public.orgs(id) with CHECK (platform_tenant_id = id) enforcing 1:1 identity.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-ownership-review.md",
+        "packages/db/drizzle/0038_organization_cross_schema_contract.sql",
+        "apps/union-eyes/backend/auth_core/migrations/0003_move_organizations_to_union_eyes.py"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "orgs",
@@ -1036,7 +1675,17 @@
         "packages/db/src/schema/orgs.ts"
       ],
       "django_sources": [],
-      "rationale": "Platform owns the canonical org identity (public.orgs). Union Eyes references it via cross-schema FK from union_eyes.organizations.platform_tenant_id."
+      "rationale": "Platform owns the canonical org identity (public.orgs). Union Eyes references it via cross-schema FK from union_eyes.organizations.platform_tenant_id.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-ownership-review.md",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-architecture-approval.md",
+        "packages/db/drizzle/0038_organization_cross_schema_contract.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "page_analytics",
@@ -1048,7 +1697,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "pending_profiles",
@@ -1060,7 +1716,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "pilot_alert_escalations",
@@ -1068,9 +1731,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": false,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform pilot alert escalations; non-foundational in Phase 0B.2."
+      "rationale": "Platform pilot alert escalations; non-foundational in Phase 0B.2.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "pilot_alert_rules",
@@ -1078,9 +1752,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": false,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform pilot alerting configuration; non-foundational in Phase 0B.2."
+      "rationale": "Platform pilot alerting configuration; non-foundational in Phase 0B.2.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "pilot_alerts",
@@ -1088,9 +1773,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": false,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform pilot alerting; non-foundational in Phase 0B.2 (no schema change required)."
+      "rationale": "Platform pilot alerting; non-foundational in Phase 0B.2 (no schema change required).",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "pilot_definitions",
@@ -1098,9 +1794,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": true,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform Drizzle owns pilot definitions (packages/db/drizzle/*.sql, pilot_* series)."
+      "rationale": "Platform Drizzle owns pilot definitions (packages/db/drizzle/*.sql, pilot_* series).",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/src/schema/pilot.ts"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "pilot_health_scores",
@@ -1108,9 +1815,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": false,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform pilot health scoring; non-foundational in Phase 0B.2."
+      "rationale": "Platform pilot health scoring; non-foundational in Phase 0B.2.",
+      "review_status": "RULE_DERIVED_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
+      "classification_method": "RULE_BASED"
     },
     {
       "table": "pilot_metric_events",
@@ -1118,9 +1836,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": true,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform-side pilot metric telemetry stream; Union Eyes does not define this table."
+      "rationale": "Platform-side pilot metric telemetry stream; Union Eyes does not define this table.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/src/schema/pilot.ts"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "pilot_metric_rollups",
@@ -1128,9 +1857,20 @@
       "ddl_owner": "platform",
       "target_schema": "public",
       "foundational": true,
-      "platform_sources": [],
+      "platform_sources": [
+        "packages/db/src/schema/pilot.ts",
+        "packages/db/drizzle/0033_pilot_metrics.sql"
+      ],
       "django_sources": [],
-      "rationale": "Platform-side aggregated pilot metrics; Union Eyes reads via governed resolver only."
+      "rationale": "Platform-side aggregated pilot metrics; Union Eyes reads via governed resolver only.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/src/schema/pilot.ts"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "precedent_citations",
@@ -1142,7 +1882,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "precedent_tags",
@@ -1154,7 +1901,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "profiles",
@@ -1163,8 +1917,17 @@
       "target_schema": "union_eyes",
       "foundational": false,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "rationale": "No direct Drizzle CREATE TABLE nor default-named Django CreateModel emitted this identifier, but a `db_table` override in Django migrations declares it. Owner = Union Eyes; target schema = union_eyes.",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "apps/union-eyes/backend/ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "report_delivery_history",
@@ -1176,7 +1939,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "report_executions",
@@ -1188,7 +1958,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "report_shares",
@@ -1200,7 +1977,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "report_templates",
@@ -1212,7 +1996,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "reports",
@@ -1224,7 +2015,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "scheduled_reports",
@@ -1236,7 +2034,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "scim_configurations",
@@ -1248,7 +2053,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "scim_events_log",
@@ -1260,7 +2072,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "shared_clause_library",
@@ -1272,7 +2091,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "sso_providers",
@@ -1284,7 +2110,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "sso_sessions",
@@ -1296,7 +2129,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "stripe_webhook_events",
@@ -1311,7 +2151,15 @@
       "django_sources": [
         "billing/0001_initial.py"
       ],
-      "rationale": "Stripe billing events are a platform commerce surface. Platform (Drizzle) owns DDL; Django billing app adopts via `managed = False` and reads through the shared table."
+      "rationale": "Stripe billing events are a platform commerce surface. Platform (Drizzle) owns DDL; Django billing app adopts via `managed = False` and reads through the shared table.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "apps/union-eyes/backend/billing/migrations/0002_adopt_platform_stripe_webhook_events.py",
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-django-adoption-strategy.md"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "tentative_agreements",
@@ -1323,7 +2171,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "trend_analyses",
@@ -1335,7 +2190,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "ue_case_risk_snapshots",
@@ -1344,8 +2206,19 @@
       "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "UE Cognition telemetry table; text prefixed IDs promoted from uuid in Phase 0B.2 \u00a712."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "rationale": "UE Cognition telemetry table; text prefixed IDs promoted from uuid in Phase 0B.2 \u00a712.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "ue_cognition_audits",
@@ -1354,8 +2227,19 @@
       "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "UE Cognition audit telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "rationale": "UE Cognition audit telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "ue_engagement_snapshots",
@@ -1364,8 +2248,19 @@
       "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "UE Cognition engagement telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "rationale": "UE Cognition engagement telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "ue_kpi_snapshots",
@@ -1374,8 +2269,19 @@
       "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "UE Cognition KPI snapshot telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "rationale": "UE Cognition KPI snapshot telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "ue_precedent_matches",
@@ -1384,8 +2290,19 @@
       "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "UE Cognition precedent-matching telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "rationale": "UE Cognition precedent-matching telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "ue_workload_snapshots",
@@ -1394,8 +2311,19 @@
       "target_schema": "union_eyes",
       "foundational": true,
       "platform_sources": [],
-      "django_sources": [],
-      "rationale": "UE Cognition workload telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712."
+      "django_sources": [
+        "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "rationale": "UE Cognition workload telemetry; text prefixed IDs promoted in Phase 0B.2 \u00a712.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2r/phase-0b2r-schema-catalog-proof.md",
+        "packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "union_density",
@@ -1407,7 +2335,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "user_engagement_scores",
@@ -1419,7 +2354,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "user_sessions",
@@ -1431,7 +2373,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "user_uuid_mapping",
@@ -1443,7 +2392,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "users",
@@ -1455,7 +2411,14 @@
       "django_sources": [
         "auth_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "votes",
@@ -1470,7 +2433,15 @@
       "django_sources": [
         "unions/0001_initial.py"
       ],
-      "rationale": "Same identifier, different domain object. public.votes = platform governance votes (packages/db/src/schema/governance.ts). Django union-membership votes (apps/union-eyes/backend/unions/migrations/0001_initial.py). Resolution: Rename Django table to union_eyes.union_votes in a future wave; do not merge."
+      "rationale": "Same identifier, different domain object. public.votes = platform governance votes (packages/db/src/schema/governance.ts). Django union-membership votes (apps/union-eyes/backend/unions/migrations/0001_initial.py). Resolution: Rename Django table to union_eyes.union_votes in a future wave; do not merge.",
+      "review_status": "HUMAN_REVIEWED",
+      "reviewed_by": "Aubert Nungisa",
+      "reviewed_at": "2026-07-23",
+      "evidence_sources": [
+        "reports/audits/cupe-national-phase-0/phase-0b2/phase-0b2-ownership-manifest.md",
+        "reports/audits/cupe-national-phase-0/phase-0b1/phase-0b1-pre-manifest-inventory.md"
+      ],
+      "classification_method": "MANUAL"
     },
     {
       "table": "wage_benchmarks",
@@ -1482,7 +2453,14 @@
       "django_sources": [
         "analytics/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "analytics/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "wage_progressions",
@@ -1494,7 +2472,14 @@
       "django_sources": [
         "bargaining/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
     },
     {
       "table": "wcag_success_criteria",
@@ -1506,7 +2491,489 @@
       "django_sources": [
         "ai_core/0001_initial.py"
       ],
-      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave)."
+      "rationale": "Table exists only in the Union Eyes Django migrations. Platform Drizzle does not define or reference it. DDL owner = Union Eyes; target schema = union_eyes (moved out of public in Phase 0B.2 \u00a78 for the foundational slice; non-foundational tables move in a later wave).",
+      "review_status": "AUTO_CLASSIFIED_UNREVIEWED",
+      "reviewed_by": "",
+      "reviewed_at": "",
+      "evidence_sources": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification_method": "AUTOMATED_HEURISTIC"
+    }
+  ],
+  "provenance_repair": {
+    "phase": "0B.2R",
+    "repaired_at": "2026-07-23",
+    "generator": "scripts/audit/enrich-phase0b2r-ownership-manifest.py",
+    "description": "Adds review_status, reviewed_by, reviewed_at, evidence_sources, classification_method to every table. Fixes EXTRA-entry generator weakness by populating missing source arrays per known rules. Foundational rows with unresolved ownership become validator hard fails."
+  },
+  "allowed_review_statuses": [
+    "HUMAN_REVIEWED",
+    "RULE_DERIVED_REVIEWED",
+    "AUTO_CLASSIFIED_UNREVIEWED",
+    "OWNERSHIP_UNRESOLVED"
+  ],
+  "allowed_classification_methods": [
+    "MANUAL",
+    "RULE_BASED",
+    "AUTOMATED_HEURISTIC"
+  ],
+  "provenance_rules": {
+    "foundational_rows_must_be_reviewed": true,
+    "auto_classified_unreviewed_foundational_is_hard_fail": true,
+    "extra_generator_rows_must_have_non_empty_source_arrays": true,
+    "human_reviewed_requires_reviewer_and_date": true
+  },
+  "deferred_review_register": [
+    {
+      "table": "ab_test_assignments",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ab_test_events",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ab_test_variants",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ab_tests",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "accessibility_audits",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "accessibility_issues",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "accessibility_test_suites",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "accessibility_user_testing",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "address_change_history",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "address_validation_cache",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ai_budgets",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ai_rate_limits",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ai_safety_filters",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ai_usage_metrics",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "analytics_metrics",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "analytics_scheduled_reports",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "arbitration_decisions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "arbitration_precedents",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "arbitrator_profiles",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "bargaining_notes",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "bargaining_proposals",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "bargaining_team_members",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "benchmark_categories",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "benchmark_data",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "benefit_comparisons",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "cba_clauses",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "cba_contacts",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "cba_footnotes",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "cba_version_history",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "chat_messages",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "chat_sessions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "chatbot_analytics",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "chatbot_suggestions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "clause_comparisons",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "clause_comparisons_history",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "clause_library_tags",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "collective_agreements",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "communication_analytics",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "comparative_analyses",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "contribution_rates",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "cost_of_living_data",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "country_address_formats",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "cross_org_access_log",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "external_data_sync_log",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "feature_flags",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "insight_recommendations",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "international_addresses",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "knowledge_base",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "kpi_configurations",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "member_consents",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "member_contact_preferences",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "member_employment_details",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "member_history_events",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "mfa_configurations",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "ml_predictions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "model_metadata",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "negotiation_sessions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "negotiations",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "oauth_providers",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "organization_benchmark_snapshots",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "organization_relationships",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "organization_sharing_grants",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "organization_sharing_settings",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "organization_users",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "page_analytics",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "pending_profiles",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "precedent_citations",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "precedent_tags",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "profiles",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "report_delivery_history",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "report_executions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "report_shares",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "report_templates",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "reports",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "scheduled_reports",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "scim_configurations",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "scim_events_log",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "shared_clause_library",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "sso_providers",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "sso_sessions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "tentative_agreements",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "trend_analyses",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "union_density",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "user_engagement_scores",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "user_sessions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "user_uuid_mapping",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "users",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "wage_benchmarks",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "wage_progressions",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
+    },
+    {
+      "table": "wcag_success_criteria",
+      "reason": "Non-foundational UE-owned table. Auto-classified on generator rule 'no platform_sources AND has union_eyes django_sources'. Per-table human review deferred to CUPE Wave 1.",
+      "target_phase": "CUPE Wave 1"
     }
   ]
 }
