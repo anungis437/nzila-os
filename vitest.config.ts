@@ -112,6 +112,7 @@ export default defineConfig({
       'packages/platform-reasoning-engine',
       'packages/platform-cognition-core',
       'packages/platform-growth-os',
+      'packages/platform-org-resolver',
       'packages/ue-cognition',
       // Platform observability
       'packages/platform-observability',
