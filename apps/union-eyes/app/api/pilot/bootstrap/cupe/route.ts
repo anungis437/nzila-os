@@ -19,6 +19,8 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { eq } from 'drizzle-orm';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { provisionPlatformParticipant } from '@/lib/organizations/platform-tenant';
+import { emitPlatformAuditEvent } from '@/lib/audit/platform-audit-events';
 
 const bodySchema = z.object({
   reset: z.boolean().default(false),
@@ -91,6 +93,19 @@ export const POST = withApi(
     }
 
     if (!orgId) throw ApiError.internal('Failed to resolve bootstrap organization');
+
+    // Phase 0B.2R §7 — provision the platform participant mapping so the
+    // CUPE pilot org has a valid platform tenant id. Idempotent (ON CONFLICT
+    // DO NOTHING) so it is safe to call for both freshly-created and
+    // pre-existing orgs. This is what makes the emitPlatformAuditEvent call
+    // below succeed instead of throwing PlatformTenantMappingRequired.
+    await withSystemContext(async () =>
+      provisionPlatformParticipant({
+        organizationId: orgId!,
+        legalName: fixture.org.name,
+        jurisdiction: 'CA',
+      }),
+    );
 
     let membersInserted = 0;
     await withSystemContext(async () => {
@@ -199,6 +214,26 @@ export const POST = withApi(
         membersInserted,
         casesInserted,
         worksites: fixture.worksites.length,
+      },
+    });
+
+    // Phase 0B.2R §7 — mirror the bootstrap event onto the platform-owned
+    // audit_events chain via the resolver-enforced helper. This is a real
+    // production callsite of requirePlatformTenantId → PostgreSQL and is
+    // the counterpart to the integration test at
+    // apps/union-eyes/lib/__tests__/platform-audit-events.integration.test.ts
+    await emitPlatformAuditEvent({
+      organizationId: orgId,
+      actorUserId: userId ?? 'system:pilot-bootstrap',
+      actorRole: userId ? 'admin' : 'system',
+      action: 'pilot.cupe_bootstrap_executed',
+      targetType: 'organization',
+      targetId: orgId,
+      afterJson: {
+        membersInserted,
+        casesInserted,
+        worksites: fixture.worksites.length,
+        reset: body.reset,
       },
     });
 
