@@ -1,0 +1,161 @@
+===== PHASE 0B.2R §10 CLEAN COMPOSITION + RUNTIME PROOF =====
+DB=phase0b2r_compose_20260723125331 Started=2026-07-23T12:53:31.4136536-04:00
+KeepDb=False
+
+---- STEP 1: CREATE DATABASE phase0b2r_compose_20260723125331 ----
+===== ADMIN create-db =====
+CREATE DATABASE
+---- STEP 2: COMPOSE SCHEMA via phase0b2-compose.ps1 ----
+OK — see log: C:\APPS\nzila-automation-phase0b-clean\reports\audits\cupe-national-phase-0\phase-0b2\logs\phase-0b2-compose-20260723125332.log
+---- STEP 3: VERIFY union_eyes SCHEMA ----
+===== INLINE verify-schema (db=phase0b2r_compose_20260723125331) =====
+  nspname   
+------------
+ union_eyes
+(1 row)
+
+---- STEP 4: VERIFY public.orgs + Option-D contract ----
+===== INLINE verify-orgs-contract (db=phase0b2r_compose_20260723125331) =====
+     ?column?      
+-------------------
+ orgs.id.type:uuid
+(1 row)
+
+                   ?column?                    
+-----------------------------------------------
+ ue.organizations.platform_tenant_id.type:uuid
+(1 row)
+
+                    ?column?                     
+-------------------------------------------------
+ ue.organizations.platform_tenant_id.nullable:NO
+(1 row)
+
+---- STEP 5: VERIFY 6 UE COGNITION TABLES ----
+===== INLINE verify-ue-tables (db=phase0b2r_compose_20260723125331) =====
+       table_name        | id_type | org_id_type 
+-------------------------+---------+-------------
+ ue_case_risk_snapshots  | text    | uuid
+ ue_cognition_audits     | text    | uuid
+ ue_engagement_snapshots | text    | uuid
+ ue_kpi_snapshots        | text    | uuid
+ ue_precedent_matches    | text    | uuid
+ ue_workload_snapshots   | text    | uuid
+(6 rows)
+
+---- STEP 6: CREATE public.organizations COMPAT VIEW ----
+===== INLINE create-compat-view (db=phase0b2r_compose_20260723125331) =====
+CREATE VIEW
+ALTER TABLE
+---- STEP 7: SEED HAPPY ORG (007) ----
+===== INLINE seed-happy-org (db=phase0b2r_compose_20260723125331) =====
+BEGIN
+INSERT 0 1
+INSERT 0 1
+COMMIT
+---- STEP 8: EXPORT PHASE0B2R_INTEGRATION_DB_URL + DATABASE_URL ----
+env set (secret redacted): postgres://nzila:***@localhost:5433/phase0b2r_compose_20260723125331
+---- STEP 9: RUN §7 HAPPY-PATH INTEGRATION TEST ----
+NOTE: fail-closed scenario is structurally impossible on composed DB.
+      0038's NOT NULL + CHECK on union_eyes.organizations.platform_tenant_id
+      prevents seeding a row with platform_tenant_id = NULL. The resolver-level
+      fail-closed path is verified in §7 against the dev DB (where the table is
+      still public.organizations without those constraints).
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0b-clean/apps/union-eyes
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 1 skipped (2)
+   Start at  12:53:45
+   Duration  4.87s (transform 2.70s, setup 0ms, import 788ms, tests 3.76s, environment 0ms)
+
+---- STEP 10: VERIFY audit_events ROW WITH UUID org_id ----
+===== INLINE verify-audit-events (db=phase0b2r_compose_20260723125331) =====
+ test_audit_row_count 
+----------------------
+                    1
+(1 row)
+
+---- STEP 11: RUN §9 KPI REAL-DATA SQL ----
+===== FILE section-9-real-data-sql (db=phase0b2r_compose_20260723125331) =====
+BEGIN
+=== 1) ue_case_risk_snapshots ===
+INSERT 0 1
+               id               |                org_id                |       tenant_id       |      case_id       | risk_tier |  model_version   
+--------------------------------+--------------------------------------+-----------------------+--------------------+-----------+------------------
+ crs_phase0b2r-9_deadbeef000001 | 00000007-0000-4007-8007-000000000007 | test-tenant-phase0b2r | case_phase0b2r_001 | high      | phase0b2r-crs-v1
+(1 row)
+
+=== 2) ue_workload_snapshots ===
+INSERT 0 1
+               id               |                org_id                |  steward_id   | utilization_ratio |   status   
+--------------------------------+--------------------------------------+---------------+-------------------+------------
+ wls_phase0b2r-9_deadbeef000002 | 00000007-0000-4007-8007-000000000007 | steward_alpha |               0.9 | overloaded
+(1 row)
+
+=== 3) ue_engagement_snapshots ===
+INSERT 0 1
+               id               |                org_id                |   member_id    |  tier   | recommended_channel 
+--------------------------------+--------------------------------------+----------------+---------+---------------------
+ mes_phase0b2r-9_deadbeef000003 | 00000007-0000-4007-8007-000000000007 | member_epsilon | at_risk | email
+(1 row)
+
+=== 4) ue_precedent_matches ===
+INSERT 0 1
+               id               |                org_id                |    for_case_id     | success_rate 
+--------------------------------+--------------------------------------+--------------------+--------------
+ pcm_phase0b2r-9_deadbeef000004 | 00000007-0000-4007-8007-000000000007 | case_phase0b2r_001 |         0.72
+(1 row)
+
+=== 5) ue_kpi_snapshots ===
+INSERT 0 1
+               id               |                org_id                | window_days |  model_version   | total_grievances 
+--------------------------------+--------------------------------------+-------------+------------------+------------------
+ kpi_phase0b2r-9_deadbeef000005 | 00000007-0000-4007-8007-000000000007 |          30 | phase0b2r-kpi-v1 | 47
+(1 row)
+
+=== 6) ue_cognition_audits ===
+INSERT 0 1
+               id               |                org_id                |    resource     | action  |          resource_id           
+--------------------------------+--------------------------------------+-----------------+---------+--------------------------------
+ aud_phase0b2r-9_deadbeef000006 | 00000007-0000-4007-8007-000000000007 | ue_kpi_snapshot | compute | kpi_phase0b2r-9_deadbeef000005
+(1 row)
+
+=== 7) Aggregate proof (6 tables, 6 rows, all matching org UUID) ===
+       table_name        | phase0b2r_rows 
+-------------------------+----------------
+ ue_case_risk_snapshots  |              1
+ ue_cognition_audits     |              1
+ ue_engagement_snapshots |              1
+ ue_kpi_snapshots        |              1
+ ue_precedent_matches    |              1
+ ue_workload_snapshots   |              1
+(6 rows)
+
+COMMIT
+---- STEP 12: VERIFY 6 UE COGNITION ROWS ----
+===== INLINE verify-ue-rows (db=phase0b2r_compose_20260723125331) =====
+            t            | count 
+-------------------------+-------
+ ue_case_risk_snapshots  |     1
+ ue_cognition_audits     |     1
+ ue_engagement_snapshots |     1
+ ue_kpi_snapshots        |     1
+ ue_precedent_matches    |     1
+ ue_workload_snapshots   |     1
+(6 rows)
+
+---- STEP 13: AGGREGATE SUMMARY ----
+===== INLINE aggregate-summary (db=phase0b2r_compose_20260723125331) =====
+ audit_rows | crs | wls | mes | pcm | kpi | aud 
+------------+-----+-----+-----+-----+-----+-----
+          1 |   1 |   1 |   1 |   1 |   1 |   1
+(1 row)
+
+---- STEP 14: DROP DATABASE phase0b2r_compose_20260723125331 ----
+===== ADMIN drop-db =====
+DROP DATABASE
+---- STEP 15: DONE ----
+log=C:\APPS\nzila-automation-phase0b-clean\reports\audits\cupe-national-phase-0\phase-0b2r\logs\phase-0b2r-section10-compose-runtime-20260723125331.log
+===== PHASE 0B.2R §10 COMPLETE Finished=2026-07-23T12:53:51.5959450-04:00 =====

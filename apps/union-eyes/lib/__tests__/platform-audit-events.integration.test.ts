@@ -40,9 +40,21 @@ const describeIfDb = DB_URL ? describe : describe.skip
 
 // Fixed test UUIDs — deterministic seed identity.
 const HAPPY_ORG_ID = '00000007-0000-4007-8007-000000000007'
+// FAIL_ORG_ID is intentionally NEVER inserted into organizations. This
+// exercises the resolver's "row does not exist" branch of the fail-closed
+// path (see platform-tenant.ts: `null — organizations row does not exist
+// at all`). This is portable across both:
+//   * dev DB shape — public.organizations is a base table with nullable
+//     platform_tenant_id (Django auth_core/0003 not applied there).
+//   * §10 composed DB shape — public.organizations is a compat view over
+//     union_eyes.organizations, whose platform_tenant_id column is
+//     NOT NULL + CHECK (platform_tenant_id = id) per drizzle 0038.
+//     Seeding a fail-closed row with NULL platform_tenant_id is
+//     structurally impossible on this shape, so the "row missing"
+//     branch is the only portable way to exercise fail-closed here.
+const HAPPY_ORG_ID_PLATFORM_TENANT_ID = HAPPY_ORG_ID
 const FAIL_ORG_ID = '00000007-0000-4007-8007-000000000008'
 const HAPPY_ORG_SLUG = '__phase0b2r_section7_happy__'
-const FAIL_ORG_SLUG = '__phase0b2r_section7_fail__'
 
 describeIfDb('emitPlatformAuditEvent — real PostgreSQL (Phase 0B.2R §7)', () => {
   // Unique per-run actor tag so we can locate this run's audit_events rows.
@@ -57,42 +69,44 @@ describeIfDb('emitPlatformAuditEvent — real PostgreSQL (Phase 0B.2R §7)', () 
     client = postgres(DB_URL!, { max: 2, prepare: false })
     db = drizzle(client)
 
-    // Seed the "happy path" org — will be provisioned as a platform
-    // participant below via the real provisionPlatformParticipant helper.
+    // Precondition for the FK on public.orgs — insert the platform side
+    // FIRST so the same-UUID row exists for the organizations row below
+    // and for `provisionPlatformParticipant`'s idempotent insert.
     await db.execute(sql`
-      INSERT INTO public.organizations (id, name, slug, organization_type, hierarchy_path)
+      INSERT INTO public.orgs (id, legal_name, jurisdiction, status)
+      VALUES (
+        ${HAPPY_ORG_ID}::uuid,
+        'Phase 0B.2R §7 happy-path test org',
+        'CA',
+        'active'::org_status
+      )
+      ON CONFLICT (id) DO NOTHING
+    `)
+
+    // Seed the "happy path" org WITH platform_tenant_id set to the
+    // same UUID. On the §10 composed DB this is required by the
+    // NOT NULL + same-UUID CHECK; on the dev DB it is harmless
+    // (platform_tenant_id is a plain nullable column there).
+    await db.execute(sql`
+      INSERT INTO public.organizations (id, name, slug, organization_type, hierarchy_path, platform_tenant_id)
       VALUES (
         ${HAPPY_ORG_ID}::uuid,
         'Phase 0B.2R §7 happy-path test org',
         ${HAPPY_ORG_SLUG},
         'local',
-        ARRAY[]::text[]
+        ARRAY[]::text[],
+        ${HAPPY_ORG_ID_PLATFORM_TENANT_ID}::uuid
       )
       ON CONFLICT (slug) DO NOTHING
     `)
 
-    // Seed the "fail-closed" org — intentionally NOT provisioned.
-    // Its platform_tenant_id column stays NULL, which must cause
-    // requirePlatformTenantId to throw PlatformTenantMappingRequired.
+    // Fail-closed: FAIL_ORG_ID is intentionally NOT inserted. See the
+    // comment on the constant declaration above for rationale.
+    // Belt-and-braces: if a prior run left FAIL_ORG_ID present (e.g.
+    // from an older revision of this test), clean it out to restore
+    // the "row does not exist" invariant.
     await db.execute(sql`
-      INSERT INTO public.organizations (id, name, slug, organization_type, hierarchy_path)
-      VALUES (
-        ${FAIL_ORG_ID}::uuid,
-        'Phase 0B.2R §7 fail-closed test org',
-        ${FAIL_ORG_SLUG},
-        'local',
-        ARRAY[]::text[]
-      )
-      ON CONFLICT (slug) DO NOTHING
-    `)
-
-    // Reset the fail-closed org's platform_tenant_id in case a prior
-    // run of a *different* test provisioned it. This test's contract
-    // requires FAIL_ORG_ID to have NULL platform_tenant_id.
-    await db.execute(sql`
-      UPDATE public.organizations
-      SET platform_tenant_id = NULL
-      WHERE id = ${FAIL_ORG_ID}::uuid
+      DELETE FROM public.organizations WHERE id = ${FAIL_ORG_ID}::uuid
     `)
   })
 
