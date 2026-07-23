@@ -1,0 +1,1 @@
+PASS 1979 test files / 27793 tests passed / 3 skipped / 0 failed in 360.86s (exit 0). Initial run had 2 failures in apps/union-eyes/app/api/__tests__/pilot-bootstrap-cupe.route.test.ts caused by section-7 additions to route (provisionPlatformParticipant + emitPlatformAuditEvent) not being mocked in the pre-existing unit test; added the two mocks and re-ran — green.

@@ -7,6 +7,8 @@ const m = vi.hoisted(() => ({
   withSystemContext: vi.fn(),
   trackPilotEvent: vi.fn(),
   auditLog: vi.fn(),
+  provisionPlatformParticipant: vi.fn(),
+  emitPlatformAuditEvent: vi.fn(),
   selectQueue: [] as unknown[][],
 }));
 
@@ -45,6 +47,12 @@ vi.mock('fs/promises', () => ({ readFile: m.readFile }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
+vi.mock('@/lib/organizations/platform-tenant', () => ({
+  provisionPlatformParticipant: m.provisionPlatformParticipant,
+}));
+vi.mock('@/lib/audit/platform-audit-events', () => ({
+  emitPlatformAuditEvent: m.emitPlatformAuditEvent,
+}));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
   AuditEventType: { DATA_CREATE: 'DATA_CREATE' },
@@ -74,6 +82,8 @@ describe('pilot/bootstrap/cupe route', () => {
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.trackPilotEvent.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
+    m.provisionPlatformParticipant.mockResolvedValue(undefined);
+    m.emitPlatformAuditEvent.mockResolvedValue(undefined);
     m.withApi.mockImplementation(
       (_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (_request: NextRequest, ctx: any = { body: { reset: false, includeDemoScript: true }, userId: 'u1' }) => {

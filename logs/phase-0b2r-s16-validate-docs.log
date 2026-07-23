@@ -1,0 +1,1 @@
+PASS 0 errors / 1224 warnings / 1529 info, 2216 files scanned; drift on reports/doc-consistency.{json,md} (timestamp-only, 2 lines each) reverted per section-13 disposition
