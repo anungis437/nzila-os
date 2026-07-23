@@ -1,9 +1,9 @@
 # Operational Build Customer-Fixture Scan (Wave 0 §8, Task E)
 
-- Generated: 2026-07-21T13:39:15.870Z
+- Generated: 2026-07-21T18:49:39.854Z
 - Policy: **hardcoded-audit-trail-permit** (JSON allowlist retired; only the hardcoded audit-trail permit is honoured).
 - Patterns: `cupe\s*[-_]?\s*4373`, `cupe\s*local\s*4373`, `CUPE4373_`
-- Source files scanned: 5294
+- Source files scanned: 5310
 - Source files with hits: 1
 - Total source hits: 4
 - Build directory: (not scanned this run)

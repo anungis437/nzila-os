@@ -1,7 +1,7 @@
 # Anti-Theatre Scan Report
 
-- Generated: 2026-07-21T10:21:11.481Z
-- Files scanned: 4798
+- Generated: 2026-07-21T14:09:29.305Z
+- Files scanned: 4792
 - Rules: R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8
 - **Errors: 0**
 - Warnings: 1264
@@ -41,7 +41,7 @@
 | warning | R-6 | `apps/union-eyes/app/[locale]/dashboard/stewards/ratings/page.tsx` | 29 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/[locale]/final-go/page.tsx` | 39 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/[locale]/operational-proving/page.tsx` | 43 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/app/[locale]/page.tsx` | 46 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/app/[locale]/page.tsx` | 45 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/admin/pki/signatures/[id]/sign/route.ts` | 88 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts` | 64 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/app/api/cases/[caseId]/timeline/route.ts` | 97 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -78,7 +78,7 @@
 | warning | R-6 | `apps/union-eyes/components/analytics/engagement-metrics-dashboard.tsx` | 209 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/analytics/real-time-ticker.tsx` | 109 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/analytics/scheduled-reports-manager.tsx` | 341 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/auth/login-form.tsx` | 65 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/components/auth/login-form.tsx` | 62 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/automation/automation-workflow-builder.tsx` | 826 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/calendar/CalendarSyncManager.tsx` | 77 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/cancellation-popup.tsx` | 32 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -104,7 +104,7 @@
 | warning | R-6 | `apps/union-eyes/components/credit-usage-display.tsx` | 38 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/cross-union-analytics/cross-union-analytics-console.tsx` | 217 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/dashboards/clc-dashboard.tsx` | 75 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/dashboards/federation-dashboard.tsx` | 77 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/components/dashboards/federation-dashboard.tsx` | 76 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/dashboards/pilot-dashboard.tsx` | 66 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/dashboards/pilot-dashboard.tsx` | 83 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/dashboards/union-dashboard.tsx` | 306 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -196,9 +196,9 @@
 | warning | R-6 | `apps/union-eyes/components/rewards/recognition-feed.tsx` | 52 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/rewards/recognition-feed.tsx` | 108 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/satisfaction/satisfaction-survey.tsx` | 217 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/sidebar.tsx` | 109 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/sidebar.tsx` | 194 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/sidebar.tsx` | 206 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/components/sidebar.tsx` | 104 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/components/sidebar.tsx` | 186 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/components/sidebar.tsx` | 198 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/signatures/documents-list.tsx` | 65 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/social-media/campaign-scheduler.tsx` | 186 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/social-media/post-composer.tsx` | 185 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |

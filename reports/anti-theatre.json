@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T10:21:11.475Z",
-  "scannedFiles": 4798,
+  "generatedAt": "2026-07-21T14:09:29.300Z",
+  "scannedFiles": 4792,
   "rulesRun": [
     "R-1",
     "R-2",
@@ -267,7 +267,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/app/[locale]/page.tsx",
-      "line": 46,
+      "line": 45,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -563,7 +563,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/auth/login-form.tsx",
-      "line": 65,
+      "line": 62,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -771,7 +771,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/dashboards/federation-dashboard.tsx",
-      "line": 77,
+      "line": 76,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1507,7 +1507,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/sidebar.tsx",
-      "line": 109,
+      "line": 104,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1515,7 +1515,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/sidebar.tsx",
-      "line": 194,
+      "line": 186,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1523,7 +1523,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/sidebar.tsx",
-      "line": 206,
+      "line": 198,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"

@@ -1,0 +1,3 @@
+[migrate] incrementals: 39 discovered; 0 already applied; 39 pending.
+[migrate] applying 0000_initial.sql
+[migrate:fail] failure applying 0000_initial.sql: relation "votes" already exists. Statements executed prior to this error remain committed. Either patch the database manually, add a healer migration, or (only for genuinely known-broken historical files) add an entry to packages/db/drizzle/.known-partial-failures.json naming the healer migration.

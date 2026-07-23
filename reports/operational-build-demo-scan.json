@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T13:39:15.870Z",
+  "generatedAt": "2026-07-21T18:49:39.854Z",
   "workspace": "C:/APPS/nzila-automation",
   "patterns": [
     "cupe\\s*[-_]?\\s*4373",
@@ -8,7 +8,7 @@
   ],
   "policy": "hardcoded-audit-trail-permit",
   "source": {
-    "scannedFiles": 5294,
+    "scannedFiles": 5310,
     "filesWithHits": 1,
     "totalHits": 4,
     "files": [

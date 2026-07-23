@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-07-21T02:27:49.462Z
+Generated: 2026-07-23T06:44:07.372Z
 
-Total documents indexed: 1539
+Total documents indexed: 1592
 Stale documents (>90 days since repo validation): 1
 
 ## Category Summary
@@ -25,7 +25,9 @@ Stale documents (>90 days since repo validation): 1
 | hardening | 1 | 0 |
 | healthcare | 1 | 0 |
 | incident-response.md | 1 | 0 |
+| institutional-engineering | 39 | 0 |
 | migration | 2 | 0 |
+| nzila | 5 | 0 |
 | nzila-finalization | 11 | 0 |
 | nzila-infrastructure-convergence | 12 | 0 |
 | nzila-live-audit | 11 | 0 |
@@ -45,7 +47,7 @@ Stale documents (>90 days since repo validation): 1
 | root | 4 | 1 |
 | runbooks | 2 | 0 |
 | sred | 87 | 0 |
-| union-eyes | 48 | 0 |
+| union-eyes | 57 | 0 |
 | zonga | 2 | 0 |
 
 ## Documents
@@ -1066,7 +1068,7 @@ Stale documents (>90 days since repo validation): 1
 | [docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/README.md](docs/doctrine/whitepapers/README.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-07-21 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-07-23 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/gates/gate-taxonomy.md](docs/governance/gates/gate-taxonomy.md) | governance | 2026-07-18 | current |
 | [docs/governance/owner-operated-review-model.md](docs/governance/owner-operated-review-model.md) | governance | 2026-07-18 | current |
@@ -1076,6 +1078,45 @@ Stale documents (>90 days since repo validation): 1
 | [docs/healthcare/discovery-surveys.md](docs/healthcare/discovery-surveys.md) | healthcare | 2026-05-17 | current |
 | [docs/incident-response.md](docs/incident-response.md) | incident-response.md | 2026-07-18 | current |
 | [docs/INDEX.md](docs/INDEX.md) | INDEX.md | 2026-07-18 | current |
+| [docs/institutional-engineering/candidates/edition-1.1/candidate-change-log.md](docs/institutional-engineering/candidates/edition-1.1/candidate-change-log.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.1-institutional-engineering/IEBOK-I.1-institutional-engineering.md](docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.1-institutional-engineering/IEBOK-I.1-institutional-engineering.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.2-institutional-architecture/IEBOK-I.2-institutional-architecture.md](docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.2-institutional-architecture/IEBOK-I.2-institutional-architecture.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.3-institutional-systems/IEBOK-I.3-institutional-systems.md](docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.3-institutional-systems/IEBOK-I.3-institutional-systems.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/candidates/edition-1.1/governance/IEBOK-0-series-charter.md](docs/institutional-engineering/candidates/edition-1.1/governance/IEBOK-0-series-charter.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/foundations/IEBOK-I.1-institutional-engineering/IEBOK-I.1-institutional-engineering.md](docs/institutional-engineering/foundations/IEBOK-I.1-institutional-engineering/IEBOK-I.1-institutional-engineering.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/foundations/IEBOK-I.1-institutional-engineering/README.md](docs/institutional-engineering/foundations/IEBOK-I.1-institutional-engineering/README.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/foundations/IEBOK-I.2-institutional-architecture/IEBOK-I.2-institutional-architecture.md](docs/institutional-engineering/foundations/IEBOK-I.2-institutional-architecture/IEBOK-I.2-institutional-architecture.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/foundations/IEBOK-I.2-institutional-architecture/README.md](docs/institutional-engineering/foundations/IEBOK-I.2-institutional-architecture/README.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/foundations/IEBOK-I.3-institutional-systems/IEBOK-I.3-institutional-systems.md](docs/institutional-engineering/foundations/IEBOK-I.3-institutional-systems/IEBOK-I.3-institutional-systems.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/foundations/IEBOK-I.3-institutional-systems/README.md](docs/institutional-engineering/foundations/IEBOK-I.3-institutional-systems/README.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/glossary/controlled-glossary.md](docs/institutional-engineering/glossary/controlled-glossary.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/baseline-repository-manifest.md](docs/institutional-engineering/governance/baseline-repository-manifest.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/corpus-qualification-program.md](docs/institutional-engineering/governance/corpus-qualification-program.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/IEBOK-0-series-charter.md](docs/institutional-engineering/governance/IEBOK-0-series-charter.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/IEBOK-CORPUS-INVENTORY.md](docs/institutional-engineering/governance/IEBOK-CORPUS-INVENTORY.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/ingestion-decision-record.md](docs/institutional-engineering/governance/ingestion-decision-record.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/provenance-register.md](docs/institutional-engineering/governance/provenance-register.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/seed-corpus-freeze-notice.md](docs/institutional-engineering/governance/seed-corpus-freeze-notice.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/governance/SEED-CORPUS-REGISTER.md](docs/institutional-engineering/governance/SEED-CORPUS-REGISTER.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/correction-backlog.md](docs/institutional-engineering/qualification/correction-backlog.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/cross-volume-consistency-matrix.md](docs/institutional-engineering/qualification/cross-volume-consistency-matrix.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/external-foundations-matrix.md](docs/institutional-engineering/qualification/external-foundations-matrix.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/external-review-dossier.md](docs/institutional-engineering/qualification/external-review-dossier.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/external-reviewer-role-matrix.md](docs/institutional-engineering/qualification/external-reviewer-role-matrix.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/foundations-claim-register.md](docs/institutional-engineering/qualification/foundations-claim-register.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/IEBOK-I.3-technical-review-plan.md](docs/institutional-engineering/qualification/IEBOK-I.3-technical-review-plan.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/IEBOK-QUAL-000.md](docs/institutional-engineering/qualification/IEBOK-QUAL-000.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/IEBOK-QUAL-I.1.md](docs/institutional-engineering/qualification/IEBOK-QUAL-I.1.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/IEBOK-QUAL-I.2.md](docs/institutional-engineering/qualification/IEBOK-QUAL-I.2.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/IEBOK-QUAL-I.3.md](docs/institutional-engineering/qualification/IEBOK-QUAL-I.3.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/internal-requalification-records.md](docs/institutional-engineering/qualification/internal-requalification-records.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/qualification-evidence-index.md](docs/institutional-engineering/qualification/qualification-evidence-index.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/terminology-authority-register.md](docs/institutional-engineering/qualification/terminology-authority-register.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/wave-2b-correction-disposition-register.md](docs/institutional-engineering/qualification/wave-2b-correction-disposition-register.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/qualification/wave-2b-file-inventory.md](docs/institutional-engineering/qualification/wave-2b-file-inventory.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/README.md](docs/institutional-engineering/README.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/registries/terminology-collision-register.md](docs/institutional-engineering/registries/terminology-collision-register.md) | institutional-engineering | 2026-07-22 | current |
+| [docs/institutional-engineering/registries/unresolved-matters.md](docs/institutional-engineering/registries/unresolved-matters.md) | institutional-engineering | 2026-07-22 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | current |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | current |
 | [docs/nzila-finalization/canonical-operating-system-navigation.md](docs/nzila-finalization/canonical-operating-system-navigation.md) | nzila-finalization | 2026-07-18 | current |
@@ -1156,6 +1197,11 @@ Stale documents (>90 days since repo validation): 1
 | [docs/nzila-tier2-hardening/README.md](docs/nzila-tier2-hardening/README.md) | nzila-tier2-hardening | 2026-05-11 | current |
 | [docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md](docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md) | nzila-tier3-operating-infrastructure | 2026-07-18 | current |
 | [docs/nzila-tier3-operating-infrastructure/README.md](docs/nzila-tier3-operating-infrastructure/README.md) | nzila-tier3-operating-infrastructure | 2026-07-18 | current |
+| [docs/nzila/institutional-engineering/INSTE-CLAIMS-BOUNDARY.md](docs/nzila/institutional-engineering/INSTE-CLAIMS-BOUNDARY.md) | nzila | 2026-07-22 | current |
+| [docs/nzila/institutional-engineering/INSTE-NZILA-CROSSWALK.md](docs/nzila/institutional-engineering/INSTE-NZILA-CROSSWALK.md) | nzila | 2026-07-22 | current |
+| [docs/nzila/institutional-engineering/method-no-rewrite-findings.md](docs/nzila/institutional-engineering/method-no-rewrite-findings.md) | nzila | 2026-07-22 | current |
+| [docs/nzila/institutional-engineering/nzila-implementation-profile.md](docs/nzila/institutional-engineering/nzila-implementation-profile.md) | nzila | 2026-07-22 | current |
+| [docs/nzila/institutional-engineering/NZILA-INSTE-001-alignment-doctrine.md](docs/nzila/institutional-engineering/NZILA-INSTE-001-alignment-doctrine.md) | nzila | 2026-07-22 | current |
 | [docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md](docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md) | oci | 2026-05-22 | current |
 | [docs/oci/ai/AI_DISCLOSURE_NOTICE.md](docs/oci/ai/AI_DISCLOSURE_NOTICE.md) | oci | 2026-05-22 | current |
 | [docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md](docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md) | oci | 2026-05-22 | current |
@@ -1321,8 +1367,8 @@ Stale documents (>90 days since repo validation): 1
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-07-18 | current |
 | [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-22 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-07-18 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-07-21 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-07-21 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-07-23 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-07-23 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-07-18 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |
@@ -1575,6 +1621,15 @@ Stale documents (>90 days since repo validation): 1
 | [docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md](docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md) | union-eyes | 2026-07-21 | current |
 | [docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md) | union-eyes | 2026-07-21 | current |
 | [docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md](docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/19_AUTHORIZATION_VIOLATION.md](docs/union-eyes/reality-remediation/19_AUTHORIZATION_VIOLATION.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md](docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md](docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md](docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md](docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/deadline-engine/00-charter.md](docs/union-eyes/reality-remediation/deadline-engine/00-charter.md) | union-eyes | 2026-07-21 | current |
+| [docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md](docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md) | union-eyes | 2026-07-21 | current |
 | [docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md](docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/runtime-convergence/fsm-pilot-module-runtime-reconvergence.md](docs/union-eyes/runtime-convergence/fsm-pilot-module-runtime-reconvergence.md) | union-eyes | 2026-05-11 | current |
 | [docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md](docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md) | union-eyes | 2026-05-11 | current |

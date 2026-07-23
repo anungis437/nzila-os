@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T02:27:52.199Z",
+  "generatedAt": "2026-07-23T06:44:27.431Z",
   "overallScore": 7.9,
   "categories": {
     "runtime_proof": {
@@ -16,9 +16,9 @@
       ]
     },
     "script_sprawl": {
-      "score": 1.9,
+      "score": 1.8,
       "findings": [
-        "Root script count is 302.",
+        "Root script count is 305.",
         "Root command surface is still dense and benefits from continued pruning."
       ]
     },
@@ -77,7 +77,7 @@
     },
     {
       "category": "script_sprawl",
-      "finding": "Root script count is 302."
+      "finding": "Root script count is 305."
     },
     {
       "category": "script_sprawl",

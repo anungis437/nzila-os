@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T02:27:49.462Z",
-  "totalDocuments": 1539,
+  "generatedAt": "2026-07-23T06:44:07.372Z",
+  "totalDocuments": 1592,
   "staleDocuments": 1,
   "categories": [
     {
@@ -84,8 +84,18 @@
       "staleCount": 0
     },
     {
+      "category": "institutional-engineering",
+      "count": 39,
+      "staleCount": 0
+    },
+    {
       "category": "migration",
       "count": 2,
+      "staleCount": 0
+    },
+    {
+      "category": "nzila",
+      "count": 5,
       "staleCount": 0
     },
     {
@@ -185,7 +195,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 48,
+      "count": 57,
       "staleCount": 0
     },
     {
@@ -6282,7 +6292,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-07-21",
+      "lastValidated": "2026-07-23",
       "stale": false
     },
     {
@@ -6337,6 +6347,240 @@
       "path": "docs/INDEX.md",
       "category": "INDEX.md",
       "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/candidates/edition-1.1/candidate-change-log.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.1-institutional-engineering/IEBOK-I.1-institutional-engineering.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.2-institutional-architecture/IEBOK-I.2-institutional-architecture.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/candidates/edition-1.1/foundations/IEBOK-I.3-institutional-systems/IEBOK-I.3-institutional-systems.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/candidates/edition-1.1/governance/IEBOK-0-series-charter.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/foundations/IEBOK-I.1-institutional-engineering/IEBOK-I.1-institutional-engineering.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/foundations/IEBOK-I.1-institutional-engineering/README.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/foundations/IEBOK-I.2-institutional-architecture/IEBOK-I.2-institutional-architecture.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/foundations/IEBOK-I.2-institutional-architecture/README.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/foundations/IEBOK-I.3-institutional-systems/IEBOK-I.3-institutional-systems.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/foundations/IEBOK-I.3-institutional-systems/README.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/glossary/controlled-glossary.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/baseline-repository-manifest.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/corpus-qualification-program.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/IEBOK-0-series-charter.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/IEBOK-CORPUS-INVENTORY.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/ingestion-decision-record.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/provenance-register.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/seed-corpus-freeze-notice.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/governance/SEED-CORPUS-REGISTER.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/correction-backlog.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/cross-volume-consistency-matrix.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/external-foundations-matrix.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/external-review-dossier.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/external-reviewer-role-matrix.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/foundations-claim-register.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/IEBOK-I.3-technical-review-plan.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/IEBOK-QUAL-000.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/IEBOK-QUAL-I.1.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/IEBOK-QUAL-I.2.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/IEBOK-QUAL-I.3.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/internal-requalification-records.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/qualification-evidence-index.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/terminology-authority-register.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/wave-2b-correction-disposition-register.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/qualification/wave-2b-file-inventory.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/README.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/registries/terminology-collision-register.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/institutional-engineering/registries/unresolved-matters.md",
+      "category": "institutional-engineering",
+      "lastValidated": "2026-07-22",
       "stale": false
     },
     {
@@ -6817,6 +7061,36 @@
       "path": "docs/nzila-tier3-operating-infrastructure/README.md",
       "category": "nzila-tier3-operating-infrastructure",
       "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila/institutional-engineering/INSTE-CLAIMS-BOUNDARY.md",
+      "category": "nzila",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila/institutional-engineering/INSTE-NZILA-CROSSWALK.md",
+      "category": "nzila",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila/institutional-engineering/method-no-rewrite-findings.md",
+      "category": "nzila",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila/institutional-engineering/nzila-implementation-profile.md",
+      "category": "nzila",
+      "lastValidated": "2026-07-22",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila/institutional-engineering/NZILA-INSTE-001-alignment-doctrine.md",
+      "category": "nzila",
+      "lastValidated": "2026-07-22",
       "stale": false
     },
     {
@@ -7812,13 +8086,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-07-21",
+      "lastValidated": "2026-07-23",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-07-21",
+      "lastValidated": "2026-07-23",
       "stale": false
     },
     {
@@ -9329,6 +9603,60 @@
     },
     {
       "path": "docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/19_AUTHORIZATION_VIOLATION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/deadline-engine/00-charter.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-07-21",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md",
       "category": "union-eyes",
       "lastValidated": "2026-07-21",
       "stale": false

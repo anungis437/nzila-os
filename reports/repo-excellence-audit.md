@@ -1,6 +1,6 @@
 # Repo Excellence Audit
 
-Generated: 2026-07-21T02:27:52.199Z
+Generated: 2026-07-23T06:44:27.431Z
 
 Overall score: 7.9 / 10
 
@@ -10,7 +10,7 @@ Overall score: 7.9 / 10
 | --- | ---: |
 | runtime_proof | 9 |
 | duplication | 8 |
-| script_sprawl | 1.9 |
+| script_sprawl | 1.8 |
 | hidden_fragility | 8 |
 | docs_truth | 8.9 |
 | naming_consistency | 10 |
@@ -28,7 +28,7 @@ Overall score: 7.9 / 10
 - [runtime_proof] Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available.
 - [duplication] Duplicate script bodies remain: contract-tests, contract:test
 - [duplication] Duplicate script bodies remain: inventory:check, docs:sync
-- [script_sprawl] Root script count is 302.
+- [script_sprawl] Root script count is 305.
 - [script_sprawl] Root command surface is still dense and benefits from continued pruning.
 - [docs_truth] 1 indexed documents are stale by repo-mtime policy (>90 days).
 - [ci_efficiency] Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml
