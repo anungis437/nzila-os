@@ -10,6 +10,47 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..', '..');
 const appRoot = path.join(repoRoot, 'apps', 'union-eyes');
 
+// -------------------------------------------------------------------------
+// Phase 0C.2 §6 defensive replay-refusal guard (added 2026-07-23).
+//
+// This script replays the frozen legacy Union Eyes migration lineage under
+// apps/union-eyes/db/migrations/. That lineage was officially frozen on
+// 2026-05-09 and is governed by
+//   docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md
+// which forbids replay against fresh databases (§4) and mandates a
+// replay-refusal contract enforced by the compliant runner
+// tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs (§6).
+//
+// This script is retained solely for historical archaeology and one-off
+// forensic replays gated on the same explicit-attestation contract as the
+// compliant bootstrap. It MUST NOT be invoked by the Phase 0C E2E
+// lifecycle allocator, by CI, by QA_TEST_ENV, or by any developer workflow
+// that has not first read the governance document.
+//
+// To invoke this script you MUST provide BOTH of:
+//   UE_LINEAGE_REPLAY_OVERRIDE=1
+//   UE_LINEAGE_REPLAY_REASON=<non-trivial free-text reason>
+// -------------------------------------------------------------------------
+const REPLAY_OVERRIDE = process.env.UE_LINEAGE_REPLAY_OVERRIDE === '1';
+const REPLAY_REASON = (process.env.UE_LINEAGE_REPLAY_REASON || '').trim();
+if (!REPLAY_OVERRIDE || REPLAY_REASON.length < 16) {
+  console.error(
+    '[ue:legacy-replay] REFUSED to replay frozen legacy migration lineage.\n' +
+      '  Governance: docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md §4/§6.\n' +
+      '  Frozen dir: apps/union-eyes/db/migrations/ (sentinel: .lineage-frozen).\n' +
+      '  Compliant runner: tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs.\n' +
+      '  To force replay (forensic use only) provide BOTH:\n' +
+      '    UE_LINEAGE_REPLAY_OVERRIDE=1\n' +
+      '    UE_LINEAGE_REPLAY_REASON=<non-trivial free-text reason, min 16 chars>\n',
+  );
+  process.exit(1);
+}
+console.warn(
+  '[ue:legacy-replay] WARNING: proceeding with frozen legacy replay.\n' +
+    `  Attested reason: ${REPLAY_REASON}\n` +
+    '  Production deployments MUST reject any attestation with legacy_replay_override=true.',
+);
+
 loadEnv({ path: path.join(appRoot, '.env.local') });
 
 if (!process.env.DATABASE_URL) {

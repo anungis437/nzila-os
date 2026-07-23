@@ -204,48 +204,73 @@ export async function allocateDatabase(options: AllocateOptions = {}): Promise<A
 /**
  * Invoke the canonical UE migration pipeline against the disposable DB.
  *
- * Two-stage pipeline (both required for a Phase 0B-contract-complete DB):
- *   1) Platform bootstrap  (extensions + scoped platform migrations)
- *      → tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs
- *   2) Union Eyes app migrations  (organization_members, voter_eligibility, …)
- *      → tooling/scripts/run-union-eyes-drizzle-migrate.mjs
+ * COMPLIANT PIPELINE (Phase 0C.2 §6 refactor, effective 2026-07-23):
+ *   → tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs
  *
- * Rationale: the platform bootstrap intentionally skips the "legacy lineage"
- * (`db/migrations/*`) which is where UE app tables live. Production/demo
- * environments restore a snapshot via UE_DB_RESTORE_SNAPSHOT_URL to get the
- * baseline; disposable-DB E2E has no such snapshot, so we must apply the
- * legacy migrator too. See phase-0c-lifecycle-design.md §7.
+ * The compliant bootstrap runner is the ONLY governed entry point. It:
+ *   (a) Enforces the .lineage-frozen sentinel on apps/union-eyes/db/migrations/
+ *       and refuses to touch the frozen legacy lineage unless the caller
+ *       provides BOTH UE_LINEAGE_REPLAY_OVERRIDE=1 and
+ *       UE_LINEAGE_REPLAY_REASON.
+ *   (b) Applies scoped Drizzle migrations from apps/union-eyes/db/migrations-cache/.
+ *   (c) Applies tooling/sql/union-eyes-qa-baseline.sql (idempotent minimum
+ *       schema for QA/CI).
+ *   (d) Optionally restores a canonical Django-owned snapshot when
+ *       UE_DB_RESTORE_SNAPSHOT_URL is set.
+ *
+ * Why this changed:
+ *   The previous Phase 0C.1 pipeline invoked a second stage
+ *   `run-union-eyes-drizzle-migrate.mjs` which replayed the entire frozen
+ *   legacy lineage (97 SQL files in apps/union-eyes/db/migrations/). That
+ *   replay violates the freeze contract documented in
+ *   docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md
+ *   §4 (replay prohibitions) and §6 (replay-refusal contract). The replay
+ *   also unavoidably aborted inside 0008_lean_mother_askani.sql at
+ *   statement #7 105 (`relation "knowledge_base" does not exist`) — see
+ *   reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-migration-0008-forensic-analysis.md.
+ *
+ *   The compliant bootstrap already produces a functionally complete
+ *   schema for the disposable-DB E2E target environment. No second stage
+ *   is required. If any E2E-required table proves absent, the correct
+ *   remediation is a NEW scoped migration under db/migrations-cache/,
+ *   NOT a resurrection of the legacy replay.
  */
 function runMigrations(repoRoot: string, dbUrl: string, runDir: string): void {
-  const stages: Array<{ id: string; script: string }> = [
-    { id: 'bootstrap', script: path.join(repoRoot, 'tooling', 'scripts', 'run-union-eyes-drizzle-bootstrap.mjs') },
-    { id: 'ue-app-migrations', script: path.join(repoRoot, 'tooling', 'scripts', 'run-union-eyes-drizzle-migrate.mjs') },
-  ]
-  const logFile = path.join(runDir, 'migrations.log')
-  fs.writeFileSync(logFile, '', 'utf8')
+  const bootstrapScript = path.join(
+    repoRoot,
+    'tooling',
+    'scripts',
+    'run-union-eyes-drizzle-bootstrap.mjs',
+  )
+  if (!fs.existsSync(bootstrapScript)) {
+    throw new Error(
+      `[ue:e2e:allocate-db] Compliant migration runner not found at ${bootstrapScript}. Cannot proceed.`,
+    )
+  }
 
-  for (const stage of stages) {
-    if (!fs.existsSync(stage.script)) {
-      throw new Error(
-        `[ue:e2e:allocate-db] Migration stage '${stage.id}' not found at ${stage.script}. Cannot proceed.`,
-      )
-    }
-    fs.appendFileSync(logFile, `\n===== stage: ${stage.id} (${stage.script}) =====\n`, 'utf8')
-    const child = spawnSync('node', [stage.script], {
-      cwd: repoRoot,
-      env: { ...process.env, DATABASE_URL: dbUrl },
-      encoding: 'utf8',
-      stdio: 'pipe',
-    })
-    const combined = `${child.stdout ?? ''}\n${child.stderr ?? ''}`
-    fs.appendFileSync(logFile, combined, 'utf8')
-    if (child.status !== 0) {
-      // eslint-disable-next-line no-console
-      console.error(`[ue:e2e:allocate-db] stage '${stage.id}' failed:\n${combined}`)
-      throw new Error(
-        `[ue:e2e:allocate-db] Migration stage '${stage.id}' failed (exit=${child.status}). See ${logFile}.`,
-      )
-    }
+  const logFile = path.join(runDir, 'migrations.log')
+  fs.writeFileSync(
+    logFile,
+    `[ue:e2e:allocate-db] Phase 0C.2 compliant runner: ${bootstrapScript}\n` +
+      `[ue:e2e:allocate-db] Legacy replay refused per historical-migration-lineage-governance.md §4/§6.\n`,
+    'utf8',
+  )
+  fs.appendFileSync(logFile, `\n===== stage: bootstrap (${bootstrapScript}) =====\n`, 'utf8')
+
+  const child = spawnSync('node', [bootstrapScript], {
+    cwd: repoRoot,
+    env: { ...process.env, DATABASE_URL: dbUrl },
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+  const combined = `${child.stdout ?? ''}\n${child.stderr ?? ''}`
+  fs.appendFileSync(logFile, combined, 'utf8')
+  if (child.status !== 0) {
+    // eslint-disable-next-line no-console
+    console.error(`[ue:e2e:allocate-db] bootstrap runner failed:\n${combined}`)
+    throw new Error(
+      `[ue:e2e:allocate-db] Compliant migration runner failed (exit=${child.status}). See ${logFile}.`,
+    )
   }
 }
 
