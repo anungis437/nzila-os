@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-21T02:27:52.199Z",
-  "overallScore": 7.9,
+  "generatedAt": "2026-07-23T14:14:06.158Z",
+  "overallScore": 7.8,
   "categories": {
     "runtime_proof": {
-      "score": 9,
+      "score": 8,
       "findings": [
-        "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+        "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
       ]
     },
     "duplication": {
@@ -16,9 +16,9 @@
       ]
     },
     "script_sprawl": {
-      "score": 1.9,
+      "score": 1.8,
       "findings": [
-        "Root script count is 302.",
+        "Root script count is 305.",
         "Root command surface is still dense and benefits from continued pruning."
       ]
     },
@@ -27,10 +27,8 @@
       "findings": []
     },
     "docs_truth": {
-      "score": 8.9,
-      "findings": [
-        "1 indexed documents are stale by repo-mtime policy (>90 days)."
-      ]
+      "score": 9,
+      "findings": []
     },
     "naming_consistency": {
       "score": 10,
@@ -65,7 +63,7 @@
   "improvementBacklog": [
     {
       "category": "runtime_proof",
-      "finding": "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+      "finding": "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
     },
     {
       "category": "duplication",
@@ -77,15 +75,11 @@
     },
     {
       "category": "script_sprawl",
-      "finding": "Root script count is 302."
+      "finding": "Root script count is 305."
     },
     {
       "category": "script_sprawl",
       "finding": "Root command surface is still dense and benefits from continued pruning."
-    },
-    {
-      "category": "docs_truth",
-      "finding": "1 indexed documents are stale by repo-mtime policy (>90 days)."
     },
     {
       "category": "ci_efficiency",
