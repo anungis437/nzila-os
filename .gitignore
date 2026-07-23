@@ -282,3 +282,6 @@ apps/trustcore/gtm/
 
 # HubSpot config file
 hubspot.config.yml
+
+# Playwright storage-state files (Phase 0C.2 §12) — regenerated per run, contain live session tokens
+apps/union-eyes/playwright/.auth/

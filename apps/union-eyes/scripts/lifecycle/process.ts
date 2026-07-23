@@ -5,7 +5,7 @@
  * ourselves spawned and recorded to `.e2e-lifecycle/pid.json`.
  */
 
-import { spawn, type ChildProcess } from 'node:child_process'
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, createWriteStream } from 'node:fs'
 import net from 'node:net'
 import path from 'node:path'
@@ -129,6 +129,42 @@ function processIsAlive(pid: number): boolean {
   }
 }
 
+/**
+ * Signal the tracked PID and — on Windows — its entire process tree.
+ *
+ * Rationale: on win32, `spawn(cmd, args, { shell: true })` produces a
+ * `cmd.exe`/`pnpm.cmd` wrapper whose PID is the one we record; the actual
+ * `next` (Node) grandchild is a distinct process. POSIX process-group
+ * signalling is unavailable on Windows, so `process.kill(pid)` only
+ * terminates the wrapper, orphaning the underlying dev server. Using
+ * `taskkill /PID <pid> /T /F` (Terminate + Force) walks the win32 job-object
+ * tree and kills every descendant. This *never* uses `/IM node.exe` or
+ * anything else that could hit an unrelated node process — only our own
+ * recorded PID and its descendants.
+ *
+ * On POSIX, falls back to `process.kill(pid, signal)`.
+ */
+function killTracked(pid: number, signal: NodeJS.Signals): boolean {
+  if (process.platform !== 'win32') {
+    try {
+      process.kill(pid, signal)
+      return true
+    } catch {
+      return false
+    }
+  }
+  // Windows: use taskkill for the entire tree. /F ("force") is required for
+  // SIGKILL; for a graceful stop we still use /F because Windows console apps
+  // do not honour SIGTERM the same way — but /T ensures no orphan children.
+  // We keep SIGTERM vs SIGKILL semantics in the caller by choosing whether to
+  // await between the two calls.
+  const res = spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], {
+    stdio: 'ignore',
+    windowsHide: true,
+  })
+  return res.status === 0
+}
+
 // ---------- server boot / stop ----------------------------------------------
 
 export interface BootServerOptions {
@@ -225,7 +261,15 @@ export async function stopServer(options: StopServerOptions = {}): Promise<StopS
   }
 
   try {
-    process.kill(rec.pid, 'SIGTERM')
+    if (process.platform === 'win32') {
+      // Windows: taskkill /T /F terminates the tree in one call. It is
+      // "hard" (comparable to SIGKILL); we still call it here to give the
+      // caller the opportunity to short-circuit before the extra wait +
+      // second attempt below, preserving the sigterm/sigkill result shape.
+      killTracked(rec.pid, 'SIGTERM')
+    } else {
+      process.kill(rec.pid, 'SIGTERM')
+    }
   } catch {
     /* already gone */
   }
@@ -240,7 +284,11 @@ export async function stopServer(options: StopServerOptions = {}): Promise<StopS
   }
 
   try {
-    process.kill(rec.pid, 'SIGKILL')
+    if (process.platform === 'win32') {
+      killTracked(rec.pid, 'SIGKILL')
+    } else {
+      process.kill(rec.pid, 'SIGKILL')
+    }
   } catch {
     /* already gone */
   }
