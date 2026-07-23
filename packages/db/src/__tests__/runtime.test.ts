@@ -43,7 +43,6 @@ describe('db client proxy', () => {
         'DATABASE_URL environment variable is required',
       )
     },
-    20000,
   )
 
   it('initializes the drizzle client once and reuses it for get/has access', async () => {

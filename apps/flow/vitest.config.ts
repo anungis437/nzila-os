@@ -8,6 +8,12 @@ export default defineProject({
     name: 'Flow-app',
     environment: 'node',
     include: ['lib/**/*.test.ts', 'tests/**/*.test.ts', 'app/**/*.test.ts'],
+    // Slice tests dynamically import Next.js server components; cold module
+    // resolution on Windows + monorepo-scale parallel runners can exceed the
+    // 5s vitest default. 30s gives comfortable headroom while still catching
+    // genuine hangs.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     // @ts-expect-error Coverage options are supported at runtime but not in this ProjectConfig type.
     coverage: {
       provider: 'v8',

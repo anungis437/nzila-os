@@ -19,7 +19,12 @@ export default defineProject({
   },
   test: {
     name: "union-eyes",
-    testTimeout: 60000,
+    // Route-matrix smoke and import-matrix tests dynamically import hundreds
+    // of Next.js API route modules; cold module resolution on Windows +
+    // monorepo-scale parallel runners can occasionally push individual
+    // per-route imports past 60s. 120s gives comfortable headroom.
+    testTimeout: 120_000,
+    hookTimeout: 60_000,
     coverage: {
       provider: "v8",
       include: [
