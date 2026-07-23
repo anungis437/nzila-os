@@ -6,6 +6,21 @@ migration-pipeline defect (`phase-0c1-migration-pipeline-blocker.md`) blocks
 §14 authoritative baseline — full FR-01/02/03 verification carries over to
 Phase 0D per AMBER-INFRA-INCOMPLETE closure.
 
+> **AMENDMENT — 2026-07-23 (Phase 0C.2 §3 phase-ownership correction).**
+>
+> Every "carries over to Phase 0D" / "Phase 0D scope" / "Phase 0D handoff"
+> reference in this register is **superseded**. Read every such reference
+> as "carries over to Phase 0C.2" / "Phase 0C.2 scope" / "Phase 0C.2
+> handoff". The residual work for FR-01, FR-02, FR-03, and FR-06 remains
+> **Phase 0C** work and must complete on this same branch before Phase 0C
+> can be closed as GREEN.
+>
+> Phase 0D staging deployment is not authorised until Phase 0C.2
+> achieves GREEN closure per the Phase 0C.2 mandate.
+>
+> The historical wording below is preserved verbatim for audit fidelity
+> — no FR row bodies have been rewritten.
+
 ## FR-01 — Auth-required tests fail at `helpers/auth.ts:77 toHaveURL(...) 5000ms timeout`
 
 - **Category:** INFRASTRUCTURE_BLOCKED
@@ -118,3 +133,43 @@ Infrastructure primitives (env / disposable-DB / process / readiness) all
 landed and unit-tested. Authoritative baseline execution deferred pending
 resolution of migration 0008 defect (FR-06, new). No PRODUCT_DEFECT,
 TEST_DEFECT, or EXTERNAL_DEPENDENCY categories were observed.
+
+---
+
+## Phase 0C.2 §3 amendment — FR-06 root-cause pivot
+
+**Effective 2026-07-23 (Phase 0C.2 §4 forensic analysis).**
+
+FR-06 was originally classified as "corruption of migration 0008" in
+`phase-0c1-migration-pipeline-blocker.md`. Phase 0C.2 §4 forensic
+analysis (see `phase-0c2-migration-0008-forensic-analysis.md`, to be
+produced later in this phase) reveals a superseding root cause:
+
+- **Legacy `apps/union-eyes/db/migrations/` is officially FROZEN** as of
+  2026-05-09 (sentinel `apps/union-eyes/db/migrations/.lineage-frozen`
+  present, governance policy in
+  `docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md`).
+- The compliant fresh-DB path is: `run-union-eyes-drizzle-bootstrap.mjs`
+  → reconciled scoped root `apps/union-eyes/db/migrations-cache/`
+  (4 files) + `tooling/sql/union-eyes-qa-baseline.sql` (22 KB idempotent
+  minimum schema for QA/CI) + optional Django snapshot restore via
+  `UE_DB_RESTORE_SNAPSHOT_URL`.
+- The Phase 0C.1 runner `run-union-eyes-drizzle-migrate.mjs`, added to
+  `apps/union-eyes/scripts/lifecycle/allocate-db.ts` `runMigrations()`
+  as the "stage 2 UE app migrations" step, **replays the entire frozen
+  legacy lineage** in violation of the governance policy §4 replay
+  prohibitions.
+- Migration 0008 is not a Phase 0C defect — it is a frozen historical
+  artifact whose corruption is one of many reasons the freeze exists.
+
+**Phase 0C.2 remedy (executed in §4–§9 of the Phase 0C.2 mandate):**
+1. Refactor `allocate-db.ts` `runMigrations()` to invoke only the
+   compliant `run-union-eyes-drizzle-bootstrap.mjs`.
+2. Remove or defense-guard `run-union-eyes-drizzle-migrate.mjs` so the
+   frozen lineage cannot be replayed accidentally.
+3. Prove clean-DB path (bootstrap + QA baseline → contract-complete
+   disposable DB) and existing-DB upgrade path.
+4. Preserve 0008 unchanged.
+
+FR-06 remains INFRASTRUCTURE_BLOCKED until the refactor lands with
+runtime proof, at which point FR-06 is closed as RESOLVED.

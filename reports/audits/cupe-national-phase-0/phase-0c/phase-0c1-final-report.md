@@ -12,6 +12,50 @@
 
 ---
 
+> **AMENDMENT — 2026-07-23 (Phase 0C.2 §3 phase-ownership correction).**
+>
+> The residual work identified in this report — specifically §9
+> (auth-state generator), §10 (Playwright projects restructure), §11 /
+> §19 (`NZILA_E2E_MANAGED_SERVER` handoff), §14 (authoritative baseline
+> run), §15 (cross-org security tests), §16 (bilingual smoke), §17
+> (accessibility smoke), §18 (flake analysis ≥ 3 runs), and the
+> migration-pipeline defect classified as FR-06 — is **NOT** a
+> Phase 0D scope item. Per explicit direction from Aubert, all of
+> that residual work is **reassigned to Phase 0C.2** and must complete
+> on this same branch before Phase 0C can be closed as GREEN.
+>
+> The language "❌ DEFERRED to Phase 0D" that appears in the §2
+> execution register below is **superseded**. Read those rows as
+> "❌ REASSIGNED to Phase 0C.2". The historical wording is preserved
+> for audit fidelity — no §2 rows have been rewritten.
+>
+> The §6 "Recommended follow-up (Phase 0D)" heading is likewise
+> superseded. The three remediation options listed there remain valid
+> options, but they are Phase 0C.2 remediation options, not Phase 0D
+> options. Phase 0D staging deployment is still explicitly not
+> authorised until Phase 0C.2 achieves GREEN closure per the
+> Phase 0C.2 mandate.
+>
+> Post-amendment Phase ownership summary:
+>
+> | Item | Original wording | Corrected ownership |
+> | --- | --- | --- |
+> | Migration 0008 forensic + healer (FR-06) | Phase 0D follow-up | **Phase 0C.2 §4–§9** |
+> | Auth-state generator (§9) | Phase 0D | **Phase 0C.2 §12** |
+> | Playwright projects restructure (§10) | Phase 0D | **Phase 0C.2 §13** |
+> | `NZILA_E2E_MANAGED_SERVER` handoff (§11/§19) | Phase 0D | **Phase 0C.2 §14** |
+> | Authoritative full baseline (§14) | Phase 0D | **Phase 0C.2 §15** |
+> | Cross-org security tests (§15) | Phase 0D | **Phase 0C.2 §17** |
+> | Bilingual smoke (§16) | Phase 0D | **Phase 0C.2 §18** |
+> | Accessibility smoke (§17) | Phase 0D | **Phase 0C.2 §19** |
+> | Flake analysis (§18) | Phase 0D | **Phase 0C.2 §20** |
+>
+> The Phase 0C.2 mandate is authoritative; see
+> `phase-0c2-checkpoint-verification.md` and the Phase 0C.2 final
+> report (to be produced at §25 closure) for the executed record.
+
+---
+
 ## Executive summary
 
 Phase 0C.1 was chartered to (a) implement the governed E2E lifecycle designed
