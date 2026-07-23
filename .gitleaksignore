@@ -30,3 +30,23 @@ apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:3
 #   exposed — see the entry above for the underlying dev-only fallback.
 # Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
 .gitleaksignore:nzila-database-url-with-password:11
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 0C.1 governed E2E lifecycle files — 6 findings, all the same well-known
+# local-dev PostgreSQL admin URL used as a fallback default when
+# E2E_DB_ADMIN_URL is unset. The credential pattern (nzila:nzila_dev on
+# localhost:5433) is the standard local dev credential documented in dev.ps1,
+# docker-compose.yml, and AGENTS.md/CLAUDE.md. The rule regex is intentionally
+# broader than its own description ("not localhost") and matches this fallback.
+# No secret is exposed — production and staging environments require
+# E2E_DB_ADMIN_URL to be provided via environment (see hardening in the
+# Phase 0C.2 commit series that removes the fallback going forward). The
+# historical commit range still shows the literal.
+# Rule: nzila-database-url-with-password
+# Reviewed: Phase 0C.2 gate (2026-07-23).
+reports/audits/cupe-national-phase-0/phase-0c/phase-0c1-final-report.md:nzila-database-url-with-password:131
+apps/union-eyes/scripts/lifecycle/allocate-db.ts:nzila-database-url-with-password:197
+apps/union-eyes/scripts/lifecycle/prove-db-allocator.ts:nzila-database-url-with-password:26
+reports/audits/cupe-national-phase-0/phase-0c/phase-0c-database-fixture-proof.md:nzila-database-url-with-password:20
+apps/union-eyes/scripts/lifecycle/env.ts:nzila-database-url-with-password:75
+apps/union-eyes/scripts/lifecycle/env.ts:nzila-database-url-with-password:203
