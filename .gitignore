@@ -195,6 +195,9 @@ packages/packages/
 **/playwright-report/
 **/test-results/
 
+# ----- Phase 0C.1 governed E2E lifecycle scratch (runs/history/pids) ------
+**/.e2e-lifecycle/
+
 # ----- Security scan artifacts ------
 audit-report.json
 snyk-report.*
