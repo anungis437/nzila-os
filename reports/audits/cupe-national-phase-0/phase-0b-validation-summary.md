@@ -1,5 +1,26 @@
 # Phase 0B — Validation Summary
 
+> **✅ Phase 0B.3 final closure adjudication (2026-07-23).**
+> Phase 0B is **CLOSED GREEN — PHASE 0B FOUNDATIONAL RUNTIME PROVEN**.
+> The internal inconsistency in Phase 0B.2R (simultaneously "closed" and
+> "AMBER") was adjudicated under the rule *"No AMBER classification may
+> survive without at least one concrete open item marked
+> `blocks_green = true`. If no such item remains, promote the phase to
+> GREEN."* The open items register carries 8 items (OPEN-01…OPEN-08)
+> with **zero** blocks_green=true. Phase 0B mandate satisfied by §7
+> real-DB integration proof (CUPE bootstrap → resolver → PostgreSQL,
+> 2/2 pass on fresh re-run). All prior AMBER classifications for
+> Phase 0B, 0B.1, 0B.2, and 0B.2R are preserved for audit trail.
+> Final adjudication record:
+> [phase-0b3/phase-0b3-final-adjudication.md](phase-0b3/phase-0b3-final-adjudication.md).
+> Evidence bundle (12 artefacts):
+> [phase-0b3/](phase-0b3/).
+> Per the Phase 0B.3 mandate: no environment deployed, no CUPE scenario
+> graduated, no Phase 0C / 0D / 1 started, no force-push, no merge to
+> `main`.
+
+---
+
 > **✅ Phase 0B.2 architecture-decision update (2026-07-23).**
 > The AMBER — ARCHITECTURE DECISION REQUIRED classification recorded in the
 > Phase 0B.1 correction header immediately below has been resolved by

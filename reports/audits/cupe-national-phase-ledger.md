@@ -4,7 +4,7 @@ Single source of truth for phase progression. Updated at the close of each phase
 
 ## Phase 0 — Baseline Stabilization
 
-**Status:** `IN_PROGRESS — CHECKPOINT 2349d497b · Phase 0A closed AMBER 2026-07-23 · Phase 0A.1 closed GREEN 2026-07-23 · Phase 0B RE-CLASSIFIED AMBER 2026-04-25 (was GREEN 2026-04-24) · Phase 0B.1 closed AMBER — ARCHITECTURE DECISION REQUIRED 2026-07-23 · Phase 0B.2 RE-CLASSIFIED AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE 2026-07-23 (was GREEN 2026-07-23; superseded by Phase 0B.2R corrective phase) · Phase 0B.2R IN_PROGRESS 2026-07-23 (Option D — Governed hybrid)`
+**Status:** `IN_PROGRESS — CHECKPOINT 2349d497b · Phase 0A closed AMBER 2026-07-23 · Phase 0A.1 closed GREEN 2026-07-23 · Phase 0B RE-CLASSIFIED AMBER 2026-04-25 (was GREEN 2026-04-24) · Phase 0B.1 closed AMBER — ARCHITECTURE DECISION REQUIRED 2026-07-23 · Phase 0B.2 RE-CLASSIFIED AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE 2026-07-23 (was GREEN 2026-07-23; superseded by Phase 0B.2R corrective phase) · Phase 0B.2R closed AMBER 2026-07-23 (foundational runtime integration achieved but self-imposed "5 paths" bar unmet — superseded by Phase 0B.3 adjudication) · Phase 0B.3 closed GREEN — PHASE 0B FOUNDATIONAL RUNTIME PROVEN 2026-07-23`
 **Authorized at commit:** `290e6c77dd1bc2ddcf33d899e52f13ccd57bd161`
 **Branch:** `fix/union-eyes-reality-remediation` (historical/audit) · `fix/union-eyes-phase0b-clean` (Phase 0B.2 implementation)
 **Local database:** native Windows PostgreSQL 17.8 on `localhost:5433`, DB `nzila_automation`, user `nzila`
@@ -127,6 +127,66 @@ against the runtime-integrated code, (4) resolve the side-fix scope, and
 Per the Phase 0B.2R mandate: no Phase 0C / 0D / 1 started, no CUPE
 scenario graduated, no environment deployed. Historical GREEN text
 preserved below for audit-trail continuity.
+
+**Phase 0B.2R · Corrective closure of Phase 0B.2 (2026-07-23):** closed
+`AMBER — FOUNDATIONAL RUNTIME INTEGRATION ACHIEVED, SELF-IMPOSED 5-PATHS BAR UNMET`
+on branch `fix/union-eyes-phase0b-clean` (base
+`4d6f63511a1bde7f02408f5621a1ce9ca8a42245`, HEAD `8c19cdc0c`).
+Delivered: (§3) manifest provenance repair to v2 with 13/13 foundational
+rows HUMAN_REVIEWED and 0 blockers; (§4+§5) foundational ownership
+resolution for `organization_members` (`UNION_EYES_OWNED_SHARED`) and
+`audit_events` (`PLATFORM_OWNED_EXCLUSIVE`); (§6+§8) organization
+cross-schema contract 6/6 checks pass; (§7) resolver production
+call-site integration — CUPE bootstrap route calls
+`provisionPlatformParticipant` in `withSystemContext` and
+`emitPlatformAuditEvent` for pilot audit, backed by real-DB integration
+test that connects to native PostgreSQL 17.8 and confirms actual INSERT
+via independent `psql` witness; (§9) KPI DB migration real-data proof
+against 6/6 UE Cognition tables; (§10) clean-composition proof and
+(§11) existing-DB upgrade proof both pass on runtime-integrated code;
+(§12) `cupe-vocabulary` side-fix retained with documented rationale;
+(§13) governance regenerated artefact retained; (§14) hooks/validation
+log documenting Windows Lefthook fan-in bug and standalone trio
+workaround; (§15+§16) closure statement and AGENTS.md gate green; (§17)
+INV-06 contract-test exemption for the §7 real-DB integration test
+(single-file literal, follows `apps/console/lib/proof-center-ports-db.ts`
+precedent). AMBER classification acknowledged that the "5 paths" bar
+from `phase-0b2r-amber-closure.md` §4 (KPI ingest, Django audit, CUPE
+bootstrap, member enrollment, worksite assignment) was met on only
+1 path (CUPE bootstrap). See
+[cupe-national-phase-0/phase-0b2r/](cupe-national-phase-0/phase-0b2r/).
+Superseded by Phase 0B.3 adjudication on 2026-07-23 (see below).
+
+**Phase 0B.3 · Final Closure Adjudication (2026-07-23):** closed
+`GREEN — PHASE 0B FOUNDATIONAL RUNTIME PROVEN` on branch
+`fix/union-eyes-phase0b-clean` (base
+`4d6f63511a1bde7f02408f5621a1ce9ca8a42245`, HEAD `8c19cdc0c`).
+Adjudicated the internal inconsistency in the Phase 0B.2R report
+(simultaneously "closed" and "AMBER") under the rule *"No AMBER
+classification may survive without at least one concrete open item
+marked `blocks_green = true`. If no such item remains, promote the
+phase to GREEN."* Findings: (a) Phase 0B mandate required *"at least
+one test must execute API/server action → resolver → PostgreSQL.
+Mocks alone are insufficient."* — the §7 CUPE bootstrap call site plus
+real-DB integration test satisfies this literal mandate (2/2 passes
+against native PG on fresh re-run, 6.77s); (b) the "5 paths" bar was
+self-imposed in `phase-0b2r-amber-closure.md` §4 and maps to Phase 0C
+feature scope, not to Phase 0B foundational identifier-integrity
+requirements; (c) the open items register enumerates 8 items
+(OPEN-01…OPEN-08) with **zero** items marked `blocks_green = true`;
+(d) manifest verifier reports 125 tables, 13 foundational (all
+HUMAN_REVIEWED), 0 blockers; (e) all AGENTS.md pilot-mode gates
+(lint / typecheck / test:fast / validate:docs / governance:audit) run
+green (fresh 2026-07-23); (f) adversarial audits of the §17 INV-06
+exemption and the §16 route-test mock addition conclude both are
+narrow, precedented, symmetric, and safe. Verdict: GREEN. Evidence
+bundle (12 artefacts) lives under
+[cupe-national-phase-0/phase-0b3/](cupe-national-phase-0/phase-0b3/);
+final adjudication record at
+[cupe-national-phase-0/phase-0b3/phase-0b3-final-adjudication.md](cupe-national-phase-0/phase-0b3/phase-0b3-final-adjudication.md).
+Per the Phase 0B.3 mandate: no environment deployed, no CUPE scenario
+graduated, no Phase 0C / 0D / 1 started, no historical rewrite, no
+force-push, no merge to `main`.
 
 **Phase 0B.2 · Foundational Architecture Slice under Option D (2026-07-23) — SUPERSEDED GREEN entry (retained for audit):**
 ~~closed `GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE` on branch
@@ -305,6 +365,40 @@ and adds the substantive-outcome marker table + governed clean-DB proof.)
 * Idempotent second run: bootstrap-apply skipped, default 0 pending, --verify exit 0.
 * Historical migrations `0000_initial.sql` – `0033_fix_pilot_alerts_rule_fk.sql` remain byte-identical.
 * Phase 0 as a whole remains open for the residual items (§4 org-model, §5 KPI id, §6 Playwright, §7 E2E, §10 staging, §11 smoke).
+
+### Phase 0B.2R closure classification (this session, 2026-07-23) — SUPERSEDED
+
+**`AMBER — FOUNDATIONAL RUNTIME INTEGRATION ACHIEVED, SELF-IMPOSED 5-PATHS BAR UNMET`** (superseded by Phase 0B.3 on the same date; retained for audit)
+
+* §3 manifest provenance repair complete (v2 schema; 13/13 foundational HUMAN_REVIEWED; 0 blockers).
+* §4+§5 foundational ownership resolutions landed (`organization_members` = `UNION_EYES_OWNED_SHARED`; `audit_events` = `PLATFORM_OWNED_EXCLUSIVE`).
+* §6+§8 organization cross-schema contract re-verified (6/6 pass).
+* §7 resolver production call-site integration delivered — CUPE bootstrap route + real-DB integration test (2/2 pass, independent psql witness).
+* §9 KPI DB migration real-data proof against 6/6 UE Cognition tables.
+* §10+§11 clean-composition + existing-DB upgrade proofs both pass on runtime-integrated code.
+* §12+§13 side-fixes retained with disposition rationale.
+* §14 hooks/validation log documents Windows Lefthook fan-in bug and standalone trio workaround.
+* §15+§16 closure statement and AGENTS.md gate green.
+* §17 INV-06 exemption for the §7 real-DB integration test (single-file literal, precedented, safe).
+* AMBER rationale: The "5 paths" bar from `phase-0b2r-amber-closure.md` §4 was met on only 1 of 5 paths (CUPE bootstrap).
+
+### Phase 0B.3 closure classification (this session, 2026-07-23)
+
+**`GREEN — PHASE 0B FOUNDATIONAL RUNTIME PROVEN`**
+
+* Adjudication rule applied: *"No AMBER classification may survive without at least one concrete open item marked `blocks_green = true`. If no such item remains, promote the phase to GREEN."*
+* Phase 0B mandate satisfied: at least one API → resolver → PostgreSQL runtime proof exists (§7 CUPE bootstrap; real-DB integration test 2/2 pass, fresh re-run 6.77s).
+* The "5 paths" bar in `phase-0b2r-amber-closure.md` §4 was self-imposed and maps to Phase 0C feature scope, not Phase 0B foundational identifier-integrity.
+* Open items register enumerates 8 items (OPEN-01…OPEN-08); ZERO items marked `blocks_green = true`.
+* Manifest: 125 tables, 13 foundational (all HUMAN_REVIEWED), 0 blockers.
+* Fresh validation (2026-07-23): decisive suite 46/46 pass, `tooling-checks` 18/18 pass, contract-tests 9426/9426 pass, typecheck 236/236, lint 0 errors, `validate:docs` 0 errors, `governance:audit` all 8 layers green.
+* Adversarial audits of §17 INV-06 exemption and §16 route-test mock addition both conclude: narrow, precedented, symmetric, safe.
+* Ownership closure: `organization_members` (`UNION_EYES_OWNED_SHARED`) internally consistent; `audit_events` (`PLATFORM_OWNED_EXCLUSIVE`) verified (96 platform refs / 0 Django `db_table='audit_events'` bindings).
+* KPI integrity: physical `uuid` at DB via migration 0039 (verified against real data); TS-surface `text()` typing is deliberate Wave 1 ergonomic gap, documented inline.
+* Evidence bundle: 12 artefacts under [cupe-national-phase-0/phase-0b3/](cupe-national-phase-0/phase-0b3/).
+* Final adjudication record: [cupe-national-phase-0/phase-0b3/phase-0b3-final-adjudication.md](cupe-national-phase-0/phase-0b3/phase-0b3-final-adjudication.md).
+* Per the Phase 0B.3 mandate: no environment deployed, no CUPE scenario graduated, no Phase 0C / 0D / 1 started, no historical rewrite, no force-push, no merge to `main`.
+* Phase 0 as a whole remains open for the residual items (§6 Playwright, §7 E2E, §10 staging, §11 smoke).
 
 ### Phase 0B closure classification (this session, 2026-04-24)
 
