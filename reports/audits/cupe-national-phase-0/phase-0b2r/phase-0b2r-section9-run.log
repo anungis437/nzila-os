@@ -1,0 +1,55 @@
+BEGIN
+=== 1) ue_case_risk_snapshots ===
+INSERT 0 1
+               id               |                org_id                |       tenant_id       |      case_id       | risk_tier |  model_version   
+--------------------------------+--------------------------------------+-----------------------+--------------------+-----------+------------------
+ crs_phase0b2r-9_deadbeef000001 | 00000007-0000-4007-8007-000000000007 | test-tenant-phase0b2r | case_phase0b2r_001 | high      | phase0b2r-crs-v1
+(1 row)
+
+=== 2) ue_workload_snapshots ===
+INSERT 0 1
+               id               |                org_id                |  steward_id   | utilization_ratio |   status   
+--------------------------------+--------------------------------------+---------------+-------------------+------------
+ wls_phase0b2r-9_deadbeef000002 | 00000007-0000-4007-8007-000000000007 | steward_alpha |               0.9 | overloaded
+(1 row)
+
+=== 3) ue_engagement_snapshots ===
+INSERT 0 1
+               id               |                org_id                |   member_id    |  tier   | recommended_channel 
+--------------------------------+--------------------------------------+----------------+---------+---------------------
+ mes_phase0b2r-9_deadbeef000003 | 00000007-0000-4007-8007-000000000007 | member_epsilon | at_risk | email
+(1 row)
+
+=== 4) ue_precedent_matches ===
+INSERT 0 1
+               id               |                org_id                |    for_case_id     | success_rate 
+--------------------------------+--------------------------------------+--------------------+--------------
+ pcm_phase0b2r-9_deadbeef000004 | 00000007-0000-4007-8007-000000000007 | case_phase0b2r_001 |         0.72
+(1 row)
+
+=== 5) ue_kpi_snapshots ===
+INSERT 0 1
+               id               |                org_id                | window_days |  model_version   | total_grievances 
+--------------------------------+--------------------------------------+-------------+------------------+------------------
+ kpi_phase0b2r-9_deadbeef000005 | 00000007-0000-4007-8007-000000000007 |          30 | phase0b2r-kpi-v1 | 47
+(1 row)
+
+=== 6) ue_cognition_audits ===
+INSERT 0 1
+               id               |                org_id                |    resource     | action  |          resource_id           
+--------------------------------+--------------------------------------+-----------------+---------+--------------------------------
+ aud_phase0b2r-9_deadbeef000006 | 00000007-0000-4007-8007-000000000007 | ue_kpi_snapshot | compute | kpi_phase0b2r-9_deadbeef000005
+(1 row)
+
+=== 7) Aggregate proof (6 tables, 6 rows, all matching org UUID) ===
+       table_name        | phase0b2r_rows 
+-------------------------+----------------
+ ue_case_risk_snapshots  |              1
+ ue_cognition_audits     |              1
+ ue_engagement_snapshots |              1
+ ue_kpi_snapshots        |              1
+ ue_precedent_matches    |              1
+ ue_workload_snapshots   |              1
+(6 rows)
+
+COMMIT
