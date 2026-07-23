@@ -1,27 +1,39 @@
 /**
- * @nzila/ue-cognition/schema — Phase-2 Drizzle schema declarations.
+ * @nzila/ue-cognition/schema — Drizzle schema for the UE Cognition
+ * telemetry tables.
  *
- * NOT YET RUN AS A MIGRATION. Phase-1 storage is file-backed JSON under
- * `ops/ue-cognition/`. These tables describe the eventual move to Postgres
- * so the schema is reviewable + testable today and the file→DB swap is a
- * single store-adapter change.
+ * Phase 0B.2 §12: the six UE Cognition tables live in the `union_eyes`
+ * schema (per packages/db/schema-ownership-manifest.json,
+ * UNION_EYES_OWNED_EXCLUSIVE) and their `id` column is `text` (not `uuid`)
+ * because the runtime writes prefixed identifiers produced by
+ * `makeId('crs' | 'wls' | 'mes' | 'pcm' | 'kpi' | 'aud')` in
+ * packages/ue-cognition/src/utils.ts.
+ *
+ * The DDL for these tables lives in
+ * packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql. This
+ * Drizzle schema is READ-ONLY relative to that migration and must be kept
+ * byte-identical in column names and types.
  */
-import { sql } from 'drizzle-orm'
 import {
   boolean,
   doublePrecision,
   integer,
   jsonb,
-  pgTable,
+  pgSchema,
   text,
   timestamp,
-  uuid,
 } from 'drizzle-orm/pg-core'
 
-export const ueCaseRiskSnapshots = pgTable('ue_case_risk_snapshots', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+/**
+ * Drizzle `pgSchema` handle for the `union_eyes` schema. All UE-owned
+ * cognition tables MUST be declared through this handle.
+ */
+export const unionEyesSchema = pgSchema('union_eyes')
+
+export const ueCaseRiskSnapshots = unionEyesSchema.table('ue_case_risk_snapshots', {
+  id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull(),
-  orgId: uuid('org_id').notNull(),
+  orgId: text('org_id').notNull(), // uuid at DB level; string in TS to match Option D tenant contract
   caseId: text('case_id').notNull(),
   caseKind: text('case_kind').notNull(),
   riskScore: integer('risk_score').notNull(),
@@ -37,10 +49,10 @@ export const ueCaseRiskSnapshots = pgTable('ue_case_risk_snapshots', {
   snapshotAt: timestamp('snapshot_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export const ueWorkloadSnapshots = pgTable('ue_workload_snapshots', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+export const ueWorkloadSnapshots = unionEyesSchema.table('ue_workload_snapshots', {
+  id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull(),
-  orgId: uuid('org_id').notNull(),
+  orgId: text('org_id').notNull(),
   stewardId: text('steward_id').notNull(),
   currentCaseload: integer('current_caseload').notNull(),
   maxCaseload: integer('max_caseload').notNull(),
@@ -54,10 +66,10 @@ export const ueWorkloadSnapshots = pgTable('ue_workload_snapshots', {
   snapshotAt: timestamp('snapshot_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export const ueEngagementSnapshots = pgTable('ue_engagement_snapshots', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+export const ueEngagementSnapshots = unionEyesSchema.table('ue_engagement_snapshots', {
+  id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull(),
-  orgId: uuid('org_id').notNull(),
+  orgId: text('org_id').notNull(),
   memberId: text('member_id').notNull(),
   engagementScore: integer('engagement_score').notNull(),
   disengagementProbability: doublePrecision('disengagement_probability').notNull(),
@@ -70,10 +82,10 @@ export const ueEngagementSnapshots = pgTable('ue_engagement_snapshots', {
   snapshotAt: timestamp('snapshot_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export const uePrecedentMatches = pgTable('ue_precedent_matches', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+export const uePrecedentMatches = unionEyesSchema.table('ue_precedent_matches', {
+  id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull(),
-  orgId: uuid('org_id').notNull(),
+  orgId: text('org_id').notNull(),
   forCaseId: text('for_case_id').notNull(),
   matches: jsonb('matches').notNull(),
   typicalDaysToResolve: doublePrecision('typical_days_to_resolve'),
@@ -82,10 +94,10 @@ export const uePrecedentMatches = pgTable('ue_precedent_matches', {
   retrievedAt: timestamp('retrieved_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export const ueKpiSnapshots = pgTable('ue_kpi_snapshots', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+export const ueKpiSnapshots = unionEyesSchema.table('ue_kpi_snapshots', {
+  id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull(),
-  orgId: uuid('org_id').notNull(),
+  orgId: text('org_id').notNull(),
   windowDays: integer('window_days').notNull(),
   windowStart: timestamp('window_start', { withTimezone: true }).notNull(),
   windowEnd: timestamp('window_end', { withTimezone: true }).notNull(),
@@ -94,10 +106,10 @@ export const ueKpiSnapshots = pgTable('ue_kpi_snapshots', {
   computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export const ueCognitionAudits = pgTable('ue_cognition_audits', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+export const ueCognitionAudits = unionEyesSchema.table('ue_cognition_audits', {
+  id: text('id').primaryKey(),
   tenantId: text('tenant_id').notNull(),
-  orgId: uuid('org_id').notNull(),
+  orgId: text('org_id').notNull(),
   resource: text('resource').notNull(),
   action: text('action').notNull(),
   actorId: text('actor_id'),
@@ -117,3 +129,4 @@ export const UE_COGNITION_TABLES = [
 ] as const
 
 void boolean
+
