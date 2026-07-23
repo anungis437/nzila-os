@@ -206,6 +206,12 @@ packages:
     tier: foundational
     description: "Cross-app authentication adapters and session utilities"
 
+  platform-org-resolver:
+    owner: "@nzila/platform"
+    steward: null
+    tier: foundational
+    description: "Cross-schema organization resolver — Phase 0B.2 governed hybrid contract (public.orgs ↔ union_eyes.organizations)"
+
   platform-billing:
     owner: "@nzila/commerce"
     steward: null

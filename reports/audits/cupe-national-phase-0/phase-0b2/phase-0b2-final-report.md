@@ -1,7 +1,21 @@
 # Phase 0B.2 §21 — Final Report
 
+> **SUPERSEDED — 2026-07-23.** This GREEN final report is superseded by
+> Phase 0B.2R (see [../phase-0b2r/](../phase-0b2r/)). Corrected classification:
+> **AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE**. The resolver was
+> delivered as a package + adapter + unit tests only — with zero production
+> call-sites — and Commit `d86ab9ccc` explicitly deferred route wiring to
+> Phase 0C, contradicting the Phase 0B.2 closure contract. Additionally, all
+> seven Phase 0B.2 commits were made with `LEFTHOOK=0` (hook bypass), which
+> should have been disclosed in this report. The scope-adjacent
+> `cupe-vocabulary` side-fix and regenerated repo-wide governance artifacts
+> also landed in the deployable Phase 0B branch without a necessity decision.
+> This report is retained below for audit-trail continuity; do not act on it
+> as a closure.
+
 **Phase:** Phase 0B.2 — Foundational Architecture Slice under Option D
-**Classification:** GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE
+**Original classification (superseded):** GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE
+**Corrected classification (Phase 0B.2R):** AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE
 **Approver:** Aubert
 **Date:** 2026-07-23
 **Branch:** `fix/union-eyes-phase0b-clean` (base `4d6f63511`)

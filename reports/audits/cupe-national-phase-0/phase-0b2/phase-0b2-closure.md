@@ -1,6 +1,18 @@
 # Phase 0B.2 §20 — Closure Classification
 
-**Classification:** `GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE`
+> **SUPERSEDED — 2026-07-23.** This GREEN closure is superseded by Phase 0B.2R
+> (see [../phase-0b2r/phase-0b2r-closure.md](../phase-0b2r/phase-0b2r-closure.md)
+> once written and [../phase-0b2r/phase-0b2r-gap-analysis.md](../phase-0b2r/phase-0b2r-gap-analysis.md)).
+> Corrected classification: **AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE**.
+> Reason: Gate #5 of this closure ("Resolver in foundational paths") was
+> misinterpreted as satisfied by the `foundational-paths.ts` enumeration in the
+> resolver package. The Phase 0B.2 closure contract required the resolver to be
+> called from real production HTTP/API or server-action code paths, not merely
+> enumerated as a static allowlist. Commit `d86ab9ccc` explicitly deferred route
+> wiring to Phase 0C, which contradicts Gate #5. This GREEN report is retained
+> below for audit-trail continuity; do not act on it as a closure.
+
+**Original classification (superseded):** `GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE`
 **Approver:** Aubert (sole approver, per Phase 0 governance)
 **Date:** 2026-07-23
 **Branch:** `fix/union-eyes-phase0b-clean` (base `4d6f63511`)

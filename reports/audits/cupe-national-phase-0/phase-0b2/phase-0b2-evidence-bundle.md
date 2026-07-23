@@ -1,5 +1,15 @@
 # Phase 0B.2 §18 — Evidence Bundle
 
+> **SUPERSEDED — 2026-07-23.** This bundle refers to the Phase 0B.2 GREEN
+> closure that has been downgraded to
+> `AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE`. The corrective
+> Phase 0B.2R evidence bundle is at
+> [../phase-0b2r/](../phase-0b2r/). All documents listed below remain valid
+> artefacts of what Phase 0B.2 actually delivered (schema ownership manifest,
+> organization contract migration, KPI migration, resolver package + adapter,
+> unit tests), but their aggregate does **not** satisfy the Phase 0B.2
+> foundational-runtime-integration gate.
+
 Branch: `fix/union-eyes-phase0b-clean` @ 4d6f63511 (working tree; not yet committed)
 Worktree: `C:\APPS\nzila-automation-phase0b-clean`
 Evidence root: `reports/audits/cupe-national-phase-0/phase-0b2/`

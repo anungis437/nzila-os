@@ -4,7 +4,7 @@ Single source of truth for phase progression. Updated at the close of each phase
 
 ## Phase 0 — Baseline Stabilization
 
-**Status:** `IN_PROGRESS — CHECKPOINT 2349d497b · Phase 0A closed AMBER 2026-07-23 · Phase 0A.1 closed GREEN 2026-07-23 · Phase 0B RE-CLASSIFIED AMBER 2026-04-25 (was GREEN 2026-04-24) · Phase 0B.1 closed AMBER — ARCHITECTURE DECISION REQUIRED 2026-07-23 · Phase 0B.2 closed GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE 2026-07-23 (Option D — Governed hybrid)`
+**Status:** `IN_PROGRESS — CHECKPOINT 2349d497b · Phase 0A closed AMBER 2026-07-23 · Phase 0A.1 closed GREEN 2026-07-23 · Phase 0B RE-CLASSIFIED AMBER 2026-04-25 (was GREEN 2026-04-24) · Phase 0B.1 closed AMBER — ARCHITECTURE DECISION REQUIRED 2026-07-23 · Phase 0B.2 RE-CLASSIFIED AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE 2026-07-23 (was GREEN 2026-07-23; superseded by Phase 0B.2R corrective phase) · Phase 0B.2R IN_PROGRESS 2026-07-23 (Option D — Governed hybrid)`
 **Authorized at commit:** `290e6c77dd1bc2ddcf33d899e52f13ccd57bd161`
 **Branch:** `fix/union-eyes-reality-remediation` (historical/audit) · `fix/union-eyes-phase0b-clean` (Phase 0B.2 implementation)
 **Local database:** native Windows PostgreSQL 17.8 on `localhost:5433`, DB `nzila_automation`, user `nzila`
@@ -101,7 +101,35 @@ Per the Phase 0B.1 directive: no environment deployed, no CUPE scenario
 graduated, no Phase 0C / 0D / 1 started.
 
 **Phase 0B.2 · Foundational Architecture Slice under Option D (2026-07-23):**
-closed `GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE` on branch
+**RE-CLASSIFIED** `AMBER — FOUNDATIONAL RUNTIME INTEGRATION INCOMPLETE`
+on branch `fix/union-eyes-phase0b-clean` (base
+`4d6f63511a1bde7f02408f5621a1ce9ca8a42245`, HEAD `7d29759c6`). The
+2026-07-23 GREEN closure recorded below is **superseded**. Reason for
+downgrade: the resolver package (`@nzila/platform-org-resolver`) and
+app-level DB adapter (`apps/union-eyes/lib/organizations/platform-tenant.ts`)
+were delivered with unit tests but ZERO production call-sites — Commit
+`d86ab9ccc` explicitly states "No route wiring; deferred to Phase 0C by
+explicit scope". The Phase 0B.2 closure contract required the resolver
+to be integrated into real foundational paths (pilot definitions, pilot
+metrics, KPI ownership, RLS context, audit writes). A resolver used only
+by tests does not satisfy this gate. Two additional gaps: (a) the
+`packages/cupe-vocabulary/package.json` side-fix and regenerated repo-wide
+governance artifacts landed in the deployable Phase 0B branch without an
+explicit necessity decision; (b) all seven Phase 0B.2 commits were
+created with `LEFTHOOK=0` — evidence must state hooks were bypassed, not
+that normal commit gates passed. Corrective closure phase **Phase 0B.2R**
+is authorized to (1) integrate the resolver into at least one real
+HTTP/API → resolver → DB path, (2) prove KPI DB migration with
+representative data, (3) re-run clean-composition + existing-DB proofs
+against the runtime-integrated code, (4) resolve the side-fix scope, and
+(5) run hooks normally on Phase 0B.2R commits. See
+[cupe-national-phase-0/phase-0b2r/](cupe-national-phase-0/phase-0b2r/).
+Per the Phase 0B.2R mandate: no Phase 0C / 0D / 1 started, no CUPE
+scenario graduated, no environment deployed. Historical GREEN text
+preserved below for audit-trail continuity.
+
+**Phase 0B.2 · Foundational Architecture Slice under Option D (2026-07-23) — SUPERSEDED GREEN entry (retained for audit):**
+~~closed `GREEN — FOUNDATIONAL ARCHITECTURE SLICE COMPLETE` on branch
 `fix/union-eyes-phase0b-clean` (base `4d6f63511a1bde7f02408f5621a1ce9ca8a42245`).
 Aubert selected **Option D — Governed hybrid architecture** as the resolution
 of the Phase 0B.1 architecture-decision gate. Phase 0B.2 delivered the
@@ -134,7 +162,7 @@ clean branch (selective path-level extraction only). One pre-existing,
 unrelated repo bug was landed as a scope-adjacent side-fix during §17
 validation (`packages/cupe-vocabulary/package.json` exports rewrote from
 non-existent `./dist/*` to `./src/*.ts` — disclosed in
-[cupe-national-phase-0/phase-0b2/phase-0b2-validation.md](cupe-national-phase-0/phase-0b2/phase-0b2-validation.md)).
+[cupe-national-phase-0/phase-0b2/phase-0b2-validation.md](cupe-national-phase-0/phase-0b2/phase-0b2-validation.md)).~~
 
 **Phase 0B · Organization and Identifier Integrity Closure (2026-04-24) — SUPERSEDED entry:**
 ~~closed `GREEN — ORGANIZATION AND IDENTIFIER INTEGRITY CLOSED`. Two-lineage
