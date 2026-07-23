@@ -21,7 +21,7 @@ import {
 
 const repoRoot = path.resolve(__dirname, '..', '..', '..', '..')
 
-process.env.NODE_ENV = 'test'
+;(process.env as Record<string, string | undefined>).NODE_ENV = 'test'
 process.env.E2E_DB_ADMIN_URL =
   process.env.E2E_DB_ADMIN_URL ?? 'postgresql://nzila:nzila_dev@localhost:5433/postgres'
 

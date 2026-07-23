@@ -171,7 +171,7 @@ export function bootServer(options: BootServerOptions): BootServerResult {
 
   const child: ChildProcess = spawn(options.command, options.args, {
     cwd: options.cwd,
-    env: { ...options.env, PORT: String(options.port) },
+    env: { ...options.env, PORT: String(options.port) } as unknown as NodeJS.ProcessEnv,
     stdio: ['ignore', 'pipe', 'pipe'],
     shell: process.platform === 'win32',
     detached: false,
