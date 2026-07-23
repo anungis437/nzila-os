@@ -1,0 +1,98 @@
+===== PHASE 0B.2 §15 UPGRADE PROOF Started=2026-07-23T12:57:21.6730834-04:00 DB=phase0b2r_upgrade_20260723125709 =====
+===== STEP 1: Seed pre-existing rows =====
+----- BEGIN seed test rows -----
+BEGIN
+INSERT 0 1
+INSERT 0 1
+COMMIT
+----- END seed test rows -----
+===== STEP 2: Snapshot BEFORE =====
+----- BEGIN snapshot before -----
+      ?column?       
+---------------------
+ before.orgs.count=1
+(1 row)
+
+        ?column?        
+------------------------
+ before.ue_orgs.count=1
+(1 row)
+
+            ?column?             
+---------------------------------
+ before.ue_kpi_snapshots.count=0
+(1 row)
+
+----- END snapshot before -----
+===== STEP 3: Re-apply 0038 (expect no-op) =====
+----- BEGIN re-apply 0038 -----
+BEGIN
+DO
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0038_organization_cross_schema_contract.sql:64: NOTICE:  column "platform_tenant_id" of relation "organizations" already exists, skipping
+UPDATE 0
+INSERT 0 0
+DO
+DO
+DO
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0038_organization_cross_schema_contract.sql:136: NOTICE:  relation "ux_organizations_platform_tenant_id" already exists, skipping
+CREATE INDEX
+DO
+COMMIT
+----- END re-apply 0038 -----
+===== STEP 4: Re-apply 0039 (expect no-op) =====
+----- BEGIN re-apply 0039 -----
+BEGIN
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:38: NOTICE:  schema "union_eyes" already exists, skipping
+CREATE SCHEMA
+DO
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:106: NOTICE:  relation "ue_case_risk_snapshots" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:123: NOTICE:  relation "ue_workload_snapshots" already exists, skipping
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:139: NOTICE:  relation "ue_engagement_snapshots" already exists, skipping
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:151: NOTICE:  relation "ue_precedent_matches" already exists, skipping
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:163: NOTICE:  relation "ue_kpi_snapshots" already exists, skipping
+CREATE TABLE
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:175: NOTICE:  relation "ue_cognition_audits" already exists, skipping
+DO
+DO
+COMMIT
+----- END re-apply 0039 -----
+===== STEP 5: Snapshot AFTER =====
+----- BEGIN snapshot after -----
+      ?column?      
+--------------------
+ after.orgs.count=1
+(1 row)
+
+       ?column?        
+-----------------------
+ after.ue_orgs.count=1
+(1 row)
+
+            ?column?            
+--------------------------------
+ after.ue_kpi_snapshots.count=0
+(1 row)
+
+         ?column?          
+---------------------------
+ after.contract.check_ok=1
+(1 row)
+
+         ?column?          
+---------------------------
+ after.contract.mismatch=0
+(1 row)
+
+----- END snapshot after -----
+===== STEP 6: Verify contract rejection =====
+----- BEGIN contract enforcement -----
+DO
+psql:C:/Users/AubertNungisa/AppData/Local/Temp/tmpneoba2.tmp:22: NOTICE:  contract.rejected=YES
+----- END contract enforcement -----
+===== UPGRADE PROOF COMPLETE Finished=2026-07-23T12:57:23.0264097-04:00 =====

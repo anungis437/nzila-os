@@ -1,0 +1,157 @@
+===== PHASE 0B.2R §11 EXISTING-DB UPGRADE + RUNTIME PROOF =====
+DB=phase0b2r_upgrade_20260723125709 Started=2026-07-23T12:57:09.3285588-04:00
+KeepDb=False
+
+---- STEP 1: CREATE DATABASE phase0b2r_upgrade_20260723125709 ----
+CREATE DATABASE
+---- STEP 2: COMPOSE BASE SCHEMA via phase0b2-compose.ps1 ----
+OK - see log: C:\APPS\nzila-automation-phase0b-clean\reports\audits\cupe-national-phase-0\phase-0b2\logs\phase-0b2-compose-20260723125710.log
+---- STEP 3: APPLY COMPOSE->RUNTIME ADAPTERS ----
+----- BEGIN view+alter -----
+CREATE VIEW
+ALTER TABLE
+----- END   view+alter -----
+---- STEP 4: RUN phase0b2-upgrade.ps1 (idempotency + preservation) ----
+OK - see log: C:\APPS\nzila-automation-phase0b-clean\reports\audits\cupe-national-phase-0\phase-0b2\logs\phase-0b2-upgrade-20260723125721.log
+---- STEP 5: VERIFY ACME ROW (1111...) SURVIVED UPGRADE ----
+----- BEGIN acme-count-post-upgrade -----
+  ?column?   
+-------------
+ acme_orgs=1
+(1 row)
+
+    ?column?    
+----------------
+ acme_ue_orgs=1
+(1 row)
+
+----- END   acme-count-post-upgrade -----
+---- STEP 6: SEED HAPPY ORG (007) ----
+----- BEGIN seed-happy-org -----
+BEGIN
+INSERT 0 1
+INSERT 0 1
+COMMIT
+----- END   seed-happy-org -----
+---- STEP 7: EXPORT PHASE0B2R_INTEGRATION_DB_URL + DATABASE_URL ----
+env set (secret redacted): postgres://nzila:***@localhost:5433/phase0b2r_upgrade_20260723125709
+---- STEP 8: RUN §7 HAPPY-PATH INTEGRATION TEST ----
+NOTE: fail-closed exercised in §7 dev-DB run; not repeatable structurally on composed/upgraded DB (see §10 report).
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0b-clean/apps/union-eyes
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 1 skipped (2)
+   Start at  12:57:25
+   Duration  4.89s (transform 2.91s, setup 0ms, import 627ms, tests 4.01s, environment 0ms)
+
+---- STEP 9-10: VERIFY audit_events ROW WITH UUID org_id ----
+----- BEGIN audit-row-verify -----
+         ?column?         
+--------------------------
+ test_audit_row_count = 1
+(1 row)
+
+                         ?column?                         
+----------------------------------------------------------
+ test_audit_org_id = 00000007-0000-4007-8007-000000000007
+(1 row)
+
+----- END   audit-row-verify -----
+---- STEP 11: RUN §9 KPI REAL-DATA SQL ----
+----- BEGIN section9-ue-cognition -----
+BEGIN
+=== 1) ue_case_risk_snapshots ===
+INSERT 0 1
+               id               |                org_id                |       tenant_id       |      case_id       | risk_tier |  model_version   
+--------------------------------+--------------------------------------+-----------------------+--------------------+-----------+------------------
+ crs_phase0b2r-9_deadbeef000001 | 00000007-0000-4007-8007-000000000007 | test-tenant-phase0b2r | case_phase0b2r_001 | high      | phase0b2r-crs-v1
+(1 row)
+
+=== 2) ue_workload_snapshots ===
+INSERT 0 1
+               id               |                org_id                |  steward_id   | utilization_ratio |   status   
+--------------------------------+--------------------------------------+---------------+-------------------+------------
+ wls_phase0b2r-9_deadbeef000002 | 00000007-0000-4007-8007-000000000007 | steward_alpha |               0.9 | overloaded
+(1 row)
+
+=== 3) ue_engagement_snapshots ===
+INSERT 0 1
+               id               |                org_id                |   member_id    |  tier   | recommended_channel 
+--------------------------------+--------------------------------------+----------------+---------+---------------------
+ mes_phase0b2r-9_deadbeef000003 | 00000007-0000-4007-8007-000000000007 | member_epsilon | at_risk | email
+(1 row)
+
+=== 4) ue_precedent_matches ===
+INSERT 0 1
+               id               |                org_id                |    for_case_id     | success_rate 
+--------------------------------+--------------------------------------+--------------------+--------------
+ pcm_phase0b2r-9_deadbeef000004 | 00000007-0000-4007-8007-000000000007 | case_phase0b2r_001 |         0.72
+(1 row)
+
+=== 5) ue_kpi_snapshots ===
+INSERT 0 1
+               id               |                org_id                | window_days |  model_version   | total_grievances 
+--------------------------------+--------------------------------------+-------------+------------------+------------------
+ kpi_phase0b2r-9_deadbeef000005 | 00000007-0000-4007-8007-000000000007 |          30 | phase0b2r-kpi-v1 | 47
+(1 row)
+
+=== 6) ue_cognition_audits ===
+INSERT 0 1
+               id               |                org_id                |    resource     | action  |          resource_id           
+--------------------------------+--------------------------------------+-----------------+---------+--------------------------------
+ aud_phase0b2r-9_deadbeef000006 | 00000007-0000-4007-8007-000000000007 | ue_kpi_snapshot | compute | kpi_phase0b2r-9_deadbeef000005
+(1 row)
+
+=== 7) Aggregate proof (6 tables, 6 rows, all matching org UUID) ===
+       table_name        | phase0b2r_rows 
+-------------------------+----------------
+ ue_case_risk_snapshots  |              1
+ ue_cognition_audits     |              1
+ ue_engagement_snapshots |              1
+ ue_kpi_snapshots        |              1
+ ue_precedent_matches    |              1
+ ue_workload_snapshots   |              1
+(6 rows)
+
+COMMIT
+----- END   section9-ue-cognition -----
+---- STEP 12: VERIFY 6 UE COGNITION ROWS ----
+----- BEGIN ue-cognition-counts -----
+        ?column?         | count 
+-------------------------+-------
+ ue_case_risk_snapshots  | 1
+ ue_workload_snapshots   | 1
+ ue_engagement_snapshots | 1
+ ue_precedent_matches    | 1
+ ue_kpi_snapshots        | 1
+ ue_cognition_audits     | 1
+(6 rows)
+
+----- END   ue-cognition-counts -----
+---- STEP 13: AGGREGATE SUMMARY ----
+----- BEGIN aggregate -----
+ audit_rows | crs | wls | mes | pcm | kpi | aud 
+------------+-----+-----+-----+-----+-----+-----
+          1 |   1 |   1 |   1 |   1 |   1 |   1
+(1 row)
+
+----- END   aggregate -----
+---- STEP 14: VERIFY ACME ROW STILL SURVIVES (post seeding + test) ----
+----- BEGIN acme-count-post-all -----
+     ?column?      
+-------------------
+ acme_orgs_final=1
+(1 row)
+
+       ?column?       
+----------------------
+ acme_ue_orgs_final=1
+(1 row)
+
+----- END   acme-count-post-all -----
+---- STEP 15: DROP DATABASE phase0b2r_upgrade_20260723125709 ----
+DROP DATABASE
+---- STEP 16: DONE ----
+===== PHASE 0B.2R §11 COMPLETE Finished=2026-07-23T12:57:32.4680634-04:00 =====

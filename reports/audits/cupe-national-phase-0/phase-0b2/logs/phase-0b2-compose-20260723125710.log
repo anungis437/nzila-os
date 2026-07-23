@@ -1,0 +1,1204 @@
+===== PHASE 0B.2 §14 COMPOSITION PROOF =====
+DB=phase0b2r_upgrade_20260723125709 Started=2026-07-23T12:57:10.6101820-04:00
+
+Allowlisted mid-file aborts (each paired with a healer): 0010_pilot_alerting_hardening.sql, 0013_orchestrator_runtime_hardening.sql, 0017_trustcore_law25.sql, 0019_trustcore_policies.sql, 0025_trustcore_privacy_programs_org_name.sql, 0032_audit_events_canonical_hash.sql, 0033_fix_pilot_alerts_rule_fk.sql
+
+---- STEP 1: BOOTSTRAP ----
+===== APPLY bootstrap/0000_platform_schema_prerequisites.sql =====
+BEGIN
+CREATE EXTENSION
+CREATE EXTENSION
+CREATE EXTENSION
+CREATE EXTENSION
+DO
+DO
+DO
+DO
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+COMMIT
+---- STEP 2: DRIZZLE 0000..0037 ----
+===== APPLY 0000_initial.sql =====
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0000_initial.sql:1098: NOTICE:  identifier "ai_knowledge_ingestion_runs_source_id_ai_knowledge_sources_id_fk" will be truncated to "ai_knowledge_ingestion_runs_source_id_ai_knowledge_sources_id_f"
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0001_solid_cargill.sql =====
+CREATE TYPE
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0001_solid_cargill.sql:25: NOTICE:  drop cascades to constraint indirect_tax_periods_account_id_indirect_tax_accounts_id_fk on table indirect_tax_periods
+DROP TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0001_solid_cargill.sql:26: NOTICE:  drop cascades to constraint indirect_tax_summary_period_id_indirect_tax_periods_id_fk on table indirect_tax_summary
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0001_solid_cargill.sql:48: NOTICE:  drop cascades to constraint ai_requests_prompt_version_id_ai_prompt_versions_id_fk on table ai_requests
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+DROP TABLE
+ALTER TABLE
+CREATE INDEX
+ALTER TABLE
+ALTER TABLE
+DROP TYPE
+CREATE TYPE
+ALTER TABLE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+DROP TYPE
+===== APPLY 0002_rich_marten_broadcloak.sql =====
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+ALTER TYPE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0002_rich_marten_broadcloak.sql:203: NOTICE:  identifier "ai_knowledge_ingestion_runs_source_id_ai_knowledge_sources_id_fk" will be truncated to "ai_knowledge_ingestion_runs_source_id_ai_knowledge_sources_id_f"
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0003_redundant_starfox.sql =====
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0003_redundant_starfox.sql:315: NOTICE:  identifier "ml_scores_ue_cases_priority_inference_run_id_ml_inference_runs_id_fk" will be truncated to "ml_scores_ue_cases_priority_inference_run_id_ml_inference_runs_"
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0004_audit_events_immutable.sql =====
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+===== APPLY 0005_ai_model_registry.sql =====
+ALTER TYPE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0006_idempotency_cache.sql =====
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0007_flow_domain_tables.sql =====
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0008_ai_governance_store.sql =====
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0009_pilot_metrics_layer.sql =====
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0010_pilot_alerting_hardening.sql =====
+ALTER TABLE
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0010_pilot_alerting_hardening.sql:43: ERROR:  syntax error at or near "NOT"
+LINE 2:   ADD CONSTRAINT IF NOT EXISTS pilot_alerts_rule_fk
+                            ^
+!!! ALLOWLISTED partial-apply at 0010_pilot_alerting_hardening.sql exitcode=3 (healer expected)
+===== APPLY 0011_platform_integrations_connections.sql =====
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+ALTER TABLE
+CREATE INDEX
+===== APPLY 0012_platform_integrations_runtime.sql =====
+CREATE TYPE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0012_platform_integrations_runtime.sql:43: NOTICE:  identifier "platform_integration_dlq_entries_delivery_id_platform_integration_deliveries_id_fk" will be truncated to "platform_integration_dlq_entries_delivery_id_platform_integrati"
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0013_orchestrator_runtime_hardening.sql =====
+ALTER TABLE
+UPDATE 0
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0013_orchestrator_runtime_hardening.sql:34: ERROR:  cannot drop index automation_commands_correlation_id_unique because constraint automation_commands_correlation_id_unique on table automation_commands requires it
+HINT:  You can drop constraint automation_commands_correlation_id_unique on table automation_commands instead.
+!!! ALLOWLISTED partial-apply at 0013_orchestrator_runtime_hardening.sql exitcode=3 (healer expected)
+===== APPLY 0014_rename_actor_user_id.sql =====
+ALTER TABLE
+===== APPLY 0015_itsm_command_center.sql =====
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0016_pipeline_alerts.sql =====
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0017_trustcore_law25.sql =====
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0017_trustcore_law25.sql:11: ERROR:  syntax error at or near "NOT"
+LINE 1: CREATE TYPE IF NOT EXISTS "public"."tc_program_status"
+                       ^
+!!! ALLOWLISTED partial-apply at 0017_trustcore_law25.sql exitcode=3 (healer expected)
+===== APPLY 0018_trustcore_snapshots.sql =====
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0019_trustcore_policies.sql =====
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0019_trustcore_policies.sql:30: ERROR:  relation "trustcore_privacy_programs" does not exist
+!!! ALLOWLISTED partial-apply at 0019_trustcore_policies.sql exitcode=3 (healer expected)
+===== APPLY 0020_trustcore_reminders.sql =====
+DO
+DO
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0021_trustcore_subscriptions.sql =====
+DO
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0022_trustcore_leads.sql =====
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0023_trustcore_risks.sql =====
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0024_trustops_foundations.sql =====
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0025_trustcore_privacy_programs_org_name.sql =====
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0025_trustcore_privacy_programs_org_name.sql:13: ERROR:  relation "trustcore_privacy_programs" does not exist
+!!! ALLOWLISTED partial-apply at 0025_trustcore_privacy_programs_org_name.sql exitcode=3 (healer expected)
+===== APPLY 0026_healthcare_discovery_surveys.sql =====
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TYPE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+===== APPLY 0027_seed_healthcare_unit_92.sql =====
+INSERT 0 1
+===== APPLY 0028_policy_lifecycle_governance.sql =====
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+===== APPLY 0029_itsm_automation_ticket_fields_entity_graph.sql =====
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0030_console_schema_bootstrap.sql =====
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0030_console_schema_bootstrap.sql:12: NOTICE:  extension "pgcrypto" already exists, skipping
+CREATE EXTENSION
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0030_console_schema_bootstrap.sql:182: NOTICE:  relation "platform_integration_connections" already exists, skipping
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0030_console_schema_bootstrap.sql:183: NOTICE:  relation "platform_integration_connections_org_provider_uq" already exists, skipping
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+===== APPLY 0031_idempotency_reservation_lease.sql =====
+ALTER TABLE
+===== APPLY 0032_audit_events_canonical_hash.sql =====
+ALTER TABLE
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0032_audit_events_canonical_hash.sql:43: ERROR:  column "org_id" does not exist
+!!! ALLOWLISTED partial-apply at 0032_audit_events_canonical_hash.sql exitcode=3 (healer expected)
+===== APPLY 0033_fix_pilot_alerts_rule_fk.sql =====
+DO
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+===== APPLY 0034_heal_orchestrator_runtime_hardening.sql =====
+BEGIN
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "org_id" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "idempotency_key" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "version" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "attempt_count" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "execution_owner" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "lease_expires_at" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "last_heartbeat_at" of relation "automation_commands" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "started_at" of relation "automation_commands" already exists, skipping
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0034_heal_orchestrator_runtime_hardening.sql:83: NOTICE:  column "completed_at" of relation "automation_commands" already exists, skipping
+UPDATE 0
+DO
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+ALTER TABLE
+UPDATE 0
+DO
+CREATE INDEX
+CREATE INDEX
+COMMIT
+===== APPLY 0035_heal_trustcore_law25_chain.sql =====
+BEGIN
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+DO
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0035_heal_trustcore_law25_chain.sql:337: NOTICE:  relation "trustcore_policies" already exists, skipping
+CREATE TABLE
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0035_heal_trustcore_law25_chain.sql:340: NOTICE:  relation "tc_policies_org_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0035_heal_trustcore_law25_chain.sql:342: NOTICE:  relation "tc_policies_org_type_idx" already exists, skipping
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+COMMIT
+===== APPLY 0036_heal_audit_events_canonical_hash.sql =====
+BEGIN
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0036_heal_audit_events_canonical_hash.sql:61: NOTICE:  column "occurred_at" of relation "audit_events" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0036_heal_audit_events_canonical_hash.sql:61: NOTICE:  column "hash_version" of relation "audit_events" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+DO
+DO
+CREATE INDEX
+DO
+COMMIT
+===== APPLY 0037_heal_pilot_alerting_hardening.sql =====
+BEGIN
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "rule_id" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "status" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "dedup_key" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "correlation_id" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "occurrence_count" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "first_seen_at" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "last_seen_at" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "window_start" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "window_end" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "metric_value" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "threshold_value" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "playbook_key" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "what_happened" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "why_it_matters" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "what_to_do_next" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "assignee_user_id" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "acknowledged_by" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "acknowledged_at" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "resolved_by" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "resolution_notes" of relation "pilot_alerts" already exists, skipping
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:76: NOTICE:  column "escalated_at" of relation "pilot_alerts" already exists, skipping
+ALTER TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:94: NOTICE:  relation "pilot_alert_rules" already exists, skipping
+CREATE TABLE
+DO
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:116: NOTICE:  relation "pilot_alert_rules_org_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:118: NOTICE:  relation "pilot_alert_rules_metric_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:120: NOTICE:  relation "pilot_alert_rules_uni_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:133: NOTICE:  relation "pilot_alert_escalations" already exists, skipping
+CREATE TABLE
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:136: NOTICE:  relation "pilot_alert_escalations_org_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:138: NOTICE:  relation "pilot_alert_escalations_sev_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:142: NOTICE:  relation "pilot_alerts_dedup_idx" already exists, skipping
+CREATE INDEX
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:144: NOTICE:  relation "pilot_alerts_correlation_idx" already exists, skipping
+CREATE INDEX
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0037_heal_pilot_alerting_hardening.sql:147: NOTICE:  relation "pilot_alerts_open_dedup_idx" already exists, skipping
+COMMIT
+Baseline complete. Partial-applies encountered: 6
+---- STEP 3: DJANGO auth_core 0001..0003 (SQL projection) ----
+===== INLINE django-auth_core/0001..0003.sql-projection =====
+CREATE TABLE
+ALTER TABLE
+CREATE SCHEMA
+DO
+---- STEP 4: DRIZZLE 0038 ----
+===== APPLY 0038_organization_cross_schema_contract.sql =====
+BEGIN
+DO
+ALTER TABLE
+UPDATE 0
+INSERT 0 0
+DO
+DO
+DO
+CREATE INDEX
+DO
+COMMIT
+---- STEP 5: DJANGO auth_core/0004 + billing/0002 (state-only per Django models — no DB ops) ----
+    (These migrations use SeparateDatabaseAndState with empty database_operations.
+     The corresponding shared platform tables (organization_members, stripe_webhook_events)
+     are declared in packages/db and already created by the Drizzle chain above.
+     Nothing to apply at the SQL level; Django state alone is enough.)
+---- STEP 6: DRIZZLE 0039 ----
+===== APPLY 0039_ue_cognition_text_id_promotion.sql =====
+BEGIN
+psql:C:/APPS/nzila-automation-phase0b-clean/packages/db/drizzle/0039_ue_cognition_text_id_promotion.sql:38: NOTICE:  schema "union_eyes" already exists, skipping
+CREATE SCHEMA
+DO
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+DO
+DO
+COMMIT
+---- VERIFICATION ----
+===== INLINE verification =====
+        obj        
+-------------------
+ schema:public
+ schema:union_eyes
+(2 rows)
+
+                   ?column?                    
+-----------------------------------------------
+ ue.organizations.platform_tenant_id.type:uuid
+(1 row)
+
+                 ?column?                 
+------------------------------------------
+ fk:organizations_platform_tenant_id_fkey
+(1 row)
+
+                        ?column?                        
+--------------------------------------------------------
+ check:organizations_platform_tenant_id_equals_id_check
+(1 row)
+
+                 ?column?                 
+------------------------------------------
+ ue_table:ue_case_risk_snapshots.id:text
+ ue_table:ue_cognition_audits.id:text
+ ue_table:ue_engagement_snapshots.id:text
+ ue_table:ue_kpi_snapshots.id:text
+ ue_table:ue_precedent_matches.id:text
+ ue_table:ue_workload_snapshots.id:text
+(6 rows)
+
+        ?column?        
+------------------------
+ public.orgs.rowcount:0
+(1 row)
+
+===== COMPOSITION COMPLETE Finished=2026-07-23T12:57:20.7710731-04:00 =====
