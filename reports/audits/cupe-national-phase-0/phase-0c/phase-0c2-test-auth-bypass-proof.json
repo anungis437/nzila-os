@@ -1,0 +1,71 @@
+{
+  "phase": "0C.2",
+  "section": "§4",
+  "title": "Playwright E2E auth bypass hardening",
+  "verdict": "GREEN",
+  "generated_at_utc": "2026-01-01T00:00:00Z",
+  "test_file": "packages/platform-auth/src/password/auth-service-bypass.test.ts",
+  "implementation_file": "packages/platform-auth/src/password/auth-service.ts",
+  "proof_report": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-test-auth-bypass-proof.md",
+  "gates": {
+    "count": 6,
+    "design": "positive-list loopback allow-list, fail-closed on any missing/unparseable input",
+    "list": [
+      { "id": 1, "name": "PLAYWRIGHT_TEST_AUTH", "requirement": "== 'true'" },
+      { "id": 2, "name": "QA_TEST_ENV", "requirement": "== 'true'" },
+      { "id": 3, "name": "NODE_ENV", "requirement": "∈ {test, development}" },
+      { "id": 4, "name": "DATABASE_URL", "requirement": "hostname ∈ {localhost, 127.0.0.1, ::1, [::1], 0.0.0.0}" },
+      { "id": 5, "name": "NEXT_PUBLIC_APP_URL", "requirement": "hostname ∈ {localhost, 127.0.0.1, ::1, [::1], 0.0.0.0}" },
+      { "id": 6, "name": "User-Agent", "requirement": "contains 'playwright-e2e-auth' (silent-refuse if missing)" }
+    ]
+  },
+  "tests": {
+    "file_count": 1,
+    "test_count": 32,
+    "passed": 32,
+    "failed": 0,
+    "describe_blocks": [
+      { "name": "§4 baseline — all gates satisfied", "count": 4 },
+      { "name": "§4 gate 6 — User-Agent absence is silent", "count": 3 },
+      { "name": "§4 gate 1 — PLAYWRIGHT_TEST_AUTH", "count": 3 },
+      { "name": "§4 gate 2 — QA_TEST_ENV", "count": 2 },
+      { "name": "§4 gate 3 — NODE_ENV never production", "count": 4 },
+      { "name": "§4 gate 4 — DATABASE_URL must be loopback", "count": 6 },
+      { "name": "§4 gate 5 — NEXT_PUBLIC_APP_URL must be loopback", "count": 5 },
+      { "name": "§4 defence-in-depth — worst-case leak scenarios", "count": 4 },
+      { "name": "§4 warn-once behaviour", "count": 1 }
+    ]
+  },
+  "regression": {
+    "package": "@nzila/platform-auth",
+    "test_files": 9,
+    "test_count_after": 125,
+    "test_count_before": 93,
+    "delta": 32,
+    "failed": 0,
+    "typecheck_exit_code": 0
+  },
+  "refusal_matrix": [
+    { "scenario": "Production (NODE_ENV=production, all bypass flags true, magic UA)", "verdict": "REFUSED", "reason": "Gate 3" },
+    { "scenario": "Staging (staging.unioneyes.app app URL)", "verdict": "REFUSED", "reason": "Gate 5" },
+    { "scenario": "Azure Flexible Server DB", "verdict": "REFUSED", "reason": "Gate 4" },
+    { "scenario": "AWS RDS DB", "verdict": "REFUSED", "reason": "Gate 4" },
+    { "scenario": "Supabase DB", "verdict": "REFUSED", "reason": "Gate 4" },
+    { "scenario": "Public IP DB", "verdict": "REFUSED", "reason": "Gate 4" },
+    { "scenario": "Azure Container Apps app URL", "verdict": "REFUSED", "reason": "Gate 5" },
+    { "scenario": "Local dev without QA_TEST_ENV", "verdict": "REFUSED", "reason": "Gate 2" },
+    { "scenario": "Any request lacking magic UA", "verdict": "REFUSED", "reason": "Gate 6 (silent)" },
+    { "scenario": "Unparseable DATABASE_URL", "verdict": "REFUSED", "reason": "fail-closed" },
+    { "scenario": "Unparseable NEXT_PUBLIC_APP_URL", "verdict": "REFUSED", "reason": "fail-closed" },
+    { "scenario": "Undefined/empty NODE_ENV", "verdict": "REFUSED", "reason": "fail-closed" }
+  ],
+  "unchanged_code_paths": [
+    "password verification (verifyPassword + Argon2id rehash)",
+    "session issuance (createSession + setSessionCookie)",
+    "audit logging (authAuditLog)",
+    "account lockout after MAX_FAILED_ATTEMPTS",
+    "password-reset rate limiting",
+    "MFA challenge issuance for TOTP-enabled accounts",
+    "risk assessment"
+  ]
+}

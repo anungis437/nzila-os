@@ -1,0 +1,41 @@
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0c/packages/platform-auth
+
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 baseline ΓÇö all gates satisfied > ALLOWS bypass when all six gates pass 4ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 baseline ΓÇö all gates satisfied > ALLOWS bypass when NODE_ENV is development (not just test) 1ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 baseline ΓÇö all gates satisfied > ALLOWS bypass with 127.0.0.1 loopback DATABASE_URL 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 baseline ΓÇö all gates satisfied > ALLOWS bypass with 0.0.0.0 loopback NEXT_PUBLIC_APP_URL 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 6 ΓÇö User-Agent absence is silent (no warn) > REFUSES bypass when UA is missing entirely, without warning 1ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 6 ΓÇö User-Agent absence is silent (no warn) > REFUSES bypass for an ordinary browser UA, without warning 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 6 ΓÇö User-Agent absence is silent (no warn) > REFUSES bypass for empty-string UA, without warning 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 1 ΓÇö PLAYWRIGHT_TEST_AUTH > REFUSES bypass when PLAYWRIGHT_TEST_AUTH is undefined, and WARNS 1ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 1 ΓÇö PLAYWRIGHT_TEST_AUTH > REFUSES bypass when PLAYWRIGHT_TEST_AUTH="false" 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 1 ΓÇö PLAYWRIGHT_TEST_AUTH > REFUSES bypass when PLAYWRIGHT_TEST_AUTH="1" (must be literal "true") 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 2 ΓÇö QA_TEST_ENV > REFUSES bypass when QA_TEST_ENV is undefined, and WARNS 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 2 ΓÇö QA_TEST_ENV > REFUSES bypass when QA_TEST_ENV="false" 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 3 ΓÇö NODE_ENV never production > REFUSES bypass when NODE_ENV="production" (all other gates green!), and WARNS 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 3 ΓÇö NODE_ENV never production > REFUSES bypass when NODE_ENV="staging" 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 3 ΓÇö NODE_ENV never production > REFUSES bypass when NODE_ENV is undefined (fail-closed) 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 3 ΓÇö NODE_ENV never production > REFUSES bypass when NODE_ENV is empty string (fail-closed) 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 4 ΓÇö DATABASE_URL must be loopback > REFUSES bypass when DATABASE_URL points at Azure Flexible Server 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 4 ΓÇö DATABASE_URL must be loopback > REFUSES bypass when DATABASE_URL points at AWS RDS 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 4 ΓÇö DATABASE_URL must be loopback > REFUSES bypass when DATABASE_URL points at Supabase 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 4 ΓÇö DATABASE_URL must be loopback > REFUSES bypass when DATABASE_URL is undefined 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 4 ΓÇö DATABASE_URL must be loopback > REFUSES bypass when DATABASE_URL is unparseable 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 4 ΓÇö DATABASE_URL must be loopback > REFUSES bypass when DATABASE_URL host is a public IP 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 5 ΓÇö NEXT_PUBLIC_APP_URL must be loopback > REFUSES bypass when NEXT_PUBLIC_APP_URL is the production unioneyes.app hostname 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 5 ΓÇö NEXT_PUBLIC_APP_URL must be loopback > REFUSES bypass when NEXT_PUBLIC_APP_URL is the staging staging.unioneyes.app hostname 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 5 ΓÇö NEXT_PUBLIC_APP_URL must be loopback > REFUSES bypass when NEXT_PUBLIC_APP_URL is an Azure Container Apps hostname 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 5 ΓÇö NEXT_PUBLIC_APP_URL must be loopback > REFUSES bypass when NEXT_PUBLIC_APP_URL is undefined 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 gate 5 ΓÇö NEXT_PUBLIC_APP_URL must be loopback > REFUSES bypass when NEXT_PUBLIC_APP_URL is unparseable 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 defense-in-depth ΓÇö worst-case leak scenarios > REFUSES bypass in production even when both bypass flags are true and UA is correct 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 defense-in-depth ΓÇö worst-case leak scenarios > REFUSES bypass in staging (loopback flags but staging URLs) 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 defense-in-depth ΓÇö worst-case leak scenarios > REFUSES bypass in ordinary local dev without QA_TEST_ENV 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 defense-in-depth ΓÇö worst-case leak scenarios > REFUSES bypass for any request that does not present the magic UA, even in a fully-green env 0ms
+ Γ£ô src/password/auth-service-bypass.test.ts > ┬º4 warn-once behaviour > emits the refusal warning only once per (gate, UA-prefix) pair 0ms
+
+ Test Files  1 passed (1)
+      Tests  32 passed (32)
+   Start at  19:27:26
+   Duration  2.59s (transform 1.12s, setup 0ms, import 2.23s, tests 15ms, environment 0ms)
+

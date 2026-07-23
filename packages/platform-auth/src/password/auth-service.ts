@@ -100,14 +100,161 @@ const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000 // 1 hour
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000 // 15-minute window
 const MAX_RESET_REQUESTS = 3 // Max resets per window per IP
 
-function isPlaywrightE2EAuthRequest(input: { userAgent?: string | null }): boolean {
-  const testAuthEnabled = (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true'
-  if (!testAuthEnabled) {
+// ─── Playwright E2E auth bypass (Phase 0C.2 §4 hardened) ──────────────────
+//
+// The bypass short-circuits the MFA gate and risk-assessment path so that
+// governed E2E lifecycle tests can deterministically log fixture users in.
+// It does NOT weaken password verification, session issuance, or any of the
+// account-lifecycle / account-lockout / audit-logging code paths.
+//
+// The bypass is DEFENSE-IN-DEPTH GATED. Six independent conditions must all
+// evaluate true for the bypass to fire; the moment any one is missing the
+// request is treated as a normal production request. This is intentionally
+// belt-and-braces so that if a single flag leaks into a real environment
+// (e.g. someone copies test env vars into production by mistake) the bypass
+// still refuses to activate:
+//
+//   Gate 1  PLAYWRIGHT_TEST_AUTH === 'true'
+//   Gate 2  QA_TEST_ENV          === 'true'
+//   Gate 3  NODE_ENV             ∈ { 'test', 'development' }  (never 'production')
+//   Gate 4  DATABASE_URL         resolves to a loopback host  (localhost / 127.0.0.1 / ::1 / 0.0.0.0)
+//   Gate 5  NEXT_PUBLIC_APP_URL  resolves to a loopback host
+//   Gate 6  request User-Agent   contains substring 'playwright-e2e-auth'
+//
+// When any of Gates 1–5 fails but the caller nonetheless presents the magic
+// UA, we emit a one-time console.warn so CI logs make the misconfiguration
+// visible instead of silently falling through.
+
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'])
+
+/** Extract hostname from a URL string; returns null if the URL is malformed or empty. */
+function tryHostname(url: string | undefined | null): string | null {
+  const trimmed = url?.trim()
+  if (!trimmed) return null
+  try {
+    return new URL(trimmed).hostname.toLowerCase()
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Determine whether a DATABASE_URL string points at a loopback host.
+ * Non-loopback (e.g. Azure Flexible Server, RDS, Supabase) or unparseable
+ * URLs always return false so the bypass fails closed.
+ */
+function isLoopbackDbUrl(url: string | undefined | null): boolean {
+  const host = tryHostname(url)
+  return host !== null && LOOPBACK_HOSTS.has(host)
+}
+
+/**
+ * Determine whether an application base URL string points at a loopback host.
+ * Non-loopback URLs (unioneyes.app, *.azurecontainerapps.io, etc.) or
+ * unparseable URLs always return false so the bypass fails closed.
+ */
+function isLoopbackAppUrl(url: string | undefined | null): boolean {
+  const host = tryHostname(url)
+  return host !== null && LOOPBACK_HOSTS.has(host)
+}
+
+/** Environment snapshot used by the gate. Kept explicit so it is testable
+ *  without mutating process.env. */
+export interface PlaywrightBypassEnv {
+  PLAYWRIGHT_TEST_AUTH?: string | undefined
+  QA_TEST_ENV?: string | undefined
+  NODE_ENV?: string | undefined
+  DATABASE_URL?: string | undefined
+  NEXT_PUBLIC_APP_URL?: string | undefined
+}
+
+const warnedGates = new Set<string>()
+
+function warnRefusedGate(gate: string, ctx: { userAgent?: string | null }): void {
+  const key = `${gate}:${(ctx.userAgent ?? '').slice(0, 32)}`
+  if (warnedGates.has(key)) return
+  warnedGates.add(key)
+  console.warn(
+    `[platform-auth] Playwright E2E auth bypass refused (gate=${gate}). ` +
+      `Request presented the playwright UA marker but the environment is not a governed test environment. ` +
+      `This is expected in production/staging — the bypass fails closed. ` +
+      `If you intended to run governed E2E tests, ensure PLAYWRIGHT_TEST_AUTH=true, QA_TEST_ENV=true, ` +
+      `NODE_ENV=test|development, and DATABASE_URL + NEXT_PUBLIC_APP_URL are both loopback.`,
+  )
+}
+
+/**
+ * Pure function form for direct testing. Given an input request and an
+ * environment snapshot, returns true iff every hardening gate is satisfied.
+ *
+ * Exported so that §4 hardening tests can exercise every combination
+ * without mutating process.env.
+ */
+export function isPlaywrightE2EAuthAllowed(
+  input: { userAgent?: string | null },
+  env: PlaywrightBypassEnv,
+): boolean {
+  const ua = (input.userAgent ?? '').toLowerCase()
+  const uaPresent = ua.includes('playwright-e2e-auth')
+
+  // If the UA marker is absent the caller is not asking for the bypass at
+  // all — silently return false without logging (no misconfiguration to
+  // warn about).
+  if (!uaPresent) return false
+
+  // Gate 1: explicit opt-in flag.
+  if ((env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() !== 'true') {
+    warnRefusedGate('PLAYWRIGHT_TEST_AUTH', input)
     return false
   }
 
-  const ua = (input.userAgent ?? '').toLowerCase()
-  return ua.includes('playwright-e2e-auth')
+  // Gate 2: governed-test-env marker (independent flag — either can be
+  // missing on its own).
+  if ((env.QA_TEST_ENV ?? '').toLowerCase() !== 'true') {
+    warnRefusedGate('QA_TEST_ENV', input)
+    return false
+  }
+
+  // Gate 3: never in production. Empty NODE_ENV is treated as production for
+  // the purposes of this gate (fail closed).
+  const nodeEnv = (env.NODE_ENV ?? '').toLowerCase()
+  if (nodeEnv !== 'test' && nodeEnv !== 'development') {
+    warnRefusedGate('NODE_ENV', input)
+    return false
+  }
+
+  // Gate 4: DATABASE_URL must be a loopback host. Refuses Azure Flexible
+  // Server, RDS, Supabase, any non-parseable URL, and any missing value.
+  if (!isLoopbackDbUrl(env.DATABASE_URL)) {
+    warnRefusedGate('DATABASE_URL', input)
+    return false
+  }
+
+  // Gate 5: NEXT_PUBLIC_APP_URL must be a loopback host. Refuses
+  // unioneyes.app, *.azurecontainerapps.io, and any non-parseable URL.
+  if (!isLoopbackAppUrl(env.NEXT_PUBLIC_APP_URL)) {
+    warnRefusedGate('NEXT_PUBLIC_APP_URL', input)
+    return false
+  }
+
+  return true
+}
+
+function isPlaywrightE2EAuthRequest(input: { userAgent?: string | null }): boolean {
+  return isPlaywrightE2EAuthAllowed(input, {
+    PLAYWRIGHT_TEST_AUTH: process.env.PLAYWRIGHT_TEST_AUTH,
+    QA_TEST_ENV: process.env.QA_TEST_ENV,
+    NODE_ENV: process.env.NODE_ENV,
+    DATABASE_URL: process.env.DATABASE_URL,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  })
+}
+
+/** @internal Test-only: reset the per-process warn-once cache so hardening
+ *  tests can observe each independent warning path. Not part of the public
+ *  API — do not import from application code. */
+export function __resetPlaywrightBypassWarnCacheForTests(): void {
+  warnedGates.clear()
 }
 
 // ─── Audit Logging ──────────────────────────────────────────────────────────
