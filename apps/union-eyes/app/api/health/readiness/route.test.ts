@@ -33,7 +33,7 @@ describe('Phase 0C.1 §6 — /api/health/readiness', () => {
       // fixture user count
       if (s.includes('users WHERE email LIKE')) return Promise.resolve([{ c: 5 }])
       // auth_users lookup
-      if (s.includes('auth_users WHERE email')) return Promise.resolve([{ '1': 1 }])
+      if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
       return Promise.resolve([])
     })
   }
@@ -71,7 +71,7 @@ describe('Phase 0C.1 §6 — /api/health/readiness', () => {
       if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
       if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
       if (s.includes('users WHERE email LIKE')) return Promise.resolve([{ c: 0 }])
-      if (s.includes('auth_users WHERE email')) return Promise.resolve([])
+      if (s.includes('user_management.users WHERE email')) return Promise.resolve([])
       return Promise.resolve([])
     })
     const { GET } = await import('./route')
@@ -91,7 +91,7 @@ describe('Phase 0C.1 §6 — /api/health/readiness', () => {
       if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
       if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 0 }])
       if (s.includes('users WHERE email LIKE')) return Promise.resolve([{ c: 5 }])
-      if (s.includes('auth_users WHERE email')) return Promise.resolve([{ '1': 1 }])
+      if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
       return Promise.resolve([])
     })
     const { GET } = await import('./route')

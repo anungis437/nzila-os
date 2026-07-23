@@ -56,13 +56,16 @@ const REQUIRED_UE_TABLES = [
   'claim_updates',
   'organization_members',
 ]
+// Mirrors UE_TEST_USERS in apps/union-eyes/tests/fixtures/test-users.ts.
+// Keep the LIKE probe below in sync with the shared '@nzila.test' suffix.
 const EXPECTED_FIXTURE_USER_EMAILS = [
-  'member.primary@ue-e2e.nzila.local',
-  'steward.primary@ue-e2e.nzila.local',
-  'staff.primary@ue-e2e.nzila.local',
-  'executive.primary@ue-e2e.nzila.local',
-  'admin.primary@ue-e2e.nzila.local',
+  'ue.qa.member.primary@nzila.test',
+  'ue.qa.steward.primary@nzila.test',
+  'ue.qa.staff.primary@nzila.test',
+  'ue.qa.executive.primary@nzila.test',
+  'ue.qa.admin.primary@nzila.test',
 ]
+const FIXTURE_EMAIL_LIKE = '%@nzila.test'
 
 function isProd(): boolean {
   return process.env.NODE_ENV === 'production'
@@ -248,7 +251,7 @@ async function runChecks(): Promise<CheckResult[]> {
   try {
     const rows = (await db.execute(
       sql.raw(
-        `SELECT count(*)::int AS c FROM public.users WHERE email LIKE '%@ue-e2e.nzila.local'`,
+        `SELECT count(*)::int AS c FROM public.users WHERE email LIKE '${FIXTURE_EMAIL_LIKE}'`,
       ),
     )) as unknown as Array<{ c: number }>
     const count = Array.isArray(rows) && rows.length > 0 ? Number(rows[0]?.c ?? 0) : 0
@@ -269,13 +272,13 @@ async function runChecks(): Promise<CheckResult[]> {
     })
   }
 
-  // 10. auth.fixtures — every expected fixture user is present
+  // 10. auth.fixtures — every expected fixture user is present in user_management.users
   try {
     const missing: string[] = []
     for (const email of EXPECTED_FIXTURE_USER_EMAILS) {
       const safe = email.replace(/'/g, "''")
       const rows = (await db.execute(
-        sql.raw(`SELECT 1 FROM public.auth_users WHERE email = '${safe}' LIMIT 1`),
+        sql.raw(`SELECT 1 FROM user_management.users WHERE email = '${safe}' LIMIT 1`),
       )) as unknown as Array<Record<string, unknown>>
       if (!Array.isArray(rows) || rows.length === 0) missing.push(email)
     }
