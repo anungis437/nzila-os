@@ -1,0 +1,9 @@
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0b-clean
+
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  13:51:27
+   Duration  22.74s (transform 56ms, setup 0ms, import 506ms, tests 21.84s, environment 0ms)
+

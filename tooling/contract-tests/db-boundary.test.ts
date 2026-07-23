@@ -66,6 +66,12 @@ const EXEMPT_PATHS = [
   'apps/union-eyes/db/',
   'apps/union-eyes/lib/database/',
   'apps/union-eyes/lib/db/',
+  // Phase 0B.2R §7 — real-PostgreSQL integration test that intentionally
+  // exercises the API/server action → resolver → PostgreSQL chain per the
+  // Phase 0B.2R mandate ("mocks alone are insufficient"). Gated by the
+  // PHASE0B2R_INTEGRATION_DB_URL env var; skipped by default. This is a
+  // TEST file, not runtime code — the invariant's intent is preserved.
+  'apps/union-eyes/lib/__tests__/platform-audit-events.integration.test.ts',
   // Union-Eyes — scripts/ is dev tooling (predev schema-align, seeders); not app runtime
   'apps/union-eyes/scripts/',
   // Union-Eyes — financial-service is a sidecar with its own DB client + migration scripts
