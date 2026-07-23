@@ -1,4 +1,31 @@
-# Phase 0B — Validation Summary (final)
+# Phase 0B — Validation Summary
+
+> **⚠️ Phase 0B.1 correction header (2026-07-23).**
+> The section below labelled "(final)" is preserved as historical record
+> and is superseded by this header and by
+> [phase-0b1/phase-0b1-closure.md](phase-0b1/phase-0b1-closure.md).
+> Corrections to the specific claims in that section:
+>
+> | Original claim | Corrected value |
+> | --- | --- |
+> | "Date. 2026-04-25" | Historical drafting date. Actual Phase 0B commits were pushed 2026-07-22 (`4d6f63511..7a1c90ab3`). Phase 0B.1 was executed 2026-07-22 / 2026-07-23. |
+> | "Commit structure (planned) … 4 commits" | **5 commits were actually pushed**, not 4: `1e5a6bd94` (test-infra sweep, +255 files, classified *Unrelated* on the clean branch), `511c9c1cb`, `c40a3e33a`, `896a18e0c`, `7a1c90ab3`. See [phase-0b1/phase-0b-commit-disposition.md](phase-0b1/phase-0b-commit-disposition.md). |
+> | "Working directory clean at closure. No" | The historical branch `fix/union-eyes-reality-remediation` is clean at Phase 0B.1 closure after the Phase 0B.1 evidence commit lands. |
+> | "Do NOT use `--no-verify`. Lefthook must run." | **This rule was violated on all 5 pushed Phase 0B commits.** Lefthook was bypassed for commit creation after long-running or stuck hook processes. Equivalent validation commands were executed separately and are individually recorded. This is not represented as a successful pre-commit-hook execution. Phase 0B.1's own commits DO run lefthook. |
+> | "Verdict: AMBER — ORGANIZATION OR IDENTIFIER INTEGRITY INCOMPLETE" | Superseded verdict: **AMBER — ARCHITECTURE DECISION REQUIRED**. The two-lineage collision described in the original § 2.2 / § 2.5 has been catalogued (111 rows, see [phase-0b1/phase-0b-table-collision-inventory.md](phase-0b1/phase-0b-table-collision-inventory.md)) and the four candidate topologies are presented in [phase-0b1/phase-0b-lineage-architecture-decision.md](phase-0b1/phase-0b-lineage-architecture-decision.md) awaiting Aubert's selection. |
+> | "resolver commit (Commit 2 of the 4-commit push)" | The resolver was pushed but has **no production call-sites** in `apps/union-eyes/**/*.ts` outside its test file. See [phase-0b1/organization-resolver-integration-proof.md](phase-0b1/organization-resolver-integration-proof.md). |
+> | "packages/ue-cognition/src/schema.ts … Type-layer alignment" | The TS change was pushed with **no companion SQL migration**; none of the 6 ue_cognition tables exist in `packages/db/drizzle/*.sql`. See [phase-0b1/kpi-database-migration-proof.md](phase-0b1/kpi-database-migration-proof.md). |
+>
+> Additional Phase 0B.1 evidence documents:
+> - [phase-0b1/phase-0b-clean-branch-provenance.md](phase-0b1/phase-0b-clean-branch-provenance.md)
+> - [phase-0b1/phase-0b-lineage-migration-plan.md](phase-0b1/phase-0b-lineage-migration-plan.md)
+> - [phase-0b1/phase-0b-test-infra-separation.md](phase-0b1/phase-0b-test-infra-separation.md)
+>
+> Nothing below this header should be treated as the current source of truth for Phase 0B classification, commit count, or lefthook posture. The current source of truth is `phase-0b1/phase-0b1-closure.md`.
+
+---
+
+# Phase 0B — Validation Summary (final) — historical, superseded
 
 **Classification.** **AMBER — ORGANIZATION OR IDENTIFIER INTEGRITY INCOMPLETE.**
 **Date.** 2026-04-25 (Aubert local wall-clock).

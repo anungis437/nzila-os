@@ -4,7 +4,7 @@ Single source of truth for phase progression. Updated at the close of each phase
 
 ## Phase 0 — Baseline Stabilization
 
-**Status:** `IN_PROGRESS — CHECKPOINT 2349d497b · Phase 0A closed AMBER 2026-07-23 · Phase 0A.1 closed GREEN 2026-07-23 · Phase 0B RE-CLASSIFIED AMBER 2026-04-25 (was GREEN 2026-04-24)`
+**Status:** `IN_PROGRESS — CHECKPOINT 2349d497b · Phase 0A closed AMBER 2026-07-23 · Phase 0A.1 closed GREEN 2026-07-23 · Phase 0B RE-CLASSIFIED AMBER 2026-04-25 (was GREEN 2026-04-24) · Phase 0B.1 closed AMBER — ARCHITECTURE DECISION REQUIRED 2026-07-23`
 **Authorized at commit:** `290e6c77dd1bc2ddcf33d899e52f13ccd57bd161`
 **Branch:** `fix/union-eyes-reality-remediation`
 **Local database:** native Windows PostgreSQL 17.8 on `localhost:5433`, DB `nzila_automation`, user `nzila`
@@ -69,6 +69,36 @@ the deferred items are enumerated in
 the final AMBER report is
 [cupe-national-phase-0/phase-0b-validation-summary.md](cupe-national-phase-0/phase-0b-validation-summary.md).
 Per the Phase 0B directive, Phase 0C, Phase 0D, and Phase 1 are NOT started.
+
+**Phase 0B.1 · Scope Recovery and Two-Lineage Decision Gate (2026-07-22 / 2026-07-23):**
+closed **AMBER — ARCHITECTURE DECISION REQUIRED** (Aubert sole approver).
+Executed after the 5-commit Phase 0B push (`4d6f63511..7a1c90ab3`) was
+identified as carrying (a) a 255-file repo-wide test-infra sweep conflated
+with Phase 0B, (b) a resolver with no production call-sites, (c) a KPI
+schema.ts change with no companion SQL migration, and (d) a validation
+summary that under-reported commit count and did not disclose that
+lefthook was bypassed on every Phase 0B commit. Phase 0B.1 did NOT rewrite
+or force-push any of the 5 pushed commits. Instead it:
+(1) published a per-commit disposition classifying each of the 5 commits
+by clean-branch action (`Retain` / `Retain + require companion` / `Drop`);
+(2) established a clean worktree `../nzila-automation-phase0b-clean` on
+`fix/union-eyes-phase0b-clean` @ `4d6f63511` for future reconstruction;
+(3) generated a 111-row two-lineage collision inventory
+(SHARED_INTENT × 2, DJANGO_INTERNAL × 9, REQUIRES_DECISION × 100);
+(4) presented four candidate topology options
+(A: single owner / B: dual schema / C: dual DB / D: governed hybrid) with
+recommendation-pending-Aubert-approval;
+(5) documented the integration gap for the platform-tenant resolver
+(31 baseline API routes require wiring after option selected);
+(6) documented the DB migration gap for the ue-cognition schema change
+(6 tables, no SQL migration authored);
+(7) corrected the stale Phase 0B validation summary via a header amendment
+(original preserved as historical/superseded);
+(8) documented the test-infra sweep as belonging on a separate future
+branch. Evidence lives under
+[cupe-national-phase-0/phase-0b1/](cupe-national-phase-0/phase-0b1/).
+Per the Phase 0B.1 directive: no environment deployed, no CUPE scenario
+graduated, no Phase 0C / 0D / 1 started.
 
 **Phase 0B · Organization and Identifier Integrity Closure (2026-04-24) — SUPERSEDED entry:**
 ~~closed `GREEN — ORGANIZATION AND IDENTIFIER INTEGRITY CLOSED`. Two-lineage
