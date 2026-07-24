@@ -127,9 +127,31 @@ const config: PlaywrightTestConfig = defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   testIgnore: ['**/.next/**', '**/node_modules/**'],
+  // Phase 0C.2R §3.1: unconditionally emit a stable JSON report so every run
+  // (CI or local) produces a per-test artefact reconcilable across three-run
+  // baselines. Filename is keyed by NZILA_E2E_RUN_ID when supplied by the
+  // governed lifecycle (`scripts/lifecycle/run.ts`), else falls back to a
+  // predictable path so ad-hoc runs are still captured.
   reporter: process.env.CI
-    ? [['html', { open: 'never' }], ['github']]
-    : [['html', { open: 'on-failure' }]],
+    ? [
+        ['html', { open: 'never' }],
+        ['github'],
+        [
+          'json',
+          {
+            outputFile: `test-results/results-${process.env.NZILA_E2E_RUN_ID ?? 'ci'}.json`,
+          },
+        ],
+      ]
+    : [
+        ['html', { open: 'on-failure' }],
+        [
+          'json',
+          {
+            outputFile: `test-results/results-${process.env.NZILA_E2E_RUN_ID ?? 'local'}.json`,
+          },
+        ],
+      ],
 
   use: {
     baseURL: getE2EEnv().PLAYWRIGHT_BASE_URL,

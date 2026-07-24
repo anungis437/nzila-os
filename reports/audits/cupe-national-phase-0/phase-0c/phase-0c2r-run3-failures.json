@@ -1,0 +1,302 @@
+[
+  {
+    "hash": "035433341e75cea361ecf19bc3c9553a67950748",
+    "name": "e2e\\empty-states.spec.ts >> Empty states >> dashboard with no active cases shows meaningful empty state",
+    "loc": "e2e\\empty-states.spec.ts:83:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "03d6b0b9d600683e7416a25db83c10e6c26accce",
+    "name": "e2e\\ue-workflow.spec.ts >> UnionEyes QA E2E Flows >> 1) intake -> review -> assign -> escalate -> resolve",
+    "loc": "e2e\\ue-workflow.spec.ts:20:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "077a60c58a0d6af9222558a1470a7793ba49bda1",
+    "name": "e2e\\permission-boundaries.spec.ts >> Permission boundaries — role gate enforcement >> Member role — blocked admin surfaces >> member: /dashboard/admin is blocked (P0 — missing server-side gate)",
+    "loc": "e2e\\permission-boundaries.spec.ts:85:9",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "0ca3a1b0cb1d4030c5b096dea032c12440ff97d9",
+    "name": "e2e\\no-fsm-overexposure.spec.ts >> No FSM overexposure in pilot-facing UX >> executive: raw FSM terms are hidden across role journey",
+    "loc": "e2e\\no-fsm-overexposure.spec.ts:25:9",
+    "err": "expect(page).toHaveURL(expected) failed"
+  },
+  {
+    "hash": "0eeaa9aa5fbca92a437a339ae9f15fb444dd5452",
+    "name": "e2e\\cape-features.spec.ts >> Steward workbench >> dashboard page loads with content",
+    "loc": "e2e\\cape-features.spec.ts:383:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "110ff5e8f5ddf9010203c48b9870535d8014226d",
+    "name": "tests\\e2e\\auditor-readonly.spec.ts >> UE E2E - auditor read-only boundary >> auditor can read allowed surfaces but mutation controls are blocked",
+    "loc": "tests\\e2e\\auditor-readonly.spec.ts:14:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "18253abccdd6bf0d3170ad99102f5d57b634269a",
+    "name": "e2e\\member-journey.spec.ts >> Member journey >> member: governance nav items are not visible",
+    "loc": "e2e\\member-journey.spec.ts:49:7",
+    "err": "expect(locator).toBeVisible() failed"
+  },
+  {
+    "hash": "302fac62d340930de753c64e04d4582677992989",
+    "name": "e2e\\governance\\deployment-legitimacy-visibility.spec.ts >> governance: deployment legitimacy visibility >> attestation surface accepts release id queries without 5xx",
+    "loc": "e2e\\governance\\deployment-legitimacy-visibility.spec.ts:14:7",
+    "err": "TimeoutError: apiRequestContext.get: Timeout 20000ms exceeded."
+  },
+  {
+    "hash": "3bbce09bfac3822c0d452fce3a07688acf31845f",
+    "name": "e2e\\cape-features.spec.ts >> Grievance submission flow >> grievance queue page loads with content",
+    "loc": "e2e\\cape-features.spec.ts:126:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "46fd8e96a0eb76618b6be0730a62d9970e81cb4c",
+    "name": "e2e\\authenticated-role-navigation.spec.ts >> UnionEyes authenticated role-centric navigation >> member: /dashboard redirects to centralized landing and role IA",
+    "loc": "e2e\\authenticated-role-navigation.spec.ts:29:9",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "4f74e7640c52c25ba5641c8d9052f601085e3dde",
+    "name": "tests\\e2e\\negative-workflow-transitions.spec.ts >> UE E2E — negative workflow transitions (FSM invariant) >> triage → resolved is blocked — must go via under_review (NEG-FSM-TRIAGE-DIRECT-RESOLVE)",
+    "loc": "tests\\e2e\\negative-workflow-transitions.spec.ts:36:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002"
+  },
+  {
+    "hash": "5b3bf45da47e0471ba3f1cc5c9faa79943de6e80",
+    "name": "e2e\\ocra-adaptive-flow.spec.ts >> OCRA adaptive live flow — smoke >> fr-CA route renders the assessment flow",
+    "loc": "e2e\\ocra-adaptive-flow.spec.ts:47:7",
+    "err": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "hash": "5e5c8b8900f0faef234a6dc4ce8b639847ac374b",
+    "name": "tests\\e2e\\steward-review.spec.ts >> UE E2E - steward review >> steward reviews assigned case and comment path is authorized",
+    "loc": "tests\\e2e\\steward-review.spec.ts:14:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "61aa10505f175caec5ec1d1fb06d20cd54defe35",
+    "name": "e2e\\bilingual\\locale-smoke.en.spec.ts >> Bilingual smoke — en-CA >> locale-prefixed homepage /en-CA renders with <html lang=\"en-CA\">",
+    "loc": "e2e\\bilingual\\_helpers.ts:51:9",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002"
+  },
+  {
+    "hash": "65d331715a4760bec71b3aad79088537f988e458",
+    "name": "e2e\\member-journey.spec.ts >> Member journey >> GAP-01 — Governance persona: no edit/write controls visible >> governance: no submit/create buttons visible on landing page",
+    "loc": "e2e\\member-journey.spec.ts:185:9",
+    "err": "expect(page).toHaveURL(expected) failed"
+  },
+  {
+    "hash": "6dcd34a1ae3cf32ec0730691ea407b073fd15262",
+    "name": "tests\\e2e\\auth-session-switch.spec.ts >> UE E2E - auth session switching >> sequential logins replace the active session and role context",
+    "loc": "tests\\e2e\\auth-session-switch.spec.ts:24:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "716dc402a87ea2e76f0922ded0ef5e600a3b8269",
+    "name": "e2e\\stakeholder-demo-journeys.spec.ts >> UnionEyes stakeholder demo journeys >> executive demo path is stable and continuity-safe",
+    "loc": "e2e\\stakeholder-demo-journeys.spec.ts:30:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "7375c92b4970882961af3df6cf8cdecbb5a1b82b",
+    "name": "e2e\\stakeholder-demo-journeys.spec.ts >> Marketing-to-app continuity routes >> for-clc and context-aware pages preserve context in CTAs",
+    "loc": "e2e\\stakeholder-demo-journeys.spec.ts:145:7",
+    "err": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "hash": "756d961c2c178b351be9172f983a57fc035b64f8",
+    "name": "e2e\\stakeholder-demo-journeys.spec.ts >> Marketing-to-app continuity routes >> pilot request CTA remains actionable from context routes",
+    "loc": "e2e\\stakeholder-demo-journeys.spec.ts:183:7",
+    "err": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "hash": "76bfc8885b41f46bf51388e0b26e66cf5c7fd759",
+    "name": "tests\\e2e\\cross-org-block.spec.ts >> UE E2E - cross-org containment >> wrong-org user cannot access case or audit export",
+    "loc": "tests\\e2e\\cross-org-block.spec.ts:14:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "7dc2363fbb5583bc191afbd2dbcc3485147cf0bf",
+    "name": "tests\\e2e\\case-resolution.spec.ts >> UE E2E - case resolution >> authorized resolution is visible and invalid post-resolution mutation is blocked",
+    "loc": "tests\\e2e\\case-resolution.spec.ts:14:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "8f1924b42798ac947369ffcb2f452eb0b45d2b77",
+    "name": "e2e\\dashboard.spec.ts >> Dashboard flows >> dashboard loads with navigation sidebar",
+    "loc": "e2e\\dashboard.spec.ts:25:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "a505f52125ce6ce289e51e8325b0408c1bb57c6f",
+    "name": "tests\\e2e\\case-escalation.spec.ts >> UE E2E - case escalation >> authorized escalation succeeds and unauthorized escalation is blocked",
+    "loc": "tests\\e2e\\case-escalation.spec.ts:14:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "a5f021626eacf33a4df01b32f3cc1d7045d46ac1",
+    "name": "tests\\e2e\\org-isolation-negative.spec.ts >> UE E2E — org isolation negative paths >> wrong-org user cannot lookup primary-org grievance by claim number (NEG-ORG-CLAIM-LOOKUP)",
+    "loc": "tests\\e2e\\org-isolation-negative.spec.ts:42:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002"
+  },
+  {
+    "hash": "a67f07ee26f77d13a2d1af83fe3943ba9a90cdd6",
+    "name": "e2e\\permission-boundaries.spec.ts >> Permission boundaries — role gate enforcement >> Unauthenticated user >> is redirected away from /dashboard",
+    "loc": "e2e\\permission-boundaries.spec.ts:31:9",
+    "err": "expect(received).toMatch(expected)"
+  },
+  {
+    "hash": "a7231ba0d3a5b69de19cdc12aba5bfecf18c5600",
+    "name": "e2e\\member-journey.spec.ts >> Member journey >> member: case management nav items are not visible",
+    "loc": "e2e\\member-journey.spec.ts:43:7",
+    "err": "expect(locator).toBeVisible() failed"
+  },
+  {
+    "hash": "aaa2b332d47500dd2257f40fb151eeeac1049a37",
+    "name": "e2e\\cba-intelligence.spec.ts >> Labor continuity intelligence page >> authenticated user can navigate protected continuity route without auth failure",
+    "loc": "e2e\\cba-intelligence.spec.ts:66:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "ad65d1b12debe5193169ab884bef094a600d1624",
+    "name": "e2e\\cape-features.spec.ts >> Grievance draft save & resume >> intake page renders form with required fields",
+    "loc": "e2e\\cape-features.spec.ts:34:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "b28784d33f8256ac7662cc08cc1ed1dec1e539b7",
+    "name": "e2e\\ocra-adaptive-flow.spec.ts >> OCRA adaptive live flow — telemetry privacy (network) >> telemetry POSTs never carry org names or free text",
+    "loc": "e2e\\ocra-adaptive-flow.spec.ts:56:7",
+    "err": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "hash": "b73c708a51fd9197700f3a43c07313d622a69ff7",
+    "name": "e2e\\cape-features.spec.ts >> Pilot readiness checklist >> onboarding page renders checklist with 7 items",
+    "loc": "e2e\\cape-features.spec.ts:171:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "b8625d874738f3c03eeb43fb565db8a9ea16c082",
+    "name": "e2e\\permission-boundaries.spec.ts >> Permission boundaries — role gate enforcement >> Unauthenticated user >> is redirected away from /dashboard/admin",
+    "loc": "e2e\\permission-boundaries.spec.ts:40:9",
+    "err": "expect(received).toMatch(expected)"
+  },
+  {
+    "hash": "bb8f35061c108d1d26e7e47887a0840b0f158664",
+    "name": "e2e\\cape-features.spec.ts >> Leadership dashboard >> dashboard renders 6 KPI cards",
+    "loc": "e2e\\cape-features.spec.ts:275:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "c0337c047778f512dd50d3bac1ca9df725db8c3b",
+    "name": "tests\\e2e\\admin-assignment.spec.ts >> UE E2E - admin assignment >> admin can assign and member cannot assign",
+    "loc": "tests\\e2e\\admin-assignment.spec.ts:14:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "c5f5c2a02cc465c9609427810a00471a754d3e7c",
+    "name": "tests\\e2e\\auth-failure-handling.spec.ts >> UE E2E — auth and session failure handling >> unauthenticated requests are denied at all critical surfaces (NEG-AUTH-NO-SESSION)",
+    "loc": "tests\\e2e\\auth-failure-handling.spec.ts:47:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "cfa05b27dc546ab92e94140d61a246be752da0e0",
+    "name": "e2e\\cape-features.spec.ts >> Employer communications >> contacts API endpoint is reachable",
+    "loc": "e2e\\cape-features.spec.ts:356:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "cfdfbf9f2aaca29288977901f4482a4c93bb4492",
+    "name": "e2e\\permission-boundaries.spec.ts >> Permission boundaries — role gate enforcement >> Unauthenticated user >> unauthenticated PATCH to /api/cases/transition returns 401",
+    "loc": "e2e\\permission-boundaries.spec.ts:61:9",
+    "err": "expect(received).toContain(expected) // indexOf"
+  },
+  {
+    "hash": "d5ba5784a0b87affc0c3c17a2d47004294c84adc",
+    "name": "e2e\\stakeholder-demo-journeys.spec.ts >> Marketing-to-app continuity routes >> executive and governance journeys avoid raw FSM language",
+    "loc": "e2e\\stakeholder-demo-journeys.spec.ts:207:7",
+    "err": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "hash": "d73e9ff6847bc736059a48b0c19ff4a0a22b6825",
+    "name": "e2e\\ocra-adaptive-flow.spec.ts >> OCRA adaptive live flow — smoke >> renders the consent step and exposes the assessment flow root",
+    "loc": "e2e\\ocra-adaptive-flow.spec.ts:35:7",
+    "err": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "hash": "d934d5d2d90c1a523905ee5ff59b66a6643349e3",
+    "name": "e2e\\a11y\\smoke.spec.ts >> Accessibility smoke — structural WCAG invariants >> every marketing route sets <html lang> to a non-empty value",
+    "loc": "e2e\\a11y\\smoke.spec.ts:88:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002"
+  },
+  {
+    "hash": "df1adb23bf0b8f08bd83c60b6a5a94c7ec51c432",
+    "name": "e2e\\bilingual\\locale-smoke.fr.spec.ts >> Bilingual smoke — fr-CA >> locale-prefixed homepage /fr-CA renders with <html lang=\"fr-CA\">",
+    "loc": "e2e\\bilingual\\_helpers.ts:51:9",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002"
+  },
+  {
+    "hash": "df5010296e12187499f9d9480fe36fcdff052463",
+    "name": "e2e\\permission-boundaries.spec.ts >> Permission boundaries — role gate enforcement >> Unauthenticated user >> unauthenticated POST to /api/cases/intake returns 401 or 403",
+    "loc": "e2e\\permission-boundaries.spec.ts:47:9",
+    "err": "expect(received).toContain(expected) // indexOf"
+  },
+  {
+    "hash": "e3734e138e5ae683207b4f467018f15d9021d649",
+    "name": "e2e\\permission-boundaries.spec.ts >> Permission boundaries — role gate enforcement >> Unauthenticated user >> unauthenticated POST to /api/cases/assign returns 401 or 403",
+    "loc": "e2e\\permission-boundaries.spec.ts:72:9",
+    "err": "TimeoutError: apiRequestContext.post: Timeout 20000ms exceeded."
+  },
+  {
+    "hash": "e881c49f00388c7ff8ea38dfa1253c33dc14d3fd",
+    "name": "e2e\\no-fsm-overexposure.spec.ts >> No FSM overexposure in pilot-facing UX >> admin: raw FSM terms are hidden across role journey",
+    "loc": "e2e\\no-fsm-overexposure.spec.ts:25:9",
+    "err": "expect(page).toHaveURL(expected) failed"
+  },
+  {
+    "hash": "e8b3ea01c3affe5e1a3519cee44409820bf188cb",
+    "name": "e2e\\member-journey.spec.ts >> Member journey >> GAP-01 — Governance persona: no edit/write controls visible >> governance: cannot see \"Open Representation Case\" action",
+    "loc": "e2e\\member-journey.spec.ts:175:9",
+    "err": "expect(page).toHaveURL(expected) failed"
+  },
+  {
+    "hash": "e9b8a6b6e6ff15436051e7a24b27949590a29a3f",
+    "name": "e2e\\no-fsm-overexposure.spec.ts >> No FSM overexposure in pilot-facing UX >> member: raw FSM terms are hidden across role journey",
+    "loc": "e2e\\no-fsm-overexposure.spec.ts:25:9",
+    "err": "expect(page).toHaveURL(expected) failed"
+  },
+  {
+    "hash": "edfc9ae9ee7dd00dc0c216f1da82eb72f58a9d04",
+    "name": "e2e\\governance\\deployment-legitimacy-visibility.spec.ts >> governance: deployment legitimacy visibility >> health endpoint exposes release identity governance headers (when bound)",
+    "loc": "e2e\\governance\\deployment-legitimacy-visibility.spec.ts:10:7",
+    "err": "TimeoutError: apiRequestContext.get: Timeout 20000ms exceeded."
+  },
+  {
+    "hash": "ef46713392e5f3e941ba8754dc69c12ad2e67b92",
+    "name": "e2e\\pilot-journey.spec.ts >> Union pilot journey >> member intake uses the approved intake and evidence endpoints",
+    "loc": "e2e\\pilot-journey.spec.ts:15:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "f2c2930f734879087278846c26026f50e965bc74",
+    "name": "tests\\e2e\\external-ux-tester.spec.ts >> UE E2E - external UX tester containment >> external tester is limited to isolated UX scope",
+    "loc": "tests\\e2e\\external-ux-tester.spec.ts:15:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "f8c497d8c4240320a0abe55079e18049640e4a03",
+    "name": "e2e\\missing-routes.spec.ts >> Existing routes — positive smoke check >> admin: /dashboard renders for admin role",
+    "loc": "e2e\\missing-routes.spec.ts:54:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded."
+  },
+  {
+    "hash": "ff8a9e62692260586e7e31e70829c18c98b4ab20",
+    "name": "tests\\e2e\\evidence-misuse.spec.ts >> UE E2E — evidence misuse and access control >> invalid evidence ID returns safe error — no server crash or data leak (NEG-EVIDENCE-INVALID-ID)",
+    "loc": "tests\\e2e\\evidence-misuse.spec.ts:39:7",
+    "err": "[ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002"
+  }
+]
