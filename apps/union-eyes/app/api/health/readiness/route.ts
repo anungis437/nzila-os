@@ -1,22 +1,44 @@
 /**
- * Phase 0C.1 §6/§8 — Governed E2E readiness endpoint.
+ * Phase 0C.1 §6/§8 + Phase 0C.2 §6 — Governed E2E readiness endpoint.
  *
  * GET /api/health/readiness
  *
- * Returns 200 iff ALL 10 checks pass:
- *   1. app.boot            — this handler returning (implicit)
- *   2. db.connect          — SELECT 1 succeeds
- *   3. db.schema.public    — critical public-schema tables present
- *   4. db.schema.union_eyes — union_eyes-schema tables present
- *   5. db.migrations.platform — __drizzle_migrations table has ≥1 row
- *   6. db.migrations.django — django_migrations table has ≥1 row (or skipped)
- *   7. db.contract.phase0b — organization_membership resolver present
- *   8. db.tables.kpi       — ue_kpi_snapshot / ue_pilot_definition exist (or skipped)
- *   9. db.seed.marker      — ue_e2e_seed_marker present with a runId
- *  10. auth.fixtures       — every fixture user resolvable in auth_users
+ * Returns 200 iff ALL critical checks pass. The orchestrator (§5) polls
+ * this URL — not `/liveness` — because liveness only proves that a
+ * process is listening, whereas readiness proves that the process is
+ * actually usable for governed E2E: schema present, fixtures seeded,
+ * memberships wired, migration lineage sane, and (when running under
+ * managed-server mode) the run-id env var is present.
+ *
+ * Critical checks (Phase 0C.1 §6/§8):
+ *   1. app.boot                — this handler returning (implicit)
+ *   2. db.connect              — SELECT 1 succeeds
+ *   3. db.schema.public        — critical public-schema tables present
+ *   4. db.schema.union_eyes    — union_eyes-schema tables present
+ *   5. db.migrations.platform  — __drizzle_migrations table has ≥1 row
+ *   6. db.migrations.django    — django_migrations table has ≥1 row (or skipped)
+ *   7. db.contract.phase0b     — organization_members resolver present
+ *   8. db.tables.kpi           — ue_kpi_snapshot / ue_pilot_definition (or skipped)
+ *   9. db.seed.marker          — ≥5 fixture users present under @nzila.test
+ *  10. auth.fixtures           — every fixture user resolvable in user_management.users
+ *
+ * Additional checks (Phase 0C.2 §6):
+ *  11. db.fixtures.orgs        — 3 canonical fixture organizations present
+ *                                (primary / secondary / uxTesterIsolated)
+ *  12. db.fixtures.mappings    — user_management.organization_users has
+ *                                ≥5 rows for the fixture personas
+ *  13. db.fixtures.memberships — public.organization_members has ≥5 rows
+ *                                for the fixture personas
+ *  14. db.migration.lineage    — __drizzle_migrations row count matches
+ *                                the canonical migrations-cache lineage
+ *                                floor (≥4 = the 4 canonical files)
+ *  15. env.run_id              — when NZILA_E2E_MANAGED_SERVER=true the
+ *                                server MUST also have NZILA_E2E_RUN_ID
+ *                                (otherwise skipped — production-safe)
  *
  * Response body is fully detailed in NODE_ENV=test/development.
- * In production, body is redacted (no table names, no counts, no PII).
+ * In production, body is redacted (no table names, no counts, no PII,
+ * no run-id).
  */
 
 import { NextResponse } from 'next/server'
@@ -35,6 +57,11 @@ type CheckId =
   | 'db.tables.kpi'
   | 'db.seed.marker'
   | 'auth.fixtures'
+  | 'db.fixtures.orgs'
+  | 'db.fixtures.mappings'
+  | 'db.fixtures.memberships'
+  | 'db.migration.lineage'
+  | 'env.run_id'
 
 type CheckState = 'ok' | 'fail' | 'skipped'
 
@@ -45,7 +72,17 @@ interface CheckResult {
 }
 
 interface ReadinessBody {
-  status: 'ready' | 'not_ready' | 'database_unavailable' | 'migration_pending' | 'schema_missing' | 'seed_missing' | 'auth_fixture_missing'
+  status:
+    | 'ready'
+    | 'not_ready'
+    | 'database_unavailable'
+    | 'migration_pending'
+    | 'schema_missing'
+    | 'seed_missing'
+    | 'auth_fixture_missing'
+    | 'fixtures_incomplete'
+    | 'lineage_below_floor'
+    | 'run_id_missing'
   checks: CheckResult[]
   timestamp: string
 }
@@ -66,6 +103,29 @@ const EXPECTED_FIXTURE_USER_EMAILS = [
   'ue.qa.admin.primary@nzila.test',
 ]
 const FIXTURE_EMAIL_LIKE = '%@nzila.test'
+
+// Phase 0C.2 §6 — Fixture organization IDs mirror UE_TEST_ORGS in
+// apps/union-eyes/tests/fixtures/test-orgs.ts. Only the 3 seeded orgs
+// are required; productionLike (44444...) is DEFINED but NOT seeded.
+const EXPECTED_FIXTURE_ORG_IDS = [
+  '11111111-1111-4111-8111-111111111111', // primary
+  '22222222-2222-4222-8222-222222222222', // secondary
+  '33333333-3333-4333-8333-333333333333', // uxTesterIsolated
+]
+
+// Phase 0C.2 §6 — Canonical migration lineage floor. The scoped
+// canonical migrations-cache/ directory contains exactly 4 migration
+// files (0000..0003). If __drizzle_migrations rows drop below this
+// floor, either the DB was reset without re-running migrations or a
+// non-canonical migration path was used.
+const MIGRATION_LINEAGE_FLOOR = 4
+
+// Phase 0C.2 §6 — Managed-server env var names. Duplicated here (not
+// imported from scripts/lifecycle/managed-server-handshake.ts) so this
+// route stays app-level and doesn't pull scripts/ into the Next.js
+// runtime graph. Keep in lock-step.
+const MANAGED_SERVER_ENV = 'NZILA_E2E_MANAGED_SERVER'
+const MANAGED_SERVER_RUN_ID_ENV = 'NZILA_E2E_RUN_ID'
 
 function isProd(): boolean {
   return process.env.NODE_ENV === 'production'
@@ -98,6 +158,11 @@ async function runChecks(): Promise<CheckResult[]> {
       'db.tables.kpi',
       'db.seed.marker',
       'auth.fixtures',
+      'db.fixtures.orgs',
+      'db.fixtures.mappings',
+      'db.fixtures.memberships',
+      'db.migration.lineage',
+      'env.run_id',
     ] as CheckId[]) {
       results.push({ id, state: 'fail', detail: 'db not available' })
     }
@@ -123,6 +188,11 @@ async function runChecks(): Promise<CheckResult[]> {
       'db.tables.kpi',
       'db.seed.marker',
       'auth.fixtures',
+      'db.fixtures.orgs',
+      'db.fixtures.mappings',
+      'db.fixtures.memberships',
+      'db.migration.lineage',
+      'env.run_id',
     ] as CheckId[]) {
       results.push({ id, state: 'fail', detail: 'db unavailable' })
     }
@@ -295,6 +365,145 @@ async function runChecks(): Promise<CheckResult[]> {
     })
   }
 
+  // 11. db.fixtures.orgs — 3 canonical fixture organizations must be present
+  try {
+    const missing: string[] = []
+    for (const orgId of EXPECTED_FIXTURE_ORG_IDS) {
+      const safe = orgId.replace(/'/g, "''")
+      const rows = (await db.execute(
+        sql.raw(`SELECT 1 FROM public.organizations WHERE id = '${safe}' LIMIT 1`),
+      )) as unknown as Array<Record<string, unknown>>
+      if (!Array.isArray(rows) || rows.length === 0) missing.push(orgId)
+    }
+    results.push(
+      missing.length === 0
+        ? { id: 'db.fixtures.orgs', state: 'ok', detail: `orgs=${EXPECTED_FIXTURE_ORG_IDS.length}` }
+        : {
+            id: 'db.fixtures.orgs',
+            state: 'fail',
+            detail: `missing: ${missing.length}/${EXPECTED_FIXTURE_ORG_IDS.length}`,
+          },
+    )
+  } catch (err) {
+    results.push({
+      id: 'db.fixtures.orgs',
+      state: 'fail',
+      detail: err instanceof Error ? err.message : 'unknown',
+    })
+  }
+
+  // 12. db.fixtures.mappings — auth-layer user→org bindings.
+  // user_management.organization_users must have at least one row per
+  // primary fixture persona (5). Baseline seed writes 10 rows.
+  try {
+    const rows = (await db.execute(
+      sql.raw(`SELECT count(*)::int AS c FROM user_management.organization_users`),
+    )) as unknown as Array<{ c: number }>
+    const count = Array.isArray(rows) && rows.length > 0 ? Number(rows[0]?.c ?? 0) : 0
+    results.push(
+      count >= EXPECTED_FIXTURE_USER_EMAILS.length
+        ? { id: 'db.fixtures.mappings', state: 'ok', detail: `mappings=${count}` }
+        : {
+            id: 'db.fixtures.mappings',
+            state: 'fail',
+            detail: `expected≥${EXPECTED_FIXTURE_USER_EMAILS.length} platform mappings, found ${count}`,
+          },
+    )
+  } catch (err) {
+    results.push({
+      id: 'db.fixtures.mappings',
+      state: 'fail',
+      detail: err instanceof Error ? err.message : 'unknown',
+    })
+  }
+
+  // 13. db.fixtures.memberships — app-layer memberships.
+  // public.organization_members must carry at least one row per primary
+  // fixture persona (5). Baseline seed writes 10 rows.
+  try {
+    const rows = (await db.execute(
+      sql.raw(`SELECT count(*)::int AS c FROM public.organization_members`),
+    )) as unknown as Array<{ c: number }>
+    const count = Array.isArray(rows) && rows.length > 0 ? Number(rows[0]?.c ?? 0) : 0
+    results.push(
+      count >= EXPECTED_FIXTURE_USER_EMAILS.length
+        ? { id: 'db.fixtures.memberships', state: 'ok', detail: `memberships=${count}` }
+        : {
+            id: 'db.fixtures.memberships',
+            state: 'fail',
+            detail: `expected≥${EXPECTED_FIXTURE_USER_EMAILS.length} memberships, found ${count}`,
+          },
+    )
+  } catch (err) {
+    results.push({
+      id: 'db.fixtures.memberships',
+      state: 'fail',
+      detail: err instanceof Error ? err.message : 'unknown',
+    })
+  }
+
+  // 14. db.migration.lineage — the canonical migrations-cache/ contains
+  // exactly 4 migrations; __drizzle_migrations must be ≥ that floor.
+  try {
+    const rows = (await db.execute(
+      sql`SELECT count(*)::int AS c FROM drizzle.__drizzle_migrations`,
+    )) as unknown as Array<{ c: number }>
+    const count = Array.isArray(rows) && rows.length > 0 ? Number(rows[0]?.c ?? 0) : 0
+    results.push(
+      count >= MIGRATION_LINEAGE_FLOOR
+        ? {
+            id: 'db.migration.lineage',
+            state: 'ok',
+            detail: `applied=${count} floor=${MIGRATION_LINEAGE_FLOOR}`,
+          }
+        : {
+            id: 'db.migration.lineage',
+            state: 'fail',
+            detail: `below floor: applied=${count} floor=${MIGRATION_LINEAGE_FLOOR}`,
+          },
+    )
+  } catch (err) {
+    results.push({
+      id: 'db.migration.lineage',
+      state: 'fail',
+      detail: err instanceof Error ? err.message : 'unknown',
+    })
+  }
+
+  // 15. env.run_id — only enforced when managed-server mode is active.
+  // In production this is skipped so the check is invisible.
+  try {
+    const managedFlag = process.env[MANAGED_SERVER_ENV] === 'true'
+    if (!managedFlag) {
+      results.push({
+        id: 'env.run_id',
+        state: 'skipped',
+        detail: 'not in managed-server mode',
+      })
+    } else {
+      const runId = process.env[MANAGED_SERVER_RUN_ID_ENV]
+      if (typeof runId === 'string' && runId.length > 0) {
+        results.push({
+          id: 'env.run_id',
+          state: 'ok',
+          detail: `runIdLen=${runId.length}`,
+        })
+      } else {
+        results.push({
+          id: 'env.run_id',
+          state: 'fail',
+          detail: `${MANAGED_SERVER_RUN_ID_ENV} required in managed-server mode`,
+        })
+      }
+    }
+  } catch (err) {
+    results.push({
+      id: 'env.run_id',
+      state: 'fail',
+      detail: err instanceof Error ? err.message : 'unknown',
+    })
+  }
+
   return results
 }
 
@@ -306,6 +515,17 @@ function classifyStatus(results: CheckResult[]): ReadinessBody['status'] {
   if (fails.some((r) => r.id.startsWith('db.schema'))) return 'schema_missing'
   if (fails.some((r) => r.id === 'db.seed.marker')) return 'seed_missing'
   if (fails.some((r) => r.id === 'auth.fixtures')) return 'auth_fixture_missing'
+  if (fails.some((r) => r.id === 'env.run_id')) return 'run_id_missing'
+  if (fails.some((r) => r.id === 'db.migration.lineage')) return 'lineage_below_floor'
+  if (
+    fails.some(
+      (r) =>
+        r.id === 'db.fixtures.orgs' ||
+        r.id === 'db.fixtures.mappings' ||
+        r.id === 'db.fixtures.memberships',
+    )
+  )
+    return 'fixtures_incomplete'
   return 'not_ready'
 }
 

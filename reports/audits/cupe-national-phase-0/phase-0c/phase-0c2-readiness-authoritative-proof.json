@@ -1,0 +1,153 @@
+{
+  "phase": "0C.2",
+  "section": 6,
+  "title": "Readiness authoritative endpoint",
+  "generatedAt": "2026-04-25",
+  "verdict": "GREEN",
+  "endpoint": {
+    "path": "/api/health/readiness",
+    "method": "GET",
+    "cacheControl": "no-cache, no-store, must-revalidate"
+  },
+  "checks": {
+    "totalBefore": 10,
+    "totalAfter": 15,
+    "added": [
+      {
+        "id": "db.fixtures.orgs",
+        "kind": "existence",
+        "target": "public.organizations",
+        "count": 3,
+        "orgIds": [
+          "11111111-1111-4111-8111-111111111111",
+          "22222222-2222-4222-8222-222222222222",
+          "33333333-3333-4333-8333-333333333333"
+        ]
+      },
+      {
+        "id": "db.fixtures.mappings",
+        "kind": "count",
+        "target": "user_management.organization_users",
+        "floor": 5
+      },
+      {
+        "id": "db.fixtures.memberships",
+        "kind": "count",
+        "target": "public.organization_members",
+        "floor": 5
+      },
+      {
+        "id": "db.migration.lineage",
+        "kind": "count",
+        "target": "drizzle.__drizzle_migrations",
+        "floor": 4
+      },
+      {
+        "id": "env.run_id",
+        "kind": "env",
+        "gate": "NZILA_E2E_MANAGED_SERVER === 'true'",
+        "required": "NZILA_E2E_RUN_ID",
+        "skipsWhenGateOff": true
+      }
+    ],
+    "orderedIds": [
+      "app.boot",
+      "db.connect",
+      "db.schema.public",
+      "db.schema.union_eyes",
+      "db.migrations.platform",
+      "db.migrations.django",
+      "db.contract.phase0b",
+      "db.tables.kpi",
+      "db.seed.marker",
+      "auth.fixtures",
+      "db.fixtures.orgs",
+      "db.fixtures.mappings",
+      "db.fixtures.memberships",
+      "db.migration.lineage",
+      "env.run_id"
+    ]
+  },
+  "statusEnum": {
+    "before": [
+      "ready",
+      "not_ready",
+      "migration_pending",
+      "schema_missing",
+      "seed_missing",
+      "auth_fixture_missing",
+      "database_unavailable"
+    ],
+    "added": [
+      "fixtures_incomplete",
+      "lineage_below_floor",
+      "run_id_missing"
+    ],
+    "classifierPrecedence": [
+      "database_unavailable",
+      "migration_pending",
+      "schema_missing",
+      "seed_missing",
+      "auth_fixture_missing",
+      "run_id_missing",
+      "lineage_below_floor",
+      "fixtures_incomplete",
+      "not_ready"
+    ]
+  },
+  "productionRedaction": {
+    "enabled": true,
+    "trigger": "NODE_ENV === 'production'",
+    "strippedFields": ["detail"],
+    "preservedFields": ["id", "state"],
+    "noRunIdLengthLeak": true,
+    "noPgErrorLeak": true
+  },
+  "proveScript": {
+    "path": "apps/union-eyes/scripts/lifecycle/prove-phase-0c2-auth-state-generator.ts",
+    "before": {
+      "step5PolledEndpoint": "/api/health/liveness",
+      "variableName": "livenessUrl"
+    },
+    "after": {
+      "step5PolledEndpoint": "/api/health/readiness",
+      "variableName": "readinessUrl"
+    },
+    "rationale": "Auth-state generation depends on seeded fixtures; readiness catches misconfiguration before the generator issues its first login request."
+  },
+  "orchestratorAlignment": {
+    "scriptsLifecycleRunTsStep8": "/api/health/readiness (unchanged since Phase 0C.1)",
+    "proveAuthStateGeneratorStep5": "/api/health/readiness (fixed in this section)",
+    "allGovernedCallersPollReadiness": true
+  },
+  "tests": {
+    "file": "apps/union-eyes/app/api/health/readiness/route.test.ts",
+    "log": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-readiness-authoritative-tests.log",
+    "totalBefore": 5,
+    "totalAfter": 15,
+    "groups": [
+      { "name": "happy path", "count": 2 },
+      { "name": "database failure modes", "count": 3 },
+      { "name": "Phase 0C.2 §6 — fixture completeness", "count": 3 },
+      { "name": "Phase 0C.2 §6 — migration lineage", "count": 2 },
+      { "name": "Phase 0C.2 §6 — env.run_id gate", "count": 4 },
+      { "name": "production redaction", "count": 1 }
+    ],
+    "durationMs": 718,
+    "passed": 15,
+    "failed": 0
+  },
+  "caveatCompliance": {
+    "orchestratorPollsReadinessNotLiveness": "verified — both governed callers poll readiness",
+    "playwrightBypassStructurallyImpossibleOutsideGovernedExecution": "unchanged from §4; env.run_id check adds positive assertion for managed-mode",
+    "gitleaksExceptionNarrowlyScoped": "no change required — evidence contains no credential-bearing URL literals"
+  },
+  "filesChanged": [
+    "apps/union-eyes/app/api/health/readiness/route.ts",
+    "apps/union-eyes/app/api/health/readiness/route.test.ts",
+    "apps/union-eyes/scripts/lifecycle/prove-phase-0c2-auth-state-generator.ts",
+    "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-readiness-authoritative-proof.md",
+    "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-readiness-authoritative-proof.json",
+    "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-readiness-authoritative-tests.log"
+  ]
+}

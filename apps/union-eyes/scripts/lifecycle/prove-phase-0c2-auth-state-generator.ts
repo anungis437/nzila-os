@@ -11,7 +11,8 @@
  *   2. Allocate disposable DB (compliant bootstrap).
  *   3. Seed test fixtures.
  *   4. Boot Next.js dev server (PID-tracked, owned).
- *   5. Poll `/api/health/liveness` until 200.
+ *   5. Poll `/api/health/readiness` until 200 (Phase 0C.2 §6 —
+ *      authoritative gate, verifies DB + schema + fixtures).
  *   6. Invoke `generateAuthStates()` to log-in all 5 personas and write
  *      `playwright/.auth/<role>.json` storage-state files.
  *   7. Validate: every persona ok, every storageState file has one
@@ -235,11 +236,17 @@ async function main(): Promise<void> {
     log(`- log: \`${path.relative(REPO_ROOT, boot.logPath).replace(/\\/g, '/')}\``)
     log('')
 
-    log('## Step 5 — Poll `/api/health/liveness` until 200 (timeout 180s)')
+    log('## Step 5 — Poll `/api/health/readiness` until 200 (timeout 180s)')
     log('')
-    const livenessUrl = `http://localhost:${port}/api/health/liveness`
+    // Phase 0C.2 §6 — Readiness is the authoritative gate. Liveness only
+    // proves that a process is listening, whereas readiness proves that
+    // DB is connected, schemas are present, fixtures are seeded, and
+    // (when applicable) the run-id env var is set. Auth-state generation
+    // depends on all of that, so polling readiness — not liveness —
+    // catches misconfiguration BEFORE we start issuing login requests.
+    const readinessUrl = `http://localhost:${port}/api/health/readiness`
     const readiness = await pollReadiness({
-      url: livenessUrl,
+      url: readinessUrl,
       timeoutMs: 180_000,
       intervalMs: 1_000,
     })
@@ -247,9 +254,9 @@ async function main(): Promise<void> {
     log(`- attempts: \`${readiness.attempts}\``)
     log(`- elapsedMs: \`${readiness.elapsedMs}\``)
     if (!readiness.ready) {
-      failures.push(`server did not become live within 180s`)
+      failures.push(`server did not become ready within 180s`)
       verdict = 'FAIL'
-      throw new Error('server not live')
+      throw new Error('server not ready')
     }
     log('')
 

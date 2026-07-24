@@ -1,0 +1,24 @@
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0c/apps/union-eyes
+
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > happy path > returns 200 ready when all critical checks pass 254ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > happy path > includes exactly 15 check ids 3ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > database failure modes > returns 503 database_unavailable when SELECT 1 fails 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > database failure modes > returns 503 seed_missing when no fixture users exist 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > database failure modes > returns 503 migration_pending when no migrations applied 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö fixture completeness > returns 503 fixtures_incomplete when a fixture org is missing 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö fixture completeness > returns 503 fixtures_incomplete when platform mappings are short 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö fixture completeness > returns 503 fixtures_incomplete when memberships are short 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö migration lineage > returns 503 migration_pending (not lineage) when 0 migrations applied 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö migration lineage > reports lineage OK when at the floor exactly (4) 2ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö env.run_id gate > is skipped when managed-server flag is not "true" 1ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö env.run_id gate > fails when managed-server flag is on but NZILA_E2E_RUN_ID is missing 1ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö env.run_id gate > passes with runIdLen detail when both env vars are set 1ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > Phase 0C.2 ┬º6 ΓÇö env.run_id gate > rejects managed flag values other than exact "true" 3ms
+ Γ£ô |union-eyes| app/api/health/readiness/route.test.ts > Phase 0C.1 ┬º6 + Phase 0C.2 ┬º6 ΓÇö /api/health/readiness > production redaction > redacts detail in production 2ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  20:06:17
+   Duration  718ms (transform 152ms, setup 0ms, import 137ms, tests 284ms, environment 0ms)
+
