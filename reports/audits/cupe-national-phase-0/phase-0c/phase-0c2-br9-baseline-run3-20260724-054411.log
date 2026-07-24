@@ -1,0 +1,1683 @@
+
+> @nzila/union-eyes@1.0.0 e2e:governed C:\APPS\nzila-automation-phase0c\apps\union-eyes
+> tsx scripts/lifecycle/run.ts
+
+[e2e:governed] env loaded (adminUrl=postgresql://<user>:<pw>@localhost:5433/postgres)
+[e2e:governed] Γû╢ step 1: preflight
+[e2e:governed] Γ£ö step 1: preflight (9 ms) ΓÇö node=v24.13.1, port=3002 free
+[e2e:governed] Γû╢ step 2: allocate-db
+[ue:e2e:allocate-db] Creating disposable DB 'ue_e2e_20260724094416_90145a' via postgresql://<user>:<pw>@localhost:5433/postgres (owner=nzila)
+[e2e:governed] Γ£ö step 2: allocate-db (3562 ms) ΓÇö db=ue_e2e_20260724094416_90145a runId=20260724094416_90145a
+[e2e:governed] Γû╢ step 3: allocate-port
+[e2e:governed] Γ£ö step 3: allocate-port (2 ms) ΓÇö port=3002 (preferred=3002)
+[e2e:governed] Γû╢ step 4: migrations.platform
+[e2e:governed] Γ£ö step 4: migrations.platform (0 ms) ΓÇö applied during allocate-db (drizzle bootstrap)
+[e2e:governed] Γû╢ step 5: migrations.django
+[e2e:governed] Γ£ö step 5: migrations.django (0 ms) ΓÇö Django not required for Phase 0C.1 baseline; see readiness ┬º6 #6
+[e2e:governed] Γû╢ step 6: verify-phase0b-contract
+[e2e:governed] Γ£ö step 6: verify-phase0b-contract (117 ms) ΓÇö organization_members present
+[e2e:governed] Γû╢ step 7: seed
+[ue:seed:test-env] Seed complete
+{
+  "testOrgs": 4,
+  "testUsers": 10,
+  "testCases": 3,
+  "externalTesterOrg": "33333333-3333-4333-8333-333333333333",
+  "externalTesterUser": "ue-qa-ux-tester-001",
+  "suspendedUser": "ue-qa-member-suspended",
+  "productionLikeOrgGuardrail": "44444444-4444-4444-8444-444444444444",
+  "qaPassword": "NzilaQa!2026"
+}
+[e2e:governed] Γ£ö step 7: seed (10853 ms) ΓÇö seed-test-env applied to disposable DB
+[e2e:governed] Γû╢ step 8: boot-server
+(node:39448) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[e2e:governed] Γ£ö step 8: boot-server (33182 ms) ΓÇö pid=33744 port=3002 readyAfter=31407ms handshakeRunId=20260724094416_90145a
+[e2e:governed] Γû╢ step 9: generate-auth-states
+{
+  "baseUrl": "http://localhost:3002",
+  "outputDir": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth",
+  "results": [
+    {
+      "role": "member",
+      "email": "ue.qa.member.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "iFI5CsDLΓÇª",
+      "cookieExpires": 1784972707,
+      "meEmail": "ue.qa.member.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\member.json"
+    },
+    {
+      "role": "steward",
+      "email": "ue.qa.steward.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "dKs-EP7DΓÇª",
+      "cookieExpires": 1784972708,
+      "meEmail": "ue.qa.steward.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\steward.json"
+    },
+    {
+      "role": "staff",
+      "email": "ue.qa.staff.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "p23vAALPΓÇª",
+      "cookieExpires": 1784972708,
+      "meEmail": "ue.qa.staff.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\staff.json"
+    },
+    {
+      "role": "executive",
+      "email": "ue.qa.executive.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "BrVrMUpbΓÇª",
+      "cookieExpires": 1784972709,
+      "meEmail": "ue.qa.executive.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\executive.json"
+    },
+    {
+      "role": "admin",
+      "email": "ue.qa.admin.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "UrL9FnbqΓÇª",
+      "cookieExpires": 1784972709,
+      "meEmail": "ue.qa.admin.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\admin.json"
+    }
+  ],
+  "allOk": true
+}
+[e2e:governed] Γ£ö step 9: generate-auth-states (4945 ms) ΓÇö roles=5 allOk=true dir=playwright\.auth
+[e2e:governed] Γû╢ step 10: playwright
+
+Running 212 tests using 1 worker
+
+[1A[2K[1/212] [setup] ΓÇ║ playwright\setup\auth-state.setup.ts:34:6 ΓÇ║ phase-0c2-s8 auth-state summary is present, complete, and consistent
+[1A[2K[2/212] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ member: raw FSM terms are hidden across role journey
+[1A[2K  1) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ member: raw FSM terms are hidden across role journey 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:27:7
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-a0e7e--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-a0e7e--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[3/212] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ staff: raw FSM terms are hidden across role journey
+[1A[2K[4/212] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ executive: raw FSM terms are hidden across role journey
+[1A[2K  2) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ executive: raw FSM terms are hidden across role journey 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/intelligence(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/intelligence" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:27:7
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-84efa--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-84efa--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[5/212] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ governance: raw FSM terms are hidden across role journey
+[1A[2K[6/212] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ admin: raw FSM terms are hidden across role journey
+[1A[2K  3) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ admin: raw FSM terms are hidden across role journey 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/admin\/organizations(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:27:7
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-df4fa--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-df4fa--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[7/212] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ member: pilot excluded routes are hard-gated
+[1A[2K[8/212] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ steward: pilot excluded routes are hard-gated
+[1A[2K[9/212] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ staff: pilot excluded routes are hard-gated
+[1A[2K[10/212] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ executive: pilot excluded routes are hard-gated
+[1A[2K[11/212] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ governance: pilot excluded routes are hard-gated
+[1A[2K[12/212] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ admin: pilot excluded routes are hard-gated
+[1A[2K[13/212] [public] ΓÇ║ e2e\smoke.spec.ts:15:7 ΓÇ║ Public pages smoke tests ΓÇ║ marketing page renders
+[1A[2K[14/212] [public] ΓÇ║ e2e\smoke.spec.ts:20:7 ΓÇ║ Public pages smoke tests ΓÇ║ sign-in page renders
+[1A[2K[15/212] [public] ΓÇ║ e2e\smoke.spec.ts:26:7 ΓÇ║ Public pages smoke tests ΓÇ║ sign-up page renders
+[1A[2K[16/212] [public] ΓÇ║ e2e\smoke.spec.ts:31:7 ΓÇ║ Public pages smoke tests ΓÇ║ API health endpoint returns 200
+[1A[2K[17/212] [public] ΓÇ║ e2e\smoke.spec.ts:39:7 ΓÇ║ Accessibility smoke tests ΓÇ║ marketing page has no critical a11y violations
+[1A[2K[18/212] [member] ΓÇ║ e2e\member-journey.spec.ts:33:7 ΓÇ║ Member journey ΓÇ║ member lands at member portal after login
+[1A[2K[19/212] [member] ΓÇ║ e2e\member-journey.spec.ts:43:7 ΓÇ║ Member journey ΓÇ║ member: case management nav items are not visible
+[1A[2K  4) [member] ΓÇ║ e2e\member-journey.spec.ts:43:7 ΓÇ║ Member journey ΓÇ║ member: case management nav items are not visible 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+       at e2e\helpers\navigation-assertions.ts:17
+
+      15 | export async function assertForbiddenNavLabels(page: Page, labels: string[]): Promise<void> {
+      16 |   const nav = sidebarNav(page);
+    > 17 |   await expect(nav).toBeVisible();
+         |                     ^
+      18 |   for (const label of labels) {
+      19 |     await expect(nav.getByRole('link', { name: label }).first()).toHaveCount(0);
+      20 |   }
+        at assertForbiddenNavLabels (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\navigation-assertions.ts:17:21)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\member-journey.spec.ts:46:35
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--c73ba-t-nav-items-are-not-visible-member\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--c73ba-t-nav-items-are-not-visible-member\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-member-journey-Member--c73ba-t-nav-items-are-not-visible-member\error-context.md
+
+
+[1A[2K[20/212] [member] ΓÇ║ e2e\member-journey.spec.ts:49:7 ΓÇ║ Member journey ΓÇ║ member: governance nav items are not visible
+[1A[2K  5) [member] ΓÇ║ e2e\member-journey.spec.ts:49:7 ΓÇ║ Member journey ΓÇ║ member: governance nav items are not visible 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+       at e2e\helpers\navigation-assertions.ts:17
+
+      15 | export async function assertForbiddenNavLabels(page: Page, labels: string[]): Promise<void> {
+      16 |   const nav = sidebarNav(page);
+    > 17 |   await expect(nav).toBeVisible();
+         |                     ^
+      18 |   for (const label of labels) {
+      19 |     await expect(nav.getByRole('link', { name: label }).first()).toHaveCount(0);
+      20 |   }
+        at assertForbiddenNavLabels (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\navigation-assertions.ts:17:21)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\member-journey.spec.ts:57:35
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--0cb28-e-nav-items-are-not-visible-member\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--0cb28-e-nav-items-are-not-visible-member\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-member-journey-Member--0cb28-e-nav-items-are-not-visible-member\error-context.md
+
+
+[1A[2K[21/212] [member] ΓÇ║ e2e\member-journey.spec.ts:62:7 ΓÇ║ Member journey ΓÇ║ member: cannot navigate to /dashboard/intelligence
+[1A[2K[22/212] [member] ΓÇ║ e2e\member-journey.spec.ts:72:7 ΓÇ║ Member journey ΓÇ║ member: cannot navigate to /dashboard/governance
+[1A[2K[23/212] [member] ΓÇ║ e2e\member-journey.spec.ts:82:7 ΓÇ║ Member journey ΓÇ║ member: cannot navigate to /dashboard/admin
+[1A[2K[24/212] [member] ΓÇ║ e2e\member-journey.spec.ts:94:7 ΓÇ║ Member journey ΓÇ║ GAP-03: member sees only their own case submissions (API returns scoped data)
+[1A[2K[25/212] [member] ΓÇ║ e2e\member-journey.spec.ts:150:7 ΓÇ║ Member journey ΓÇ║ GAP-03: member cannot directly fetch another member's case via API
+[1A[2K[26/212] [member] ΓÇ║ e2e\member-journey.spec.ts:175:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: cannot see "Open Representation Case" action
+[1A[2K  6) [member] ΓÇ║ e2e\member-journey.spec.ts:175:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: cannot see "Open Representation Case" action 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/governance(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/inbox"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/inbox"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\member-journey.spec.ts:176:7
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--2100e--Representation-Case-action-member\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--2100e--Representation-Case-action-member\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-member-journey-Member--2100e--Representation-Case-action-member\error-context.md
+
+
+[1A[2K[27/212] [member] ΓÇ║ e2e\member-journey.spec.ts:185:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: no submit/create buttons visible on landing page
+[1A[2K  7) [member] ΓÇ║ e2e\member-journey.spec.ts:185:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: no submit/create buttons visible on landing page 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/governance(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/inbox"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/inbox" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/inbox"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/inbox"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\member-journey.spec.ts:186:7
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--3d60d-ons-visible-on-landing-page-member\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-member-journey-Member--3d60d-ons-visible-on-landing-page-member\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-member-journey-Member--3d60d-ons-visible-on-landing-page-member\error-context.md
+
+
+[1A[2K[28/212] [member] ΓÇ║ e2e\member-journey.spec.ts:205:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: case detail page (if reachable) shows no edit button
+[1A[2K[29/212] [member] ΓÇ║ e2e\member-journey.spec.ts:244:7 ΓÇ║ Member journey ΓÇ║ member intake form renders with required fields
+[1A[2K[30/212] [member] ΓÇ║ tests\e2e\member-intake.spec.ts:14:7 ΓÇ║ UE E2E - member intake ΓÇ║ member submits intake and sees submitted state
+[1A[2K[31/212] [member] ΓÇ║ tests\e2e\member-intake.spec.ts:30:7 ΓÇ║ UE E2E - member intake ΓÇ║ member creates grievance case with required audit chain (MEMBER-CREATE-GRIEVANCE-CASE)
+[1A[2K[32/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:31:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ is redirected away from /dashboard
+[1A[2K  8) [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:31:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ is redirected away from /dashboard 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoMatch[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected pattern: [32m/sign[-/]?in|login|signup|^https?:\/\/[^/]+\/?$/i[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+
+      35 |       const url = page.url();
+      36 |       // Must end up on a public route (sign-in, signup, root) ΓÇö never the dashboard.
+    > 37 |       expect(url).toMatch(/sign[-/]?in|login|signup|^https?:\/\/[^/]+\/?$/i);
+         |                   ^
+      38 |     });
+      39 |
+      40 |     test('is redirected away from /dashboard/admin', async ({ page }) => {
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\permission-boundaries.spec.ts:37:19
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-permission-boundaries--01386-irected-away-from-dashboard-steward\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-permission-boundaries--01386-irected-away-from-dashboard-steward\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-permission-boundaries--01386-irected-away-from-dashboard-steward\error-context.md
+
+
+[1A[2K[33/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:40:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ is redirected away from /dashboard/admin
+[1A[2K  9) [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:40:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ is redirected away from /dashboard/admin 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoMatch[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected pattern: [32m/sign[-/]?in|login|signup|^https?:\/\/[^/]+\/?$/i[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin"[39m
+
+      42 |       await page.waitForLoadState('load');
+      43 |       const url = page.url();
+    > 44 |       expect(url).toMatch(/sign[-/]?in|login|signup|^https?:\/\/[^/]+\/?$/i);
+         |                   ^
+      45 |     });
+      46 |
+      47 |     test('unauthenticated POST to /api/cases/intake returns 401 or 403', async ({ request }) => {
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\permission-boundaries.spec.ts:44:19
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-permission-boundaries--f931a-d-away-from-dashboard-admin-steward\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-permission-boundaries--f931a-d-away-from-dashboard-admin-steward\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-permission-boundaries--f931a-d-away-from-dashboard-admin-steward\error-context.md
+
+
+[1A[2K[34/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:47:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated POST to /api/cases/intake returns 401 or 403
+[1A[2K  10) [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:47:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated POST to /api/cases/intake returns 401 or 403 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m500[39m
+    Received array: [31m[401, 403][39m
+
+      56 |         headers: { 'Content-Type': 'application/json' },
+      57 |       });
+    > 58 |       expect([401, 403]).toContain(response.status());
+         |                          ^
+      59 |     });
+      60 |
+      61 |     test('unauthenticated PATCH to /api/cases/transition returns 401', async ({ request }) => {
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\permission-boundaries.spec.ts:58:26
+
+    Error Context: test-results\e2e-permission-boundaries--515e0-s-intake-returns-401-or-403-steward\error-context.md
+
+
+[1A[2K[35/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:61:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated PATCH to /api/cases/transition returns 401
+[1A[2K  11) [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:61:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated PATCH to /api/cases/transition returns 401 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m500[39m
+    Received array: [31m[401, 403, 404][39m
+
+      67 |         headers: { 'Content-Type': 'application/json' },
+      68 |       });
+    > 69 |       expect([401, 403, 404]).toContain(response.status());
+         |                               ^
+      70 |     });
+      71 |
+      72 |     test('unauthenticated POST to /api/cases/assign returns 401 or 403', async ({ request }) => {
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\permission-boundaries.spec.ts:69:31
+
+    Error Context: test-results\e2e-permission-boundaries--95a94-ases-transition-returns-401-steward\error-context.md
+
+
+[1A[2K[36/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:72:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated POST to /api/cases/assign returns 401 or 403
+[1A[2K  12) [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:72:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated POST to /api/cases/assign returns 401 or 403 
+
+    TimeoutError: apiRequestContext.post: Timeout 20000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ POST http://localhost:3002/api/cases/FAKE-CASE-001/assign[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - Content-Type: application/json[22m
+    [2m    - content-length: 30[22m
+    [2m    - cookie: nzila_session=dKs-EP7D8Pt_73kLk40oz3JcJRBE9YdjD-hZs_ylKKY[22m
+
+
+      72 |     test('unauthenticated POST to /api/cases/assign returns 401 or 403', async ({ request }) => {
+      73 |       // GAP-04: unauthenticated POST to assign endpoint.
+    > 74 |       const response = await request.post('/api/cases/FAKE-CASE-001/assign', {
+         |                                      ^
+      75 |         data: { assigneeId: 'steward-probe' },
+      76 |         headers: { 'Content-Type': 'application/json' },
+      77 |       });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\permission-boundaries.spec.ts:74:38
+
+    Error Context: test-results\e2e-permission-boundaries--767df-s-assign-returns-401-or-403-steward\error-context.md
+
+
+[1A[2K[37/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:85:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Member role ΓÇö blocked admin surfaces ΓÇ║ member: /dashboard/admin is blocked (P0 ΓÇö missing server-side gate)
+[1A[2K  13) [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:85:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Member role ΓÇö blocked admin surfaces ΓÇ║ member: /dashboard/admin is blocked (P0 ΓÇö missing server-side gate) 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=dKs-EP7D8Pt_73kLk40oz3JcJRBE9YdjD-hZs_ylKKY[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\permission-boundaries.spec.ts:25:5
+
+    Error Context: test-results\e2e-permission-boundaries--af228-ΓÇö-missing-server-side-gate--steward\error-context.md
+
+
+[1A[2K[38/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:97:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Member role ΓÇö blocked admin surfaces ΓÇ║ member: /dashboard/documents is blocked (P1 ΓÇö missing server-side gate)
+[1A[2K[39/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:107:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Member role ΓÇö blocked admin surfaces ΓÇ║ member: /dashboard/billing-admin is blocked
+[1A[2K[40/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:117:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Member role ΓÇö blocked admin surfaces ΓÇ║ member: /dashboard/admin/organizations is blocked
+[1A[2K[41/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:131:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Steward role ΓÇö blocked admin surfaces ΓÇ║ steward: /dashboard/admin is blocked (P0 ΓÇö missing server-side gate)
+[1A[2K[42/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:142:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Steward role ΓÇö blocked admin surfaces ΓÇ║ steward: /dashboard/billing-admin is blocked
+[1A[2K[43/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:152:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Steward role ΓÇö blocked admin surfaces ΓÇ║ steward: /dashboard/documents is blocked (P1 ΓÇö missing server-side gate)
+[1A[2K[44/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:166:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Governance (auditor) role ΓÇö blocked admin surfaces ΓÇ║ governance: /dashboard/admin is blocked
+[1A[2K[45/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:176:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Governance (auditor) role ΓÇö blocked admin surfaces ΓÇ║ governance: /dashboard/billing-admin is blocked
+[1A[2K[46/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:186:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Governance (auditor) role ΓÇö blocked admin surfaces ΓÇ║ governance: /dashboard/claims/new is blocked (GAP-01 ΓÇö no edit for read-only role)
+[1A[2K[47/212] [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:202:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ FSM ΓÇö invalid state transitions ΓÇ║ steward: cannot POST an invalid FSM skip-state transition
+[1A[2K[48/212] [steward] ΓÇ║ tests\e2e\steward-review.spec.ts:14:7 ΓÇ║ UE E2E - steward review ΓÇ║ steward reviews assigned case and comment path is authorized
+[1A[2K  14) [steward] ΓÇ║ tests\e2e\steward-review.spec.ts:14:7 ΓÇ║ UE E2E - steward review ΓÇ║ steward reviews assigned case and comment path is authorized 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=dKs-EP7D8Pt_73kLk40oz3JcJRBE9YdjD-hZs_ylKKY[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\steward-review.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-steward-review-U-86cd5--comment-path-is-authorized-steward\error-context.md
+
+
+[1A[2K[49/212] [steward] ΓÇ║ tests\e2e\steward-review.spec.ts:29:7 ΓÇ║ UE E2E - steward review ΓÇ║ steward annotation includes required audit metadata (STEWARD-COMMENT-ANNOTATE)
+[1A[2K[50/212] [steward] ΓÇ║ tests\e2e\steward-review.spec.ts:44:7 ΓÇ║ UE E2E - steward review ΓÇ║ steward can only update permitted fields on a case (STEWARD-UPDATE-ALLOWED-FIELDS)
+[1A[2K[51/212] [staff] ΓÇ║ tests\e2e\auditor-readonly.spec.ts:14:7 ΓÇ║ UE E2E - auditor read-only boundary ΓÇ║ auditor can read allowed surfaces but mutation controls are blocked
+[1A[2K  15) [staff] ΓÇ║ tests\e2e\auditor-readonly.spec.ts:14:7 ΓÇ║ UE E2E - auditor read-only boundary ΓÇ║ auditor can read allowed surfaces but mutation controls are blocked 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=p23vAALPGEftE_QsKuhlKWxDeeNzbxgLhZwTJEcEmgw[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\auditor-readonly.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-auditor-readonly-81ef9-tation-controls-are-blocked-staff\error-context.md
+
+
+[1A[2K[52/212] [staff] ΓÇ║ tests\e2e\case-escalation.spec.ts:14:7 ΓÇ║ UE E2E - case escalation ΓÇ║ authorized escalation succeeds and unauthorized escalation is blocked
+[1A[2K  16) [staff] ΓÇ║ tests\e2e\case-escalation.spec.ts:14:7 ΓÇ║ UE E2E - case escalation ΓÇ║ authorized escalation succeeds and unauthorized escalation is blocked 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=p23vAALPGEftE_QsKuhlKWxDeeNzbxgLhZwTJEcEmgw[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\case-escalation.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-case-escalation--ef0c6-rized-escalation-is-blocked-staff\error-context.md
+
+
+[1A[2K[53/212] [staff] ΓÇ║ tests\e2e\case-resolution.spec.ts:14:7 ΓÇ║ UE E2E - case resolution ΓÇ║ authorized resolution is visible and invalid post-resolution mutation is blocked
+[1A[2K  17) [staff] ΓÇ║ tests\e2e\case-resolution.spec.ts:14:7 ΓÇ║ UE E2E - case resolution ΓÇ║ authorized resolution is visible and invalid post-resolution mutation is blocked 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=p23vAALPGEftE_QsKuhlKWxDeeNzbxgLhZwTJEcEmgw[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\case-resolution.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-case-resolution--061d6-olution-mutation-is-blocked-staff\error-context.md
+
+
+[1A[2K[54/212] [staff] ΓÇ║ tests\e2e\external-ux-tester.spec.ts:15:7 ΓÇ║ UE E2E - external UX tester containment ΓÇ║ external tester is limited to isolated UX scope
+[1A[2K  18) [staff] ΓÇ║ tests\e2e\external-ux-tester.spec.ts:15:7 ΓÇ║ UE E2E - external UX tester containment ΓÇ║ external tester is limited to isolated UX scope 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=p23vAALPGEftE_QsKuhlKWxDeeNzbxgLhZwTJEcEmgw[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\external-ux-tester.spec.ts:7:5
+
+    Error Context: test-results\tests-e2e-external-ux-test-d1ef0-imited-to-isolated-UX-scope-staff\error-context.md
+
+
+[1A[2K[55/212] [staff] ΓÇ║ tests\e2e\external-ux-tester.spec.ts:33:7 ΓÇ║ UE E2E - external UX tester containment ΓÇ║ attempted role escalation by external tester is denied and audit-evidenced (NEG-ATTEMPTED-ROLE-ESCALATION)
+[1A[2K[56/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA
+[1A[2K  19) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:25:5
+
+    Error Context: test-results\e2e-authenticated-role-nav-5378b-ralized-landing-and-role-IA-admin\error-context.md
+
+
+[1A[2K[57/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: mobile landing keeps nav and primary action reachable
+[1A[2K[58/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: /dashboard redirects to centralized landing and role IA
+[1A[2K[59/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: mobile landing keeps nav and primary action reachable
+[1A[2K[60/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: /dashboard redirects to centralized landing and role IA
+[1A[2K[61/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: mobile landing keeps nav and primary action reachable
+[1A[2K[62/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: /dashboard redirects to centralized landing and role IA
+[1A[2K[63/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: mobile landing keeps nav and primary action reachable
+[1A[2K[64/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: /dashboard redirects to centralized landing and role IA
+[1A[2K[65/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: mobile landing keeps nav and primary action reachable
+[1A[2K[66/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: /dashboard redirects to centralized landing and role IA
+[1A[2K[67/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: mobile landing keeps nav and primary action reachable
+[1A[2K[68/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/intelligence is blocked
+[1A[2K[69/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/governance is blocked
+[1A[2K[70/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: cross-role route /dashboard/admin/organizations is blocked
+[1A[2K[71/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: cross-role route /dashboard/admin/organizations is blocked
+[1A[2K[72/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: cross-role route /dashboard/claims/new is blocked
+[1A[2K[73/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/analytics-admin is blocked
+[1A[2K[74/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/billing-admin is blocked
+[1A[2K[75/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/compliance-admin is blocked
+[1A[2K[76/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/debug is blocked
+[1A[2K[77/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cross-union-analytics is blocked
+[1A[2K[78/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/sector-analytics is blocked
+[1A[2K[79/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/executive-operating-intelligence is blocked
+[1A[2K[80/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/clc is blocked
+[1A[2K[81/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/admin is blocked
+[1A[2K[82/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/trustee is blocked
+[1A[2K[83/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/strike-fund is blocked
+[1A[2K[84/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/employer-execution is blocked
+[1A[2K[85/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/billing-admin is blocked
+[1A[2K[86/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/compliance-admin is blocked
+[1A[2K[87/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/debug is blocked
+[1A[2K[88/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/clc is blocked
+[1A[2K[89/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cognition is blocked
+[1A[2K[90/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/longitudinal-cognition is blocked
+[1A[2K[91/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/security is blocked
+[1A[2K[92/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/customer-success is blocked
+[1A[2K[93/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/operations is blocked
+[1A[2K[94/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/ops is blocked
+[1A[2K[95/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/cognition is blocked
+[1A[2K[96/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/longitudinal-cognition is blocked
+[1A[2K[97/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/customer-success is blocked
+[1A[2K[98/212] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/ops is blocked
+[1A[2K[99/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:34:7 ΓÇ║ Grievance draft save & resume ΓÇ║ intake page renders form with required fields
+[1A[2K  20) [admin] ΓÇ║ e2e\cape-features.spec.ts:34:7 ΓÇ║ Grievance draft save & resume ΓÇ║ intake page renders form with required fields 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:25:5
+
+    Error Context: test-results\e2e-cape-features-Grievanc-c5756-s-form-with-required-fields-admin\error-context.md
+
+
+[1A[2K[100/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:54:7 ΓÇ║ Grievance draft save & resume ΓÇ║ draft is saved to sessionStorage on field input
+[1A[2K[101/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:70:7 ΓÇ║ Grievance draft save & resume ΓÇ║ resume modal appears when returning with a saved draft
+[1A[2K[102/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:126:7 ΓÇ║ Grievance submission flow ΓÇ║ grievance queue page loads with content
+[1A[2K  21) [admin] ΓÇ║ e2e\cape-features.spec.ts:126:7 ΓÇ║ Grievance submission flow ΓÇ║ grievance queue page loads with content 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:118:5
+
+    Error Context: test-results\e2e-cape-features-Grievanc-60548-eue-page-loads-with-content-admin\error-context.md
+
+
+[1A[2K[103/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:138:7 ΓÇ║ Grievance submission flow ΓÇ║ intake form validates required fields before submission
+[1A[2K[104/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:171:7 ΓÇ║ Pilot readiness checklist ΓÇ║ onboarding page renders checklist with 7 items
+[1A[2K  22) [admin] ΓÇ║ e2e\cape-features.spec.ts:171:7 ΓÇ║ Pilot readiness checklist ΓÇ║ onboarding page renders checklist with 7 items 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:162:5
+
+    Error Context: test-results\e2e-cape-features-Pilot-re-3054b-ders-checklist-with-7-items-admin\error-context.md
+
+
+[1A[2K[105/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:184:7 ΓÇ║ Pilot readiness checklist ΓÇ║ checklist displays all 7 expected items
+[1A[2K[106/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:242:7 ΓÇ║ Pilot readiness checklist ΓÇ║ pilot onboarding API returns valid checklist state
+[1A[2K[107/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:275:7 ΓÇ║ Leadership dashboard ΓÇ║ dashboard renders 6 KPI cards
+[1A[2K  23) [admin] ΓÇ║ e2e\cape-features.spec.ts:275:7 ΓÇ║ Leadership dashboard ΓÇ║ dashboard renders 6 KPI cards 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:266:5
+
+    Error Context: test-results\e2e-cape-features-Leadersh-c3ad0-shboard-renders-6-KPI-cards-admin\error-context.md
+
+
+[1A[2K[108/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:315:7 ΓÇ║ Leadership dashboard ΓÇ║ leadership API returns structured KPI data
+[1A[2K[109/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:337:7 ΓÇ║ Leadership dashboard ΓÇ║ leadership API supports timeframe parameter
+[1A[2K[110/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:356:7 ΓÇ║ Employer communications ΓÇ║ contacts API endpoint is reachable
+[1A[2K  24) [admin] ΓÇ║ e2e\cape-features.spec.ts:356:7 ΓÇ║ Employer communications ΓÇ║ contacts API endpoint is reachable 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:353:5
+
+    Error Context: test-results\e2e-cape-features-Employer-427e8-s-API-endpoint-is-reachable-admin\error-context.md
+
+
+[1A[2K[111/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:363:7 ΓÇ║ Employer communications ΓÇ║ communications API endpoint is reachable
+[1A[2K[112/212] [admin] ΓÇ║ e2e\cape-features.spec.ts:383:7 ΓÇ║ Steward workbench ΓÇ║ dashboard page loads with content
+[1A[2K  25) [admin] ΓÇ║ e2e\cape-features.spec.ts:383:7 ΓÇ║ Steward workbench ΓÇ║ dashboard page loads with content 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:375:5
+
+    Error Context: test-results\e2e-cape-features-Steward--0dd81-ard-page-loads-with-content-admin\error-context.md
+
+
+[1A[2K[113/212] [admin] ΓÇ║ e2e\dashboard.spec.ts:25:7 ΓÇ║ Dashboard flows ΓÇ║ dashboard loads with navigation sidebar
+[1A[2K  26) [admin] ΓÇ║ e2e\dashboard.spec.ts:25:7 ΓÇ║ Dashboard flows ΓÇ║ dashboard loads with navigation sidebar 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\dashboard.spec.ts:21:5
+
+    Error Context: test-results\e2e-dashboard-Dashboard-fl-63d7f-ads-with-navigation-sidebar-admin\error-context.md
+
+
+[1A[2K[114/212] [admin] ΓÇ║ e2e\dashboard.spec.ts:34:7 ΓÇ║ Dashboard flows ΓÇ║ cases page loads
+[1A[2K[115/212] [admin] ΓÇ║ e2e\dashboard.spec.ts:42:7 ΓÇ║ Dashboard flows ΓÇ║ admin page loads for admin users
+[1A[2K[116/212] [admin] ΓÇ║ e2e\empty-states.spec.ts:83:7 ΓÇ║ Empty states ΓÇ║ dashboard with no active cases shows meaningful empty state
+[1A[2K  27) [admin] ΓÇ║ e2e\empty-states.spec.ts:83:7 ΓÇ║ Empty states ΓÇ║ dashboard with no active cases shows meaningful empty state 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\empty-states.spec.ts:78:5
+
+    Error Context: test-results\e2e-empty-states-Empty-sta-b9b09-hows-meaningful-empty-state-admin\error-context.md
+
+
+[1A[2K[117/212] [admin] ΓÇ║ e2e\empty-states.spec.ts:114:7 ΓÇ║ Empty states ΓÇ║ steward inbox renders the signal feed without errors
+[1A[2K[118/212] [admin] ΓÇ║ e2e\empty-states.spec.ts:145:7 ΓÇ║ Empty states ΓÇ║ GAP-05: grievances page with no grievances shows empty state
+[1A[2K[119/212] [admin] ΓÇ║ e2e\empty-states.spec.ts:177:7 ΓÇ║ Empty states ΓÇ║ members page with no search results shows empty state message
+[1A[2K[120/212] [admin] ΓÇ║ e2e\empty-states.spec.ts:215:7 ΓÇ║ Empty states ΓÇ║ admin users page with stubbed empty list shows empty state
+[1A[2K[121/212] [admin] ΓÇ║ e2e\empty-states.spec.ts:237:7 ΓÇ║ Empty states ΓÇ║ cases list with no data shows empty state (pending if route is 404)
+[1A[2K[122/212] [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:10:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ health endpoint exposes release identity governance headers (when bound)
+[1A[2K  28) [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:10:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ health endpoint exposes release identity governance headers (when bound) 
+
+    TimeoutError: apiRequestContext.get: Timeout 20000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/api/health[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+
+
+       at e2e\helpers\governance.ts:19
+
+      17 |   baseUrl: string,
+      18 | ): Promise<void> {
+    > 19 |   const response = await page.request.get(`${baseUrl}/api/health`)
+         |                                       ^
+      20 |   // In local/dev e2e, health may report degraded dependencies as 503.
+      21 |   // Treat degraded as reachable, but still fail on hard unhandled errors.
+      22 |   expect([200, 503]).toContain(response.status())
+        at expectGovernanceHeadersOnHealth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\governance.ts:19:39)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\governance\deployment-legitimacy-visibility.spec.ts:11:42
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--b91ff-ernance-headers-when-bound--admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--b91ff-ernance-headers-when-bound--admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-governance-deployment--b91ff-ernance-headers-when-bound--admin\error-context.md
+
+
+[1A[2K[123/212] [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:14:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ attestation surface accepts release id queries without 5xx
+[1A[2K  29) [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:14:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ attestation surface accepts release id queries without 5xx 
+
+    TimeoutError: apiRequestContext.get: Timeout 20000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/api/health?releaseId=UE-DEV[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+
+
+       at e2e\helpers\governance.ts:45
+
+      43 |   releaseId: string,
+      44 | ): Promise<void> {
+    > 45 |   const r: APIResponse = await page.request.get(
+         |                                             ^
+      46 |     `${baseUrl}/api/health?releaseId=${encodeURIComponent(releaseId)}`,
+      47 |   )
+      48 |   // In e2e, degraded dependencies can surface as 503; only hard panics
+        at expectAttestationReachable (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\governance.ts:45:45)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\governance\deployment-legitimacy-visibility.spec.ts:15:37
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--1cbe6-ease-id-queries-without-5xx-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--1cbe6-ease-id-queries-without-5xx-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-governance-deployment--1cbe6-ease-id-queries-without-5xx-admin\error-context.md
+
+
+[1A[2K[124/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:34:7 ΓÇ║ Missing routes ΓÇö known 404 gaps (pending) ΓÇ║ ops page exists and renders
+[1A[2K[125/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:54:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard renders for admin role
+[1A[2K  30) [admin] ΓÇ║ e2e\missing-routes.spec.ts:54:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard renders for admin role 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\missing-routes.spec.ts:51:5
+
+    Error Context: test-results\e2e-missing-routes-Existin-1e692-oard-renders-for-admin-role-admin\error-context.md
+
+
+[1A[2K[126/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:62:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard/admin renders for admin role
+[1A[2K[127/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:74:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard/settings renders
+[1A[2K[128/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:81:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ steward: /dashboard/inbox renders (consolidated cases view ΓÇö Wave 3)
+[1A[2K[129/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:89:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ member: /dashboard/claims/new renders (intake form)
+[1A[2K[130/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:102:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ governance: /dashboard/continuity-intelligence renders
+[1A[2K[131/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:112:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ steward: /dashboard/grievances list page renders (FLOW-003 fixed)
+[1A[2K[132/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:122:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ steward: /dashboard/cases list page renders (FLOW-004 fixed)
+[1A[2K[133/212] [admin] ΓÇ║ e2e\missing-routes.spec.ts:132:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ member: /dashboard/claims list page renders (FLOW-005 fixed)
+[1A[2K[134/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:35:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ renders the consent step and exposes the assessment flow root
+[1A[2K  31) [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:35:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ renders the consent step and exposes the assessment flow root 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/continuity-assessment/start", waiting until "load"[22m
+
+
+      36 |     page,
+      37 |   }) => {
+    > 38 |     await page.goto(ASSESSMENT_PATH_EN);
+         |                ^
+      39 |     await expect(
+      40 |       page.getByTestId('icra-assessment-flow').first(),
+      41 |     ).toBeVisible({ timeout: 20_000 });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ocra-adaptive-flow.spec.ts:38:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-ocra-adaptive-flow-OCR-18d07-es-the-assessment-flow-root-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-ocra-adaptive-flow-OCR-18d07-es-the-assessment-flow-root-admin\error-context.md
+
+
+[1A[2K[135/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:47:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ fr-CA route renders the assessment flow
+[1A[2K  32) [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:47:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ fr-CA route renders the assessment flow 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/fr-CA/continuity-assessment/start", waiting until "load"[22m
+
+
+      46 |
+      47 |   test('fr-CA route renders the assessment flow', async ({ page }) => {
+    > 48 |     await page.goto(ASSESSMENT_PATH_FR);
+         |                ^
+      49 |     await expect(
+      50 |       page.getByTestId('icra-assessment-flow').first(),
+      51 |     ).toBeVisible({ timeout: 20_000 });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ocra-adaptive-flow.spec.ts:48:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-ocra-adaptive-flow-OCR-6c6f5-renders-the-assessment-flow-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-ocra-adaptive-flow-OCR-6c6f5-renders-the-assessment-flow-admin\error-context.md
+
+
+[1A[2K[136/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:56:7 ΓÇ║ OCRA adaptive live flow ΓÇö telemetry privacy (network) ΓÇ║ telemetry POSTs never carry org names or free text
+[1A[2K  33) [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:56:7 ΓÇ║ OCRA adaptive live flow ΓÇö telemetry privacy (network) ΓÇ║ telemetry POSTs never carry org names or free text 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/continuity-assessment/start", waiting until "load"[22m
+
+
+      73 |     });
+      74 |
+    > 75 |     await page.goto(ASSESSMENT_PATH_EN);
+         |                ^
+      76 |     // Give the page a moment to settle any initial telemetry beacon
+      77 |     await page.waitForLoadState('load');
+      78 |     expect(violations).toEqual([]);
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ocra-adaptive-flow.spec.ts:75:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-ocra-adaptive-flow-OCR-eb7f0-arry-org-names-or-free-text-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-ocra-adaptive-flow-OCR-eb7f0-arry-org-names-or-free-text-admin\error-context.md
+
+
+[1A[2K[137/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:87:7 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ per-question testid attributes are wired in the assessment flow source
+[1A[2K[138/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:105:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ small local union: consent ΓåÆ org context ΓåÆ adaptive card ΓåÆ submit
+[1A[2K[139/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:109:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ federated national union: distinct band assignment + distinct routed count
+[1A[2K[140/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:113:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ healthcare authority ΓÇö adaptive card reflects healthcare exposure band
+[1A[2K[141/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:117:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ resume mid-flow restores adaptive context
+[1A[2K[142/212] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:121:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ corrupted persisted state falls back to consent step gracefully
+[1A[2K[143/212] [admin] ΓÇ║ e2e\pilot-journey.spec.ts:15:7 ΓÇ║ Union pilot journey ΓÇ║ member intake uses the approved intake and evidence endpoints
+[1A[2K  34) [admin] ΓÇ║ e2e\pilot-journey.spec.ts:15:7 ΓÇ║ Union pilot journey ΓÇ║ member intake uses the approved intake and evidence endpoints 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\pilot-journey.spec.ts:11:5
+
+    Error Context: test-results\e2e-pilot-journey-Union-pi-24dee-take-and-evidence-endpoints-admin\error-context.md
+
+
+[1A[2K[144/212] [admin] ΓÇ║ e2e\pilot-journey.spec.ts:111:7 ΓÇ║ Union pilot journey ΓÇ║ staff pilot APIs have authenticated coverage for assign, transition, audit, and export
+[1A[2K[145/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:30:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ executive demo path is stable and continuity-safe
+[1A[2K  35) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:30:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ executive demo path is stable and continuity-safe 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:27:5
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-8db24--stable-and-continuity-safe-admin\error-context.md
+
+
+[1A[2K[146/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:55:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ staff/steward demo path is operational and non-executive
+[1A[2K[147/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:77:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ governance demo path is explainability-safe and non-surveillance
+[1A[2K[148/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:98:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ member demo path remains simple and non-governance
+[1A[2K[149/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:120:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ admin demo path exposes controls and pilot configuration
+[1A[2K[150/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:145:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ for-clc and context-aware pages preserve context in CTAs
+[1A[2K  36) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:145:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ for-clc and context-aware pages preserve context in CTAs 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/for-clc", waiting until "domcontentloaded"[22m
+
+
+      154 |
+      155 |     for (const route of routes) {
+    > 156 |       await page.goto(`/${locale}${route}`, { waitUntil: 'domcontentloaded' });
+          |                  ^
+      157 |       await expect(page.locator('body')).toBeVisible();
+      158 |       await expect(page).not.toHaveURL(/404|not-found/i);
+      159 |     }
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:156:18
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-stakeholder-demo-journ-4f2ca-es-preserve-context-in-CTAs-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-4f2ca-es-preserve-context-in-CTAs-admin\error-context.md
+
+
+[1A[2K[151/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:183:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ pilot request CTA remains actionable from context routes
+[1A[2K  37) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:183:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ pilot request CTA remains actionable from context routes 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/proof?context=procurement", waiting until "domcontentloaded"[22m
+
+
+      182 |
+      183 |   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
+    > 184 |     await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
+          |                ^
+      185 |     const procurementContextCta = page
+      186 |       .locator(
+      187 |         'a[href*="/organizational-continuity-risk"][href*="context=procurement"], a[href*="/institutional-continuity-risk"][href*="context=procurement"]',
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:184:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-stakeholder-demo-journ-0c172-ionable-from-context-routes-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-0c172-ionable-from-context-routes-admin\error-context.md
+
+
+[1A[2K[152/212] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:207:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ executive and governance journeys avoid raw FSM language
+[1A[2K  38) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:207:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ executive and governance journeys avoid raw FSM language 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/proof?context=executive", waiting until "domcontentloaded"[22m
+
+
+      206 |
+      207 |   test('executive and governance journeys avoid raw FSM language', async ({ page }) => {
+    > 208 |     await page.goto(`/${locale}/proof?context=executive`, { waitUntil: 'domcontentloaded' });
+          |                ^
+      209 |     await assertNoTextExposure(page, ['FSM', 'Finite State Machine', 'Workflow Engine', 'Transition Graph']);
+      210 |
+      211 |     await page.goto(`/${locale}/trust?context=governance`, { waitUntil: 'domcontentloaded' });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:208:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-stakeholder-demo-journ-b3883-neys-avoid-raw-FSM-language-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-b3883-neys-avoid-raw-FSM-language-admin\error-context.md
+
+
+[1A[2K[153/212] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:20:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 1) intake -> review -> assign -> escalate -> resolve
+[1A[2K  39) [admin] ΓÇ║ e2e\ue-workflow.spec.ts:20:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 1) intake -> review -> assign -> escalate -> resolve 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ue-workflow.spec.ts:14:5
+
+    Error Context: test-results\e2e-ue-workflow-UnionEyes--543ab-assign---escalate---resolve-admin\error-context.md
+
+
+[1A[2K[154/212] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:34:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 2) unauthorized access attempt is blocked
+[1A[2K[155/212] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:39:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 3) cross-org access attempt is blocked
+[1A[2K[156/212] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:53:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 4) read-only journey blocks mutation
+[1A[2K[157/212] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:65:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 5) intelligence dashboard endpoint is tier-gated
+[1A[2K[158/212] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:73:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 6) export audit pack route is role and org constrained
+[1A[2K[159/212] [admin] ΓÇ║ tests\e2e\admin-assignment.spec.ts:14:7 ΓÇ║ UE E2E - admin assignment ΓÇ║ admin can assign and member cannot assign
+[1A[2K  40) [admin] ΓÇ║ tests\e2e\admin-assignment.spec.ts:14:7 ΓÇ║ UE E2E - admin assignment ΓÇ║ admin can assign and member cannot assign 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=UrL9FnbqC24t5hYWDdBgX8gxPtNYrFKqj_wIewEgcj4[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\admin-assignment.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-admin-assignment-a51fe-gn-and-member-cannot-assign-admin\error-context.md
+
+
+[1A[2K[160/212] [executive] ΓÇ║ e2e\cba-intelligence.spec.ts:66:7 ΓÇ║ Labor continuity intelligence page ΓÇ║ authenticated user can navigate protected continuity route without auth failure
+[1A[2K  41) [executive] ΓÇ║ e2e\cba-intelligence.spec.ts:66:7 ΓÇ║ Labor continuity intelligence page ΓÇ║ authenticated user can navigate protected continuity route without auth failure 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=BrVrMUpbJbVOJ36yK-NqNcHg37EiBL5NTAFmmGl-3dc[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cba-intelligence.spec.ts:47:5
+
+    Error Context: test-results\e2e-cba-intelligence-Labor-8328a--route-without-auth-failure-executive\error-context.md
+
+
+[1A[2K[161/212] [executive] ΓÇ║ e2e\cba-intelligence.spec.ts:75:7 ΓÇ║ Labor continuity intelligence page ΓÇ║ renders tabbed workflow when entitled, otherwise remains stable under module gating
+[1A[2K[162/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:47:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ unauthenticated requests are denied at all critical surfaces (NEG-AUTH-NO-SESSION)
+[1A[2K  42) [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:47:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ unauthenticated requests are denied at all critical surfaces (NEG-AUTH-NO-SESSION) 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\auth-failure-handling.spec.ts:39:5
+
+    Error Context: test-results\tests-e2e-auth-failure-han-bf609-rfaces-NEG-AUTH-NO-SESSION--security\error-context.md
+
+
+[1A[2K[163/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:64:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ member role is insufficient for evidence export (NEG-AUTH-MEMBER-EVIDENCE-EXPORT)
+[1A[2K[164/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:74:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ member role is insufficient for audit log access (NEG-AUTH-MEMBER-AUDIT-READ)
+[1A[2K[165/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:86:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ role cannot be escalated via header injection (NEG-AUTH-HEADER-INJECTION)
+[1A[2K[166/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:104:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ session switch isolates state between users (NEG-AUTH-SESSION-ISOLATION)
+[1A[2K[167/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:121:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ auditor cannot perform mutations (NEG-AUTH-AUDITOR-MUTATION)
+[1A[2K[168/212] [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:145:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ steward cannot perform admin-only operations (NEG-AUTH-STEWARD-ADMIN-LIMIT)
+[1A[2K[169/212] [security] ΓÇ║ tests\e2e\auth-session-switch.spec.ts:24:7 ΓÇ║ UE E2E - auth session switching ΓÇ║ sequential logins replace the active session and role context
+[1A[2K  43) [security] ΓÇ║ tests\e2e\auth-session-switch.spec.ts:24:7 ΓÇ║ UE E2E - auth session switching ΓÇ║ sequential logins replace the active session and role context 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\auth-session-switch.spec.ts:16:5
+
+    Error Context: test-results\tests-e2e-auth-session-swi-f125a-ve-session-and-role-context-security\error-context.md
+
+
+[1A[2K[170/212] [security] ΓÇ║ tests\e2e\cross-org-block.spec.ts:14:7 ΓÇ║ UE E2E - cross-org containment ΓÇ║ wrong-org user cannot access case or audit export
+[1A[2K  44) [security] ΓÇ║ tests\e2e\cross-org-block.spec.ts:14:7 ΓÇ║ UE E2E - cross-org containment ΓÇ║ wrong-org user cannot access case or audit export 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\cross-org-block.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-cross-org-block--dbd22-access-case-or-audit-export-security\error-context.md
+
+
+[1A[2K[171/212] [security] ΓÇ║ tests\e2e\cross-org-block.spec.ts:30:7 ΓÇ║ UE E2E - cross-org containment ΓÇ║ wrong-org member cannot access evidence/documents from another org (MEMBER-CANNOT-VIEW-WRONG-ORG-DOCUMENT)
+[1A[2K[172/212] [security] ΓÇ║ tests\e2e\cross-org-block.spec.ts:38:7 ΓÇ║ UE E2E - cross-org containment ΓÇ║ wrong-org auditor cannot access audit records from another org (AUDITOR-CANNOT-ACCESS-WRONG-ORG)
+[1A[2K[173/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:39:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ invalid evidence ID returns safe error ΓÇö no server crash or data leak (NEG-EVIDENCE-INVALID-ID)
+[1A[2K  45) [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:39:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ invalid evidence ID returns safe error ΓÇö no server crash or data leak (NEG-EVIDENCE-INVALID-ID) 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+        at Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002)
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\evidence-misuse.spec.ts:31:5
+
+    Error Context: test-results\tests-e2e-evidence-misuse--8ff33-ak-NEG-EVIDENCE-INVALID-ID--security\error-context.md
+
+
+[1A[2K[174/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:51:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ cross-org evidence request is denied (NEG-EVIDENCE-CROSS-ORG)
+[1A[2K[175/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:67:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ member cannot export evidence (insufficient role) (NEG-EVIDENCE-MEMBER-EXPORT)
+[1A[2K[176/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:80:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ authorized evidence export returns audit-safe structure only (NEG-EVIDENCE-EXPORT-SHAPE)
+[1A[2K[177/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:108:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ member cannot delete evidence (NEG-EVIDENCE-MEMBER-DELETE)
+[1A[2K[178/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:119:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ evidence upload without session is denied (NEG-EVIDENCE-ANON-UPLOAD)
+[1A[2K[179/212] [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:130:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ evidence governance telemetry does not expose sensitive case content (NEG-EVIDENCE-TELEMETRY-SAFE)
+[1A[2K[180/212] [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:36:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ triage ΓåÆ resolved is blocked ΓÇö must go via under_review (NEG-FSM-TRIAGE-DIRECT-RESOLVE)
+[1A[2K  46) [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:36:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ triage ΓåÆ resolved is blocked ΓÇö must go via under_review (NEG-FSM-TRIAGE-DIRECT-RESOLVE) 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+        at Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002)
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\negative-workflow-transitions.spec.ts:28:5
+
+    Error Context: test-results\tests-e2e-negative-workflo-e31f5--FSM-TRIAGE-DIRECT-RESOLVE--security\error-context.md
+
+
+[1A[2K[181/212] [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:57:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ closed ΓåÆ investigation is blocked without explicit reopen (NEG-FSM-CLOSED-NO-INVESTIGATION)
+[1A[2K[182/212] [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:84:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ member cannot self-advance case to arbitration (NEG-FSM-ARBITRATION-BYPASS)
+[1A[2K[183/212] [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:104:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ member cannot directly resolve a case (NEG-FSM-MEMBER-DIRECT-RESOLVE)
+[1A[2K[184/212] [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:123:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ re-submitting a resolved case without reopen is rejected (NEG-FSM-RESUBMIT-CLOSED)
+[1A[2K[185/212] [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:150:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ unauthorized user cannot perform any transition (NEG-FSM-UNAUTHORIZED-TRANSITION)
+[1A[2K[186/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:42:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ wrong-org user cannot lookup primary-org grievance by claim number (NEG-ORG-CLAIM-LOOKUP)
+[1A[2K  47) [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:42:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ wrong-org user cannot lookup primary-org grievance by claim number (NEG-ORG-CLAIM-LOOKUP) 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+        at Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002)
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\org-isolation-negative.spec.ts:34:5
+
+    Error Context: test-results\tests-e2e-org-isolation-ne-052b5-umber-NEG-ORG-CLAIM-LOOKUP--security\error-context.md
+
+
+[1A[2K[187/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:51:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ wrong-org user cannot view documents/evidence for primary-org case (NEG-ORG-EVIDENCE-READ)
+[1A[2K[188/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:60:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ wrong-org user cannot export evidence for primary-org case (NEG-ORG-EXPORT)
+[1A[2K[189/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:73:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ universal search cannot return primary-org records to wrong-org user (NEG-ORG-SEARCH-LEAKAGE)
+[1A[2K[190/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:94:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ dashboard metrics do not expose primary-org aggregate data to wrong-org user (NEG-ORG-DASHBOARD-METRICS)
+[1A[2K[191/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:112:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ audit log cannot be read by wrong-org user (NEG-ORG-AUDIT-READ)
+[1A[2K[192/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:129:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ workbench case list does not include primary-org cases for wrong-org user (NEG-ORG-WORKBENCH)
+[1A[2K[193/212] [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:143:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ workflow transition on primary-org case is denied to wrong-org user (NEG-ORG-WORKFLOW-MUTATION)
+[1A[2K[194/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA renders with <html lang="en-CA">
+[1A[2K  48) [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA renders with <html lang="en-CA"> 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=iFI5CsDLUWfDA9N7Sqy3J62Iapu-hXCaDmfhoYtOnnw[22m
+    )
+        at Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002)
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\bilingual\_helpers.ts:47:7
+
+    Error Context: test-results\e2e-bilingual-locale-smoke-53db9-nders-with-html-lang-en-CA--bilingual-en\error-context.md
+
+
+[1A[2K[195/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:59:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed /en-CA/trust renders with <html lang="en-CA">
+[1A[2K[196/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:67:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed /en-CA/pricing renders with <html lang="en-CA">
+[1A[2K[197/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:75:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed /en-CA/story renders with <html lang="en-CA">
+[1A[2K[198/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:83:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA exposes UnionEyes brand in <title>
+[1A[2K[199/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:90:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA has no images missing alt attribute
+[1A[2K[200/212] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:98:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ API health endpoint reachable (locale=en-CA project context)
+[1A[2K[201/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA renders with <html lang="fr-CA">
+[1A[2K  49) [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA renders with <html lang="fr-CA"> 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=iFI5CsDLUWfDA9N7Sqy3J62Iapu-hXCaDmfhoYtOnnw[22m
+    )
+        at Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002)
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\bilingual\_helpers.ts:47:7
+
+    Error Context: test-results\e2e-bilingual-locale-smoke-eb2bc-nders-with-html-lang-fr-CA--bilingual-fr\error-context.md
+
+
+[1A[2K[202/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:59:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed /fr-CA/trust renders with <html lang="fr-CA">
+[1A[2K[203/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:67:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed /fr-CA/pricing renders with <html lang="fr-CA">
+[1A[2K[204/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:75:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed /fr-CA/story renders with <html lang="fr-CA">
+[1A[2K[205/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:83:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA exposes UnionEyes brand in <title>
+[1A[2K[206/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:90:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA has no images missing alt attribute
+[1A[2K[207/212] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:98:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ API health endpoint reachable (locale=fr-CA project context)
+[1A[2K[208/212] [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:88:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every marketing route sets <html lang> to a non-empty value
+[1A[2K  50) [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:88:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every marketing route sets <html lang> to a non-empty value 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    )
+        at Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: connect ECONNREFUSED ::1:3002)
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\a11y\smoke.spec.ts:84:5
+
+    Error Context: test-results\e2e-a11y-smoke-Accessibili-4a824-l-lang-to-a-non-empty-value-accessibility\error-context.md
+
+
+[1A[2K[209/212] [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:98:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every <img> on every marketing route has an alt attribute
+[1A[2K[210/212] [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:107:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every marketing route has exactly one <h1>
+[1A[2K[211/212] [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:119:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every visible <a href> on every marketing route has an accessible name
+[1A[2K[212/212] [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:137:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every visible <button> on every marketing route has an accessible name
+[1A[2K  50 failed
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ member: raw FSM terms are hidden across role journey 
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ executive: raw FSM terms are hidden across role journey 
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ admin: raw FSM terms are hidden across role journey 
+    [member] ΓÇ║ e2e\member-journey.spec.ts:43:7 ΓÇ║ Member journey ΓÇ║ member: case management nav items are not visible 
+    [member] ΓÇ║ e2e\member-journey.spec.ts:49:7 ΓÇ║ Member journey ΓÇ║ member: governance nav items are not visible 
+    [member] ΓÇ║ e2e\member-journey.spec.ts:175:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: cannot see "Open Representation Case" action 
+    [member] ΓÇ║ e2e\member-journey.spec.ts:185:9 ΓÇ║ Member journey ΓÇ║ GAP-01 ΓÇö Governance persona: no edit/write controls visible ΓÇ║ governance: no submit/create buttons visible on landing page 
+    [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:31:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ is redirected away from /dashboard 
+    [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:40:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ is redirected away from /dashboard/admin 
+    [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:47:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated POST to /api/cases/intake returns 401 or 403 
+    [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:61:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated PATCH to /api/cases/transition returns 401 
+    [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:72:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Unauthenticated user ΓÇ║ unauthenticated POST to /api/cases/assign returns 401 or 403 
+    [steward] ΓÇ║ e2e\permission-boundaries.spec.ts:85:9 ΓÇ║ Permission boundaries ΓÇö role gate enforcement ΓÇ║ Member role ΓÇö blocked admin surfaces ΓÇ║ member: /dashboard/admin is blocked (P0 ΓÇö missing server-side gate) 
+    [steward] ΓÇ║ tests\e2e\steward-review.spec.ts:14:7 ΓÇ║ UE E2E - steward review ΓÇ║ steward reviews assigned case and comment path is authorized 
+    [staff] ΓÇ║ tests\e2e\auditor-readonly.spec.ts:14:7 ΓÇ║ UE E2E - auditor read-only boundary ΓÇ║ auditor can read allowed surfaces but mutation controls are blocked 
+    [staff] ΓÇ║ tests\e2e\case-escalation.spec.ts:14:7 ΓÇ║ UE E2E - case escalation ΓÇ║ authorized escalation succeeds and unauthorized escalation is blocked 
+    [staff] ΓÇ║ tests\e2e\case-resolution.spec.ts:14:7 ΓÇ║ UE E2E - case resolution ΓÇ║ authorized resolution is visible and invalid post-resolution mutation is blocked 
+    [staff] ΓÇ║ tests\e2e\external-ux-tester.spec.ts:15:7 ΓÇ║ UE E2E - external UX tester containment ΓÇ║ external tester is limited to isolated UX scope 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:34:7 ΓÇ║ Grievance draft save & resume ΓÇ║ intake page renders form with required fields 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:126:7 ΓÇ║ Grievance submission flow ΓÇ║ grievance queue page loads with content 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:171:7 ΓÇ║ Pilot readiness checklist ΓÇ║ onboarding page renders checklist with 7 items 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:275:7 ΓÇ║ Leadership dashboard ΓÇ║ dashboard renders 6 KPI cards 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:356:7 ΓÇ║ Employer communications ΓÇ║ contacts API endpoint is reachable 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:383:7 ΓÇ║ Steward workbench ΓÇ║ dashboard page loads with content 
+    [admin] ΓÇ║ e2e\dashboard.spec.ts:25:7 ΓÇ║ Dashboard flows ΓÇ║ dashboard loads with navigation sidebar 
+    [admin] ΓÇ║ e2e\empty-states.spec.ts:83:7 ΓÇ║ Empty states ΓÇ║ dashboard with no active cases shows meaningful empty state 
+    [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:10:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ health endpoint exposes release identity governance headers (when bound) 
+    [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:14:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ attestation surface accepts release id queries without 5xx 
+    [admin] ΓÇ║ e2e\missing-routes.spec.ts:54:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard renders for admin role 
+    [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:35:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ renders the consent step and exposes the assessment flow root 
+    [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:47:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ fr-CA route renders the assessment flow 
+    [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:56:7 ΓÇ║ OCRA adaptive live flow ΓÇö telemetry privacy (network) ΓÇ║ telemetry POSTs never carry org names or free text 
+    [admin] ΓÇ║ e2e\pilot-journey.spec.ts:15:7 ΓÇ║ Union pilot journey ΓÇ║ member intake uses the approved intake and evidence endpoints 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:30:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ executive demo path is stable and continuity-safe 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:145:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ for-clc and context-aware pages preserve context in CTAs 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:183:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ pilot request CTA remains actionable from context routes 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:207:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ executive and governance journeys avoid raw FSM language 
+    [admin] ΓÇ║ e2e\ue-workflow.spec.ts:20:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 1) intake -> review -> assign -> escalate -> resolve 
+    [admin] ΓÇ║ tests\e2e\admin-assignment.spec.ts:14:7 ΓÇ║ UE E2E - admin assignment ΓÇ║ admin can assign and member cannot assign 
+    [executive] ΓÇ║ e2e\cba-intelligence.spec.ts:66:7 ΓÇ║ Labor continuity intelligence page ΓÇ║ authenticated user can navigate protected continuity route without auth failure 
+    [security] ΓÇ║ tests\e2e\auth-failure-handling.spec.ts:47:7 ΓÇ║ UE E2E ΓÇö auth and session failure handling ΓÇ║ unauthenticated requests are denied at all critical surfaces (NEG-AUTH-NO-SESSION) 
+    [security] ΓÇ║ tests\e2e\auth-session-switch.spec.ts:24:7 ΓÇ║ UE E2E - auth session switching ΓÇ║ sequential logins replace the active session and role context 
+    [security] ΓÇ║ tests\e2e\cross-org-block.spec.ts:14:7 ΓÇ║ UE E2E - cross-org containment ΓÇ║ wrong-org user cannot access case or audit export 
+    [security] ΓÇ║ tests\e2e\evidence-misuse.spec.ts:39:7 ΓÇ║ UE E2E ΓÇö evidence misuse and access control ΓÇ║ invalid evidence ID returns safe error ΓÇö no server crash or data leak (NEG-EVIDENCE-INVALID-ID) 
+    [security] ΓÇ║ tests\e2e\negative-workflow-transitions.spec.ts:36:7 ΓÇ║ UE E2E ΓÇö negative workflow transitions (FSM invariant) ΓÇ║ triage ΓåÆ resolved is blocked ΓÇö must go via under_review (NEG-FSM-TRIAGE-DIRECT-RESOLVE) 
+    [security] ΓÇ║ tests\e2e\org-isolation-negative.spec.ts:42:7 ΓÇ║ UE E2E ΓÇö org isolation negative paths ΓÇ║ wrong-org user cannot lookup primary-org grievance by claim number (NEG-ORG-CLAIM-LOOKUP) 
+    [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA renders with <html lang="en-CA"> 
+    [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA renders with <html lang="fr-CA"> 
+    [accessibility] ΓÇ║ e2e\a11y\smoke.spec.ts:88:7 ΓÇ║ Accessibility smoke ΓÇö structural WCAG invariants ΓÇ║ every marketing route sets <html lang> to a non-empty value 
+  7 skipped
+  131 did not run
+  24 passed (1.0h)
+
+To open last HTML report run:
+[36m[39m
+[36m  pnpm exec playwright show-report[39m
+[36m[39m
+[e2e:governed] Γ£ö step 10: playwright (3656795 ms) ΓÇö exitCode=1
+[e2e:governed] Γû╢ step 11: collect-artifacts
+[e2e:governed] Γ£ö step 11: collect-artifacts (181 ms) ΓÇö artifacts=playwright-report,test-results,server.log
+[e2e:governed] Γ£ö step 12: stop-server (sigterm)
+[e2e:governed] Γ£ö step 13: drop-db ue_e2e_20260724094416_90145a
+[e2e:governed] Γ£ö step 14: verify-port-release port=3002
+[e2e:governed] summary written ΓåÆ C:\APPS\nzila-automation-phase0c\reports\audits\cupe-national-phase-0\phase-0c\run-artifacts\20260724094416_90145a\run-summary.json
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 e2e:governed: `tsx scripts/lifecycle/run.ts`
+Exit status 1
