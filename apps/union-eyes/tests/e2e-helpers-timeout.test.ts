@@ -83,20 +83,37 @@ describe('Phase 0C.2 §12 — _helpers.ts ensureServerReady beforeAll timeout', 
     expect(setTimeoutIdx).toBeLessThan(endpointsIdx)
   })
 
-  it('preserves the pre-existing 90_000 ms internal poll budget', () => {
-    // The §12 fix must not reduce the internal readiness poll window; it only
-    // raises the enclosing test/hook ceiling so the inner loop can run to
-    // completion. Regression guard against accidental double-shrinking.
+  it('raises the internal poll budget to 180_000 ms (Phase 0C.2R §8 / FSR-A repair)', () => {
+    // Phase 0C.2R §8 (FSR-A repair): §BR-9 Run 3 showed 30/50 baseline failures
+    // sharing the identical `Server readiness check timed out after 90000ms`
+    // signature across 29 unique specs in 8 projects. The prior 90_000 ms
+    // helper budget wasted 90 s of headroom relative to the §12 enclosing
+    // `test.setTimeout(180_000)`. Raising the internal budget to 180_000 ms
+    // aligns the helper with its caller's ceiling.
+    //
+    // See reports/audits/cupe-national-phase-0/phase-0c/phase-0c2r-failure-signature-register.md
+    // §7.3 for the full blast-radius table.
     const body = ENSURE_FN_MATCH![1]
-    expect(body).toMatch(/const\s+timeoutMs\s*=\s*90[_]?000/)
+    expect(body).toMatch(/const\s+timeoutMs\s*=\s*180[_]?000/)
+    // Explicitly reject the pre-repair 90_000 value so a merge that restores
+    // it fails fast.
+    expect(body).not.toMatch(/const\s+timeoutMs\s*=\s*90[_]?000/)
   })
 
-  it('leaves the request per-attempt timeout at 10_000 ms', () => {
-    // Playwright APIRequestContext.get({ timeout }) upper bound. Reducing it
-    // would help beforeAll timing but hide legitimate slow endpoints. Kept
-    // fixed as a governance signal.
+  it('raises the per-request Playwright timeout to 30_000 ms (Phase 0C.2R §8 / FSR-A repair)', () => {
+    // Per-request 10 s cap tripped inside a single cold `/sign-in` SSR compile
+    // before the other two endpoints could be polled. 30 s gives each endpoint
+    // enough headroom to complete a legitimately-slow first hit while still
+    // being short enough that a persistent server hang throws inside the
+    // enclosing 180 s test wrapper.
     const body = ENSURE_FN_MATCH![1]
-    expect(body).toMatch(/timeout:\s*10[_]?000/)
+    expect(body).toMatch(/const\s+perRequestTimeoutMs\s*=\s*30[_]?000/)
+    // The get() call must reference the constant (not a hard-coded literal),
+    // so `perRequestTimeoutMs` remains the single source of truth.
+    expect(body).toMatch(/request\.get\([^)]+\{\s*timeout:\s*perRequestTimeoutMs\s*\}\)/)
+    // Explicitly reject the pre-repair 10_000 literal so it cannot silently
+    // return.
+    expect(body).not.toMatch(/timeout:\s*10[_]?000/)
   })
 
   it('accepts the canonical health status set (200/204/401/403/404/503)', () => {

@@ -13,13 +13,25 @@ export async function ensureServerReady(request: APIRequestContext): Promise<voi
   // because 3 endpoints × 10s per-request timeout can burst 30s+ on cold compile,
   // and internally this helper polls up to 90s. Wrapped in try/catch so callers
   // outside a running test context (e.g. standalone probes) are a safe no-op.
+  //
+  // Phase 0C.2R §8 (FSR-A repair): raise helper budget from 90 s → 180 s and per-request
+  // timeout from 10 s → 30 s. §BR-9 Run 3 shows 30/50 (60%) of baseline failures share
+  // the identical `Server readiness check timed out after 90000ms` signature across
+  // 29 unique specs in 8 projects (see phase-0c2r-failure-signature-register.md §7.3).
+  // The helper's 90 s ceiling wasted 90 s of headroom vs the enclosing `test.setTimeout`
+  // (180_000). The per-request 10 s cap trips inside a single cold `/sign-in` compile
+  // before other endpoints can be polled. Raising both aligns the helper with its
+  // caller's ceiling and lets a legitimately-slow first hit complete without masking
+  // real product defects (endpoint-level 30 s is still short enough that a persistent
+  // server hang throws within the enclosing 180 s test wrapper).
   try {
     test.setTimeout(180_000)
   } catch {
     // no enclosing test/hook — safe no-op
   }
   const endpoints = ['/api/auth_core/health/', '/api/health', '/sign-in']
-  const timeoutMs = 90_000
+  const timeoutMs = 180_000
+  const perRequestTimeoutMs = 30_000
   const pollMs = 1_500
   const startedAt = Date.now()
   let lastError: string | null = null
@@ -27,7 +39,7 @@ export async function ensureServerReady(request: APIRequestContext): Promise<voi
   while (Date.now() - startedAt < timeoutMs) {
     for (const endpoint of endpoints) {
       try {
-        const response = await request.get(endpoint, { timeout: 10_000 })
+        const response = await request.get(endpoint, { timeout: perRequestTimeoutMs })
         if ([200, 204, 401, 403, 404, 503].includes(response.status())) {
           return
         }
