@@ -1,0 +1,278 @@
+{
+  "generatedAt": "2026-07-24T00:42:55.996Z",
+  "playwrightStats": {
+    "startTime": "2026-07-24T00:42:35.794Z",
+    "duration": 3205.664,
+    "expected": 0,
+    "skipped": 193,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "summary": {
+    "totalTestCases": 193,
+    "totalSpecFiles": 30,
+    "projectsWithTests": 8
+  },
+  "byProject": {
+    "setup": {
+      "testCount": 1,
+      "fileCount": 1,
+      "files": [
+        "playwright/setup/auth-state.setup.ts"
+      ]
+    },
+    "public": {
+      "testCount": 16,
+      "fileCount": 3,
+      "files": [
+        "e2e/no-fsm-overexposure.spec.ts",
+        "e2e/pilot-mode-gating.spec.ts",
+        "e2e/smoke.spec.ts"
+      ]
+    },
+    "member": {
+      "testCount": 14,
+      "fileCount": 2,
+      "files": [
+        "e2e/member-journey.spec.ts",
+        "tests/e2e/member-intake.spec.ts"
+      ]
+    },
+    "steward": {
+      "testCount": 19,
+      "fileCount": 2,
+      "files": [
+        "e2e/permission-boundaries.spec.ts",
+        "tests/e2e/steward-review.spec.ts"
+      ]
+    },
+    "staff": {
+      "testCount": 5,
+      "fileCount": 4,
+      "files": [
+        "tests/e2e/auditor-readonly.spec.ts",
+        "tests/e2e/case-escalation.spec.ts",
+        "tests/e2e/case-resolution.spec.ts",
+        "tests/e2e/external-ux-tester.spec.ts"
+      ]
+    },
+    "admin": {
+      "testCount": 104,
+      "fileCount": 11,
+      "files": [
+        "e2e/authenticated-role-navigation.spec.ts",
+        "e2e/cape-features.spec.ts",
+        "e2e/dashboard.spec.ts",
+        "e2e/empty-states.spec.ts",
+        "e2e/governance/deployment-legitimacy-visibility.spec.ts",
+        "e2e/missing-routes.spec.ts",
+        "e2e/ocra-adaptive-flow.spec.ts",
+        "e2e/pilot-journey.spec.ts",
+        "e2e/stakeholder-demo-journeys.spec.ts",
+        "e2e/ue-workflow.spec.ts",
+        "tests/e2e/admin-assignment.spec.ts"
+      ]
+    },
+    "executive": {
+      "testCount": 2,
+      "fileCount": 1,
+      "files": [
+        "e2e/cba-intelligence.spec.ts"
+      ]
+    },
+    "security": {
+      "testCount": 32,
+      "fileCount": 6,
+      "files": [
+        "tests/e2e/auth-failure-handling.spec.ts",
+        "tests/e2e/auth-session-switch.spec.ts",
+        "tests/e2e/cross-org-block.spec.ts",
+        "tests/e2e/evidence-misuse.spec.ts",
+        "tests/e2e/negative-workflow-transitions.spec.ts",
+        "tests/e2e/org-isolation-negative.spec.ts"
+      ]
+    }
+  },
+  "byFile": {
+    "e2e/authenticated-role-navigation.spec.ts": {
+      "testCount": 43,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/cape-features.spec.ts": {
+      "testCount": 14,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/cba-intelligence.spec.ts": {
+      "testCount": 2,
+      "projects": [
+        "executive"
+      ]
+    },
+    "e2e/dashboard.spec.ts": {
+      "testCount": 3,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/empty-states.spec.ts": {
+      "testCount": 6,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/governance/deployment-legitimacy-visibility.spec.ts": {
+      "testCount": 2,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/member-journey.spec.ts": {
+      "testCount": 12,
+      "projects": [
+        "member"
+      ]
+    },
+    "e2e/missing-routes.spec.ts": {
+      "testCount": 10,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/no-fsm-overexposure.spec.ts": {
+      "testCount": 5,
+      "projects": [
+        "public"
+      ]
+    },
+    "e2e/ocra-adaptive-flow.spec.ts": {
+      "testCount": 9,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/permission-boundaries.spec.ts": {
+      "testCount": 16,
+      "projects": [
+        "steward"
+      ]
+    },
+    "e2e/pilot-journey.spec.ts": {
+      "testCount": 2,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/pilot-mode-gating.spec.ts": {
+      "testCount": 6,
+      "projects": [
+        "public"
+      ]
+    },
+    "e2e/smoke.spec.ts": {
+      "testCount": 5,
+      "projects": [
+        "public"
+      ]
+    },
+    "e2e/stakeholder-demo-journeys.spec.ts": {
+      "testCount": 8,
+      "projects": [
+        "admin"
+      ]
+    },
+    "e2e/ue-workflow.spec.ts": {
+      "testCount": 6,
+      "projects": [
+        "admin"
+      ]
+    },
+    "playwright/setup/auth-state.setup.ts": {
+      "testCount": 1,
+      "projects": [
+        "setup"
+      ]
+    },
+    "tests/e2e/admin-assignment.spec.ts": {
+      "testCount": 1,
+      "projects": [
+        "admin"
+      ]
+    },
+    "tests/e2e/auditor-readonly.spec.ts": {
+      "testCount": 1,
+      "projects": [
+        "staff"
+      ]
+    },
+    "tests/e2e/auth-failure-handling.spec.ts": {
+      "testCount": 7,
+      "projects": [
+        "security"
+      ]
+    },
+    "tests/e2e/auth-session-switch.spec.ts": {
+      "testCount": 1,
+      "projects": [
+        "security"
+      ]
+    },
+    "tests/e2e/case-escalation.spec.ts": {
+      "testCount": 1,
+      "projects": [
+        "staff"
+      ]
+    },
+    "tests/e2e/case-resolution.spec.ts": {
+      "testCount": 1,
+      "projects": [
+        "staff"
+      ]
+    },
+    "tests/e2e/cross-org-block.spec.ts": {
+      "testCount": 3,
+      "projects": [
+        "security"
+      ]
+    },
+    "tests/e2e/evidence-misuse.spec.ts": {
+      "testCount": 7,
+      "projects": [
+        "security"
+      ]
+    },
+    "tests/e2e/external-ux-tester.spec.ts": {
+      "testCount": 2,
+      "projects": [
+        "staff"
+      ]
+    },
+    "tests/e2e/member-intake.spec.ts": {
+      "testCount": 2,
+      "projects": [
+        "member"
+      ]
+    },
+    "tests/e2e/negative-workflow-transitions.spec.ts": {
+      "testCount": 6,
+      "projects": [
+        "security"
+      ]
+    },
+    "tests/e2e/org-isolation-negative.spec.ts": {
+      "testCount": 8,
+      "projects": [
+        "security"
+      ]
+    },
+    "tests/e2e/steward-review.spec.ts": {
+      "testCount": 3,
+      "projects": [
+        "steward"
+      ]
+    }
+  }
+}

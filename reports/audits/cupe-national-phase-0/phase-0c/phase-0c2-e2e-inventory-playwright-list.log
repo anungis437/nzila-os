@@ -1,0 +1,4896 @@
+{
+  "config": {
+    "configFile": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright.config.ts",
+    "rootDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "setup",
+        "name": "setup",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "playwright/setup/auth-state.setup.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "public",
+        "name": "public",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "e2e/smoke.spec.ts",
+          "e2e/pilot-mode-gating.spec.ts",
+          "e2e/no-fsm-overexposure.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "member",
+        "name": "member",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "e2e/member-journey.spec.ts",
+          "tests/e2e/member-intake.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "steward",
+        "name": "steward",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "tests/e2e/steward-review.spec.ts",
+          "e2e/permission-boundaries.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "staff",
+        "name": "staff",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "tests/e2e/case-escalation.spec.ts",
+          "tests/e2e/case-resolution.spec.ts",
+          "tests/e2e/external-ux-tester.spec.ts",
+          "tests/e2e/auditor-readonly.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "admin",
+        "name": "admin",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "tests/e2e/admin-assignment.spec.ts",
+          "e2e/dashboard.spec.ts",
+          "e2e/missing-routes.spec.ts",
+          "e2e/cape-features.spec.ts",
+          "e2e/empty-states.spec.ts",
+          "e2e/authenticated-role-navigation.spec.ts",
+          "e2e/pilot-journey.spec.ts",
+          "e2e/ocra-adaptive-flow.spec.ts",
+          "e2e/stakeholder-demo-journeys.spec.ts",
+          "e2e/ue-workflow.spec.ts",
+          "e2e/governance/deployment-legitimacy-visibility.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "executive",
+        "name": "executive",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "e2e/cba-intelligence.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "security",
+        "name": "security",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "tests/e2e/cross-org-block.spec.ts",
+          "tests/e2e/org-isolation-negative.spec.ts",
+          "tests/e2e/auth-failure-handling.spec.ts",
+          "tests/e2e/auth-session-switch.spec.ts",
+          "tests/e2e/evidence-misuse.spec.ts",
+          "tests/e2e/negative-workflow-transitions.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "bilingual-en",
+        "name": "bilingual-en",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "e2e/bilingual/**/*.en.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "bilingual-fr",
+        "name": "bilingual-fr",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "e2e/bilingual/**/*.fr.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "accessibility",
+        "name": "accessibility",
+        "testDir": "C:/APPS/nzila-automation-phase0c/apps/union-eyes",
+        "testIgnore": [
+          "**/.next/**",
+          "**/node_modules/**"
+        ],
+        "testMatch": [
+          "e2e/a11y/**/*.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.1",
+    "workers": 1,
+    "webServer": {
+      "command": "pnpm dev",
+      "port": 3002,
+      "reuseExistingServer": false,
+      "timeout": 120000,
+      "env": {
+        "AI_AGENT": "github_copilot_vscode_agent",
+        "ALLUSERSPROFILE": "C:\\ProgramData",
+        "APPDATA": "C:\\Users\\AubertNungisa\\AppData\\Roaming",
+        "AUTH_SECRET": "x",
+        "BROWSERSLIST_IGNORE_OLD_DATA": "true",
+        "BUNDLED_DEBUGPY_PATH": "c:\\Users\\AubertNungisa\\.vscode\\extensions\\ms-python.debugpy-2026.6.0-win32-x64\\bundled\\libs\\debugpy",
+        "CHROME_CRASHPAD_PIPE_NAME": "\\\\.\\pipe\\crashpad_27088_CIDVSWVCDQCYBHHX",
+        "COLORTERM": "truecolor",
+        "CommonProgramFiles": "C:\\Program Files\\Common Files",
+        "CommonProgramFiles(x86)": "C:\\Program Files (x86)\\Common Files",
+        "CommonProgramW6432": "C:\\Program Files\\Common Files",
+        "COMPUTERNAME": "AUBERT_PC",
+        "ComSpec": "C:\\WINDOWS\\system32\\cmd.exe",
+        "COPILOT_AGENT": "1",
+        "COPILOT_DEBUG_NONCE": "fef1d9fe4d31ab73b8298f2bcc52951b",
+        "DATABASE_URL": "postgres://x:x@localhost:5433/x",
+        "DEBIAN_FRONTEND": "noninteractive",
+        "DriverData": "C:\\Windows\\System32\\Drivers\\DriverData",
+        "EFC_27132_1262719628": "1",
+        "EFC_27132_1592913036": "1",
+        "EFC_27132_2283032206": "1",
+        "EFC_27132_2775293581": "1",
+        "EFC_27132_3789132940": "1",
+        "EFC_27132_4126798990": "0",
+        "GIT_ASKPASS": "c:\\Users\\AubertNungisa\\AppData\\Roaming\\Code\\User\\globalStorage\\vscode.git\\askpass\\70789581cae28aa7\\askpass.sh",
+        "GIT_EDITOR": ":",
+        "GIT_MERGE_AUTOEDIT": "no",
+        "GIT_PAGER": "cat",
+        "HOME": "C:\\Users\\AubertNungisa",
+        "HOMEDRIVE": "C:",
+        "HOMEPATH": "\\Users\\AubertNungisa",
+        "LANG": "en_US.UTF-8",
+        "LOCALAPPDATA": "C:\\Users\\AubertNungisa\\AppData\\Local",
+        "LOGONSERVER": "\\\\AUBERT_PC",
+        "NODE_ENV": "test",
+        "npm_command": "exec",
+        "npm_config_user_agent": "pnpm/10.33.0 npm/? node/v24.13.1 win32 x64",
+        "npm_config_verify_deps_before_run": "false",
+        "NUMBER_OF_PROCESSORS": "20",
+        "OneDrive": "C:\\Users\\AubertNungisa\\OneDrive - Curling Canada",
+        "OneDriveCommercial": "C:\\Users\\AubertNungisa\\OneDrive - Curling Canada",
+        "OS": "Windows_NT",
+        "Path": "./node_modules/.bin;C:\\APPS\\nzila-automation-phase0c\\node_modules\\.bin;C:\\Users\\AubertNungisa\\AppData\\Local\\pnpm\\.tools\\pnpm\\10.33.0\\bin;C:\\Program Files\\PowerShell\\7;c:\\Users\\AubertNungisa\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand;c:\\Users\\AubertNungisa\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli;C:\\Program Files\\Microsoft SDKs\\Azure\\CLI2\\wbin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\Git\\cmd;C:\\Program Files\\nodejs\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\PuTTY\\;C:\\Program Files\\k6\\;C:\\Program Files\\PowerShell\\7\\;C:\\Users\\AubertNungisa\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\;C:\\Users\\AubertNungisa\\AppData\\Local\\Programs\\Python\\Python313\\;C:\\Users\\AubertNungisa\\AppData\\Local\\Programs\\Python\\Launcher\\;C:\\Users\\AubertNungisa\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\AubertNungisa\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\AubertNungisa\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\AubertNungisa\\AppData\\Roaming\\npm;C:\\Users\\AubertNungisa\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Stripe.StripeCli_Microsoft.Winget.Source_8wekyb3d8bbwe;;C:\\Users\\AubertNungisa\\AppData\\Local\\cursor-agent;C:\\Users\\AubertNungisa\\Downloads\\codeql-win64\\codeql;C:\\Users\\AubertNungisa\\.local\\bin;C:\\Users\\AubertNungisa\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;;c:\\Users\\AubertNungisa\\.vscode\\extensions\\ms-python.debugpy-2026.6.0-win32-x64\\bundled\\scripts\\noConfigScripts",
+        "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JSE;.WSF;.WSH;.MSC;.CPL",
+        "PLAYWRIGHT_TEST_AUTH": "true",
+        "pnpm_config_verify_deps_before_run": "false",
+        "PNPM_PACKAGE_NAME": "@nzila/union-eyes",
+        "POWERSHELL_DISTRIBUTION_CHANNEL": "MSI:Windows 10 Pro",
+        "PROCESSOR_ARCHITECTURE": "AMD64",
+        "PROCESSOR_IDENTIFIER": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+        "PROCESSOR_LEVEL": "6",
+        "PROCESSOR_REVISION": "9a03",
+        "ProgramData": "C:\\ProgramData",
+        "ProgramFiles": "C:\\Program Files",
+        "ProgramFiles(x86)": "C:\\Program Files (x86)",
+        "ProgramW6432": "C:\\Program Files",
+        "PROMPT": "$P$G",
+        "PSModulePath": "C:\\Users\\AubertNungisa\\OneDrive - Curling Canada\\Documents\\PowerShell\\Modules;C:\\Program Files\\PowerShell\\Modules;c:\\program files\\powershell\\7\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+        "PUBLIC": "C:\\Users\\Public",
+        "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+        "PYTHONSTARTUP": "c:\\Users\\AubertNungisa\\AppData\\Roaming\\Code\\User\\workspaceStorage\\5ecd25d5691afb717de91f9823714933\\ms-python.python\\pythonrc.py",
+        "PYTHON_BASIC_REPL": "1",
+        "QA_TEST_ENV": "true",
+        "SESSIONNAME": "Console",
+        "SystemDrive": "C:",
+        "SystemRoot": "C:\\WINDOWS",
+        "TEMP": "C:\\Users\\AUBERT~1\\AppData\\Local\\Temp",
+        "TERM_PROGRAM": "vscode",
+        "TERM_PROGRAM_VERSION": "1.130.0",
+        "TMP": "C:\\Users\\AUBERT~1\\AppData\\Local\\Temp",
+        "USERDOMAIN": "AzureAD",
+        "USERDOMAIN_ROAMINGPROFILE": "AzureAD",
+        "USERNAME": "AubertNungisa",
+        "USERPROFILE": "C:\\Users\\AubertNungisa",
+        "VOTING_SECRET": "x",
+        "VSCODE_DEBUGPY_ADAPTER_ENDPOINTS": "c:\\Users\\AubertNungisa\\.vscode\\extensions\\ms-python.debugpy-2026.6.0-win32-x64\\.noConfigDebugAdapterEndpoints\\endpoint-c3301f0feb00b836.txt",
+        "VSCODE_GIT_ASKPASS_EXTRA_ARGS": "",
+        "VSCODE_GIT_ASKPASS_MAIN": "c:\\Users\\AubertNungisa\\AppData\\Roaming\\Code\\User\\globalStorage\\vscode.git\\askpass\\70789581cae28aa7\\askpass-main.js",
+        "VSCODE_GIT_ASKPASS_NODE": "C:\\Users\\AubertNungisa\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+        "VSCODE_GIT_IPC_HANDLE": "\\\\.\\pipe\\vscode-git-2a9736302b-sock",
+        "VSCODE_INJECTION": "1",
+        "VSCODE_PYTHON_AUTOACTIVATE_GUARD": "1",
+        "windir": "C:\\WINDOWS",
+        "ZES_ENABLE_SYSMAN": "1",
+        "__COMPAT_LAYER": "DetectorsAppHealth",
+        "PLAYWRIGHT_BASE_URL": "http://localhost:3002",
+        "UE_E2E_RISK_BYPASS": "true"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "playwright\\setup\\auth-state.setup.ts",
+      "file": "playwright/setup/auth-state.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "phase-0c2-s8 auth-state summary is present, complete, and consistent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "c071d6928669b0f3755d-6d3b81b8700b636bd0e6",
+          "file": "playwright/setup/auth-state.setup.ts",
+          "line": 34,
+          "column": 6
+        }
+      ]
+    },
+    {
+      "title": "e2e\\no-fsm-overexposure.spec.ts",
+      "file": "e2e/no-fsm-overexposure.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "No FSM overexposure in pilot-facing UX",
+          "file": "e2e/no-fsm-overexposure.spec.ts",
+          "line": 19,
+          "column": 6,
+          "specs": [
+            {
+              "title": "member: raw FSM terms are hidden across role journey",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "39153f0af8e878f335ff-fda36037d1bd12dd2ca0",
+              "file": "e2e/no-fsm-overexposure.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "staff: raw FSM terms are hidden across role journey",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "39153f0af8e878f335ff-489a85a80b16848a0951",
+              "file": "e2e/no-fsm-overexposure.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "executive: raw FSM terms are hidden across role journey",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "39153f0af8e878f335ff-676122e5a5020c506a2a",
+              "file": "e2e/no-fsm-overexposure.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "governance: raw FSM terms are hidden across role journey",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "39153f0af8e878f335ff-997f8840f4705d014ffa",
+              "file": "e2e/no-fsm-overexposure.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "admin: raw FSM terms are hidden across role journey",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "39153f0af8e878f335ff-ff084d80f9b7918f6ccd",
+              "file": "e2e/no-fsm-overexposure.spec.ts",
+              "line": 25,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\pilot-mode-gating.spec.ts",
+      "file": "e2e/pilot-mode-gating.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UnionEyes hard pilot-mode gating",
+          "file": "e2e/pilot-mode-gating.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "member: pilot excluded routes are hard-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3b59f7396321713c2c-80a33304db92a43c44c6",
+              "file": "e2e/pilot-mode-gating.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "steward: pilot excluded routes are hard-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3b59f7396321713c2c-bad29831d700aeebfccb",
+              "file": "e2e/pilot-mode-gating.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "staff: pilot excluded routes are hard-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3b59f7396321713c2c-0feb7dc190abb01a924d",
+              "file": "e2e/pilot-mode-gating.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "executive: pilot excluded routes are hard-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3b59f7396321713c2c-bd60f7a8ca3f18f68a22",
+              "file": "e2e/pilot-mode-gating.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "governance: pilot excluded routes are hard-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3b59f7396321713c2c-ebc86f88ffa3803e9084",
+              "file": "e2e/pilot-mode-gating.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "admin: pilot excluded routes are hard-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3b59f7396321713c2c-d8934007a8a7fd71d038",
+              "file": "e2e/pilot-mode-gating.spec.ts",
+              "line": 17,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\smoke.spec.ts",
+      "file": "e2e/smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Public pages smoke tests",
+          "file": "e2e/smoke.spec.ts",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "marketing page renders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "aa58ad17b2d44b8d86cc-4d6d03f83ef1c30b6c75",
+              "file": "e2e/smoke.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "sign-in page renders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "aa58ad17b2d44b8d86cc-13236bdadb5063a344c2",
+              "file": "e2e/smoke.spec.ts",
+              "line": 20,
+              "column": 7
+            },
+            {
+              "title": "sign-up page renders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "aa58ad17b2d44b8d86cc-fa3eaccf444ef5cddb0a",
+              "file": "e2e/smoke.spec.ts",
+              "line": 26,
+              "column": 7
+            },
+            {
+              "title": "API health endpoint returns 200",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "aa58ad17b2d44b8d86cc-d683489abda824a4aaa2",
+              "file": "e2e/smoke.spec.ts",
+              "line": 31,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Accessibility smoke tests",
+          "file": "e2e/smoke.spec.ts",
+          "line": 38,
+          "column": 6,
+          "specs": [
+            {
+              "title": "marketing page has no critical a11y violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "public",
+                  "projectName": "public",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "aa58ad17b2d44b8d86cc-9257c8b4d2ce3d08d9a7",
+              "file": "e2e/smoke.spec.ts",
+              "line": 39,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\member-journey.spec.ts",
+      "file": "e2e/member-journey.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Member journey",
+          "file": "e2e/member-journey.spec.ts",
+          "line": 24,
+          "column": 6,
+          "specs": [
+            {
+              "title": "member lands at member portal after login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-c52b813e7f0b3c3312bd",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 33,
+              "column": 7
+            },
+            {
+              "title": "member: case management nav items are not visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-53a530347a6825f3f7e1",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 43,
+              "column": 7
+            },
+            {
+              "title": "member: governance nav items are not visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-6676d8d87662f48b9ec2",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 49,
+              "column": 7
+            },
+            {
+              "title": "member: cannot navigate to /dashboard/intelligence",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-ee3d74338f33cd466188",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 62,
+              "column": 7
+            },
+            {
+              "title": "member: cannot navigate to /dashboard/governance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-e194a61defffab32d74b",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 72,
+              "column": 7
+            },
+            {
+              "title": "member: cannot navigate to /dashboard/admin",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-a091bb183875a503d904",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 82,
+              "column": 7
+            },
+            {
+              "title": "GAP-03: member sees only their own case submissions (API returns scoped data)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-6ef68755725992731a33",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 94,
+              "column": 7
+            },
+            {
+              "title": "GAP-03: member cannot directly fetch another member's case via API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-28562a7fbc713cfa6bae",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 150,
+              "column": 7
+            },
+            {
+              "title": "member intake form renders with required fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "36bb2a8ac36e6a4089ad-5648c83e3af5605283fd",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 244,
+              "column": 7
+            }
+          ],
+          "suites": [
+            {
+              "title": "GAP-01 ΓÇö Governance persona: no edit/write controls visible",
+              "file": "e2e/member-journey.spec.ts",
+              "line": 174,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "governance: cannot see \"Open Representation Case\" action",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "member",
+                      "projectName": "member",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "36bb2a8ac36e6a4089ad-5d3059b7c430f1a76795",
+                  "file": "e2e/member-journey.spec.ts",
+                  "line": 175,
+                  "column": 9
+                },
+                {
+                  "title": "governance: no submit/create buttons visible on landing page",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "member",
+                      "projectName": "member",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "36bb2a8ac36e6a4089ad-fc871e253ec632d6eaba",
+                  "file": "e2e/member-journey.spec.ts",
+                  "line": 185,
+                  "column": 9
+                },
+                {
+                  "title": "governance: case detail page (if reachable) shows no edit button",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "member",
+                      "projectName": "member",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "36bb2a8ac36e6a4089ad-240e309e52abed04a8cb",
+                  "file": "e2e/member-journey.spec.ts",
+                  "line": 205,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\member-intake.spec.ts",
+      "file": "tests/e2e/member-intake.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - member intake",
+          "file": "tests/e2e/member-intake.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "member submits intake and sees submitted state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "87e93fbdcbccbf82f10e-4a84435480d51d5ab965",
+              "file": "tests/e2e/member-intake.spec.ts",
+              "line": 14,
+              "column": 7
+            },
+            {
+              "title": "member creates grievance case with required audit chain (MEMBER-CREATE-GRIEVANCE-CASE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "member",
+                  "projectName": "member",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "87e93fbdcbccbf82f10e-671696f0f2af34bce2d1",
+              "file": "tests/e2e/member-intake.spec.ts",
+              "line": 30,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\permission-boundaries.spec.ts",
+      "file": "e2e/permission-boundaries.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Permission boundaries ΓÇö role gate enforcement",
+          "file": "e2e/permission-boundaries.spec.ts",
+          "line": 21,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Unauthenticated user",
+              "file": "e2e/permission-boundaries.spec.ts",
+              "line": 30,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "is redirected away from /dashboard",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-8adcfa3e3866b24afad7",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 31,
+                  "column": 9
+                },
+                {
+                  "title": "is redirected away from /dashboard/admin",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-d899a9ba1c26a145f104",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 40,
+                  "column": 9
+                },
+                {
+                  "title": "unauthenticated POST to /api/cases/intake returns 401 or 403",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-bb500e3d7543379acd01",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 47,
+                  "column": 9
+                },
+                {
+                  "title": "unauthenticated PATCH to /api/cases/transition returns 401",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-687308baf6ff72a3aad3",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 61,
+                  "column": 9
+                },
+                {
+                  "title": "unauthenticated POST to /api/cases/assign returns 401 or 403",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-be252c6a30455e906af5",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 72,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Member role ΓÇö blocked admin surfaces",
+              "file": "e2e/permission-boundaries.spec.ts",
+              "line": 84,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "member: /dashboard/admin is blocked (P0 ΓÇö missing server-side gate)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-d27c98293a362d82af28",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 85,
+                  "column": 9
+                },
+                {
+                  "title": "member: /dashboard/documents is blocked (P1 ΓÇö missing server-side gate)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-acb13048b6efa7f8abdd",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 97,
+                  "column": 9
+                },
+                {
+                  "title": "member: /dashboard/billing-admin is blocked",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-f41e92e1c3865b90ae9d",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 107,
+                  "column": 9
+                },
+                {
+                  "title": "member: /dashboard/admin/organizations is blocked",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-9d0c16e85cfbb78f65c0",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 117,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Steward role ΓÇö blocked admin surfaces",
+              "file": "e2e/permission-boundaries.spec.ts",
+              "line": 130,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "steward: /dashboard/admin is blocked (P0 ΓÇö missing server-side gate)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-9ce429b96dbce464291f",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 131,
+                  "column": 9
+                },
+                {
+                  "title": "steward: /dashboard/billing-admin is blocked",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-5001f0ebc82b7980717d",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 142,
+                  "column": 9
+                },
+                {
+                  "title": "steward: /dashboard/documents is blocked (P1 ΓÇö missing server-side gate)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-db13e32cb551dbc2f1de",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 152,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "Governance (auditor) role ΓÇö blocked admin surfaces",
+              "file": "e2e/permission-boundaries.spec.ts",
+              "line": 165,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "governance: /dashboard/admin is blocked",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-04afc20c171e51d54d41",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 166,
+                  "column": 9
+                },
+                {
+                  "title": "governance: /dashboard/billing-admin is blocked",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-bbfcf650f1c5be96976e",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 176,
+                  "column": 9
+                },
+                {
+                  "title": "governance: /dashboard/claims/new is blocked (GAP-01 ΓÇö no edit for read-only role)",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-0ad60fbcc190cd3cc9a1",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 186,
+                  "column": 9
+                }
+              ]
+            },
+            {
+              "title": "FSM ΓÇö invalid state transitions",
+              "file": "e2e/permission-boundaries.spec.ts",
+              "line": 201,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "steward: cannot POST an invalid FSM skip-state transition",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "steward",
+                      "projectName": "steward",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "9bf4ac72d4de15e078a4-7d10e1be7606af62e6e4",
+                  "file": "e2e/permission-boundaries.spec.ts",
+                  "line": 202,
+                  "column": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\steward-review.spec.ts",
+      "file": "tests/e2e/steward-review.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - steward review",
+          "file": "tests/e2e/steward-review.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "steward reviews assigned case and comment path is authorized",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "steward",
+                  "projectName": "steward",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5741e96e0456ea187fd0-c698ab1f541500cfb7a4",
+              "file": "tests/e2e/steward-review.spec.ts",
+              "line": 14,
+              "column": 7
+            },
+            {
+              "title": "steward annotation includes required audit metadata (STEWARD-COMMENT-ANNOTATE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "steward",
+                  "projectName": "steward",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5741e96e0456ea187fd0-eb7d2812db7348e7c950",
+              "file": "tests/e2e/steward-review.spec.ts",
+              "line": 29,
+              "column": 7
+            },
+            {
+              "title": "steward can only update permitted fields on a case (STEWARD-UPDATE-ALLOWED-FIELDS)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "steward",
+                  "projectName": "steward",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5741e96e0456ea187fd0-9fef7dc0528485bbb98f",
+              "file": "tests/e2e/steward-review.spec.ts",
+              "line": 44,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\auditor-readonly.spec.ts",
+      "file": "tests/e2e/auditor-readonly.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - auditor read-only boundary",
+          "file": "tests/e2e/auditor-readonly.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "auditor can read allowed surfaces but mutation controls are blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "staff",
+                  "projectName": "staff",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1304faae96f9ddebe89b-ea6e4af30ed565659c98",
+              "file": "tests/e2e/auditor-readonly.spec.ts",
+              "line": 14,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\case-escalation.spec.ts",
+      "file": "tests/e2e/case-escalation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - case escalation",
+          "file": "tests/e2e/case-escalation.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "authorized escalation succeeds and unauthorized escalation is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "staff",
+                  "projectName": "staff",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00171b66440182235910-973ea91ced93ef40c105",
+              "file": "tests/e2e/case-escalation.spec.ts",
+              "line": 14,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\case-resolution.spec.ts",
+      "file": "tests/e2e/case-resolution.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - case resolution",
+          "file": "tests/e2e/case-resolution.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "authorized resolution is visible and invalid post-resolution mutation is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "staff",
+                  "projectName": "staff",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "28e948d7cc3ff88c17e8-4dddd05c22334f3338cd",
+              "file": "tests/e2e/case-resolution.spec.ts",
+              "line": 14,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\external-ux-tester.spec.ts",
+      "file": "tests/e2e/external-ux-tester.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - external UX tester containment",
+          "file": "tests/e2e/external-ux-tester.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "external tester is limited to isolated UX scope",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "staff",
+                  "projectName": "staff",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9c723b37c528227857ce-1efe60a0ec556f73fd04",
+              "file": "tests/e2e/external-ux-tester.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "attempted role escalation by external tester is denied and audit-evidenced (NEG-ATTEMPTED-ROLE-ESCALATION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "staff",
+                  "projectName": "staff",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9c723b37c528227857ce-cb9770bca1cdb01f7a91",
+              "file": "tests/e2e/external-ux-tester.spec.ts",
+              "line": 33,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\authenticated-role-navigation.spec.ts",
+      "file": "e2e/authenticated-role-navigation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UnionEyes authenticated role-centric navigation",
+          "file": "e2e/authenticated-role-navigation.spec.ts",
+          "line": 23,
+          "column": 6,
+          "specs": [
+            {
+              "title": "member: /dashboard redirects to centralized landing and role IA",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-3d8dac1b4aa2a57561da",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "member: mobile landing keeps nav and primary action reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-6ce14d3468a049f0bcb1",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "steward: /dashboard redirects to centralized landing and role IA",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-0f258b7c2b17562a2aaf",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "steward: mobile landing keeps nav and primary action reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-f10eca657bad969aaa5a",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "staff: /dashboard redirects to centralized landing and role IA",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-5d55a5566b3ba79ff7be",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "staff: mobile landing keeps nav and primary action reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-12a6d26f6c0eac860cf3",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "executive: /dashboard redirects to centralized landing and role IA",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-283479e7061ba93e7cce",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "executive: mobile landing keeps nav and primary action reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-1f5a404eafc88d8b250c",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "governance: /dashboard redirects to centralized landing and role IA",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-c332595caca0b9e28dee",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "governance: mobile landing keeps nav and primary action reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-a4aed55545198b1f4d67",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "admin: /dashboard redirects to centralized landing and role IA",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-654994a39a8aa28f9218",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "admin: mobile landing keeps nav and primary action reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-d0a261d37de8b3f15b1c",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 54,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/intelligence is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-f2b532f6888f3bab287e",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/governance is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-85fd601798110ba0b2e6",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "staff: cross-role route /dashboard/admin/organizations is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-784aa6827f3515710297",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "executive: cross-role route /dashboard/admin/organizations is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-babb2f239e3de2fb41ae",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "governance: cross-role route /dashboard/claims/new is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-8c4dcc3d5a7390c94571",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/analytics-admin is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-71d9eb3c2aa0b5473034",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/billing-admin is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-36b154945eef6bc52b81",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/compliance-admin is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-a956d4f296068b649455",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/debug is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-5cd96c9b0114fdc31e7d",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/cross-union-analytics is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-35f08673aaa05d08f5f1",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/sector-analytics is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-b5ace7861a7c5c0f3116",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/executive-operating-intelligence is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-19e4280e2b3d986d73e2",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/clc is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-c63bbcbb0e63e52ae0ea",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/pension/admin is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-8c104303b3c07252bde1",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/pension/trustee is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-1c671e93e4d8dd1e2baf",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/strike-fund is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-6d90cfdefb359ccdd930",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/employer-execution is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-f9bb8f428f1321c3786f",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/billing-admin is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-60c6c7b12683ca658296",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/compliance-admin is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-474fd63c2a35e7055d18",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/debug is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-8a7e6f5ab20d4f6cc5c2",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/clc is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-035e9da5ddfe16d75601",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/cognition is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-ba0c9ca3d17d731bb626",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/longitudinal-cognition is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-bd7174844d82304293a6",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/security is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-0d1a8727b3ec20e044df",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/customer-success is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-244886a87550bd260ecc",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/operations is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-abd7c88deaf45d5c8326",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "member: cross-role route /dashboard/ops is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-b85f507a336a8c72133c",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/cognition is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-6fad0205bdf6fb9d4af2",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/longitudinal-cognition is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-651fcbfec616d8642656",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/customer-success is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-4b51f06395d66f13a459",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            },
+            {
+              "title": "steward: cross-role route /dashboard/ops is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "97dae68f57d6f5e72a1f-3b8f0e1852db073407f2",
+              "file": "e2e/authenticated-role-navigation.spec.ts",
+              "line": 115,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\cape-features.spec.ts",
+      "file": "e2e/cape-features.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Grievance draft save & resume",
+          "file": "e2e/cape-features.spec.ts",
+          "line": 21,
+          "column": 6,
+          "specs": [
+            {
+              "title": "intake page renders form with required fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-947a62a2a10a088e564e",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 34,
+              "column": 7
+            },
+            {
+              "title": "draft is saved to sessionStorage on field input",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-c9233470fcdd07247128",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 54,
+              "column": 7
+            },
+            {
+              "title": "resume modal appears when returning with a saved draft",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-c0784cab208fbd75c881",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 70,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Grievance submission flow",
+          "file": "e2e/cape-features.spec.ts",
+          "line": 114,
+          "column": 6,
+          "specs": [
+            {
+              "title": "grievance queue page loads with content",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-21df765a11e5188fe34c",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 126,
+              "column": 7
+            },
+            {
+              "title": "intake form validates required fields before submission",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-d2f395d523e8641bf99f",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 138,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Pilot readiness checklist",
+          "file": "e2e/cape-features.spec.ts",
+          "line": 158,
+          "column": 6,
+          "specs": [
+            {
+              "title": "onboarding page renders checklist with 7 items",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-631ff7dcad2816627f19",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 171,
+              "column": 7
+            },
+            {
+              "title": "checklist displays all 7 expected items",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-55029620ee8d0371076c",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 184,
+              "column": 7
+            },
+            {
+              "title": "pilot onboarding API returns valid checklist state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-8cafbc445f7c637d31e2",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 242,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Leadership dashboard",
+          "file": "e2e/cape-features.spec.ts",
+          "line": 262,
+          "column": 6,
+          "specs": [
+            {
+              "title": "dashboard renders 6 KPI cards",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-da16639187e265063a5c",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 275,
+              "column": 7
+            },
+            {
+              "title": "leadership API returns structured KPI data",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-9cadc8f350928c2cab03",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 315,
+              "column": 7
+            },
+            {
+              "title": "leadership API supports timeframe parameter",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-2bd6cccf772026adb74b",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 337,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Employer communications",
+          "file": "e2e/cape-features.spec.ts",
+          "line": 349,
+          "column": 6,
+          "specs": [
+            {
+              "title": "contacts API endpoint is reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-e68d0c5f25c58df209a9",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 356,
+              "column": 7
+            },
+            {
+              "title": "communications API endpoint is reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-12d7b765a1b6355e437d",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 363,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Steward workbench",
+          "file": "e2e/cape-features.spec.ts",
+          "line": 371,
+          "column": 6,
+          "specs": [
+            {
+              "title": "dashboard page loads with content",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "292393455d3eb3979cc0-823b0ff509495088c838",
+              "file": "e2e/cape-features.spec.ts",
+              "line": 383,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\dashboard.spec.ts",
+      "file": "e2e/dashboard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Dashboard flows",
+          "file": "e2e/dashboard.spec.ts",
+          "line": 17,
+          "column": 6,
+          "specs": [
+            {
+              "title": "dashboard loads with navigation sidebar",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d892c21f4fe98edf46bf-1ef60f443d0490d833f6",
+              "file": "e2e/dashboard.spec.ts",
+              "line": 25,
+              "column": 7
+            },
+            {
+              "title": "cases page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d892c21f4fe98edf46bf-18e31f9c44563c1b5a2d",
+              "file": "e2e/dashboard.spec.ts",
+              "line": 34,
+              "column": 7
+            },
+            {
+              "title": "admin page loads for admin users",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d892c21f4fe98edf46bf-4e730cc8f718cc7cac33",
+              "file": "e2e/dashboard.spec.ts",
+              "line": 42,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\empty-states.spec.ts",
+      "file": "e2e/empty-states.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Empty states",
+          "file": "e2e/empty-states.spec.ts",
+          "line": 74,
+          "column": 6,
+          "specs": [
+            {
+              "title": "dashboard with no active cases shows meaningful empty state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38a0316bfcd9574ed89-d3a871cdb77c9dcc6761",
+              "file": "e2e/empty-states.spec.ts",
+              "line": 83,
+              "column": 7
+            },
+            {
+              "title": "steward inbox renders the signal feed without errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38a0316bfcd9574ed89-332fbb779a763692835d",
+              "file": "e2e/empty-states.spec.ts",
+              "line": 114,
+              "column": 7
+            },
+            {
+              "title": "GAP-05: grievances page with no grievances shows empty state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38a0316bfcd9574ed89-6adaeb5e4dae86c5e644",
+              "file": "e2e/empty-states.spec.ts",
+              "line": 145,
+              "column": 7
+            },
+            {
+              "title": "members page with no search results shows empty state message",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38a0316bfcd9574ed89-3bacab7dc7c0c6471abd",
+              "file": "e2e/empty-states.spec.ts",
+              "line": 177,
+              "column": 7
+            },
+            {
+              "title": "admin users page with stubbed empty list shows empty state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38a0316bfcd9574ed89-2ec4c08b6bf78512d56e",
+              "file": "e2e/empty-states.spec.ts",
+              "line": 215,
+              "column": 7
+            },
+            {
+              "title": "cases list with no data shows empty state (pending if route is 404)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38a0316bfcd9574ed89-6224a0354ae5537b556b",
+              "file": "e2e/empty-states.spec.ts",
+              "line": 237,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\governance\\deployment-legitimacy-visibility.spec.ts",
+      "file": "e2e/governance/deployment-legitimacy-visibility.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "governance: deployment legitimacy visibility",
+          "file": "e2e/governance/deployment-legitimacy-visibility.spec.ts",
+          "line": 9,
+          "column": 6,
+          "specs": [
+            {
+              "title": "health endpoint exposes release identity governance headers (when bound)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "37bd72d6b455e4ccb704-ad42effefd948c565cf3",
+              "file": "e2e/governance/deployment-legitimacy-visibility.spec.ts",
+              "line": 10,
+              "column": 7
+            },
+            {
+              "title": "attestation surface accepts release id queries without 5xx",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "37bd72d6b455e4ccb704-bdd30a037e59695e1e29",
+              "file": "e2e/governance/deployment-legitimacy-visibility.spec.ts",
+              "line": 14,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\missing-routes.spec.ts",
+      "file": "e2e/missing-routes.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Missing routes ΓÇö known 404 gaps (pending)",
+          "file": "e2e/missing-routes.spec.ts",
+          "line": 23,
+          "column": 6,
+          "specs": [
+            {
+              "title": "ops page exists and renders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Route not yet implemented: FLOW-006 ΓÇö /dashboard/ops returns 404",
+                      "location": {
+                        "file": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\e2e\\missing-routes.spec.ts",
+                        "line": 30,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-a761164faa8d1fb6648c",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 34,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Existing routes ΓÇö positive smoke check",
+          "file": "e2e/missing-routes.spec.ts",
+          "line": 47,
+          "column": 6,
+          "specs": [
+            {
+              "title": "admin: /dashboard renders for admin role",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-40133f7e3cd30d977ca6",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 54,
+              "column": 7
+            },
+            {
+              "title": "admin: /dashboard/admin renders for admin role",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-4bc1a1f149f2712be373",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 62,
+              "column": 7
+            },
+            {
+              "title": "admin: /dashboard/settings renders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-0fc7591d000fb82274eb",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 74,
+              "column": 7
+            },
+            {
+              "title": "steward: /dashboard/inbox renders (consolidated cases view ΓÇö Wave 3)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-0940f0810d11fb5bbf28",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 81,
+              "column": 7
+            },
+            {
+              "title": "member: /dashboard/claims/new renders (intake form)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-882a435bd0ecf661ca18",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 89,
+              "column": 7
+            },
+            {
+              "title": "governance: /dashboard/continuity-intelligence renders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-6ff9a0c3288862164805",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 102,
+              "column": 7
+            },
+            {
+              "title": "steward: /dashboard/grievances list page renders (FLOW-003 fixed)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-68e1ecbbed3462887218",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 112,
+              "column": 7
+            },
+            {
+              "title": "steward: /dashboard/cases list page renders (FLOW-004 fixed)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-34af6209b14ad27d22da",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 122,
+              "column": 7
+            },
+            {
+              "title": "member: /dashboard/claims list page renders (FLOW-005 fixed)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d1dde1a297b84ea1a0c8-18d05601ba0be353db01",
+              "file": "e2e/missing-routes.spec.ts",
+              "line": 132,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\ocra-adaptive-flow.spec.ts",
+      "file": "e2e/ocra-adaptive-flow.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "OCRA adaptive live flow ΓÇö smoke",
+          "file": "e2e/ocra-adaptive-flow.spec.ts",
+          "line": 34,
+          "column": 6,
+          "specs": [
+            {
+              "title": "renders the consent step and exposes the assessment flow root",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-8cbddcf25d65e9ec7be2",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 35,
+              "column": 7
+            },
+            {
+              "title": "fr-CA route renders the assessment flow",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-19d147e0b3ea3cb0acd7",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 47,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "OCRA adaptive live flow ΓÇö telemetry privacy (network)",
+          "file": "e2e/ocra-adaptive-flow.spec.ts",
+          "line": 55,
+          "column": 6,
+          "specs": [
+            {
+              "title": "telemetry POSTs never carry org names or free text",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-6ea38b8b867a2538e8db",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 56,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "OCRA adaptive live flow ΓÇö full traversal",
+          "file": "e2e/ocra-adaptive-flow.spec.ts",
+          "line": 86,
+          "column": 6,
+          "specs": [
+            {
+              "title": "per-question testid attributes are wired in the assessment flow source",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-d623fe2cad397b1c0826",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 87,
+              "column": 7
+            },
+            {
+              "title": "small local union: consent ΓåÆ org context ΓåÆ adaptive card ΓåÆ submit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\e2e\\ocra-adaptive-flow.spec.ts",
+                        "line": 105,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-1d54388e43425beff046",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 105,
+              "column": 8
+            },
+            {
+              "title": "federated national union: distinct band assignment + distinct routed count",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\e2e\\ocra-adaptive-flow.spec.ts",
+                        "line": 109,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-d2bdff24442d43f521bd",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 109,
+              "column": 8
+            },
+            {
+              "title": "healthcare authority ΓÇö adaptive card reflects healthcare exposure band",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\e2e\\ocra-adaptive-flow.spec.ts",
+                        "line": 113,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-cf2df5230a238f3949c5",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 113,
+              "column": 8
+            },
+            {
+              "title": "resume mid-flow restores adaptive context",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\e2e\\ocra-adaptive-flow.spec.ts",
+                        "line": 117,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-b422e92f95e1642b29a7",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 117,
+              "column": 8
+            },
+            {
+              "title": "corrupted persisted state falls back to consent step gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\e2e\\ocra-adaptive-flow.spec.ts",
+                        "line": 121,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "86a9520739bd77bc3eed-9b4c06e3077afb247531",
+              "file": "e2e/ocra-adaptive-flow.spec.ts",
+              "line": 121,
+              "column": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\pilot-journey.spec.ts",
+      "file": "e2e/pilot-journey.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Union pilot journey",
+          "file": "e2e/pilot-journey.spec.ts",
+          "line": 7,
+          "column": 6,
+          "specs": [
+            {
+              "title": "member intake uses the approved intake and evidence endpoints",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9e85dcbfdee2f87cd8e5-2fc9ab9900d1930c9450",
+              "file": "e2e/pilot-journey.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "staff pilot APIs have authenticated coverage for assign, transition, audit, and export",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9e85dcbfdee2f87cd8e5-5fb0f52a42aa27760931",
+              "file": "e2e/pilot-journey.spec.ts",
+              "line": 111,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\stakeholder-demo-journeys.spec.ts",
+      "file": "e2e/stakeholder-demo-journeys.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UnionEyes stakeholder demo journeys",
+          "file": "e2e/stakeholder-demo-journeys.spec.ts",
+          "line": 25,
+          "column": 6,
+          "specs": [
+            {
+              "title": "executive demo path is stable and continuity-safe",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-b2c20d4dd3ae230aa298",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "staff/steward demo path is operational and non-executive",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-61a0e42bf0bbf368e13d",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 55,
+              "column": 7
+            },
+            {
+              "title": "governance demo path is explainability-safe and non-surveillance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-03a515dd8ff6c16a2fd6",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 77,
+              "column": 7
+            },
+            {
+              "title": "member demo path remains simple and non-governance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-f553fc2cb9fb79c94e84",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 98,
+              "column": 7
+            },
+            {
+              "title": "admin demo path exposes controls and pilot configuration",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-54e68fd123d28072954b",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 120,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Marketing-to-app continuity routes",
+          "file": "e2e/stakeholder-demo-journeys.spec.ts",
+          "line": 142,
+          "column": 6,
+          "specs": [
+            {
+              "title": "for-clc and context-aware pages preserve context in CTAs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-13ca9f7f19be0711d75b",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 145,
+              "column": 7
+            },
+            {
+              "title": "pilot request CTA remains actionable from context routes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-cea21e15bb821999bd9b",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 183,
+              "column": 7
+            },
+            {
+              "title": "executive and governance journeys avoid raw FSM language",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c34ae677c89e36142716-4dbd934d08470950c167",
+              "file": "e2e/stakeholder-demo-journeys.spec.ts",
+              "line": 207,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\ue-workflow.spec.ts",
+      "file": "e2e/ue-workflow.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UnionEyes QA E2E Flows",
+          "file": "e2e/ue-workflow.spec.ts",
+          "line": 12,
+          "column": 6,
+          "specs": [
+            {
+              "title": "1) intake -> review -> assign -> escalate -> resolve",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5368906ef2b21bd80bb0-66e30f5db84f97b0ce8b",
+              "file": "e2e/ue-workflow.spec.ts",
+              "line": 20,
+              "column": 7
+            },
+            {
+              "title": "2) unauthorized access attempt is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5368906ef2b21bd80bb0-9edee43fe64987c5f4e0",
+              "file": "e2e/ue-workflow.spec.ts",
+              "line": 34,
+              "column": 7
+            },
+            {
+              "title": "3) cross-org access attempt is blocked",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5368906ef2b21bd80bb0-7c7a2e4c390a845697d7",
+              "file": "e2e/ue-workflow.spec.ts",
+              "line": 39,
+              "column": 7
+            },
+            {
+              "title": "4) read-only journey blocks mutation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5368906ef2b21bd80bb0-59128ccedfecc83d894d",
+              "file": "e2e/ue-workflow.spec.ts",
+              "line": 53,
+              "column": 7
+            },
+            {
+              "title": "5) intelligence dashboard endpoint is tier-gated",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5368906ef2b21bd80bb0-7c33ec3c328e75b62190",
+              "file": "e2e/ue-workflow.spec.ts",
+              "line": 65,
+              "column": 7
+            },
+            {
+              "title": "6) export audit pack route is role and org constrained",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5368906ef2b21bd80bb0-b258c2ed88d172268cfe",
+              "file": "e2e/ue-workflow.spec.ts",
+              "line": 73,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\admin-assignment.spec.ts",
+      "file": "tests/e2e/admin-assignment.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - admin assignment",
+          "file": "tests/e2e/admin-assignment.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "admin can assign and member cannot assign",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "admin",
+                  "projectName": "admin",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "dd7e9fdef6e091cc52a9-5b4395a156eb8154263c",
+              "file": "tests/e2e/admin-assignment.spec.ts",
+              "line": 14,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "e2e\\cba-intelligence.spec.ts",
+      "file": "e2e/cba-intelligence.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Labor continuity intelligence page",
+          "file": "e2e/cba-intelligence.spec.ts",
+          "line": 43,
+          "column": 6,
+          "specs": [
+            {
+              "title": "authenticated user can navigate protected continuity route without auth failure",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "executive",
+                  "projectName": "executive",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b100cdf46048b96d694e-f3d7d74706c90f63c0f3",
+              "file": "e2e/cba-intelligence.spec.ts",
+              "line": 66,
+              "column": 7
+            },
+            {
+              "title": "renders tabbed workflow when entitled, otherwise remains stable under module gating",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "executive",
+                  "projectName": "executive",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b100cdf46048b96d694e-b5492bc880526a0232b7",
+              "file": "e2e/cba-intelligence.spec.ts",
+              "line": 75,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\auth-failure-handling.spec.ts",
+      "file": "tests/e2e/auth-failure-handling.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E ΓÇö auth and session failure handling",
+          "file": "tests/e2e/auth-failure-handling.spec.ts",
+          "line": 37,
+          "column": 6,
+          "specs": [
+            {
+              "title": "unauthenticated requests are denied at all critical surfaces (NEG-AUTH-NO-SESSION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-7c93510fb544c4300000",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 47,
+              "column": 7
+            },
+            {
+              "title": "member role is insufficient for evidence export (NEG-AUTH-MEMBER-EVIDENCE-EXPORT)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-6c7aa08fbb4ece11fe69",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 64,
+              "column": 7
+            },
+            {
+              "title": "member role is insufficient for audit log access (NEG-AUTH-MEMBER-AUDIT-READ)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-43608390b72aada21692",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 74,
+              "column": 7
+            },
+            {
+              "title": "role cannot be escalated via header injection (NEG-AUTH-HEADER-INJECTION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-ca646f60fc3d87b36a78",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 86,
+              "column": 7
+            },
+            {
+              "title": "session switch isolates state between users (NEG-AUTH-SESSION-ISOLATION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-73f560874626fef1d93c",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 104,
+              "column": 7
+            },
+            {
+              "title": "auditor cannot perform mutations (NEG-AUTH-AUDITOR-MUTATION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-529bc40842fe95dffc6a",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 121,
+              "column": 7
+            },
+            {
+              "title": "steward cannot perform admin-only operations (NEG-AUTH-STEWARD-ADMIN-LIMIT)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bea385299a858b673288-e48812b96e080cbbc610",
+              "file": "tests/e2e/auth-failure-handling.spec.ts",
+              "line": 145,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\auth-session-switch.spec.ts",
+      "file": "tests/e2e/auth-session-switch.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - auth session switching",
+          "file": "tests/e2e/auth-session-switch.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "sequential logins replace the active session and role context",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "77493e11dc37ba8432d5-b17595e588f8c0fd2932",
+              "file": "tests/e2e/auth-session-switch.spec.ts",
+              "line": 24,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\cross-org-block.spec.ts",
+      "file": "tests/e2e/cross-org-block.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E - cross-org containment",
+          "file": "tests/e2e/cross-org-block.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "wrong-org user cannot access case or audit export",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00a695e5315585ce8d86-e20c3ae364bec62d42dc",
+              "file": "tests/e2e/cross-org-block.spec.ts",
+              "line": 14,
+              "column": 7
+            },
+            {
+              "title": "wrong-org member cannot access evidence/documents from another org (MEMBER-CANNOT-VIEW-WRONG-ORG-DOCUMENT)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00a695e5315585ce8d86-e36aa243d79e445d30c6",
+              "file": "tests/e2e/cross-org-block.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "wrong-org auditor cannot access audit records from another org (AUDITOR-CANNOT-ACCESS-WRONG-ORG)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00a695e5315585ce8d86-8448060e3c8ff1d9aceb",
+              "file": "tests/e2e/cross-org-block.spec.ts",
+              "line": 38,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\evidence-misuse.spec.ts",
+      "file": "tests/e2e/evidence-misuse.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E ΓÇö evidence misuse and access control",
+          "file": "tests/e2e/evidence-misuse.spec.ts",
+          "line": 29,
+          "column": 6,
+          "specs": [
+            {
+              "title": "invalid evidence ID returns safe error ΓÇö no server crash or data leak (NEG-EVIDENCE-INVALID-ID)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-0f0ac1145426785ed155",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 39,
+              "column": 7
+            },
+            {
+              "title": "cross-org evidence request is denied (NEG-EVIDENCE-CROSS-ORG)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-6cd13aa00e842f026839",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "member cannot export evidence (insufficient role) (NEG-EVIDENCE-MEMBER-EXPORT)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-42a6e04711a236d5db82",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 67,
+              "column": 7
+            },
+            {
+              "title": "authorized evidence export returns audit-safe structure only (NEG-EVIDENCE-EXPORT-SHAPE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-e59bb405298151389810",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 80,
+              "column": 7
+            },
+            {
+              "title": "member cannot delete evidence (NEG-EVIDENCE-MEMBER-DELETE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-c6774c7ee81be89756f5",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 108,
+              "column": 7
+            },
+            {
+              "title": "evidence upload without session is denied (NEG-EVIDENCE-ANON-UPLOAD)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-2448b4582ec0681a26c8",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 119,
+              "column": 7
+            },
+            {
+              "title": "evidence governance telemetry does not expose sensitive case content (NEG-EVIDENCE-TELEMETRY-SAFE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "51616b58feb3bb8a41d4-d21266d31a9cb2df5101",
+              "file": "tests/e2e/evidence-misuse.spec.ts",
+              "line": 130,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\negative-workflow-transitions.spec.ts",
+      "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E ΓÇö negative workflow transitions (FSM invariant)",
+          "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+          "line": 26,
+          "column": 6,
+          "specs": [
+            {
+              "title": "triage ΓåÆ resolved is blocked ΓÇö must go via under_review (NEG-FSM-TRIAGE-DIRECT-RESOLVE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3570c02f99111644d0-3ac7c40efc05ab338733",
+              "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+              "line": 36,
+              "column": 7
+            },
+            {
+              "title": "closed ΓåÆ investigation is blocked without explicit reopen (NEG-FSM-CLOSED-NO-INVESTIGATION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3570c02f99111644d0-f485cb5d57186e59a5c3",
+              "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "member cannot self-advance case to arbitration (NEG-FSM-ARBITRATION-BYPASS)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3570c02f99111644d0-4012bde72bfecf9e60d4",
+              "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+              "line": 84,
+              "column": 7
+            },
+            {
+              "title": "member cannot directly resolve a case (NEG-FSM-MEMBER-DIRECT-RESOLVE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3570c02f99111644d0-774c93ff124a42dcd93b",
+              "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+              "line": 104,
+              "column": 7
+            },
+            {
+              "title": "re-submitting a resolved case without reopen is rejected (NEG-FSM-RESUBMIT-CLOSED)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3570c02f99111644d0-ffede15466d3cf1e53b6",
+              "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+              "line": 123,
+              "column": 7
+            },
+            {
+              "title": "unauthorized user cannot perform any transition (NEG-FSM-UNAUTHORIZED-TRANSITION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "be3570c02f99111644d0-7ee668d26015a9ba8e51",
+              "file": "tests/e2e/negative-workflow-transitions.spec.ts",
+              "line": 150,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tests\\e2e\\org-isolation-negative.spec.ts",
+      "file": "tests/e2e/org-isolation-negative.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "UE E2E ΓÇö org isolation negative paths",
+          "file": "tests/e2e/org-isolation-negative.spec.ts",
+          "line": 32,
+          "column": 6,
+          "specs": [
+            {
+              "title": "wrong-org user cannot lookup primary-org grievance by claim number (NEG-ORG-CLAIM-LOOKUP)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-3176cac401cb2f83102f",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 42,
+              "column": 7
+            },
+            {
+              "title": "wrong-org user cannot view documents/evidence for primary-org case (NEG-ORG-EVIDENCE-READ)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-2756335c226451fb5a63",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "wrong-org user cannot export evidence for primary-org case (NEG-ORG-EXPORT)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-9102be0e81b267706947",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 60,
+              "column": 7
+            },
+            {
+              "title": "universal search cannot return primary-org records to wrong-org user (NEG-ORG-SEARCH-LEAKAGE)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-7d65110e74a57e34843e",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "dashboard metrics do not expose primary-org aggregate data to wrong-org user (NEG-ORG-DASHBOARD-METRICS)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-89a4ea273257ec4cbc97",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 94,
+              "column": 7
+            },
+            {
+              "title": "audit log cannot be read by wrong-org user (NEG-ORG-AUDIT-READ)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-e673d39cddb6826ea924",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 112,
+              "column": 7
+            },
+            {
+              "title": "workbench case list does not include primary-org cases for wrong-org user (NEG-ORG-WORKBENCH)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-8e32340108522535a4a7",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 129,
+              "column": 7
+            },
+            {
+              "title": "workflow transition on primary-org case is denied to wrong-org user (NEG-ORG-WORKFLOW-MUTATION)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "security",
+                  "projectName": "security",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "448702fe302afad5b959-bcafe85bbc46aea3c3b8",
+              "file": "tests/e2e/org-isolation-negative.spec.ts",
+              "line": 143,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T00:42:35.794Z",
+    "duration": 3205.664,
+    "expected": 0,
+    "skipped": 193,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
