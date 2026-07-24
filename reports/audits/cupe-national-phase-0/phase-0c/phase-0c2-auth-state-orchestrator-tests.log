@@ -1,0 +1,18 @@
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0c/apps/union-eyes
+
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö happy path (all 5 personas OK) > writes storageState per persona and summary.json with allOk=true 48ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö happy path (all 5 personas OK) > every login request carries a User-Agent containing "playwright-e2e-auth" 12ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö happy path (all 5 personas OK) > written storageState files are Playwright v1 shape with nzila_session cookie 17ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö per-persona failure isolation > one login failure does not prevent the other four from succeeding 10ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö cookie extraction failure > records failure when login 200 but no Set-Cookie header 3ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö /me verification > records failure when me returns a different email 4ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö /me verification > records failure when me returns non-200 status 4ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö summary.json is always written > writes summary.json even when every persona fails 7ms
+ Γ£ô |union-eyes| scripts/lifecycle/generate-auth-states.test.ts > generateAuthStates ΓÇö network error propagates as per-persona error > captures thrown fetch error into result.error without crashing the run 4ms
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  20:15:39
+   Duration  539ms (transform 77ms, setup 0ms, import 104ms, tests 111ms, environment 0ms)
+

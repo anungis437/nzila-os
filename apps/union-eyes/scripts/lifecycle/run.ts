@@ -31,7 +31,7 @@
  *   - Every step's outcome is captured in a per-run summary JSON.
  */
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, writeFileSync, copyFileSync, cpSync, statSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, cpSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { performance } from 'node:perf_hooks'
 
@@ -297,12 +297,43 @@ async function main(): Promise<void> {
 
     if (!boot) throw new Error('bootServer returned undefined')
 
-    // Step 9 — Generate auth states
-    await withStep(steps, 9, 'generate-auth-states', () => {
+    // Step 9 — Generate auth states (Phase 0C.2 §7 — orchestrated wiring)
+    //
+    // Hardening notes:
+    //   - The generator CLI reads NZILA_AUTH_STATE_BASE_URL first; we set it
+    //     explicitly to the runtime port so we do not depend on inherited
+    //     NEXT_PUBLIC_APP_URL (which may be a stale dotenv value if the
+    //     preferred port was taken and step 3 auto-assigned a different one).
+    //   - We set NZILA_AUTH_STATE_DIR explicitly for the same reason (the
+    //     generator's default is derived from __dirname, which is correct
+    //     but relying on the default hides the contract).
+    //   - We propagate the managed-server flag + runId so that any inner
+    //     probe issued by the generator against /api/health/managed-server
+    //     would agree with the orchestrator on the runId.
+    //   - We cap spawnSync with a 90s timeout — the generator's own per-
+    //     request timeout is 20s and it must complete 5 personas × 2 calls,
+    //     so 90s is a safe ceiling before we consider it hung.
+    //   - After exit=0, we verify playwright/.auth/summary.json actually
+    //     lists allOk=true with a result entry per canonical persona. This
+    //     catches a generator that silently regresses to partial success.
+    const AUTH_STATE_DIR = path.join(APP_ROOT, 'playwright', '.auth')
+    const AUTH_STATE_SUMMARY = path.join(AUTH_STATE_DIR, 'summary.json')
+    const AUTH_STATE_TIMEOUT_MS = 90_000
+    const AUTH_STATE_EXPECTED_ROLES = ['member', 'steward', 'staff', 'executive', 'admin'] as const
+
+    await withStep(steps, 9, 'generate-auth-states', async () => {
       const authEnv: NodeJS.ProcessEnv = {
         ...process.env,
+        NZILA_AUTH_STATE_BASE_URL: `http://localhost:${port}`,
+        NZILA_AUTH_STATE_DIR: AUTH_STATE_DIR,
+        // Kept for backward compatibility with any external tooling that
+        // reads this variable — the generator CLI itself ignores it.
         UE_TEST_BASE_URL: `http://localhost:${port}`,
         UE_TEST_USER_PASSWORD: process.env.UE_TEST_USER_PASSWORD ?? 'ue-qa-test-password-!23',
+        // Managed-server context — informational for the generator, but keeps
+        // the whole run under a single runId if it ever adds handshake probes.
+        [MANAGED_SERVER_ENV_VAR]: 'true',
+        [MANAGED_SERVER_RUN_ID_ENV_VAR]: alloc!.runId,
       }
       const res = spawnSync(
         'pnpm',
@@ -312,12 +343,57 @@ async function main(): Promise<void> {
           env: authEnv,
           stdio: 'inherit',
           shell: process.platform === 'win32',
+          timeout: AUTH_STATE_TIMEOUT_MS,
+          killSignal: 'SIGKILL',
         },
       )
+      if (res.signal === 'SIGKILL' || (res.error && (res.error as NodeJS.ErrnoException).code === 'ETIMEDOUT')) {
+        throw new Error(`generate-auth-states timed out after ${AUTH_STATE_TIMEOUT_MS}ms`)
+      }
       if (res.status !== 0) {
         throw new Error(`generate-auth-states exited with code ${res.status}`)
       }
-      return { detail: 'storageState per role written to playwright/.auth/' }
+
+      // Post-exit verification — read summary.json, refuse partial success.
+      if (!existsSync(AUTH_STATE_SUMMARY)) {
+        throw new Error(`generate-auth-states exited 0 but summary.json missing at ${AUTH_STATE_SUMMARY}`)
+      }
+      let parsed: {
+        allOk?: boolean
+        results?: Array<{ role?: string; ok?: boolean; storageStatePath?: string; error?: string }>
+      }
+      try {
+        parsed = JSON.parse(readFileSync(AUTH_STATE_SUMMARY, 'utf8')) as typeof parsed
+      } catch (err) {
+        throw new Error(`generate-auth-states summary.json unparseable: ${err instanceof Error ? err.message : err}`)
+      }
+      if (parsed.allOk !== true) {
+        const failing = (parsed.results ?? [])
+          .filter((r) => r.ok !== true)
+          .map((r) => `${r.role ?? '<unknown>'}=${r.error ?? 'no-error'}`)
+          .join(', ')
+        throw new Error(
+          `generate-auth-states reported allOk=${String(parsed.allOk)} — failing: ${failing || '<none listed>'}`,
+        )
+      }
+      const gotRoles = new Set((parsed.results ?? []).filter((r) => r.ok === true).map((r) => r.role))
+      const missing = AUTH_STATE_EXPECTED_ROLES.filter((r) => !gotRoles.has(r))
+      if (missing.length > 0) {
+        throw new Error(
+          `generate-auth-states missing storageState for role(s): ${missing.join(',')}`,
+        )
+      }
+      // Also verify each storageStatePath file actually exists on disk.
+      for (const r of parsed.results ?? []) {
+        if (r.ok && r.storageStatePath && !existsSync(r.storageStatePath)) {
+          throw new Error(
+            `generate-auth-states reported ok=true for '${r.role}' but file missing at ${r.storageStatePath}`,
+          )
+        }
+      }
+      return {
+        detail: `roles=${AUTH_STATE_EXPECTED_ROLES.length} allOk=true dir=${path.relative(APP_ROOT, AUTH_STATE_DIR)}`,
+      }
     })
 
     // Step 10 — Playwright

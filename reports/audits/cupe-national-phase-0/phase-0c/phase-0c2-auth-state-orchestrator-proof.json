@@ -1,0 +1,93 @@
+{
+  "phase": "0C.2",
+  "section": "§7",
+  "title": "Auth-state generation orchestrator wiring",
+  "status": "GREEN",
+  "generatedAt": "2026-04-24T00:00:00Z",
+  "scope": {
+    "orchestratorFile": "apps/union-eyes/scripts/lifecycle/run.ts",
+    "generatorFile": "apps/union-eyes/scripts/lifecycle/generate-auth-states.ts",
+    "testFileAdded": "apps/union-eyes/scripts/lifecycle/generate-auth-states.test.ts"
+  },
+  "gapsClosed": [
+    {
+      "id": "gap-1",
+      "name": "cli-env-var-mismatch",
+      "before": "step 9 set UE_TEST_BASE_URL only; generator reads NZILA_AUTH_STATE_BASE_URL",
+      "after": "step 9 now sets NZILA_AUTH_STATE_BASE_URL explicitly; UE_TEST_BASE_URL retained for back-compat"
+    },
+    {
+      "id": "gap-2",
+      "name": "output-dir-implicit",
+      "before": "generator defaulted output dir from its own __dirname",
+      "after": "step 9 sets NZILA_AUTH_STATE_DIR explicitly to playwright/.auth"
+    },
+    {
+      "id": "gap-3",
+      "name": "exit-code-only-success-signal",
+      "before": "orchestrator only checked spawnSync exit code",
+      "after": "orchestrator reads summary.json, asserts allOk===true and all 5 canonical roles present, and verifies each storageState file exists on disk"
+    },
+    {
+      "id": "gap-4",
+      "name": "no-timeout-guard",
+      "before": "spawnSync had no timeout — a hung generator would hang the whole run",
+      "after": "spawnSync timeout=90000ms with killSignal=SIGKILL; timeout raises 'timed out after 90000ms' error"
+    },
+    {
+      "id": "gap-5",
+      "name": "no-unit-tests",
+      "before": "generate-auth-states.ts had zero unit tests",
+      "after": "9 unit tests / 6 describe groups pin the HTTP contract, UA requirement, cookie parsing, me verification, and summary shape"
+    }
+  ],
+  "nonNegotiablesPreserved": {
+    "playwrightTestAuthPropagation": {
+      "asserted": true,
+      "howEnforced": "step 8's merged env still spreads GovernedE2EEnv which sets PLAYWRIGHT_TEST_AUTH=true (env.ts line 165); no change required in step 8"
+    },
+    "bypassUserAgentPinned": {
+      "asserted": true,
+      "howEnforced": "test #2 fails if any login request lacks 'playwright-e2e-auth' in the UA header"
+    },
+    "storageStateShapePinned": {
+      "asserted": true,
+      "howEnforced": "test #3 verifies cookies[0] has name/value/domain/path/expires/httpOnly/secure/sameSite fields"
+    }
+  },
+  "verification": {
+    "newTests": {
+      "file": "apps/union-eyes/scripts/lifecycle/generate-auth-states.test.ts",
+      "testCount": 9,
+      "describeGroups": 6,
+      "passed": 9,
+      "failed": 0,
+      "durationMs": 539
+    },
+    "regressionTests": {
+      "scope": "apps/union-eyes/scripts/lifecycle",
+      "testFiles": 5,
+      "testCount": 71,
+      "passed": 71,
+      "failed": 0,
+      "durationMs": 1650
+    },
+    "typecheck": {
+      "scope": "apps/union-eyes",
+      "command": "pnpm exec tsc --noEmit -p tsconfig.json",
+      "exitCode": 0,
+      "output": ""
+    }
+  },
+  "testMatrix": [
+    { "id": 1, "group": "happy path", "name": "writes storageState per persona and summary.json with allOk=true" },
+    { "id": 2, "group": "happy path", "name": "every login request carries a User-Agent containing 'playwright-e2e-auth'" },
+    { "id": 3, "group": "happy path", "name": "written storageState files are Playwright v1 shape with nzila_session cookie" },
+    { "id": 4, "group": "per-persona failure isolation", "name": "one login failure does not prevent the other four from succeeding" },
+    { "id": 5, "group": "cookie extraction failure", "name": "records failure when login 200 but no Set-Cookie header" },
+    { "id": 6, "group": "/me verification", "name": "records failure when me returns a different email" },
+    { "id": 7, "group": "/me verification", "name": "records failure when me returns non-200 status" },
+    { "id": 8, "group": "summary.json is always written", "name": "writes summary.json even when every persona fails" },
+    { "id": 9, "group": "network error", "name": "captures thrown fetch error into result.error without crashing the run" }
+  ]
+}
