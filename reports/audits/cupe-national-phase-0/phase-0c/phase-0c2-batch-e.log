@@ -1,0 +1,215 @@
+
+> @nzila/union-eyes@1.0.0 e2e:governed C:\APPS\nzila-automation-phase0c\apps\union-eyes
+> tsx scripts/lifecycle/run.ts
+
+[e2e:governed] env loaded (adminUrl=postgresql://<user>:<pw>@localhost:5433/postgres)
+[e2e:governed] Γû╢ step 1: preflight
+[e2e:governed] Γ£ö step 1: preflight (10 ms) ΓÇö node=v24.13.1, port=3002 free
+[e2e:governed] Γû╢ step 2: allocate-db
+[ue:e2e:allocate-db] Creating disposable DB 'ue_e2e_20260724072220_311b5f' via postgresql://<user>:<pw>@localhost:5433/postgres (owner=nzila)
+[e2e:governed] Γ£ö step 2: allocate-db (1555 ms) ΓÇö db=ue_e2e_20260724072220_311b5f runId=20260724072220_311b5f
+[e2e:governed] Γû╢ step 3: allocate-port
+[e2e:governed] Γ£ö step 3: allocate-port (3 ms) ΓÇö port=3002 (preferred=3002)
+[e2e:governed] Γû╢ step 4: migrations.platform
+[e2e:governed] Γ£ö step 4: migrations.platform (0 ms) ΓÇö applied during allocate-db (drizzle bootstrap)
+[e2e:governed] Γû╢ step 5: migrations.django
+[e2e:governed] Γ£ö step 5: migrations.django (0 ms) ΓÇö Django not required for Phase 0C.1 baseline; see readiness ┬º6 #6
+[e2e:governed] Γû╢ step 6: verify-phase0b-contract
+[e2e:governed] Γ£ö step 6: verify-phase0b-contract (122 ms) ΓÇö organization_members present
+[e2e:governed] Γû╢ step 7: seed
+[ue:seed:test-env] Seed complete
+{
+  "testOrgs": 4,
+  "testUsers": 10,
+  "testCases": 3,
+  "externalTesterOrg": "33333333-3333-4333-8333-333333333333",
+  "externalTesterUser": "ue-qa-ux-tester-001",
+  "suspendedUser": "ue-qa-member-suspended",
+  "productionLikeOrgGuardrail": "44444444-4444-4444-8444-444444444444",
+  "qaPassword": "NzilaQa!2026"
+}
+[e2e:governed] Γ£ö step 7: seed (10242 ms) ΓÇö seed-test-env applied to disposable DB
+[e2e:governed] Γû╢ step 8: boot-server
+(node:32512) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[e2e:governed] Γ£ö step 8: boot-server (26580 ms) ΓÇö pid=36104 port=3002 readyAfter=25472ms handshakeRunId=20260724072220_311b5f
+[e2e:governed] Γû╢ step 9: generate-auth-states
+{
+  "baseUrl": "http://localhost:3002",
+  "outputDir": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth",
+  "results": [
+    {
+      "role": "member",
+      "email": "ue.qa.member.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "WHtK6h2fΓÇª",
+      "cookieExpires": 1784964183,
+      "meEmail": "ue.qa.member.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\member.json"
+    },
+    {
+      "role": "steward",
+      "email": "ue.qa.steward.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "Kkd40XV6ΓÇª",
+      "cookieExpires": 1784964184,
+      "meEmail": "ue.qa.steward.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\steward.json"
+    },
+    {
+      "role": "staff",
+      "email": "ue.qa.staff.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "MSzhWfKaΓÇª",
+      "cookieExpires": 1784964184,
+      "meEmail": "ue.qa.staff.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\staff.json"
+    },
+    {
+      "role": "executive",
+      "email": "ue.qa.executive.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "sVI3yREqΓÇª",
+      "cookieExpires": 1784964184,
+      "meEmail": "ue.qa.executive.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\executive.json"
+    },
+    {
+      "role": "admin",
+      "email": "ue.qa.admin.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "WctcB_ieΓÇª",
+      "cookieExpires": 1784964185,
+      "meEmail": "ue.qa.admin.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\admin.json"
+    }
+  ],
+  "allOk": true
+}
+[e2e:governed] Γ£ö step 9: generate-auth-states (5923 ms) ΓÇö roles=5 allOk=true dir=playwright\.auth
+[e2e:governed] Γû╢ step 10: playwright
+[e2e:governed]   playwright project filter: setup, bilingual-en, bilingual-fr
+
+Running 15 tests using 1 worker
+
+[1A[2K[1/15] [setup] ΓÇ║ playwright\setup\auth-state.setup.ts:34:6 ΓÇ║ phase-0c2-s8 auth-state summary is present, complete, and consistent
+[1A[2K[2/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA renders with <html lang="en-CA">
+[1A[2K  1) [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA renders with <html lang="en-CA"> 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('body')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('body')[22m
+    [2m    9 ├ù locator resolved to <body>ΓÇª</body>[22m
+    [2m      - unexpected value "hidden"[22m
+
+
+      51 |     test(`locale-prefixed homepage /${locale} renders with <html lang="${locale}">`, async ({ page }) => {
+      52 |       await page.goto(`/${locale}`, { waitUntil: 'domcontentloaded' });
+    > 53 |       await expect(page.locator('body')).toBeVisible();
+         |                                          ^
+      54 |       const htmlLang = await page.getAttribute('html', 'lang');
+      55 |       expect(htmlLang).toBe(locale);
+      56 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\bilingual\_helpers.ts:53:42
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-bilingual-locale-smoke-53db9-nders-with-html-lang-en-CA--bilingual-en\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-bilingual-locale-smoke-53db9-nders-with-html-lang-en-CA--bilingual-en\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-bilingual-locale-smoke-53db9-nders-with-html-lang-en-CA--bilingual-en\error-context.md
+
+
+[1A[2K[3/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:59:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed /en-CA/trust renders with <html lang="en-CA">
+[1A[2K[4/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:67:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed /en-CA/pricing renders with <html lang="en-CA">
+[1A[2K[5/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:75:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed /en-CA/story renders with <html lang="en-CA">
+[1A[2K[6/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:83:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA exposes UnionEyes brand in <title>
+[1A[2K[7/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:90:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA has no images missing alt attribute
+[1A[2K[8/15] [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:98:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ API health endpoint reachable (locale=en-CA project context)
+[1A[2K[9/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA renders with <html lang="fr-CA">
+[1A[2K  2) [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA renders with <html lang="fr-CA"> 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('body')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('body')[22m
+    [2m    9 ├ù locator resolved to <body>ΓÇª</body>[22m
+    [2m      - unexpected value "hidden"[22m
+
+
+      51 |     test(`locale-prefixed homepage /${locale} renders with <html lang="${locale}">`, async ({ page }) => {
+      52 |       await page.goto(`/${locale}`, { waitUntil: 'domcontentloaded' });
+    > 53 |       await expect(page.locator('body')).toBeVisible();
+         |                                          ^
+      54 |       const htmlLang = await page.getAttribute('html', 'lang');
+      55 |       expect(htmlLang).toBe(locale);
+      56 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\bilingual\_helpers.ts:53:42
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-bilingual-locale-smoke-eb2bc-nders-with-html-lang-fr-CA--bilingual-fr\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-bilingual-locale-smoke-eb2bc-nders-with-html-lang-fr-CA--bilingual-fr\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-bilingual-locale-smoke-eb2bc-nders-with-html-lang-fr-CA--bilingual-fr\error-context.md
+
+
+[1A[2K[10/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:59:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed /fr-CA/trust renders with <html lang="fr-CA">
+[1A[2K[11/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:67:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed /fr-CA/pricing renders with <html lang="fr-CA">
+[1A[2K[12/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:75:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed /fr-CA/story renders with <html lang="fr-CA">
+[1A[2K[13/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:83:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA exposes UnionEyes brand in <title>
+[1A[2K[14/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:90:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA has no images missing alt attribute
+[1A[2K[15/15] [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:98:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ API health endpoint reachable (locale=fr-CA project context)
+[1A[2K  2 failed
+    [bilingual-en] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö en-CA ΓÇ║ locale-prefixed homepage /en-CA renders with <html lang="en-CA"> 
+    [bilingual-fr] ΓÇ║ e2e\bilingual\_helpers.ts:51:9 ΓÇ║ Bilingual smoke ΓÇö fr-CA ΓÇ║ locale-prefixed homepage /fr-CA renders with <html lang="fr-CA"> 
+  13 passed (1.3m)
+
+To open last HTML report run:
+[36m[39m
+[36m  pnpm exec playwright show-report[39m
+[36m[39m
+[e2e:governed] Γ£ö step 10: playwright (81650 ms) ΓÇö exitCode=1 projects=[setup,bilingual-en,bilingual-fr]
+[e2e:governed] Γû╢ step 11: collect-artifacts
+[e2e:governed] Γ£ö step 11: collect-artifacts (39 ms) ΓÇö artifacts=playwright-report,test-results,server.log
+[e2e:governed] Γ£ö step 12: stop-server (sigterm)
+[e2e:governed] Γ£ö step 13: drop-db ue_e2e_20260724072220_311b5f
+[e2e:governed] Γ£ö step 14: verify-port-release port=3002
+[e2e:governed] summary written ΓåÆ C:\APPS\nzila-automation-phase0c\reports\audits\cupe-national-phase-0\phase-0c\run-artifacts\20260724072220_311b5f\run-summary.json
+C:\APPS\nzila-automation-phase0c\apps\union-eyes:
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 e2e:governed: `tsx scripts/lifecycle/run.ts`
+Exit status 1
