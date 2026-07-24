@@ -1,0 +1,293 @@
+{
+  "generatedAt": "2026-07-24T14:12:15.921Z",
+  "source": {
+    "failures": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2r-run3-failures.json",
+    "inventory": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-e2e-inventory-reconciled.json",
+    "postInventoryAdditions": "§13 bilingual (7×2) + §14 a11y (5) populated after inventory snapshot"
+  },
+  "runId": "20260724094416_90145a",
+  "totals": {
+    "failedInSummary": 50,
+    "fsrAOccurrences": 30,
+    "otherFailures": 20,
+    "dnrTotal": 145,
+    "dnrByHelperCascade": 145
+  },
+  "unknownSpecs": [],
+  "rows": [
+    {
+      "project": "accessibility",
+      "spec": "e2e/a11y/smoke.spec.ts",
+      "specTestCount": 5,
+      "fsrAOccurrences": 1,
+      "dnrCount": 4,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/authenticated-role-navigation.spec.ts",
+      "specTestCount": 43,
+      "fsrAOccurrences": 1,
+      "dnrCount": 42,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/cape-features.spec.ts",
+      "specTestCount": 14,
+      "fsrAOccurrences": 6,
+      "dnrCount": 13,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/dashboard.spec.ts",
+      "specTestCount": 3,
+      "fsrAOccurrences": 1,
+      "dnrCount": 2,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/empty-states.spec.ts",
+      "specTestCount": 6,
+      "fsrAOccurrences": 1,
+      "dnrCount": 5,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/governance/deployment-legitimacy-visibility.spec.ts",
+      "specTestCount": 2,
+      "fsrAOccurrences": 0,
+      "dnrCount": 0,
+      "otherFailures": [
+        {
+          "code": "FSR-G",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/missing-routes.spec.ts",
+      "specTestCount": 10,
+      "fsrAOccurrences": 1,
+      "dnrCount": 9,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/ocra-adaptive-flow.spec.ts",
+      "specTestCount": 9,
+      "fsrAOccurrences": 0,
+      "dnrCount": 0,
+      "otherFailures": [
+        {
+          "code": "FSR-B",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/pilot-journey.spec.ts",
+      "specTestCount": 2,
+      "fsrAOccurrences": 1,
+      "dnrCount": 1,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/stakeholder-demo-journeys.spec.ts",
+      "specTestCount": 8,
+      "fsrAOccurrences": 1,
+      "dnrCount": 7,
+      "otherFailures": [
+        {
+          "code": "FSR-B",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "project": "admin",
+      "spec": "e2e/ue-workflow.spec.ts",
+      "specTestCount": 6,
+      "fsrAOccurrences": 1,
+      "dnrCount": 5,
+      "otherFailures": []
+    },
+    {
+      "project": "admin",
+      "spec": "tests/e2e/admin-assignment.spec.ts",
+      "specTestCount": 1,
+      "fsrAOccurrences": 1,
+      "dnrCount": 0,
+      "otherFailures": []
+    },
+    {
+      "project": "bilingual-en",
+      "spec": "e2e/bilingual/locale-smoke.en.spec.ts",
+      "specTestCount": 7,
+      "fsrAOccurrences": 1,
+      "dnrCount": 6,
+      "otherFailures": []
+    },
+    {
+      "project": "bilingual-fr",
+      "spec": "e2e/bilingual/locale-smoke.fr.spec.ts",
+      "specTestCount": 7,
+      "fsrAOccurrences": 1,
+      "dnrCount": 6,
+      "otherFailures": []
+    },
+    {
+      "project": "executive",
+      "spec": "e2e/cba-intelligence.spec.ts",
+      "specTestCount": 2,
+      "fsrAOccurrences": 1,
+      "dnrCount": 1,
+      "otherFailures": []
+    },
+    {
+      "project": "member",
+      "spec": "e2e/member-journey.spec.ts",
+      "specTestCount": 12,
+      "fsrAOccurrences": 0,
+      "dnrCount": 0,
+      "otherFailures": [
+        {
+          "code": "FSR-D",
+          "count": 2
+        },
+        {
+          "code": "FSR-C",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "project": "public",
+      "spec": "e2e/no-fsm-overexposure.spec.ts",
+      "specTestCount": 5,
+      "fsrAOccurrences": 0,
+      "dnrCount": 0,
+      "otherFailures": [
+        {
+          "code": "FSR-C",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "project": "security",
+      "spec": "tests/e2e/auth-failure-handling.spec.ts",
+      "specTestCount": 7,
+      "fsrAOccurrences": 1,
+      "dnrCount": 6,
+      "otherFailures": []
+    },
+    {
+      "project": "security",
+      "spec": "tests/e2e/auth-session-switch.spec.ts",
+      "specTestCount": 1,
+      "fsrAOccurrences": 1,
+      "dnrCount": 0,
+      "otherFailures": []
+    },
+    {
+      "project": "security",
+      "spec": "tests/e2e/cross-org-block.spec.ts",
+      "specTestCount": 3,
+      "fsrAOccurrences": 1,
+      "dnrCount": 2,
+      "otherFailures": []
+    },
+    {
+      "project": "security",
+      "spec": "tests/e2e/evidence-misuse.spec.ts",
+      "specTestCount": 7,
+      "fsrAOccurrences": 1,
+      "dnrCount": 6,
+      "otherFailures": []
+    },
+    {
+      "project": "security",
+      "spec": "tests/e2e/negative-workflow-transitions.spec.ts",
+      "specTestCount": 6,
+      "fsrAOccurrences": 1,
+      "dnrCount": 5,
+      "otherFailures": []
+    },
+    {
+      "project": "security",
+      "spec": "tests/e2e/org-isolation-negative.spec.ts",
+      "specTestCount": 8,
+      "fsrAOccurrences": 1,
+      "dnrCount": 7,
+      "otherFailures": []
+    },
+    {
+      "project": "staff",
+      "spec": "tests/e2e/auditor-readonly.spec.ts",
+      "specTestCount": 1,
+      "fsrAOccurrences": 1,
+      "dnrCount": 0,
+      "otherFailures": []
+    },
+    {
+      "project": "staff",
+      "spec": "tests/e2e/case-escalation.spec.ts",
+      "specTestCount": 1,
+      "fsrAOccurrences": 1,
+      "dnrCount": 0,
+      "otherFailures": []
+    },
+    {
+      "project": "staff",
+      "spec": "tests/e2e/case-resolution.spec.ts",
+      "specTestCount": 1,
+      "fsrAOccurrences": 1,
+      "dnrCount": 0,
+      "otherFailures": []
+    },
+    {
+      "project": "staff",
+      "spec": "tests/e2e/external-ux-tester.spec.ts",
+      "specTestCount": 2,
+      "fsrAOccurrences": 1,
+      "dnrCount": 1,
+      "otherFailures": []
+    },
+    {
+      "project": "steward",
+      "spec": "e2e/permission-boundaries.spec.ts",
+      "specTestCount": 16,
+      "fsrAOccurrences": 1,
+      "dnrCount": 15,
+      "otherFailures": [
+        {
+          "code": "FSR-F",
+          "count": 2
+        },
+        {
+          "code": "FSR-E",
+          "count": 2
+        },
+        {
+          "code": "FSR-H",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "project": "steward",
+      "spec": "tests/e2e/steward-review.spec.ts",
+      "specTestCount": 3,
+      "fsrAOccurrences": 1,
+      "dnrCount": 2,
+      "otherFailures": []
+    }
+  ]
+}
