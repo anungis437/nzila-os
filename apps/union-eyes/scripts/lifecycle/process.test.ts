@@ -205,4 +205,41 @@ describe('pollReadiness', () => {
     expect(res.ready).toBe(false)
     expect(res.attempts).toBeGreaterThan(0)
   })
+
+  it('caps each fetch with a per-request timeout (Phase 0C.2 §11)', async () => {
+    // Server that ACCEPTS the connection but NEVER writes a response.
+    // Without a per-request timeout, fetch would hang the entire poll
+    // window on a single attempt. With the §11 fix, each fetch aborts
+    // after ~10s and we advance to the next attempt.
+    const sockets: net.Socket[] = []
+    const srv = net.createServer((sock) => {
+      sockets.push(sock)
+      // Never respond — hold the socket open.
+    })
+    await new Promise<void>((r) => srv.listen(0, '127.0.0.1', () => r()))
+    const addr = srv.address() as net.AddressInfo
+    try {
+      const startedAt = Date.now()
+      // Budget: pollReadiness inner per-request timeout is 10s. Give the
+      // overall poll 15s so we get ≥2 attempts even against a hanging
+      // socket (attempt 1 aborts at ~10s, attempt 2 fires ~10.1s and
+      // aborts ~20.1s at which point the outer loop has already exited).
+      const res = await pollReadiness({
+        url: `http://127.0.0.1:${addr.port}/`,
+        timeoutMs: 15_000,
+        intervalMs: 100,
+      })
+      const elapsed = Date.now() - startedAt
+      expect(res.ready).toBe(false)
+      // The bug this guards against: a single 15s+ fetch consuming the
+      // whole window. We expect at least 2 attempts to have fired.
+      expect(res.attempts).toBeGreaterThanOrEqual(2)
+      // Overall completion must be bounded: at worst attempt-2 aborts at
+      // ~20s. Anything past 25s would indicate the abort itself hung.
+      expect(elapsed).toBeLessThan(25_000)
+    } finally {
+      for (const s of sockets) s.destroy()
+      await new Promise<void>((r) => srv.close(() => r()))
+    }
+  }, 40_000)
 })

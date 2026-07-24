@@ -19,7 +19,8 @@
  *   6. db.migrations.django    — django_migrations table has ≥1 row (or skipped)
  *   7. db.contract.phase0b     — organization_members resolver present
  *   8. db.tables.kpi           — ue_kpi_snapshot / ue_pilot_definition (or skipped)
- *   9. db.seed.marker          — ≥5 fixture users present under @nzila.test
+ *   9. db.seed.marker          — ≥5 fixture users present in
+ *                                user_management.users under @nzila.test
  *  10. auth.fixtures           — every fixture user resolvable in user_management.users
  *
  * Additional checks (Phase 0C.2 §6):
@@ -87,7 +88,13 @@ interface ReadinessBody {
   timestamp: string
 }
 
-const REQUIRED_PUBLIC_TABLES = ['users', 'organizations']
+// Phase 0C.2 §11 (fix d) — `users` is NOT in `public`. The canonical
+// fixture user table is `user_management.users` (probed by check 10
+// auth.fixtures and check 9 db.seed.marker below). Requiring `public.users`
+// here caused every governed run to abort at readiness with
+// `db.schema.public: missing: users`. Keep only tables that actually
+// live in `public`.
+const REQUIRED_PUBLIC_TABLES = ['organizations']
 const REQUIRED_UE_TABLES = [
   'claims',
   'claim_updates',
@@ -317,11 +324,13 @@ async function runChecks(): Promise<CheckResult[]> {
     })
   }
 
-  // 9. db.seed.marker — the seed writes a distinguishable row; we probe fixture identity
+  // 9. db.seed.marker — the seed writes a distinguishable row; we probe fixture identity.
+  //    Phase 0C.2 §11 (fix d): fixture users live in `user_management.users`,
+  //    NOT `public.users` (mirrors check 10 auth.fixtures).
   try {
     const rows = (await db.execute(
       sql.raw(
-        `SELECT count(*)::int AS c FROM public.users WHERE email LIKE '${FIXTURE_EMAIL_LIKE}'`,
+        `SELECT count(*)::int AS c FROM user_management.users WHERE email LIKE '${FIXTURE_EMAIL_LIKE}'`,
       ),
     )) as unknown as Array<{ c: number }>
     const count = Array.isArray(rows) && rows.length > 0 ? Number(rows[0]?.c ?? 0) : 0

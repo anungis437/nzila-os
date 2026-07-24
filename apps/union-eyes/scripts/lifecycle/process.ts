@@ -321,10 +321,18 @@ export interface PollReadinessResult {
 /**
  * Polls a URL until it returns HTTP 200 or the timeout elapses.
  * Used for `/api/health/readiness`.
+ *
+ * Each individual fetch is capped by a per-request AbortController timeout
+ * (default 10s). Without this cap a hanging server (e.g. Next.js compiling
+ * a route that never finishes) can consume the entire poll window in a
+ * single fetch, giving us only a handful of "attempts" and no diagnostic
+ * signal. See Phase 0C.2 §11 baseline-run-2 attempt-2 which observed
+ * attempts=4 in 323s (~80s per fetch).
  */
 export async function pollReadiness(options: PollReadinessOptions): Promise<PollReadinessResult> {
   const timeout = options.timeoutMs ?? 120_000
   const interval = options.intervalMs ?? 1_000
+  const perRequestTimeoutMs = 10_000
   const start = Date.now()
   let attempts = 0
   let lastStatus: number | undefined
@@ -332,8 +340,10 @@ export async function pollReadiness(options: PollReadinessOptions): Promise<Poll
 
   while (Date.now() - start < timeout) {
     attempts++
+    const ac = new AbortController()
+    const to = setTimeout(() => ac.abort(), perRequestTimeoutMs)
     try {
-      const res = await fetch(options.url, { method: 'GET' })
+      const res = await fetch(options.url, { method: 'GET', signal: ac.signal })
       lastStatus = res.status
       try {
         lastBody = await res.json()
@@ -345,6 +355,8 @@ export async function pollReadiness(options: PollReadinessOptions): Promise<Poll
       }
     } catch (err) {
       lastBody = err instanceof Error ? err.message : String(err)
+    } finally {
+      clearTimeout(to)
     }
     await new Promise((r) => setTimeout(r, interval))
   }

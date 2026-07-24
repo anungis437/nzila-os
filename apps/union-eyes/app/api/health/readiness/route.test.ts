@@ -49,7 +49,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
       // any generic `public.` catch-all
       if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
       // user_management.users lookup (check 10 — auth.fixtures)
-      if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+      if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
       // user_management.organization_users count (check 12 — fixtures.mappings)
       if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
       // public.organization_members count (check 13 — fixtures.memberships)
@@ -126,7 +126,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
         if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
         if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
@@ -149,7 +149,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
         if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
         if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 0 }])
@@ -177,7 +177,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
           // First 2 orgs found, third missing
           return Promise.resolve(orgProbeCount < 3 ? [{ '1': 1 }] : [])
         }
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
@@ -200,7 +200,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
         if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
         if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 2 }]) // ← short
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
@@ -223,7 +223,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
         if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
         if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 0 }]) // ← empty
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
@@ -250,7 +250,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
         if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
         if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 0 }])
@@ -271,7 +271,7 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
         if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
         if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
-        if (s.includes('user_management.users WHERE email')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
         if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
         if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
         if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 4 }])
@@ -358,6 +358,71 @@ describe('Phase 0C.1 §6 + Phase 0C.2 §6 — /api/health/readiness', () => {
       for (const check of body.checks) {
         expect(check).not.toHaveProperty('detail')
       }
+    })
+  })
+
+  describe('Phase 0C.2 §11 (fix d) — schema probes target user_management.users', () => {
+    it('db.seed.marker queries user_management.users (not public.users)', async () => {
+      const queries: string[] = []
+      mockExecute.mockImplementation((q: unknown) => {
+        const s = String(q)
+        queries.push(s)
+        if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
+        if (s.includes('information_schema.tables')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
+        if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
+        if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
+        if (s.includes('users WHERE email LIKE')) return Promise.resolve([{ c: 5 }])
+        return Promise.resolve([])
+      })
+      const { GET } = await import('./route')
+      const res = await GET()
+      expect(res.status).toBe(200)
+      // Any query that filters by LIKE (the seed-marker probe) MUST be
+      // aimed at user_management.users — never public.users.
+      const likeQueries = queries.filter((q) => q.includes('WHERE email LIKE'))
+      expect(likeQueries.length).toBeGreaterThan(0)
+      for (const q of likeQueries) {
+        expect(q).toContain('user_management.users')
+        expect(q).not.toMatch(/\bpublic\.users\b/)
+      }
+    })
+
+    it('db.schema.public does NOT require a public.users table', async () => {
+      // Every information_schema.tables probe returns exists=false EXCEPT
+      // for `public.organizations`. If the endpoint still required
+      // `public.users`, this scenario would produce db.schema.public=fail
+      // and status=schema_missing (as it did before fix d).
+      mockExecute.mockImplementation((q: unknown) => {
+        const s = String(q)
+        if (s.trim() === 'SELECT 1') return Promise.resolve([{ '?column?': 1 }])
+        if (s.includes('information_schema.tables')) {
+          const isOrgs =
+            s.includes("table_schema = 'public'") && s.includes("table_name = 'organizations'")
+          const isOrgMembers =
+            s.includes("table_schema = 'public'") &&
+            s.includes("table_name = 'organization_members'")
+          return Promise.resolve(isOrgs || isOrgMembers ? [{ '1': 1 }] : [])
+        }
+        if (s.includes('public.organizations WHERE id')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.users WHERE email =')) return Promise.resolve([{ '1': 1 }])
+        if (s.includes('user_management.organization_users')) return Promise.resolve([{ c: 10 }])
+        if (s.includes('public.organization_members')) return Promise.resolve([{ c: 10 }])
+        if (s.includes('__drizzle_migrations')) return Promise.resolve([{ c: 42 }])
+        if (s.includes('users WHERE email LIKE')) return Promise.resolve([{ c: 5 }])
+        return Promise.resolve([])
+      })
+      const { GET } = await import('./route')
+      const res = await GET()
+      const body = await res.json()
+      const schemaPublic = body.checks.find((c: any) => c.id === 'db.schema.public')
+      expect(schemaPublic.state).toBe('ok')
+      // The earlier bug produced `db.schema.public: fail, detail: missing: users`.
+      // Assert that specific failure mode is gone regardless of other checks'
+      // status.
+      expect(schemaPublic.detail ?? '').not.toMatch(/missing:[^,]*\busers\b/)
     })
   })
 })

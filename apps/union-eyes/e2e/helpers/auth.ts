@@ -50,15 +50,28 @@ export async function loginAsRole(page: Page, role: StakeholderRole): Promise<vo
   ];
 
   if ((process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true') {
-    // TODO(phase-0c2-§11): This branch injects a synthetic `nzila_session`
-    // cookie that does NOT match any real PG session row. Once §8's
-    // persona storageState projects are the default source of auth, this
-    // branch should first check `page.context().cookies()` for an existing
-    // `nzila_session` (loaded from `playwright/.auth/<role>.json`) and
-    // skip the fake injection when a real session cookie is already
-    // present. Kept unchanged in §8 to avoid coupling config wiring with
-    // helper behaviour changes; §11 (baseline-failure repair) will land
-    // the reconciled behaviour together with the tests that exercise it.
+    // Phase 0C.2 §11 — reconcile with §8 persona storageState.
+    //
+    // When Playwright loads a project's storageState (e.g.
+    // `playwright/.auth/<role>.json`), the context already carries a real
+    // `nzila_session` cookie backed by a PG session row. Injecting a
+    // synthetic `nzila_session=ue-seed-session-*` on top of that would
+    // overwrite the valid cookie with garbage and break every test that
+    // relies on the real persona (dashboard renders, RBAC checks,
+    // organization_members lookups).
+    //
+    // Contract:
+    //   • If a real `nzila_session` cookie is present → apply ONLY
+    //     org-context cookies and return; do NOT touch nzila_session.
+    //   • Otherwise → keep the legacy synthetic-cookie behaviour so
+    //     specs written before §8 (which never opted into storageState)
+    //     continue to work.
+    const existing = await page.context().cookies(cookieUrl);
+    const hasRealSession = existing.some((c) => c.name === 'nzila_session' && c.value.length > 0);
+    if (hasRealSession) {
+      await page.context().addCookies(orgContextCookies);
+      return;
+    }
     await page.context().addCookies([
       {
         name: 'nzila_session',

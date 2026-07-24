@@ -1,0 +1,78 @@
+{
+  "section": "phase-0c2-§11",
+  "title": "Baseline Run 2 — post-fix governed E2E validation",
+  "branch": "fix/union-eyes-phase0c-e2e-stabilization",
+  "worktree": "C:\\APPS\\nzila-automation-phase0c",
+  "canonicalRun": {
+    "runId": "20260724022239_79178c",
+    "startedAt": "2026-07-24T02:22:39.509Z",
+    "finishedAt": "2026-07-24T03:03:39.887Z",
+    "durationMs": 2460373,
+    "orchestrator": {
+      "status": "green",
+      "stepsExecuted": 14,
+      "stepsGreen": 14,
+      "cleanupRan": true
+    },
+    "playwright": {
+      "exitCode": 1,
+      "totalTests": 193,
+      "passed": 23,
+      "failed": 48,
+      "skipped": 7,
+      "didNotRun": 115,
+      "durationMinutes": 40.0
+    }
+  },
+  "attempts": [
+    { "n": 1, "log": "phase-0c2-baseline-run-2-20260723-200430.log", "outcome": "fail-step-8-readiness" },
+    { "n": 2, "log": "phase-0c2-baseline-run-2-20260723-203115.log", "outcome": "fail-step-8-missing-columns" },
+    { "n": 3, "log": "phase-0c2-baseline-run-2-20260723-205706.log", "outcome": "fail-step-10-DATABASE_URL-missing" },
+    { "n": 4, "log": "phase-0c2-baseline-run-2-20260723-212523.log", "outcome": "green-through-step-10; Playwright-fails" },
+    { "n": 5, "log": "phase-0c2-baseline-run-2-20260723-212751.log", "outcome": "hang-post-Playwright-HTML-report-server" },
+    { "n": 6, "log": "phase-0c2-baseline-run-2-20260723-222234.log", "outcome": "green-14-steps; Playwright-exitCode-1" }
+  ],
+  "fixes": [
+    { "id": "a", "file": "apps/union-eyes/scripts/lifecycle/run.ts", "summary": "applyEnvToProcess after loadGovernedE2EEnv", "tests": "env.test.ts (14)" },
+    { "id": "b", "file": "apps/union-eyes/e2e/helpers/auth.ts", "summary": "loginAsRole short-circuits synthetic cookie when real nzila_session present", "tests": "auth.reconciliation.test.ts (3)" },
+    { "id": "c", "file": "apps/union-eyes/scripts/lifecycle/run.ts", "summary": "unconditional stopServer + verifyPortRelease in finally", "tests": "run-cleanup.test.ts (3)" },
+    { "id": "d", "file": "apps/union-eyes/app/api/health/readiness/route.ts", "summary": "REQUIRED_PUBLIC_TABLES = ['organizations']; db.seed.marker → user_management.users", "tests": "route.test.ts (17)" },
+    { "id": "fetch-timeout", "file": "apps/union-eyes/scripts/lifecycle/process.ts", "summary": "pollReadiness fetch wrapped in 10s AbortController", "tests": "process.test.ts (13 total, #13 new)" },
+    { "id": "lastBody", "file": "apps/union-eyes/scripts/lifecycle/run.ts", "summary": "step 8 error includes 2KB lastBody", "tests": "in-vivo" },
+    { "id": "e", "file": "apps/union-eyes/scripts/lifecycle/run.ts", "summary": "step 10 pwEnv includes DATABASE_URL=alloc.url", "tests": "in-vivo (attempts 4, 5, 6)" },
+    { "id": "f", "file": "apps/union-eyes/scripts/lifecycle/run.ts", "summary": "step 10 pwEnv includes PW_TEST_HTML_REPORT_OPEN=never", "tests": "in-vivo (attempt 6)" }
+  ],
+  "regressionSuites": {
+    "unionEyesUnit": "50/50 in 22.12s",
+    "contractTests": "9426/9426 in 100-135s"
+  },
+  "failureTaxonomy": {
+    "assertTimeout": 27,
+    "toHaveURL": 17,
+    "toBeVisible": 9,
+    "pageGotoTimeout": 6,
+    "toContain": 5,
+    "toMatch": 4,
+    "apiRequestTimeout": 3,
+    "errAborted": 1,
+    "note": "Counts sum > 48 because a failing test may raise multiple error lines. 48 unique failing tests."
+  },
+  "nonNegotiablesAudit": [
+    { "rule": "Orchestrator polls /api/health/readiness not liveness", "status": "preserved" },
+    { "rule": "Playwright auth bypass structurally impossible outside governed test execution", "status": "preserved" },
+    { "rule": "Gitleaks exception NARROWLY scoped", "status": "not-touched-this-section" }
+  ],
+  "exitCriteria": {
+    "orchestratorGreen14Steps": true,
+    "cleanupRuns": true,
+    "runSummaryWritten": true,
+    "playwrightArtifactsPreserved": true,
+    "unitTestsGreen": true,
+    "contractTestsGreen": true
+  },
+  "deferrals": [
+    { "to": "§15", "reason": "Baseline Run 2 flake analysis requires 3 runs; classification of 48 test failures as systemic vs. flaky" },
+    { "to": "§19", "reason": "Closure classification: fixable-now vs. Phase 0D acceptance for each failure class" }
+  ],
+  "nextSection": "§12 — cross-org security tests"
+}

@@ -1,0 +1,60 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: tests\e2e\admin-assignment.spec.ts >> UE E2E - admin assignment >> admin can assign and member cannot assign
+- Location: tests\e2e\admin-assignment.spec.ts:14:7
+
+# Error details
+
+```
+"beforeAll" hook timeout of 60000ms exceeded.
+```
+
+# Test source
+
+```ts
+  1  | import { expect, test } from '@playwright/test'
+  2  | import { assertPermissionDenied, ensureServerReady, loginAsTestUser, seedOrVerifyTestState, UE_E2E_USERS, cleanupDatabaseConnections } from './_helpers'
+  3  | 
+  4  | test.describe('UE E2E - admin assignment', () => {
+> 5  |   test.beforeAll(async ({ request }) => {
+     |        ^ "beforeAll" hook timeout of 60000ms exceeded.
+  6  |     await ensureServerReady(request)
+  7  |     await seedOrVerifyTestState(request)
+  8  |   })
+  9  | 
+  10 |   test.afterEach(async ({ request }) => {
+  11 |     await cleanupDatabaseConnections(request)
+  12 |   })
+  13 | 
+  14 |   test('admin can assign and member cannot assign', async ({ request }) => {
+  15 |     await loginAsTestUser(request, UE_E2E_USERS.admin)
+  16 | 
+  17 |     const assignAsAdmin = await request.post('/api/workbench/assign', {
+  18 |       data: {
+  19 |         claimId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+  20 |         assignedTo: 'ue-qa-steward-primary',
+  21 |       },
+  22 |     })
+  23 | 
+  24 |     expect([200, 403, 409, 422]).toContain(assignAsAdmin.status())
+  25 | 
+  26 |     await loginAsTestUser(request, UE_E2E_USERS.member)
+  27 | 
+  28 |     const assignAsMember = await request.post('/api/workbench/assign', {
+  29 |       data: {
+  30 |         claimId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+  31 |         assignedTo: 'ue-qa-steward-primary',
+  32 |       },
+  33 |     })
+  34 | 
+  35 |     assertPermissionDenied(assignAsMember.status())
+  36 |   })
+  37 | })
+  38 | 
+```

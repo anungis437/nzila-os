@@ -1,0 +1,59 @@
+▲ Next.js 16.2.6 (webpack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.5.14:3002
+✓ Ready in 1484ms
+[otel] Initialized for union-eyes → http://localhost:4318
+{"level":"info","message":"[union-eyes] os-core env validation passed","timestamp":"2026-07-24T01:25:56.022Z"}
+ℹ️ [2026-07-24T01:25:56.040Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Environment audit event
+  Context: {
+  "eventType": "ENV_VALIDATION",
+  "variable": "all",
+  "status": "PASSED",
+  "details": {
+    "validCount": 8
+  }
+}
+ℹ️ [2026-07-24T01:25:56.041Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Environment validation passed
+⚠️ [2026-07-24T01:25:56.045Z] [WARN] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] [runtime-fail-closed] mode=advisory satisfied=false
+  - crypto.fallback: missing FALLBACK_ENCRYPTION_KEY → fail-closed governance (boot refused under RUNTIME_FAIL_CLOSED=true)
+  - auth.webhook.secret: missing AUTH_WEBHOOK_SECRET → bounded runtime (related surface disabled)
+  - crypto.pii: missing EVIDENCE_SEAL_KEY → bounded runtime (related surface disabled)
+  - identity.entra.client_id: missing AZURE_AD_CLIENT_ID → continuity-safe fallback (Entra path disabled)
+  - identity.entra.tenant_id: missing AZURE_AD_TENANT_ID → continuity-safe fallback (Entra path disabled)
+  - identity.entra.client_secret: missing AZURE_AD_CLIENT_SECRET → continuity-safe fallback (Entra path disabled)
+  - lineage.secret_topology: missing SECRET_TOPOLOGY → explicit degradation (lineage banner)
+  - lineage.secret_authority: missing SECRET_AUTHORITY → explicit degradation (lineage banner)
+  - lineage.environment_isolation: missing ENVIRONMENT_ISOLATION → explicit degradation (lineage banner)
+⚠️ [2026-07-24T01:25:56.046Z] [WARN] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] NZILA_MODE is not set; pilot demo mutation routes will remain fail-closed
+  Context: {
+  "runtimeMode": null
+}
+ℹ️ [2026-07-24T01:25:57.754Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Running database startup validation
+ℹ️ [2026-07-24T01:25:57.755Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Starting database connection validation
+ℹ️ [2026-07-24T01:25:57.755Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Database validation attempt
+  Context: {
+  "attempt": 1,
+  "maxRetries": 3
+}
+ℹ️ [2026-07-24T01:25:58.296Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Database connection validated
+  Context: {
+  "responseTime": 541,
+  "hasDetails": true
+}
+ℹ️ [2026-07-24T01:25:58.312Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Database query test passed
+  Context: {
+  "tableCount": "33"
+}
+⚠️ [2026-07-24T01:25:58.317Z] [WARN] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Missing critical database tables
+  Context: {
+  "missingTables": "[REDACTED]",
+  "message": "Database migrations may not be up to date"
+}
+⚠️ [2026-07-24T01:25:58.317Z] [WARN] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Database schema validation warnings detected
+ℹ️ [2026-07-24T01:25:58.317Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] All database startup checks passed
+ℹ️ [2026-07-24T01:25:58.317Z] [INFO] [2902ba85-30dd-4cba-8534-b4a3ce774cfb] Database startup checks passed
+- Experiments (use with caution):
+  · optimizePackageImports
+  · serverActions
+
+ GET /api/health/readiness 200 in 247ms (next.js: 16ms, proxy.ts: 177ms, application-code: 53ms)

@@ -1,0 +1,241 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e\pilot-mode-gating.spec.ts >> UnionEyes hard pilot-mode gating >> admin: pilot excluded routes are hard-gated
+- Location: e2e\pilot-mode-gating.spec.ts:17:9
+
+# Error details
+
+```
+Error: expect(page).toHaveURL(expected) failed
+
+Expected pattern: /\/en-CA\/dashboard\/admin\/organizations(?:$|[/?#])/
+Received string:  "http://localhost:3002/en-CA/dashboard"
+Timeout: 5000ms
+
+Call log:
+  - Expect "toHaveURL" with timeout 5000ms
+    6 × unexpected value "http://localhost:3002/en-CA/dashboard"
+    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...
+
+```
+
+# Page snapshot
+
+```yaml
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - complementary "Primary navigation" [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link "UnionEyes home" [ref=e8] [cursor=pointer]:
+            - /url: /en-CA/dashboard
+            - img "UnionEyes" [ref=e9]
+          - button "Collapse sidebar" [ref=e10]:
+            - img [ref=e11]
+        - navigation "Primary" [ref=e14]:
+          - list [ref=e16]:
+            - listitem [ref=e17]:
+              - link "Workspace" [ref=e18] [cursor=pointer]:
+                - /url: /en-CA/dashboard/workspace
+                - img [ref=e19]
+                - generic [ref=e24]: Workspace
+            - listitem [ref=e25]:
+              - link "Organization" [ref=e26] [cursor=pointer]:
+                - /url: /en-CA/dashboard/admin/organizations
+                - img [ref=e28]
+                - generic [ref=e31]: Organization
+            - listitem [ref=e32]:
+              - link "Users & Roles" [ref=e33] [cursor=pointer]:
+                - /url: /en-CA/dashboard/admin/members
+                - img [ref=e34]
+                - generic [ref=e37]: Users & Roles
+            - listitem [ref=e38]:
+              - link "Pilot Configuration" [ref=e39] [cursor=pointer]:
+                - /url: /en-CA/dashboard/admin/onboarding
+                - img [ref=e40]
+                - generic [ref=e43]: Pilot Configuration
+            - listitem [ref=e44]:
+              - link "Policies" [ref=e45] [cursor=pointer]:
+                - /url: /en-CA/dashboard/governance
+                - img [ref=e46]
+                - generic [ref=e49]: Policies
+            - listitem [ref=e50]:
+              - link "Audit" [ref=e51] [cursor=pointer]:
+                - /url: /en-CA/dashboard/audits
+                - img [ref=e52]
+                - generic [ref=e55]: Audit
+            - listitem [ref=e56]:
+              - link "Security" [ref=e57] [cursor=pointer]:
+                - /url: /en-CA/dashboard/security
+                - img [ref=e58]
+                - generic [ref=e61]: Security
+            - listitem [ref=e62]:
+              - link "Exports" [ref=e63] [cursor=pointer]:
+                - /url: /en-CA/dashboard/movement-insights/export
+                - img [ref=e64]
+                - generic [ref=e67]: Exports
+            - listitem [ref=e68]:
+              - link "Integrations" [ref=e69] [cursor=pointer]:
+                - /url: /en-CA/dashboard/integrations
+                - img [ref=e70]
+                - generic [ref=e73]: Integrations
+            - listitem [ref=e74]:
+              - link "System Status" [ref=e75] [cursor=pointer]:
+                - /url: /en-CA/dashboard/operations
+                - img [ref=e76]
+                - generic [ref=e79]: System Status
+      - link "ue.qa.admin.primary@nzila.test Profile" [ref=e81] [cursor=pointer]:
+        - /url: /en-CA/dashboard/profile
+        - generic [ref=e84]:
+          - paragraph [ref=e85]: ue.qa.admin.primary@nzila.test
+          - paragraph [ref=e86]: Profile
+    - generic [ref=e87]:
+      - generic [ref=e89]:
+        - button "🇨🇦 English" [ref=e91]:
+          - img [ref=e92]
+          - generic [ref=e95]: 🇨🇦
+          - generic [ref=e96]: English
+        - generic [ref=e97]:
+          - img [ref=e98]
+          - generic [ref=e102]: Loading...
+        - generic [ref=e103]:
+          - generic [ref=e105]:
+            - img [ref=e106]
+            - textbox "Search cases, agreements, dates" [ref=e109]
+          - button "Sign out" [ref=e110]:
+            - img [ref=e111]
+            - generic [ref=e114]: Sign out
+      - main [ref=e115]:
+        - generic [ref=e116]:
+          - complementary [ref=e117]:
+            - navigation [ref=e120]
+          - main [ref=e151]
+  - region "Notifications (F8)":
+    - list
+```
+
+# Test source
+
+```ts
+  1   | import type { APIRequestContext, Page } from '@playwright/test';
+  2   | import { expect } from '@playwright/test';
+  3   | import { ensureServerReady, getBaseUrl, loginAsTestUser, seedOrVerifyTestState } from '../../tests/e2e/_helpers';
+  4   | import { getExpectedLanding, getFixture, toLocalizedPath, type StakeholderRole } from './role-fixtures';
+  5   | 
+  6   | export async function bootstrapE2EAuth(request: APIRequestContext): Promise<void> {
+  7   |   await ensureServerReady(request);
+  8   |   await seedOrVerifyTestState(request);
+  9   | }
+  10  | 
+  11  | export async function loginAsRole(page: Page, role: StakeholderRole): Promise<void> {
+  12  |   const fixture = getFixture(role);
+  13  |   const baseUrl = new URL(getBaseUrl());
+  14  |   const cookieUrl = baseUrl.toString();
+  15  | 
+  16  |   const orgContextCookies = [
+  17  |     {
+  18  |       name: 'selected_org_id',
+  19  |       value: fixture.orgId,
+  20  |       url: cookieUrl,
+  21  |       httpOnly: false,
+  22  |       secure: false,
+  23  |       sameSite: 'Lax' as const,
+  24  |     },
+  25  |     {
+  26  |       name: 'selected_organization_id',
+  27  |       value: fixture.orgId,
+  28  |       url: cookieUrl,
+  29  |       httpOnly: false,
+  30  |       secure: false,
+  31  |       sameSite: 'Lax' as const,
+  32  |     },
+  33  |     {
+  34  |       name: 'selected_tenant_id',
+  35  |       value: fixture.orgId,
+  36  |       url: cookieUrl,
+  37  |       httpOnly: false,
+  38  |       secure: false,
+  39  |       sameSite: 'Lax' as const,
+  40  |     },
+  41  |     {
+  42  |       name: 'active-organization',
+  43  |       value: '',
+  44  |       url: cookieUrl,
+  45  |       expires: 0,
+  46  |       httpOnly: false,
+  47  |       secure: false,
+  48  |       sameSite: 'Lax' as const,
+  49  |     },
+  50  |   ];
+  51  | 
+  52  |   if ((process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true') {
+  53  |     // Phase 0C.2 §11 — reconcile with §8 persona storageState.
+  54  |     //
+  55  |     // When Playwright loads a project's storageState (e.g.
+  56  |     // `playwright/.auth/<role>.json`), the context already carries a real
+  57  |     // `nzila_session` cookie backed by a PG session row. Injecting a
+  58  |     // synthetic `nzila_session=ue-seed-session-*` on top of that would
+  59  |     // overwrite the valid cookie with garbage and break every test that
+  60  |     // relies on the real persona (dashboard renders, RBAC checks,
+  61  |     // organization_members lookups).
+  62  |     //
+  63  |     // Contract:
+  64  |     //   • If a real `nzila_session` cookie is present → apply ONLY
+  65  |     //     org-context cookies and return; do NOT touch nzila_session.
+  66  |     //   • Otherwise → keep the legacy synthetic-cookie behaviour so
+  67  |     //     specs written before §8 (which never opted into storageState)
+  68  |     //     continue to work.
+  69  |     const existing = await page.context().cookies(cookieUrl);
+  70  |     const hasRealSession = existing.some((c) => c.name === 'nzila_session' && c.value.length > 0);
+  71  |     if (hasRealSession) {
+  72  |       await page.context().addCookies(orgContextCookies);
+  73  |       return;
+  74  |     }
+  75  |     await page.context().addCookies([
+  76  |       {
+  77  |         name: 'nzila_session',
+  78  |         value: `ue-seed-session-${fixture.userId}`,
+  79  |         url: cookieUrl,
+  80  |         httpOnly: true,
+  81  |         secure: false,
+  82  |         sameSite: 'Lax',
+  83  |       },
+  84  |       ...orgContextCookies,
+  85  |     ]);
+  86  | 
+  87  |     return;
+  88  |   }
+  89  | 
+  90  |   await loginAsTestUser(page.request, fixture.email);
+  91  |   await page.context().addCookies(orgContextCookies);
+  92  | }
+  93  | 
+  94  | export async function gotoDashboardAsRole(page: Page, role: StakeholderRole): Promise<string> {
+  95  |   const fixture = getFixture(role);
+  96  |   await loginAsRole(page, role);
+  97  |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+  98  |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+> 99  |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+      |                      ^ Error: expect(page).toHaveURL(expected) failed
+  100 |   return landing;
+  101 | }
+  102 | 
+  103 | export async function assertPilotModeEnabled(page: Page): Promise<void> {
+  104 |   const response = await page.request.get('/api/feature-flags?flag=pilot-mode');
+  105 |   expect(response.ok()).toBeTruthy();
+  106 |   const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
+  107 |   const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
+  108 |   expect(enabled).toBe(true);
+  109 | }
+  110 | 
+  111 | function escapeRegExp(value: string): string {
+  112 |   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  113 | }
+  114 | 
+```

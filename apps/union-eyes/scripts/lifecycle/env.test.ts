@@ -148,4 +148,23 @@ describe('Phase 0C.1 §5 — governed E2E env loader', () => {
     expect(process.env.PLAYWRIGHT_BASE_URL).toBe(env.PLAYWRIGHT_BASE_URL)
     expect(process.env.AUTH_SECRET).toBe(env.AUTH_SECRET)
   })
+
+  it('Phase 0C.2 §11 regression — run.ts orchestrator wires applyEnvToProcess after loadGovernedE2EEnv', async () => {
+    // Baseline Run 1 (see reports/audits/cupe-national-phase-0/phase-0c/
+    // phase-0c2-baseline-run-1.md) aborted at step 6 because run.ts loaded
+    // the governed env but never applied it to process.env — spawned children
+    // (drizzle bootstrap, seed, next dev) inherited a bare env missing
+    // QA_TEST_ENV=true, so the QA baseline SQL was silently skipped and
+    // organization_members never existed. This test guards that regression
+    // by asserting the source explicitly imports and invokes the helper.
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const runSrc = fs.readFileSync(path.join(__dirname, 'run.ts'), 'utf8')
+    expect(runSrc).toMatch(/import\s*\{[^}]*\bapplyEnvToProcess\b[^}]*\}\s*from\s*['"]\.\/env['"]/)
+    // Must be called after the env is loaded and before the readiness log line.
+    const loadIdx = runSrc.indexOf('loadGovernedE2EEnv({ appRoot: APP_ROOT })')
+    const applyIdx = runSrc.indexOf('applyEnvToProcess(env)')
+    expect(loadIdx).toBeGreaterThan(0)
+    expect(applyIdx).toBeGreaterThan(loadIdx)
+  })
 })

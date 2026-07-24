@@ -37,6 +37,7 @@ import { performance } from 'node:perf_hooks'
 
 import {
   loadGovernedE2EEnv,
+  applyEnvToProcess,
   redactUrl,
 } from './env'
 import { allocateDatabase, dropDatabase } from './allocate-db'
@@ -135,6 +136,12 @@ async function main(): Promise<void> {
   let env: import('./env').GovernedE2EEnv
   try {
     env = loadGovernedE2EEnv({ appRoot: APP_ROOT })
+    // Phase 0C.2 §11 — apply loaded env to process.env so spawned children
+    // (bootstrap, seed, next dev, playwright) inherit QA_TEST_ENV=true,
+    // AUTH_SECRET, NODE_ENV=test, etc. Without this call, the QA baseline
+    // SQL is silently skipped and organization_members never gets created,
+    // aborting step 6. See phase-0c2-baseline-run-1.md for the diagnostic.
+    applyEnvToProcess(env)
     log(`env loaded (adminUrl=${redactUrl(env.E2E_DB_ADMIN_URL)})`)
   } catch (err) {
     log(`fatal: env load failed — ${err instanceof Error ? err.message : String(err)}`)
@@ -270,8 +277,18 @@ async function main(): Promise<void> {
         intervalMs: 1_000,
       })
       if (!readiness.ready) {
+        // Phase 0C.2 §11 — Emit lastBody diagnostic so operators can see
+        // which readiness check(s) failed without needing to re-hit the
+        // endpoint manually. Keep bounded (2 KB) to avoid noisy logs.
+        let bodyStr = ''
+        try {
+          bodyStr = JSON.stringify(readiness.lastBody)
+          if (bodyStr.length > 2048) bodyStr = `${bodyStr.slice(0, 2048)}…<truncated>`
+        } catch {
+          bodyStr = '<unserializable>'
+        }
         throw new Error(
-          `readiness did not go green within 120s (attempts=${readiness.attempts}, lastStatus=${readiness.lastStatus ?? 'none'})`,
+          `readiness did not go green within 120s (attempts=${readiness.attempts}, lastStatus=${readiness.lastStatus ?? 'none'}, lastBody=${bodyStr})`,
         )
       }
       // Phase 0C.2 §5 — Handshake gate. Readiness only proves that SOME server
@@ -400,6 +417,21 @@ async function main(): Promise<void> {
     await withStep(steps, 10, 'playwright', () => {
       const pwEnv: NodeJS.ProcessEnv = {
         ...process.env,
+        // Phase 0C.2 §11 (fix e) — Playwright's tests/e2e/e2e-env.ts asserts
+        // DATABASE_URL is present. Steps 8/9 wire alloc.url into their own
+        // pwEnv, but step 10 previously relied on process.env — which does
+        // NOT contain DATABASE_URL because applyEnvToProcess ran before
+        // allocate-db assigned alloc.url. Pass the disposable-DB URL
+        // explicitly so tests hit the SAME database the seed populated.
+        DATABASE_URL: alloc!.url,
+        // Phase 0C.2 §11 (fix f) — html reporter's default behaviour opens the
+        // HTML report on failure and BLOCKS the process ("Serving HTML report
+        // at http://localhost:9323. Press Ctrl+C to quit."). In the governed
+        // lifecycle that hangs the orchestrator after step 10 so cleanup
+        // (stop-server / drop-db / verify-port-release) never runs. Set the
+        // official opt-out env var so playwright exits immediately after
+        // producing the report on disk.
+        PW_TEST_HTML_REPORT_OPEN: 'never',
         UE_TEST_BASE_URL: `http://localhost:${port}`,
         PLAYWRIGHT_PORT: String(port),
         // Phase 0C.2 §5 — tells playwright.config.ts NOT to spawn its own
@@ -462,24 +494,32 @@ async function main(): Promise<void> {
     status = 'aborted'
     log(`ABORT — ${err instanceof Error ? err.message : String(err)}`)
   } finally {
-    // Step 12 — Stop server (always attempted)
-    if (boot) {
-      try {
-        const stop = await stopServer({ gracefulTimeoutMs: 10_000 })
-        steps.push({ step: 12, id: 'stop-server', outcome: 'ok', detail: `method=${stop.method}`, elapsedMs: 0 })
-        log(`✔ step 12: stop-server (${stop.method})`)
-      } catch (err) {
-        steps.push({
-          step: 12,
-          id: 'stop-server',
-          outcome: 'failed',
-          detail: err instanceof Error ? err.message : String(err),
-          elapsedMs: 0,
-        })
-        log(`✘ step 12: stop-server FAILED — ${err instanceof Error ? err.message : err}`)
-      }
-    } else {
-      steps.push({ step: 12, id: 'stop-server', outcome: 'skipped', detail: 'server never booted', elapsedMs: 0 })
+    // Step 12 — Stop server (always attempted).
+    //
+    // Phase 0C.2 §11 (fix c) — Previously gated on `if (boot)`, but `boot`
+    // is only assigned when withStep RETURNS a value. If readiness fails,
+    // withStep throws BEFORE the return, so `boot` stays null even though
+    // bootServer() already spawned a child and wrote pid.json. That
+    // orphaned the Next.js process on port 3002 across runs, producing
+    // EADDRINUSE on the next attempt.
+    //
+    // Fix: always call stopServer(). It internally reads pid.json and
+    // returns { method: 'no-record' } as a no-op when no server is
+    // tracked, so calling it unconditionally is safe.
+    try {
+      const stop = await stopServer({ gracefulTimeoutMs: 10_000 })
+      const outcome = stop.method === 'no-record' ? 'skipped' : 'ok'
+      steps.push({ step: 12, id: 'stop-server', outcome, detail: `method=${stop.method}`, elapsedMs: 0 })
+      log(`${outcome === 'ok' ? '✔' : '⚠'} step 12: stop-server (${stop.method})`)
+    } catch (err) {
+      steps.push({
+        step: 12,
+        id: 'stop-server',
+        outcome: 'failed',
+        detail: err instanceof Error ? err.message : String(err),
+        elapsedMs: 0,
+      })
+      log(`✘ step 12: stop-server FAILED — ${err instanceof Error ? err.message : err}`)
     }
 
     // Step 13 — Drop DB (unless preserved)
