@@ -1,0 +1,344 @@
+
+> @nzila/union-eyes@1.0.0 e2e:governed C:\APPS\nzila-automation-phase0c\apps\union-eyes
+> tsx scripts/lifecycle/run.ts
+
+[e2e:governed] env loaded (adminUrl=postgresql://<user>:<pw>@localhost:5433/postgres)
+[e2e:governed] Γû╢ step 1: preflight
+[e2e:governed] Γ£ö step 1: preflight (10 ms) ΓÇö node=v24.13.1, port=3002 free
+[e2e:governed] Γû╢ step 2: allocate-db
+[ue:e2e:allocate-db] Creating disposable DB 'ue_e2e_20260724062400_98fd88' via postgresql://<user>:<pw>@localhost:5433/postgres (owner=nzila)
+[e2e:governed] Γ£ö step 2: allocate-db (3464 ms) ΓÇö db=ue_e2e_20260724062400_98fd88 runId=20260724062400_98fd88
+[e2e:governed] Γû╢ step 3: allocate-port
+[e2e:governed] Γ£ö step 3: allocate-port (2 ms) ΓÇö port=3002 (preferred=3002)
+[e2e:governed] Γû╢ step 4: migrations.platform
+[e2e:governed] Γ£ö step 4: migrations.platform (0 ms) ΓÇö applied during allocate-db (drizzle bootstrap)
+[e2e:governed] Γû╢ step 5: migrations.django
+[e2e:governed] Γ£ö step 5: migrations.django (0 ms) ΓÇö Django not required for Phase 0C.1 baseline; see readiness ┬º6 #6
+[e2e:governed] Γû╢ step 6: verify-phase0b-contract
+[e2e:governed] Γ£ö step 6: verify-phase0b-contract (120 ms) ΓÇö organization_members present
+[e2e:governed] Γû╢ step 7: seed
+[ue:seed:test-env] Seed complete
+{
+  "testOrgs": 4,
+  "testUsers": 10,
+  "testCases": 3,
+  "externalTesterOrg": "33333333-3333-4333-8333-333333333333",
+  "externalTesterUser": "ue-qa-ux-tester-001",
+  "suspendedUser": "ue-qa-member-suspended",
+  "productionLikeOrgGuardrail": "44444444-4444-4444-8444-444444444444",
+  "qaPassword": "NzilaQa!2026"
+}
+[e2e:governed] Γ£ö step 7: seed (10705 ms) ΓÇö seed-test-env applied to disposable DB
+[e2e:governed] Γû╢ step 8: boot-server
+(node:25936) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[e2e:governed] Γ£ö step 8: boot-server (36831 ms) ΓÇö pid=17492 port=3002 readyAfter=35006ms handshakeRunId=20260724062400_98fd88
+[e2e:governed] Γû╢ step 9: generate-auth-states
+{
+  "baseUrl": "http://localhost:3002",
+  "outputDir": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth",
+  "results": [
+    {
+      "role": "member",
+      "email": "ue.qa.member.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "pcS7BXyzΓÇª",
+      "cookieExpires": 1784960694,
+      "meEmail": "ue.qa.member.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\member.json"
+    },
+    {
+      "role": "steward",
+      "email": "ue.qa.steward.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "l3On16vzΓÇª",
+      "cookieExpires": 1784960695,
+      "meEmail": "ue.qa.steward.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\steward.json"
+    },
+    {
+      "role": "staff",
+      "email": "ue.qa.staff.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "DDsmhLhbΓÇª",
+      "cookieExpires": 1784960695,
+      "meEmail": "ue.qa.staff.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\staff.json"
+    },
+    {
+      "role": "executive",
+      "email": "ue.qa.executive.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "_DmquptWΓÇª",
+      "cookieExpires": 1784960695,
+      "meEmail": "ue.qa.executive.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\executive.json"
+    },
+    {
+      "role": "admin",
+      "email": "ue.qa.admin.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "5hEDW3YtΓÇª",
+      "cookieExpires": 1784960696,
+      "meEmail": "ue.qa.admin.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\admin.json"
+    }
+  ],
+  "allOk": true
+}
+[e2e:governed] Γ£ö step 9: generate-auth-states (4334 ms) ΓÇö roles=5 allOk=true dir=playwright\.auth
+[e2e:governed] Γû╢ step 10: playwright
+[e2e:governed]   playwright project filter: setup, public
+
+Running 17 tests using 1 worker
+
+[1A[2K[1/17] [setup] ΓÇ║ playwright\setup\auth-state.setup.ts:34:6 ΓÇ║ phase-0c2-s8 auth-state summary is present, complete, and consistent
+[1A[2K[2/17] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ member: raw FSM terms are hidden across role journey
+[1A[2K  1) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ member: raw FSM terms are hidden across role journey 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/inbox" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:27:7
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-a0e7e--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-a0e7e--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[3/17] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ staff: raw FSM terms are hidden across role journey
+[1A[2K  2) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ staff: raw FSM terms are hidden across role journey 
+
+    Error: page.goto: net::ERR_ABORTED at http://localhost:3002/en-CA/dashboard/settings
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/dashboard/settings", waiting until "domcontentloaded"[22m
+
+
+      34 |
+      35 |       for (const path of sampleRoutes) {
+    > 36 |         await page.goto(toLocalizedPath(path, fixture.locale), { waitUntil: 'domcontentloaded' });
+         |                    ^
+      37 |         await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
+      38 |         await assertNoTextExposure(page, FORBIDDEN_FSM_TERMS);
+      39 |       }
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:36:20
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-5ca27--hidden-across-role-journey-public\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-5ca27--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-5ca27--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[4/17] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ executive: raw FSM terms are hidden across role journey
+[1A[2K  3) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ executive: raw FSM terms are hidden across role journey 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/intelligence(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/intelligence" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:27:7
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-84efa--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-84efa--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[5/17] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ governance: raw FSM terms are hidden across role journey
+[1A[2K[6/17] [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ admin: raw FSM terms are hidden across role journey
+[1A[2K  4) [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ admin: raw FSM terms are hidden across role journey 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/admin\/organizations(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\no-fsm-overexposure.spec.ts:27:7
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-no-fsm-overexposure-No-df4fa--hidden-across-role-journey-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-no-fsm-overexposure-No-df4fa--hidden-across-role-journey-public\error-context.md
+
+
+[1A[2K[7/17] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ member: pilot excluded routes are hard-gated
+[1A[2K[8/17] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ steward: pilot excluded routes are hard-gated
+[1A[2K[9/17] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ staff: pilot excluded routes are hard-gated
+[1A[2K[10/17] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ executive: pilot excluded routes are hard-gated
+[1A[2K  5) [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ executive: pilot excluded routes are hard-gated 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/intelligence(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\pilot-mode-gating.spec.ts:19:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-pilot-mode-gating-Unio-5f4df-luded-routes-are-hard-gated-public\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-pilot-mode-gating-Unio-5f4df-luded-routes-are-hard-gated-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-pilot-mode-gating-Unio-5f4df-luded-routes-are-hard-gated-public\error-context.md
+
+
+[1A[2K[11/17] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ governance: pilot excluded routes are hard-gated
+[1A[2K[12/17] [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ admin: pilot excluded routes are hard-gated
+[1A[2K  6) [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ admin: pilot excluded routes are hard-gated 
+
+    Error: apiRequestContext.get: read ECONNRESET
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/api/feature-flags?flag=pilot-mode[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=ue-seed-session-ue-qa-admin-primary; selected_org_id=11111111-1111-4111-8111-111111111111; selected_organization_id=11111111-1111-4111-8111-111111111111; selected_tenant_id=11111111-1111-4111-8111-111111111111[22m
+
+
+       at e2e\helpers\auth.ts:104
+
+      102 |
+      103 | export async function assertPilotModeEnabled(page: Page): Promise<void> {
+    > 104 |   const response = await page.request.get('/api/feature-flags?flag=pilot-mode');
+          |                                       ^
+      105 |   expect(response.ok()).toBeTruthy();
+      106 |   const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
+      107 |   const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
+        at assertPilotModeEnabled (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:104:39)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\pilot-mode-gating.spec.ts:20:35
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-pilot-mode-gating-Unio-8c002-luded-routes-are-hard-gated-public\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-pilot-mode-gating-Unio-8c002-luded-routes-are-hard-gated-public\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-pilot-mode-gating-Unio-8c002-luded-routes-are-hard-gated-public\error-context.md
+
+
+[1A[2K[13/17] [public] ΓÇ║ e2e\smoke.spec.ts:15:7 ΓÇ║ Public pages smoke tests ΓÇ║ marketing page renders
+[1A[2K[14/17] [public] ΓÇ║ e2e\smoke.spec.ts:20:7 ΓÇ║ Public pages smoke tests ΓÇ║ sign-in page renders
+[1A[2K[15/17] [public] ΓÇ║ e2e\smoke.spec.ts:26:7 ΓÇ║ Public pages smoke tests ΓÇ║ sign-up page renders
+[1A[2K[16/17] [public] ΓÇ║ e2e\smoke.spec.ts:31:7 ΓÇ║ Public pages smoke tests ΓÇ║ API health endpoint returns 200
+[1A[2K[17/17] [public] ΓÇ║ e2e\smoke.spec.ts:39:7 ΓÇ║ Accessibility smoke tests ΓÇ║ marketing page has no critical a11y violations
+[1A[2K  6 failed
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ member: raw FSM terms are hidden across role journey 
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ staff: raw FSM terms are hidden across role journey 
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ executive: raw FSM terms are hidden across role journey 
+    [public] ΓÇ║ e2e\no-fsm-overexposure.spec.ts:25:9 ΓÇ║ No FSM overexposure in pilot-facing UX ΓÇ║ admin: raw FSM terms are hidden across role journey 
+    [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ executive: pilot excluded routes are hard-gated 
+    [public] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ admin: pilot excluded routes are hard-gated 
+  11 passed (3.7m)
+
+To open last HTML report run:
+[36m[39m
+[36m  pnpm exec playwright show-report[39m
+[36m[39m
+[e2e:governed] Γ£ö step 10: playwright (222206 ms) ΓÇö exitCode=1 projects=[setup,public]
+[e2e:governed] Γû╢ step 11: collect-artifacts
+[e2e:governed] Γ£ö step 11: collect-artifacts (71 ms) ΓÇö artifacts=playwright-report,test-results,server.log
+[e2e:governed] Γ£ö step 12: stop-server (sigterm)
+[e2e:governed] Γ£ö step 13: drop-db ue_e2e_20260724062400_98fd88
+[e2e:governed] Γ£ö step 14: verify-port-release port=3002
+[e2e:governed] summary written ΓåÆ C:\APPS\nzila-automation-phase0c\reports\audits\cupe-national-phase-0\phase-0c\run-artifacts\20260724062400_98fd88\run-summary.json
+C:\APPS\nzila-automation-phase0c\apps\union-eyes:
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 e2e:governed: `tsx scripts/lifecycle/run.ts`
+Exit status 1
