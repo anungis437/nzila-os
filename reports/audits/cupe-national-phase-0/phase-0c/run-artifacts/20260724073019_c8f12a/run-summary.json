@@ -1,0 +1,112 @@
+{
+  "runId": "20260724073019_c8f12a",
+  "startedAt": "2026-07-24T07:30:19.829Z",
+  "finishedAt": "2026-07-24T07:32:15.134Z",
+  "totalElapsedMs": 115303,
+  "status": "red",
+  "playwrightExitCode": 1,
+  "dbUrl": "postgresql://<user>:<pw>@localhost:5433/ue_e2e_20260724073019_c8f12a",
+  "port": 3002,
+  "runDir": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\.e2e-lifecycle\\runs\\20260724073019_c8f12a",
+  "artifactDir": "C:\\APPS\\nzila-automation-phase0c\\reports\\audits\\cupe-national-phase-0\\phase-0c\\run-artifacts\\20260724073019_c8f12a",
+  "steps": [
+    {
+      "step": 1,
+      "id": "preflight",
+      "outcome": "ok",
+      "detail": "node=v24.13.1, port=3002 free",
+      "elapsedMs": 10
+    },
+    {
+      "step": 2,
+      "id": "allocate-db",
+      "outcome": "ok",
+      "detail": "db=ue_e2e_20260724073019_c8f12a runId=20260724073019_c8f12a",
+      "elapsedMs": 4146
+    },
+    {
+      "step": 3,
+      "id": "allocate-port",
+      "outcome": "ok",
+      "detail": "port=3002 (preferred=3002)",
+      "elapsedMs": 2
+    },
+    {
+      "step": 4,
+      "id": "migrations.platform",
+      "outcome": "ok",
+      "detail": "applied during allocate-db (drizzle bootstrap)",
+      "elapsedMs": 0
+    },
+    {
+      "step": 5,
+      "id": "migrations.django",
+      "outcome": "skipped",
+      "detail": "Django not required for Phase 0C.1 baseline; see readiness §6 #6",
+      "elapsedMs": 0
+    },
+    {
+      "step": 6,
+      "id": "verify-phase0b-contract",
+      "outcome": "ok",
+      "detail": "organization_members present",
+      "elapsedMs": 119
+    },
+    {
+      "step": 7,
+      "id": "seed",
+      "outcome": "ok",
+      "detail": "seed-test-env applied to disposable DB",
+      "elapsedMs": 10302
+    },
+    {
+      "step": 8,
+      "id": "boot-server",
+      "outcome": "ok",
+      "detail": "pid=12392 port=3002 readyAfter=26347ms handshakeRunId=20260724073019_c8f12a",
+      "elapsedMs": 33086
+    },
+    {
+      "step": 9,
+      "id": "generate-auth-states",
+      "outcome": "ok",
+      "detail": "roles=5 allOk=true dir=playwright\\.auth",
+      "elapsedMs": 5453
+    },
+    {
+      "step": 10,
+      "id": "playwright",
+      "outcome": "ok",
+      "detail": "exitCode=1 projects=[setup,accessibility]",
+      "elapsedMs": 61334
+    },
+    {
+      "step": 11,
+      "id": "collect-artifacts",
+      "outcome": "ok",
+      "detail": "artifacts=playwright-report,test-results,server.log",
+      "elapsedMs": 32
+    },
+    {
+      "step": 12,
+      "id": "stop-server",
+      "outcome": "ok",
+      "detail": "method=sigterm",
+      "elapsedMs": 0
+    },
+    {
+      "step": 13,
+      "id": "drop-db",
+      "outcome": "ok",
+      "detail": "ue_e2e_20260724073019_c8f12a",
+      "elapsedMs": 0
+    },
+    {
+      "step": 14,
+      "id": "verify-port-release",
+      "outcome": "ok",
+      "detail": "port 3002 released",
+      "elapsedMs": 0
+    }
+  ]
+}

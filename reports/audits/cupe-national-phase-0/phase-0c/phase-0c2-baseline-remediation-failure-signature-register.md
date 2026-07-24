@@ -191,3 +191,16 @@ The two counts are consistent under the correct decomposition: 48 = 29 (cascade)
 ## 10. Section closure
 
 §BR-5 is discharged upon commit of this document plus the machine-readable CSV. §BR-6 (targeted batches A–F) is the next action; it requires no further evidence gathering before it can begin.
+
+## 11. §BR-8 addendum — new signature RTP-11 (discovered in Batch F)
+
+**RTP-11 — Playwright CSS selector parser rejects `:has-text(regex)` inside chained `:not(...)`.**
+
+- Symptom (verbatim from Batch F log): `Error: locator.count: Unexpected token "/" while parsing css selector "…:not(:has-text(/\S/))…". Did you mean to CSS.escape it?`
+- Occurrences in Batch F: 2 — `apps/union-eyes/e2e/a11y/smoke.spec.ts:126` (`a[href]:visible:not(:has-text(/\S/))…`) and `apps/union-eyes/e2e/a11y/smoke.spec.ts:144` (`button:visible:not(:has-text(/\S/))…`). Enclosing test bodies at `smoke.spec.ts:119` and `smoke.spec.ts:137`.
+- Class: **spec-authoring defect.** `:has-text(regex)` is a Playwright text-engine construct valid only at the top level of a Playwright locator; it cannot be chained inside a plain CSS `:not(...)` pseudo-class. The selector is rejected by the CSS parser at construction time before any DOM query happens.
+- Environment influence: **none.** Reproduces on any Playwright ≥ 1.32 / Node ≥ 18 / any OS. Fails deterministically at `.locator(...).count()`.
+- Not observed in Baseline Runs 1-3 because the `accessibility` project never reached test-level execution (position >162 in the full baseline order; tripped by RTP-6 admin cascade).
+- §BR-10 remediation suggestion (out of scope for §BR-5/§BR-8; no `e2e/**` edits permitted here): rewrite the two `.locator(...)` calls as `.locator('a[href]:visible').filter({ hasNotText: /\S/ })` (and the button equivalent) and iterate, or scan candidate elements via `evaluateAll` and count the ones lacking an accessible name in JS.
+- Signature roll-up after Batch F: RTP-1 … RTP-11 (11 total). All §BR-8 per-project batches (A, B, C, D, E, F) have executed; no batch produced an un-classifiable failure.
+

@@ -1,0 +1,43 @@
+
+> @nzila/union-eyes@1.0.0 e2e:governed C:\APPS\nzila-automation-phase0c\apps\union-eyes
+> tsx scripts/lifecycle/run.ts
+
+[e2e:governed] env loaded (adminUrl=postgresql://<user>:<pw>@localhost:5433/postgres)
+[e2e:governed] Γû╢ step 1: preflight
+[e2e:governed] Γ£ö step 1: preflight (9 ms) ΓÇö node=v24.13.1, port=3002 free
+[e2e:governed] Γû╢ step 2: allocate-db
+[ue:e2e:allocate-db] Creating disposable DB 'ue_e2e_20260724072718_6d3832' via postgresql://<user>:<pw>@localhost:5433/postgres (owner=nzila)
+[e2e:governed] Γ£ö step 2: allocate-db (1696 ms) ΓÇö db=ue_e2e_20260724072718_6d3832 runId=20260724072718_6d3832
+[e2e:governed] Γû╢ step 3: allocate-port
+[e2e:governed] Γ£ö step 3: allocate-port (2 ms) ΓÇö port=3002 (preferred=3002)
+[e2e:governed] Γû╢ step 4: migrations.platform
+[e2e:governed] Γ£ö step 4: migrations.platform (0 ms) ΓÇö applied during allocate-db (drizzle bootstrap)
+[e2e:governed] Γû╢ step 5: migrations.django
+[e2e:governed] Γ£ö step 5: migrations.django (0 ms) ΓÇö Django not required for Phase 0C.1 baseline; see readiness ┬º6 #6
+[e2e:governed] Γû╢ step 6: verify-phase0b-contract
+[e2e:governed] Γ£ö step 6: verify-phase0b-contract (138 ms) ΓÇö organization_members present
+[e2e:governed] Γû╢ step 7: seed
+[ue:seed:test-env] Seed complete
+{
+  "testOrgs": 4,
+  "testUsers": 10,
+  "testCases": 3,
+  "externalTesterOrg": "33333333-3333-4333-8333-333333333333",
+  "externalTesterUser": "ue-qa-ux-tester-001",
+  "suspendedUser": "ue-qa-member-suspended",
+  "productionLikeOrgGuardrail": "44444444-4444-4444-8444-444444444444",
+  "qaPassword": "NzilaQa!2026"
+}
+[e2e:governed] Γ£ö step 7: seed (10184 ms) ΓÇö seed-test-env applied to disposable DB
+[e2e:governed] Γû╢ step 8: boot-server
+(node:30156) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[e2e:governed] Γ£ÿ step 8: boot-server FAILED (24538 ms) ΓÇö managed-server handshake failed: reason=timeout error=This operation was aborted actualRunId=none actualApp=none
+[e2e:governed] ABORT ΓÇö managed-server handshake failed: reason=timeout error=This operation was aborted actualRunId=none actualApp=none
+[e2e:governed] Γ£ö step 12: stop-server (sigterm)
+[e2e:governed] Γ£ö step 13: drop-db ue_e2e_20260724072718_6d3832
+[e2e:governed] Γ£ö step 14: verify-port-release port=3002
+[e2e:governed] summary written ΓåÆ C:\APPS\nzila-automation-phase0c\apps\union-eyes\.e2e-lifecycle\runs\20260724072718_6d3832\run-summary.json
+C:\APPS\nzila-automation-phase0c\apps\union-eyes:
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 e2e:governed: `tsx scripts/lifecycle/run.ts`
+Exit status 2

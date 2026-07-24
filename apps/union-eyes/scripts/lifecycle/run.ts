@@ -315,9 +315,14 @@ async function main(): Promise<void> {
       // If a stale dev server were squatting on this port, its runId would
       // differ (or the endpoint would 404) and the orchestrator aborts before
       // any test runs.
+      // Phase 0C.2 §BR-8 Batch F — Handshake timeout bumped from 5s (§5 default)
+      // to 30s because the /api/health/managed-server route can cold-compile in
+      // Next.js dev when first requested. Readiness already gates on server-up;
+      // this is only the runId verification. 30s matches readiness retry budget.
       const handshake = await verifyManagedServer({
         baseUrl: `http://localhost:${port}`,
         expectedRunId: alloc!.runId,
+        timeoutMs: 30_000,
       })
       if (!handshake.ok) {
         throw new Error(
