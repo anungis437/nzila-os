@@ -95,6 +95,24 @@ function log(msg: string): void {
   process.stdout.write(`[e2e:governed] ${msg}\n`)
 }
 
+/**
+ * Phase 0C.2 §BR-6 — parse `PLAYWRIGHT_PROJECTS` env var into a normalised
+ * list of project names.
+ *
+ * Accepts comma- and/or whitespace-separated entries. Empty/undefined
+ * input yields `[]` (interpreted downstream as "run all wired projects").
+ * Exported for the regression guard at
+ * `apps/union-eyes/tests/lifecycle-project-filter.test.ts` — kept pure so it
+ * can be tested without spawning children.
+ */
+export function parseProjectFilter(raw: string | undefined | null): string[] {
+  if (raw === undefined || raw === null) return []
+  return raw
+    .split(/[\s,]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
+
 async function withStep<T>(
   steps: StepRecord[],
   step: number,
@@ -440,9 +458,30 @@ async function main(): Promise<void> {
         [MANAGED_SERVER_ENV_VAR]: 'true',
         [MANAGED_SERVER_RUN_ID_ENV_VAR]: alloc!.runId,
       }
+      // Phase 0C.2 §BR-6 — Optional project filter for targeted batches.
+      // Set PLAYWRIGHT_PROJECTS to a comma- or whitespace-separated list of
+      // project names from PLAYWRIGHT_PROJECT_MANIFEST (see playwright.config.ts)
+      // to scope this run to specific projects, e.g.:
+      //   PLAYWRIGHT_PROJECTS=setup,public pnpm --filter @nzila/union-eyes e2e:governed
+      //   PLAYWRIGHT_PROJECTS='setup admin' ...
+      // When set, the runner injects `--project <name>` arguments for each entry
+      // (Playwright accepts repeated --project flags, ANDed by union). When
+      // absent or empty, all wired projects run (existing behaviour).
+      // This is the primary mechanism for §BR-6 targeted batches A-F and the
+      // §BR-8 per-project independent-validation acceptance checks. NO baseline
+      // is rewritten — the governed lifecycle still owns preflight, DB alloc,
+      // seed, server boot, auth-state generation, artifact copy, and teardown.
+      const projectFilter = parseProjectFilter(process.env.PLAYWRIGHT_PROJECTS)
+      const playwrightArgs = ['exec', 'playwright', 'test']
+      for (const projectName of projectFilter) {
+        playwrightArgs.push('--project', projectName)
+      }
+      if (projectFilter.length > 0) {
+        log(`  playwright project filter: ${projectFilter.join(', ')}`)
+      }
       const res = spawnSync(
         'pnpm',
-        ['exec', 'playwright', 'test'],
+        playwrightArgs,
         {
           cwd: APP_ROOT,
           env: pwEnv,
@@ -451,8 +490,10 @@ async function main(): Promise<void> {
         },
       )
       playwrightExit = typeof res.status === 'number' ? res.status : 1
+      const filterSummary =
+        projectFilter.length > 0 ? ` projects=[${projectFilter.join(',')}]` : ''
       return {
-        detail: `exitCode=${playwrightExit}`,
+        detail: `exitCode=${playwrightExit}${filterSummary}`,
         // Non-zero exit is captured but NOT thrown — cleanup steps must still run.
       }
     })
@@ -614,9 +655,18 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  // Defensive — main() has its own try/finally, but if something escaped:
-  // eslint-disable-next-line no-console
-  console.error('[e2e:governed] fatal (unhandled):', err)
-  process.exit(3)
-})
+// Phase 0C.2 §BR-6 — guard the top-level invocation so that importing this
+// module (e.g. the `parseProjectFilter` regression guard at
+// `apps/union-eyes/tests/lifecycle-project-filter.test.ts`) does NOT trigger
+// the orchestrator. tsx compiles this file to CommonJS at runtime, so
+// `require.main === module` is the reliable check. Under vitest, `require`
+// exists in the CJS-emitted output and points at the test worker's main
+// module, so this branch is skipped during unit tests.
+if (require.main === module) {
+  main().catch((err) => {
+    // Defensive — main() has its own try/finally, but if something escaped:
+    // eslint-disable-next-line no-console
+    console.error('[e2e:governed] fatal (unhandled):', err)
+    process.exit(3)
+  })
+}
