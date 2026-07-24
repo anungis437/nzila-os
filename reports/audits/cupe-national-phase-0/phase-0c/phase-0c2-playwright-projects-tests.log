@@ -1,0 +1,44 @@
+
+ RUN  v4.1.2 C:/APPS/nzila-automation-phase0c/apps/union-eyes
+
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö project structure > declares exactly the 11 canonical project names in the expected order 3ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö project structure > exports PLAYWRIGHT_AUTH_DIR = "playwright/.auth" 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö project structure > exports PLAYWRIGHT_STORAGE_STATE_PATHS with all five canonical roles under playwright/.auth/ 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö project structure > PLAYWRIGHT_PROJECT_MANIFEST exposes every project so tooling can discover routing 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö setup gate > setup project points at playwright/setup/auth-state.setup.ts 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö setup gate > setup project does NOT declare storageState (it verifies, does not consume) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö setup gate > setup project has no dependencies (runs first) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > 'member' project uses storageState playwright/.auth/undefined and depends on setup 1ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > 'steward' project uses storageState playwright/.auth/undefined and depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > 'staff' project uses storageState playwright/.auth/undefined and depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > 'admin' project uses storageState playwright/.auth/undefined and depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > 'executive' project uses storageState playwright/.auth/undefined and depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > bilingual-en project uses the member storageState (bilingual seed) and depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > bilingual-fr project uses the member storageState (bilingual seed) and depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö persona projects > bilingual-en uses locale en-CA and bilingual-fr uses locale fr-CA 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö unauthenticated projects > security project starts with an empty storageState (cold session) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö unauthenticated projects > accessibility project starts with an empty storageState (cold session) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö unauthenticated projects > public project has NO storageState and NO setup dependency (fully independent) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > member project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > steward project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > staff project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > admin project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > executive project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > security project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > bilingual-en project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > bilingual-fr project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö dependency graph > accessibility project depends on setup 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö spec routing (testMatch) > no explicit spec path is duplicated across project testMatch lists 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö spec routing (testMatch) > routes known persona-primary specs to the expected project 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö spec routing (testMatch) > routes negative / cross-org specs to the security project 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö spec routing (testMatch) > routes truly public/unauthenticated specs to the public project 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö spec routing (testMatch) > bilingual & accessibility projects use glob patterns (populated by ┬º13 / ┬º14) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö global settings preserved > workers is 1 (single-worker; ┬º15 will evaluate multi-worker separately) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö global settings preserved > fullyParallel is false (avoids destabilising the baseline before ┬º10) 0ms
+ Γ£ô |union-eyes| playwright.config.test.ts > phase-0c2-s8 playwright.config.ts ΓÇö global settings preserved > timeout stays at 60_000ms (no timeout inflation) 0ms
+
+ Test Files  1 passed (1)
+      Tests  35 passed (35)
+   Start at  20:32:38
+   Duration  1.28s (transform 92ms, setup 0ms, import 899ms, tests 12ms, environment 0ms)
+

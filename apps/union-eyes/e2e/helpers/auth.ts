@@ -50,6 +50,15 @@ export async function loginAsRole(page: Page, role: StakeholderRole): Promise<vo
   ];
 
   if ((process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true') {
+    // TODO(phase-0c2-§11): This branch injects a synthetic `nzila_session`
+    // cookie that does NOT match any real PG session row. Once §8's
+    // persona storageState projects are the default source of auth, this
+    // branch should first check `page.context().cookies()` for an existing
+    // `nzila_session` (loaded from `playwright/.auth/<role>.json`) and
+    // skip the fake injection when a real session cookie is already
+    // present. Kept unchanged in §8 to avoid coupling config wiring with
+    // helper behaviour changes; §11 (baseline-failure repair) will land
+    // the reconciled behaviour together with the tests that exercise it.
     await page.context().addCookies([
       {
         name: 'nzila_session',

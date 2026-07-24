@@ -1,0 +1,139 @@
+{
+  "section": "phase-0c2-s8",
+  "title": "Playwright projects wiring",
+  "baseline_head": "1c2ed4f2043dab6303ad92db93f6868836fdc543",
+  "branch": "fix/union-eyes-phase0c-e2e-stabilization",
+  "worktree": "C:\\APPS\\nzila-automation-phase0c",
+  "package": "apps/union-eyes",
+  "files": {
+    "modified": [
+      "apps/union-eyes/playwright.config.ts",
+      "apps/union-eyes/e2e/helpers/auth.ts"
+    ],
+    "created": [
+      "apps/union-eyes/playwright/setup/auth-state.setup.ts",
+      "apps/union-eyes/playwright.config.test.ts",
+      "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-playwright-projects-proof.md",
+      "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-playwright-projects-proof.json",
+      "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-playwright-projects-tests.log"
+    ]
+  },
+  "projects": {
+    "count": 11,
+    "order": [
+      "setup",
+      "public",
+      "member",
+      "steward",
+      "staff",
+      "admin",
+      "executive",
+      "security",
+      "bilingual-en",
+      "bilingual-fr",
+      "accessibility"
+    ],
+    "topology": {
+      "setup": {
+        "testMatch": ["playwright/setup/auth-state.setup.ts"],
+        "storageState": null,
+        "dependencies": []
+      },
+      "public": {
+        "storageState": null,
+        "dependencies": []
+      },
+      "member": {
+        "storageState": "playwright/.auth/member.json",
+        "dependencies": ["setup"]
+      },
+      "steward": {
+        "storageState": "playwright/.auth/steward.json",
+        "dependencies": ["setup"]
+      },
+      "staff": {
+        "storageState": "playwright/.auth/staff.json",
+        "dependencies": ["setup"]
+      },
+      "admin": {
+        "storageState": "playwright/.auth/admin.json",
+        "dependencies": ["setup"]
+      },
+      "executive": {
+        "storageState": "playwright/.auth/executive.json",
+        "dependencies": ["setup"]
+      },
+      "security": {
+        "storageState": { "cookies": [], "origins": [] },
+        "dependencies": ["setup"]
+      },
+      "bilingual-en": {
+        "storageState": "playwright/.auth/member.json",
+        "dependencies": ["setup"],
+        "locale": "en-CA"
+      },
+      "bilingual-fr": {
+        "storageState": "playwright/.auth/member.json",
+        "dependencies": ["setup"],
+        "locale": "fr-CA"
+      },
+      "accessibility": {
+        "storageState": { "cookies": [], "origins": [] },
+        "dependencies": ["setup"]
+      }
+    }
+  },
+  "setup_gate_invariants": [
+    "playwright/.auth/summary.json exists",
+    "summary parses with baseUrl, outputDir, results, allOk fields",
+    "summary.allOk === true",
+    "each of 5 canonical roles (member, steward, staff, executive, admin) present exactly once with ok:true and string storageStatePath",
+    "each storageState file exists, non-empty, valid JSON with cookies[] + origins[] arrays and non-empty nzila_session cookie"
+  ],
+  "global_settings_preserved": {
+    "workers": 1,
+    "fullyParallel": false,
+    "timeout_ms": 60000,
+    "retries_ci": 2,
+    "retries_local": 0
+  },
+  "test_results": {
+    "playwright_config_test": {
+      "files_passed": 1,
+      "tests_passed": 35,
+      "tests_failed": 0,
+      "duration_ms": 1280
+    },
+    "union_eyes_full_regression": {
+      "files_total": 1112,
+      "files_passed": 1111,
+      "files_skipped": 1,
+      "tests_total": 16173,
+      "tests_passed": 16171,
+      "tests_skipped": 2,
+      "tests_failed": 0,
+      "duration_ms": 164640
+    },
+    "typecheck": {
+      "command": "pnpm exec tsc --noEmit",
+      "status": "clean"
+    }
+  },
+  "deferred_to_section_11": {
+    "file": "apps/union-eyes/e2e/helpers/auth.ts",
+    "line": 53,
+    "issue": "PLAYWRIGHT_TEST_AUTH=true branch injects synthetic nzila_session cookie that overrides pre-loaded storageState",
+    "rationale": "§8 scope is config wiring; §11 (baseline-failure repair) will land the reconciled behaviour with tests",
+    "marker": "TODO(phase-0c2-§11) in auth.ts"
+  },
+  "populates_section_13_14": {
+    "bilingual_directory": "apps/union-eyes/e2e/bilingual/",
+    "accessibility_directory": "apps/union-eyes/e2e/a11y/",
+    "current_state": "wired but empty; testMatch globs already declared"
+  },
+  "verification_artifacts": {
+    "tests_log": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-playwright-projects-tests.log",
+    "proof_md": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-playwright-projects-proof.md",
+    "proof_json": "reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-playwright-projects-proof.json"
+  }
+}
