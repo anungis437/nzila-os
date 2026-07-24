@@ -1,0 +1,8 @@
+
+> @nzila/union-eyes@1.0.0 e2e:governed C:\APPS\nzila-automation-phase0c\apps\union-eyes
+> tsx scripts/lifecycle/run.ts
+
+[e2e:governed] fatal: env load failed ΓÇö [ue:e2e:env] AUTH_SECRET must be a non-empty string of ΓëÑ 16 chars (got length=1).
+C:\APPS\nzila-automation-phase0c\apps\union-eyes:
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 e2e:governed: `tsx scripts/lifecycle/run.ts`
+Exit status 2

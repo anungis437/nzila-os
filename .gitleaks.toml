@@ -115,8 +115,11 @@ tags = ["database"]
 keywords = ["postgresql://", "postgres://"]
 
   [rules.allowlist]
-  description = "drizzle.config.ts files use env-var fallback with local dev URL — not a real secret"
-  paths = ['''drizzle\.config\.ts$''']
+  description = "drizzle.config.ts files use env-var fallback with local dev URL — not a real secret. Phase 0C.2 baseline evidence emits already-redacted <user>:<pw>@localhost URLs via lifecycle/env.ts redactUrl()."
+  paths = [
+    '''drizzle\.config\.ts$''',
+    '''reports/audits/cupe-national-phase-0/phase-0c/phase-0c2-baseline-run-.*''',
+  ]
 
 [[rules]]
 id = "nzila-qbo-client-secret"

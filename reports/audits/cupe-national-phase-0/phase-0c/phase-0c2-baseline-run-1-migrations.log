@@ -1,0 +1,20 @@
+[ue:e2e:allocate-db] Phase 0C.2 compliant runner: C:\APPS\nzila-automation-phase0c\tooling\scripts\run-union-eyes-drizzle-bootstrap.mjs
+[ue:e2e:allocate-db] Legacy replay refused per historical-migration-lineage-governance.md §4/§6.
+
+===== stage: bootstrap (C:\APPS\nzila-automation-phase0c\tooling\scripts\run-union-eyes-drizzle-bootstrap.mjs) =====
+[bootstrap] Legacy lineage freeze respected. Skipping any replay of db/migrations/.
+[bootstrap] Ensuring required extensions...
+[bootstrap] extension OK: uuid-ossp
+[bootstrap] extension OK: pgcrypto
+[bootstrap] extension OK: pg_trgm
+[bootstrap] extension OK: btree_gin
+[bootstrap] extension optional/unavailable: vector (permission denied to create extension "vector")
+[bootstrap] UE_DB_RESTORE_SNAPSHOT_URL not set — skipping canonical snapshot restore. In demo/pilot environments this MUST be set per docs/architecture/orm-governance/environment-bootstrap-strategy.md.
+[bootstrap] Applying scoped Drizzle migrations from db/migrations-cache/ ...
+[bootstrap] applying scoped migration: 0000_outstanding_viper
+[bootstrap] applying scoped migration: 0001_lean_iron_man
+[bootstrap] applying scoped migration: 0002_certain_juggernaut
+[bootstrap] applying scoped migration: 0003_dizzy_alex_wilder
+[bootstrap] Bootstrap attestation recorded.
+[bootstrap] Bootstrap complete.
+

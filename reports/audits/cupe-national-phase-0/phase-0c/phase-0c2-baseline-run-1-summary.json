@@ -1,0 +1,77 @@
+{
+  "runId": "20260724004806_ff82d5",
+  "startedAt": "2026-07-24T00:48:06.608Z",
+  "finishedAt": "2026-07-24T00:48:11.188Z",
+  "totalElapsedMs": 4580,
+  "status": "aborted",
+  "playwrightExitCode": null,
+  "dbUrl": "postgresql://<user>:<pw>@localhost:5433/ue_e2e_20260724004806_ff82d5",
+  "port": 3002,
+  "runDir": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\.e2e-lifecycle\\runs\\20260724004806_ff82d5",
+  "artifactDir": "",
+  "steps": [
+    {
+      "step": 1,
+      "id": "preflight",
+      "outcome": "ok",
+      "detail": "node=v24.13.1, port=3002 free",
+      "elapsedMs": 10
+    },
+    {
+      "step": 2,
+      "id": "allocate-db",
+      "outcome": "ok",
+      "detail": "db=ue_e2e_20260724004806_ff82d5 runId=20260724004806_ff82d5",
+      "elapsedMs": 4240
+    },
+    {
+      "step": 3,
+      "id": "allocate-port",
+      "outcome": "ok",
+      "detail": "port=3002 (preferred=3002)",
+      "elapsedMs": 2
+    },
+    {
+      "step": 4,
+      "id": "migrations.platform",
+      "outcome": "ok",
+      "detail": "applied during allocate-db (drizzle bootstrap)",
+      "elapsedMs": 0
+    },
+    {
+      "step": 5,
+      "id": "migrations.django",
+      "outcome": "skipped",
+      "detail": "Django not required for Phase 0C.1 baseline; see readiness §6 #6",
+      "elapsedMs": 0
+    },
+    {
+      "step": 6,
+      "id": "verify-phase0b-contract",
+      "outcome": "failed",
+      "detail": "organization_members table missing after migrations",
+      "elapsedMs": 107
+    },
+    {
+      "step": 12,
+      "id": "stop-server",
+      "outcome": "skipped",
+      "detail": "server never booted",
+      "elapsedMs": 0
+    },
+    {
+      "step": 13,
+      "id": "drop-db",
+      "outcome": "ok",
+      "detail": "ue_e2e_20260724004806_ff82d5",
+      "elapsedMs": 0
+    },
+    {
+      "step": 14,
+      "id": "verify-port-release",
+      "outcome": "ok",
+      "detail": "port 3002 released",
+      "elapsedMs": 0
+    }
+  ]
+}
