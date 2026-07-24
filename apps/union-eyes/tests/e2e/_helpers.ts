@@ -1,4 +1,4 @@
-import { expect, type APIRequestContext } from '@playwright/test'
+import { expect, test, type APIRequestContext } from '@playwright/test'
 import { UE_TEST_USER_PASSWORD, UE_TEST_USERS } from '../fixtures/test-users'
 import { getE2EEnv } from './e2e-env'
 
@@ -7,6 +7,17 @@ export function getBaseUrl(): string {
 }
 
 export async function ensureServerReady(request: APIRequestContext): Promise<void> {
+  // Phase 0C.2 §12: extend the enclosing hook/test timeout to 180s so that Next.js
+  // dev-mode SSR compile-first-hit latency does not exceed the default 60s beforeAll
+  // ceiling. Baseline Run 2 attempt-6 showed all 6 security specs timing out here
+  // because 3 endpoints × 10s per-request timeout can burst 30s+ on cold compile,
+  // and internally this helper polls up to 90s. Wrapped in try/catch so callers
+  // outside a running test context (e.g. standalone probes) are a safe no-op.
+  try {
+    test.setTimeout(180_000)
+  } catch {
+    // no enclosing test/hook — safe no-op
+  }
   const endpoints = ['/api/auth_core/health/', '/api/health', '/sign-in']
   const timeoutMs = 90_000
   const pollMs = 1_500
