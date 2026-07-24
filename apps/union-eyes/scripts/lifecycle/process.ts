@@ -218,8 +218,47 @@ export function bootServer(options: BootServerOptions): BootServerResult {
     throw new Error(`Failed to spawn '${options.command} ${options.args.join(' ')}'`)
   }
 
-  child.stdout?.pipe(logStream)
-  child.stderr?.pipe(logStream)
+  // Phase 0C.2 §BR-4 (baseline-remediation §4) — Prevent the child's stdout
+  // Socket from crashing the orchestrator with `ERR_STREAM_WRITE_AFTER_END`
+  // after `taskkill /T /F` kills Next.js in stopServer().
+  //
+  // Two independent hardenings:
+  //
+  // (1) `{ end: false }` on both pipes decouples logStream lifecycle from
+  //     the source. Default pipe() auto-calls destination.end() when the
+  //     source closes; a final buffered Socket 'data' event (which can
+  //     arrive AFTER the FIN packet) then tries to write to an already-
+  //     ended stream. We keep logStream open until we explicitly end it
+  //     on child 'exit', with a setImmediate to drain trailing chunks.
+  //
+  // (2) A defensive error handler on logStream swallows *only* the
+  //     ERR_STREAM_WRITE_AFTER_END code (the sole timing race we've
+  //     observed on Windows Node 24 taskkill /T /F). Any other stream
+  //     error re-throws, preserving genuine defect signal.
+  //
+  // Baseline Run 2 (2026-07-23 23:46) crashed at step 12 with this exact
+  // error → orchestrator exited before step 13 (drop-db) and step 14
+  // (verify-port-release), producing orphan test DBs ue_e2e_20260724012756_871bd3
+  // and ue_e2e_20260724034611_438b93. Baseline Run 3 on identical HEAD did
+  // NOT crash — timing-dependent, MUST be handled defensively.
+  logStream.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'ERR_STREAM_WRITE_AFTER_END') return
+    // Rethrow any other stream error — genuine defect signal.
+    throw err
+  })
+  child.stdout?.pipe(logStream, { end: false })
+  child.stderr?.pipe(logStream, { end: false })
+  child.once('exit', () => {
+    // Defer to next microtask/tick so trailing Socket 'data' events
+    // have a chance to flush before we close the writable side.
+    setImmediate(() => {
+      try {
+        logStream.end()
+      } catch {
+        /* already ended — safe no-op */
+      }
+    })
+  })
 
   const record: PidRecord = {
     pid: child.pid,
