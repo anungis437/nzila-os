@@ -1,0 +1,1744 @@
+
+> @nzila/union-eyes@1.0.0 e2e:governed C:\APPS\nzila-automation-phase0c\apps\union-eyes
+> tsx scripts/lifecycle/run.ts
+
+[e2e:governed] env loaded (adminUrl=postgresql://<user>:<pw>@localhost:5433/postgres)
+[e2e:governed] Γû╢ step 1: preflight
+[e2e:governed] Γ£ö step 1: preflight (10 ms) ΓÇö node=v24.13.1, port=3002 free
+[e2e:governed] Γû╢ step 2: allocate-db
+[ue:e2e:allocate-db] Creating disposable DB 'ue_e2e_20260724064034_14e83f' via postgresql://<user>:<pw>@localhost:5433/postgres (owner=nzila)
+[e2e:governed] Γ£ö step 2: allocate-db (1580 ms) ΓÇö db=ue_e2e_20260724064034_14e83f runId=20260724064034_14e83f
+[e2e:governed] Γû╢ step 3: allocate-port
+[e2e:governed] Γ£ö step 3: allocate-port (2 ms) ΓÇö port=3002 (preferred=3002)
+[e2e:governed] Γû╢ step 4: migrations.platform
+[e2e:governed] Γ£ö step 4: migrations.platform (0 ms) ΓÇö applied during allocate-db (drizzle bootstrap)
+[e2e:governed] Γû╢ step 5: migrations.django
+[e2e:governed] Γ£ö step 5: migrations.django (0 ms) ΓÇö Django not required for Phase 0C.1 baseline; see readiness ┬º6 #6
+[e2e:governed] Γû╢ step 6: verify-phase0b-contract
+[e2e:governed] Γ£ö step 6: verify-phase0b-contract (126 ms) ΓÇö organization_members present
+[e2e:governed] Γû╢ step 7: seed
+[ue:seed:test-env] Seed complete
+{
+  "testOrgs": 4,
+  "testUsers": 10,
+  "testCases": 3,
+  "externalTesterOrg": "33333333-3333-4333-8333-333333333333",
+  "externalTesterUser": "ue-qa-ux-tester-001",
+  "suspendedUser": "ue-qa-member-suspended",
+  "productionLikeOrgGuardrail": "44444444-4444-4444-8444-444444444444",
+  "qaPassword": "NzilaQa!2026"
+}
+[e2e:governed] Γ£ö step 7: seed (10554 ms) ΓÇö seed-test-env applied to disposable DB
+[e2e:governed] Γû╢ step 8: boot-server
+(node:18320) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[e2e:governed] Γ£ö step 8: boot-server (28688 ms) ΓÇö pid=39316 port=3002 readyAfter=26703ms handshakeRunId=20260724064034_14e83f
+[e2e:governed] Γû╢ step 9: generate-auth-states
+{
+  "baseUrl": "http://localhost:3002",
+  "outputDir": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth",
+  "results": [
+    {
+      "role": "member",
+      "email": "ue.qa.member.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "k4CdHcuoΓÇª",
+      "cookieExpires": 1784961678,
+      "meEmail": "ue.qa.member.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\member.json"
+    },
+    {
+      "role": "steward",
+      "email": "ue.qa.steward.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "x_3Y-TtvΓÇª",
+      "cookieExpires": 1784961679,
+      "meEmail": "ue.qa.steward.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\steward.json"
+    },
+    {
+      "role": "staff",
+      "email": "ue.qa.staff.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "HVysGYl6ΓÇª",
+      "cookieExpires": 1784961679,
+      "meEmail": "ue.qa.staff.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\staff.json"
+    },
+    {
+      "role": "executive",
+      "email": "ue.qa.executive.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "E3w3tGqWΓÇª",
+      "cookieExpires": 1784961679,
+      "meEmail": "ue.qa.executive.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\executive.json"
+    },
+    {
+      "role": "admin",
+      "email": "ue.qa.admin.primary@nzila.test",
+      "ok": true,
+      "loginStatus": 200,
+      "meStatus": 200,
+      "cookieName": "nzila_session",
+      "cookieValueSample": "j5LTXIxPΓÇª",
+      "cookieExpires": 1784961680,
+      "meEmail": "ue.qa.admin.primary@nzila.test",
+      "storageStatePath": "C:\\APPS\\nzila-automation-phase0c\\apps\\union-eyes\\playwright\\.auth\\admin.json"
+    }
+  ],
+  "allOk": true
+}
+[e2e:governed] Γ£ö step 9: generate-auth-states (4681 ms) ΓÇö roles=5 allOk=true dir=playwright\.auth
+[e2e:governed] Γû╢ step 10: playwright
+[e2e:governed]   playwright project filter: setup, admin
+
+Running 105 tests using 1 worker
+
+[1A[2K[1/105] [setup] ΓÇ║ playwright\setup\auth-state.setup.ts:34:6 ΓÇ║ phase-0c2-s8 auth-state summary is present, complete, and consistent
+[1A[2K[2/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA
+[1A[2K  1) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-5378b-ralized-landing-and-role-IA-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-5378b-ralized-landing-and-role-IA-admin\error-context.md
+
+
+[1A[2K[3/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: mobile landing keeps nav and primary action reachable
+[1A[2K  2) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-9dfe7-nd-primary-action-reachable-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-9dfe7-nd-primary-action-reachable-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-9dfe7-nd-primary-action-reachable-admin\error-context.md
+
+
+[1A[2K[4/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: /dashboard redirects to centralized landing and role IA
+[1A[2K  3) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/work(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-f084d-ralized-landing-and-role-IA-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-f084d-ralized-landing-and-role-IA-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-f084d-ralized-landing-and-role-IA-admin\error-context.md
+
+
+[1A[2K[5/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: mobile landing keeps nav and primary action reachable
+[1A[2K  4) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-96944-nd-primary-action-reachable-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-96944-nd-primary-action-reachable-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-96944-nd-primary-action-reachable-admin\error-context.md
+
+
+[1A[2K[6/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: /dashboard redirects to centralized landing and role IA
+[1A[2K  5) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/work(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-c89bd-ralized-landing-and-role-IA-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-c89bd-ralized-landing-and-role-IA-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-c89bd-ralized-landing-and-role-IA-admin\error-context.md
+
+
+[1A[2K[7/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: mobile landing keeps nav and primary action reachable
+[1A[2K  6) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-3eee6-nd-primary-action-reachable-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-3eee6-nd-primary-action-reachable-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-3eee6-nd-primary-action-reachable-admin\error-context.md
+
+
+[1A[2K[8/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: /dashboard redirects to centralized landing and role IA
+[1A[2K  7) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/intelligence(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-5c0d7-ralized-landing-and-role-IA-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-5c0d7-ralized-landing-and-role-IA-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-5c0d7-ralized-landing-and-role-IA-admin\error-context.md
+
+
+[1A[2K[9/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: mobile landing keeps nav and primary action reachable
+[1A[2K[10/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: /dashboard redirects to centralized landing and role IA
+[1A[2K  8) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: /dashboard redirects to centralized landing and role IA 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/governance(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-05e34-ralized-landing-and-role-IA-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-05e34-ralized-landing-and-role-IA-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-05e34-ralized-landing-and-role-IA-admin\error-context.md
+
+
+[1A[2K[11/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: mobile landing keeps nav and primary action reachable
+[1A[2K  9) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: mobile landing keeps nav and primary action reachable 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('nav, [role="navigation"], button[aria-label="Open navigation"]').filter({ visible: true }).first()[22m
+
+
+      68 |         .filter({ visible: true })
+      69 |         .first();
+    > 70 |       await expect(reachableNav).toBeVisible();
+         |                                  ^
+      71 |       await expect(page.locator('body')).toBeVisible();
+      72 |       await assertHeadingOrFallback(page, REQUIRED_VISIBLE_LABELS[role][0]);
+      73 |     });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:70:34
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-fbd9d-nd-primary-action-reachable-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-fbd9d-nd-primary-action-reachable-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-fbd9d-nd-primary-action-reachable-admin\error-context.md
+
+
+[1A[2K[12/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: /dashboard redirects to centralized landing and role IA
+[1A[2K[13/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ admin: mobile landing keeps nav and primary action reachable
+[1A[2K[14/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/intelligence is blocked
+[1A[2K  10) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/intelligence is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    2 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-3ccae-ard-intelligence-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-3ccae-ard-intelligence-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-3ccae-ard-intelligence-is-blocked-admin\error-context.md
+
+
+[1A[2K[15/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/governance is blocked
+[1A[2K  11) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/governance is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-78482-board-governance-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-78482-board-governance-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-78482-board-governance-is-blocked-admin\error-context.md
+
+
+[1A[2K[16/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: cross-role route /dashboard/admin/organizations is blocked
+[1A[2K  12) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: cross-role route /dashboard/admin/organizations is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/work(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-7274d-in-organizations-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-7274d-in-organizations-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-7274d-in-organizations-is-blocked-admin\error-context.md
+
+
+[1A[2K[17/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: cross-role route /dashboard/admin/organizations is blocked
+[1A[2K  13) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: cross-role route /dashboard/admin/organizations is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/intelligence(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-172f0-in-organizations-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-172f0-in-organizations-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-172f0-in-organizations-is-blocked-admin\error-context.md
+
+
+[1A[2K[18/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: cross-role route /dashboard/claims/new is blocked
+[1A[2K  14) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: cross-role route /dashboard/claims/new is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/governance(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-331b0-board-claims-new-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-331b0-board-claims-new-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-331b0-board-claims-new-is-blocked-admin\error-context.md
+
+
+[1A[2K[19/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/analytics-admin is blocked
+[1A[2K  15) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/analytics-admin is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-c0b7e--analytics-admin-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-c0b7e--analytics-admin-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-c0b7e--analytics-admin-is-blocked-admin\error-context.md
+
+
+[1A[2K[20/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/billing-admin is blocked
+[1A[2K  16) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/billing-admin is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-074d0-rd-billing-admin-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-074d0-rd-billing-admin-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-074d0-rd-billing-admin-is-blocked-admin\error-context.md
+
+
+[1A[2K[21/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/compliance-admin is blocked
+[1A[2K  17) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/compliance-admin is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-e6d8d-compliance-admin-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-e6d8d-compliance-admin-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-e6d8d-compliance-admin-is-blocked-admin\error-context.md
+
+
+[1A[2K[22/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/debug is blocked
+[1A[2K  18) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/debug is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-e07e0--dashboard-debug-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-e07e0--dashboard-debug-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-e07e0--dashboard-debug-is-blocked-admin\error-context.md
+
+
+[1A[2K[23/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cross-union-analytics is blocked
+[1A[2K  19) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cross-union-analytics is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    6 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-90ea7--union-analytics-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-90ea7--union-analytics-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-90ea7--union-analytics-is-blocked-admin\error-context.md
+
+
+[1A[2K[24/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/sector-analytics is blocked
+[1A[2K  20) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/sector-analytics is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-d1739-sector-analytics-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-d1739-sector-analytics-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-d1739-sector-analytics-is-blocked-admin\error-context.md
+
+
+[1A[2K[25/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/executive-operating-intelligence is blocked
+[1A[2K  21) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/executive-operating-intelligence is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-d557f-ing-intelligence-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-d557f-ing-intelligence-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-d557f-ing-intelligence-is-blocked-admin\error-context.md
+
+
+[1A[2K[26/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/clc is blocked
+[1A[2K  22) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/clc is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-8888d-te-dashboard-clc-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-8888d-te-dashboard-clc-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-8888d-te-dashboard-clc-is-blocked-admin\error-context.md
+
+
+[1A[2K[27/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/admin is blocked
+[1A[2K  23) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/admin is blocked 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/en-CA\/dashboard\/inbox(?:$|[/?#])/[39m
+    Received string:  [31m"http://localhost:3002/en-CA/dashboard/admin/organizations"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    5 ├ù unexpected value "http://localhost:3002/en-CA/dashboard"[22m
+    [2m    - waiting for" http://localhost:3002/en-CA/dashboard/admin/organizations" navigation to finish...[22m
+    [2m    - navigated to "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+    [2m    3 ├ù unexpected value "http://localhost:3002/en-CA/dashboard/admin/organizations"[22m
+
+
+       at e2e\helpers\auth.ts:99
+
+       97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+    >  99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+          |                      ^
+      100 |   return landing;
+      101 | }
+      102 |
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:99:22)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-20281-rd-pension-admin-is-blocked-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-20281-rd-pension-admin-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-20281-rd-pension-admin-is-blocked-admin\error-context.md
+
+
+[1A[2K[28/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/trustee is blocked
+[1A[2K  24) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/trustee is blocked 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/dashboard", waiting until "domcontentloaded"[22m
+
+
+       at e2e\helpers\auth.ts:97
+
+       95 |   const fixture = getFixture(role);
+       96 |   await loginAsRole(page, role);
+    >  97 |   await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+          |              ^
+       98 |   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
+       99 |   await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+      100 |   return landing;
+        at gotoDashboardAsRole (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:97:14)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:117:32
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-authenticated-role-nav-938c0--pension-trustee-is-blocked-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-authenticated-role-nav-938c0--pension-trustee-is-blocked-admin\error-context.md
+
+
+[1A[2K[29/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/strike-fund is blocked
+[1A[2K  25) [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/strike-fund is blocked 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\authenticated-role-navigation.spec.ts:25:5
+
+    Error Context: test-results\e2e-authenticated-role-nav-30657-oard-strike-fund-is-blocked-admin\error-context.md
+
+
+[1A[2K[30/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/employer-execution is blocked
+[1A[2K[31/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/billing-admin is blocked
+[1A[2K[32/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/compliance-admin is blocked
+[1A[2K[33/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/debug is blocked
+[1A[2K[34/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/clc is blocked
+[1A[2K[35/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cognition is blocked
+[1A[2K[36/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/longitudinal-cognition is blocked
+[1A[2K[37/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/security is blocked
+[1A[2K[38/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/customer-success is blocked
+[1A[2K[39/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/operations is blocked
+[1A[2K[40/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/ops is blocked
+[1A[2K[41/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/cognition is blocked
+[1A[2K[42/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/longitudinal-cognition is blocked
+[1A[2K[43/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/customer-success is blocked
+[1A[2K[44/105] [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: cross-role route /dashboard/ops is blocked
+[1A[2K[45/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:34:7 ΓÇ║ Grievance draft save & resume ΓÇ║ intake page renders form with required fields
+[1A[2K  26) [admin] ΓÇ║ e2e\cape-features.spec.ts:34:7 ΓÇ║ Grievance draft save & resume ΓÇ║ intake page renders form with required fields 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:25:5
+
+    Error Context: test-results\e2e-cape-features-Grievanc-c5756-s-form-with-required-fields-admin\error-context.md
+
+
+[1A[2K[46/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:54:7 ΓÇ║ Grievance draft save & resume ΓÇ║ draft is saved to sessionStorage on field input
+[1A[2K[47/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:70:7 ΓÇ║ Grievance draft save & resume ΓÇ║ resume modal appears when returning with a saved draft
+[1A[2K[48/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:126:7 ΓÇ║ Grievance submission flow ΓÇ║ grievance queue page loads with content
+[1A[2K  27) [admin] ΓÇ║ e2e\cape-features.spec.ts:126:7 ΓÇ║ Grievance submission flow ΓÇ║ grievance queue page loads with content 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:118:5
+
+    Error Context: test-results\e2e-cape-features-Grievanc-60548-eue-page-loads-with-content-admin\error-context.md
+
+
+[1A[2K[49/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:138:7 ΓÇ║ Grievance submission flow ΓÇ║ intake form validates required fields before submission
+[1A[2K[50/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:171:7 ΓÇ║ Pilot readiness checklist ΓÇ║ onboarding page renders checklist with 7 items
+[1A[2K  28) [admin] ΓÇ║ e2e\cape-features.spec.ts:171:7 ΓÇ║ Pilot readiness checklist ΓÇ║ onboarding page renders checklist with 7 items 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:162:5
+
+    Error Context: test-results\e2e-cape-features-Pilot-re-3054b-ders-checklist-with-7-items-admin\error-context.md
+
+
+[1A[2K[51/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:184:7 ΓÇ║ Pilot readiness checklist ΓÇ║ checklist displays all 7 expected items
+[1A[2K[52/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:242:7 ΓÇ║ Pilot readiness checklist ΓÇ║ pilot onboarding API returns valid checklist state
+[1A[2K[53/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:275:7 ΓÇ║ Leadership dashboard ΓÇ║ dashboard renders 6 KPI cards
+[1A[2K  29) [admin] ΓÇ║ e2e\cape-features.spec.ts:275:7 ΓÇ║ Leadership dashboard ΓÇ║ dashboard renders 6 KPI cards 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:266:5
+
+    Error Context: test-results\e2e-cape-features-Leadersh-c3ad0-shboard-renders-6-KPI-cards-admin\error-context.md
+
+
+[1A[2K[54/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:315:7 ΓÇ║ Leadership dashboard ΓÇ║ leadership API returns structured KPI data
+[1A[2K[55/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:337:7 ΓÇ║ Leadership dashboard ΓÇ║ leadership API supports timeframe parameter
+[1A[2K[56/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:356:7 ΓÇ║ Employer communications ΓÇ║ contacts API endpoint is reachable
+[1A[2K  30) [admin] ΓÇ║ e2e\cape-features.spec.ts:356:7 ΓÇ║ Employer communications ΓÇ║ contacts API endpoint is reachable 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:353:5
+
+    Error Context: test-results\e2e-cape-features-Employer-427e8-s-API-endpoint-is-reachable-admin\error-context.md
+
+
+[1A[2K[57/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:363:7 ΓÇ║ Employer communications ΓÇ║ communications API endpoint is reachable
+[1A[2K[58/105] [admin] ΓÇ║ e2e\cape-features.spec.ts:383:7 ΓÇ║ Steward workbench ΓÇ║ dashboard page loads with content
+[1A[2K  31) [admin] ΓÇ║ e2e\cape-features.spec.ts:383:7 ΓÇ║ Steward workbench ΓÇ║ dashboard page loads with content 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\cape-features.spec.ts:375:5
+
+    Error Context: test-results\e2e-cape-features-Steward--0dd81-ard-page-loads-with-content-admin\error-context.md
+
+
+[1A[2K[59/105] [admin] ΓÇ║ e2e\dashboard.spec.ts:25:7 ΓÇ║ Dashboard flows ΓÇ║ dashboard loads with navigation sidebar
+[1A[2K  32) [admin] ΓÇ║ e2e\dashboard.spec.ts:25:7 ΓÇ║ Dashboard flows ΓÇ║ dashboard loads with navigation sidebar 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\dashboard.spec.ts:21:5
+
+    Error Context: test-results\e2e-dashboard-Dashboard-fl-63d7f-ads-with-navigation-sidebar-admin\error-context.md
+
+
+[1A[2K[60/105] [admin] ΓÇ║ e2e\dashboard.spec.ts:34:7 ΓÇ║ Dashboard flows ΓÇ║ cases page loads
+[1A[2K[61/105] [admin] ΓÇ║ e2e\dashboard.spec.ts:42:7 ΓÇ║ Dashboard flows ΓÇ║ admin page loads for admin users
+[1A[2K[62/105] [admin] ΓÇ║ e2e\empty-states.spec.ts:83:7 ΓÇ║ Empty states ΓÇ║ dashboard with no active cases shows meaningful empty state
+[1A[2K  33) [admin] ΓÇ║ e2e\empty-states.spec.ts:83:7 ΓÇ║ Empty states ΓÇ║ dashboard with no active cases shows meaningful empty state 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\empty-states.spec.ts:78:5
+
+    Error Context: test-results\e2e-empty-states-Empty-sta-b9b09-hows-meaningful-empty-state-admin\error-context.md
+
+
+[1A[2K[63/105] [admin] ΓÇ║ e2e\empty-states.spec.ts:114:7 ΓÇ║ Empty states ΓÇ║ steward inbox renders the signal feed without errors
+[1A[2K[64/105] [admin] ΓÇ║ e2e\empty-states.spec.ts:145:7 ΓÇ║ Empty states ΓÇ║ GAP-05: grievances page with no grievances shows empty state
+[1A[2K[65/105] [admin] ΓÇ║ e2e\empty-states.spec.ts:177:7 ΓÇ║ Empty states ΓÇ║ members page with no search results shows empty state message
+[1A[2K[66/105] [admin] ΓÇ║ e2e\empty-states.spec.ts:215:7 ΓÇ║ Empty states ΓÇ║ admin users page with stubbed empty list shows empty state
+[1A[2K[67/105] [admin] ΓÇ║ e2e\empty-states.spec.ts:237:7 ΓÇ║ Empty states ΓÇ║ cases list with no data shows empty state (pending if route is 404)
+[1A[2K[68/105] [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:10:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ health endpoint exposes release identity governance headers (when bound)
+[1A[2K  34) [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:10:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ health endpoint exposes release identity governance headers (when bound) 
+
+    TimeoutError: apiRequestContext.get: Timeout 20000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/api/health[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+
+
+       at e2e\helpers\governance.ts:19
+
+      17 |   baseUrl: string,
+      18 | ): Promise<void> {
+    > 19 |   const response = await page.request.get(`${baseUrl}/api/health`)
+         |                                       ^
+      20 |   // In local/dev e2e, health may report degraded dependencies as 503.
+      21 |   // Treat degraded as reachable, but still fail on hard unhandled errors.
+      22 |   expect([200, 503]).toContain(response.status())
+        at expectGovernanceHeadersOnHealth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\governance.ts:19:39)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\governance\deployment-legitimacy-visibility.spec.ts:11:42
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--b91ff-ernance-headers-when-bound--admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--b91ff-ernance-headers-when-bound--admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-governance-deployment--b91ff-ernance-headers-when-bound--admin\error-context.md
+
+
+[1A[2K[69/105] [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:14:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ attestation surface accepts release id queries without 5xx
+[1A[2K  35) [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:14:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ attestation surface accepts release id queries without 5xx 
+
+    TimeoutError: apiRequestContext.get: Timeout 20000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/api/health?releaseId=UE-DEV[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+
+
+       at e2e\helpers\governance.ts:45
+
+      43 |   releaseId: string,
+      44 | ): Promise<void> {
+    > 45 |   const r: APIResponse = await page.request.get(
+         |                                             ^
+      46 |     `${baseUrl}/api/health?releaseId=${encodeURIComponent(releaseId)}`,
+      47 |   )
+      48 |   // In e2e, degraded dependencies can surface as 503; only hard panics
+        at expectAttestationReachable (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\governance.ts:45:45)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\governance\deployment-legitimacy-visibility.spec.ts:15:37
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--1cbe6-ease-id-queries-without-5xx-admin\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-governance-deployment--1cbe6-ease-id-queries-without-5xx-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-governance-deployment--1cbe6-ease-id-queries-without-5xx-admin\error-context.md
+
+
+[1A[2K[70/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:34:7 ΓÇ║ Missing routes ΓÇö known 404 gaps (pending) ΓÇ║ ops page exists and renders
+[1A[2K[71/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:54:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard renders for admin role
+[1A[2K  36) [admin] ΓÇ║ e2e\missing-routes.spec.ts:54:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard renders for admin role 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\missing-routes.spec.ts:51:5
+
+    Error Context: test-results\e2e-missing-routes-Existin-1e692-oard-renders-for-admin-role-admin\error-context.md
+
+
+[1A[2K[72/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:62:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard/admin renders for admin role
+[1A[2K[73/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:74:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard/settings renders
+[1A[2K[74/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:81:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ steward: /dashboard/inbox renders (consolidated cases view ΓÇö Wave 3)
+[1A[2K[75/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:89:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ member: /dashboard/claims/new renders (intake form)
+[1A[2K[76/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:102:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ governance: /dashboard/continuity-intelligence renders
+[1A[2K[77/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:112:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ steward: /dashboard/grievances list page renders (FLOW-003 fixed)
+[1A[2K[78/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:122:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ steward: /dashboard/cases list page renders (FLOW-004 fixed)
+[1A[2K[79/105] [admin] ΓÇ║ e2e\missing-routes.spec.ts:132:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ member: /dashboard/claims list page renders (FLOW-005 fixed)
+[1A[2K[80/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:35:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ renders the consent step and exposes the assessment flow root
+[1A[2K  37) [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:35:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ renders the consent step and exposes the assessment flow root 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/continuity-assessment/start", waiting until "load"[22m
+
+
+      36 |     page,
+      37 |   }) => {
+    > 38 |     await page.goto(ASSESSMENT_PATH_EN);
+         |                ^
+      39 |     await expect(
+      40 |       page.getByTestId('icra-assessment-flow').first(),
+      41 |     ).toBeVisible({ timeout: 20_000 });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ocra-adaptive-flow.spec.ts:38:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-ocra-adaptive-flow-OCR-18d07-es-the-assessment-flow-root-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-ocra-adaptive-flow-OCR-18d07-es-the-assessment-flow-root-admin\error-context.md
+
+
+[1A[2K[81/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:47:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ fr-CA route renders the assessment flow
+[1A[2K  38) [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:47:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ fr-CA route renders the assessment flow 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/fr-CA/continuity-assessment/start", waiting until "load"[22m
+
+
+      46 |
+      47 |   test('fr-CA route renders the assessment flow', async ({ page }) => {
+    > 48 |     await page.goto(ASSESSMENT_PATH_FR);
+         |                ^
+      49 |     await expect(
+      50 |       page.getByTestId('icra-assessment-flow').first(),
+      51 |     ).toBeVisible({ timeout: 20_000 });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ocra-adaptive-flow.spec.ts:48:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-ocra-adaptive-flow-OCR-6c6f5-renders-the-assessment-flow-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-ocra-adaptive-flow-OCR-6c6f5-renders-the-assessment-flow-admin\error-context.md
+
+
+[1A[2K[82/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:56:7 ΓÇ║ OCRA adaptive live flow ΓÇö telemetry privacy (network) ΓÇ║ telemetry POSTs never carry org names or free text
+[1A[2K  39) [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:56:7 ΓÇ║ OCRA adaptive live flow ΓÇö telemetry privacy (network) ΓÇ║ telemetry POSTs never carry org names or free text 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/continuity-assessment/start", waiting until "load"[22m
+
+
+      73 |     });
+      74 |
+    > 75 |     await page.goto(ASSESSMENT_PATH_EN);
+         |                ^
+      76 |     // Give the page a moment to settle any initial telemetry beacon
+      77 |     await page.waitForLoadState('load');
+      78 |     expect(violations).toEqual([]);
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ocra-adaptive-flow.spec.ts:75:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-ocra-adaptive-flow-OCR-eb7f0-arry-org-names-or-free-text-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-ocra-adaptive-flow-OCR-eb7f0-arry-org-names-or-free-text-admin\error-context.md
+
+
+[1A[2K[83/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:87:7 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ per-question testid attributes are wired in the assessment flow source
+[1A[2K[84/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:105:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ small local union: consent ΓåÆ org context ΓåÆ adaptive card ΓåÆ submit
+[1A[2K[85/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:109:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ federated national union: distinct band assignment + distinct routed count
+[1A[2K[86/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:113:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ healthcare authority ΓÇö adaptive card reflects healthcare exposure band
+[1A[2K[87/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:117:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ resume mid-flow restores adaptive context
+[1A[2K[88/105] [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:121:8 ΓÇ║ OCRA adaptive live flow ΓÇö full traversal ΓÇ║ corrupted persisted state falls back to consent step gracefully
+[1A[2K[89/105] [admin] ΓÇ║ e2e\pilot-journey.spec.ts:15:7 ΓÇ║ Union pilot journey ΓÇ║ member intake uses the approved intake and evidence endpoints
+[1A[2K  40) [admin] ΓÇ║ e2e\pilot-journey.spec.ts:15:7 ΓÇ║ Union pilot journey ΓÇ║ member intake uses the approved intake and evidence endpoints 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\pilot-journey.spec.ts:11:5
+
+    Error Context: test-results\e2e-pilot-journey-Union-pi-24dee-take-and-evidence-endpoints-admin\error-context.md
+
+
+[1A[2K[90/105] [admin] ΓÇ║ e2e\pilot-journey.spec.ts:111:7 ΓÇ║ Union pilot journey ΓÇ║ staff pilot APIs have authenticated coverage for assign, transition, audit, and export
+[1A[2K[91/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:30:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ executive demo path is stable and continuity-safe
+[1A[2K  41) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:30:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ executive demo path is stable and continuity-safe 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at bootstrapE2EAuth (C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\helpers\auth.ts:7:3)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:27:5
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-8db24--stable-and-continuity-safe-admin\error-context.md
+
+
+[1A[2K[92/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:55:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ staff/steward demo path is operational and non-executive
+[1A[2K[93/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:77:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ governance demo path is explainability-safe and non-surveillance
+[1A[2K[94/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:98:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ member demo path remains simple and non-governance
+[1A[2K[95/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:120:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ admin demo path exposes controls and pilot configuration
+[1A[2K[96/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:145:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ for-clc and context-aware pages preserve context in CTAs
+[1A[2K  42) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:145:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ for-clc and context-aware pages preserve context in CTAs 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/for-clc", waiting until "domcontentloaded"[22m
+
+
+      154 |
+      155 |     for (const route of routes) {
+    > 156 |       await page.goto(`/${locale}${route}`, { waitUntil: 'domcontentloaded' });
+          |                  ^
+      157 |       await expect(page.locator('body')).toBeVisible();
+      158 |       await expect(page).not.toHaveURL(/404|not-found/i);
+      159 |     }
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:156:18
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-stakeholder-demo-journ-4f2ca-es-preserve-context-in-CTAs-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-4f2ca-es-preserve-context-in-CTAs-admin\error-context.md
+
+
+[1A[2K[97/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:183:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ pilot request CTA remains actionable from context routes
+[1A[2K  43) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:183:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ pilot request CTA remains actionable from context routes 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/proof?context=procurement", waiting until "domcontentloaded"[22m
+
+
+      182 |
+      183 |   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
+    > 184 |     await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
+          |                ^
+      185 |     const procurementContextCta = page
+      186 |       .locator(
+      187 |         'a[href*="/organizational-continuity-risk"][href*="context=procurement"], a[href*="/institutional-continuity-risk"][href*="context=procurement"]',
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:184:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-stakeholder-demo-journ-0c172-ionable-from-context-routes-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-0c172-ionable-from-context-routes-admin\error-context.md
+
+
+[1A[2K[98/105] [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:207:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ executive and governance journeys avoid raw FSM language
+[1A[2K  44) [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:207:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ executive and governance journeys avoid raw FSM language 
+
+    TimeoutError: page.goto: Timeout 45000ms exceeded.
+    Call log:
+    [2m  - navigating to "http://localhost:3002/en-CA/proof?context=executive", waiting until "domcontentloaded"[22m
+
+
+      206 |
+      207 |   test('executive and governance journeys avoid raw FSM language', async ({ page }) => {
+    > 208 |     await page.goto(`/${locale}/proof?context=executive`, { waitUntil: 'domcontentloaded' });
+          |                ^
+      209 |     await assertNoTextExposure(page, ['FSM', 'Finite State Machine', 'Workflow Engine', 'Transition Graph']);
+      210 |
+      211 |     await page.goto(`/${locale}/trust?context=governance`, { waitUntil: 'domcontentloaded' });
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\stakeholder-demo-journeys.spec.ts:208:16
+
+    attachment #1: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-stakeholder-demo-journ-b3883-neys-avoid-raw-FSM-language-admin\video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-stakeholder-demo-journ-b3883-neys-avoid-raw-FSM-language-admin\error-context.md
+
+
+[1A[2K[99/105] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:20:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 1) intake -> review -> assign -> escalate -> resolve
+[1A[2K  45) [admin] ΓÇ║ e2e\ue-workflow.spec.ts:20:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 1) intake -> review -> assign -> escalate -> resolve 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\e2e\ue-workflow.spec.ts:14:5
+
+    Error Context: test-results\e2e-ue-workflow-UnionEyes--543ab-assign---escalate---resolve-admin\error-context.md
+
+
+[1A[2K[100/105] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:34:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 2) unauthorized access attempt is blocked
+[1A[2K[101/105] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:39:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 3) cross-org access attempt is blocked
+[1A[2K[102/105] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:53:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 4) read-only journey blocks mutation
+[1A[2K[103/105] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:65:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 5) intelligence dashboard endpoint is tier-gated
+[1A[2K[104/105] [admin] ΓÇ║ e2e\ue-workflow.spec.ts:73:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 6) export audit pack route is role and org constrained
+[1A[2K[105/105] [admin] ΓÇ║ tests\e2e\admin-assignment.spec.ts:14:7 ΓÇ║ UE E2E - admin assignment ΓÇ║ admin can assign and member cannot assign
+[1A[2K  46) [admin] ΓÇ║ tests\e2e\admin-assignment.spec.ts:14:7 ΓÇ║ UE E2E - admin assignment ΓÇ║ admin can assign and member cannot assign 
+
+    Error: [ue:e2e] Server readiness check timed out after 90000ms (apiRequestContext.get: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - ΓåÆ GET http://localhost:3002/sign-in[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - cookie: nzila_session=j5LTXIxPh8K1F_zzOysW5PDWXUSoOUBtGD_SvM-qc5M[22m
+    )
+
+       at tests\e2e\_helpers.ts:43
+
+      41 |   }
+      42 |
+    > 43 |   throw new Error(
+         |         ^
+      44 |     `[ue:e2e] Server readiness check timed out after ${timeoutMs}ms${lastError ? ` (${lastError})` : ''}`,
+      45 |   )
+      46 | }
+        at ensureServerReady (C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\_helpers.ts:43:9)
+        at C:\APPS\nzila-automation-phase0c\apps\union-eyes\tests\e2e\admin-assignment.spec.ts:6:5
+
+    Error Context: test-results\tests-e2e-admin-assignment-a51fe-gn-and-member-cannot-assign-admin\error-context.md
+
+
+[1A[2K  46 failed
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: /dashboard redirects to centralized landing and role IA 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: mobile landing keeps nav and primary action reachable 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: /dashboard redirects to centralized landing and role IA 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ steward: mobile landing keeps nav and primary action reachable 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: /dashboard redirects to centralized landing and role IA 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: mobile landing keeps nav and primary action reachable 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: /dashboard redirects to centralized landing and role IA 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:29:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: /dashboard redirects to centralized landing and role IA 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:54:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: mobile landing keeps nav and primary action reachable 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/intelligence is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/governance is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ staff: cross-role route /dashboard/admin/organizations is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ executive: cross-role route /dashboard/admin/organizations is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ governance: cross-role route /dashboard/claims/new is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/analytics-admin is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/billing-admin is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/compliance-admin is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/debug is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/cross-union-analytics is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/sector-analytics is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/executive-operating-intelligence is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/clc is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/admin is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/pension/trustee is blocked 
+    [admin] ΓÇ║ e2e\authenticated-role-navigation.spec.ts:115:9 ΓÇ║ UnionEyes authenticated role-centric navigation ΓÇ║ member: cross-role route /dashboard/strike-fund is blocked 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:34:7 ΓÇ║ Grievance draft save & resume ΓÇ║ intake page renders form with required fields 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:126:7 ΓÇ║ Grievance submission flow ΓÇ║ grievance queue page loads with content 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:171:7 ΓÇ║ Pilot readiness checklist ΓÇ║ onboarding page renders checklist with 7 items 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:275:7 ΓÇ║ Leadership dashboard ΓÇ║ dashboard renders 6 KPI cards 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:356:7 ΓÇ║ Employer communications ΓÇ║ contacts API endpoint is reachable 
+    [admin] ΓÇ║ e2e\cape-features.spec.ts:383:7 ΓÇ║ Steward workbench ΓÇ║ dashboard page loads with content 
+    [admin] ΓÇ║ e2e\dashboard.spec.ts:25:7 ΓÇ║ Dashboard flows ΓÇ║ dashboard loads with navigation sidebar 
+    [admin] ΓÇ║ e2e\empty-states.spec.ts:83:7 ΓÇ║ Empty states ΓÇ║ dashboard with no active cases shows meaningful empty state 
+    [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:10:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ health endpoint exposes release identity governance headers (when bound) 
+    [admin] ΓÇ║ e2e\governance\deployment-legitimacy-visibility.spec.ts:14:7 ΓÇ║ governance: deployment legitimacy visibility ΓÇ║ attestation surface accepts release id queries without 5xx 
+    [admin] ΓÇ║ e2e\missing-routes.spec.ts:54:7 ΓÇ║ Existing routes ΓÇö positive smoke check ΓÇ║ admin: /dashboard renders for admin role 
+    [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:35:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ renders the consent step and exposes the assessment flow root 
+    [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:47:7 ΓÇ║ OCRA adaptive live flow ΓÇö smoke ΓÇ║ fr-CA route renders the assessment flow 
+    [admin] ΓÇ║ e2e\ocra-adaptive-flow.spec.ts:56:7 ΓÇ║ OCRA adaptive live flow ΓÇö telemetry privacy (network) ΓÇ║ telemetry POSTs never carry org names or free text 
+    [admin] ΓÇ║ e2e\pilot-journey.spec.ts:15:7 ΓÇ║ Union pilot journey ΓÇ║ member intake uses the approved intake and evidence endpoints 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:30:7 ΓÇ║ UnionEyes stakeholder demo journeys ΓÇ║ executive demo path is stable and continuity-safe 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:145:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ for-clc and context-aware pages preserve context in CTAs 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:183:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ pilot request CTA remains actionable from context routes 
+    [admin] ΓÇ║ e2e\stakeholder-demo-journeys.spec.ts:207:7 ΓÇ║ Marketing-to-app continuity routes ΓÇ║ executive and governance journeys avoid raw FSM language 
+    [admin] ΓÇ║ e2e\ue-workflow.spec.ts:20:7 ΓÇ║ UnionEyes QA E2E Flows ΓÇ║ 1) intake -> review -> assign -> escalate -> resolve 
+    [admin] ΓÇ║ tests\e2e\admin-assignment.spec.ts:14:7 ΓÇ║ UE E2E - admin assignment ΓÇ║ admin can assign and member cannot assign 
+  6 skipped
+  48 did not run
+  5 passed (34.2m)
+
+To open last HTML report run:
+[36m[39m
+[36m  pnpm exec playwright show-report[39m
+[36m[39m
+[e2e:governed] Γ£ö step 10: playwright (2056810 ms) ΓÇö exitCode=1 projects=[setup,admin]
+[e2e:governed] Γû╢ step 11: collect-artifacts
+[e2e:governed] Γ£ö step 11: collect-artifacts (238 ms) ΓÇö artifacts=playwright-report,test-results,server.log
+[e2e:governed] Γ£ö step 12: stop-server (sigterm)
+[e2e:governed] Γ£ö step 13: drop-db ue_e2e_20260724064034_14e83f
+[e2e:governed] Γ£ö step 14: verify-port-release port=3002
+[e2e:governed] summary written ΓåÆ C:\APPS\nzila-automation-phase0c\reports\audits\cupe-national-phase-0\phase-0c\run-artifacts\20260724064034_14e83f\run-summary.json
+C:\APPS\nzila-automation-phase0c\apps\union-eyes:
+ΓÇëERR_PNPM_RECURSIVE_RUN_FIRST_FAILΓÇë @nzila/union-eyes@1.0.0 e2e:governed: `tsx scripts/lifecycle/run.ts`
+Exit status 1
