@@ -54,6 +54,7 @@ import {
   MANAGED_SERVER_RUN_ID_ENV_VAR,
   verifyManagedServer,
 } from './managed-server-handshake'
+import { warmRoutes } from './route-prewarm'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -329,8 +330,16 @@ async function main(): Promise<void> {
           `managed-server handshake failed: reason=${handshake.reason} error=${handshake.error} actualRunId=${handshake.actualRunId ?? 'none'} actualApp=${handshake.actualApp ?? 'none'}`,
         )
       }
+      // Phase 0C.2R §6 Rung 1 — Route pre-warm probes. Sequentially warm
+      // Next.js dev-mode webpack cache for the highest-blast-radius routes
+      // BEFORE Playwright starts. Root cause per §6: parallel cold compiles
+      // stall /api/health responses, tripping ensureServerReady's 90s poll
+      // budget and cascading to 131 did-not-run failures.
+      // Best-effort — a failed probe logs but does NOT abort the lifecycle.
+      const prewarm = await warmRoutes({ baseUrl: `http://localhost:${port}` })
+      const prewarmDetail = `probed=${prewarm.summary.probed} ok=${prewarm.summary.ok} non2xx=${prewarm.summary.acceptedNon2xx} timeout=${prewarm.summary.timeout} net=${prewarm.summary.networkError} 5xx=${prewarm.summary.serverError} budgetExceeded=${prewarm.summary.budgetExceeded} elapsedMs=${Math.round(prewarm.summary.totalElapsedMs)}`
       return {
-        detail: `pid=${b.pid} port=${port} readyAfter=${readiness.elapsedMs}ms handshakeRunId=${handshake.actualRunId}`,
+        detail: `pid=${b.pid} port=${port} readyAfter=${readiness.elapsedMs}ms handshakeRunId=${handshake.actualRunId} prewarm[${prewarmDetail}]`,
         value: b,
       }
     }) as Awaited<ReturnType<typeof bootServer>>
