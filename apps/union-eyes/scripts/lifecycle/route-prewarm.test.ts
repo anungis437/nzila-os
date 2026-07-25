@@ -52,12 +52,23 @@ describe('§6 Rung 1 — Frozen constants', () => {
   })
 
   it('PREWARM_ROUTES includes the §BR-8 hot signatures', () => {
-    // Signatures observed in Batch A/C forensics.
+    // Signatures observed in Batch A/C forensics. Note: /en-CA/admin is
+    // NOT pre-warmed — it 404s (admin routes live under /dashboard/admin)
+    // and pre-warming a 404 triggers _error compile which races
+    // subsequent POST /api/auth/login (Run 6.1' regression, §6.11).
     expect(PREWARM_ROUTES).toContain('/sign-in')
-    expect(PREWARM_ROUTES).toContain('/en-CA/admin')
     expect(PREWARM_ROUTES).toContain('/continuity-assessment/start')
     expect(PREWARM_ROUTES).toContain('/api/feature-flags?flag=pilot-mode')
     expect(PREWARM_ROUTES).toContain('/api/health')
+  })
+
+  it('PREWARM_ROUTES does NOT include /en-CA/admin (404 → _error compile race)', () => {
+    // Regression guard for §6.11 root cause: pre-warming a 404 route
+    // forces Next.js dev-mode to compile _error; its late manifest write
+    // corrupts a concurrent POST /api/auth/login response with a
+    // "Manifest file is empty" 500. Restoring this route without a
+    // proven mitigation is forbidden.
+    expect(PREWARM_ROUTES).not.toContain('/en-CA/admin')
   })
 
   it('PREWARM_ROUTES contains no duplicates', () => {

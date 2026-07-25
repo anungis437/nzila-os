@@ -44,11 +44,24 @@
  *   3-5. Locale marketing pages — hit by bilingual + a11y (12/14 assertions).
  *   6.   /sign-in — first cold hit by security project at position 162/193.
  *   7.   Persona landing (member dashboard) — most-common assertRoleLanding.
- *   8.   Admin dashboard — 104-spec project; primary DNR cascade epicenter.
- *   9.   Continuity assessment start — RTP-8 (ocra-adaptive-flow 45s cold).
- *   10.  Feature-flags API — RTP-2 (ECONNRESET when compile queue saturated).
- *   11.  Managed-server health — cheap, but confirms handshake path warm.
- *   12.  Standard health — RTP-9 (governance apiRequest 20s cold).
+ *        Auth-protected admin routes are NOT pre-warmed: an unauthenticated
+ *        GET to /en-CA/dashboard/admin resolves to the dashboard root's
+ *        redirect (already warmed via /en-CA/dashboard), so a dedicated
+ *        admin probe would provide no additional coverage AND — as
+ *        empirically observed in Run 6.1' (2026-07-25 02:40 EDT) —
+ *        pre-warming a route that returns 404 forces Next.js dev-mode to
+ *        compile `_error`, whose write races the sequential auth-state
+ *        POST /api/auth/login stream and produces a "Manifest file is
+ *        empty" 500 on the 5th (admin) login. See §6.11.
+ *   8.   Continuity assessment start — RTP-8 (ocra-adaptive-flow 45s cold).
+ *   9.   Feature-flags API — RTP-2 (ECONNRESET when compile queue saturated).
+ *   10.  Managed-server health — cheap, but confirms handshake path warm.
+ *   11.  Standard health — RTP-9 (governance apiRequest 20s cold).
+ *
+ * INVARIANT: every route in this list MUST resolve to a 2xx or 3xx (redirect)
+ * on an unauthenticated GET. Never include a route known to 404, because
+ * Next.js dev-mode's `_error` compile is a manifest-write hazard that races
+ * subsequent POSTs (Run 6.1' evidence, see §6.11).
  */
 export const PREWARM_ROUTES: readonly string[] = Object.freeze([
   '/en-CA',
@@ -58,7 +71,6 @@ export const PREWARM_ROUTES: readonly string[] = Object.freeze([
   '/en-CA/story',
   '/sign-in',
   '/en-CA/dashboard',
-  '/en-CA/admin',
   '/continuity-assessment/start',
   '/api/feature-flags?flag=pilot-mode',
   '/api/health/managed-server',
