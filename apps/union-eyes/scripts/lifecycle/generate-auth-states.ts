@@ -62,6 +62,33 @@ export interface GenerateAuthStatesOptions {
   outputDir: string
   personas?: readonly PersonaSpec[]
   requestTimeoutMs?: number
+  /**
+   * Maximum number of RETRY attempts (excluding the initial attempt) for a
+   * transient failure (HTTP 5xx or fetch/network error) on either the login
+   * or /me call. Default 2 → up to 3 total attempts per call.
+   *
+   * Rationale: Next.js dev-mode compiles routes (including `_error`) lazily
+   * and the manifest write can race with concurrent request handlers,
+   * producing a transient 500 ("Manifest file is empty"). This retry loop
+   * makes the generator resilient to that dev-mode race without masking
+   * genuine product bugs — a real 5xx still fails after N attempts and
+   * every retry is logged to stderr for visibility.
+   *
+   * Non-transient failures (4xx, cookie missing, email mismatch) are NOT
+   * retried — those are product bugs and must fail loudly.
+   */
+  maxRetries?: number
+  /**
+   * Delay in ms between retry attempts. Default 1500ms. Chosen to allow a
+   * short-lived Next.js dev-mode compilation window (~1s typical) to
+   * complete before the next attempt.
+   */
+  retryDelayMs?: number
+  /**
+   * Optional sink for retry log lines (defaults to `process.stderr.write`).
+   * Injected in tests to assert retry visibility.
+   */
+  onRetryLog?: (line: string) => void
 }
 
 export interface PersonaResult {
@@ -76,6 +103,10 @@ export interface PersonaResult {
   cookieExpires?: number
   storageStatePath?: string
   error?: string
+  /** Number of login attempts made (1 = success on first try, 2+ = retries). */
+  loginAttempts?: number
+  /** Number of /me attempts made (1 = success on first try, 2+ = retries). */
+  meAttempts?: number
 }
 
 export interface GenerateAuthStatesResult {
@@ -157,6 +188,77 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
   }
 }
 
+// ─── Retry helper ───────────────────────────────────────────────────────────
+//
+// Retries the given async request producer on:
+//   - fetch/network errors (any thrown exception), OR
+//   - HTTP 5xx responses (transient framework/dev-mode failures).
+//
+// Does NOT retry on:
+//   - 4xx responses (bad credentials, forbidden, not found — product bugs),
+//   - 2xx/3xx responses (success — return as-is).
+//
+// Every retry attempt is logged to the provided sink so real product bugs
+// remain visible even after a retry masks a transient framework hiccup.
+
+interface RetryOutcome {
+  response?: Response
+  error?: unknown
+  attempts: number
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, ms))
+}
+
+async function fetchWithRetry(args: {
+  label: string
+  requestFn: () => Promise<Response>
+  maxRetries: number
+  retryDelayMs: number
+  log: (line: string) => void
+}): Promise<RetryOutcome> {
+  const maxAttempts = args.maxRetries + 1
+  let lastError: unknown
+  let lastResponse: Response | undefined
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await args.requestFn()
+      if (response.status < 500) {
+        return { response, attempts: attempt }
+      }
+      // 5xx — transient. Consume body so the socket can be reused.
+      const bodyPreview = await response.text().catch(() => '')
+      lastResponse = new Response(bodyPreview, {
+        status: response.status,
+        headers: response.headers,
+      })
+      if (attempt < maxAttempts) {
+        args.log(
+          `[generate-auth-states] retry ${attempt}/${args.maxRetries} for ${args.label}: HTTP ${response.status} — waiting ${args.retryDelayMs}ms (body: ${bodyPreview.slice(0, 160).replace(/\s+/g, ' ')})\n`,
+        )
+        await sleep(args.retryDelayMs)
+        continue
+      }
+      return { response: lastResponse, attempts: attempt }
+    } catch (err) {
+      lastError = err
+      if (attempt < maxAttempts) {
+        const msg = err instanceof Error ? err.message : String(err)
+        args.log(
+          `[generate-auth-states] retry ${attempt}/${args.maxRetries} for ${args.label}: fetch error ${msg} — waiting ${args.retryDelayMs}ms\n`,
+        )
+        await sleep(args.retryDelayMs)
+        continue
+      }
+      return { error: lastError, attempts: attempt }
+    }
+  }
+  // Unreachable — loop always returns.
+  return { error: lastError, response: lastResponse, attempts: maxAttempts }
+}
+
 // ─── Storage-state file ─────────────────────────────────────────────────────
 
 function buildStorageState(
@@ -214,6 +316,13 @@ export async function generateAuthStates(
 ): Promise<GenerateAuthStatesResult> {
   const personas = options.personas ?? CANONICAL_PERSONAS
   const timeoutMs = options.requestTimeoutMs ?? 20_000
+  const maxRetries = options.maxRetries ?? 2
+  const retryDelayMs = options.retryDelayMs ?? 1500
+  const log =
+    options.onRetryLog ??
+    ((line: string) => {
+      process.stderr.write(line)
+    })
   const domain = extractDomain(options.baseUrl)
 
   mkdirSync(options.outputDir, { recursive: true })
@@ -230,24 +339,42 @@ export async function generateAuthStates(
     }
 
     try {
-      // 1) Login
-      const loginRes = await fetchWithTimeout(
-        `${options.baseUrl.replace(/\/$/, '')}/api/auth/login`,
-        {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            accept: 'application/json',
-            'user-agent': E2E_USER_AGENT,
-          },
-          body: JSON.stringify({ email: persona.email, password: persona.password }),
-        },
-        timeoutMs,
-      )
+      // 1) Login (with retry on 5xx / network error)
+      const loginOutcome = await fetchWithRetry({
+        label: `POST /api/auth/login (${persona.role})`,
+        maxRetries,
+        retryDelayMs,
+        log,
+        requestFn: () =>
+          fetchWithTimeout(
+            `${options.baseUrl.replace(/\/$/, '')}/api/auth/login`,
+            {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+                accept: 'application/json',
+                'user-agent': E2E_USER_AGENT,
+              },
+              body: JSON.stringify({ email: persona.email, password: persona.password }),
+            },
+            timeoutMs,
+          ),
+      })
+      result.loginAttempts = loginOutcome.attempts
+      if (!loginOutcome.response) {
+        const msg =
+          loginOutcome.error instanceof Error
+            ? loginOutcome.error.message
+            : String(loginOutcome.error ?? 'unknown fetch error')
+        result.error = `login fetch failed after ${loginOutcome.attempts} attempts: ${msg}`
+        results.push(result)
+        continue
+      }
+      const loginRes = loginOutcome.response
       result.loginStatus = loginRes.status
       if (loginRes.status !== 200) {
         const text = await loginRes.text().catch(() => '')
-        result.error = `login returned ${loginRes.status}: ${text.slice(0, 240)}`
+        result.error = `login returned ${loginRes.status} after ${loginOutcome.attempts} attempts: ${text.slice(0, 240)}`
         results.push(result)
         continue
       }
@@ -262,18 +389,36 @@ export async function generateAuthStates(
       result.cookieValueSample = cookie.value.slice(0, 8) + '…'
       result.cookieExpires = cookie.expiresUnix
 
-      // 2) Verify via /api/auth/me carrying the cookie
-      const meRes = await fetchWithTimeout(
-        `${options.baseUrl.replace(/\/$/, '')}/api/auth/me`,
-        {
-          method: 'GET',
-          headers: {
-            cookie: `${cookie.name}=${cookie.value}`,
-            accept: 'application/json',
-          },
-        },
-        timeoutMs,
-      )
+      // 2) Verify via /api/auth/me carrying the cookie (with retry on 5xx / network error)
+      const meOutcome = await fetchWithRetry({
+        label: `GET /api/auth/me (${persona.role})`,
+        maxRetries,
+        retryDelayMs,
+        log,
+        requestFn: () =>
+          fetchWithTimeout(
+            `${options.baseUrl.replace(/\/$/, '')}/api/auth/me`,
+            {
+              method: 'GET',
+              headers: {
+                cookie: `${cookie.name}=${cookie.value}`,
+                accept: 'application/json',
+              },
+            },
+            timeoutMs,
+          ),
+      })
+      result.meAttempts = meOutcome.attempts
+      if (!meOutcome.response) {
+        const msg =
+          meOutcome.error instanceof Error
+            ? meOutcome.error.message
+            : String(meOutcome.error ?? 'unknown fetch error')
+        result.error = `me fetch failed after ${meOutcome.attempts} attempts: ${msg}`
+        results.push(result)
+        continue
+      }
+      const meRes = meOutcome.response
       result.meStatus = meRes.status
       let meBody: { user?: { email?: string } | null } = { user: null }
       try {
@@ -284,7 +429,7 @@ export async function generateAuthStates(
       const meEmail = meBody.user?.email
       result.meEmail = meEmail
       if (meRes.status !== 200 || !meEmail) {
-        result.error = `me returned status=${meRes.status} email=${JSON.stringify(meEmail)}`
+        result.error = `me returned status=${meRes.status} email=${JSON.stringify(meEmail)} after ${meOutcome.attempts} attempts`
         results.push(result)
         continue
       }

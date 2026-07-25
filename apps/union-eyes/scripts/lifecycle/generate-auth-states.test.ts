@@ -304,7 +304,14 @@ describe('generateAuthStates — summary.json is always written', () => {
     fetchMock.mockResolvedValue(
       makeLoginResponse({ status: 500, cookie: null, body: '{"error":"boom"}' }),
     )
-    const result = await generateAuthStates({ baseUrl: BASE_URL, outputDir: tmpDir })
+    // Disable retries so this test runs fast — the retry behavior itself is
+    // covered by the dedicated retry describe block below.
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      maxRetries: 0,
+      retryDelayMs: 0,
+    })
 
     expect(result.allOk).toBe(false)
     expect(result.results.every((r) => r.ok === false)).toBe(true)
@@ -342,6 +349,10 @@ describe('generateAuthStates — network error propagates as per-persona error',
       baseUrl: BASE_URL,
       outputDir: tmpDir,
       personas: [CANONICAL_PERSONAS[0]!],
+      // Disable retries so this test runs fast — retry-on-network-error is
+      // covered by the dedicated retry describe block below.
+      maxRetries: 0,
+      retryDelayMs: 0,
     })
 
     expect(result.allOk).toBe(false)
@@ -350,5 +361,242 @@ describe('generateAuthStates — network error propagates as per-persona error',
     expect(r.error).toContain('ECONNREFUSED')
     // No storageState written.
     expect(existsSync(path.join(tmpDir, `${r.role}.json`))).toBe(false)
+  })
+})
+
+// ─── §6 Rung 1.2 — bounded retry hardening ──────────────────────────────────
+//
+// Regression guards for the transient-failure retry loop introduced to
+// tolerate Next.js dev-mode manifest write races. Rules the retry loop
+// MUST honor:
+//   1. Retry ONLY on HTTP 5xx or thrown fetch error (never 4xx / never 2xx).
+//   2. Retry cap = `maxRetries` (default 2 → max 3 total attempts per call).
+//   3. Log every retry to the provided sink so real product bugs stay visible.
+//   4. Track attempt count in `PersonaResult.loginAttempts` / `.meAttempts`.
+//   5. Persistent failures still fail after N attempts (retry never masks
+//      genuine 5xx bugs — it just gives dev-mode races a chance to settle).
+
+describe('generateAuthStates — bounded retry (§6 Rung 1.2)', () => {
+  it('retries login on transient 500 and succeeds on the 2nd attempt', async () => {
+    let loginCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      const u = String(url)
+      if (u.endsWith('/api/auth/login')) {
+        loginCalls++
+        if (loginCalls === 1) {
+          // Simulate the "Manifest file is empty" dev-mode race — transient 500.
+          return Promise.resolve(makeLoginResponse({ status: 500, cookie: null, body: 'Manifest file is empty' }))
+        }
+        return Promise.resolve(makeLoginResponse({ cookie: goodCookie('member') }))
+      }
+      if (u.endsWith('/api/auth/me')) {
+        return Promise.resolve(makeMeResponse(CANONICAL_PERSONAS[0]!.email))
+      }
+      throw new Error(`unexpected ${u}`)
+    })
+
+    const logLines: string[] = []
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS[0]!],
+      maxRetries: 2,
+      retryDelayMs: 1, // fast test
+      onRetryLog: (line) => logLines.push(line),
+    })
+
+    expect(result.allOk).toBe(true)
+    const r = result.results[0]!
+    expect(r.ok).toBe(true)
+    expect(r.loginStatus).toBe(200)
+    expect(r.loginAttempts).toBe(2)
+    expect(r.meAttempts).toBe(1)
+    expect(loginCalls).toBe(2)
+    // Retry logged with the transient body preview.
+    expect(logLines.length).toBeGreaterThanOrEqual(1)
+    expect(logLines[0]).toContain('retry 1/2')
+    expect(logLines[0]).toContain('POST /api/auth/login (member)')
+    expect(logLines[0]).toContain('HTTP 500')
+    expect(logLines[0]).toContain('Manifest file is empty')
+  })
+
+  it('retries me on transient 500 and succeeds on the 3rd attempt', async () => {
+    let meCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      const u = String(url)
+      if (u.endsWith('/api/auth/login')) {
+        return Promise.resolve(makeLoginResponse({ cookie: goodCookie('admin') }))
+      }
+      if (u.endsWith('/api/auth/me')) {
+        meCalls++
+        if (meCalls < 3) {
+          return Promise.resolve(makeMeResponse(null, 502))
+        }
+        const admin = CANONICAL_PERSONAS.find((p) => p.role === 'admin')!
+        return Promise.resolve(makeMeResponse(admin.email))
+      }
+      throw new Error(`unexpected ${u}`)
+    })
+
+    const logLines: string[] = []
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS.find((p) => p.role === 'admin')!],
+      maxRetries: 2,
+      retryDelayMs: 1,
+      onRetryLog: (line) => logLines.push(line),
+    })
+
+    expect(result.allOk).toBe(true)
+    const r = result.results[0]!
+    expect(r.ok).toBe(true)
+    expect(r.meStatus).toBe(200)
+    expect(r.loginAttempts).toBe(1)
+    expect(r.meAttempts).toBe(3)
+    expect(meCalls).toBe(3)
+    expect(logLines.filter((l) => l.includes('/api/auth/me')).length).toBe(2)
+  })
+
+  it('fails after maxRetries+1 attempts when the 5xx is persistent', async () => {
+    let loginCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      if (String(url).endsWith('/api/auth/login')) {
+        loginCalls++
+        return Promise.resolve(makeLoginResponse({ status: 503, cookie: null, body: 'still broken' }))
+      }
+      throw new Error(`unexpected ${url}`)
+    })
+
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS[0]!],
+      maxRetries: 2,
+      retryDelayMs: 1,
+      onRetryLog: () => {},
+    })
+
+    expect(result.allOk).toBe(false)
+    const r = result.results[0]!
+    expect(r.ok).toBe(false)
+    expect(r.loginStatus).toBe(503)
+    expect(r.loginAttempts).toBe(3) // initial + 2 retries
+    expect(loginCalls).toBe(3)
+    expect(r.error).toContain('login returned 503 after 3 attempts')
+    // No storageState written — real product bug still surfaces after retries exhaust.
+    expect(existsSync(path.join(tmpDir, `${r.role}.json`))).toBe(false)
+  })
+
+  it('does NOT retry on 4xx (product bug — bad credentials must fail loudly)', async () => {
+    let loginCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      if (String(url).endsWith('/api/auth/login')) {
+        loginCalls++
+        return Promise.resolve(makeLoginResponse({ status: 401, cookie: null, body: '{"error":"bad-creds"}' }))
+      }
+      throw new Error(`unexpected ${url}`)
+    })
+
+    const logLines: string[] = []
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS[0]!],
+      maxRetries: 5, // large — should still not be used
+      retryDelayMs: 1,
+      onRetryLog: (line) => logLines.push(line),
+    })
+
+    expect(result.allOk).toBe(false)
+    const r = result.results[0]!
+    expect(r.ok).toBe(false)
+    expect(r.loginStatus).toBe(401)
+    expect(r.loginAttempts).toBe(1) // NOT retried
+    expect(loginCalls).toBe(1)
+    expect(logLines).toHaveLength(0) // no retry log lines for 4xx
+    expect(r.error).toContain('login returned 401 after 1 attempts')
+  })
+
+  it('retries on thrown fetch error (network) and succeeds on the 2nd attempt', async () => {
+    let loginCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      const u = String(url)
+      if (u.endsWith('/api/auth/login')) {
+        loginCalls++
+        if (loginCalls === 1) {
+          return Promise.reject(new Error('ECONNRESET'))
+        }
+        return Promise.resolve(makeLoginResponse({ cookie: goodCookie('steward') }))
+      }
+      if (u.endsWith('/api/auth/me')) {
+        return Promise.resolve(
+          makeMeResponse(CANONICAL_PERSONAS.find((p) => p.role === 'steward')!.email),
+        )
+      }
+      throw new Error(`unexpected ${u}`)
+    })
+
+    const logLines: string[] = []
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS.find((p) => p.role === 'steward')!],
+      maxRetries: 2,
+      retryDelayMs: 1,
+      onRetryLog: (line) => logLines.push(line),
+    })
+
+    expect(result.allOk).toBe(true)
+    const r = result.results[0]!
+    expect(r.ok).toBe(true)
+    expect(r.loginAttempts).toBe(2)
+    expect(loginCalls).toBe(2)
+    expect(logLines[0]).toContain('fetch error ECONNRESET')
+  })
+
+  it('honors maxRetries=0 (no retries — initial attempt only)', async () => {
+    let loginCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      if (String(url).endsWith('/api/auth/login')) {
+        loginCalls++
+        return Promise.resolve(makeLoginResponse({ status: 500, cookie: null, body: 'x' }))
+      }
+      throw new Error(`unexpected ${url}`)
+    })
+
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS[0]!],
+      maxRetries: 0,
+      retryDelayMs: 1,
+    })
+
+    expect(result.allOk).toBe(false)
+    expect(result.results[0]!.loginAttempts).toBe(1)
+    expect(loginCalls).toBe(1)
+  })
+
+  it('default maxRetries is 2 (3 total attempts) when option omitted', async () => {
+    let loginCalls = 0
+    fetchMock.mockImplementation((url: string) => {
+      if (String(url).endsWith('/api/auth/login')) {
+        loginCalls++
+        return Promise.resolve(makeLoginResponse({ status: 500, cookie: null, body: 'x' }))
+      }
+      throw new Error(`unexpected ${url}`)
+    })
+
+    const result = await generateAuthStates({
+      baseUrl: BASE_URL,
+      outputDir: tmpDir,
+      personas: [CANONICAL_PERSONAS[0]!],
+      retryDelayMs: 1, // omit maxRetries — expect default of 2
+    })
+
+    expect(result.allOk).toBe(false)
+    expect(result.results[0]!.loginAttempts).toBe(3)
+    expect(loginCalls).toBe(3)
   })
 })
