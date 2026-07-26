@@ -46,7 +46,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@auth/core": "^0.34.3",
+    "@auth/core": "^0.41.3",
     "@nzila/db": "workspace:*",
     "@nzila/org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
