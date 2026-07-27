@@ -22,15 +22,15 @@
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.400.0",
-    "next": "16.2.6",
+    "next": "16.2.12",
     "next-intl": "^4.9.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "@tailwindcss/postcss": "^4",
-    "@types/react": "^19.1.2",
+    "@types/react": "^19.2.17",
     "tailwindcss": "^4",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"

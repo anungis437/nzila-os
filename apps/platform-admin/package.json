@@ -40,10 +40,10 @@
     "@nzila/schema-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "next": "16.2.6",
+    "next": "16.2.12",
     "next-intl": "^4.9.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "zod": "^3.24.0"
   },
   "devDependencies": {

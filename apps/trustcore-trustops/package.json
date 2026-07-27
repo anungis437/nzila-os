@@ -27,9 +27,9 @@
     "@nzila/trustcore-trustops": "workspace:*",
     "@nzila/trustops-intelligence": "workspace:*",
     "@nzila/ui": "workspace:*",
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "zod": "^3.24.0"
   },
   "devDependencies": {
