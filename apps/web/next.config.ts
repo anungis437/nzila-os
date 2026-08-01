@@ -35,6 +35,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   turbopack: {},
+  serverExternalPackages: ['dompurify'],
   transpilePackages: ['@nzila/ui'],
   output: process.platform === 'win32' ? undefined : 'standalone',
   redirects: async () => [
