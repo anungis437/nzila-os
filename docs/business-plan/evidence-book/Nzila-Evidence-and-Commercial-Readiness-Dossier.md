@@ -1327,7 +1327,7 @@ The repository shows a concentrated maturation wave from early 2026 through mid-
 Add an authoritative corporate-and-product milestone ledger so future diligence does not need to reconstruct chronology across many files.
 
 ---
-# 15 — Founder Investment
+# 14 — Founder Investment
 
 ## Objective
 
@@ -1428,7 +1428,7 @@ The founder investment documented here materially reduces the execution risk ass
 Prepare a founder investment summary document for formal BDC filing, cross-referencing the repository evidence table above with a narrative time-and-effort summary authored by the founders.
 
 ---
-# 16 — Commercial Traction Pipeline
+# 15 — Commercial Traction Pipeline
 
 ## Objective
 
