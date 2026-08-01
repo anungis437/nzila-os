@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-01T21:52:03.442Z",
+  "generatedAt": "2026-08-01T22:24:46.085Z",
   "filesScanned": 2243,
-  "totalFindings": 2770,
+  "totalFindings": 2769,
   "findingsByRule": {
-    "stale-reference": 1041,
+    "stale-reference": 1040,
     "stale-package-ref": 68,
     "naming-inconsistency": 1527,
     "stale-date": 23,
@@ -11,7 +11,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1220,
+    "warning": 1219,
     "info": 1550
   },
   "findings": [
@@ -6125,13 +6125,6 @@
       "file": "docs/courtlens/target-architecture.md",
       "line": 1,
       "message": "References @nzila/abr but package does not exist"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md",
-      "line": 266,
-      "message": "Possible broken link: [`canonicalScoringPayload.ts`](../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts)"
     },
     {
       "rule": "stale-package-ref",

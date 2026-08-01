@@ -28,17 +28,16 @@ The existing constitutional architecture — encompassing Levels 0–12, ontolog
 
 ## Index
 
-1. [Chapter I — Constitutional Measurement Theory](#chapter-i--constitutional-measurement-theory)
-2. [Chapter II — Constitutional Metamodel](#chapter-ii--constitutional-metamodel)
-3. [Chapter III — Constitutional Engineering Lifecycle](#chapter-iii--constitutional-engineering-lifecycle)
-4. [Chapter IV — Constitutional Law Classification](#chapter-iv--constitutional-law-classification)
-5. [Chapter V — Constitutional Science Derivation](#chapter-v--constitutional-science-derivation)
-6. [Chapter VI — Constitutional Theory Evolution](#chapter-vi--constitutional-theory-evolution)
-7. [Chapter VII — Institutional Hierarchy](#chapter-vii--institutional-hierarchy)
-8. [Chapter VIII — Governance Epistemology](#chapter-viii--governance-epistemology)
-9. [Chapter IX — Institutional Dynamics](#chapter-ix--institutional-dynamics)
-10. [Chapter X — Institutional Intelligence](#chapter-x--institutional-intelligence)
-11. [Constitutional Consistency Proof](#constitutional-consistency-proof)
+1. [Chapter I — Constitutional Measurement Theory](#chapter-i-constitutional-measurement-theory)
+2. [Chapter II — Constitutional Metamodel](#chapter-ii-constitutional-metamodel)
+3. [Chapter III — Constitutional Engineering Lifecycle](#chapter-iii-constitutional-engineering-lifecycle)
+4. [Chapter IV — Constitutional Law Classification](#chapter-iv-constitutional-law-classification)
+5. [Chapter V — Constitutional Science Derivation](#chapter-v-constitutional-science-derivation)
+6. [Chapter VI — Constitutional Theory Evolution](#chapter-vi-constitutional-theory-evolution)
+7. [Chapter VII — Institutional Hierarchy](#chapter-vii-institutional-hierarchy)
+8. [Chapter VIII — Governance Epistemology](#chapter-viii-governance-epistemology)
+9. [Chapter IX — Institutional Dynamics](#chapter-ix-institutional-dynamics)
+10. [Chapter X — Institutional Intelligence](#chapter-x-institutional-intelligence)
 
 ---
 

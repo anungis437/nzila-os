@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-01T21:52:03.442Z
+> Generated: 2026-08-01T22:24:46.085Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 2243 |
-| Total Findings | 2770 |
+| Total Findings | 2769 |
 | Errors | 0 |
-| Warnings | 1220 |
+| Warnings | 1219 |
 | Info | 1550 |
 
 ## Findings by Rule
@@ -17,12 +17,12 @@
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1527 |
-| stale-reference | 1041 |
+| stale-reference | 1040 |
 | missing-package-readme | 111 |
 | stale-package-ref | 68 |
 | stale-date | 23 |
 
-## stale-reference (1041)
+## stale-reference (1040)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -833,7 +833,6 @@
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:137` — Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:138` — Possible broken link: [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
 - 🟡 `docs/categories/stakeholders/tutorials/first-app.md:135` — Possible broken link: [Reference: Package Catalogue](../reference/packages.md)
-- 🟡 `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md:266` — Possible broken link: [`canonicalScoringPayload.ts`](../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 - 🟡 `governance/business/README.md:158` — Possible broken link: [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/business/README.md:159` — Possible broken link: [Migration Plan](../MIGRATION_PLAN.md)

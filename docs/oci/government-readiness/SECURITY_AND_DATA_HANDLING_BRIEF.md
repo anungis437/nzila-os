@@ -263,13 +263,13 @@ These properties make the output **defensible** to an auditor or regulator:
 
 - **Determinism (canonical payload).** Identical substantive inputs yield a
   byte-identical *canonical scoring payload* (defined in
-  [`canonicalScoringPayload.ts`](../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts))
+  [`canonicalScoringPayload.ts`](../../../apps/union-eyes/lib/icra/traceability/canonicalScoringPayload.ts))
   and an identical SHA-256 reproducibility hash. Wall-clock metadata
   (`scoredAt`, `generatedAt`, `answeredAt`) is deliberately excluded from the
   canonical payload so it cannot mask substantive drift and so the hash is
   stable across runs. The *full* scoring outputs are **not** byte-identical
   because they contain those timestamps. See
-  [IMPLEMENTATION_STATUS.md §C3](./IMPLEMENTATION_STATUS.md#1-core-scoring--determinism).
+  [IMPLEMENTATION_STATUS.md §C3](./IMPLEMENTATION_STATUS.md#1-core-scoring-determinism).
 - **Non-regression.** The additive layer **never mutates** the scoring trace
   and **never changes** any score; proven by deep-clone comparison in the
   backward-compatibility test.
