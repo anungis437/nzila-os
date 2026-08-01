@@ -3,12 +3,12 @@
 # Amended Constitution: Scientific Foundations
 
 <!--
-  ARTIFACT TYPE: Constitutional Supplement (Immutable Core — Founder Sign-Off Required)
-  CONVENTION: Phase II — Scientific Foundations Convention
-  STATUS: Ratified by Constitutional Design Council
-  DOCTRINE_VERSION: 2.0.0
-  SUPERSEDES: Scientific Foundations Review findings (Phase I)
-  GOVERNANCE: Constitution-class — amendment requires supermajority of Constitutional Design Council
+  ARTIFACT TYPE: Constitutional Amendment Draft (Human Ratification Required)
+  CONVENTION: Phase II-A — Scientific Foundations Remediation Draft
+  STATUS: Draft for Human Ratification
+  DOCTRINE_VERSION: 2.0.0-draft
+  ADDRESSES: Scientific Foundations Review findings (Phase I) and independent audit remediation scope
+  GOVERNANCE: Constitution-class — human approval required under docs/doctrine/DOCTRINE_GOVERNANCE.md
   CANONICAL SOURCE: docs/doctrine/IEBOK_CONSTITUTIONAL_CONVENTION_PHASE_II.md
 -->
 
@@ -16,7 +16,7 @@
 
 ## Preamble
 
-This document constitutes the formal output of the Phase II sitting of the Constitutional Design Council for the Institutional Engineering Body of Knowledge (IEBOK). The Council convened with representatives from ISO Technical Committees, IEEE Standards Association, INCOSE, Systems Science, Philosophy of Science, Formal Ontology, Enterprise Architecture, Measurement Science, Complexity Science, Knowledge Engineering, Organizational Science, Academic Discipline Design, Research Methodology, and Scientific Epistemology.
+This document is a draft output of a simulated multidisciplinary constitutional review for the Institutional Engineering Body of Knowledge (IEBOK). It is an internal drafting artifact and does not represent participation, endorsement, certification, or approval by ISO, IEEE, INCOSE, or any external standards body.
 
 The Phase I Scientific Foundations Review identified constitutional gaps that, if unresolved, would prevent IEBOK from achieving recognition as a coherent scientific discipline by international standards bodies and academic institutions. This Phase II convention addressed those gaps.
 
@@ -169,7 +169,7 @@ No measurement designed in a methodology layer may redefine the constitutional d
 
 ## 1.8 Amendment Rules
 
-This chapter may be amended only through a Constitutional Design Council supermajority, upon evidence that a definition or rule has produced scientific incoherence or has been falsified by systematic cross-disciplinary evidence. Amendments must preserve backward compatibility with prior measurements conducted under the previous version, or must constitutionally retire those measurements.
+This chapter may be amended only through a simulated multidisciplinary constitutional review body authorized human approval, upon evidence that a definition or rule has produced scientific incoherence or has been falsified by systematic cross-disciplinary evidence. Amendments must preserve backward compatibility with prior measurements conducted under the previous version, or must constitutionally retire those measurements.
 
 ## 1.9 Illustrative Examples (Non-Prescriptive)
 
@@ -207,7 +207,7 @@ The metamodel must coherently handle the temporal dimension. Some entities persi
 
 ## 2.3 Constitutional Meta-Types
 
-The Constitutional Design Council recognizes nine constitutional meta-types:
+The simulated multidisciplinary constitutional review body recognizes nine constitutional meta-types:
 
 ---
 
@@ -227,7 +227,7 @@ The Constitutional Design Council recognizes nine constitutional meta-types:
 
 **Distinguishing Criterion:** Temporal boundedness and change-induction are jointly necessary and sufficient. An event that induces no change is constitutionally vacuous.
 
-**Institutional Examples:** A ratification vote, a leadership succession, a contract signing, an organizational merger, a policy amendment.
+**Institutional Examples:** An approval vote, a leadership succession, a contract signing, an organizational merger, a policy amendment.
 
 ---
 
@@ -237,7 +237,7 @@ The Constitutional Design Council recognizes nine constitutional meta-types:
 
 **Distinguishing Criterion:** A process is distinguished from an event by its internal temporal structure (it has phases or stages). It is distinguished from an enduring entity by ceasing to exist upon completion.
 
-**Institutional Examples:** A governance review process, an onboarding process, a policy development process, a ratification process, an audit process.
+**Institutional Examples:** A governance review process, an onboarding process, a policy development process, an approval process, an audit process.
 
 ---
 
@@ -269,7 +269,7 @@ The Constitutional Design Council recognizes nine constitutional meta-types:
 
 **Distinguishing Criterion:** States are distinguished from qualities by their temporal indexicality — a state is an entity's condition at a time, not a persisting attribute. Qualities may be stable through many states.
 
-**Institutional Examples:** An institution in a governance crisis state, a policy in a ratified state, a role in a vacant state, a committee in a suspended state.
+**Institutional Examples:** An institution in a governance crisis state, a policy in a approved state, a role in a vacant state, a committee in a suspended state.
 
 ---
 
@@ -279,7 +279,7 @@ The Constitutional Design Council recognizes nine constitutional meta-types:
 
 **Distinguishing Criterion:** Intentional institutional production and governance function are jointly necessary. Naturally occurring phenomena are not artifacts.
 
-**Institutional Examples:** A constitution, a governance policy, an operational procedure, a memorandum of understanding, a ratified bylaw, an audit report, a knowledge registry.
+**Institutional Examples:** A constitution, a governance policy, an operational procedure, a memorandum of understanding, a approved bylaw, an audit report, a knowledge registry.
 
 ---
 
@@ -319,7 +319,7 @@ Any proposed ontological entity must satisfy the following admission procedure b
 
 ## 2.5 Existing Entity Mapping
 
-The Constitutional Design Council finds that all currently recognized IEBOK ontological entities are mappable to these nine meta-types. The following mappings are constitutionally declared:
+The simulated multidisciplinary constitutional review body finds that all currently recognized IEBOK ontological entities are mappable to these nine meta-types. The following mappings are constitutionally declared:
 
 | Existing Entity Class | Primary Meta-Type(s) |
 |---|---|
@@ -339,7 +339,7 @@ The Constitutional Design Council finds that all currently recognized IEBOK onto
 
 ## 2.6 Amendment Rules
 
-A new meta-type may be added only if: (a) a candidate entity has been formally proposed and cannot be assigned to any existing meta-type; (b) the Constitutional Design Council has demonstrated that the gap is real and not terminological; and (c) the new meta-type satisfies the distinguishing criterion requirement. Meta-type elimination requires demonstration that all entities previously assigned to the eliminated type can be coherently reassigned without loss of ontological precision.
+A new meta-type may be added only if: (a) a candidate entity has been formally proposed and cannot be assigned to any existing meta-type; (b) the simulated multidisciplinary constitutional review body has demonstrated that the gap is real and not terminological; and (c) the new meta-type satisfies the distinguishing criterion requirement. Meta-type elimination requires demonstration that all entities previously assigned to the eliminated type can be coherently reassigned without loss of ontological precision.
 
 ---
 
@@ -476,7 +476,7 @@ IEBOK produces laws about institutional behavior and engineering. For these laws
 
 ## 4.2 Constitutional Law Classes
 
-The Constitutional Design Council recognizes five constitutional classes of institutional laws:
+The simulated multidisciplinary constitutional review body recognizes five constitutional classes of institutional laws:
 
 ---
 
@@ -584,7 +584,7 @@ The direction of dependency runs D → L → E → C, with N drawing from all cl
 
 ## 4.4 Amendment Rules
 
-The classification system itself may be amended only by Constitutional Design Council supermajority. A proposal to add or eliminate a law class must demonstrate either an irresolvable category of institutional law not captured by existing classes, or that an existing class has been shown to be reducible to another without loss of constitutional precision.
+The classification system itself may be amended only by simulated multidisciplinary constitutional review body supermajority. A proposal to add or eliminate a law class must demonstrate either an irresolvable category of institutional law not captured by existing classes, or that an existing class has been shown to be reducible to another without loss of constitutional precision.
 
 ---
 
@@ -615,7 +615,7 @@ Elimination of the science must produce a constitutional gap: a class of institu
 
 ## 5.3 Application to Existing Sciences
 
-The Constitutional Design Council applies the derivation procedure to the existing six sciences. The Council notes that the existing sciences were not formally named in the materials provided for this convention; accordingly, the Council operates on the basis of the classes of scientific inquiry that any coherent body of institutional knowledge about governance, continuity, engineering, and organizational behavior necessarily implies. The following six science classes are derived, not merely defended.
+The simulated multidisciplinary constitutional review body applies the derivation procedure to the existing six sciences. The Council notes that the existing sciences were not formally named in the materials provided for this convention; accordingly, the Council operates on the basis of the classes of scientific inquiry that any coherent body of institutional knowledge about governance, continuity, engineering, and organizational behavior necessarily implies. The following six science classes are derived, not merely defended.
 
 ---
 
@@ -772,7 +772,7 @@ An anomaly is a constitutionally recognized discrepancy between a prediction or 
 
 **Stage A-1 — Anomaly Registration.** The anomaly must be formally documented with: (a) the specific theoretical claim it challenges; (b) the evidence constituting the anomaly; (c) the measurement quality of the evidence.
 
-**Stage A-2 — Anomaly Classification.** The Constitutional Design Council classifies the anomaly as:
+**Stage A-2 — Anomaly Classification.** The simulated multidisciplinary constitutional review body classifies the anomaly as:
 - *Type I — Measurement Anomaly:* the discrepancy may be explained by measurement limitations. Resolution is sought at the measurement level before theoretical revision.
 - *Type II — Boundary Anomaly:* the theory is valid within its original domain but the anomaly lies outside that domain. Resolution is scope clarification, not theory revision.
 - *Type III — Internal Anomaly:* the discrepancy challenges a constitutionally central claim of the theory. Type III anomalies are escalated to the competing theories process.
@@ -789,7 +789,7 @@ When two or more theoretical accounts of the same institutional phenomena compet
 
 **Stage CT-2 — Evidence Gathering.** Evidence is gathered under Chapter I standards specifically designed to differentiate the competing theories.
 
-**Stage CT-3 — Comparative Evaluation.** The Constitutional Design Council evaluates the competing theories against: (a) the evidence gathered; (b) internal consistency; (c) consistency with definitional and logical laws; (d) predictive coverage across the IEBOK lifecycle phases.
+**Stage CT-3 — Comparative Evaluation.** The simulated multidisciplinary constitutional review body evaluates the competing theories against: (a) the evidence gathered; (b) internal consistency; (c) consistency with definitional and logical laws; (d) predictive coverage across the IEBOK lifecycle phases.
 
 **Stage CT-4 — Selection or Synthesis.** One of the following outcomes is constitutionally recognized:
 - *Selection:* one theory is constitutionally adopted and the other is retired with documented rationale.
@@ -805,13 +805,13 @@ A paradigm shift — a change in foundational assumptions affecting multiple law
 
 **Stage PE-2 — Extended Evidence Period.** A minimum constitutional review period allows the full IEBOK community of practice to evaluate the petition against available evidence.
 
-**Stage PE-3 — Constitutional Convention.** Paradigm evolution is ratified only through a constitutional convention equivalent in authority to the founding convention.
+**Stage PE-3 — Constitutional Convention.** Paradigm evolution is approved only through constitutional authority equivalent to the founding approval authority defined in doctrine governance.
 
-**Stage PE-4 — Constitutional Translation.** Upon ratification, a constitutional translation document must establish the correspondence between the prior paradigm's core concepts and the new paradigm's core concepts, to preserve the constitutional continuity of prior engineering work.
+**Stage PE-4 — Constitutional Translation.** Upon approval, a constitutional translation document must establish the correspondence between the prior paradigm's core concepts and the new paradigm's core concepts, to preserve the constitutional continuity of prior engineering work.
 
 ## 6.6 Law Refinement and Law Replacement
 
-**Law Refinement** is the constitutional process of adjusting the scope, precision, or boundary conditions of an existing law without changing its fundamental character. Refinement requires: documented evidence justifying the adjustment; demonstration that the core claim is preserved; and approval by the appropriate law class authority (Definitional laws require Council supermajority; Logical laws require formal validity demonstration; Empirical and Causal laws require evidence meeting Chapter I thresholds; Normative laws require constitutional value analysis).
+**Law Refinement** is the constitutional process of adjusting the scope, precision, or boundary conditions of an existing law without changing its fundamental character. Refinement requires: documented evidence justifying the adjustment; demonstration that the core claim is preserved; and approval by the appropriate law class authority (Definitional laws require authorized human approval under doctrine governance; Logical laws require formal validity demonstration; Empirical and Causal laws require evidence meeting Chapter I thresholds; Normative laws require constitutional value analysis).
 
 **Law Replacement** is the constitutional process of retiring an existing law and substituting a different law covering the same domain. Replacement requires all the elements of refinement plus: demonstration that the existing law cannot be adequately refined; demonstration that the proposed replacement satisfies all five derivation criteria for its law class; and documentation of the impact on all downstream laws and sciences that depend on the replaced law.
 
@@ -822,7 +822,7 @@ Constitutional amendments — changes to the foundational architecture of IEBOK 
 1. **Formal petition** documenting the constitutional insufficiency addressed.
 2. **Constitutional review period** allowing evaluation of the petition.
 3. **Consistency analysis** demonstrating that the proposed amendment does not introduce contradictions with existing constitutional architecture.
-4. **Supermajority ratification** by the Constitutional Design Council.
+4. **Authorized human approval** by constitutional authority defined in `docs/doctrine/DOCTRINE_GOVERNANCE.md`.
 5. **Constitutional documentation** updating all affected constitutional documents.
 6. **Translation record** establishing the governance continuity between prior and amended constitutional states.
 
@@ -915,7 +915,7 @@ IEBOK operates across governance traditions that differ in their foundational ac
 
 ## 8.2 Constitutional Finding on Cultural Boundedness
 
-The Constitutional Design Council finds, upon analysis, that the common articulations of legitimacy, authority, stewardship, and accountability within institutional literature are partly culturally bounded. Specifically:
+The simulated multidisciplinary constitutional review body finds, upon analysis, that the common articulations of legitimacy, authority, stewardship, and accountability within institutional literature are partly culturally bounded. Specifically:
 
 - Legitimacy is often implicitly grounded in electoral or majoritarian democratic theory, making it inapplicable to non-democratic governance traditions.
 - Authority is often conceptualized through hierarchical command structures, making it inadequate for consensus-based and network-based governance.
@@ -982,7 +982,7 @@ This finding requires redesign of all four concepts as constitutional abstractio
 **Constitutional Definition:** Accountability is the constitutional relationship in which an institutional actor is constitutionally required to provide an account of the exercise of authority, the use of institutional resources, and the outcomes of institutional decisions to designated institutional principals or communities, and to bear the constitutionally specified consequences of that accounting.
 
 **Constitutional Abstraction Criteria:**
-- Accountability does not presuppose adversarial oversight. It requires an answering relationship, which may be constituted through: reporting, deliberation, peer review, communal judgment, or formal adjudication — depending on the operative normative framework.
+- Accountability does not presuppose adversarial oversight. It requires an answering relationship, which may be constituted through: reporting, deliberation, structured review, communal judgment, or formal adjudication — depending on the operative normative framework.
 - Accountability does not presuppose punishment. Consequences may include: commendation, corrective action, removal from authority, institutional learning, restitution, or adjustment of norms.
 - Accountability is relational: it always runs from an accountable actor to an accountable principal within a constitutional framework.
 
@@ -1115,7 +1115,7 @@ The concept of Institutional Intelligence has been employed across the IEBOK eco
 
 ## 10.2 Candidate Categories Under Review
 
-The Constitutional Design Council considers the following candidate constitutional categories for Institutional Intelligence:
+The simulated multidisciplinary constitutional review body considers the following candidate constitutional categories for Institutional Intelligence:
 
 1. An emergent state — a property that arises from institutional system conditions.
 2. A measurable construct — a latent variable amenable to Chapter I measurement.
@@ -1142,7 +1142,7 @@ A systems property is a property of the institutional system as a whole, not red
 
 ## 10.4 Constitutional Determination
 
-The Constitutional Design Council finds, unanimously, that Institutional Intelligence is constitutionally a **composite quality** (Meta-Type Q in Chapter II) of an institutional system, constituted by the co-presence and functional integration of institutional capabilities (Meta-Type C) across the domains of governance, continuity, knowledge, and adaptive response — that: (a) includes emergent dimensions; (b) is amenable to measurement through the latent construct framework of Chapter I; (c) functions as the teleological orientation of Institutional Engineering; and (d) is produced — not merely described — through constitutionally governed engineering interventions.
+The simulated multidisciplinary constitutional review provisionally determines, that Institutional Intelligence is constitutionally a **composite quality** (Meta-Type Q in Chapter II) of an institutional system, constituted by the co-presence and functional integration of institutional capabilities (Meta-Type C) across the domains of governance, continuity, knowledge, and adaptive response — that: (a) includes emergent dimensions; (b) is amenable to measurement through the latent construct framework of Chapter I; (c) functions as the teleological orientation of Institutional Engineering; and (d) is produced — not merely described — through constitutionally governed engineering interventions.
 
 **Formal Constitutional Definition — Institutional Intelligence:**
 Institutional Intelligence is the quality of an institutional system constituted by the functional integration of its governance capability, continuity capability, knowledge capability, and adaptive capability, such that the system maintains operational coherence, governance legitimacy, and purposive continuity across time, transition, and environmental change, in a manner that is constitutionally recognizable, measurable, and improvable through institutional engineering.
@@ -1179,148 +1179,51 @@ The constitutional definition of Institutional Intelligence may be amended only 
 
 ---
 
-# Constitutional Consistency Proof
+---
 
-## Proof Purpose
 
-The Constitutional Design Council is required to demonstrate, before ratification, that:
+# Constitutional Draft Integrity and Traceability Status
 
-1. No contradictions have been introduced into the constitutional architecture.
-2. Every finding from the Phase I Scientific Foundations Review has been resolved or constitutionally deferred with justification.
-3. The resulting architecture could withstand scrutiny from ISO, IEEE, INCOSE, and a multidisciplinary academic review committee.
+## Draft Status and Authority
+
+This artifact is **DRAFT FOR HUMAN RATIFICATION**.
+
+- Authoring mode: **SIMULATED MULTIDISCIPLINARY CONSTITUTIONAL REVIEW**
+- Current authorized approver: **Founder-controlled constitutional authority per `docs/doctrine/DOCTRINE_GOVERNANCE.md`**
+- Required approval action: **explicit human sign-off by authorized approver**
+- Post-approval amendment authority: governed by approved constitutional governance record
+- Distinction: authoring/review does not constitute ratification
+
+## Independent References
+
+This draft must be read with the following canonical remediation records:
+
+1. `docs/doctrine/IEBOK_PHASE_I_FINDINGS_REGISTER.md`
+2. `docs/doctrine/IEBOK_PHASE_II_INDEPENDENT_RATIFICATION_AUDIT.md`
+3. `docs/doctrine/IEBOK_CONSTITUTIONAL_PRECEDENCE.md`
+4. `docs/doctrine/IEBOK_CONSTITUTIONAL_METAMODEL.md`
+5. `docs/doctrine/IEBOK_AXIOM_AND_LAW_REGISTRY.md`
+6. `docs/doctrine/IEBOK_MEASUREMENT_CONFORMANCE_REGISTER.md`
+7. `docs/doctrine/IEBOK_SCIENCE_DERIVATION_RECORD.md`
+8. `docs/doctrine/IEBOK_LIFECYCLE_CONFORMANCE_MATRIX.md`
+9. `docs/doctrine/IEBOK_ENTROPY_DISPOSITION.md`
+10. `docs/doctrine/IEBOK_INSTITUTIONAL_INTELLIGENCE_CLASSIFICATION.md`
+
+## External-Authority Language Constraint
+
+Statements in this draft regarding ISO, IEEE, INCOSE, or academic compatibility are design-oriented comparative claims, not established external endorsements or certifications.
+
+## RESIDUAL CONSTITUTIONAL QUESTIONS
+
+| Issue ID | Reason unresolved | Governing interim rule | Evidence required | Review trigger | Amendment path |
+|---|---|---|---|---|---|
+| RCQ-01 | Full science minimality/non-overlap not independently reproduced | Maintain six-science structure as provisional | Independent derivation replication across candidate alternatives | Contradictory derivation evidence | Chapter V amendment route |
+| RCQ-02 | Legacy scoring models predate Chapter I measurement constitution | Use models as transitional/illustrative unless conformance evidence exists | Reliability/validity/calibration/uncertainty/reproducibility package | Model used for empirical-law evidence | Chapter I + conformance register update |
+| RCQ-03 | Cross-cultural measurement equivalence unresolved | No universal cross-cultural comparability claims | Comparative measurement studies across governance traditions | New cross-cultural deployment with inconsistent results | Constitutional measurement amendment process |
+| RCQ-04 | Institutional Intelligence final closure still provisional | Apply provisional quality + second-order construct classification | Construct-structure independence and exhaustiveness evidence | Conflicting classification results from validated studies | Chapter X amendment route |
+| RCQ-05 | Entropy remains non-formal in constitutional state | Treat entropy as analogical model only | Formal theoretical and empirical demonstration for quantity status | Proposal to use equation-level entropy claims | Entropy disposition amendment path |
 
 ---
 
-## Proof Section 1 — Internal Consistency
-
-The Council examines the ten chapters for internal contradictions:
-
-**Check 1.1 — Measurement Theory (Ch. I) vs. Metamodel (Ch. II).**
-Chapter I defines observable and latent constructs. Chapter II defines meta-types including Quality (Q), which is the primary meta-type for latent constructs, and observable phenomena as properties of Enduring Entities (E) or States (S). *No contradiction.* The chapters are mutually reinforcing: Chapter II provides the ontological basis for what is measured; Chapter I provides the epistemological rules for measurement.
-
-**Check 1.2 — Metamodel (Ch. II) vs. Lifecycle (Ch. III).**
-Chapter II defines nine meta-types. Chapter III defines ten lifecycle phases. Each lifecycle phase produces outputs that are classifiable as meta-type instances: recognition produces statements about Enduring Entities (E) and States (S); design produces Artifacts (A) specifying target States (S) and Processes (P); implementation produces Events (V); and so on. *No contradiction.*
-
-**Check 1.3 — Law Classification (Ch. IV) vs. Science Derivation (Ch. V).**
-Chapter IV defines five law classes. Chapter V derives six sciences, each of which produces laws. Institutional Ontology produces Definitional and Logical laws. Governance Science produces Normative and Empirical laws. Continuity Science produces Causal and Empirical laws. Organizational Dynamics Science produces Empirical and Causal laws. Measurement Science produces Definitional and Empirical laws. Engineering Science produces Normative and Logical laws. All five law classes are produced by at least one science. All six sciences produce at least one law class. *No contradiction.*
-
-**Check 1.4 — Lifecycle (Ch. III) vs. Theory Evolution (Ch. VI).**
-The lifecycle governs engineering engagements. Theory evolution governs the evolution of the theoretical architecture itself. These are constitutionally distinct domains. The lifecycle's anomaly handling (Phases 8 and 9 trigger re-entry) is distinguishable from Chapter VI anomaly handling (which governs the constitutional law system). *No contradiction.*
-
-**Check 1.5 — Institutional Hierarchy (Ch. VII) vs. Metamodel (Ch. II).**
-Chapter VII introduces four structural types. Each maps cleanly to Chapter II meta-types: Federated Institutions are Enduring Entities (E) with Relationship (R) meta-types among members; Nested Institutions are Enduring Entities (E) with Constraint (K) relationships to their containing institutions; Subsidiary Institutions are Enduring Entities (E) with Capability (C) delegated from a parent; Institutional Ecosystems are constituted by Relationship (R) networks among Enduring Entities (E). *No contradiction.*
-
-**Check 1.6 — Governance Epistemology (Ch. VIII) vs. Constitution (constitution.md).**
-Chapter VIII redesigns legitimacy, authority, stewardship, and accountability as constitutional abstractions. The existing constitution.md uses these terms in their common sense. The Chapter VIII abstractions are supersets of the common-sense usages — they encompass the democratic and operational contexts of the existing constitution without contradiction. *No contradiction. The Chapter VIII abstractions constitute backward-compatible generalizations.*
-
-**Check 1.7 — Institutional Dynamics (Ch. IX) vs. Lifecycle (Ch. III).**
-Chapter IX introduces seven dynamic phenomena. Each has a lifecycle mapping: time is presupposed by the lifecycle's phase sequencing; change is instantiated as state transitions (Phases 5, 9); emergence is addressed as a monitoring responsibility in Phase 8; feedback is constitutionally required to be characterized in design (Phase 4); thresholds may trigger lifecycle re-entry at any phase; path dependence is addressed in characterization (Phase 2) and historical evidence requirements; adaptation is the constitutional purpose of Phase 9 (Evolution). *No contradiction.*
-
-**Check 1.8 — Institutional Intelligence (Ch. X) vs. All Other Chapters.**
-Institutional Intelligence is constitutionally determined as a Quality (Meta-Type Q, Chapter II) of an Enduring Entity (Meta-Type E, Chapter II), constituted by four Capabilities (Meta-Type C, Chapter II), measurable as a latent construct (Chapter I), producible through the full Engineering Lifecycle (Chapter III), studied by all six sciences (Chapter V), oriented by Normative laws (Chapter IV), applicable across all institutional hierarchy types (Chapter VII), assessable through the constitutional abstractions of Chapter VIII, and subject to the dynamic phenomena of Chapter IX. *No contradiction. Chapter X is internally coherent with the full constitutional architecture.*
-
-**Consistency Verdict: No internal contradictions are present in the amended constitution.**
-
----
-
-## Proof Section 2 — Resolution of Phase I Scientific Foundations Findings
-
-The Constitutional Design Council reviews the findings accepted as the working agenda for this convention:
-
-| Phase I Finding | Chapter Addressing It | Resolution Status |
-|---|---|---|
-| Absence of constitutional measurement theory | Chapter I | Fully Resolved |
-| Absence of constitutional metamodel for ontological concepts | Chapter II | Fully Resolved |
-| Absence of a methodology-independent engineering lifecycle | Chapter III | Fully Resolved |
-| Absence of constitutional classification of laws | Chapter IV | Fully Resolved |
-| Absence of a formal derivation procedure for sciences | Chapter V | Fully Resolved |
-| Inability to constitutionally handle anomalies and competing theories | Chapter VI | Fully Resolved |
-| Ontological inadequacy for complex institutional structures | Chapter VII | Fully Resolved |
-| Cultural boundedness of governance concepts | Chapter VIII | Fully Resolved — redesigned as constitutional abstractions |
-| Absence of constitutional treatment of institutional dynamics | Chapter IX | Fully Resolved |
-| Definitional ambiguity of Institutional Intelligence | Chapter X | Fully Resolved |
-
-**Resolution Verdict: All Phase I findings are constitutionally resolved. No findings have been deferred.**
-
----
-
-## Proof Section 3 — ISO/IEEE/INCOSE/Academic Defensibility
-
-### ISO Compatibility
-
-ISO standards (particularly ISO/IEC Guide 99 on measurement, ISO 9000 series on quality management, and ISO/IEC 15288 on systems engineering lifecycle) are compatible with this constitution in the following respects:
-
-- Chapter I's definitions of measurement, uncertainty, validity, and calibration are consistent with ISO/IEC Guide 99 (International Vocabulary of Metrology).
-- Chapter III's lifecycle (Recognition through Retirement) maps coherently to ISO/IEC 15288 lifecycle processes without contradiction, while remaining more abstract and domain-general.
-- Chapter IV's law classification provides a constitutional epistemology for claims of the type made in ISO management system standards.
-- Chapter VIII's constitutional abstractions of legitimacy and accountability are compatible with ISO governance documentation requirements.
-
-*ISO Compatibility finding: Compatible. No ISO conflicts identified.*
-
-### IEEE Compatibility
-
-IEEE standards for systems engineering, software engineering, and knowledge representation are compatible with this constitution in the following respects:
-
-- Chapter III's lifecycle is compatible with IEEE 15288 and related standards.
-- Chapter II's metamodel provides a formal ontological foundation compatible with IEEE ontology and knowledge representation standards.
-- Chapter I's measurement theory is compatible with IEEE measurement standards' epistemological requirements.
-- Chapter VI's theory evolution process is compatible with IEEE's standards review and revision procedures.
-
-*IEEE Compatibility finding: Compatible. No IEEE conflicts identified.*
-
-### INCOSE Compatibility
-
-INCOSE's systems engineering body of knowledge (SEBoK) and systems engineering handbook are compatible with this constitution in the following respects:
-
-- Chapter III's lifecycle is a superset of, and is compatible with, INCOSE's systems engineering lifecycle processes.
-- Chapter II's metamodel provides an ontological foundation for INCOSE-compatible system modeling.
-- Chapter V's science derivation is compatible with INCOSE's systems science foundations.
-- Chapter IX's institutional dynamics treatment extends INCOSE's complexity and emergence concepts to the institutional domain.
-
-*INCOSE Compatibility finding: Compatible. No INCOSE conflicts identified.*
-
-### Academic Review Defensibility
-
-The constitutional architecture satisfies the following academic review criteria:
-
-- **Philosophy of Science:** Chapter IV's law classification satisfies standard philosophy-of-science requirements for falsifiability (Popper), demarcation criteria, and theory structure. Chapter VI's theory evolution satisfies Kuhnian and Lakatosian requirements for progressive scientific programs.
-- **Formal Ontology:** Chapter II's metamodel is consistent with BFO (Basic Formal Ontology) and DOLCE (Descriptive Ontology for Linguistic and Cognitive Engineering) upper-level ontologies.
-- **Measurement Science:** Chapter I's measurement theory is consistent with the representational theory of measurement and with Item Response Theory and Classical Test Theory for latent construct measurement.
-- **Systems Science:** Chapter IX's institutional dynamics treatment is consistent with the complexity science and systems theory literature without being mathematically over-specified.
-- **Organizational Science:** Chapter VII's institutional hierarchy and Chapter VIII's governance epistemology are consistent with organizational theory literature on federalism, nested institutions, and comparative governance.
-
-*Academic defensibility finding: The constitutional architecture is defensible against multidisciplinary academic review. No fundamental disciplinary conflicts are identified.*
-
----
-
-## Proof Section 4 — Constitutional Ratification Statement
-
-The Constitutional Design Council, having:
-
-1. Produced ten constitutional chapters addressing all Phase I findings;
-2. Verified internal consistency across all chapters;
-3. Confirmed resolution of all Phase I findings;
-4. Demonstrated compatibility with ISO, IEEE, INCOSE, and multidisciplinary academic standards;
-
-— **hereby unanimously ratifies the amended IEBOK constitution as constituted by this document, integrated with the existing constitutional architecture.**
-
-The Convention is formally concluded.
-
----
-
-## Remaining Constitutional Issues
-
-The Convention documents the following constitutional issues for future convention consideration. These are not deferrals of Phase II work; they are issues that arose during Phase II deliberations and could not be resolved without further evidence or extended deliberation:
-
-**Issue R-1 — Cross-Cultural Measurement Equivalence.** Chapter I establishes constitutional measurement theory without fully resolving how measurement validity is constitutionally established across institutional cultures that differ in their operative epistemological frameworks. Future conventions should develop constitutional guidance on cross-cultural measurement equivalence.
-
-**Issue R-2 — Constitutional Relationship Between Sciences and Methodologies.** The relationship between the six constitutional sciences and the IEBOK methodologies is constitutionally clear in principle (methodologies instantiate lifecycle phases using science-grounded theories) but the formal derivation procedure for methodologies from sciences has not been constitutionally established. Future conventions should complete this derivation.
-
-**Issue R-3 — Minimum Institutional Scale for Constitutional Applicability.** IEBOK's constitutional architecture is developed with reference to recognizable institutions. The minimum scale at which the constitution applies — whether a two-person governance body, a temporary task force, or a formal registered institution — has not been constitutionally determined. Future conventions should establish constitutional scale criteria.
-
----
-
-*This document is ratified by the Constitutional Design Council.*
-*Convention Date: 2026-08-01*
-*Constitutional Version: IEBOK v2.0.0*
-*Governance: Constitution-class — amendment requires supermajority of the Constitutional Design Council.*
+*Status: DRAFT FOR HUMAN RATIFICATION*
+*Ratification has not occurred in this artifact.*
