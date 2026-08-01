@@ -37,6 +37,32 @@ This evidence book converts major business assertions about Nzila Ventures into 
 | `APPENDICES.md` | File index, glossary, abbreviations, legend, and Institutional Assets appendix |
 | `Nzila-Evidence-and-Commercial-Readiness-Dossier.md` | Full compiled dossier |
 
+## BDC Underwriter Stress-Test Series
+
+The following documents apply six-hat BDC underwriting scrutiny to the dossier. They are not rewrites — they are adversarial stress tests intended to surface every question a BDC credit committee would raise before the meeting.
+
+| File | Purpose |
+|---|---|
+| `BDC-U1-Underwriter-Attack-Review.md` | All 23 underwriting findings across repayment, collateral, management, commercial, legal, governance, and evidence — with severity, exact document reference, and wording to correct |
+| `BDC-U2-Repayment-Story-Audit.md` | Month-by-month repayment trace, downside scenario, covenant risks, and liquidity risks |
+| `BDC-U3-Financial-Consistency-Audit.md` | Cross-document financial contradictions, missing assumptions, and impossible timing |
+| `BDC-U4-Commercial-Evidence-Audit.md` | Claim-evidence-confidence-gap matrix with Keep / Rewrite / Downgrade / Remove dispositions |
+| `BDC-U5-Founder-Investment-Ledger.md` | Estimated founder investment ledger separating cash invested, sweat equity, and IP created |
+| `BDC-U6-Management-Credibility-Review.md` | Promotional language audit; capability-to-evidence map; evidence-based management summary |
+| `BDC-U7-Executive-Summary-Compressed.md` | Two-page BDC-facing executive summary answering all five committee questions |
+| `BDC-U8-Decline-Memo-and-Rebuttal.md` | Strongest possible decline memo (with exact quotes); strongest rebuttal using only in-repository evidence |
+
+### Reading Order for BDC Preparation
+
+1. `BDC-U1-Underwriter-Attack-Review.md` — know every finding before the meeting
+2. `BDC-U2-Repayment-Story-Audit.md` — draft the missing repayment model
+3. `BDC-U3-Financial-Consistency-Audit.md` — fix the numbered inconsistencies
+4. `BDC-U4-Commercial-Evidence-Audit.md` — remove or rewrite flagged claims
+5. `BDC-U5-Founder-Investment-Ledger.md` — get founder to sign off with actual figures
+6. `BDC-U6-Management-Credibility-Review.md` — complete Michel's documentation
+7. `BDC-U7-Executive-Summary-Compressed.md` — use as the cover page
+8. `BDC-U8-Decline-Memo-and-Rebuttal.md` — rehearse the hard questions
+
 ## Confidence Rating Legend
 
 | Confidence | Meaning |
