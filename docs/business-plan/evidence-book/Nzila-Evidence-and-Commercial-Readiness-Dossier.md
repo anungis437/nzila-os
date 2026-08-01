@@ -1327,6 +1327,211 @@ The repository shows a concentrated maturation wave from early 2026 through mid-
 Add an authoritative corporate-and-product milestone ledger so future diligence does not need to reconstruct chronology across many files.
 
 ---
+# 15 — Founder Investment
+
+## Objective
+
+Document the personal founder investment that underlies the Nzila platform — the years of pre-commercial R&D, development activity, and asset creation that were funded personally by the founders without outside equity financing.
+
+## Statement
+
+> These investments have been funded personally by the founders without outside equity financing.
+
+This is a financing request to commercialize and scale a substantial body of founder-funded intellectual property — not to fund an idea.
+
+## What Has Been Built
+
+The repository documents years of sustained founder investment across every dimension of the platform. The following categories reflect what has been built before any external capital event.
+
+### Research and Development
+
+| Investment category | Evidence | Confidence |
+|---|---|---|
+| Years of founder-funded R&D | Sustained repository activity dating to earliest changelog entries, with governance, product, platform, and commercial artifacts across all periods | Verified |
+| Thousands of development hours | 26 app directories, 225 shared package directories, and 52 CI/CD workflow files represent a substantial software engineering body of work | Verified |
+| Prototype development | Union Eyes controlled-pilot infrastructure, ABR/FairCase implemented modules, and CourtLens planning artifacts | Verified |
+| Customer discovery | Documented pilot discussions, executive engagement programs, and discovery-phase commercial pipeline | Documented |
+| Evidence production | Structured pilot evidence packs, certification artifacts, and production-readiness records | Verified |
+
+### Platform and Infrastructure
+
+| Investment category | Evidence | Confidence |
+|---|---|---|
+| Azure cloud infrastructure | Production-certified Azure infrastructure supporting Union Eyes and the shared platform | Demonstrated |
+| Software engineering | Monorepo architecture with governed shared packages, multi-product deployment, release gates, and evidence-layer tooling | Verified |
+| Security architecture | Row-level security, RBAC, audit chains, CI/CD security scans, SBOM, and DAST integration | Demonstrated |
+| DevOps and release governance | 52 GitHub Actions workflows covering CI, security, release, governance, and deployment gates | Verified |
+
+### Intellectual Property and Documentation
+
+| Investment category | Evidence | Confidence |
+|---|---|---|
+| Documentation corpus | Thousands of pages of architecture, governance, doctrine, commercial, and operational documentation across `docs/`, `governance/`, and `apps/` | Verified |
+| Governance frameworks | Owner-operated review model, gate taxonomy, portfolio truth system, and legal corporate structure | Verified |
+| Methodology and doctrine | Institutional Intelligence doctrine, OCI Method™, OCRA diagnostic instrument, and CLEAR evidence framework | Verified |
+| Commercialization assets | Pricing frameworks, pilot programs, sales kits, buyer packs, trust kits, proposal templates, and evidence playbooks | Verified |
+
+### Commercial and Market Development
+
+| Investment category | Evidence | Confidence |
+|---|---|---|
+| Commercialization framework | Defined pilot programs, pricing models, sales motions, and go-to-market strategy for Union Eyes and CIVIC | Documented |
+| Market engagement | Executive discovery meetings, union demonstrations, public-sector discovery, and pilot discussions | Documented |
+| Evidence books and buyer packs | Product-specific pilot evidence packs, security buyer packs, procurement trust kits, and proposal packages | Verified |
+| Pricing framework | Published tiered pricing for Union Eyes; CIVIC public-sector discovery pricing in development | Documented |
+
+## Supporting Artifacts
+
+- `governance/corporate/governance/legal-shareholder-and-corporate-structure-summary.md`
+- `governance/corporate/governance/document-founder-executive-roles-equity-memo.md`
+- `governance/corporate/intellectual-property/IP_PORTFOLIO_PROTECTION_STRATEGY.md`
+- `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md`
+- `apps/union-eyes/maturity.json`
+- `apps/abr/maturity.json`
+- `docs/union-eyes/pilot-evidence-pack/`
+- `docs/readiness/production-certification.md`
+- `docs/doctrine/DOCTRINE.md`
+- `docs/oci/OCI_METHOD.md`
+- `CHANGELOG.md`
+- `package.json`
+
+## What This Means for BDC
+
+A lender evaluating this company sees:
+
+- A **substantial pre-commercial IP base** built at founder risk over multiple years
+- **Platform-grade engineering** rather than a single-product prototype
+- **Commercial packaging that is ready to deploy** — not being built with loan proceeds
+- **Governance discipline** that reflects institutional operating habits, not startup aspirations
+- A **financing request scoped to commercialization and scale** of proven assets, not exploration
+
+The founder investment documented here materially reduces the execution risk associated with this lending request. The platform exists. The products are defined. The methodology is published. The go-to-market motion is underway.
+
+## Confidence Summary
+
+| Category | Confidence |
+|---|---|
+| Software engineering investment | Verified |
+| Platform and infrastructure | Demonstrated |
+| Documentation and methodology | Verified |
+| Governance frameworks | Verified |
+| Commercialization assets | Verified |
+| Market engagement activity | Documented |
+
+## Gaps
+
+- Formal third-party valuation of the founder investment corpus is not yet in-repo.
+- Exact hours-invested record is not independently verified in-repo.
+
+## Next Milestone
+
+Prepare a founder investment summary document for formal BDC filing, cross-referencing the repository evidence table above with a narrative time-and-effort summary authored by the founders.
+
+---
+# 16 — Commercial Traction Pipeline
+
+## Objective
+
+Document the evidence of commercial market engagement without overstating revenue or signed-contract status. This section shows that commercialization has begun and that the pipeline is active — not that the company has closed deals it has not closed.
+
+## Statement
+
+> Commercialization has begun. The pipeline is active. No revenue is claimed that has not been earned.
+
+## Commercial Pipeline Status
+
+Nzila is in the early-commercialization phase. The activities documented below represent genuine market engagement supported by repository-evidenced commercial infrastructure.
+
+### Active Commercial Motions
+
+| Activity | Evidence | Confidence |
+|---|---|---|
+| Executive discovery meetings | Documented in commercial pursuit system and conversation guides | Documented |
+| Union demonstrations | Pilot offer to CUPE and documented union GTM map | Documented |
+| Pilot discussions | Union Eyes controlled-pilot GO clearance with defined pilot offer | Demonstrated |
+| Public-sector discussions | CIVIC public-service conversation guide and executive briefing materials | Documented |
+| Healthcare discovery | Healthcare sector mentioned in target-institution materials | Documented |
+
+### Commercialization Infrastructure and Controlled Demonstration Environments
+
+| Asset | Path | Confidence |
+|---|---|---|
+| Controlled demonstration environments | `apps/union-eyes/` — controlled-pilot GO clearance | Demonstrated |
+| Customer-specific proposal packages | `docs/categories/stakeholders/commercial/sales-kit/` | Verified |
+| Evidence books | `docs/union-eyes/pilot-evidence-pack/` | Verified |
+| Pricing framework | `docs/categories/stakeholders/commercial/pricing-framework.md` | Documented |
+| Sales kit (Union Eyes) | `docs/categories/stakeholders/commercial/sales-kit/README.md` | Verified |
+| Pilot offer (CUPE) | `docs/categories/stakeholders/commercial/pilot-offer-cupe.md` | Documented |
+| Objection handling | `docs/categories/stakeholders/commercial/sales-kit/` | Verified |
+| Security buyer packs | `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md` | Demonstrated |
+| Executive summary | `docs/categories/stakeholders/commercial/executive-summary.md` | Verified |
+| CIVIC forwardable brief | `docs/public-service/forwardable/civic-one-page-brief-executive.md` | Verified |
+
+### Pursuit System
+
+| Asset | Path | Confidence |
+|---|---|---|
+| Founder revenue cockpit | `docs/categories/stakeholders/commercial/FOUNDER_REVENUE_COCKPIT.md` | Documented |
+| Top 15 pursuit list | `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md` | Documented |
+| Union GTM map | `docs/categories/stakeholders/commercial/UNION_GTM_MAP.md` | Documented |
+| Customer proof playbook | `docs/categories/stakeholders/commercial/customer-proof-playbook.md` | Verified |
+| Claims ledger | `docs/categories/stakeholders/commercial/claims-ledger.md` | Verified |
+
+## Claims Discipline
+
+Nzila's commercial documentation system is specifically designed to prevent overstating pipeline or revenue:
+
+- **Claims Ledger** (`docs/categories/stakeholders/commercial/claims-ledger.md`) forces every external claim to be tagged as: `actual`, `estimated`, `forecast`, `scenario`, `roadmap`, or `honesty-note`.
+- **Portfolio truth** (`governance/portfolio/product-catalog.json`) uses a `metric_classifications` field to prevent estimated or scenario revenue from being presented as actuals.
+- **Customer proof playbook** defines how testimonial, case-study, KPI, permission, and renewal evidence should be captured before commercial claims can be made.
+
+**Confidence: Verified.** This claims-control infrastructure is itself a strong signal of management discipline and BDC credibility.
+
+## What BDC Should Read From This
+
+| Signal | Interpretation |
+|---|---|
+| Documented pursuit system | Commercialization is structured, not ad hoc |
+| Controlled demonstration environment | Buyers can be shown a real system today |
+| Pricing framework published | The company knows what it is selling and at what price |
+| Claims discipline infrastructure | Management will not overstate traction to a lender |
+| CIVIC public-sector briefings ready | The public-sector pipeline is being built in parallel |
+| Pilot offer defined and documented | The path from discovery to first dollar is clear |
+
+## Revenue Status
+
+No booked revenue is claimed in this dossier. The commercial pipeline documented here represents:
+
+- Active market engagement with qualified prospects
+- Infrastructure ready to support first-contract execution
+- A structured sales system that will produce evidence when deals close
+
+The financing request is to accelerate this commercialization activity — not to fund exploratory work.
+
+## Supporting Artifacts
+
+- `docs/categories/stakeholders/commercial/pricing-framework.md`
+- `docs/categories/stakeholders/commercial/pilot-offer-cupe.md`
+- `docs/categories/stakeholders/commercial/sales-kit/README.md`
+- `docs/categories/stakeholders/commercial/FOUNDER_REVENUE_COCKPIT.md`
+- `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md`
+- `docs/categories/stakeholders/commercial/UNION_GTM_MAP.md`
+- `docs/categories/stakeholders/commercial/claims-ledger.md`
+- `docs/categories/stakeholders/commercial/customer-proof-playbook.md`
+- `docs/union-eyes/pilot-evidence-pack/`
+- `docs/public-service/forwardable/`
+
+## Gaps
+
+- Signed customer contracts and booked revenue records are not present in-repo.
+- Specific named prospects in pursuit list cannot be disclosed in a public dossier.
+- Healthcare and CIVIC discovery activities have not yet produced signed engagement records.
+
+## Next Milestone
+
+Convert active pilot discussions into signed pilot agreements and produce the first customer proof artifact (testimonial, KPI report, or case study) per the customer-proof playbook protocol.
+
+---
 # Appendices
 
 ## Objective

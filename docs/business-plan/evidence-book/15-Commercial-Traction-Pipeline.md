@@ -22,11 +22,11 @@ Nzila is in the early-commercialization phase. The activities documented below r
 | Public-sector discussions | CIVIC public-service conversation guide and executive briefing materials | Documented |
 | Healthcare discovery | Healthcare sector mentioned in target-institution materials | Documented |
 
-### Production-Ready Commercial Infrastructure
+### Commercialization Infrastructure and Controlled Demonstration Environments
 
 | Asset | Path | Confidence |
 |---|---|---|
-| Production-ready demo environments | `apps/union-eyes/` — controlled-pilot GO clearance | Demonstrated |
+| Controlled demonstration environments | `apps/union-eyes/` — controlled-pilot GO clearance | Demonstrated |
 | Customer-specific proposal packages | `docs/categories/stakeholders/commercial/sales-kit/` | Verified |
 | Evidence books | `docs/union-eyes/pilot-evidence-pack/` | Verified |
 | Pricing framework | `docs/categories/stakeholders/commercial/pricing-framework.md` | Documented |
