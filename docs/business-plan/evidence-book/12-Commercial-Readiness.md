@@ -8,12 +8,12 @@ Provide an evidence-based readiness scorecard grounded in repository artifacts.
 
 | Dimension | Score (1-5) | Justification | Confidence |
 |---|---:|---|---|
-| Product | 3.5 | Union Eyes is pilot-ready with strong evidence; FairCase is implemented but less operationally evidenced; CourtLens is planning-only. | Demonstrated |
-| Commercial | 3.5 | Pricing, pilots, sales kits, claims discipline, and buyer packs are substantial, but closed-deal evidence is limited. | Documented |
+| Product | 3.5 | Union Eyes is pilot-ready with strong evidence; CIVIC is in active discovery/engagement with documented thesis and materials; CourtLens is planning-only. | Demonstrated |
+| Commercial | 3.5 | Pricing, pilots, sales kits, claims discipline, and buyer packs are substantial for Union Eyes; CIVIC has forwardable briefings; closed-deal evidence is limited. | Documented |
 | Operational | 4.0 | Release, runbook, DR, and production-certification materials are unusually mature for the platform and Union Eyes. | Demonstrated |
 | Governance | 3.5 | Strong gate architecture and portfolio truth exist, but board/advisory and legal-entity consistency need tightening. | Verified |
 | Technology | 4.5 | Shared platform, monorepo scale, auth authority, database, and deployment controls are strongly evidenced. | Verified |
-| Implementation | 3.5 | Union Eyes has detailed implementation and pilot-run materials; FairCase has good buyer-facing pilot packaging; CourtLens does not. | Documented |
+| Implementation | 3.5 | Union Eyes has detailed implementation and pilot-run materials; CIVIC has public-sector conversation and engagement guides; CourtLens does not. | Documented |
 | Sales | 3.0 | Sales motions and collateral exist, but in-repo evidence of converted, referenceable customers is limited. | Documented |
 | Documentation | 4.0 | Repository documentation is broad, indexed, and role-specific, though some artifacts are stale or conflicting. | Verified |
 | Security | 4.0 | Internal evidence is strong, especially for Union Eyes; completed external attestations are still pending. | Demonstrated |
@@ -31,11 +31,11 @@ Provide an evidence-based readiness scorecard grounded in repository artifacts.
 ## Supporting Artifacts
 
 - `apps/union-eyes/maturity.json`
-- `apps/abr/maturity.json`
 - `docs/union-eyes/pilot-evidence-pack/`
 - `docs/readiness/`
 - `docs/categories/stakeholders/commercial/`
-- `docs/categories/products-and-market/faircase/`
+- `docs/public-service/civic-thesis.md`
+- `docs/public-service/forwardable/`
 - `docs/courtlens/`
 - `docs/compliance/soc2/`
 - `governance/portfolio/product-catalog.json`

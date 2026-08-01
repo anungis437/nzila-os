@@ -22,7 +22,7 @@ Assess the security, privacy, governance, accessibility, bilingual, and complian
 ## Privacy Framework
 
 - **Privacy and data-governance posture is explicitly documented at the corporate level.** **Confidence: Documented.** Evidence: `governance/corporate/compliance/security-data-governance-overview.md`.
-- **Union Eyes and FairCase both present privacy-first / identity-vault / org-scoped handling models.** **Confidence: Documented.** Evidence: `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md`, `docs/categories/products-and-market/faircase/procurement-trust-kit.md`.
+- **Union Eyes presents a privacy-first / identity-vault / org-scoped handling model. The ABR codebase (CourtLens foundation) includes equivalent privacy-scoped architecture.** **Confidence: Documented.** Evidence: `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md`, `apps/abr/README.md`.
 - **Legal-compliance language should be interpreted cautiously where legal memo evidence is not surfaced.** **Confidence: Verified.** Evidence: `docs/categories/stakeholders/commercial/claims-ledger.md` marks some compliance claims as honesty notes.
 
 ## AI Governance
@@ -34,12 +34,12 @@ Assess the security, privacy, governance, accessibility, bilingual, and complian
 ## Accessibility (WCAG / AODA)
 
 - **Union Eyes documents accessibility as a compliance objective.** **Confidence: Documented.** Evidence: `apps/union-eyes/README.md` references AODA/accessibility in compliance sections.
-- **FairCase procurement collateral claims WCAG 2.1 AA is in progress.** **Confidence: Planned.** Evidence: `docs/categories/products-and-market/faircase/procurement-trust-kit.md`.
+- **WCAG 2.1 AA accessibility is documented as an in-progress objective for the ABR/CourtLens codebase.** **Confidence: Planned.** Evidence: `apps/abr/README.md`.
 - **A repository-wide completed accessibility certification was not evidenced.** **Confidence: Not Yet Evidenced.**
 
 ## Bilingual Readiness (French / English)
 
-- **FairCase is explicitly bilingual by design with populated `apps/abr/messages/en-CA.json` / `apps/abr/messages/fr-CA.json` dashboard catalogs.** **Confidence: Verified.** Evidence: `apps/abr/README.md`, `apps/abr/messages/`.
+- **The ABR codebase (CourtLens technical foundation) is explicitly bilingual by design with populated `apps/abr/messages/en-CA.json` / `apps/abr/messages/fr-CA.json` dashboard catalogs.** **Confidence: Verified.** Evidence: `apps/abr/README.md`, `apps/abr/messages/`.
 - **Union Eyes documents bilingual member-facing communications in pilot/commercial materials.** **Confidence: Documented.** Evidence: `docs/categories/stakeholders/commercial/pilot-offer-cupe.md`, `docs/categories/stakeholders/commercial/pricing-framework.md`, message-parity scripts in `apps/union-eyes/scripts/sync-en-fr-parity.mjs`.
 - **Platform-wide bilingual readiness is product-specific rather than uniformly proven.** **Confidence: Documented.**
 
@@ -85,7 +85,7 @@ Assess the security, privacy, governance, accessibility, bilingual, and complian
 
 ## Current Maturity
 
-Security evidence is strong at the platform and Union Eyes level, moderate for FairCase, and weakest where external attestations would normally supplement internal documentation.
+Security evidence is strong at the platform and Union Eyes level, moderate for the ABR/CourtLens codebase, and weakest where external attestations would normally supplement internal documentation.
 
 ## Commercialization Relevance
 

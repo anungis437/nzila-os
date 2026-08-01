@@ -7,7 +7,7 @@ Summarize only documented validation evidence: pilots, customer-discovery traces
 ## Evidence Summary
 
 - **Union Eyes has the clearest pilot-validation corpus.** **Confidence: Demonstrated.** Evidence: `docs/union-eyes/pilot-evidence-pack/`, `docs/categories/products-and-market/union-eyes/pilot-overview.md`, `docs/categories/products-and-market/union-eyes/pilot-kpis.md`.
-- **FairCase has pilot plans and commercial diagnostics, but less operational validation evidence in-repo.** **Confidence: Documented.** Evidence: `docs/categories/products-and-market/faircase/pilot-package-v1.md`, `docs/categories/products-and-market/faircase/pilot-plan.md`, `docs/categories/products-and-market/faircase/buyer-pack.md`.
+- **CIVIC has public-sector discovery engagement and forwardable briefings, but no completed pilot-validation corpus.** **Confidence: Documented.** Evidence: `docs/public-service/civic-one-page-brief.md`, `docs/public-service/public-service-conversation-guide.md`.
 - **OCI/OCRA methodology includes procurement-facing validation binders and adversarial-review protocols, but these should not be described as completed external validation.** **Confidence: Documented.** Evidence: `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md`.
 
 ## Pilot Programs
@@ -16,7 +16,7 @@ Summarize only documented validation evidence: pilots, customer-discovery traces
 |---|---|---|---|
 | Union Eyes controlled pilot | Full evidence pack, readiness memo, operations runbook, scope lock, success metrics | Demonstrated | `docs/union-eyes/pilot-evidence-pack/` |
 | Union Eyes pilot metrics | Route-level KPI definitions and auditable metric-write model | Verified | `docs/categories/products-and-market/union-eyes/pilot-kpis.md`, `apps/union-eyes/docs/procurement/PILOT_SCOPE.md` |
-| FairCase pilot | Buyer-facing pilot package and track definition | Documented | `docs/categories/products-and-market/faircase/pilot-package-v1.md`, `docs/categories/products-and-market/faircase/pilot-plan.md` |
+| CIVIC public-sector discovery | Forwardable briefings and conversation guides for government audiences | Documented | `docs/public-service/forwardable/`, `docs/public-service/public-service-conversation-guide.md` |
 | CourtLens pilot | Planning-stage pilot definition only | Planned | `docs/courtlens/pilot-readiness-plan.md` |
 
 ## Customer Discovery Evidence
@@ -27,7 +27,7 @@ Summarize only documented validation evidence: pilots, customer-discovery traces
 ## Sector Validation
 
 - **Union Eyes sector focus is well articulated around Canadian labour organizations.** **Confidence: Documented.** Evidence: `docs/categories/stakeholders/commercial/why-union-eyes.md`, `docs/categories/stakeholders/commercial/pilot-offer-cupe.md`, and Union Eyes product docs under `docs/categories/products-and-market/union-eyes/`.
-- **FairCase sector focus is articulated around public sector, regulated institutions, unions, and universities.** **Confidence: Documented.** Evidence: `docs/categories/products-and-market/faircase/buyer-pack.md`, `docs/categories/products-and-market/faircase/pilot-package-v1.md`.
+- **CIVIC sector focus is explicitly framed around public-service continuity, modernization, and institutional-memory challenges for federal and provincial institutions.** **Confidence: Documented.** Evidence: `docs/public-service/civic-thesis.md`, `docs/public-service/the-public-service-continuity-problem.md`.
 - **Institutional-intelligence sector rationale is deeply documented in doctrine whitepapers.** **Confidence: Documented.** Evidence: doctrine and OCI whitepapers.
 
 ## Adversarial Testing / CBA Intelligence Validation
@@ -70,7 +70,7 @@ This section matters because commercial readiness is materially improved when pr
 ## Gaps
 
 - Customer-discovery transcripts, reference letters, or close reports are not a strong in-repo evidence class yet.
-- FairCase and CourtLens do not yet have evidence packs comparable to Union Eyes.
+- CIVIC and CourtLens do not yet have evidence packs comparable to Union Eyes.
 - External independent validation remains more prepared-for than completed.
 
 ## Next Milestone

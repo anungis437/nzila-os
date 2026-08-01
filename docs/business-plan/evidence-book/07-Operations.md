@@ -84,7 +84,7 @@ Operational maturity matters directly to lenders, procurement teams, and partner
 
 ## Gaps
 
-- Product-level observability and DR proof are not yet equally complete for FairCase and other portfolio products.
+- Product-level observability and DR proof are not yet equally complete for CourtLens (ABR) and other portfolio products.
 - Some references in readiness docs point to follow-up runbooks or evidence artifacts that are still evolving.
 - FinOps evidence is more tooling-rich than externally summarized.
 

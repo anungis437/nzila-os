@@ -21,7 +21,7 @@ This evidence book converts major business assertions about Nzila Ventures into 
 | `00-Executive-Summary.md` | High-level diligence summary and overall maturity assessment |
 | `01-Company.md` | Corporate identity, governance, principals, and repository-operating evidence |
 | `02-Institutional-Intelligence.md` | Institutional Intelligence / OCI doctrine and methodology evidence |
-| `03-Products.md` | Product-by-product evidence for Union Eyes, FairCase, and CourtLens |
+| `03-Products.md` | Product-by-product evidence for Union Eyes, CIVIC, and CourtLens (FairCase historical lineage) |
 | `04-Technology.md` | Shared platform, architecture, packages, infrastructure, and CI/CD evidence |
 | `05-Commercialization.md` | Pricing, pilot motions, GTM materials, and commercial packaging |
 | `06-Security.md` | Security, privacy, auditability, AI governance, and compliance posture |
@@ -32,7 +32,9 @@ This evidence book converts major business assertions about Nzila Ventures into 
 | `11-Gap-Register.md` | Honest gap log and remediation priorities |
 | `12-Commercial-Readiness.md` | Evidence-based readiness scorecard |
 | `13-Timeline.md` | Chronological repository-derived milestone view |
-| `APPENDICES.md` | File index, glossary, abbreviations, and legend |
+| `14-Founder-Investment.md` | Founder-funded R&D and pre-commercial investment documentation |
+| `15-Commercial-Traction-Pipeline.md` | Active commercial pipeline evidence without overstating traction |
+| `APPENDICES.md` | File index, glossary, abbreviations, legend, and Institutional Assets appendix |
 | `Nzila-Evidence-and-Commercial-Readiness-Dossier.md` | Full compiled dossier |
 
 ## Confidence Rating Legend

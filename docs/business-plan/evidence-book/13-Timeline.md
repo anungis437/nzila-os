@@ -15,7 +15,7 @@ Present the documented chronology of Nzila's recent product, doctrine, and readi
 | 2026-05-01 | Union Eyes maturity file records last validation date and pilot-proof sell-now posture. | `apps/union-eyes/maturity.json`, `governance/portfolio/product-catalog.json` | Verified |
 | 2026-05-14 | Union Eyes pilot evidence pack v2.0 marks controlled pilot GO and assembles buyer/security/runtime/runbook evidence. | `docs/union-eyes/pilot-evidence-pack/README.md` | Demonstrated |
 | 2026-05-18 | Canonical doctrine is marked “canonical since 2026-05-18.” | `docs/doctrine/DOCTRINE.md` | Verified |
-| 2026-05-22 | Portfolio status report generated from product catalog shows Union Eyes and FairCase as Tier 1 sell-now pilot-proof products. | `reports/portfolio-status.md`, `governance/portfolio/product-catalog.json` | Verified |
+| 2026-05-22 | Portfolio status report generated from product catalog shows Union Eyes as Tier 1 sell-now pilot-proof product. CIVIC public-sector engagement materials and ABR (CourtLens foundation) also present in repository. | `reports/portfolio-status.md`, `governance/portfolio/product-catalog.json` | Verified |
 | 2026-05-22 | Continuity Gap master whitepaper canonical markdown ingestion is dated and governed. | `docs/doctrine/whitepapers/CONTINUITY_GAP_MASTER_WHITEPAPER.md` | Verified |
 | 2026-05-23 | OCI Method™ whitepaper is first published as canonical methodology specification. | `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md` | Verified |
 | 2026-06-28 | Gate taxonomy document formalizes blocking vs advisory governance-gate authority. | `docs/governance/gates/gate-taxonomy.md` | Verified |

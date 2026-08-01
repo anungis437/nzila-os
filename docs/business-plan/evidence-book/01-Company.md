@@ -78,7 +78,7 @@ Lenders and partners can verify that the business is organized around a real ope
 
 ## Gaps
 
-- Entity naming is inconsistent across the repository (Nzila Ventures Inc., Nzila Digital Ventures, and in one FairCase commercial artifact, Nzila OS Inc.).
+- Entity naming is inconsistent across the repository (Nzila Ventures Inc., Nzila Digital Ventures, and in one legacy commercial artifact, Nzila OS Inc.).
 - Board minutes and formal governance resolutions are referenced conceptually but not surfaced as current in-repo evidence.
 - Principals beyond Aubert and Michel are not clearly evidenced.
 

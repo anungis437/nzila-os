@@ -2,13 +2,25 @@
 
 ## Objective
 
-Assess the three primary commercial products referenced in the brief — Union Eyes, FairCase, and CourtLens — using repository evidence only.
+Assess the three active commercial implementations of the Institutional Intelligence platform — Union Eyes (labour sector), CIVIC (public sector), and CourtLens (legal and access-to-justice) — using repository evidence only.
+
+## Product Architecture
+
+Nzila operates one company with a shared Institutional Intelligence platform expressed through three sector implementations:
+
+| Product | Sector | Stage |
+|---|---|---|
+| **Union Eyes** | Labour | Controlled pilot GO — strongest commercial evidence |
+| **CIVIC** | Public institutions | Market engagement and discovery phase |
+| **CourtLens** | Legal / access-to-justice | Planning and pipeline — ABR reuse-first architecture |
+
+> **Note on FairCase:** FairCase (ABR) was an earlier naming and framing for what became the justice and institutional-governance platform. Its implemented codebase (`apps/abr/`) now serves as the reuse-first technical foundation for CourtLens. FairCase is retained here as historical lineage and technical context only — it is not an active commercial offering.
 
 ## Evidence Summary
 
 - **Union Eyes is the most evidenced commercial product in the repository.** **Confidence: Demonstrated.** Evidence: `apps/union-eyes/README.md`, `apps/union-eyes/maturity.json`, `docs/union-eyes/pilot-evidence-pack/`, `docs/categories/products-and-market/union-eyes/`, `docs/readiness/production-certification.md`.
-- **FairCase (formerly ABR) is a real application with implemented modules, localization, pilot packaging, and GTM materials.** **Confidence: Verified.** Evidence: `apps/abr/README.md`, `apps/abr/maturity.json`, `docs/categories/products-and-market/faircase/`.
-- **CourtLens currently exists as a migration and pilot-planning workstream built to reuse ABR.** **Confidence: Verified.** Evidence: `docs/courtlens/README.md`, `docs/courtlens/target-architecture.md`, `docs/courtlens/pilot-readiness-plan.md`.
+- **CIVIC is the public-sector implementation of the Institutional Intelligence platform, with documented thesis, market-engagement materials, and a distinct front-door narrative for government and institutional audiences.** **Confidence: Documented.** Evidence: `docs/public-service/civic-thesis.md`, `docs/public-service/civic-one-page-brief.md`, `docs/public-service/civic-faq.md`, `docs/CIVIC_OCI_ALIGNMENT.md`.
+- **CourtLens currently exists as a migration and pilot-planning workstream built to reuse the ABR codebase.** **Confidence: Verified.** Evidence: `docs/courtlens/README.md`, `docs/courtlens/target-architecture.md`, `docs/courtlens/pilot-readiness-plan.md`.
 
 ---
 
@@ -71,62 +83,90 @@ Convert controlled-pilot evidence into signed-customer and renewal evidence, whi
 
 ---
 
-## FairCase / ABR
+## CIVIC
 
 ### Purpose and Problem Solved
 
-- **FairCase is positioned as a justice and equity governance platform for institutions handling complaints, investigations, accountability, and anti-Black-racism operations.** **Confidence: Verified.** Evidence: `apps/abr/README.md`, `docs/categories/products-and-market/faircase/executive-summary.md`, `docs/categories/products-and-market/faircase/buyer-pack.md`.
+- **CIVIC is the public-sector implementation of the Institutional Intelligence platform — the front door through which federal and provincial institutions engage with Nzila's continuity, governance, and accountability methodology.** **Confidence: Verified.** Evidence: `docs/public-service/civic-thesis.md`, `docs/public-service/civic-one-page-brief.md`, `docs/CIVIC_OCI_ALIGNMENT.md`.
+- **CIVIC = Continuity, Implementation, Visibility, Integrity, and Capacity.** These five pillars directly map to the OCI scoring dimensions and the CLEAR evidence framework. **Confidence: Verified.** Evidence: `docs/public-service/civic-thesis.md`, `docs/CIVIC_OCI_ALIGNMENT.md`.
+- **CIVIC exists to serve public-service leaders navigating workforce transition, modernization pressure, evidence fragmentation, accountability risk, and institutional-memory loss simultaneously.** **Confidence: Documented.** Evidence: `docs/public-service/civic-thesis.md`, `docs/public-service/the-public-service-continuity-problem.md`.
 
 ### Target Market
 
-- **Documented buyers include public-sector institutions, universities, health authorities, unions, CHRO functions, general counsel, and equity/human-rights offices.** **Confidence: Documented.** Evidence: `docs/categories/products-and-market/faircase/buyer-pack.md`, `docs/categories/products-and-market/faircase/pilot-package-v1.md`, `docs/categories/products-and-market/faircase/procurement-trust-kit.md`.
+- **Federal and provincial public institutions, government agencies, public authorities, and public-service leadership.** **Confidence: Documented.** Evidence: `docs/public-service/civic-one-page-brief.md`, `docs/public-service/target-institutions/`, `docs/public-service/public-service-conversation-guide.md`.
+- **CIVIC is purposefully differentiated from Union Eyes so federal contacts can evaluate continuity framing without being routed through labour-sector branding.** **Confidence: Verified.** Evidence: `docs/public-service/civic-thesis.md`.
 
 ### Current Maturity
 
 | Dimension | Assessment | Confidence | Evidence |
 |---|---|---|---|
-| GTM posture | sell-now | Verified | `apps/abr/maturity.json`, `governance/portfolio/product-catalog.json` |
-| Proof level | pilot-proof | Verified | `apps/abr/maturity.json`, `reports/portfolio-status.md` |
-| Product state | Implemented application with persistent data, export layer, pipeline service, and bilingual coverage | Verified | `apps/abr/README.md` |
-| Operational evidence | Partial maturity with open gaps in contracts, backup/restore proof, analytics lineage, and access-review artifacts | Verified | `apps/abr/maturity.json` |
+| Thesis and methodology | Canonical thesis, OCI alignment, and CIVIC ↔ OCI Rosetta table documented | Verified | `docs/public-service/civic-thesis.md`, `docs/CIVIC_OCI_ALIGNMENT.md` |
+| Market-facing materials | One-page brief, FAQ, executive brief, conversation guide, and forwardable materials exist | Documented | `docs/public-service/civic-one-page-brief.md`, `docs/public-service/civic-faq.md`, `docs/public-service/forwardable/` |
+| Discovery engagement | Executive discovery meetings and public-sector discussions documented in commercial pipeline | Documented | Commercial pipeline artifacts |
+| Platform runtime | CIVIC reuses the shared Institutional Intelligence platform; sector-specific configurations are in progress | Planned | `docs/public-service/civic-thesis.md`, `docs/CIVIC_OCI_ALIGNMENT.md` |
 
-### Implemented Capabilities
+### Positioning
 
-- Tribunal intelligence explorer. **Confidence: Verified.** Evidence: `apps/abr/modules/intelligence/README.md`, `apps/abr/README.md`.
-- Incident governance lifecycle. **Confidence: Verified.** Evidence: `apps/abr/modules/incidents/README.md`, `apps/abr/README.md`.
-- Executive governance exports and board-ready summaries. **Confidence: Verified.** Evidence: `apps/abr/modules/governance/README.md`, `apps/abr/README.md`.
-- Accountability analytics. **Confidence: Verified.** Evidence: `apps/abr/modules/analytics/README.md`.
-- Learning and certification workflows. **Confidence: Verified.** Evidence: `apps/abr/modules/learning/README.md`.
-- Bilingual dashboard coverage. **Confidence: Documented.** Evidence: `apps/abr/README.md`.
+CIVIC is introduced as a public-service initiative and briefing series first. The sequencing is:
+
+1. **CIVIC** as the public-service continuity front door and thought-leadership entry point
+2. **CLEAR** as the evidence-discipline methodology presented to public-service readers
+3. **OCI / OCRA** as the underlying operational methodology and diagnostic instrument
+4. **SAGE** as a future governance-evidence workspace for organizations ready for ongoing operations
 
 ### Architecture
 
-- **Shared-platform reuse:** `packages/platform-auth/package.json`, `packages/db/package.json`, `packages/decision-core/package.json`, `packages/governed-workflow/package.json`, and `packages/ui/package.json`. **Confidence: Verified.** Evidence: `apps/abr/package.json`.
-- **Dual-stack shape:** Next.js plus Django backend sidecar. **Confidence: Verified.** Evidence: `apps/abr/README.md`.
+- **Shared-platform foundation:** CIVIC reuses the same Institutional Intelligence platform infrastructure that powers Union Eyes — shared auth, database, decision-core, and governance tooling. **Confidence: Verified.** Evidence: `docs/CIVIC_OCI_ALIGNMENT.md`, `packages/institutional-intelligence/`, `packages/organizational-cognition-core/`.
+- **OCI alignment:** CIVIC is not a separate product or scoring system. When CIVIC and OCI/OCRA doctrine appear to disagree, OCI/OCRA is authoritative. **Confidence: Verified.** Evidence: `docs/CIVIC_OCI_ALIGNMENT.md`.
 
 ### Commercial Readiness
 
-FairCase has robust narrative and packaging materials: executive summary, buyer pack, pricing model, pilot package, procurement trust kit, objection handling, proposal templates, and ROI materials. **Confidence: Documented.** Evidence: `docs/categories/products-and-market/faircase/`.
-
-However, some FairCase collateral asserts stronger compliance and corporate facts than stronger repository evidence confirms. Examples include legal-entity naming and certification status in `docs/categories/products-and-market/faircase/procurement-trust-kit.md`. Those claims should be down-rated until reconciled. **Confidence: Verified.** Evidence: `docs/categories/stakeholders/commercial/claims-ledger.md`, `docs/compliance/soc2/gap-log.md`, `governance/corporate/governance/legal-shareholder-and-corporate-structure-summary.md`.
+CIVIC has a documented public-service thesis, market-engagement materials, and a distinct positioning strategy for government audiences. It is in the discovery and pilot-definition phase, not yet at signed-contract stage. **Confidence: Documented.** Evidence: `docs/public-service/`.
 
 ### Repository Evidence
 
-- `apps/abr/README.md`
-- `apps/abr/maturity.json`
-- `apps/abr/modules/`
-- `docs/categories/products-and-market/faircase/`
-- `governance/portfolio/product-catalog.json`
+- `docs/public-service/civic-thesis.md`
+- `docs/public-service/civic-one-page-brief.md`
+- `docs/public-service/civic-faq.md`
+- `docs/public-service/forwardable/`
+- `docs/public-service/public-service-conversation-guide.md`
+- `docs/CIVIC_OCI_ALIGNMENT.md`
+- `docs/public-service/target-institutions/`
 
 ### Gaps
 
-- Backup/restore proof is still partial in the maturity file.
-- Access-review evidence is documented but not yet signed as quarterly evidence.
-- Procurement collateral includes claims that require tighter reconciliation.
+- No CIVIC-specific runtime maturity file equivalent to `apps/union-eyes/maturity.json` yet published.
+- Signed pilot or engagement commitments from public-sector institutions are not yet in-repo.
+- CLEAR Method canonical artifact was not located in the reviewed repository.
 
 ### Next Milestone
 
-Bring FairCase buyer-facing trust claims into strict alignment with `apps/abr/maturity.json`, then add equivalent live-readiness and pilot-evidence-pack artifacts.
+Publish a CIVIC discovery report from executive engagements and open a formal CIVIC pilot definition with at least one target institution.
+
+---
+
+## FairCase — Historical Lineage
+
+> **This section documents FairCase as historical lineage only. FairCase is not an active commercial offering.**
+
+FairCase (internally coded as ABR) was the earlier product framing for Nzila's justice, equity-governance, and accountability platform. The implemented codebase (`apps/abr/`) — including tribunal intelligence, incident governance, executive exports, analytics, learning workflows, and bilingual coverage — now serves as the technical reuse foundation for CourtLens.
+
+**Why FairCase is not an active product:**
+
+- The strategic decision has been made to route institutional and equity-governance use cases through CourtLens (legal/access-to-justice sector) rather than maintaining FairCase as a separate commercial brand.
+- Public-sector institutions, equity offices, and CHRO functions are now addressed through the CIVIC public-sector implementation of the platform.
+- Union Eyes continues to serve labour-sector complaints and casework.
+
+**Technical heritage value:**
+
+The `apps/abr/` codebase provides CourtLens with a proven implementation of: tribunal intelligence, matter workflows, RBAC, audit chains, evidence handling, governance exports, and bilingual coverage. This reuse-first architecture materially reduces CourtLens implementation risk.
+
+**Repository Evidence:**
+
+- `apps/abr/README.md` — technical reference
+- `apps/abr/maturity.json` — maturity record
+- `apps/abr/modules/` — implemented capabilities
+- `docs/courtlens/target-architecture.md` — documents CourtLens reuse of ABR primitives
 
 ---
 
@@ -172,7 +212,7 @@ CourtLens is not yet commercially ready on repository evidence. It is better des
 ### Gaps
 
 - No implemented runtime evidence.
-- No independent pricing or sales materials comparable to Union Eyes/FairCase.
+- No independent pricing or sales materials comparable to Union Eyes/CIVIC.
 - No maturity file or production evidence corpus.
 
 ### Next Milestone
