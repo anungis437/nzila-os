@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-01T20:53:43.257Z",
+  "generatedAt": "2026-08-01T21:52:03.442Z",
   "filesScanned": 2243,
   "totalFindings": 2770,
   "findingsByRule": {
@@ -16070,7 +16070,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 973,
+      "line": 1017,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
