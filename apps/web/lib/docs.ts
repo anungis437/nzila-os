@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import matter from 'gray-matter'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
@@ -24,6 +23,46 @@ export interface Doc extends DocMeta {
   content: string
   htmlContent: string
   readingTime: number // minutes
+}
+
+/**
+ * Minimal YAML front-matter parser. Avoids pulling gray-matter (and its
+ * js-yaml dependency) into the server bundle, which causes Turbopack to
+ * fail with "Cannot read properties of undefined (reading 'bind')" during
+ * static page-data collection.
+ */
+function parseFrontMatter(raw: string): { data: Record<string, unknown>; content: string } {
+  if (!raw.startsWith('---\n')) return { data: {}, content: raw }
+
+  const end = raw.indexOf('\n---\n', 4)
+  if (end === -1) return { data: {}, content: raw }
+
+  const frontMatter = raw.slice(4, end)
+  const content = raw.slice(end + 5)
+  const data: Record<string, unknown> = {}
+
+  for (const line of frontMatter.split(/\r?\n/)) {
+    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/)
+    if (!match) continue
+
+    const key = match[1]
+    let value: unknown = match[2].trim()
+
+    if (
+      (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) ||
+      (typeof value === 'string' && value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = (value as string).slice(1, -1)
+    } else if (/^-?\d+(\.\d+)?$/.test(String(value))) {
+      value = Number(value)
+    } else if (value === 'true' || value === 'false') {
+      value = value === 'true'
+    }
+
+    data[key] = value
+  }
+
+  return { data, content }
 }
 
 /**
@@ -73,7 +112,7 @@ export function getAllDocs(scope: 'public' | 'internal' = 'public'): DocMeta[] {
   return files.map((file) => {
     const fullPath = path.join(contentDir, file)
     const raw = fs.readFileSync(fullPath, 'utf-8')
-    const { data, content } = matter(raw)
+    const { data, content } = parseFrontMatter(raw)
     const slug = file.replace(/\.md$/, '')
     const wordCount = content.trim().split(/\s+/).length
     const readingTime = Math.max(1, Math.round(wordCount / 200))
@@ -109,7 +148,7 @@ export async function getDocBySlug(
   if (!fs.existsSync(filePath)) return null
 
   const raw = fs.readFileSync(filePath, 'utf-8')
-  const { data, content } = matter(raw)
+  const { data, content } = parseFrontMatter(raw)
 
   const result = await remark()
     .use(remarkGfm)
