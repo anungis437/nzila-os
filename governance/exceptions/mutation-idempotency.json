@@ -13,73 +13,73 @@
       "path": "apps/weekone/app/api/cash/route.ts",
       "owner": "platform-core",
       "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/deals/route.ts",
       "owner": "platform-core",
       "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/weekly-brief/route.ts",
       "owner": "platform-core",
       "justification": "WeekOne is INCUBATING (founder-internal only, no external traffic). Idempotency to be added before promotion to PILOT.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/analytics/route.ts",
       "owner": "platform-core",
       "justification": "Public marketing analytics event sink (anonymous page events). Server logs the event and returns 200 \u2014 no DB writes, no side effects requiring per-request dedup. Re-evaluate when persistence is added.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/billing/checkout/route.ts",
       "owner": "platform-core",
       "justification": "Public Stripe checkout initiation \u2014 Stripe-hosted session is itself idempotent via session_id. Caller-side retries are safe (Stripe deduplicates by session). Add Idempotency-Key once we move to direct PaymentIntents.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/collaborators/invite/route.ts",
       "owner": "platform-core",
       "justification": "Auth-gated invite stub (no persistence yet). Idempotency to be added when invite persistence + email delivery is enabled (would need dedup on email+org).",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/monday-reset/route.ts",
       "owner": "platform-core",
       "justification": "Returns a static checklist with the current timestamp. Stateless (no writes), so per-request idempotency is not meaningful.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/newsletter/route.ts",
       "owner": "platform-core",
       "justification": "Public marketing newsletter signup (lead capture). Server logs the event and returns 200 \u2014 no DB writes yet. Add Idempotency-Key when ESP integration persists subscribers.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/onboarding/activation/route.ts",
       "owner": "platform-core",
       "justification": "Auth-gated activation event log (currently logger-only, no DB writes). Add Idempotency-Key when activation events are persisted to a journal.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/referrals/route.ts",
       "owner": "platform-core",
       "justification": "Public referral lead capture (no persistence yet \u2014 returns generated UUID). Add Idempotency-Key when referrals are persisted with attribution.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/templates/download/route.ts",
       "owner": "platform-core",
       "justification": "Public template download lead capture. Server logs the event and returns a static download URL \u2014 no DB writes. Add Idempotency-Key when downloads are persisted with attribution.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/weekone/app/api/waitlist/route.ts",
       "owner": "platform-core",
       "justification": "Public marketing waitlist signup (lead capture). Server logs the event and returns 200 \u2014 no DB writes yet. Add Idempotency-Key when waitlist persistence + ESP integration is enabled.",
-      "expiresOn": "2026-07-22"
+      "expiresOn": "2026-10-31"
     },
     {
       "path": "apps/nzila-hq/app/api/internal/billing/sync/route.ts",

@@ -2,8 +2,6 @@
  * HTML sanitization utility using DOMPurify
  * Use this to sanitize any HTML before rendering with dangerouslySetInnerHTML
  */
-import DOMPurify from 'dompurify';
-
 /** Trusted external domains for payment/OAuth redirects */
 const TRUSTED_REDIRECT_DOMAINS = [
   'checkout.stripe.com',
@@ -43,6 +41,8 @@ export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
     return dirty.replace(/<[^>]*>/g, ''); // codeql[js/incomplete-multi-character-sanitization] - server-side fallback; not rendered on server
   }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const DOMPurify = (require('dompurify') as typeof import('dompurify')).default;
   return DOMPurify.sanitize(dirty, {
     USE_PROFILES: { html: true },
     ALLOWED_TAGS: [

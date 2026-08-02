@@ -178,9 +178,13 @@ const nextConfig: NextConfig = {
   // Turbopack resolve aliases
   // swagger-ui-react imports `immutable` with a default import, but immutable v5
   // ESM build has no default export. Force CJS build for Turbopack compatibility.
+  // swagger-client / swagger-ui-react also import `js-yaml` with a default import,
+  // but the js-yaml v4 ESM build (js-yaml.mjs) has no default export.
+  // Force the CJS build so the default import resolves correctly.
   turbopack: {
     resolveAlias: {
       immutable: 'immutable/dist/immutable.js',
+      'js-yaml': 'js-yaml/dist/js-yaml.cjs',
     },
   },
 
@@ -375,11 +379,14 @@ const nextConfig: NextConfig = {
   webpack: (config, { dev, isServer }) => {
     // swagger-ui-react imports `immutable` with a default import, but immutable v5
     // ESM build has no default export. Force CJS build for webpack compatibility.
-    // (Turbopack uses resolveAlias above; this handles Next.js production builds.)
+    // swagger-client / swagger-ui-react also import `js-yaml` with a default import,
+    // but the js-yaml v4 ESM build has no default export. Force CJS build.
+    // (Turbopack uses resolveAlias above; this handles webpack production builds.)
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       immutable: require.resolve('immutable/dist/immutable.js'),
+      'js-yaml': require.resolve('js-yaml/dist/js-yaml.cjs'),
     };
 
     // Reduce memory usage

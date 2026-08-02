@@ -70,10 +70,72 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
+            const pull_number = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const isSensitivePath = (path) =>
+              path === 'docs/GOVERNANCE_ARCHITECTURE.md' ||
+              path.startsWith('ops/policies/') ||
+              path.startsWith('governance/') ||
+              path.startsWith('security/');
+
+            const isExpiryOnlyExceptionRollover = (file) => {
+              if (file.status !== 'modified') return false;
+              if (!/^governance\/exceptions\/.+\.json$/.test(file.filename)) return false;
+              if (!file.patch) return false;
+
+              let added = 0;
+              let removed = 0;
+
+              for (const line of file.patch.split('\n')) {
+                if (
+                  line.startsWith('@@') ||
+                  line.startsWith('---') ||
+                  line.startsWith('+++') ||
+                  line.startsWith('diff ') ||
+                  line.startsWith('index ')
+                ) {
+                  continue;
+                }
+
+                if (!line.startsWith('+') && !line.startsWith('-')) {
+                  continue;
+                }
+
+                if (!/^[+-]\s*"expiresOn":\s*"[^"]+",?$/.test(line)) {
+                  return false;
+                }
+
+                if (line.startsWith('+')) added += 1;
+                if (line.startsWith('-')) removed += 1;
+              }
+
+              return added > 0 && added === removed;
+            };
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
+            const sensitiveFiles = files.filter((file) => isSensitivePath(file.filename));
+
+            if (
+              sensitiveFiles.length > 0 &&
+              sensitiveFiles.every(isExpiryOnlyExceptionRollover)
+            ) {
+              core.info(
+                'Only governance exception expiry rollovers detected; skipping governance-approved label requirement.'
+              );
+              return;
+            }
+
             const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
+              owner,
+              repo,
+              pull_number,
             });
             const labels = pr.labels.map(l => l.name);
             if (!labels.includes('governance-approved')) {
