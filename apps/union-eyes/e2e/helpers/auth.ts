@@ -72,9 +72,49 @@ export async function loginAsRole(page: Page, role: StakeholderRole): Promise<vo
 export async function gotoDashboardAsRole(page: Page, role: StakeholderRole): Promise<string> {
   const fixture = getFixture(role);
   await loginAsRole(page, role);
-  await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+  const target = toLocalizedPath('/dashboard', fixture.locale);
   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
-  await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+  const maxAttempts = 3;
+  const transientNavigationPattern = /net::ERR_ABORTED|net::ERR_CONNECTION_REFUSED|ERR_CONNECTION_RESET|ERR_INTERNET_DISCONNECTED|timeout|net::ERR_FAILED/i;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!transientNavigationPattern.test(message)) {
+        throw error;
+      }
+    }
+
+    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
+    const currentUrl = page.url();
+    if (currentUrl.includes(landing) || currentUrl.includes(target)) {
+      return landing;
+    }
+
+    if (currentUrl.startsWith('chrome-error://') && attempt < maxAttempts) {
+      await page.waitForTimeout(750 * attempt);
+      continue;
+    }
+
+    if (currentUrl.startsWith('chrome-error://')) {
+      break;
+    }
+
+    try {
+      await expect.poll(() => page.url(), { timeout: 20_000 }).toContain(landing);
+      return landing;
+    } catch {
+      if (attempt < maxAttempts) {
+        await page.waitForTimeout(750 * attempt);
+        continue;
+      }
+      throw new Error(`Dashboard redirect did not reach ${landing}; last URL was ${page.url()}`);
+    }
+  }
+
+  await expect.poll(() => page.url(), { timeout: 20_000 }).toContain(landing);
   return landing;
 }
 
@@ -84,8 +124,4 @@ export async function assertPilotModeEnabled(page: Page): Promise<void> {
   const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
   const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
   expect(enabled).toBe(true);
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

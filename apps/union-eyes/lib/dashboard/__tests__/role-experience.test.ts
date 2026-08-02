@@ -22,8 +22,8 @@ describe('lib/dashboard/role-experience', () => {
 
   describe('getRoleLandingPath', () => {
     it('routes by experience', () => {
-      expect(getRoleLandingPath('member')).toBe('/dashboard/inbox');
-      expect(getRoleLandingPath('steward')).toBe('/dashboard/work');
+      expect(getRoleLandingPath('member')).toBe('/dashboard/workspace');
+      expect(getRoleLandingPath('steward')).toBe('/dashboard/workbench');
       expect(getRoleLandingPath('president')).toBe('/dashboard/intelligence');
       expect(getRoleLandingPath('officer')).toBe('/dashboard/governance');
       expect(getRoleLandingPath('system_admin')).toBe('/dashboard/admin/organizations');

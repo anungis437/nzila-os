@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { auth } from "@nzila/platform-auth/entra/server";
 // NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
 // dynamically imported a demo operations dashboard from `@/components/demo/*`
@@ -8,6 +7,7 @@ import { auth } from "@nzila/platform-auth/entra/server";
 // exclusively in the `@nzila/union-eyes-demo` artifact
 // (`apps/union-eyes-demo/`) and is not reachable from any code path in this
 // application.
+import { redirect } from "next/navigation";
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { UserRole } from "@/lib/auth/roles";
 import {
@@ -40,7 +40,7 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
       stage: "auth",
       locale,
     });
-    redirect("/login");
+    return null;
   }
 
   let organizationId: string = DEFAULT_ORGANIZATION_ID;
@@ -67,6 +67,7 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
   }
 
   const landingPath = getRoleLandingPath(userRole);
+  const destination = `/${locale}${landingPath}`;
 
   logger.info("[dashboard:root] resolved role landing — issuing redirect", {
     stage: "redirect",
@@ -77,5 +78,5 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
     locale,
   });
 
-  redirect(`/${locale}${landingPath}`);
+  return redirect(destination);
 }

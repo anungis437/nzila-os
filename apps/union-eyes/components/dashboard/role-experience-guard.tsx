@@ -38,8 +38,7 @@ export default function RoleExperienceGuard({ userRole }: RoleExperienceGuardPro
     const localizedLanding = `${localePrefix}${landing}`;
 
     const isDashboardRoot = pathWithoutLocale === '/dashboard' || pathWithoutLocale === '/dashboard/';
-    if (isDashboardRoot && pathname !== localizedLanding) {
-      router.replace(localizedLanding);
+    if (isDashboardRoot) {
       return;
     }
 

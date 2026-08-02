@@ -80,11 +80,11 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
 
 export function getRoleLandingPath(role?: string | null): string {
   const experience = getDashboardExperience(role);
-  if (experience === 'member') return '/dashboard/inbox';
+  if (experience === 'member') return '/dashboard/workspace';
   // Each role lands on its primary surface (not the shared "Workspace" hub,
   // which is the first sidebar entry). The sidebar highlights the nav item
   // whose href matches this landing path via `isActive`.
-  if (experience === 'staff') return '/dashboard/work';
+  if (experience === 'staff') return '/dashboard/workbench';
   if (experience === 'executive') return '/dashboard/intelligence';
   if (experience === 'governance') return '/dashboard/governance';
   return '/dashboard/admin/organizations';
@@ -107,12 +107,13 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
   if (experience === 'staff') {
     return [
       { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'Operations (Casework Console)', href: '/dashboard/work', group: 'Operations' },
+      { label: 'Operations (Casework Console)', href: '/dashboard/workbench', group: 'Operations' },
       { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
-      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
+      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/operations', group: 'Operations' },
       { label: 'Members', href: '/dashboard/members', group: 'Operations' },
       { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
       { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
+      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
       { label: 'Notifications', href: '/dashboard/notifications', group: 'Operations' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
@@ -127,6 +128,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Governance Continuity', href: '/dashboard/governance-center', group: 'Governance Continuity' },
       { label: 'Operations Outcomes (Member Outcomes Ledger)', href: '/dashboard/outcomes', group: 'Operations' },
       { label: 'Onboarding Survivability (Leadership Continuity)', href: '/dashboard/leadership', group: 'Operations' },
+      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
       { label: 'Governance Trust & Oversight', href: '/dashboard/trust', group: 'Governance Continuity' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
@@ -140,6 +142,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Governance Continuity Review', href: '/dashboard/workbench', group: 'Governance Continuity' },
       { label: 'Governance Policy Continuity', href: '/dashboard/governance', group: 'Governance Continuity' },
       { label: 'OCRA Continuity Signals', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
+      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
       { label: 'Governance Audit & Evidence', href: '/dashboard/audits', group: 'Governance Continuity' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
@@ -164,6 +167,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard',
     '/dashboard/workspace',
     '/dashboard/inbox',
+    '/dashboard/claims',
     '/dashboard/claims/new',
     '/dashboard/documents',
     '/dashboard/settings',
@@ -174,9 +178,9 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard',
     '/dashboard/workspace',
     '/dashboard/workbench',
-    '/dashboard/work',
+    '/dashboard/operations',
     '/dashboard/inbox',
-    '/dashboard/priorities',
+    '/dashboard/intelligence',
     '/dashboard/members',
     '/dashboard/documents',
     '/dashboard/correspondence',
@@ -205,6 +209,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/trust',
     '/dashboard/workbench',
     '/dashboard/continuity-intelligence',
+    '/dashboard/intelligence',
     '/dashboard/audits',
     '/dashboard/settings',
     '/dashboard/profile',
