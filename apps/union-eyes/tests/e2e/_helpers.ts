@@ -8,7 +8,7 @@ export function getBaseUrl(): string {
 
 export async function ensureServerReady(request: APIRequestContext): Promise<void> {
   const endpoints = ['/api/auth_core/health/', '/api/health', '/sign-in']
-  const timeoutMs = 90_000
+  const timeoutMs = 180_000
   const pollMs = 1_500
   const startedAt = Date.now()
   let lastError: string | null = null

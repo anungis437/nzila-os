@@ -89,7 +89,9 @@ export async function gotoDashboardAsRole(page: Page, role: StakeholderRole): Pr
 
     await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
     const currentUrl = page.url();
-    if (currentUrl.includes(landing) || currentUrl.includes(target)) {
+    // Only accept the actual landing URL — NOT the root /dashboard target,
+    // which would be a false positive (redirect hasn't fired yet).
+    if (currentUrl.includes(landing)) {
       return landing;
     }
 
