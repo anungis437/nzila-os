@@ -21,8 +21,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function StrikeFundDetailsPage(props: {
   params: Promise<{ locale: string; fundId: string }>;
 }) {
+  // Parent layout at app/[locale]/dashboard/strike-fund/layout.tsx enforces
+  // requireUser + hasMinRole('secretary_treasurer'). Retained here as
+  // defense-in-depth so this leaf remains guarded if the layout is refactored.
   await requireUser();
-  await hasMinRole('member');
+  await hasMinRole('secretary_treasurer');
 
   const { fundId } = await props.params;
 

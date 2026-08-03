@@ -109,7 +109,11 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     { role: 'member', target: '/dashboard/clc' },
     { role: 'member', target: '/dashboard/pension/admin' },
     { role: 'member', target: '/dashboard/pension/trustee' },
-    // strike-fund is member-accessible (minRole:'member' in PAGE_ACCESS_MATRIX); removed from leakage list
+    // Strike Fund is layout-guarded at hasMinRole('secretary_treasurer') per
+    // apps/union-eyes/app/[locale]/dashboard/strike-fund/layout.tsx. member (20)
+    // and steward (50) are both below 85 → layout redirects to /dashboard.
+    { role: 'member', target: '/dashboard/strike-fund' },
+    { role: 'steward', target: '/dashboard/strike-fund' },
     { role: 'member', target: '/dashboard/employer-execution' },
     { role: 'steward', target: '/dashboard/billing-admin' },
     { role: 'steward', target: '/dashboard/compliance-admin' },

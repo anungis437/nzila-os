@@ -232,8 +232,12 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'settings/page.tsx',                           minRole: 'member',               description: 'Dashboard settings (role-adaptive)' },
   { path: 'settings/data-sharing/page.tsx',              minRole: 'member',               description: 'Data sharing consent management' },
   { path: 'settings/sharing/page.tsx',                   minRole: 'member',               description: 'Organization sharing settings' },
-  { path: 'strike-fund/page.tsx',                        minRole: 'member',               description: 'Strike fund dashboard' },
-  { path: 'strike-fund/[fundId]/page.tsx',               minRole: 'member',               description: 'Strike fund detail' },
+  // Strike Fund policy (authoritative source: apps/union-eyes/app/[locale]/dashboard/strike-fund/layout.tsx)
+  // — layout enforces requireUser + hasMinRole('secretary_treasurer'); redirects lower roles to /dashboard.
+  // The `/api/strike-fund/dashboard` route retains a looser `minRole:'member'` policy for direct API calls,
+  // which is a pre-existing horizontal-privilege gap tracked separately.
+  { path: 'strike-fund/page.tsx',                        minRole: 'secretary_treasurer',  description: 'Strike fund dashboard (layout-guarded)' },
+  { path: 'strike-fund/[fundId]/page.tsx',               minRole: 'secretary_treasurer',  description: 'Strike fund detail (layout-guarded)' },
   { path: 'targets/page.tsx',                            minRole: 'member',               description: 'Targets console' },
   { path: 'voting/page.tsx',                             minRole: 'member',               description: 'Voting & elections (client-side)' },
   { path: 'organizer/impact/page.tsx',                   minRole: 'member',               description: 'Organizer impact dashboard (client-side)' },

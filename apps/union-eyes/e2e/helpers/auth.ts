@@ -124,9 +124,29 @@ export async function gotoDashboardAsRole(page: Page, role: StakeholderRole): Pr
 }
 
 export async function assertPilotModeEnabled(page: Page): Promise<void> {
-  const response = await page.request.get('/api/feature-flags?flag=pilot-mode');
-  expect(response.ok()).toBeTruthy();
-  const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
-  const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
-  expect(enabled).toBe(true);
+  const transientNetworkPattern = /ECONNRESET|ECONNREFUSED|ERR_CONNECTION_RESET|ERR_CONNECTION_REFUSED|ETIMEDOUT|timeout/i;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    try {
+      const response = await page.request.get('/api/feature-flags?flag=pilot-mode', { timeout: 10_000 });
+      expect(response.ok()).toBeTruthy();
+      const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
+      const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
+      expect(enabled).toBe(true);
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      lastError = error;
+      if (!transientNetworkPattern.test(message) || attempt === 4) {
+        throw error;
+      }
+
+      // Allow the dev server to recover before retrying pilot-mode assertion.
+      await page.waitForTimeout(800 * attempt);
+      await page.request.get('/api/health', { timeout: 5_000 }).catch(() => undefined);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Failed to verify pilot mode');
 }

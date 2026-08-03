@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StrikeFundDashboardPage() {
-  // Auth is enforced by the dashboard layout (requireUser + getUserRole).
-  // Calling requireUser() here redundantly causes transient failures under
-  // heavy test load (DB connection pressure) that incorrectly redirect to /login.
+  // Auth + role are enforced by the parent segment layout at
+  // app/[locale]/dashboard/strike-fund/layout.tsx (requireUser + hasMinRole('secretary_treasurer'))
+  // and the outer dashboard layout (requireUser). No page-level guard needed.
   return <StrikeFundConsole />;
 }

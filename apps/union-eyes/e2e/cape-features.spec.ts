@@ -28,11 +28,11 @@ test.describe("Grievance draft save & resume", () => {
 
   test.beforeEach(async ({ page }) => {
     // Member can submit a new claim — canonical role for the intake form.
-    await loginAsRole(page, 'member');
+    await gotoDashboardAsRole(page, 'member');
   });
 
   test("intake page renders form with required fields", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/claims/new");
+    await page.goto("/en-CA/dashboard/claims/new", { waitUntil: "domcontentloaded" });
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Page heading — canonical claim intake form
