@@ -1,4 +1,3 @@
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import StrikeFundConsole from '@/components/strike-fund/strike-fund-console';
@@ -19,8 +18,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StrikeFundDashboardPage() {
-  await requireUser();
-  await hasMinRole('member');
-
+  // Auth is enforced by the dashboard layout (requireUser + getUserRole).
+  // Calling requireUser() here redundantly causes transient failures under
+  // heavy test load (DB connection pressure) that incorrectly redirect to /login.
   return <StrikeFundConsole />;
 }

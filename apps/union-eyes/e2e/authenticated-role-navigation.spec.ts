@@ -109,7 +109,7 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     { role: 'member', target: '/dashboard/clc' },
     { role: 'member', target: '/dashboard/pension/admin' },
     { role: 'member', target: '/dashboard/pension/trustee' },
-    { role: 'member', target: '/dashboard/strike-fund' },
+    // strike-fund is member-accessible (minRole:'member' in PAGE_ACCESS_MATRIX); removed from leakage list
     { role: 'member', target: '/dashboard/employer-execution' },
     { role: 'steward', target: '/dashboard/billing-admin' },
     { role: 'steward', target: '/dashboard/compliance-admin' },
@@ -162,8 +162,10 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     const hrefBefore = await homeLink.getAttribute('href');
 
     // Click the sidebar link and wait for the URL to change.
+    // Use a 30s timeout: clicking a Next.js sidebar link triggers an RSC
+    // fetch which can take 10-20s on a cold dev server.
     const urlBefore = page.url();
-    await homeLink.click({ timeout: 8_000 });
+    await homeLink.click({ timeout: 30_000 });
     await page.waitForFunction((prev) => location.href !== prev, urlBefore, { timeout: 15_000 }).catch(() => undefined);
 
     // The URL must have changed and remain on a dashboard path.
