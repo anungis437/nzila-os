@@ -189,6 +189,12 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/rewards/shopify/page.tsx',              minRole: 'admin',                description: 'Shopify integration config' },
 
   // ── Member-facing pages (any authenticated member) ─────────────────────
+  { path: 'cases/page.tsx',                              minRole: 'member',               description: 'Cases alias — server redirect to /dashboard/claims (requireUser)' },
+  { path: 'documents/page.tsx',                          minRole: 'member',               description: 'Document library root — auth by layout, API routes gate per-op (read→member, write→steward)' },
+  { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified signal feed — auth by layout, InboxConsole uses Suspense for useSearchParams' },
+  { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console — auth by layout, PrioritiesConsole uses Suspense for useSearchParams' },
+  { path: 'work/page.tsx',                               minRole: 'member',               description: 'Wave 3 casework alias — auth by layout, renders WorkbenchConsole or InboxConsole by role' },
+
   { path: 'claims/page.tsx',                             minRole: 'member',               description: 'Claims list (active/historical)' },
   { path: 'claims/new/page.tsx',                         minRole: 'member',               description: 'File new claim' },
   { path: 'claims/[id]/page.tsx',                        minRole: 'member',               description: 'Claim detail view' },
@@ -244,6 +250,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'health-safety/training/page.tsx',             minRole: 'member',               description: 'Safety training compliance (client-side)' },
 
   // ── Steward-level pages (level 50) ─────────────────────────────────────
+  { path: 'grievances/page.tsx',                         minRole: 'steward',              description: 'Grievance list — requireUser + hasMinRole(steward), Wave 3 FLOW-003 surface' },
   { path: 'analytics/page.tsx',                          minRole: 'steward',              description: 'Analytics overview' },
   { path: 'clause-library/page.tsx',                     minRole: 'steward',              description: 'Shared clause library' },
   { path: 'communications/page.tsx',                     minRole: 'steward',              description: 'Communications hub' },
@@ -262,6 +269,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'knowledge-base/page.tsx',                      minRole: 'member',               description: 'Union documents library' },
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
+  { path: 'governance/page.tsx',                         minRole: 'officer',              description: 'Governance continuity overview — requireUser + hasMinRole(officer), governance experience landing' },
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },
   { path: 'pilot/page.tsx',                              minRole: 'officer',              description: 'Pilot program health metrics' },
   { path: 'trust/page.tsx',                              minRole: 'officer',              description: 'Trust & system integrity dashboard' },

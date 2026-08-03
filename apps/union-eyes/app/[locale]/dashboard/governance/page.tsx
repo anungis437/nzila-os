@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Governance Continuity | UnionEyes",
   description: "Governance continuity workspace for stewardship, oversight, and review workflows.",
 };
 
-export default function GovernanceOverviewPage() {
+export default async function GovernanceOverviewPage() {
+  try {
+    await requireUser();
+  } catch {
+    redirect("/login");
+  }
+
+  // Governance surfaces require officer-level access (level 60+).
+  // Officer is the minimum governance experience role.
+  const hasAccess = await hasMinRole("officer");
+  if (!hasAccess) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="space-y-6">
       <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
