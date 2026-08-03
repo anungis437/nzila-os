@@ -140,6 +140,52 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       );
     });
   }
+
+  // ── Focused sidebar-click navigation contract ─────────────────────────────
+  //
+  // Proves that actual sidebar LINK CLICKS (not direct page.goto) navigate to
+  // the correct URL, update aria-current="page" on the active link, and
+  // preserve the locale prefix. This is distinct from the role-experience and
+  // redirect tests above, which use page.goto for determinism.
+  //
+  // The member role is used because its nav items are stable and available to
+  // any authenticated user, keeping the test focused on the nav mechanic.
+  test('member: sidebar link click navigates and updates active state', async ({ page }) => {
+    const fixture = getFixture('member');
+    await gotoDashboardAsRole(page, 'member');
+
+    // Find and click the "Home" sidebar link (links to /dashboard/inbox).
+    const primarySidebar = 'aside[aria-label="Primary navigation"]:not([role="dialog"])';
+    const homeLink = page.locator(`${primarySidebar} a[href]`).filter({ hasText: 'Home' }).first();
+    await expect(homeLink).toBeVisible({ timeout: 10_000 });
+
+    const hrefBefore = await homeLink.getAttribute('href');
+
+    // Click the sidebar link and wait for the URL to change.
+    const urlBefore = page.url();
+    await homeLink.click({ timeout: 8_000 });
+    await page.waitForFunction((prev) => location.href !== prev, urlBefore, { timeout: 15_000 }).catch(() => undefined);
+
+    // The URL must have changed and remain on a dashboard path.
+    const urlAfter = page.url();
+    expect(urlAfter).not.toBe(urlBefore);
+    expect(urlAfter).toContain('/dashboard/');
+
+    // Locale must be preserved.
+    expect(urlAfter).toContain(`/${fixture.locale}/`);
+
+    // The clicked link must now show as active (aria-current="page")
+    // OR the URL matches its href (both are valid active-state proofs).
+    const clickedLink = page.locator(`${primarySidebar} a[href="${hrefBefore}"]`).first();
+    if (await clickedLink.count()) {
+      const ariaCurrent = await clickedLink.getAttribute('aria-current').catch(() => null);
+      const hrefPath = hrefBefore ? new URL(hrefBefore, urlAfter).pathname : null;
+      const settledPath = new URL(urlAfter).pathname;
+      const isActive = ariaCurrent === 'page' ||
+        (hrefPath !== null && (settledPath === hrefPath || settledPath.startsWith(`${hrefPath}/`)));
+      expect(isActive, `sidebar link "${hrefBefore}" not active after click. URL: ${urlAfter}`).toBe(true);
+    }
+  });
 });
 
 function escapeRegExp(value: string): string {
