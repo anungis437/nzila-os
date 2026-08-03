@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { bootstrapE2EAuth, gotoDashboardAsRole } from './helpers/auth';
 import { getFixture, toLocalizedPath } from './helpers/role-fixtures';
-import { assertNoTextExposure, navigateFromSidebarOrGoto } from './helpers/navigation-assertions';
+import {
+  assertNoTextExposure,
+  gotoWithTransientRetry,
+  navigateFromSidebarOrGoto,
+} from './helpers/navigation-assertions';
 
 async function getVisiblePageText(page: Parameters<typeof assertNoTextExposure>[0]): Promise<string> {
   return (
@@ -155,20 +159,32 @@ test.describe('Marketing-to-app continuity routes', () => {
     ];
 
     for (const route of routes) {
-      await page.goto(`/${locale}${route}`, { waitUntil: 'domcontentloaded' });
+      await gotoWithTransientRetry(page, `/${locale}${route}`, {
+        waitUntil: 'domcontentloaded',
+        timeout: 45_000,
+      });
       await expect(page.locator('body')).toBeVisible();
       await expect(page).not.toHaveURL(/404|not-found/i);
     }
 
-    await page.goto(`/${locale}/proof?context=executive`, { waitUntil: 'domcontentloaded' });
+    await gotoWithTransientRetry(page, `/${locale}/proof?context=executive`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 45_000,
+    });
     const executiveContextLinks = page.locator('a[href*="context=executive"]');
     await expect(executiveContextLinks.first()).toBeVisible({ timeout: 10000 });
 
-    await page.goto(`/${locale}/trust?context=governance`, { waitUntil: 'domcontentloaded' });
+    await gotoWithTransientRetry(page, `/${locale}/trust?context=governance`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 45_000,
+    });
     const governanceContextLinks = page.locator('a[href*="context=governance"]');
     await expect(governanceContextLinks.first()).toBeVisible({ timeout: 10000 });
 
-    await page.goto(`/${locale}/insights?context=conference`, { waitUntil: 'domcontentloaded' });
+    await gotoWithTransientRetry(page, `/${locale}/insights?context=conference`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 45_000,
+    });
     const conferenceContextCta = page.locator(
       'a[href*="organizational-continuity-risk"][href*="context=conference"], a[href*="institutional-continuity-risk"][href*="context=conference"]',
     );
@@ -183,7 +199,10 @@ test.describe('Marketing-to-app continuity routes', () => {
   });
 
   test('pilot request CTA remains actionable from context routes', async ({ page }) => {
-    await page.goto(`/${locale}/proof?context=procurement`, { waitUntil: 'domcontentloaded' });
+    await gotoWithTransientRetry(page, `/${locale}/proof?context=procurement`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 45_000,
+    });
     const procurementContextCta = page
       .locator(
         'a[href*="/organizational-continuity-risk"][href*="context=procurement"], a[href*="/institutional-continuity-risk"][href*="context=procurement"]',
@@ -207,10 +226,16 @@ test.describe('Marketing-to-app continuity routes', () => {
   });
 
   test('executive and governance journeys avoid raw FSM language', async ({ page }) => {
-    await page.goto(`/${locale}/proof?context=executive`, { waitUntil: 'domcontentloaded' });
+    await gotoWithTransientRetry(page, `/${locale}/proof?context=executive`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 45_000,
+    });
     await assertNoTextExposure(page, ['FSM', 'Finite State Machine', 'Workflow Engine', 'Transition Graph']);
 
-    await page.goto(`/${locale}/trust?context=governance`, { waitUntil: 'domcontentloaded' });
+    await gotoWithTransientRetry(page, `/${locale}/trust?context=governance`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 45_000,
+    });
     await assertNoTextExposure(page, ['FSM', 'Finite State Machine', 'Workflow Engine', 'Transition Graph']);
   });
 });

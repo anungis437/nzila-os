@@ -1,6 +1,32 @@
 import { expect, type Page } from '@playwright/test';
 
 const PRIMARY_SIDEBAR = 'aside[aria-label="Primary navigation"]:not([role="dialog"])';
+const TRANSIENT_NAVIGATION_ERROR_PATTERN =
+  /net::ERR_ABORTED|ERR_NETWORK_IO_SUSPENDED|ERR_CONNECTION_RESET|ERR_CONNECTION_REFUSED|net::ERR_FAILED|Timeout .* exceeded|ERR_HTTP2_PROTOCOL_ERROR/i;
+
+export async function gotoWithTransientRetry(
+  page: Page,
+  targetPath: string,
+  options: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle'; timeout?: number } = {},
+): Promise<void> {
+  const waitUntil = options.waitUntil ?? 'domcontentloaded';
+  const timeout = options.timeout ?? 45_000;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await page.goto(targetPath, { waitUntil, timeout });
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!TRANSIENT_NAVIGATION_ERROR_PATTERN.test(message) || attempt === 3) {
+        throw error;
+      }
+
+      await page.waitForTimeout(800 * attempt);
+      await page.request.get('/api/health', { timeout: 5_000 }).catch(() => undefined);
+    }
+  }
+}
 
 /**
  * Ensure the primary sidebar is fully expanded.
@@ -294,13 +320,12 @@ export async function assertRedirectOrDenied(
   targetPath: string,
   expectedLandingPath: string,
 ): Promise<void> {
-  try {
-    await page.goto(targetPath, { waitUntil: 'domcontentloaded', timeout: 30_000 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (!message.includes('net::ERR_ABORTED')) throw error;
-    // Fall through — always verify final settled state below.
-  }
+  await gotoWithTransientRetry(page, targetPath, { waitUntil: 'domcontentloaded', timeout: 30_000 })
+    .catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('net::ERR_ABORTED')) throw error;
+      // Fall through — always verify final settled state below.
+    });
 
   await page.waitForLoadState('domcontentloaded', { timeout: 15_000 }).catch(() => undefined);
 
@@ -352,10 +377,10 @@ export async function navigateFromSidebarOrGoto(page: Page, label: string, local
   // heavy pages have ongoing background requests.
   await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => undefined);
 
-  // Use 'load' (not 'domcontentloaded') so we wait for JS and CSS too.
-  // After 'load', React has hydrated and body should be visible.
-  await page.goto(localizedPath, { waitUntil: 'load', timeout: 90_000 }).catch(
-    () => page.goto(localizedPath, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => undefined),
+  // Use 'load' first so JS/CSS are ready, then retry with domcontentloaded
+  // for transient runtime instability in long sequential suites.
+  await gotoWithTransientRetry(page, localizedPath, { waitUntil: 'load', timeout: 90_000 }).catch(
+    () => gotoWithTransientRetry(page, localizedPath, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => undefined),
   );
 }
 

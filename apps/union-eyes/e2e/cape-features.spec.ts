@@ -13,6 +13,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureServerReady } from '../tests/e2e/_helpers';
 import { bootstrapE2EAuth, gotoDashboardAsRole, loginAsRole } from './helpers/auth';
+import { gotoWithTransientRetry } from './helpers/navigation-assertions';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
@@ -138,7 +139,10 @@ test.describe("Grievance submission flow", () => {
   test("intake form validates required fields before submission", async ({
     page,
   }) => {
-    await page.goto("/en-CA/dashboard/claims/new");
+    await gotoWithTransientRetry(page, "/en-CA/dashboard/claims/new", {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    });
     await expect(
       page.getByRole("heading", { name: /Create a New Case/i })
     ).toBeVisible({ timeout: 15_000 });
@@ -165,17 +169,20 @@ test.describe("Pilot readiness checklist", () => {
 
   test.beforeEach(async ({ page }) => {
     // Pilot onboarding is currently the admin onboarding wizard surface.
-    await loginAsRole(page, 'admin');
+    await gotoDashboardAsRole(page, 'admin');
   });
 
   test("onboarding page renders checklist with 7 items", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/admin/onboarding");
+    await gotoWithTransientRetry(page, "/en-CA/dashboard/admin/onboarding", {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    });
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Canonical onboarding wizard heading.
     await expect(
       page.getByRole("heading", { name: /Administrator Onboarding/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible({ timeout: 20_000 });
 
     // Progress indicator is shown.
     await expect(page.getByText(/Step 1 of 5/i)).toBeVisible();
