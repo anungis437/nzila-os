@@ -92,6 +92,9 @@ export async function gotoDashboardAsRole(page: Page, role: StakeholderRole): Pr
     // Only accept the actual landing URL — NOT the root /dashboard target,
     // which would be a false positive (redirect hasn't fired yet).
     if (currentUrl.includes(landing)) {
+      // Ensure the landing page is fully loaded (JS executed, React hydrated)
+      // before the caller starts additional navigations.
+      await page.waitForLoadState('load', { timeout: 30_000 }).catch(() => undefined);
       return landing;
     }
 

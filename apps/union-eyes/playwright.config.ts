@@ -31,6 +31,11 @@ export default defineConfig({
     actionTimeout: 20_000,
   },
 
+  // Increase global assertion timeout to 15s.
+  // Next.js App Router RSC streaming + client-side hydration can take
+  // several seconds on first render; 5s (default) is too tight.
+  expect: { timeout: 15_000 },
+
   projects: [
     {
       name: 'chromium',

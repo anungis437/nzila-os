@@ -23,6 +23,8 @@ async function getVisiblePageText(page: Parameters<typeof assertNoTextExposure>[
 }
 
 test.describe('UnionEyes stakeholder demo journeys', () => {
+  test.describe.configure({ timeout: 180_000 });
+
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
   });

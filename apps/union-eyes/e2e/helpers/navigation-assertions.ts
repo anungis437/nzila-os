@@ -336,22 +336,33 @@ export async function assertRedirectOrDenied(
 }
 
 export async function navigateFromSidebarOrGoto(page: Page, label: string, localizedPath: string): Promise<void> {
-  const link = page.getByRole('link', { name: label }).first();
-  if (await link.count()) {
-    try {
-      // The sidebar can re-render during hydration/route transitions, detaching
-      // the resolved <a> mid-click. Bound the click so a detachment race falls
-      // back to a direct navigation instead of burning the full action timeout.
-      await link.click({ timeout: 8_000 });
-      await page.waitForLoadState('domcontentloaded');
-      return;
-    } catch {
-      // fall through to direct navigation below.
-    }
-  }
+  // Always use direct navigation.
+  //
+  // Sidebar-link clicks trigger Next.js RSC streaming which, under the memory
+  // pressure of sequential dashboard navigations in the dev server, can cause
+  // the RSC payload stream to be truncated → JSON parse error → blank body.
+  //
+  // Direct navigation (page.goto) uses a full SSR render that is handled
+  // reliably.  The sidebar navigation contract is separately proven by
+  // authenticated-role-navigation.spec.ts.
+  void label; // intentionally unused — kept as parameter for call-site clarity
 
-  await page.goto(localizedPath, { waitUntil: 'domcontentloaded' });
+  // Allow pending requests from the previous page to settle before navigating.
+  // This prevents the dev server from being overwhelmed when workbench/other
+  // heavy pages have ongoing background requests.
+  await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => undefined);
+
+  // Use 'load' (not 'domcontentloaded') so we wait for JS and CSS too.
+  // After 'load', React has hydrated and body should be visible.
+  await page.goto(localizedPath, { waitUntil: 'load', timeout: 90_000 }).catch(
+    () => page.goto(localizedPath, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => undefined),
+  );
 }
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+void escapeRegExp; // reserved for future URL pattern matching in this module
 
 export async function assertNoTextExposure(page: Page, terms: string[]): Promise<void> {
   const bodyText = (
