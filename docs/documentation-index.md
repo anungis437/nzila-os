@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-07-23T06:44:07.372Z
+Generated: 2026-08-04T00:55:46.254Z
 
-Total documents indexed: 1592
+Total documents indexed: 1647
 Stale documents (>90 days since repo validation): 1
 
 ## Category Summary
@@ -15,11 +15,12 @@ Stale documents (>90 days since repo validation): 1
 | README.md | 1 | 0 |
 | architecture | 3 | 0 |
 | backlog | 1 | 0 |
+| business-plan | 43 | 0 |
 | categories | 925 | 0 |
 | compliance | 6 | 0 |
 | courtlens | 14 | 0 |
 | disaster-recovery.md | 1 | 0 |
-| doctrine | 61 | 0 |
+| doctrine | 73 | 0 |
 | documentation-index.md | 1 | 0 |
 | governance | 4 | 0 |
 | hardening | 1 | 0 |
@@ -60,6 +61,49 @@ Stale documents (>90 days since repo validation): 1
 | [docs/architecture/authority-policy-registry-and-decision-events.md](docs/architecture/authority-policy-registry-and-decision-events.md) | architecture | 2026-05-20 | current |
 | [docs/architecture/ORG_SCOPED_TABLES.md](docs/architecture/ORG_SCOPED_TABLES.md) | architecture | 2026-05-20 | current |
 | [docs/backlog/abr-backend.md](docs/backlog/abr-backend.md) | backlog | 2026-05-11 | current |
+| [docs/business-plan/AI-AUTHORING-POLICY.md](docs/business-plan/AI-AUTHORING-POLICY.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/BDC-DOCUMENT-CONTROL-INDEX.md](docs/business-plan/BDC-DOCUMENT-CONTROL-INDEX.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/BDC-FOUNDER-INPUT-CHECKLIST.md](docs/business-plan/BDC-FOUNDER-INPUT-CHECKLIST.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/BDC-FREEZE-RECORD.md](docs/business-plan/BDC-FREEZE-RECORD.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/BDC-WORKSTREAM-HANDOFF.md](docs/business-plan/BDC-WORKSTREAM-HANDOFF.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/CONTROLLED-VOCABULARY.md](docs/business-plan/CONTROLLED-VOCABULARY.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md](docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/DOCUMENT-LIFECYCLE.md](docs/business-plan/DOCUMENT-LIFECYCLE.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/00-Executive-Summary.md](docs/business-plan/evidence-book/00-Executive-Summary.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/01-Company.md](docs/business-plan/evidence-book/01-Company.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/02-Institutional-Intelligence.md](docs/business-plan/evidence-book/02-Institutional-Intelligence.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/03-Products.md](docs/business-plan/evidence-book/03-Products.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/04-Technology.md](docs/business-plan/evidence-book/04-Technology.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/05-Commercialization.md](docs/business-plan/evidence-book/05-Commercialization.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/06-Security.md](docs/business-plan/evidence-book/06-Security.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/07-Operations.md](docs/business-plan/evidence-book/07-Operations.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/08-Validation.md](docs/business-plan/evidence-book/08-Validation.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/09-IP.md](docs/business-plan/evidence-book/09-IP.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/10-Evidence-Register.md](docs/business-plan/evidence-book/10-Evidence-Register.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/11-Gap-Register.md](docs/business-plan/evidence-book/11-Gap-Register.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/12-Commercial-Readiness.md](docs/business-plan/evidence-book/12-Commercial-Readiness.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/13-Timeline.md](docs/business-plan/evidence-book/13-Timeline.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/14-Founder-Investment.md](docs/business-plan/evidence-book/14-Founder-Investment.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/15-Commercial-Traction-Pipeline.md](docs/business-plan/evidence-book/15-Commercial-Traction-Pipeline.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/APPENDICES.md](docs/business-plan/evidence-book/APPENDICES.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U1-Underwriter-Attack-Review.md](docs/business-plan/evidence-book/BDC-U1-Underwriter-Attack-Review.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U10-Credit-Package-Readiness.md](docs/business-plan/evidence-book/BDC-U10-Credit-Package-Readiness.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U2-Repayment-Story-Audit.md](docs/business-plan/evidence-book/BDC-U2-Repayment-Story-Audit.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U3-Financial-Consistency-Audit.md](docs/business-plan/evidence-book/BDC-U3-Financial-Consistency-Audit.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U4-Commercial-Evidence-Audit.md](docs/business-plan/evidence-book/BDC-U4-Commercial-Evidence-Audit.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U5-Founder-Investment-Ledger.md](docs/business-plan/evidence-book/BDC-U5-Founder-Investment-Ledger.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U6-Management-Credibility-Review.md](docs/business-plan/evidence-book/BDC-U6-Management-Credibility-Review.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U7-Executive-Summary-Compressed.md](docs/business-plan/evidence-book/BDC-U7-Executive-Summary-Compressed.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U8-Decline-Memo-and-Rebuttal.md](docs/business-plan/evidence-book/BDC-U8-Decline-Memo-and-Rebuttal.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/BDC-U9-Remediation-Register.md](docs/business-plan/evidence-book/BDC-U9-Remediation-Register.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/CLOSURE-RECORD.md](docs/business-plan/evidence-book/CLOSURE-RECORD.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md](docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/evidence-book/README.md](docs/business-plan/evidence-book/README.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/EVIDENCE-MAINTENANCE-GUIDE.md](docs/business-plan/EVIDENCE-MAINTENANCE-GUIDE.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/INSTITUTIONAL-CLOSURE.md](docs/business-plan/INSTITUTIONAL-CLOSURE.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/PRODUCT-GOVERNANCE.md](docs/business-plan/PRODUCT-GOVERNANCE.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md](docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md) | business-plan | 2026-08-04 | current |
+| [docs/business-plan/SINGLE-SOURCE-OF-TRUTH.md](docs/business-plan/SINGLE-SOURCE-OF-TRUTH.md) | business-plan | 2026-08-04 | current |
 | [docs/categories/historical-archive/archive/AI_ML_REMEDIATION_STATUS.md](docs/categories/historical-archive/archive/AI_ML_REMEDIATION_STATUS.md) | categories | 2026-05-11 | current |
 | [docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md](docs/categories/historical-archive/archive/audit-reports/ADVERSARIAL_CERTIFICATION_REPORT.md) | categories | 2026-05-11 | current |
 | [docs/categories/historical-archive/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md](docs/categories/historical-archive/archive/audit-reports/AUDIT_LEDGER_2026-03-25.md) | categories | 2026-05-11 | current |
@@ -1015,6 +1059,18 @@ Stale documents (>90 days since repo validation): 1
 | [docs/doctrine/DOCTRINE.md](docs/doctrine/DOCTRINE.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/FIRST_CONTACT_MESSAGING.md](docs/doctrine/FIRST_CONTACT_MESSAGING.md) | doctrine | 2026-05-20 | current |
 | [docs/doctrine/frameworks.md](docs/doctrine/frameworks.md) | doctrine | 2026-05-20 | current |
+| [docs/doctrine/IEBOK_AXIOM_AND_LAW_REGISTRY.md](docs/doctrine/IEBOK_AXIOM_AND_LAW_REGISTRY.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_CONSTITUTIONAL_CONVENTION_PHASE_II.md](docs/doctrine/IEBOK_CONSTITUTIONAL_CONVENTION_PHASE_II.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_CONSTITUTIONAL_METAMODEL.md](docs/doctrine/IEBOK_CONSTITUTIONAL_METAMODEL.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_CONSTITUTIONAL_PRECEDENCE.md](docs/doctrine/IEBOK_CONSTITUTIONAL_PRECEDENCE.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_ENTROPY_DISPOSITION.md](docs/doctrine/IEBOK_ENTROPY_DISPOSITION.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_INSTITUTIONAL_INTELLIGENCE_CLASSIFICATION.md](docs/doctrine/IEBOK_INSTITUTIONAL_INTELLIGENCE_CLASSIFICATION.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_LIFECYCLE_CONFORMANCE_MATRIX.md](docs/doctrine/IEBOK_LIFECYCLE_CONFORMANCE_MATRIX.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_MEASUREMENT_CONFORMANCE_REGISTER.md](docs/doctrine/IEBOK_MEASUREMENT_CONFORMANCE_REGISTER.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_PHASE_I_FINDINGS_REGISTER.md](docs/doctrine/IEBOK_PHASE_I_FINDINGS_REGISTER.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_PHASE_II_HUMAN_RATIFICATION_PACKET.md](docs/doctrine/IEBOK_PHASE_II_HUMAN_RATIFICATION_PACKET.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_PHASE_II_INDEPENDENT_RATIFICATION_AUDIT.md](docs/doctrine/IEBOK_PHASE_II_INDEPENDENT_RATIFICATION_AUDIT.md) | doctrine | 2026-08-04 | current |
+| [docs/doctrine/IEBOK_SCIENCE_DERIVATION_RECORD.md](docs/doctrine/IEBOK_SCIENCE_DERIVATION_RECORD.md) | doctrine | 2026-08-04 | current |
 | [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CATEGORY_VALIDATION_KIT.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_CYCLE1_PACKAGE.md](docs/doctrine/INSTITUTIONAL_INTELLIGENCE_VALIDATION_CYCLE1_PACKAGE.md) | doctrine | 2026-07-18 | current |
@@ -1068,7 +1124,7 @@ Stale documents (>90 days since repo validation): 1
 | [docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/README.md](docs/doctrine/whitepapers/README.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-07-23 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-08-04 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | current |
 | [docs/governance/gates/gate-taxonomy.md](docs/governance/gates/gate-taxonomy.md) | governance | 2026-07-18 | current |
 | [docs/governance/owner-operated-review-model.md](docs/governance/owner-operated-review-model.md) | governance | 2026-07-18 | current |
@@ -1265,7 +1321,7 @@ Stale documents (>90 days since repo validation): 1
 | [docs/oci/government-readiness/richard-packet/external-send/README.md](docs/oci/government-readiness/richard-packet/external-send/README.md) | oci | 2026-07-20 | current |
 | [docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md](docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md) | oci | 2026-07-20 | current |
 | [docs/oci/government-readiness/richard-packet/VALIDATION_WORKBOOK.md](docs/oci/government-readiness/richard-packet/VALIDATION_WORKBOOK.md) | oci | 2026-07-20 | current |
-| [docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md](docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md) | oci | 2026-07-20 | current |
+| [docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md](docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md) | oci | 2026-08-04 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md](docs/oci/intelligence/OCI_INTELLIGENCE_CONTRACTS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md](docs/oci/intelligence/OCI_INTELLIGENCE_ETHICS.md) | oci | 2026-05-22 | current |
 | [docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md](docs/oci/intelligence/OCI_INTELLIGENCE_NETWORK.md) | oci | 2026-05-22 | current |
@@ -1367,8 +1423,8 @@ Stale documents (>90 days since repo validation): 1
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-07-18 | current |
 | [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-05-22 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-07-18 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-07-23 | current |
-| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-07-23 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-08-04 | current |
+| [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-08-04 | current |
 | [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-07-18 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-05-20 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-05-20 | current |
@@ -1379,9 +1435,9 @@ Stale documents (>90 days since repo validation): 1
 | [docs/proof-center/portfolio-proof-index.md](docs/proof-center/portfolio-proof-index.md) | proof-center | 2026-07-18 | current |
 | [docs/public-service/civic-faq.md](docs/public-service/civic-faq.md) | public-service | 2026-07-18 | current |
 | [docs/public-service/civic-one-page-brief.md](docs/public-service/civic-one-page-brief.md) | public-service | 2026-07-18 | current |
-| [docs/public-service/civic-thesis.md](docs/public-service/civic-thesis.md) | public-service | 2026-07-20 | current |
-| [docs/public-service/clear-method-canonical.md](docs/public-service/clear-method-canonical.md) | public-service | 2026-07-20 | current |
-| [docs/public-service/clear-method-note.md](docs/public-service/clear-method-note.md) | public-service | 2026-07-20 | current |
+| [docs/public-service/civic-thesis.md](docs/public-service/civic-thesis.md) | public-service | 2026-08-04 | current |
+| [docs/public-service/clear-method-canonical.md](docs/public-service/clear-method-canonical.md) | public-service | 2026-08-04 | current |
+| [docs/public-service/clear-method-note.md](docs/public-service/clear-method-note.md) | public-service | 2026-08-04 | current |
 | [docs/public-service/clear-method-one-page-summary.md](docs/public-service/clear-method-one-page-summary.md) | public-service | 2026-07-18 | current |
 | [docs/public-service/equity-implementation-traceability.md](docs/public-service/equity-implementation-traceability.md) | public-service | 2026-07-18 | current |
 | [docs/public-service/five-slide-intro-deck-outline.md](docs/public-service/five-slide-intro-deck-outline.md) | public-service | 2026-07-18 | current |

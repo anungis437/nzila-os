@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-23T06:44:07.372Z",
-  "totalDocuments": 1592,
+  "generatedAt": "2026-08-04T00:55:46.254Z",
+  "totalDocuments": 1647,
   "staleDocuments": 1,
   "categories": [
     {
@@ -34,6 +34,11 @@
       "staleCount": 0
     },
     {
+      "category": "business-plan",
+      "count": 43,
+      "staleCount": 0
+    },
+    {
       "category": "categories",
       "count": 925,
       "staleCount": 0
@@ -55,7 +60,7 @@
     },
     {
       "category": "doctrine",
-      "count": 61,
+      "count": 73,
       "staleCount": 0
     },
     {
@@ -239,6 +244,264 @@
       "path": "docs/backlog/abr-backend.md",
       "category": "backlog",
       "lastValidated": "2026-05-11",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/AI-AUTHORING-POLICY.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/BDC-DOCUMENT-CONTROL-INDEX.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/BDC-FOUNDER-INPUT-CHECKLIST.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/BDC-FREEZE-RECORD.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/BDC-WORKSTREAM-HANDOFF.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/CONTROLLED-VOCABULARY.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/DOCUMENT-LIFECYCLE.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/00-Executive-Summary.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/01-Company.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/02-Institutional-Intelligence.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/03-Products.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/04-Technology.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/05-Commercialization.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/06-Security.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/07-Operations.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/08-Validation.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/09-IP.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/10-Evidence-Register.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/11-Gap-Register.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/12-Commercial-Readiness.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/13-Timeline.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/14-Founder-Investment.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/15-Commercial-Traction-Pipeline.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/APPENDICES.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U1-Underwriter-Attack-Review.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U10-Credit-Package-Readiness.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U2-Repayment-Story-Audit.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U3-Financial-Consistency-Audit.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U4-Commercial-Evidence-Audit.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U5-Founder-Investment-Ledger.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U6-Management-Credibility-Review.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U7-Executive-Summary-Compressed.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U8-Decline-Memo-and-Rebuttal.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/BDC-U9-Remediation-Register.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/CLOSURE-RECORD.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/evidence-book/README.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/EVIDENCE-MAINTENANCE-GUIDE.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/INSTITUTIONAL-CLOSURE.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/PRODUCT-GOVERNANCE.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/business-plan/SINGLE-SOURCE-OF-TRUTH.md",
+      "category": "business-plan",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
@@ -5972,6 +6235,78 @@
       "stale": false
     },
     {
+      "path": "docs/doctrine/IEBOK_AXIOM_AND_LAW_REGISTRY.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_CONSTITUTIONAL_CONVENTION_PHASE_II.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_CONSTITUTIONAL_METAMODEL.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_CONSTITUTIONAL_PRECEDENCE.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_ENTROPY_DISPOSITION.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_INSTITUTIONAL_INTELLIGENCE_CLASSIFICATION.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_LIFECYCLE_CONFORMANCE_MATRIX.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_MEASUREMENT_CONFORMANCE_REGISTER.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_PHASE_I_FINDINGS_REGISTER.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_PHASE_II_HUMAN_RATIFICATION_PACKET.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_PHASE_II_INDEPENDENT_RATIFICATION_AUDIT.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
+      "path": "docs/doctrine/IEBOK_SCIENCE_DERIVATION_RECORD.md",
+      "category": "doctrine",
+      "lastValidated": "2026-08-04",
+      "stale": false
+    },
+    {
       "path": "docs/doctrine/INSTITUTIONAL_INTELLIGENCE_CANONICAL_PACKAGE.md",
       "category": "doctrine",
       "lastValidated": "2026-07-18",
@@ -6292,7 +6627,7 @@
     {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
-      "lastValidated": "2026-07-23",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
@@ -7474,7 +7809,7 @@
     {
       "path": "docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md",
       "category": "oci",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
@@ -8086,13 +8421,13 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-07-23",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
       "path": "docs/ops/release-governance/release-governance-audit.md",
       "category": "ops",
-      "lastValidated": "2026-07-23",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
@@ -8158,19 +8493,19 @@
     {
       "path": "docs/public-service/civic-thesis.md",
       "category": "public-service",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
       "path": "docs/public-service/clear-method-canonical.md",
       "category": "public-service",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
       "path": "docs/public-service/clear-method-note.md",
       "category": "public-service",
-      "lastValidated": "2026-07-20",
+      "lastValidated": "2026-08-04",
       "stale": false
     },
     {
