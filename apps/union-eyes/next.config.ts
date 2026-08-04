@@ -6,6 +6,13 @@ import webpack from 'webpack';
 
 const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
+// Resolve the CJS entry of js-yaml at config-load time so both webpack and
+// Turbopack aliases point at a real, importable file (not an exports-blocked
+// subpath). js-yaml v4 ships `dist/js-yaml.mjs` (named-only exports) and
+// `index.js` (CJS with a default-shaped export); we always want the CJS entry
+// for consumers doing `import yaml from 'js-yaml'` (swagger-client / swagger-ui-react).
+const jsYamlCjsPath = require.resolve('js-yaml');
+
 // Gate security headers that break local HTTP dev server
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -184,7 +191,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       immutable: 'immutable/dist/immutable.js',
-      'js-yaml': 'js-yaml/dist/js-yaml.cjs',
+      'js-yaml': jsYamlCjsPath,
     },
   },
 
@@ -399,7 +406,7 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       immutable: require.resolve('immutable/dist/immutable.js'),
-      'js-yaml': require.resolve('js-yaml/dist/js-yaml.cjs'),
+      'js-yaml': jsYamlCjsPath,
     };
 
     // Reduce memory usage
