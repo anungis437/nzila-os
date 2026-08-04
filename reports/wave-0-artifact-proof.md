@@ -41,7 +41,7 @@ pnpm --filter @nzila/union-eyes-demo build
 | Exit code | 0 | 0 |
 | `.next/` demo-token files with hits | **72** | 116 |
 
-Machine-readable per-artifact snapshots: [`reports/wave-0-artifact-proof.operational.json`](../../../reports/wave-0-artifact-proof.operational.json), [`reports/wave-0-artifact-proof.demo.json`](../../../reports/wave-0-artifact-proof.demo.json).
+Machine-readable per-artifact snapshots: [`reports/wave-0-artifact-proof.operational.json`](wave-0-artifact-proof.operational.json), [`reports/wave-0-artifact-proof.demo.json`](wave-0-artifact-proof.demo.json).
 
 ## Honest interpretation
 

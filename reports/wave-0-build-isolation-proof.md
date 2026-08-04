@@ -110,7 +110,7 @@ pnpm reality:build-scan:with-bundle
 - Demo scan snapshot: [reports/wave-0-build-isolation.demo.json](wave-0-build-isolation.demo.json), [reports/wave-0-build-isolation.demo.md](wave-0-build-isolation.demo.md)
 - Tracked "current" scan (mirror of operational): [reports/operational-build-demo-scan.md](operational-build-demo-scan.md)
 - Scanner: [tooling/reality/operational-build-scan.ts](../tooling/reality/operational-build-scan.ts)
-- Allowlist: [tooling/reality/operational-build-demo-allowlist.json](../tooling/reality/operational-build-demo-allowlist.json)
+- Allowlist: retired at Wave 0 Task E — the scanner now uses a hardcoded permit constant (see the scanner header). The prior `tooling/reality/operational-build-demo-allowlist.json` was removed.
 - Runtime gate: [apps/union-eyes/lib/dashboard/role-experience.ts](../apps/union-eyes/lib/dashboard/role-experience.ts)
 - Capability entry: `UE-BUILD-OPERATIONAL-ISOLATION` in [apps/union-eyes/lib/reality/capability-registry.ts](../apps/union-eyes/lib/reality/capability-registry.ts)
 - §8 design doc: [docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md](../docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md)

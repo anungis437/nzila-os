@@ -1,17 +1,17 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-07-20 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-08-04 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Apps | 26 |
-| Packages (packages/*) | 222 |
-| Workspace Packages (apps|packages|services|tooling) | 254 |
-| GitHub Workflows | 52 |
+| Apps | 27 |
+| Packages (packages/*) | 224 |
+| Workspace Packages (apps|packages|services|tooling) | 257 |
+| GitHub Workflows | 53 |
 | Contract Test Files | 272 |
-| TS/JS Test Files | 2469 |
+| TS/JS Test Files | 2487 |
 | Python Test Files | 32 |
 
 ## Apps
@@ -37,7 +37,8 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade management — deals, listings, shipments, and commission track |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4915 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4904 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 71 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |
 | veridian-site | Next.js | 3010 | ✅ | ✅ | ❌ | ✅ | 27 |  |
@@ -87,6 +88,7 @@
 - platform-automation.yml
 - portfolio-governance.yml
 - preview-deploy.yml
+- reality-anti-theatre.yml
 - red-team.yml
 - release-governance.yml
 - release-train.yml

@@ -46,7 +46,7 @@ Public routes validated live (all `200`, all clean):
 |---|---|---|---|---|---|---|---|
 | 1 | Public homepage | `/`, `/en-CA` | `/en-CA` | [app/[locale]/page.tsx](../app/[locale]/page.tsx) | **Ready** | 200, hero + CTAs render. | "This is what any visitor sees — readiness assessment + value pillars." |
 | 2 | Product overview | `/en-CA/platform` | same | `app/[locale]/(marketing)/platform/page.tsx` | **Ready** | 200, 2.9 KB. | "Continuity OS: governance, memory, intelligence layers." |
-| 3 | Persona picker / one-click login | `/en-CA/login`, `/en-CA/sign-in` | both 200 | [components/auth/cupe4373-persona-picker.tsx](../components/auth/cupe4373-persona-picker.tsx), [components/auth/login-form.tsx](../components/auth/login-form.tsx) | **Ready** | Steward/officer/member tiles render; `/api/auth/login` works. | "Three personas — chief steward, officer, member — one click in." |
+| 3 | Persona picker / one-click login | `/en-CA/login`, `/en-CA/sign-in` | both 200 | `components/auth/cupe4373-persona-picker.tsx`, `components/auth/login-form.tsx` | **Ready** | Steward/officer/member tiles render; `/api/auth/login` works. | "Three personas — chief steward, officer, member — one click in." |
 | 4 | Chief steward dashboard | `/en-CA/dashboard` | same | [components/demo/cupe4373-operations-dashboard.tsx](../components/demo/cupe4373-operations-dashboard.tsx) | **Ready** | 200, 3.6 KB, full nav + cards. | "Steward Operations Center — daily work in one pane." |
 | 5 | Cases (list) | `/en-CA/dashboard/cases` | same | [components/demo/cupe4373-cases-console.tsx](../components/demo/cupe4373-cases-console.tsx) | **Ready** | 200, 4.8 KB. | "Every member issue tracked with state, owner, deadline." |
 | 5b | Case detail | `/en-CA/dashboard/cases/UE-4373-026` | same | [app/[locale]/dashboard/cases/[id]/page.tsx](../app/[locale]/dashboard/cases/[id]/page.tsx) | **Risky (live build)** | Source clean; **live build still shows `Grand River` + `7 West`** until deploy. | If deploy not done: use a different case ID or open from the list and pick one fresh. |
@@ -61,8 +61,8 @@ Public routes validated live (all `200`, all clean):
 | 14 | Priorities / follow-ups | `/en-CA/dashboard/priorities` | same | [components/demo/cupe4373-priorities-page.tsx](../components/demo/cupe4373-priorities-page.tsx) | **Ready** | 200, 4.3 KB, clean. | "Commitments and deadlines aggregated across the local." |
 | 15 | Calendar | `/en-CA/dashboard/calendar` | same | [components/demo/cupe4373-calendar-grid.tsx](../components/demo/cupe4373-calendar-grid.tsx) | **Ready** | 200, 1.7 KB, clean. | "Steward calendar — meetings, deadlines, hearings." |
 | 16 | Agreements | `/en-CA/dashboard/agreements` | same | [app/[locale]/dashboard/agreements/agreements-page.tsx](../app/[locale]/dashboard/agreements/agreements-page.tsx) | **Ready** | 200, 1.6 KB, clean. | "Collective agreements available at the steward's fingertips." |
-| 17 | Work surface (alt landing) | `/en-CA/dashboard/work` | same | [components/work/work-surface.tsx](../components/work/work-surface.tsx) | **Ready** | 200, 4.9 KB, clean. | Optional — only if asked "where's my work queue." |
-| 18 | Admin / demo seed | `/api/admin/seed-cupe-pilot` | same | [app/api/admin/seed-cupe-pilot/route.ts](../app/api/admin/seed-cupe-pilot/route.ts) | **Hidden** | API only; surfaced via [app/components/admin/LoadCUPEPilotForm.tsx](../app/components/admin/LoadCUPEPilotForm.tsx). | **Do not show.** Operational only. |
+| 17 | Work surface (alt landing) | `/en-CA/dashboard/work` | same | `components/work/work-surface.tsx` | **Ready** | 200, 4.9 KB, clean. | Optional — only if asked "where's my work queue." |
+| 18 | Admin / demo seed | `/api/admin/seed-cupe-pilot` | same | `app/api/admin/seed-cupe-pilot/route.ts` | **Hidden** | API only; surfaced via `app/components/admin/LoadCUPEPilotForm.tsx`. | **Do not show.** Operational only. |
 
 ---
 

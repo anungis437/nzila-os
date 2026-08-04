@@ -43,7 +43,7 @@ Legend: ✅ done · 🟢 ready-to-execute (code landed, one action from evidence
 5. ✅ **Rotate cron secret.** Evidence records the Key Vault secret identity and rotation outcome without secret-derived fingerprints.
 6. ✅ **Bind container-app secrets to KV references** via system-assigned MI (principal `20d5f517-1f03-4ced-ae19-cfc32c4c2c13`, role `Key Vault Secrets User` on `nzila-staging-kv`).
 7. ✅ **Prove rotation live.** Old value → HTTP 401, new → HTTP 200 on staging FQDN (revision `--kvrot-2607211642`).
-8. 🔴⚠️ **Rotate Resend API key.** Blocked on human — requires Resend dashboard access. Instructions in [reports/phase0/wave-1-phase-a/RESEND-ROTATION-REQUEST.md](reports/phase0/wave-1-phase-a/RESEND-ROTATION-REQUEST.md).
+8. 🔴⚠️ **Rotate Resend API key.** Blocked on human — requires Resend dashboard access. Instructions in [RESEND-ROTATION-REQUEST.md](RESEND-ROTATION-REQUEST.md).
 9. ✅ **Register migration `0045` in immutability manifest** (commit `df9283163`). Checksum `406ae1eac346989275ee54c4a05cc4ad52491372a9b3ab41403ea776c70cecca`.
 
 ### Track C — Schema-drift protection

@@ -78,8 +78,8 @@ source hits. Full rebuild was run inside the ACR runner (turbo cache miss);
 the ACR-built image inherits the same clean bundle contract enforced by
 `apps/union-eyes/next.config.ts` `outputFileTracingExcludes`.
 
-Evidence: [reports/operational-build-demo-scan.json](../operational-build-demo-scan.json)
-· [reports/operational-build-demo-scan.md](../operational-build-demo-scan.md)
+Evidence: [reports/operational-build-demo-scan.json](../../operational-build-demo-scan.json)
+· [reports/operational-build-demo-scan.md](../../operational-build-demo-scan.md)
 
 ## §13 · Staging container app baseline
 

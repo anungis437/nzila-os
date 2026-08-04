@@ -52,7 +52,7 @@ Bootstrap and seed workflows are idempotent and safe to re-run multiple times.
 ## Repo Structure
 
 ```
-apps/              26 applications
+apps/              27 applications
 packages/          canonical inventory (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools
