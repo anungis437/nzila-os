@@ -390,24 +390,35 @@ function escapeRegExp(s: string): string {
 void escapeRegExp; // reserved for future URL pattern matching in this module
 
 export async function assertNoTextExposure(page: Page, terms: string[]): Promise<void> {
-  const bodyText = (
-    await page.evaluate(() => {
-      const visibleRoots = [
-        document.querySelector('main'),
-        document.querySelector('[role="main"]'),
-        document.body,
-      ].filter(Boolean) as HTMLElement[];
+  // Some role landing pages perform a client-side redirect immediately after
+  // DOMContentLoaded (e.g. locale/permission normalization). Sampling the DOM
+  // with page.evaluate() during that window throws "Execution context was
+  // destroyed, most likely because of a navigation". Wait for the `load` event
+  // (bounded, deterministic — NOT a broad retry) so any post-hydration soft
+  // navigation has committed before we read the body text.
+  await page.waitForLoadState('load', { timeout: 15_000 }).catch(() => undefined);
 
-      for (const root of visibleRoots) {
-        const text = root.innerText?.trim();
-        if (text) return text;
+  // Prefer Playwright locator.innerText() over page.evaluate(): locators
+  // transparently re-acquire the execution context if a navigation invalidates
+  // it, which is exactly the failure mode observed on the member/staff dashboard
+  // landing paths. This is not a retry loop — it's the auto-waiting semantic
+  // Playwright provides for reads of stable DOM nodes.
+  const candidateSelectors = ['main', '[role="main"]', 'body'];
+  let bodyText = '';
+  for (const selector of candidateSelectors) {
+    try {
+      const text = (await page.locator(selector).first().innerText({ timeout: 5_000 })).trim();
+      if (text) {
+        bodyText = text;
+        break;
       }
+    } catch {
+      // fall through to next selector; final assertion still runs on empty text
+    }
+  }
 
-      return '';
-    })
-  ).toLowerCase();
-
+  const lowered = bodyText.toLowerCase();
   for (const term of terms) {
-    expect(bodyText).not.toContain(term.toLowerCase());
+    expect(lowered).not.toContain(term.toLowerCase());
   }
 }
