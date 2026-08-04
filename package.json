@@ -395,7 +395,7 @@
       "@auth/core": ">=0.41.3",
       "engine.io": ">=6.6.7",
       "find-my-way": ">=9.7.0",
-      "js-yaml": ">=4.3.0",
+      "js-yaml": ">=4.3.0 <5",
       "sharp": ">=0.35.0",
       "@opentelemetry/propagator-jaeger": ">=2.9.0",
       "@opentelemetry/exporter-prometheus": ">=0.217.0",
