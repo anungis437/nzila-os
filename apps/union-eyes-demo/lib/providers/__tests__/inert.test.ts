@@ -26,11 +26,12 @@ import {
   getRecentInertCalls,
   resetInertCallLog,
 } from '../inert';
+import { logger } from '@/lib/logger';
 
 describe('demo inert providers — throwing categories', () => {
   beforeEach(() => {
     resetInertCallLog();
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(logger, 'warn').mockImplementation(() => {});
   });
 
   it('email.send throws DEMO_NO_EXTERNAL_SIDE_EFFECT', () => {
@@ -143,7 +144,7 @@ describe('demo inert providers — throwing categories', () => {
 describe('demo inert providers — no-op categories', () => {
   beforeEach(() => {
     resetInertCallLog();
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(logger, 'warn').mockImplementation(() => {});
   });
 
   it('analytics.track logs but does not throw', () => {
@@ -199,7 +200,7 @@ describe('demo inert providers — enumeration coverage', () => {
   });
 
   it('every warn line embeds the marker', () => {
-    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const spy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
     resetInertCallLog();
     analytics.track('x');
     observability.captureMessage('y');
