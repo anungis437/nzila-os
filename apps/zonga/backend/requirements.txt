@@ -15,7 +15,7 @@ celery[redis]>=5.4,<6.0
 
 # Auth (JWT verification)
 PyJWT>=2.9,<3.0
-cryptography>=46.0.5
+cryptography>=48.0.1
 
 # Runtime
 gunicorn>=22.0,<23.0
