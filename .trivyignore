@@ -19,3 +19,11 @@ GHSA-8f24-v5vv-gm5j   # next-intl open redirect (CVE-2026-40299) false positive/
 # actual vulnerable code path. Trivy still flags the parent package metadata until upstream sdk-node ships a
 # new release pinning the patched exporter. Review: 2026-06-11.
 CVE-2026-44902   # opentelemetry sdk-node Prometheus exporter crash — patched via pnpm override on exporter-prometheus@>=0.217.0
+
+# npm ships a bundled `node-tar` inside the official Node.js base images (node:20-slim,
+# node:22-alpine). Our workspace pnpm override pins tar >=7.5.19 for our own dependency graph
+# (verified in pnpm-lock.yaml). The vulnerable tar copy Trivy flags lives at
+# /usr/local/lib/node_modules/npm/node_modules/tar/package.json and can only be updated when
+# upstream Node.js publishes a base-image rebuild that bundles a newer npm/node-tar.
+# Review: 2026-09-04 — re-check node:20-slim and node:22-alpine bundled npm tar version.
+CVE-2026-59873   # node-tar DoS via crafted gzip bomb — bundled in npm inside base image, not our dep graph
