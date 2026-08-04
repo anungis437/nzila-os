@@ -184,8 +184,10 @@ test.describe("Pilot readiness checklist", () => {
       page.getByRole("heading", { name: /Administrator Onboarding/i })
     ).toBeVisible({ timeout: 20_000 });
 
-    // Progress indicator is shown.
-    await expect(page.getByText(/Step 1 of 5/i)).toBeVisible();
+    // Progress indicator is shown. Use .first() because the wizard renders the
+    // step label twice (visible + aria/screen-reader duplicate) and strict-mode
+    // otherwise flags 2 matches (observed at f3e2bb2fe/1c07b50b2).
+    await expect(page.getByText(/Step 1 of 5/i).first()).toBeVisible();
   });
 
   test("checklist displays all 7 expected items", async ({ page }) => {
@@ -194,7 +196,7 @@ test.describe("Pilot readiness checklist", () => {
       page.getByRole("heading", { name: /Administrator Onboarding/i })
     ).toBeVisible({ timeout: 15_000 });
 
-    await expect(page.getByText(/Step 1 of 5/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Step 1 of 5/i).first()).toBeVisible({ timeout: 10_000 });
 
     // Wait for full client hydration. The header renders an org-selector whose
     // "Loading..." placeholder only disappears once client components have

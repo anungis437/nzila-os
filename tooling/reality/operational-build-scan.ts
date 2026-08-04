@@ -463,7 +463,9 @@ function renderMarkdown(report: ScanReport): string {
 }
 
 function escapeMd(s: string): string {
-  return s.replace(/\|/g, '\\|');
+  // Escape backslashes first, then pipes, so an input containing `\` cannot
+  // break out of the markdown table cell (CodeQL js/incomplete-sanitization).
+  return s.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 }
 
 // ---------------------------------------------------------------------------

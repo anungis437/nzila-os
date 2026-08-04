@@ -33,7 +33,12 @@ test.describe('No FSM overexposure in pilot-facing UX', () => {
       ];
 
       for (const path of sampleRoutes) {
-        await page.goto(toLocalizedPath(path, fixture.locale), { waitUntil: 'domcontentloaded' });
+        // Use waitUntil:'commit' so the navigation resolves as soon as the server
+        // response is committed, before any client-side soft-redirect can abort
+        // the load and produce net::ERR_ABORTED (observed on staff role at
+        // f3e2bb2fe/1c07b50b2). assertNoTextExposure() then waits for 'load'
+        // internally before sampling the DOM.
+        await page.goto(toLocalizedPath(path, fixture.locale), { waitUntil: 'commit' });
         await expect(page).not.toHaveURL(/sign[-/]?in|login/i);
         await assertNoTextExposure(page, FORBIDDEN_FSM_TERMS);
       }
@@ -41,7 +46,7 @@ test.describe('No FSM overexposure in pilot-facing UX', () => {
       // Governance-safe continuity language should remain present on continuity surfaces.
       if (role === 'executive' || role === 'governance') {
         await page.goto(toLocalizedPath('/dashboard/continuity-intelligence', fixture.locale), {
-          waitUntil: 'domcontentloaded',
+          waitUntil: 'commit',
         });
         const body = ((await page.textContent('body')) ?? '').toLowerCase();
         expect(body).toMatch(/workflow continuity|operational continuity|structured process|escalation|review|approval|continuity/);

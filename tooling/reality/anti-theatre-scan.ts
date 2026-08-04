@@ -757,7 +757,9 @@ async function main(): Promise<void> {
     '| Severity | Rule | File | Line | Message |',
     '|----------|------|------|------|---------|',
     ...result.findings.slice(0, 500).map(
-      (f) => `| ${f.severity} | ${f.rule} | \`${f.file}\` | ${f.line} | ${f.message.replace(/\|/g, '\\|')} |`,
+      // Escape backslashes first, then pipes, so an input containing `\` cannot
+      // break out of the markdown table cell (CodeQL js/incomplete-sanitization).
+      (f) => `| ${f.severity} | ${f.rule} | \`${f.file}\` | ${f.line} | ${f.message.replace(/\\/g, '\\\\').replace(/\|/g, '\\|')} |`,
     ),
   ];
   await writeFile(resolve(reportDir, 'anti-theatre.md'), md.join('\n'), 'utf8');
