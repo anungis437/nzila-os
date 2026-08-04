@@ -18,6 +18,24 @@ test.describe('Public pages smoke tests', () => {
     await request.get('/', { timeout: 60_000 }).catch(() => undefined);
   });
 
+  // The dev server can restart mid-suite once it approaches the memory
+  // threshold — Next.js prints "Server is approaching the used memory
+  // threshold, restarting..." between specs. Any smoke test unlucky enough to
+  // run during the restart window sees an unresponsive server and times out
+  // its 45s page.goto. Guard each test with a short readiness probe so the
+  // navigation only starts once the server is answering again.
+  test.beforeEach(async ({ page, request }) => {
+    const startMs = Date.now();
+    while (Date.now() - startMs < 60_000) {
+      try {
+        const probe = await request.get('/api/health', { timeout: 5_000 });
+        if ([200, 503].includes(probe.status())) return;
+      } catch {
+        await page.waitForTimeout(1_500);
+      }
+    }
+  });
+
   test('marketing page renders', async ({ page }) => {
     await page.goto(getBaseUrl(), { waitUntil: 'domcontentloaded' });
     await expect(page.locator('body')).toBeVisible();
