@@ -18,11 +18,6 @@ export async function ensureServerReady(request: APIRequestContext): Promise<voi
       try {
         const response = await request.get(endpoint, { timeout: 10_000 })
         if ([200, 204, 401, 403, 404, 503].includes(response.status())) {
-          // Warm the marketing entry route so the first `page.goto('/')` in the
-          // smoke suite isn't racing Next.js cold compilation of the localized
-          // marketing tree (which can exceed the 45s per-test goto timeout on
-          // Windows after adding business-plan doc surfaces).
-          await request.get('/', { timeout: 60_000 }).catch(() => undefined)
           return
         }
         lastError = `unexpected status ${response.status()} for ${endpoint}`

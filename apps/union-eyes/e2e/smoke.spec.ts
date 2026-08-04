@@ -10,6 +10,12 @@ import { ensureServerReady, getBaseUrl } from '../tests/e2e/_helpers';
 test.describe('Public pages smoke tests', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    // Warm the marketing entry route so the first `page.goto('/')` below
+    // isn't racing Next.js cold compilation of the localized marketing tree
+    // (which can exceed the 45s per-test goto timeout on Windows after main
+    // added business-plan doc surfaces). Fire-and-forget with a 60s ceiling —
+    // any actual test.goto below still enforces its own timeout.
+    await request.get('/', { timeout: 60_000 }).catch(() => undefined);
   });
 
   test('marketing page renders', async ({ page }) => {
