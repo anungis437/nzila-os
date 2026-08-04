@@ -3,6 +3,7 @@ import {withSentryConfig} from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import webpack from 'webpack';
+import path from 'path';
 
 const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
@@ -12,6 +13,14 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 // `index.js` (CJS with a default-shaped export); we always want the CJS entry
 // for consumers doing `import yaml from 'js-yaml'` (swagger-client / swagger-ui-react).
 const jsYamlCjsPath = require.resolve('js-yaml');
+
+// Turbopack's `resolveAlias` rejects POSIX-style absolute paths (leading `/`)
+// on Linux CI, coercing them to server-relative imports and failing with
+// "server relative imports are not implemented yet". Windows paths (`C:\...`)
+// happen to bypass this coercion. Compute a config-dir-relative POSIX path so
+// the alias is portable across Linux CI and Windows dev.
+const jsYamlCjsRelativePath =
+  './' + path.relative(__dirname, jsYamlCjsPath).replace(/\\/g, '/');
 
 // Gate security headers that break local HTTP dev server
 const isDev = process.env.NODE_ENV === 'development';
@@ -191,7 +200,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       immutable: 'immutable/dist/immutable.js',
-      'js-yaml': jsYamlCjsPath,
+      'js-yaml': jsYamlCjsRelativePath,
     },
   },
 
