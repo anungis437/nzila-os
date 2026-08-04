@@ -180,7 +180,7 @@
     "exceljs": "^4.4.0",
     "firebase-admin": "^13.7.0",
     "framer-motion": "^11.3.30",
-    "geoip-lite": "^2.0.0",
+    "geoip-lite": "^2.0.2",
     "googleapis": "^171.4.0",
     "graphql-yoga": "^5.18.0",
     "html2canvas": "^1.4.1",
