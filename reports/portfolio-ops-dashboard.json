@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-22",
+  "generated_at": "2026-08-04",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 26,
+    "total_products": 27,
     "total_engines": 4,
     "sell_now_count": 3,
-    "internal_only_count": 6,
+    "internal_only_count": 7,
     "frozen_count": 3
   },
   "engines": [
@@ -111,7 +111,7 @@
       },
       {
         "tier": 4,
-        "count": 11
+        "count": 12
       },
       {
         "tier": 5,
@@ -129,7 +129,7 @@
       },
       {
         "status": "incubating",
-        "count": 12
+        "count": 13
       },
       {
         "status": "internal",
@@ -371,6 +371,18 @@
       "readiness_tier": "internal-only",
       "registry_tier": "INCUBATING",
       "dev_port": 3008
+    },
+    {
+      "id": "union-eyes-demo",
+      "name": "Union Eyes Demo",
+      "tier": 4,
+      "status": "incubating",
+      "gtm_posture": "internal-only",
+      "recommendation": "HOLD",
+      "weighted_score": 4.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "INCUBATING",
+      "dev_port": 3012
     },
     {
       "id": "veridian-admin",

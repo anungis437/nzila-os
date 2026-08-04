@@ -687,6 +687,7 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
     'apps/veridian-care': 3,  // INCUBATING — health care portal, platform wiring planned pre-PILOT
     'apps/veridian-site': 3,  // INCUBATING — health public site, platform wiring planned pre-PILOT
     'apps/maestria': 4,  // INCUBATING — platform wiring staged pre-PILOT
+    'apps/union-eyes-demo': 3, // INCUBATING — standalone CUPE 4373 demo instance, isolated from tenant context (no DB / no AI-ML client / no OTEL) by design
   }
 
   for (const appDir of appDirs) {

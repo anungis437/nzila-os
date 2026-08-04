@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-06-07T02:15:11.148Z",
-  "commitSha": "a8dbf7917",
+  "timestamp": "2026-08-04T12:55:27.271Z",
+  "commitSha": "0a48256bc",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,14 +14,14 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 16145
+      "durationMs": 3603
     },
     {
       "id": "ORG-REGISTRY",
       "name": "Org boundary: Org-scoped registry exists and consistent",
       "status": "PASS",
       "details": "Org-scoped registry present with both ORG_SCOPED_TABLES and NON_ORG_SCOPED_TABLES",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "HASH-CHAIN",
@@ -35,7 +35,7 @@
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 3
+      "durationMs": 0
     },
     {
       "id": "AUTH-MIDDLEWARE",
@@ -43,7 +43,7 @@
       "status": "PASS",
       "details": "All 4 apps have auth edge guards (proxy.ts/middleware.ts)",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 2
     },
     {
       "id": "AUDITED-WRITES",
@@ -58,7 +58,7 @@
       "name": "Audited writes: Audit module blocks on failure",
       "status": "PASS",
       "details": "Audit emission is mandatory (blocks on failure)",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-SEALING",
@@ -72,7 +72,7 @@
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 4
+      "durationMs": 0
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 9
+      "durationMs": 3
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -111,7 +111,7 @@
       "status": "PASS",
       "details": "Trivy FS blocking scan present (exit-code: 1) in CI workflows",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 2
     },
     {
       "id": "NO-OR-TRUE-GATES",
@@ -119,7 +119,7 @@
       "status": "PASS",
       "details": "No || true on security-gating commands in CI workflows",
       "violations": [],
-      "durationMs": 112
+      "durationMs": 23
     },
     {
       "id": "ESLINT-GOVERNANCE",
@@ -127,14 +127,14 @@
       "status": "PASS",
       "details": "All 4 apps enforce 3 boundary rules",
       "violations": [],
-      "durationMs": 11
+      "durationMs": 3
     },
     {
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "253 contract test files (require ≥20)",
-      "durationMs": 5
+      "details": "272 contract test files (require ≥20)",
+      "durationMs": 4
     },
     {
       "id": "CODEOWNERS",
@@ -142,7 +142,7 @@
       "status": "PASS",
       "details": "All governance paths have code ownership",
       "violations": [],
-      "durationMs": 2
+      "durationMs": 1
     },
     {
       "id": "RED-TEAM-WORKFLOW",
@@ -156,15 +156,15 @@
       "name": "Red-team: Outputs included as evidence artifacts",
       "status": "PASS",
       "details": "Red-team outputs uploaded as artifacts, test files present",
-      "durationMs": 1
+      "durationMs": 2
     },
     {
       "id": "STUDIO-PLATFORM-SCORE",
       "name": "Studio maturity: Every app scores ≥ 7/10 on platform integration",
       "status": "PASS",
-      "details": "All 26 apps score ≥ 7/10 on platform integration",
+      "details": "All 27 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 13
+      "durationMs": 785
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -172,7 +172,7 @@
       "status": "PASS",
       "details": "All apps with AI claims have runtime ai-sdk wiring",
       "violations": [],
-      "durationMs": 56
+      "durationMs": 19
     },
     {
       "id": "STUDIO-NO-INMEM",
@@ -180,14 +180,14 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 5704
+      "durationMs": 4669
     }
   ],
   "environment": {
-    "nodeVersion": "v24.16.0",
-    "platform": "darwin",
+    "nodeVersion": "v24.13.1",
+    "platform": "win32",
     "ci": false,
-    "cwd": "/Users/oby/nzila-os"
+    "cwd": "C:/APPS/nzila-automation"
   },
-  "totalDurationMs": 22093
+  "totalDurationMs": 9199
 }
