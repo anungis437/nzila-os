@@ -14,7 +14,7 @@
   "gtmPosture": "internal-only",
   "proofLevel": "internal-proof",
   "strategicRole": "Shared orchestration backbone that remains important operationally but is not a standalone commercial SKU.",
-  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "generatedAt": "2026-08-04T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"
