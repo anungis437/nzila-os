@@ -5,7 +5,7 @@
 > **Alignment (canonical).** CLEAR is the **public-service articulation of the OCI evidence
 > discipline**. Its five pillars map to OCI's scoring dimensions, evidence ladder, obligation
 > taxonomy, and explainability contract — see the
-> [CIVIC ↔ OCI alignment Rosetta table](../CIVIC_OCI_ALIGNMENT.md#4-rosetta-table--how-the-five-pillars-line-up).
+> [CIVIC ↔ OCI alignment Rosetta table](../CIVIC_OCI_ALIGNMENT.md#4-rosetta-table-how-the-five-pillars-line-up).
 > CLEAR does not introduce new scores, bands, or rankings; it is how the OCI evidence work
 > reads to a public-service leader.
 
