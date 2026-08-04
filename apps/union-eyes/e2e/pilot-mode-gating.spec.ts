@@ -11,6 +11,13 @@ import { assertRedirectOrDenied } from './helpers/navigation-assertions';
 test.describe('UnionEyes hard pilot-mode gating', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
+    // Pre-warm each pilot-excluded route via a plain HTTP GET so the FIRST
+    // role variant (member) doesn't have to cold-compile 7 Next.js routes in
+    // one shot and blow past the 60s per-test timeout. Subsequent variants
+    // then benefit from the primed page cache.
+    for (const path of PILOT_EXCLUDED_ROUTES) {
+      await request.get(path, { timeout: 30_000 }).catch(() => undefined);
+    }
   });
 
   for (const role of STAKEHOLDER_ORDER) {
