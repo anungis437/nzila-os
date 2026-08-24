@@ -113,6 +113,9 @@ importers:
       '@tailwindcss/oxide':
         specifier: ^4.2.0
         version: 4.2.2
+      cross-spawn:
+        specifier: 7.0.6
+        version: 7.0.6
       fast-check:
         specifier: ^4.6.0
         version: 4.6.0

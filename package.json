@@ -324,6 +324,7 @@
     "@nzila/platform-utils": "workspace:*",
     "@nzila/reality-env": "workspace:*",
     "@tailwindcss/oxide": "^4.2.0",
+    "cross-spawn": "7.0.6",
     "fast-check": "^4.6.0",
     "lefthook": "^2.1.1",
     "jszip": "^3.10.1",
