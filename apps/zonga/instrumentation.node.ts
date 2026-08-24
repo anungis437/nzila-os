@@ -29,14 +29,11 @@ export function registerNodeProcessHandlers(): void {
   // Catch unhandled promise rejections and exceptions.
   process.removeAllListeners('unhandledRejection')
   process.removeAllListeners('uncaughtException')
+  process.removeAllListeners('uncaughtExceptionMonitor')
   process.on('unhandledRejection', (reason) => {
     logger.error('Unhandled promise rejection', { reason })
   })
-  process.on('uncaughtException', (err) => {
+  process.on('uncaughtExceptionMonitor', (err) => {
     logger.error('Uncaught exception', { err })
-    // Let the process crash after logging; Node is in an undefined state.
-    setImmediate(() => {
-      throw err
-    })
   })
 }
