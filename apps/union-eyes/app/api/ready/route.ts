@@ -26,12 +26,12 @@ async function checkDatabaseReady(): Promise<boolean> {
 async function checkQueueReady(): Promise<boolean> {
   const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL || ''
   if (!djangoUrl) {
-    return true
+    return false
   }
 
   try {
     const base = djangoUrl.replace(/\/$/, '')
-    const response = await fetch(`${base}/api/auth_core/health/`, {
+    const response = await fetch(`${base}/api/auth_core/ready/`, {
       cache: 'no-store',
       signal: AbortSignal.timeout(3000),
     })
@@ -94,8 +94,11 @@ function checkCalendarSchedulerReady(): boolean {
 }
 
 export async function GET() {
-  const [database, queue] = await Promise.all([checkDatabaseReady(), checkQueueReady()])
   const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
+  const [database, queue] = await Promise.all([
+    checkDatabaseReady(),
+    requireQueue ? checkQueueReady() : Promise.resolve(false),
+  ])
   const requireCalendarIntegrations = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS, isProduction())
   const requireEmailDelivery = parseBoolEnv(process.env.READY_REQUIRE_EMAIL_DELIVERY, isProduction())
   const requireCalendarTokenEncryption = parseBoolEnv(

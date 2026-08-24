@@ -37,6 +37,7 @@ describe('ready route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.ready).toBe(true);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('returns 503 when queue is required and queue health fails', async () => {
@@ -49,6 +50,20 @@ describe('ready route', () => {
     expect(response.status).toBe(503);
     const json = await response.json();
     expect(json.ready).toBe(false);
+    expect(fetch).toHaveBeenCalledWith(
+      'https://django.local/api/auth_core/ready/',
+      expect.objectContaining({ cache: 'no-store' }),
+    );
+  });
+
+  it('fails when queue is required but Django is not configured', async () => {
+    process.env.READY_REQUIRE_QUEUE = 'true';
+    const { GET } = await loadRoute();
+
+    const response = await GET();
+
+    expect(response.status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('includes optional readiness checks when enabled', async () => {

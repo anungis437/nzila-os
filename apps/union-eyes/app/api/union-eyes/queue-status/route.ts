@@ -20,7 +20,21 @@ export async function GET(req: Request) {
     if (!isServiceRequest) {
       await requireApiAuth()
     }
-    const stats = await getAllQueueStats().catch(() => [])
+
+    const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL
+    if (!djangoUrl) {
+      return NextResponse.json({
+        service: 'union-eyes',
+        availability: 'not_configured',
+        queue: null,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    const [stats, failed] = await Promise.all([
+      getAllQueueStats(),
+      getFailedJobs('celery', 20),
+    ])
 
     // Aggregate totals
     let pending = 0
@@ -38,11 +52,9 @@ export async function GET(req: Request) {
       }
     }
 
-    // Fetch failed jobs from default queue
-    const failed = await getFailedJobs('celery', 20).catch(() => [])
-
     return NextResponse.json({
       service: 'union-eyes',
+      availability: 'available',
       queue: {
         pending,
         active,
@@ -60,7 +72,14 @@ export async function GET(req: Request) {
     })
   } catch (err) {
     return NextResponse.json(
-      { error: 'Queue status unavailable', detail: String(err) },
+      {
+        service: 'union-eyes',
+        availability: 'error',
+        queue: null,
+        error: 'Queue status unavailable',
+        detail: String(err),
+        timestamp: new Date().toISOString(),
+      },
       { status: 503 },
     )
   }

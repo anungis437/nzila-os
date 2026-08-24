@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import time
 from typing import Any, Dict
 
@@ -948,16 +949,15 @@ def me(request):
     )
 
 
-@api_view(["GET"])
-def health_check(request):
-    """Deep health check — verifies DB and Redis connectivity.
+def _env_enabled(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.lower() in ("1", "true", "yes", "on")
 
-    Returns 200 if all dependencies are reachable, 503 if degraded.
-    Used by Azure Container Apps liveness/readiness probes.
-    """
+
+def _dependency_checks(include_queue=True):
     checks = {}
-
-    # ── Database ──────────────────────────────────────────────────────
     try:
         from django.db import connection
 
@@ -968,7 +968,9 @@ def health_check(request):
     except Exception:
         checks["db"] = False
 
-    # ── Redis (cache backend) ─────────────────────────────────────────
+    if not include_queue:
+        return checks
+
     try:
         from django.core.cache import cache
 
@@ -977,7 +979,6 @@ def health_check(request):
     except Exception:
         checks["redis"] = False
 
-    # ── Celery broker ─────────────────────────────────────────────────
     try:
         from config.celery import app as celery_app
 
@@ -987,6 +988,12 @@ def health_check(request):
         checks["celery_broker"] = True
     except Exception:
         checks["celery_broker"] = False
+
+    try:
+        replies = celery_app.control.inspect(timeout=2).ping()
+        checks["celery_worker"] = bool(replies)
+    except Exception:
+        checks["celery_worker"] = False
 
     # Upstash REST — independent verification of the REST token. Only runs
     # when both creds are configured (keeps backward compat for non-Upstash
@@ -1006,18 +1013,58 @@ def health_check(request):
         except Exception:
             checks["upstash_rest"] = False
 
-    # Overall status ignores upstash_rest (parallel verification path,
-    # not a runtime dependency for Django itself).
-    _core_checks = {k: v for k, v in checks.items() if k != "upstash_rest"}
-    all_healthy = all(_core_checks.values())
-    status_code = 200 if all_healthy else 503
+    return checks
+
+
+@api_view(["GET"])
+def liveness_check(request):
+    """Process liveness only; dependencies belong to readiness and diagnostics."""
+    return Response({"status": "alive", "checks": {"process": True}})
+
+
+@api_view(["GET"])
+def readiness_check(request):
+    """Require the database and, when enabled, a usable broker and live worker."""
+    queue_required = _env_enabled("READY_REQUIRE_QUEUE")
+    checks = _dependency_checks(include_queue=queue_required)
+    required = ["db"]
+    if queue_required:
+        required.extend(["celery_broker", "celery_worker"])
+    ready = all(checks.get(name, False) for name in required)
+    return Response(
+        {
+            "ready": ready,
+            "status": "ready" if ready else "not_ready",
+            "queue_required": queue_required,
+            "checks": checks,
+        },
+        status=200 if ready else 503,
+    )
+
+
+@api_view(["GET"])
+def health_check(request):
+    """Deep dependency diagnostics with core and optional capability status."""
+    checks = _dependency_checks()
+    queue_required = _env_enabled("READY_REQUIRE_QUEUE")
+
+    core_ready = checks["db"]
+    queue_available = checks["celery_broker"] and checks["celery_worker"]
+    ready = core_ready and (queue_available if queue_required else True)
+    degraded = not all(checks.values())
 
     return Response(
         {
-            "status": "ok" if all_healthy else "degraded",
+            "status": "degraded" if degraded else "ok",
+            "ready": ready,
+            "queue_required": queue_required,
+            "capabilities": {
+                "core": "available" if core_ready else "unavailable",
+                "queue": "available" if queue_available else "unavailable",
+            },
             "checks": checks,
         },
-        status=status_code,
+        status=200 if ready else 503,
     )
 
 
