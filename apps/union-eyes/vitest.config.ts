@@ -14,6 +14,14 @@ export default defineProject({
         __dirname,
         "./__mocks__/next-auth-microsoft-entra-id.ts",
       ),
+      "@nzila/cupe-vocabulary/types": path.resolve(
+        __dirname,
+        "../../packages/cupe-vocabulary/src/types.ts",
+      ),
+      "@nzila/cupe-vocabulary": path.resolve(
+        __dirname,
+        "../../packages/cupe-vocabulary/src/index.ts",
+      ),
       "@nzila/platform-auth/entra/server": path.resolve(__dirname, "./__mocks__/platform-auth-server.ts"),
     },
   },
