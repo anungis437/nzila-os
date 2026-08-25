@@ -55,9 +55,9 @@ export const PROVINCIAL_SALES_TAX: Record<Province, ProvincialSalesTax> = {
     notes: '15% HST.',
   },
   NS: {
-    province: 'NS', regime: 'HST', gstRate: 0.05, hstRate: 0.15, pstRate: null,
-    totalRate: 0.15, provincialPortionRecoverable: true,
-    notes: '15% HST.',
+    province: 'NS', regime: 'HST', gstRate: 0.05, hstRate: 0.14, pstRate: null,
+    totalRate: 0.14, provincialPortionRecoverable: true,
+    notes: '14% HST effective April 1, 2025.',
   },
   PE: {
     province: 'PE', regime: 'HST', gstRate: 0.05, hstRate: 0.15, pstRate: null,

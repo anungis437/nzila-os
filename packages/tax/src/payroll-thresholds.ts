@@ -147,9 +147,9 @@ export function generateQuarterlyRemittanceDueDates(year: number): PayrollRemitt
 
 export const CPP_2026 = {
   /** Maximum pensionable earnings (YMPE) */
-  ympe: 71_300,
+  ympe: 74_600,
   /** Second ceiling (YAMPE — CPP2) */
-  yampe: 81_200,
+  yampe: 85_000,
   /** Basic exemption */
   basicExemption: 3_500,
   /** Employee/employer CPP1 rate */
@@ -157,22 +157,22 @@ export const CPP_2026 = {
   /** Employee/employer CPP2 rate (on earnings between YMPE and YAMPE) */
   cpp2Rate: 0.04,
   /** Maximum employee CPP1 contribution */
-  maxContribution: 4_034.10,
+  maxContribution: 4_230.45,
   /** Maximum employee CPP2 contribution */
-  maxCpp2Contribution: 396.00,
+  maxCpp2Contribution: 416.00,
 } as const
 
 export const EI_2026 = {
   /** Maximum insurable earnings */
-  maxInsurableEarnings: 65_700,
+  maxInsurableEarnings: 68_900,
   /** Employee premium rate */
-  employeeRate: 0.0164,
+  employeeRate: 0.0163,
   /** Employer premium rate (1.4x employee) */
-  employerRate: 0.02296,
+  employerRate: 0.02282,
   /** Maximum employee premium */
-  maxEmployeePremium: 1_077.48,
+  maxEmployeePremium: 1_123.07,
   /** Maximum employer premium */
-  maxEmployerPremium: 1_508.47,
+  maxEmployerPremium: 1_572.30,
   /** Small business EI rate reduction — qualifying employers */
   smallBusinessReduction: 0.0,
 } as const

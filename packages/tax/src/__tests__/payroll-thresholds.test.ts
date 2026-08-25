@@ -114,12 +114,12 @@ describe('generateQuarterlyRemittanceDueDates', () => {
 })
 
 describe('CPP_2026', () => {
-  it('YMPE is $71,300', () => {
-    expect(CPP_2026.ympe).toBe(71_300)
+  it('YMPE is $74,600', () => {
+    expect(CPP_2026.ympe).toBe(74_600)
   })
 
-  it('YAMPE (CPP2) is $81,200', () => {
-    expect(CPP_2026.yampe).toBe(81_200)
+  it('YAMPE (CPP2) is $85,000', () => {
+    expect(CPP_2026.yampe).toBe(85_000)
   })
 
   it('basic exemption is $3,500', () => {
@@ -136,12 +136,12 @@ describe('CPP_2026', () => {
 })
 
 describe('EI_2026', () => {
-  it('max insurable earnings is $65,700', () => {
-    expect(EI_2026.maxInsurableEarnings).toBe(65_700)
+  it('max insurable earnings is $68,900', () => {
+    expect(EI_2026.maxInsurableEarnings).toBe(68_900)
   })
 
-  it('employee rate is 1.64%', () => {
-    expect(EI_2026.employeeRate).toBe(0.0164)
+  it('employee rate is 1.63%', () => {
+    expect(EI_2026.employeeRate).toBe(0.0163)
   })
 
   it('employer rate is 1.4x employee', () => {
