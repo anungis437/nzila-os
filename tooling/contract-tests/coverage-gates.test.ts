@@ -40,6 +40,24 @@ describe('PR15: Coverage gates — test:coverage script', () => {
       'root package.json must have test:coverage script'
     ).toBe(true)
   })
+
+  it('root coverage script bounds turbo package concurrency', () => {
+    const pkgPath = resolve(ROOT, 'package.json')
+    const pkg = JSON.parse(readContent(pkgPath))
+    expect(
+      pkg.scripts['test:coverage'],
+      'root package.json test:coverage must cap turbo concurrency for CI-sized runners'
+    ).toMatch(/turbo test:coverage .*--concurrency=(?:\d+|\d+%)/)
+  })
+
+  it('Union Eyes coverage bounds its package-local worker fan-out', () => {
+    const pkgPath = resolve(ROOT, 'apps/union-eyes/package.json')
+    const pkg = JSON.parse(readContent(pkgPath))
+    expect(
+      pkg.scripts['test:coverage'],
+      'Union Eyes coverage imports the large API route matrix and must cap Vitest workers'
+    ).toContain('--maxWorkers=2')
+  })
 })
 
 describe('PR15: Coverage gates — vitest coverage configuration', () => {

@@ -31,7 +31,7 @@
     "test:changed": "turbo test --filter=...[HEAD~1] --output-logs=new-only",
     "test:platform": "vitest run --project @nzila/platform-contracts --project @nzila/platform-auth --project @nzila/platform-shell --project @nzila/platform-notifications --project @nzila/platform-billing --project @nzila/org",
     "test:operating-layer": "vitest run --config tooling/contract-tests/vitest.config.ts tooling/contract-tests/operating-layer-e2e-hardening.test.ts tooling/contract-tests/operating-layer-multiservice-harness.test.ts",
-    "test:coverage": "turbo test:coverage",
+    "test:coverage": "turbo test:coverage --concurrency=25%",
     "contract-tests": "vitest run --project contract-tests",
     "contract:test": "vitest run --project contract-tests",
     "proof:run": "tsx scripts/proof/run-proof.ts",

@@ -70,6 +70,48 @@ describe('GET /api/health', () => {
     expect(body.checks.db).toBe('fail')
   })
 
+  it('returns healthy when all configured dependency checks pass', async () => {
+    process.env.SHOPIFY_SHOP_DOMAIN = 'shop.example'
+    process.env.SHOPIFY_ACCESS_TOKEN = 'shop-token'
+    process.env.ZOHO_CLIENT_ID = 'zoho-client'
+    process.env.CANVA_API_KEY = 'canva-key'
+
+    const { GET } = await import('./route')
+    const response = await GET()
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.status).toBe('ok')
+    expect(body.checks.shopify).toBe('ok')
+    expect(body.checks.zoho).toBe('ok')
+    expect(body.checks.canva).toBe('ok')
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://shop.example/admin/api/2024-01/shop.json',
+      expect.objectContaining({
+        method: 'GET',
+        headers: { 'X-Shopify-Access-Token': 'shop-token' },
+      }),
+    )
+  })
+
+  it('marks Shopify failed when the configured health fetch throws', async () => {
+    process.env.SHOPIFY_SHOP_DOMAIN = 'shop.example'
+    process.env.SHOPIFY_ACCESS_TOKEN = 'shop-token'
+    process.env.ZOHO_CLIENT_ID = 'zoho-client'
+    process.env.CANVA_API_KEY = 'canva-key'
+    vi.mocked(global.fetch).mockRejectedValueOnce(new Error('shopify unavailable'))
+
+    const { GET } = await import('./route')
+    const response = await GET()
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.status).toBe('degraded')
+    expect(body.checks.shopify).toBe('fail')
+    expect(body.checks.zoho).toBe('ok')
+    expect(body.checks.canva).toBe('ok')
+  })
+
   it('includes build metadata', async () => {
     const { GET } = await import('./route')
     const response = await GET()
