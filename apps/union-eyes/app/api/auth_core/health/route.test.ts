@@ -86,6 +86,32 @@ describe('GET /api/auth_core/health', () => {
     expect(body.reason).toBe('django_sidecar_unreachable')
   })
 
+  it('returns degraded when the 7 second proxy budget aborts the sidecar request', async () => {
+    process.env.DJANGO_API_URL = 'https://django.example'
+    const timeoutController = new AbortController()
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(timeoutController.signal)
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((_url, init) => new Promise((_resolve, reject) => {
+        init.signal.addEventListener('abort', () => {
+          reject(new DOMException('timed out', 'AbortError'))
+        })
+      })),
+    )
+
+    const { GET } = await import('./route')
+    const responsePromise = GET(new NextRequest('http://localhost/api/auth_core/health'))
+    timeoutController.abort()
+    const response = await responsePromise
+    const body = await response.json()
+
+    expect(timeoutSpy).toHaveBeenCalledWith(7_000)
+    expect(response.status).toBe(503)
+    expect(body.reason).toBe('django_sidecar_unreachable')
+  })
+
   it('passes through healthy sidecar response body and status', async () => {
     process.env.DJANGO_API_URL = 'https://django.example/'
     const mockHeaders = new Map([['content-type', 'application/json']])

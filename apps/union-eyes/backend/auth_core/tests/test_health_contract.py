@@ -1,4 +1,5 @@
 import os
+import time
 from unittest.mock import patch
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
@@ -7,7 +8,12 @@ import django
 
 django.setup()
 
-from auth_core.views import health_check, liveness_check, readiness_check
+from auth_core.views import (
+    _dependency_checks,
+    health_check,
+    liveness_check,
+    readiness_check,
+)
 from rest_framework.test import APIRequestFactory
 
 factory = APIRequestFactory()
@@ -38,15 +44,24 @@ def test_database_failure_fails_readiness(monkeypatch):
     checks.assert_called_once_with(include_queue=False)
 
 
+def test_queue_disabled_dependency_checks_complete_within_proxy_budget():
+    with patch("django.db.connection.ensure_connection"), patch(
+        "django.db.connection.cursor"
+    ) as cursor:
+        cursor.return_value.__enter__.return_value.execute.return_value = None
+        started = time.monotonic()
+        checks = _dependency_checks(include_queue=False)
+        elapsed = time.monotonic() - started
+
+    assert checks == {"db": True}
+    assert elapsed < 1
+
+
 def test_queue_disabled_keeps_core_ready_and_reports_degradation(monkeypatch):
     monkeypatch.setenv("READY_REQUIRE_QUEUE", "false")
-    checks = {
-        "db": True,
-        "redis": False,
-        "celery_broker": False,
-        "celery_worker": False,
-    }
-    with patch("auth_core.views._dependency_checks", return_value=checks):
+    with patch(
+        "auth_core.views._dependency_checks", return_value={"db": True}
+    ) as checks:
         response = response_for(health_check)
 
     assert response.status_code == 200
@@ -54,6 +69,9 @@ def test_queue_disabled_keeps_core_ready_and_reports_degradation(monkeypatch):
     assert response.data["status"] == "degraded"
     assert response.data["capabilities"]["queue"] == "unavailable"
     assert response.data["checks"]["redis"] is False
+    assert response.data["checks"]["celery_broker"] is False
+    assert response.data["checks"]["celery_worker"] is False
+    checks.assert_called_once_with(include_queue=False)
 
 
 def test_queue_required_fails_without_broker(monkeypatch):

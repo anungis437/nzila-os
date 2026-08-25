@@ -1045,8 +1045,16 @@ def readiness_check(request):
 @api_view(["GET"])
 def health_check(request):
     """Deep dependency diagnostics with core and optional capability status."""
-    checks = _dependency_checks()
     queue_required = _env_enabled("READY_REQUIRE_QUEUE")
+    checks = _dependency_checks(include_queue=queue_required)
+    if not queue_required:
+        checks.update(
+            {
+                "redis": False,
+                "celery_broker": False,
+                "celery_worker": False,
+            }
+        )
 
     core_ready = checks["db"]
     queue_available = checks["celery_broker"] and checks["celery_worker"]
