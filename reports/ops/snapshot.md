@@ -1,13 +1,13 @@
 # Operational Evidence Snapshot
 
-> Generated: 2026-08-01T22:06:08.328Z
+> Generated: 2026-08-25T20:47:51.039Z
 > Policy: fields without measurable evidence remain null and include source_needed.
 
 ## Metrics (30-day window unless noted)
 
 | Metric | Value | Unit | Source |
 |---|---:|---|---|
-| deploy_frequency_30d | 9.3 | deploys/week | ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week) |
+| deploy_frequency_30d | 0.47 | deploys/week | ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week) |
 | build_success_rate_30d | null | % | GitHub Actions API (not available in current execution context) |
 | median_build_minutes | null | minutes | GitHub Actions API (not available in current execution context) |
 | change_failure_rate_30d | 0 | % | ops/outputs/dora-metrics.json: metrics.change_failure_rate.value |
@@ -17,7 +17,7 @@
 | p95_latency_ms | null | ms | Application Insights latency export |
 | auth_success_rate | null | % | platform-auth auth event rollup |
 | error_rate | null | % | Application Insights / Sentry error metric export |
-| monthly_infra_cost_estimate | 843.98 | USD/month | ops/outputs/cost-allocation.json: total_monthly_cost_usd |
+| monthly_infra_cost_estimate | 4241.2 | USD/month | ops/outputs/cost-allocation.json: total_monthly_cost_usd |
 | incidents_last_30d | null | count | Incident registry export (GitHub issues/PagerDuty) |
 
 ## Missing Source Wiring
