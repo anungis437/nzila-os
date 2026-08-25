@@ -8,10 +8,6 @@ function parseBoolEnv(value: string | undefined, defaultValue: boolean): boolean
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
 }
 
-function isProduction(): boolean {
-  return process.env.NODE_ENV === 'production'
-}
-
 async function checkDatabaseReady(): Promise<boolean> {
   try {
     const { db } = await import('@nzila/db')
@@ -99,13 +95,13 @@ export async function GET() {
     checkDatabaseReady(),
     requireQueue ? checkQueueReady() : Promise.resolve(false),
   ])
-  const requireCalendarIntegrations = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS, isProduction())
-  const requireEmailDelivery = parseBoolEnv(process.env.READY_REQUIRE_EMAIL_DELIVERY, isProduction())
+  const requireCalendarIntegrations = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS, false)
+  const requireEmailDelivery = parseBoolEnv(process.env.READY_REQUIRE_EMAIL_DELIVERY, false)
   const requireCalendarTokenEncryption = parseBoolEnv(
     process.env.READY_REQUIRE_CALENDAR_TOKEN_ENCRYPTION,
-    isProduction(),
+    false,
   )
-  const requireCalendarScheduler = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_SCHEDULER, isProduction())
+  const requireCalendarScheduler = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_SCHEDULER, false)
 
   const checksInput: Record<string, boolean | 'unknown'> = {
     process: true,
