@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   checkDb: vi.fn().mockResolvedValue(true),
-  checkBlob: vi.fn().mockResolvedValue(true),
+  container: vi.fn(),
 }))
 
 vi.mock('@nzila/db', () => ({
@@ -14,7 +14,7 @@ vi.mock('drizzle-orm', () => ({
 }))
 
 vi.mock('@nzila/blob', () => ({
-  container: () => ({ getProperties: mocks.checkBlob }),
+  container: mocks.container,
 }))
 
 // Mock global fetch for Shopify API check
@@ -29,7 +29,6 @@ describe('GET /api/health', () => {
   beforeEach(() => {
     vi.resetModules()
     mocks.checkDb.mockResolvedValue(true)
-    mocks.checkBlob.mockResolvedValue(true)
     vi.clearAllMocks()
   })
 
@@ -55,6 +54,8 @@ describe('GET /api/health', () => {
     expect(body.status).toBe('degraded')
     expect(body.checks).toHaveProperty('process')
     expect(body.checks).toHaveProperty('db')
+    expect(body.checks).not.toHaveProperty('storage')
+    expect(mocks.container).not.toHaveBeenCalled()
   })
 
   it('returns degraded when db check fails', async () => {
@@ -67,18 +68,6 @@ describe('GET /api/health', () => {
     expect(response.status).toBe(200)
     expect(body.status).toBe('degraded')
     expect(body.checks.db).toBe('fail')
-  })
-
-  it('returns degraded when storage check fails', async () => {
-    mocks.checkBlob.mockRejectedValue(new Error('blob failed'))
-
-    const { GET } = await import('./route')
-    const response = await GET()
-    const body = await response.json()
-
-    expect(response.status).toBe(200)
-    expect(body.status).toBe('degraded')
-    expect(body.checks.storage).toBe('fail')
   })
 
   it('includes build metadata', async () => {

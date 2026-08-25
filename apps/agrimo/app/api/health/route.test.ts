@@ -32,7 +32,6 @@ describe('GET /api/health', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.dbExecute.mockResolvedValue({ rows: [{ ok: 1 }] })
-    mocks.container.mockReturnValue({ getProperties: vi.fn().mockResolvedValue({}) })
   })
 
   afterEach(() => {
@@ -42,7 +41,7 @@ describe('GET /api/health', () => {
     vi.restoreAllMocks()
   })
 
-  it('returns ok when db and blob checks pass', async () => {
+  it('returns ok when db check passes without probing blob', async () => {
     const GET = await loadRoute()
     const response = await GET()
     const body = await response.json()
@@ -50,14 +49,12 @@ describe('GET /api/health', () => {
     expect(response.status).toBe(200)
     expect(body.status).toBe('ok')
     expect(body.app).toBe('agrimo')
-    expect(body.checks).toEqual({ db: true, blob: true })
+    expect(body.checks).toEqual({ db: true })
+    expect(mocks.container).not.toHaveBeenCalled()
   })
 
-  it('returns degraded when dependency checks fail', async () => {
+  it('returns degraded when db check fails', async () => {
     mocks.dbExecute.mockRejectedValue(new Error('db unavailable'))
-    mocks.container.mockImplementation(() => {
-      throw new Error('blob unavailable')
-    })
 
     const GET = await loadRoute()
     const response = await GET()
@@ -65,22 +62,8 @@ describe('GET /api/health', () => {
 
     expect(response.status).toBe(503)
     expect(body.status).toBe('degraded')
-    expect(body.checks).toEqual({ db: false, blob: false })
-  })
-
-  it('handles rejected Promise.allSettled entries safely', async () => {
-    vi.spyOn(Promise, 'allSettled').mockResolvedValueOnce([
-      { status: 'rejected', reason: new Error('db settle fail') } as PromiseRejectedResult,
-      { status: 'rejected', reason: new Error('blob settle fail') } as PromiseRejectedResult,
-    ])
-
-    const GET = await loadRoute()
-    const response = await GET()
-    const body = await response.json()
-
-    expect(response.status).toBe(503)
-    expect(body.status).toBe('degraded')
-    expect(body.checks).toEqual({ db: false, blob: false })
+    expect(body.checks).toEqual({ db: false })
+    expect(mocks.container).not.toHaveBeenCalled()
   })
 
   it('uses environment build metadata when provided', async () => {

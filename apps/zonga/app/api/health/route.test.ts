@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   dbFail: false,
-  blobFail: false,
+  blobGetProperties: vi.fn(),
+  container: vi.fn(),
   redisFail: false,
 }))
 
@@ -20,10 +21,7 @@ vi.mock('drizzle-orm', () => ({
 }))
 
 vi.mock('@nzila/blob', () => ({
-  container: (_name: string) => {
-    if (mocks.blobFail) throw new Error('blob failed')
-    return { getProperties: async () => ({}) }
-  },
+  container: mocks.container,
 }))
 
 vi.mock('@nzila/os-core/rateLimit/store', () => ({
@@ -36,8 +34,10 @@ vi.mock('@nzila/os-core/rateLimit/store', () => ({
 describe('GET /api/health', () => {
   beforeEach(() => {
     mocks.dbFail = false
-    mocks.blobFail = false
     mocks.redisFail = false
+    mocks.blobGetProperties.mockResolvedValue({})
+    mocks.container.mockReturnValue({ getProperties: mocks.blobGetProperties })
+    vi.clearAllMocks()
   })
 
   it('returns ok when all checks pass', async () => {
@@ -50,6 +50,9 @@ describe('GET /api/health', () => {
     expect(body.app).toBe('@nzila/zonga')
     expect(body.checks).toBeDefined()
     expect(body.checks.db).toBe(true)
+    expect(body.checks.blob).toBe(true)
+    expect(mocks.container).toHaveBeenCalledWith('zonga-audio')
+    expect(mocks.blobGetProperties).toHaveBeenCalledOnce()
   })
 
   it('returns degraded when db check fails', async () => {
@@ -65,7 +68,7 @@ describe('GET /api/health', () => {
   })
 
   it('returns degraded when blob check fails', async () => {
-    mocks.blobFail = true
+    mocks.blobGetProperties.mockRejectedValue(new Error('blob failed'))
 
     const { GET } = await import('./route')
     const response = await GET()

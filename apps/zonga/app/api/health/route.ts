@@ -27,8 +27,8 @@ async function checkDb(): Promise<boolean> {
 async function checkBlob(): Promise<boolean> {
   try {
     const { container } = await import('@nzila/blob')
-    const client = container('evidence')
-    void client
+    const client = container('zonga-audio')
+    await client.getProperties()
     return true
   } catch {
     return false
