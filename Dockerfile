@@ -329,12 +329,14 @@ RUN groupadd --system --gid 1001 nzila && \
 
 USER orchestrator
 
+WORKDIR /app/apps/orchestrator-api
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
 
 EXPOSE 4000
 
-CMD ["pnpm", "--filter", "@nzila/orchestrator-api", "start"]
+CMD ["node", "--import", "tsx", "src/index.ts"]
 
 # ============================================
 # CFO production stage
