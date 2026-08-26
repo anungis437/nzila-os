@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-08-04T00:00:00.000Z",
+  "generatedAt": "2026-08-26T00:00:00.000Z",
   "appCount": 27,
   "packageCount": 224,
   "workspacePackageCount": 257,
   "workflowCount": 53,
-  "contractTestCount": 272,
-  "tsTestFileCount": 2487,
-  "pythonTestFileCount": 32,
+  "contractTestCount": 274,
+  "tsTestFileCount": 2494,
+  "pythonTestFileCount": 33,
   "apps": [
     {
       "name": "abr",
@@ -36,7 +36,7 @@
         "ui"
       ],
       "purpose": "FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.",
-      "codeFileCount": 303
+      "codeFileCount": 304
     },
     {
       "name": "agrimo",
@@ -109,7 +109,7 @@
         "ui"
       ],
       "purpose": "CFO finance dashboard — ledger management, tax tools, AI advisory, document intelligence, and integrations with Plaid, Dext, Xero, and QuickBooks.",
-      "codeFileCount": 237
+      "codeFileCount": 238
     },
     {
       "name": "console",
@@ -410,7 +410,7 @@
         "schema-core",
         "ui"
       ],
-      "purpose": "National Anti-Corruption Programme examination and assessment platform.",
+      "purpose": "DRC-native national education and examination infrastructure. Modeled on the",
       "codeFileCount": 64
     },
     {
@@ -529,7 +529,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 182
+      "codeFileCount": 183
     },
     {
       "name": "test-scaffold-gp",
@@ -574,7 +574,7 @@
         "trade-db",
         "ui"
       ],
-      "purpose": "Cross-border trade management — deals, listings, shipments, and commission tracking.",
+      "purpose": "Cross-border trade infrastructure: deals, financing states, listings,",
       "codeFileCount": 56
     },
     {
@@ -675,7 +675,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 4904
+      "codeFileCount": 4907
     },
     {
       "name": "union-eyes-demo",
@@ -834,7 +834,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 458
+      "codeFileCount": 459
     }
   ],
   "workflows": [
