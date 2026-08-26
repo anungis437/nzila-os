@@ -1,0 +1,104 @@
+{
+  "proofRun": "005-sage-operational-launch-evidence",
+  "title": "SAGE Operational Launch Evidence — Azure Staging",
+  "evidenceDate": "2026-07-15",
+  "buildsOn": "004-sage-final-implementation-proof",
+  "implementationCommit": "6b6d3736dd3692112690165823a0702e1b6deea9",
+  "evidenceCommit": null,
+  "evidenceCommitStatus": "pending evidence commit",
+  "deployedStagingCommit": "24b2be66",
+  "proofEnvironment": "Azure staging (subscription 'Nzila'; resource groups nzila-canada-staging-rg + nzila-staging-rg). Read-only preflight, direct read-only schema inventory, live backend-reachability + real limiter-adapter proofs, Log Analytics KQL, and repository-level automated accessibility. No deployed SAGE operational surface exists in staging.",
+  "authorizationScope": {
+    "resourceGroup": "nzila-canada-staging-rg",
+    "environment": "staging only",
+    "productionActions": "prohibited",
+    "customerOrProductionPersonalData": "prohibited",
+    "humanAvailableThisRun": false
+  },
+  "gateTaxonomy": [
+    "G1 Architecture & doctrine",
+    "G2 Authorization & tenant isolation",
+    "G3 Evidence integrity & auditability",
+    "G4 Human review & decision control",
+    "G5 Export immutability & approval",
+    "G6 Recipient delivery security",
+    "G7 Notification operational resilience",
+    "G8 Retention & legal holds",
+    "G9 Controlled destruction",
+    "G10 Privacy & data minimization",
+    "G11 Accessibility & bilingual parity",
+    "G12 Observability & incident response",
+    "G13 Backup & restoration",
+    "G14 Performance & reliability",
+    "G15 Documentation & operator readiness"
+  ],
+  "gateStatuses004": {
+    "G1": "PASS", "G2": "PASS", "G3": "PASS", "G4": "PASS", "G5": "PASS",
+    "G6": "PASS_WITH_CONDITIONS", "G7": "PASS_WITH_CONDITIONS", "G8": "PASS",
+    "G9": "PASS_WITH_CONDITIONS", "G10": "PASS_WITH_CONDITIONS",
+    "G11": "NOT_PROVEN", "G12": "NOT_PROVEN", "G13": "NOT_PROVEN",
+    "G14": "PASS_WITH_CONDITIONS", "G15": "PASS_WITH_CONDITIONS"
+  },
+  "gateStatuses005": {
+    "G1": "PASS", "G2": "PASS", "G3": "PASS", "G4": "PASS", "G5": "PASS",
+    "G6": "PASS_WITH_CONDITIONS", "G7": "PASS_WITH_CONDITIONS", "G8": "PASS",
+    "G9": "PASS_WITH_CONDITIONS", "G10": "PASS_WITH_CONDITIONS",
+    "G11": "NOT_PROVEN", "G12": "NOT_PROVEN", "G13": "NOT_PROVEN",
+    "G14": "PASS_WITH_CONDITIONS", "G15": "PASS_WITH_CONDITIONS"
+  },
+  "gateStatusChanges004to005": {},
+  "gateSummary": {
+    "PASS": 6,
+    "PASS_WITH_CONDITIONS": 6,
+    "NOT_PROVEN": 3,
+    "FAIL": 0,
+    "total": 15
+  },
+  "keyStructuralFindings": [
+    "SAGE operator/admin UI EXISTS in merged main (Finding A): ~5 app/sage pages, ~24 components, ~40 app/api/sage routes, lib/sage services, bilingual messages, and jsdom interaction tests. It is NOT deployed to staging.",
+    "Deployed staging platform-admin revision runs a PRE-SAGE image (commit 24b2be66); the SAGE operational surface is not deployed and the SAGE environment composition is absent.",
+    "nzila-staging-db was directly inventoried (temporary firewall rule, read-only catalog query, rule removed): 0 sage_% tables. SAGE migrations are NOT applied. Migration ledgers present: drizzle.__drizzle_migrations, public.django_migrations.",
+    "The only staging action group (zonga-ops-alerts) has zero receivers — no operator alert-delivery channel. It was not modified.",
+    "Restore-drill server nzila-ue-prod-db-drill-20260520 is in prod-rg (real data) and is excluded from synthetic proofs."
+  ],
+  "liveProofsPerformed": {
+    "redisBackendConnectivity": "PASS — synthetic SET(EX30)/GET/TTL/DEL/GET lifecycle against staging Upstash Redis; synthetic key removed.",
+    "sageLimiterAdapter": "PASS — the ACTUAL production limiter (os-core checkDistributedRateLimit) run against staging Upstash: threshold enforced (allow,allow,allow,deny 60s), concurrency correct (exactly 5 of 12 concurrent allowed via atomic Lua), fail-closed on invalid token, fail-closed on unreachable endpoint.",
+    "resendProviderAcceptance": "PASS (to official test sink) — HTTP 200, provider reachable, provider message id returned; recipient delivered@resend.dev (no real recipient).",
+    "logAnalyticsQuery": "Workspace nzila-staging-logs exists; KQL query AUTHORIZED (Heartbeat query executed, returned empty — no agent data). SAGE telemetry ABSENT (no deployed SAGE surface).",
+    "automatedAccessibility": "PASS (repository surfaces) — axe-core over 4 existing SAGE operator components: no serious/critical violations on control-level WCAG rules; plus SAGE locale-key parity across en/en-CA/fr/fr-CA. Does NOT prove deployed accessibility or replace the manual pass."
+  },
+  "notPerformedAndWhy": [
+    "G13 isolated PITR restore round-trip: NOT executed — requires provisioning cost-producing isolated servers and an unsupervised restore while no human is available; deferred. Backup configuration verified read-only only.",
+    "G12 live telemetry round-trip + alert routing + incident drill: NOT executed — no deployed SAGE surface emits telemetry, no configured alert channel, no human to confirm receipt.",
+    "Manual accessibility pass (keyboard + screen reader): NOT executed — requires a named human.",
+    "SAGE delivery composition (grant-scoped stable message id, provider-idempotency propagation, outbox persistence/recovery, mailbox receipt): NOT executed — requires a deployed SAGE surface."
+  ],
+  "openBlockers": {
+    "B-001": { "severity": "BLOCKER", "title": "Observability wiring and telemetry proof", "status": "open" },
+    "B-002": { "severity": "BLOCKER", "title": "Incident alerting and drill", "status": "open" },
+    "B-003": { "severity": "BLOCKER", "title": "Backup restoration round-trip", "status": "open" },
+    "B-004": { "severity": "HIGH", "title": "Accessibility (deployed + manual pass)", "status": "open" },
+    "B-005": { "severity": "BLOCKER", "title": "No SAGE-enabled staging proof deployment or isolated operational data plane", "status": "open" }
+  },
+  "blockerCount": 4,
+  "highCount": 1,
+  "recommendedReassessmentDecision": "NO_GO",
+  "newReassessmentDecision": null,
+  "effectiveAuthorizedDecision": "NO_GO",
+  "effectiveDecisionSource": "004-sage-final-implementation-proof",
+  "launchScope": "external production availability",
+  "externalProductionAuthorized": false,
+  "evidenceFiles": [
+    "00-scope-and-authorization.md",
+    "01-repository-vs-deployed-state.md",
+    "02-backend-reachability-and-limiter.md",
+    "03-resend-provider-acceptance.md",
+    "04-observability-and-alerting.md",
+    "05-backup-and-restoration.md",
+    "06-accessibility.md",
+    "07-gate-reassessment.md",
+    "08-launch-decision.md"
+  ],
+  "privacyPolicy": "No production personal data, recipient addresses, tokens, package bytes, raw storage references, credentials or connection strings are stored. Credentials were read from Key Vault into process environment only and never printed. Only booleans, HTTP status codes, safe resource names, table names and hashes are recorded. The temporary DB firewall rule (single agent IP) was removed immediately after the read-only inventory."
+}
