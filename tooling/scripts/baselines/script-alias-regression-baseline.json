@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-04T14:17:29.284Z",
+  "generatedAt": "2026-08-26T20:15:54.300Z",
   "violations": [
     {
       "name": "ai:analyze",
@@ -431,14 +431,6 @@
       "pattern": "tsx-root"
     },
     {
-      "name": "reality:build-scan",
-      "pattern": "tsx-root"
-    },
-    {
-      "name": "reality:build-scan:with-bundle",
-      "pattern": "tsx-root"
-    },
-    {
       "name": "reality:demo-guard",
       "pattern": "tsx-root"
     },
@@ -716,6 +708,10 @@
     },
     {
       "name": "validate:docs",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "validate:doctrine",
       "pattern": "tsx-root"
     },
     {
