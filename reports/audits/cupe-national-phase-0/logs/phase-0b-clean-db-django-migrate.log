@@ -1,0 +1,112 @@
+Operations to perform:
+  Apply all migrations: admin, ai_core, analytics, auth, auth_core, bargaining, billing, compliance, content, contenttypes, core, django_celery_beat, django_celery_results, exit_interviews, grievances, notifications, services, sessions, unions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying auth_core.0001_initial... OK
+  Applying ai_core.0001_initial... OK
+  Applying analytics.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying auth_core.0002_add_clerk_organization_id... OK
+  Applying bargaining.0001_initial... OK
+Traceback (most recent call last):
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+psycopg2.errors.DuplicateTable: relation "stripe_webhook_events" already exists
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\manage.py", line 30, in <module>
+    main()
+    ~~~~^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\manage.py", line 26, in main
+    execute_from_command_line(sys.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\core\management\__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\core\management\base.py", line 413, in run_from_argv
+    self.execute(*args, **cmd_options)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\core\management\base.py", line 459, in execute
+    output = self.handle(*args, **options)
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\core\management\base.py", line 107, in wrapper
+    res = handle_func(*args, **kwargs)
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\core\management\commands\migrate.py", line 357, in handle
+    post_migrate_state = executor.migrate(
+        targets,
+    ...<3 lines>...
+        fake_initial=fake_initial,
+    )
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\migrations\executor.py", line 135, in migrate
+    state = self._migrate_all_forwards(
+        state, plan, full_plan, fake=fake, fake_initial=fake_initial
+    )
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\migrations\executor.py", line 167, in _migrate_all_forwards
+    state = self.apply_migration(
+        state, migration, fake=fake, fake_initial=fake_initial
+    )
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\migrations\executor.py", line 255, in apply_migration
+    state = migration.apply(state, schema_editor)
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\migrations\migration.py", line 132, in apply
+    operation.database_forwards(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.app_label, schema_editor, old_state, project_state
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\migrations\operations\models.py", line 97, in database_forwards
+    schema_editor.create_model(model)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\base\schema.py", line 505, in create_model
+    self.execute(sql, params or None)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\postgresql\schema.py", line 45, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\base\schema.py", line 202, in execute
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\APPS\nzila-automation\apps\union-eyes\backend\.venv\Lib\site-packages\django\db\backends\utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+django.db.utils.ProgrammingError: relation "stripe_webhook_events" already exists
+
+  Applying billing.0001_initial...

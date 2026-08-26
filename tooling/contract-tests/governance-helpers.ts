@@ -62,6 +62,8 @@ const SKIP_DIRS = new Set([
   '.git',
   '__fixtures__',
   '.venv',
+  'playwright-report',  // Playwright trace assets contain minified third-party JS
+  'test-results',       // Playwright video/screenshot artifacts
 ])
 
 /**

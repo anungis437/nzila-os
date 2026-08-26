@@ -1,25 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { auth, currentUser } from '@nzila/platform-auth/entra/server';
-import { requireUser } from '@/lib/api-auth-guard';
-import { DocumentsConsole } from '@/components/documents/documents-console';
-import { Cupe4373DocumentsPage } from '@/components/demo/cupe4373-documents-page';
-import { Cupe4373MemberDocumentsPage } from '@/components/demo/cupe4373-member-views';
-import {
-  isCupe4373DemoRuntime,
-  getDashboardExperience,
-} from '@/lib/dashboard/role-experience';
-import {
-  resolveDemoMemberPersona,
-  getMemberDocuments,
-} from '@/lib/demo/cupe4373-member-view';
-import { getUserRole } from '@/lib/auth/rbac-server';
-import { UserRole } from '@/lib/auth/roles';
-import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from '@/lib/organization-utils';
-import { logger } from '@/lib/logger';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -34,52 +16,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function DocumentsPage({ params }: PageProps) {
-  const { locale } = await params;
-  try {
-    await requireUser();
-  } catch {
-    redirect('/login');
-  }
-
-  if (isCupe4373DemoRuntime()) {
-    // Members see only documents marked public_internal (collective agreement,
-    // public minutes, etc.) — not steward-restricted or privileged files.
-    const { userId } = await auth();
-    let demoOrgId: string = DEFAULT_ORGANIZATION_ID;
-    try {
-      if (userId) demoOrgId = await getOrganizationIdForUser(userId);
-    } catch (error) {
-      logger.warn('[dashboard:documents] demo getOrganizationIdForUser threw', {
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-    let role: UserRole = UserRole.MEMBER;
-    try {
-      if (userId) role = await getUserRole(userId, demoOrgId);
-    } catch (error) {
-      logger.warn('[dashboard:documents] demo getUserRole threw — defaulting to member', {
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-    if (getDashboardExperience(role) === 'member') {
-      const user = await currentUser();
-      const persona = resolveDemoMemberPersona({
-        fullName: user?.fullName ?? null,
-        firstName: user?.firstName ?? null,
-        email: user?.emailAddresses?.[0]?.emailAddress ?? null,
-      });
-      return (
-        <Cupe4373MemberDocumentsPage
-          persona={persona}
-          documents={getMemberDocuments()}
-        />
-      );
-    }
-    return <Cupe4373DocumentsPage locale={locale} />;
-  }
-
-  return <DocumentsConsole />;
+/**
+ * /dashboard/documents — document library root.
+ *
+ * Access is gated by the documents layout (requires steward role or above).
+ */
+export default async function DocumentsPage() {
+  const t = await getTranslations('documentsPage');
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('header.title')}</h1>
+      <p className="text-gray-600">{t('header.description')}</p>
+    </div>
+  );
 }

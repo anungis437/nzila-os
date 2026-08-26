@@ -11,11 +11,31 @@ import { assertRedirectOrDenied } from './helpers/navigation-assertions';
 test.describe('UnionEyes hard pilot-mode gating', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
+    // Pre-warm each pilot-excluded route via a plain HTTP GET so the FIRST
+    // role variant (member) doesn't have to cold-compile 7 Next.js routes in
+    // one shot and blow past the 60s per-test timeout. Subsequent variants
+    // then benefit from the primed page cache.
+    for (const path of PILOT_EXCLUDED_ROUTES) {
+      await request.get(path, { timeout: 30_000 }).catch(() => undefined);
+    }
   });
 
   for (const role of STAKEHOLDER_ORDER) {
-    test(`${role}: pilot excluded routes are hard-gated`, async ({ page }) => {
+    test(`${role}: pilot excluded routes are hard-gated`, async ({ page, request }) => {
       const fixture = getFixture(role);
+
+      // The dev server can restart after long sequential test runs.  Wait for
+      // it to recover before making any API or navigation calls.
+      const startMs = Date.now();
+      while (Date.now() - startMs < 45_000) {
+        try {
+          const probe = await request.get('/api/health', { timeout: 5_000 });
+          if ([200, 503].includes(probe.status())) break;
+        } catch {
+          await page.waitForTimeout(1_500);
+        }
+      }
+
       const localizedLanding = await gotoDashboardAsRole(page, role);
       await assertPilotModeEnabled(page);
 

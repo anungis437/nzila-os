@@ -1,0 +1,14 @@
+{
+  "app": {
+    "name": "Union Eyes Démo",
+    "tagline": "Environnement de démonstration à données synthétiques"
+  },
+  "banner": {
+    "synthetic": "DONNÉES SYNTHÉTIQUES — cet environnement ne contient aucun dossier réel. Les intégrations externes sont désactivées.",
+    "target": "Environnement : démo"
+  },
+  "dashboard": {
+    "title": "Tableau de bord démo",
+    "welcome": "Bienvenue dans l'espace de démonstration CUPE 4373."
+  }
+}

@@ -40,7 +40,7 @@ export async function GET(_req: NextRequest) {
 	try {
 		const upstream = await fetch(`${base}/api/auth_core/health/`, {
 			cache: 'no-store',
-			signal: AbortSignal.timeout(3000),
+			signal: AbortSignal.timeout(7000),
 		})
 
 		if (!upstream.ok) {

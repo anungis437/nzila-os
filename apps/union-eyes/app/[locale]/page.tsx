@@ -3,12 +3,11 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { auth, currentUser } from '@nzila/platform-auth/entra/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
-import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 import { getUserRole } from '@/lib/auth/rbac-server';
 import { getRoleLandingPath } from '@/lib/dashboard/role-experience';
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from '@/lib/organization-utils';
@@ -47,14 +46,7 @@ export default async function LocaleRootPage({
       // Fall back to the default org; the logged-in landing should still resolve.
     }
 
-    const user = await currentUser();
-    const email = user?.emailAddresses?.[0]?.emailAddress ?? '';
     const userRole = await getUserRole(userId, organizationId);
-
-    if (isCupe4373DemoRuntime() && email) {
-      const demoLandingPath = getRoleLandingPath(userRole);
-      redirect(`/${locale}${demoLandingPath}`);
-    }
 
     redirect(`/${locale}${getRoleLandingPath(userRole)}`);
   }

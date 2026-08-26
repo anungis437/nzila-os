@@ -1,0 +1,4 @@
+8:55AM INF 0 commits scanned.
+8:55AM INF scanned ~145728 bytes (145.73 KB) in 339ms
+8:55AM INF no leaks found
+gitleaks exit=0

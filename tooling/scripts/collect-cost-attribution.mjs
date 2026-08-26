@@ -17,9 +17,9 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { spawnSync } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import crossSpawn from 'cross-spawn';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '../..');
@@ -116,14 +116,19 @@ function queryAzureCostByResourceGroup(subscriptionId) {
     `https://management.azure.com/subscriptions/${subscriptionId}` +
     `/providers/Microsoft.CostManagement/query?api-version=2023-03-01`;
 
-  const result = spawnSync(
+  const result = crossSpawn.sync(
     'az',
     ['rest', '--method', 'post', '--uri', uri, '--body', JSON.stringify(body)],
     { encoding: 'utf8' },
   );
 
+  if (result.error) {
+    const code = result.error.code ? ` (${result.error.code})` : '';
+    throw new Error(`Azure CLI process launch failed${code}: ${result.error.message}`);
+  }
+
   if (result.status !== 0) {
-    const stderr = result.stderr?.trim() || 'unknown az error';
+    const stderr = result.stderr?.trim() || result.stdout?.trim() || `exit code ${result.status}`;
     throw new Error(`Azure Cost Management API query failed: ${stderr}`);
   }
 

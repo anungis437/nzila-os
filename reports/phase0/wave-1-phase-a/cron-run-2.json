@@ -1,0 +1,1 @@
+{"runId":"486c0e79-af1b-41af-abdd-048f4c84b5d9","workerInstance":"deadline-worker-486c0e79","correlationId":"486c0e79-af1b-41af-abdd-048f4c84b5d9","startedAt":"2026-07-21T19:01:26.516Z","finishedAt":"2026-07-21T19:01:26.522Z","durationMs":6,"examined":0,"claimed":0,"sent":0,"transientFailures":0,"permanentFailures":0,"deadLettered":0,"leasesRecovered":0,"cancelledSkipped":0}

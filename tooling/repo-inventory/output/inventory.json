@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-20T00:00:00.000Z",
-  "appCount": 26,
-  "packageCount": 222,
-  "workspacePackageCount": 254,
-  "workflowCount": 52,
+  "generatedAt": "2026-08-04T00:00:00.000Z",
+  "appCount": 27,
+  "packageCount": 224,
+  "workspacePackageCount": 257,
+  "workflowCount": 53,
   "contractTestCount": 272,
-  "tsTestFileCount": 2469,
+  "tsTestFileCount": 2487,
   "pythonTestFileCount": 32,
   "apps": [
     {
@@ -668,13 +668,33 @@
         "platform-pilot-metrics",
         "platform-shell",
         "policies",
+        "reality-env",
         "stabilization-signals",
         "ue-cognition",
         "ui",
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 4915
+      "codeFileCount": 4904
+    },
+    {
+      "name": "union-eyes-demo",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3012,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "os-core",
+        "platform-auth",
+        "reality-env",
+        "union-eyes-ui"
+      ],
+      "purpose": "",
+      "codeFileCount": 71
     },
     {
       "name": "veridian-admin",
@@ -858,6 +878,7 @@
     "platform-automation.yml",
     "portfolio-governance.yml",
     "preview-deploy.yml",
+    "reality-anti-theatre.yml",
     "red-team.yml",
     "release-governance.yml",
     "release-train.yml",

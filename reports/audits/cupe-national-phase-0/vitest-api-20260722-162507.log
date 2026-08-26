@@ -1,0 +1,13 @@
+
+> @nzila/union-eyes@1.0.0 test:qa:api C:\APPS\nzila-automation\apps\union-eyes
+> vitest run tests/api
+
+
+ RUN  v4.1.2 C:/APPS/nzila-automation/apps/union-eyes
+
+
+ Test Files  9 passed (9)
+      Tests  89 passed (89)
+   Start at  16:25:10
+   Duration  730ms (transform 733ms, setup 0ms, import 1.23s, tests 105ms, environment 2ms)
+

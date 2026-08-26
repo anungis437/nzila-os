@@ -1,0 +1,1200 @@
+
+> nzila-os@1.0.3 typecheck C:\APPS\nzila-automation
+> turbo typecheck
+
+ΓÇó turbo 2.9.14
+
+   ΓÇó Packages in scope: @nzila/abr, @nzila/agri-adapters, @nzila/agri-core, @nzila/agri-db, @nzila/agri-events, @nzila/agri-forecasting, @nzila/agri-intelligence, @nzila/agri-provenance, @nzila/agri-reporting, @nzila/agri-supply-chain, @nzila/agri-sync-contracts, @nzila/agri-traceability, @nzila/agrimo, @nzila/agrimo-core, @nzila/agrimo-intelligence, @nzila/ai-control, @nzila/ai-core, @nzila/ai-registry, @nzila/ai-sdk, @nzila/assurance-engine, @nzila/attestation-visibility, @nzila/audit, @nzila/blob, @nzila/canadian-vocabulary, @nzila/cfo, @nzila/cfo-core, @nzila/cfo-intelligence, @nzila/chaos, @nzila/chatops-slack, @nzila/chatops-teams, @nzila/clc-decision-intelligence, @nzila/clc-executive-intelligence, @nzila/cli, @nzila/clinical-timeline, @nzila/commerce-audit, @nzila/commerce-core, @nzila/commerce-db, @nzila/commerce-events, @nzila/commerce-evidence, @nzila/commerce-governance, @nzila/commerce-integration-tests, @nzila/commerce-observability, @nzila/commerce-services, @nzila/commerce-state, @nzila/comms-email, @nzila/comms-push, @nzila/comms-sms, @nzila/config, @nzila/consent-engine, @nzila/console, @nzila/continuity-analysis, @nzila/continuity-observability, @nzila/continuity-review, @nzila/contracts, @nzila/control-plane, @nzila/cora, @nzila/crm-hubspot, @nzila/cupe-vocabulary, @nzila/data-lifecycle, @nzila/db, @nzila/deal-engine, @nzila/decision-core, @nzila/decision-evidence, @nzila/decision-intelligence, @nzila/decision-intelligence-engine, @nzila/doctrine-enforcement, @nzila/enforcement, @nzila/events, @nzila/evidence, @nzila/executive-os, @nzila/finance-analytics, @nzila/finance-compliance, @nzila/finance-core, @nzila/finance-governance, @nzila/finance-identity, @nzila/finance-ledger, @nzila/finops, @nzila/flow, @nzila/flow-engine, @nzila/fsm-core, @nzila/fx, @nzila/governance, @nzila/governance-middleware, @nzila/governance-operations, @nzila/governance-otel, @nzila/governance-rationale, @nzila/governance-review, @nzila/governance-runtime, @nzila/governance-telemetry, @nzila/governed-workflow, @nzila/health-analytics, @nzila/health-connectors, @nzila/health-governance, @nzila/health-ui, @nzila/healthcare-surveys, @nzila/hq-domain, @nzila/ingestion-core, @nzila/institutional-intelligence, @nzila/integrations-calendar, @nzila/integrations-core, @nzila/integrations-db, @nzila/integrations-hubspot, @nzila/integrations-m365, @nzila/integrations-pension, @nzila/integrations-runtime, @nzila/integrations-whatsapp, @nzila/intelligence, @nzila/itsm-core, @nzila/maestria, @nzila/media-worker, @nzila/metrics-commercial, @nzila/ml-core, @nzila/ml-sdk, @nzila/mobility, @nzila/mobility-ai, @nzila/mobility-case-engine, @nzila/mobility-client-portal, @nzila/mobility-compliance, @nzila/mobility-core, @nzila/mobility-family, @nzila/mobility-programs, @nzila/nacp-core, @nzila/nacp-exams, @nzila/nar, @nzila/nzila-hq, @nzila/observability, @nzila/oci-confidence, @nzila/onboarding-core, @nzila/openapi-gen, @nzila/operating-evidence, @nzila/operational-convergence, @nzila/orchestrator-api, @nzila/org, @nzila/organizational-cognition-core, @nzila/organizational-governance-graph, @nzila/os-core, @nzila/otel-core, @nzila/partners, @nzila/patient-identity, @nzila/payments-stripe, @nzila/pilot-mode, @nzila/pipeline-alerting, @nzila/platform-admin, @nzila/platform-agent-workflows, @nzila/platform-ai-contract, @nzila/platform-ai-governance, @nzila/platform-ai-query, @nzila/platform-anomaly-engine, @nzila/platform-assurance, @nzila/platform-auth, @nzila/platform-billing, @nzila/platform-change-management, @nzila/platform-cognition-core, @nzila/platform-commerce-org, @nzila/platform-compliance-snapshots, @nzila/platform-context-orchestrator, @nzila/platform-contracts, @nzila/platform-cost, @nzila/platform-data-fabric, @nzila/platform-decision-engine, @nzila/platform-decision-graph, @nzila/platform-deploy, @nzila/platform-entity-graph, @nzila/platform-environment, @nzila/platform-event-fabric, @nzila/platform-events, @nzila/platform-evidence-pack, @nzila/platform-export, @nzila/platform-feature-flags, @nzila/platform-governance, @nzila/platform-governed-ai, @nzila/platform-growth-os, @nzila/platform-integrations, @nzila/platform-integrations-connectors, @nzila/platform-integrations-control-plane, @nzila/platform-integrations-types, @nzila/platform-intelligence, @nzila/platform-intelligence-home, @nzila/platform-isolation, @nzila/platform-jurisdiction-compliance, @nzila/platform-knowledge-registry, @nzila/platform-lakehouse, @nzila/platform-marketplace, @nzila/platform-metrics, @nzila/platform-notifications, @nzila/platform-observability, @nzila/platform-ontology, @nzila/platform-ops, @nzila/platform-performance, @nzila/platform-pilot-metrics, @nzila/platform-pilot-metrics-types, @nzila/platform-policy-engine, @nzila/platform-procurement-proof, @nzila/platform-proof, @nzila/platform-reasoning-engine, @nzila/platform-revenue, @nzila/platform-rfp-generator, @nzila/platform-rum, @nzila/platform-semantic-search, @nzila/platform-shell, @nzila/platform-utils, @nzila/platform-validation, @nzila/policies, @nzila/policy-intelligence, @nzila/pricing-engine, @nzila/qbo, @nzila/quebec-vocabulary, @nzila/reality-env, @nzila/repo-inventory, @nzila/runtime-attestation, @nzila/sage-core, @nzila/schema-core, @nzila/secrets, @nzila/security, @nzila/stabilization-signals, @nzila/tax, @nzila/test-scaffold-gp, @nzila/tools-runtime, @nzila/trade, @nzila/trade-adapters, @nzila/trade-cars, @nzila/trade-core, @nzila/trade-db, @nzila/trustcore, @nzila/trustcore-contracts, @nzila/trustcore-core, @nzila/trustcore-trustops, @nzila/trustcore-trustops-app, @nzila/trustops-intelligence, @nzila/ue-assistant, @nzila/ue-cognition, @nzila/ui, @nzila/union-eyes, @nzila/union-eyes-demo, @nzila/union-eyes-ui, @nzila/veridian-admin, @nzila/veridian-care, @nzila/veridian-site, @nzila/web, @nzila/webhooks, @nzila/weekone, @nzila/workload-intelligence, @nzila/zonga, @nzila/zonga-analytics, @nzila/zonga-control-plane, @nzila/zonga-core, @nzila/zonga-economics, @nzila/zonga-events, @nzila/zonga-growth, @nzila/zonga-intelligence, @nzila/zonga-monetization, @nzila/zonga-payments, @nzila/zonga-rights, @nzila/zonga-streaming, @nzila/zonga-streaming-aws, @union-claims/financial, financial-service, nzila-scripts-book-template
+   ΓÇó Running typecheck in 258 packages
+   ΓÇó Remote caching disabled
+
+@nzila/operating-evidence:typecheck: cache miss, executing 978c141d4867e1e3
+@nzila/platform-knowledge-registry:typecheck: cache miss, executing 2a30dd3cbabebc11
+@nzila/integrations-pension:typecheck: cache miss, executing d83c536881caca3c
+@nzila/governance-review:typecheck: cache miss, executing bdd6bcf5a5514b66
+@nzila/doctrine-enforcement:typecheck: cache miss, executing 025e27d0e2f660b7
+@nzila/platform-observability:typecheck: cache miss, executing 1ed11bd3c7a51b0a
+@nzila/governance-operations:typecheck: cache miss, executing ef12936dc67dc011
+@nzila/finance-core:typecheck: cache miss, executing 53a3b6ac6dee8015
+@nzila/operating-evidence:build: cache hit, replaying logs 16541b33fd021093
+@nzila/metrics-commercial:build: cache hit, replaying logs 6e20443ca00357da
+@nzila/operating-evidence:build: 
+@nzila/operating-evidence:build: > @nzila/operating-evidence@0.1.0 build C:\APPS\nzila-automation\services\operating-evidence
+@nzila/operating-evidence:build: > tsc
+@nzila/operating-evidence:build: 
+@nzila/metrics-commercial:build: 
+@nzila/metrics-commercial:build: > @nzila/metrics-commercial@0.1.0 build C:\APPS\nzila-automation\services\metrics-commercial
+@nzila/metrics-commercial:build: > tsc
+@nzila/metrics-commercial:build: 
+@nzila/flow-engine:typecheck: cache miss, executing 586aeffbb452cd32
+@nzila/cupe-vocabulary:build: cache hit, replaying logs 2dbb02da756aecac
+@nzila/cupe-vocabulary:build: 
+@nzila/cupe-vocabulary:build: > @nzila/cupe-vocabulary@0.1.0 build C:\APPS\nzila-automation\packages\cupe-vocabulary
+@nzila/cupe-vocabulary:build: > tsc
+@nzila/cupe-vocabulary:build: 
+@nzila/platform-integrations-types:typecheck: cache miss, executing 3a302d524a054d3a
+@nzila/operating-evidence:typecheck: 
+@nzila/operating-evidence:typecheck: > @nzila/operating-evidence@0.1.0 typecheck C:\APPS\nzila-automation\services\operating-evidence
+@nzila/operating-evidence:typecheck: > tsc --noEmit
+@nzila/operating-evidence:typecheck: 
+@nzila/platform-knowledge-registry:typecheck: 
+@nzila/platform-knowledge-registry:typecheck: > @nzila/platform-knowledge-registry@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-knowledge-registry
+@nzila/platform-knowledge-registry:typecheck: > tsc --noEmit
+@nzila/platform-knowledge-registry:typecheck: 
+@nzila/governance-review:typecheck: 
+@nzila/governance-review:typecheck: > @nzila/governance-review@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-review
+@nzila/governance-review:typecheck: > tsc --noEmit
+@nzila/governance-review:typecheck: 
+@nzila/doctrine-enforcement:typecheck: 
+@nzila/doctrine-enforcement:typecheck: > @nzila/doctrine-enforcement@0.1.0 typecheck C:\APPS\nzila-automation\packages\doctrine-enforcement
+@nzila/doctrine-enforcement:typecheck: > tsc --noEmit
+@nzila/doctrine-enforcement:typecheck: 
+@nzila/platform-observability:typecheck: 
+@nzila/platform-observability:typecheck: > @nzila/platform-observability@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-observability
+@nzila/platform-observability:typecheck: > tsc --noEmit
+@nzila/platform-observability:typecheck: 
+@nzila/integrations-pension:typecheck: 
+@nzila/integrations-pension:typecheck: > @nzila/integrations-pension@0.1.0 typecheck C:\APPS\nzila-automation\packages\integrations-pension
+@nzila/integrations-pension:typecheck: > tsc --noEmit
+@nzila/integrations-pension:typecheck: 
+@nzila/finance-core:typecheck: 
+@nzila/finance-core:typecheck: > @nzila/finance-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\finance-core
+@nzila/finance-core:typecheck: > tsc --noEmit
+@nzila/finance-core:typecheck: 
+@nzila/governance-operations:typecheck: 
+@nzila/governance-operations:typecheck: > @nzila/governance-operations@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-operations
+@nzila/governance-operations:typecheck: > tsc --noEmit
+@nzila/governance-operations:typecheck: 
+@nzila/flow-engine:typecheck: 
+@nzila/flow-engine:typecheck: > @nzila/flow-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\flow-engine
+@nzila/flow-engine:typecheck: > tsc --noEmit
+@nzila/flow-engine:typecheck: 
+@nzila/platform-integrations-types:typecheck: 
+@nzila/platform-integrations-types:typecheck: > @nzila/platform-integrations-types@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-integrations-types
+@nzila/platform-integrations-types:typecheck: > tsc --noEmit
+@nzila/platform-integrations-types:typecheck: 
+@nzila/decision-evidence:typecheck: cache miss, executing a86bb07b023434a4
+@nzila/contracts:typecheck: cache miss, executing b782a78351bf6a40
+@nzila/metrics-commercial:typecheck: cache miss, executing cf176d40f6f027b4
+@nzila/decision-evidence:typecheck: 
+@nzila/decision-evidence:typecheck: > @nzila/decision-evidence@0.1.0 typecheck C:\APPS\nzila-automation\packages\decision-evidence
+@nzila/decision-evidence:typecheck: > tsc --noEmit
+@nzila/decision-evidence:typecheck: 
+@nzila/ai-sdk:typecheck: cache miss, executing ee2a7c132e838d1c
+@nzila/contracts:typecheck: 
+@nzila/contracts:typecheck: > @nzila/contracts@0.1.0 typecheck C:\APPS\nzila-automation\packages\contracts
+@nzila/contracts:typecheck: > tsc --noEmit
+@nzila/contracts:typecheck: 
+@nzila/cfo-core:typecheck: cache miss, executing 26c61bf53bb79cc3
+@nzila/integrations-core:typecheck: cache miss, executing 82749bf40bb2b1a0
+@nzila/policies:build: cache hit, replaying logs 47a9dac59cc9d658
+@nzila/policies:build: 
+@nzila/policies:build: > @nzila/policies@0.1.0 build C:\APPS\nzila-automation\packages\policies
+@nzila/policies:build: > tsc
+@nzila/policies:build: 
+@union-claims/financial:typecheck: cache miss, executing b5844fc0ec41def3
+@nzila/governance-rationale:typecheck: cache miss, executing 6cbec0fe44b7ed34
+@nzila/metrics-commercial:typecheck: 
+@nzila/metrics-commercial:typecheck: > @nzila/metrics-commercial@0.1.0 typecheck C:\APPS\nzila-automation\services\metrics-commercial
+@nzila/metrics-commercial:typecheck: > tsc --noEmit
+@nzila/metrics-commercial:typecheck: 
+@nzila/observability:typecheck: cache miss, executing 875ba49ee6cafcb7
+@nzila/ai-sdk:typecheck: 
+@nzila/ai-sdk:typecheck: > @nzila/ai-sdk@0.1.0 typecheck C:\APPS\nzila-automation\packages\ai-sdk
+@nzila/ai-sdk:typecheck: > tsc --noEmit
+@nzila/ai-sdk:typecheck: 
+@nzila/integrations-core:typecheck: 
+@nzila/integrations-core:typecheck: > @nzila/integrations-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\integrations-core
+@nzila/integrations-core:typecheck: > tsc --noEmit
+@nzila/integrations-core:typecheck: 
+@nzila/cfo-core:typecheck: 
+@nzila/cfo-core:typecheck: > @nzila/cfo-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\cfo-core
+@nzila/cfo-core:typecheck: > tsc --noEmit
+@nzila/cfo-core:typecheck: 
+@union-claims/financial:typecheck: 
+@union-claims/financial:typecheck: > @union-claims/financial@0.1.0 typecheck C:\APPS\nzila-automation\packages\union-claims-financial
+@union-claims/financial:typecheck: > tsc --noEmit -p tsconfig.json
+@union-claims/financial:typecheck: 
+@nzila/governance-rationale:typecheck: 
+@nzila/governance-rationale:typecheck: > @nzila/governance-rationale@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-rationale
+@nzila/governance-rationale:typecheck: > tsc --noEmit
+@nzila/governance-rationale:typecheck: 
+@nzila/observability:typecheck: 
+@nzila/observability:typecheck: > @nzila/observability@0.1.0 typecheck C:\APPS\nzila-automation\packages\observability
+@nzila/observability:typecheck: > tsc --noEmit
+@nzila/observability:typecheck: 
+@nzila/governance-middleware:typecheck: cache miss, executing 5c57014b93fd9389
+@nzila/governance-middleware:typecheck: 
+@nzila/governance-middleware:typecheck: > @nzila/governance-middleware@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-middleware
+@nzila/governance-middleware:typecheck: > tsc --noEmit
+@nzila/governance-middleware:typecheck: 
+@nzila/cupe-vocabulary:typecheck: cache miss, executing b522fa0bf4dafe04
+@nzila/decision-intelligence-engine:typecheck: cache miss, executing f23097d9abea1987
+@nzila/operational-convergence:typecheck: cache miss, executing 604b78f95b1e2d81
+@nzila/continuity-observability:typecheck: cache miss, executing c0dcc5b097cbaea5
+@nzila/cupe-vocabulary:typecheck: 
+@nzila/cupe-vocabulary:typecheck: > @nzila/cupe-vocabulary@0.1.0 typecheck C:\APPS\nzila-automation\packages\cupe-vocabulary
+@nzila/cupe-vocabulary:typecheck: > tsc --noEmit
+@nzila/cupe-vocabulary:typecheck: 
+@nzila/decision-intelligence-engine:typecheck: 
+@nzila/decision-intelligence-engine:typecheck: > @nzila/decision-intelligence-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\decision-intelligence-engine
+@nzila/decision-intelligence-engine:typecheck: > tsc --noEmit
+@nzila/decision-intelligence-engine:typecheck: 
+@nzila/operational-convergence:typecheck: 
+@nzila/operational-convergence:typecheck: > @nzila/operational-convergence@0.1.0 typecheck C:\APPS\nzila-automation\packages\operational-convergence
+@nzila/operational-convergence:typecheck: > tsc --noEmit
+@nzila/operational-convergence:typecheck: 
+@nzila/canadian-vocabulary:typecheck: cache miss, executing ff4f3d7a1fed9048
+@nzila/continuity-observability:typecheck: 
+@nzila/continuity-observability:typecheck: > @nzila/continuity-observability@0.1.0 typecheck C:\APPS\nzila-automation\packages\continuity-observability
+@nzila/continuity-observability:typecheck: > tsc --noEmit
+@nzila/continuity-observability:typecheck: 
+@nzila/cli:typecheck: cache miss, executing 400324a6b66ab583
+@nzila/blob:typecheck: cache miss, executing 258df55897f2387b
+@nzila/runtime-attestation:typecheck: cache miss, executing 8d247655cc7974b5
+@nzila/canadian-vocabulary:typecheck: 
+@nzila/canadian-vocabulary:typecheck: > @nzila/canadian-vocabulary@1.0.0 typecheck C:\APPS\nzila-automation\packages\canadian-vocabulary
+@nzila/canadian-vocabulary:typecheck: > tsc --noEmit
+@nzila/canadian-vocabulary:typecheck: 
+@nzila/cli:typecheck: 
+@nzila/cli:typecheck: > @nzila/cli@0.1.0 typecheck C:\APPS\nzila-automation\packages\cli
+@nzila/cli:typecheck: > tsc --noEmit
+@nzila/cli:typecheck: 
+@nzila/blob:typecheck: 
+@nzila/blob:typecheck: > @nzila/blob@0.1.0 typecheck C:\APPS\nzila-automation\packages\blob
+@nzila/blob:typecheck: > tsc --noEmit
+@nzila/blob:typecheck: 
+@nzila/runtime-attestation:typecheck: 
+@nzila/runtime-attestation:typecheck: > @nzila/runtime-attestation@0.1.0 typecheck C:\APPS\nzila-automation\packages\runtime-attestation
+@nzila/runtime-attestation:typecheck: > tsc --noEmit
+@nzila/runtime-attestation:typecheck: 
+@nzila/governance-runtime:typecheck: cache miss, executing 31212f4edd4e5a02
+@nzila/governance-runtime:typecheck: 
+@nzila/governance-runtime:typecheck: > @nzila/governance-runtime@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-runtime
+@nzila/governance-runtime:typecheck: > tsc --noEmit
+@nzila/governance-runtime:typecheck: 
+@nzila/sage-core:typecheck: cache miss, executing 5e4d123a74ef23c3
+@nzila/openapi-gen:typecheck: cache miss, executing 1548acff14ec82b5
+@nzila/zonga-control-plane:typecheck: cache miss, executing 324d999b5ac637b1
+@nzila/reality-env:typecheck: cache miss, executing b85b8bd07551a596
+@nzila/audit:typecheck: cache miss, executing 7c934d406a571b7b
+@nzila/continuity-analysis:typecheck: cache miss, executing 3d34635564ad1e87
+@nzila/assurance-engine:typecheck: cache miss, executing 4ece9860dd408017
+@nzila/oci-confidence:typecheck: cache miss, executing 18c6c4e739019a74
+@nzila/governance-otel:typecheck: cache miss, executing 9dc564df07e3453f
+@nzila/sage-core:typecheck: 
+@nzila/sage-core:typecheck: > @nzila/sage-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\sage-core
+@nzila/sage-core:typecheck: > tsc --noEmit
+@nzila/sage-core:typecheck: 
+@nzila/openapi-gen:typecheck: 
+@nzila/openapi-gen:typecheck: > @nzila/openapi-gen@0.1.0 typecheck C:\APPS\nzila-automation\tooling\openapi-gen
+@nzila/openapi-gen:typecheck: > tsc --noEmit
+@nzila/openapi-gen:typecheck: 
+@nzila/assurance-engine:typecheck: 
+@nzila/assurance-engine:typecheck: > @nzila/assurance-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\assurance-engine
+@nzila/assurance-engine:typecheck: > tsc --noEmit
+@nzila/assurance-engine:typecheck: 
+@nzila/reality-env:typecheck: 
+@nzila/reality-env:typecheck: > @nzila/reality-env@0.1.0 typecheck C:\APPS\nzila-automation\packages\reality-env
+@nzila/reality-env:typecheck: > tsc --noEmit
+@nzila/reality-env:typecheck: 
+@nzila/continuity-analysis:typecheck: 
+@nzila/continuity-analysis:typecheck: > @nzila/continuity-analysis@0.1.0 typecheck C:\APPS\nzila-automation\packages\continuity-analysis
+@nzila/continuity-analysis:typecheck: > tsc --noEmit
+@nzila/continuity-analysis:typecheck: 
+@nzila/zonga-control-plane:typecheck: 
+@nzila/zonga-control-plane:typecheck: > @nzila/zonga-control-plane@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-control-plane
+@nzila/zonga-control-plane:typecheck: > tsc --noEmit
+@nzila/zonga-control-plane:typecheck: 
+@nzila/oci-confidence:typecheck: 
+@nzila/oci-confidence:typecheck: > @nzila/oci-confidence@0.1.0 typecheck C:\APPS\nzila-automation\packages\oci-confidence
+@nzila/oci-confidence:typecheck: > tsc --noEmit
+@nzila/oci-confidence:typecheck: 
+@nzila/audit:typecheck: 
+@nzila/audit:typecheck: > @nzila/audit@0.1.0 typecheck C:\APPS\nzila-automation\packages\audit
+@nzila/audit:typecheck: > tsc --noEmit
+@nzila/audit:typecheck: 
+@nzila/governance-otel:typecheck: 
+@nzila/governance-otel:typecheck: > @nzila/governance-otel@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-otel
+@nzila/governance-otel:typecheck: > tsc --noEmit
+@nzila/governance-otel:typecheck: 
+@nzila/institutional-intelligence:typecheck: cache miss, executing b51fae435a9d2d3e
+@nzila/institutional-intelligence:typecheck: 
+@nzila/institutional-intelligence:typecheck: > @nzila/institutional-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\institutional-intelligence
+@nzila/institutional-intelligence:typecheck: > tsc --noEmit
+@nzila/institutional-intelligence:typecheck: 
+@nzila/governance-telemetry:typecheck: cache miss, executing 05ea8a1891213fe5
+@nzila/zonga-economics:typecheck: cache miss, executing cd3d7bd99ca7e895
+@nzila/platform-ai-contract:typecheck: cache miss, executing 36c4d1f210723b2a
+@nzila/policies:typecheck: cache miss, executing 8e76ab75c993c60a
+@nzila/clc-decision-intelligence:typecheck: cache miss, executing ade654fe9f3c1614
+@nzila/governance:typecheck: cache miss, executing 429af2856c52bd60
+@nzila/quebec-vocabulary:typecheck: cache miss, executing 889a6c6beabf629c
+@nzila/continuity-review:typecheck: cache miss, executing 2908359a0f2ce625
+@nzila/governance-telemetry:typecheck: 
+@nzila/governance-telemetry:typecheck: > @nzila/governance-telemetry@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance-telemetry
+@nzila/governance-telemetry:typecheck: > tsc --noEmit
+@nzila/governance-telemetry:typecheck: 
+@nzila/zonga-economics:typecheck: 
+@nzila/zonga-economics:typecheck: > @nzila/zonga-economics@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-economics
+@nzila/zonga-economics:typecheck: > tsc --noEmit
+@nzila/zonga-economics:typecheck: 
+@nzila/platform-ai-contract:typecheck: 
+@nzila/platform-ai-contract:typecheck: > @nzila/platform-ai-contract@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-ai-contract
+@nzila/platform-ai-contract:typecheck: > tsc --noEmit
+@nzila/platform-ai-contract:typecheck: 
+@nzila/policies:typecheck: 
+@nzila/policies:typecheck: > @nzila/policies@0.1.0 typecheck C:\APPS\nzila-automation\packages\policies
+@nzila/policies:typecheck: > tsc --noEmit
+@nzila/policies:typecheck: 
+@nzila/clc-decision-intelligence:typecheck: 
+@nzila/clc-decision-intelligence:typecheck: > @nzila/clc-decision-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\clc-decision-intelligence
+@nzila/clc-decision-intelligence:typecheck: > tsc --noEmit
+@nzila/clc-decision-intelligence:typecheck: 
+@nzila/governance:typecheck: 
+@nzila/governance:typecheck: > @nzila/governance@0.1.0 typecheck C:\APPS\nzila-automation\packages\governance
+@nzila/governance:typecheck: > tsc --noEmit
+@nzila/governance:typecheck: 
+@nzila/quebec-vocabulary:typecheck: 
+@nzila/quebec-vocabulary:typecheck: > @nzila/quebec-vocabulary@1.0.0 typecheck C:\APPS\nzila-automation\packages\quebec-vocabulary
+@nzila/quebec-vocabulary:typecheck: > tsc --noEmit
+@nzila/quebec-vocabulary:typecheck: 
+@nzila/continuity-review:typecheck: 
+@nzila/continuity-review:typecheck: > @nzila/continuity-review@0.1.0 typecheck C:\APPS\nzila-automation\packages\continuity-review
+@nzila/continuity-review:typecheck: > tsc --noEmit
+@nzila/continuity-review:typecheck: 
+@nzila/stabilization-signals:typecheck: cache miss, executing ccc4fe9ac5b1cb65
+@nzila/mobility-core:typecheck: cache miss, executing 20202fc6d0e51943
+@nzila/stabilization-signals:typecheck: 
+@nzila/stabilization-signals:typecheck: > @nzila/stabilization-signals@0.1.0 typecheck C:\APPS\nzila-automation\packages\stabilization-signals
+@nzila/stabilization-signals:typecheck: > tsc --noEmit
+@nzila/stabilization-signals:typecheck: 
+@nzila/mobility-core:typecheck: 
+@nzila/mobility-core:typecheck: > @nzila/mobility-core@0.0.1 typecheck C:\APPS\nzila-automation\packages\mobility-core
+@nzila/mobility-core:typecheck: > tsc --noEmit
+@nzila/mobility-core:typecheck: 
+@nzila/platform-environment:typecheck: cache miss, executing 2ed4e668d1255cae
+@nzila/attestation-visibility:typecheck: cache miss, executing d0c8c2f28786595f
+@nzila/organizational-cognition-core:typecheck: cache miss, executing 34462d378bc20cb1
+@nzila/finance-compliance:typecheck: cache miss, executing 7adfdb25bc4a364a
+@nzila/integrations-calendar:typecheck: cache miss, executing 0e8a7526fd2d06ac
+@nzila/platform-environment:typecheck: 
+@nzila/platform-environment:typecheck: > @nzila/platform-environment@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-environment
+@nzila/platform-environment:typecheck: > tsc --noEmit
+@nzila/platform-environment:typecheck: 
+@nzila/trustcore-core:typecheck: cache miss, executing e5346324ad35c8c0
+@nzila/security:typecheck: cache miss, executing 2014076eece24510
+@nzila/attestation-visibility:typecheck: 
+@nzila/attestation-visibility:typecheck: > @nzila/attestation-visibility@0.1.0 typecheck C:\APPS\nzila-automation\packages\attestation-visibility
+@nzila/attestation-visibility:typecheck: > tsc --noEmit
+@nzila/attestation-visibility:typecheck: 
+@nzila/fx:typecheck: cache miss, executing de4deca0f22f26f9
+@nzila/organizational-cognition-core:typecheck: 
+@nzila/organizational-cognition-core:typecheck: > @nzila/organizational-cognition-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\organizational-cognition-core
+@nzila/organizational-cognition-core:typecheck: > tsc --noEmit
+@nzila/organizational-cognition-core:typecheck: 
+@nzila/finance-compliance:typecheck: 
+@nzila/finance-compliance:typecheck: > @nzila/finance-compliance@0.1.0 typecheck C:\APPS\nzila-automation\packages\finance-compliance
+@nzila/finance-compliance:typecheck: > tsc --noEmit
+@nzila/finance-compliance:typecheck: 
+@nzila/integrations-calendar:typecheck: 
+@nzila/integrations-calendar:typecheck: > @nzila/integrations-calendar@0.1.0 typecheck C:\APPS\nzila-automation\packages\integrations-calendar
+@nzila/integrations-calendar:typecheck: > tsc --noEmit
+@nzila/integrations-calendar:typecheck: 
+@nzila/trustcore-core:typecheck: 
+@nzila/trustcore-core:typecheck: > @nzila/trustcore-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\trustcore-core
+@nzila/trustcore-core:typecheck: > tsc --noEmit
+@nzila/trustcore-core:typecheck: 
+@nzila/security:typecheck: 
+@nzila/security:typecheck: > @nzila/security@0.1.0 typecheck C:\APPS\nzila-automation\packages\security
+@nzila/security:typecheck: > tsc --noEmit
+@nzila/security:typecheck: 
+@nzila/schema-core:typecheck: cache miss, executing 4fbdf4ffd267101a
+@nzila/ai-control:typecheck: cache miss, executing ccdd32c5159f8271
+@nzila/fx:typecheck: 
+@nzila/fx:typecheck: > @nzila/fx@0.1.0 typecheck C:\APPS\nzila-automation\packages\fx
+@nzila/fx:typecheck: > tsc --noEmit
+@nzila/fx:typecheck: 
+@nzila/schema-core:typecheck: 
+@nzila/schema-core:typecheck: > @nzila/schema-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\schema-core
+@nzila/schema-core:typecheck: > tsc --noEmit
+@nzila/schema-core:typecheck: 
+@nzila/ai-control:typecheck: 
+@nzila/ai-control:typecheck: > @nzila/ai-control@0.1.0 typecheck C:\APPS\nzila-automation\packages\ai-control
+@nzila/ai-control:typecheck: > tsc --noEmit
+@nzila/ai-control:typecheck: 
+@nzila/zonga-intelligence:typecheck: cache miss, executing 73371cb0d570d5da
+@nzila/trustcore-contracts:typecheck: cache miss, executing e457737dadead5cb
+@nzila/decision-core:typecheck: cache miss, executing ae145ab243e9d25f
+@nzila/platform-ontology:typecheck: cache miss, executing 260f006b2f94997f
+@nzila/chaos:typecheck: cache miss, executing ab7e80b9eeb26928
+@nzila/healthcare-surveys:typecheck: cache miss, executing 02fe02d61f05cc75
+@nzila/zonga-intelligence:typecheck: 
+@nzila/zonga-intelligence:typecheck: > @nzila/zonga-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-intelligence
+@nzila/zonga-intelligence:typecheck: > tsc --noEmit
+@nzila/zonga-intelligence:typecheck: 
+@nzila/decision-core:typecheck: 
+@nzila/decision-core:typecheck: > @nzila/decision-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\decision-core
+@nzila/decision-core:typecheck: > tsc --noEmit
+@nzila/decision-core:typecheck: 
+@nzila/trustcore-contracts:typecheck: 
+@nzila/trustcore-contracts:typecheck: > @nzila/trustcore-contracts@0.1.0 typecheck C:\APPS\nzila-automation\packages\trustcore-contracts
+@nzila/trustcore-contracts:typecheck: > tsc --noEmit
+@nzila/trustcore-contracts:typecheck: 
+@nzila/consent-engine:typecheck: cache miss, executing 4ad1da1027128d04
+@nzila/platform-ontology:typecheck: 
+@nzila/platform-ontology:typecheck: > @nzila/platform-ontology@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-ontology
+@nzila/platform-ontology:typecheck: > tsc --noEmit
+@nzila/platform-ontology:typecheck: 
+@nzila/chaos:typecheck: 
+@nzila/chaos:typecheck: > @nzila/chaos@0.1.0 typecheck C:\APPS\nzila-automation\tooling\chaos
+@nzila/chaos:typecheck: > tsc --noEmit
+@nzila/chaos:typecheck: 
+@nzila/healthcare-surveys:typecheck: 
+@nzila/healthcare-surveys:typecheck: > @nzila/healthcare-surveys@0.1.0 typecheck C:\APPS\nzila-automation\packages\healthcare-surveys
+@nzila/healthcare-surveys:typecheck: > tsc --noEmit
+@nzila/healthcare-surveys:typecheck: 
+@nzila/consent-engine:typecheck: 
+@nzila/consent-engine:typecheck: > @nzila/consent-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\consent-engine
+@nzila/consent-engine:typecheck: > tsc --noEmit
+@nzila/consent-engine:typecheck: 
+@nzila/union-eyes-ui:typecheck: cache miss, executing 3ec52940c6a579a9
+@nzila/hq-domain:typecheck: cache miss, executing 0789a14766b19427
+@nzila/clinical-timeline:typecheck: cache miss, executing 0769625814a29507
+@nzila/union-eyes-ui:typecheck: 
+@nzila/union-eyes-ui:typecheck: > @nzila/union-eyes-ui@0.1.0 typecheck C:\APPS\nzila-automation\packages\union-eyes-ui
+@nzila/union-eyes-ui:typecheck: > tsc --noEmit
+@nzila/union-eyes-ui:typecheck: 
+@nzila/hq-domain:typecheck: 
+@nzila/hq-domain:typecheck: > @nzila/hq-domain@0.1.0 typecheck C:\APPS\nzila-automation\packages\hq-domain
+@nzila/hq-domain:typecheck: > tsc --noEmit
+@nzila/hq-domain:typecheck: 
+@nzila/clinical-timeline:typecheck: 
+@nzila/clinical-timeline:typecheck: > @nzila/clinical-timeline@0.1.0 typecheck C:\APPS\nzila-automation\packages\clinical-timeline
+@nzila/clinical-timeline:typecheck: > tsc --noEmit
+@nzila/clinical-timeline:typecheck: 
+@nzila/health-ui:typecheck: cache miss, executing a11f46626a7759c4
+@nzila/health-governance:typecheck: cache miss, executing 979f5abded2269fe
+@nzila/health-analytics:typecheck: cache miss, executing c77ea2b02d01c67e
+@nzila/ui:typecheck: cache miss, executing 1dd2c5959f3b2bea
+@nzila/health-ui:typecheck: 
+@nzila/health-ui:typecheck: > @nzila/health-ui@0.1.0 typecheck C:\APPS\nzila-automation\packages\health-ui
+@nzila/health-ui:typecheck: > tsc --noEmit
+@nzila/health-ui:typecheck: 
+@nzila/org:typecheck: cache miss, executing 74ed80a03bf4253e
+@nzila/health-governance:typecheck: 
+@nzila/health-governance:typecheck: > @nzila/health-governance@0.1.0 typecheck C:\APPS\nzila-automation\packages\health-governance
+@nzila/health-governance:typecheck: > tsc --noEmit
+@nzila/health-governance:typecheck: 
+@nzila/health-analytics:typecheck: 
+@nzila/health-analytics:typecheck: > @nzila/health-analytics@0.1.0 typecheck C:\APPS\nzila-automation\packages\health-analytics
+@nzila/health-analytics:typecheck: > tsc --noEmit
+@nzila/health-analytics:typecheck: 
+@nzila/patient-identity:typecheck: cache miss, executing fb6137c37d9d9a79
+@nzila/ui:typecheck: 
+@nzila/ui:typecheck: > @nzila/ui@0.1.0 typecheck C:\APPS\nzila-automation\packages\ui
+@nzila/ui:typecheck: > tsc --noEmit
+@nzila/ui:typecheck: 
+@nzila/org:typecheck: 
+@nzila/org:typecheck: > @nzila/org@0.1.0 typecheck C:\APPS\nzila-automation\packages\org
+@nzila/org:typecheck: > tsc --noEmit
+@nzila/org:typecheck: 
+@nzila/patient-identity:typecheck: 
+@nzila/patient-identity:typecheck: > @nzila/patient-identity@0.1.0 typecheck C:\APPS\nzila-automation\packages\patient-identity
+@nzila/patient-identity:typecheck: > tsc --noEmit
+@nzila/patient-identity:typecheck: 
+@nzila/data-lifecycle:typecheck: cache miss, executing 05f54e6b3288b843
+@nzila/health-connectors:typecheck: cache miss, executing 06b5e27790d59624
+@nzila/platform-pilot-metrics-types:typecheck: cache miss, executing 3b880e3e25a46a59
+@nzila/data-lifecycle:typecheck: 
+@nzila/data-lifecycle:typecheck: > @nzila/data-lifecycle@0.1.0 typecheck C:\APPS\nzila-automation\packages\data-lifecycle
+@nzila/data-lifecycle:typecheck: > tsc --noEmit
+@nzila/data-lifecycle:typecheck: 
+@nzila/health-connectors:typecheck: 
+@nzila/health-connectors:typecheck: > @nzila/health-connectors@0.1.0 typecheck C:\APPS\nzila-automation\packages\health-connectors
+@nzila/health-connectors:typecheck: > tsc --noEmit
+@nzila/health-connectors:typecheck: 
+@nzila/platform-pilot-metrics-types:typecheck: 
+@nzila/platform-pilot-metrics-types:typecheck: > @nzila/platform-pilot-metrics-types@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-pilot-metrics-types
+@nzila/platform-pilot-metrics-types:typecheck: > tsc --noEmit
+@nzila/platform-pilot-metrics-types:typecheck: 
+@nzila/comms-sms:typecheck: cache miss, executing b21bb2e199a36654
+@nzila/webhooks:typecheck: cache miss, executing f98347590fc64c91
+@nzila/chatops-teams:typecheck: cache miss, executing 9cf275dc4f2c41af
+@nzila/comms-sms:typecheck: 
+@nzila/comms-sms:typecheck: > @nzila/comms-sms@0.1.0 typecheck C:\APPS\nzila-automation\packages\comms-sms
+@nzila/comms-sms:typecheck: > tsc --noEmit
+@nzila/comms-sms:typecheck: 
+@nzila/chatops-teams:typecheck: 
+@nzila/chatops-teams:typecheck: > @nzila/chatops-teams@0.1.0 typecheck C:\APPS\nzila-automation\packages\chatops-teams
+@nzila/chatops-teams:typecheck: > tsc --noEmit
+@nzila/chatops-teams:typecheck: 
+@nzila/integrations-db:typecheck: cache miss, executing 53b3ced1e2d05bb4
+@nzila/webhooks:typecheck: 
+@nzila/webhooks:typecheck: > @nzila/webhooks@0.1.0 typecheck C:\APPS\nzila-automation\packages\webhooks
+@nzila/webhooks:typecheck: > tsc --noEmit
+@nzila/webhooks:typecheck: 
+@nzila/comms-email:typecheck: cache miss, executing 09ff74a29e6615cf
+@nzila/comms-push:typecheck: cache miss, executing 730468b67971b8bd
+@nzila/chatops-slack:typecheck: cache miss, executing d93b879ecde06462
+@nzila/comms-email:typecheck: 
+@nzila/comms-email:typecheck: > @nzila/comms-email@0.1.0 typecheck C:\APPS\nzila-automation\packages\comms-email
+@nzila/comms-email:typecheck: > tsc --noEmit
+@nzila/comms-email:typecheck: 
+@nzila/integrations-db:typecheck: 
+@nzila/integrations-db:typecheck: > @nzila/integrations-db@0.1.0 typecheck C:\APPS\nzila-automation\packages\integrations-db
+@nzila/integrations-db:typecheck: > tsc --noEmit
+@nzila/integrations-db:typecheck: 
+@nzila/comms-push:typecheck: 
+@nzila/comms-push:typecheck: > @nzila/comms-push@0.1.0 typecheck C:\APPS\nzila-automation\packages\comms-push
+@nzila/comms-push:typecheck: > tsc --noEmit
+@nzila/comms-push:typecheck: 
+@nzila/crm-hubspot:typecheck: cache miss, executing a0731cd62b4fdce7
+@nzila/platform-event-fabric:typecheck: cache miss, executing 8a4cf267b951b93d
+@nzila/chatops-slack:typecheck: 
+@nzila/chatops-slack:typecheck: > @nzila/chatops-slack@0.1.0 typecheck C:\APPS\nzila-automation\packages\chatops-slack
+@nzila/chatops-slack:typecheck: > tsc --noEmit
+@nzila/chatops-slack:typecheck: 
+@nzila/crm-hubspot:typecheck: 
+@nzila/crm-hubspot:typecheck: > @nzila/crm-hubspot@0.1.0 typecheck C:\APPS\nzila-automation\packages\crm-hubspot
+@nzila/crm-hubspot:typecheck: > tsc --noEmit
+@nzila/crm-hubspot:typecheck: 
+@nzila/platform-event-fabric:typecheck: 
+@nzila/platform-event-fabric:typecheck: > @nzila/platform-event-fabric@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-event-fabric
+@nzila/platform-event-fabric:typecheck: > tsc --noEmit
+@nzila/platform-event-fabric:typecheck: 
+@nzila/platform-rum:typecheck: cache miss, executing 3e4ae6cba5cb6403
+@nzila/platform-feature-flags:typecheck: cache miss, executing 926778cf9f23cf45
+@nzila/platform-rum:typecheck: 
+@nzila/platform-rum:typecheck: > @nzila/platform-rum@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-rum
+@nzila/platform-rum:typecheck: > tsc --noEmit
+@nzila/platform-rum:typecheck: 
+@nzila/platform-feature-flags:typecheck: 
+@nzila/platform-feature-flags:typecheck: > @nzila/platform-feature-flags@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-feature-flags
+@nzila/platform-feature-flags:typecheck: > tsc --noEmit
+@nzila/platform-feature-flags:typecheck: 
+financial-service:typecheck: cache miss, executing c995ff444ca59c8d
+@nzila/enforcement:typecheck: cache miss, executing f12a37eb18e1fde1
+@nzila/cfo-intelligence:typecheck: cache miss, executing 0e4cb01977ca6908
+financial-service:typecheck: 
+financial-service:typecheck: > financial-service@1.0.0 typecheck C:\APPS\nzila-automation\apps\union-eyes\services\financial-service
+financial-service:typecheck: > tsc --noEmit
+financial-service:typecheck: 
+@nzila/events:typecheck: cache miss, executing e0d60f9cda92da3b
+@nzila/enforcement:typecheck: 
+@nzila/enforcement:typecheck: > @nzila/enforcement@0.1.0 typecheck C:\APPS\nzila-automation\packages\enforcement
+@nzila/enforcement:typecheck: > tsc --noEmit
+@nzila/enforcement:typecheck: 
+@nzila/cfo-intelligence:typecheck: 
+@nzila/cfo-intelligence:typecheck: > @nzila/cfo-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\cfo-intelligence
+@nzila/cfo-intelligence:typecheck: > tsc --noEmit
+@nzila/cfo-intelligence:typecheck: 
+@nzila/platform-entity-graph:typecheck: cache miss, executing dbeb07a59c3b342f
+@nzila/events:typecheck: 
+@nzila/events:typecheck: > @nzila/events@0.1.0 typecheck C:\APPS\nzila-automation\packages\events
+@nzila/events:typecheck: > tsc --noEmit
+@nzila/events:typecheck: 
+@nzila/finance-ledger:typecheck: cache miss, executing a59e5793d06a1e0e
+@nzila/finance-governance:typecheck: cache miss, executing ab701ca8b71bf2d5
+@nzila/platform-entity-graph:typecheck: 
+@nzila/platform-entity-graph:typecheck: > @nzila/platform-entity-graph@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-entity-graph
+@nzila/platform-entity-graph:typecheck: > tsc --noEmit
+@nzila/platform-entity-graph:typecheck: 
+@nzila/integrations-hubspot:typecheck: cache miss, executing 69ac9ecac3a5aa67
+@nzila/finance-ledger:typecheck: 
+@nzila/finance-ledger:typecheck: > @nzila/finance-ledger@0.1.0 typecheck C:\APPS\nzila-automation\packages\finance-ledger
+@nzila/finance-ledger:typecheck: > tsc --noEmit
+@nzila/finance-ledger:typecheck: 
+@nzila/finance-governance:typecheck: 
+@nzila/finance-governance:typecheck: > @nzila/finance-governance@0.1.0 typecheck C:\APPS\nzila-automation\packages\finance-governance
+@nzila/finance-governance:typecheck: > tsc --noEmit
+@nzila/finance-governance:typecheck: 
+@nzila/integrations-whatsapp:typecheck: cache miss, executing f26fabd6bd68592a
+@nzila/integrations-m365:typecheck: cache miss, executing 73dc9ecd11249be7
+@nzila/mobility-programs:typecheck: cache miss, executing b2df31d407500e71
+@nzila/integrations-hubspot:typecheck: 
+@nzila/integrations-hubspot:typecheck: > @nzila/integrations-hubspot@0.0.1 typecheck C:\APPS\nzila-automation\packages\integrations-hubspot
+@nzila/integrations-hubspot:typecheck: > tsc --noEmit
+@nzila/integrations-hubspot:typecheck: 
+@nzila/mobility-ai:typecheck: cache miss, executing a92411df3303a3aa
+@nzila/integrations-whatsapp:typecheck: 
+@nzila/integrations-whatsapp:typecheck: > @nzila/integrations-whatsapp@0.0.1 typecheck C:\APPS\nzila-automation\packages\integrations-whatsapp
+@nzila/integrations-whatsapp:typecheck: > tsc --noEmit
+@nzila/integrations-whatsapp:typecheck: 
+@nzila/mobility-programs:typecheck: 
+@nzila/mobility-programs:typecheck: > @nzila/mobility-programs@0.0.1 typecheck C:\APPS\nzila-automation\packages\mobility-programs
+@nzila/mobility-programs:typecheck: > tsc --noEmit
+@nzila/mobility-programs:typecheck: 
+@nzila/integrations-m365:typecheck: 
+@nzila/integrations-m365:typecheck: > @nzila/integrations-m365@0.0.1 typecheck C:\APPS\nzila-automation\packages\integrations-m365
+@nzila/integrations-m365:typecheck: > tsc --noEmit
+@nzila/integrations-m365:typecheck: 
+@nzila/mobility-ai:typecheck: 
+@nzila/mobility-ai:typecheck: > @nzila/mobility-ai@0.0.1 typecheck C:\APPS\nzila-automation\packages\mobility-ai
+@nzila/mobility-ai:typecheck: > tsc --noEmit
+@nzila/mobility-ai:typecheck: 
+@nzila/mobility-compliance:typecheck: cache miss, executing 830bbc3d1df7b5d6
+@nzila/mobility-compliance:typecheck: 
+@nzila/mobility-compliance:typecheck: > @nzila/mobility-compliance@0.0.1 typecheck C:\APPS\nzila-automation\packages\mobility-compliance
+@nzila/mobility-compliance:typecheck: > tsc --noEmit
+@nzila/mobility-compliance:typecheck: 
+@nzila/platform-contracts:typecheck: cache miss, executing b13033c01541f97f
+@nzila/zonga-events:typecheck: cache miss, executing 126326576155ed22
+@nzila/platform-contracts:typecheck: 
+@nzila/platform-contracts:typecheck: > @nzila/platform-contracts@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-contracts
+@nzila/platform-contracts:typecheck: > tsc --noEmit
+@nzila/platform-contracts:typecheck: 
+@nzila/zonga-events:typecheck: 
+@nzila/zonga-events:typecheck: > @nzila/zonga-events@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-events
+@nzila/zonga-events:typecheck: > tsc --noEmit
+@nzila/zonga-events:typecheck: 
+@nzila/zonga-rights:typecheck: cache miss, executing 5abe050dcd2f92f3
+@nzila/clc-executive-intelligence:typecheck: cache miss, executing 756dbd029206e82d
+@nzila/platform-integrations:typecheck: cache miss, executing f3ac1831fa0c4dbc
+@nzila/trustcore-trustops:typecheck: cache miss, executing d854e3f5c8f8f6de
+@nzila/finance-identity:typecheck: cache miss, executing 9a892c16e30e7197
+@nzila/zonga-rights:typecheck: 
+@nzila/zonga-rights:typecheck: > @nzila/zonga-rights@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-rights
+@nzila/zonga-rights:typecheck: > tsc --noEmit
+@nzila/zonga-rights:typecheck: 
+@nzila/commerce-core:typecheck: cache miss, executing 360f12293b1ff7aa
+@nzila/clc-executive-intelligence:typecheck: 
+@nzila/clc-executive-intelligence:typecheck: > @nzila/clc-executive-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\clc-executive-intelligence
+@nzila/clc-executive-intelligence:typecheck: > tsc --noEmit
+@nzila/clc-executive-intelligence:typecheck: 
+@nzila/platform-integrations:typecheck: 
+@nzila/platform-integrations:typecheck: > @nzila/platform-integrations@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-integrations
+@nzila/platform-integrations:typecheck: > tsc --noEmit
+@nzila/platform-integrations:typecheck: 
+@nzila/finance-identity:typecheck: 
+@nzila/finance-identity:typecheck: > @nzila/finance-identity@0.1.0 typecheck C:\APPS\nzila-automation\packages\finance-identity
+@nzila/finance-identity:typecheck: > tsc --noEmit
+@nzila/finance-identity:typecheck: 
+@nzila/trustcore-trustops:typecheck: 
+@nzila/trustcore-trustops:typecheck: > @nzila/trustcore-trustops@0.1.0 typecheck C:\APPS\nzila-automation\packages\trustcore-trustops
+@nzila/trustcore-trustops:typecheck: > tsc --noEmit
+@nzila/trustcore-trustops:typecheck: 
+@nzila/trade-core:typecheck: cache miss, executing 414753e1a2894a7e
+@nzila/commerce-core:typecheck: 
+@nzila/commerce-core:typecheck: > @nzila/commerce-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-core
+@nzila/commerce-core:typecheck: > tsc --noEmit
+@nzila/commerce-core:typecheck: 
+@nzila/trade-core:typecheck: 
+@nzila/trade-core:typecheck: > @nzila/trade-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\trade-core
+@nzila/trade-core:typecheck: > tsc --noEmit
+@nzila/trade-core:typecheck: 
+@nzila/platform-decision-graph:typecheck: cache miss, executing cbdc93fe8896aba3
+@nzila/platform-decision-graph:typecheck: 
+@nzila/platform-decision-graph:typecheck: > @nzila/platform-decision-graph@0.0.1 typecheck C:\APPS\nzila-automation\packages\platform-decision-graph
+@nzila/platform-decision-graph:typecheck: > tsc --noEmit
+@nzila/platform-decision-graph:typecheck: 
+@nzila/platform-data-fabric:typecheck: cache miss, executing a558768da71a3805
+@nzila/platform-semantic-search:typecheck: cache miss, executing f75ab996c0d5530b
+@nzila/finance-analytics:typecheck: cache miss, executing 336de7d3054e9ae3
+@nzila/mobility-family:typecheck: cache miss, executing 9931cbc324079ce1
+@nzila/platform-data-fabric:typecheck: 
+@nzila/platform-data-fabric:typecheck: > @nzila/platform-data-fabric@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-data-fabric
+@nzila/platform-data-fabric:typecheck: > tsc --noEmit
+@nzila/platform-data-fabric:typecheck: 
+@nzila/platform-notifications:typecheck: cache miss, executing c758102126fb1be7
+@nzila/platform-semantic-search:typecheck: 
+@nzila/platform-semantic-search:typecheck: > @nzila/platform-semantic-search@0.0.1 typecheck C:\APPS\nzila-automation\packages\platform-semantic-search
+@nzila/platform-semantic-search:typecheck: > tsc --noEmit
+@nzila/platform-semantic-search:typecheck: 
+@nzila/finance-analytics:typecheck: 
+@nzila/finance-analytics:typecheck: > @nzila/finance-analytics@0.1.0 typecheck C:\APPS\nzila-automation\packages\finance-analytics
+@nzila/finance-analytics:typecheck: > tsc --noEmit
+@nzila/finance-analytics:typecheck: 
+@nzila/mobility-family:typecheck: 
+@nzila/mobility-family:typecheck: > @nzila/mobility-family@0.1.0 typecheck C:\APPS\nzila-automation\packages\mobility-family
+@nzila/mobility-family:typecheck: > tsc --noEmit
+@nzila/mobility-family:typecheck: 
+@nzila/platform-notifications:typecheck: 
+@nzila/platform-notifications:typecheck: > @nzila/platform-notifications@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-notifications
+@nzila/platform-notifications:typecheck: > tsc --noEmit
+@nzila/platform-notifications:typecheck: 
+@nzila/platform-billing:typecheck: cache miss, executing 6a3e9606bc2c6d16
+@nzila/zonga-payments:typecheck: cache miss, executing 40bb8f3f3517a03f
+@nzila/platform-integrations-connectors:typecheck: cache miss, executing 8ec66fe53c2d1357
+@nzila/platform-billing:typecheck: 
+@nzila/platform-billing:typecheck: > @nzila/platform-billing@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-billing
+@nzila/platform-billing:typecheck: > tsc --noEmit
+@nzila/platform-billing:typecheck: 
+@nzila/zonga-payments:typecheck: 
+@nzila/zonga-payments:typecheck: > @nzila/zonga-payments@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-payments
+@nzila/zonga-payments:typecheck: > tsc --noEmit
+@nzila/zonga-payments:typecheck: 
+@nzila/platform-integrations-connectors:typecheck: 
+@nzila/platform-integrations-connectors:typecheck: > @nzila/platform-integrations-connectors@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-integrations-connectors
+@nzila/platform-integrations-connectors:typecheck: > tsc --noEmit
+@nzila/platform-integrations-connectors:typecheck: 
+@nzila/trustops-intelligence:typecheck: cache miss, executing 6641ba7deddbdaf7
+@nzila/trade-cars:typecheck: cache miss, executing 51cf9f603c14ca59
+@nzila/pricing-engine:typecheck: cache miss, executing f3467c1fce0d7674
+@nzila/organizational-governance-graph:typecheck: cache miss, executing b70e70e3369c0791
+@nzila/trustops-intelligence:typecheck: 
+@nzila/trustops-intelligence:typecheck: > @nzila/trustops-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\trustops-intelligence
+@nzila/trustops-intelligence:typecheck: > tsc --noEmit
+@nzila/trustops-intelligence:typecheck: 
+@nzila/trade-cars:typecheck: 
+@nzila/trade-cars:typecheck: > @nzila/trade-cars@0.1.0 typecheck C:\APPS\nzila-automation\packages\trade-cars
+@nzila/trade-cars:typecheck: > tsc --noEmit
+@nzila/trade-cars:typecheck: 
+@nzila/pricing-engine:typecheck: 
+@nzila/pricing-engine:typecheck: > @nzila/pricing-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\pricing-engine
+@nzila/pricing-engine:typecheck: > tsc --noEmit
+@nzila/pricing-engine:typecheck: 
+@nzila/platform-context-orchestrator:typecheck: cache miss, executing 175fc2aff3d3fb7e
+@nzila/platform-revenue:typecheck: cache miss, executing 46581b4bddc188fc
+@nzila/platform-governed-ai:typecheck: cache miss, executing 1a756d71b83d82c9
+@nzila/organizational-governance-graph:typecheck: 
+@nzila/organizational-governance-graph:typecheck: > @nzila/organizational-governance-graph@0.1.0 typecheck C:\APPS\nzila-automation\packages\organizational-governance-graph
+@nzila/organizational-governance-graph:typecheck: > tsc --noEmit
+@nzila/organizational-governance-graph:typecheck: 
+@nzila/platform-revenue:typecheck: 
+@nzila/platform-revenue:typecheck: > @nzila/platform-revenue@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-revenue
+@nzila/platform-revenue:typecheck: > tsc --noEmit
+@nzila/platform-revenue:typecheck: 
+@nzila/platform-reasoning-engine:typecheck: cache miss, executing c734f2d819472a3b
+@nzila/platform-context-orchestrator:typecheck: 
+@nzila/platform-context-orchestrator:typecheck: > @nzila/platform-context-orchestrator@0.0.1 typecheck C:\APPS\nzila-automation\packages\platform-context-orchestrator
+@nzila/platform-context-orchestrator:typecheck: > tsc --noEmit
+@nzila/platform-context-orchestrator:typecheck: 
+@nzila/platform-governed-ai:typecheck: 
+@nzila/platform-governed-ai:typecheck: > @nzila/platform-governed-ai@0.0.1 typecheck C:\APPS\nzila-automation\packages\platform-governed-ai
+@nzila/platform-governed-ai:typecheck: > tsc --noEmit
+@nzila/platform-governed-ai:typecheck: 
+@nzila/platform-reasoning-engine:typecheck: 
+@nzila/platform-reasoning-engine:typecheck: > @nzila/platform-reasoning-engine@0.0.1 typecheck C:\APPS\nzila-automation\packages\platform-reasoning-engine
+@nzila/platform-reasoning-engine:typecheck: > tsc --noEmit
+@nzila/platform-reasoning-engine:typecheck: 
+@nzila/db:typecheck: cache miss, executing 8607af1d9cd418b0
+@nzila/platform-ops:typecheck: cache miss, executing 3b0258200145619b
+@nzila/db:typecheck: 
+@nzila/db:typecheck: > @nzila/db@0.1.0 typecheck C:\APPS\nzila-automation\packages\db
+@nzila/db:typecheck: > tsc --noEmit
+@nzila/db:typecheck: 
+@nzila/platform-auth:typecheck: cache miss, executing c085974c407ac6ab
+@nzila/platform-ops:typecheck: 
+@nzila/platform-ops:typecheck: > @nzila/platform-ops@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-ops
+@nzila/platform-ops:typecheck: > tsc --noEmit
+@nzila/platform-ops:typecheck: 
+@nzila/platform-auth:typecheck: 
+@nzila/platform-auth:typecheck: > @nzila/platform-auth@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-auth
+@nzila/platform-auth:typecheck: > tsc --noEmit
+@nzila/platform-auth:typecheck: 
+@nzila/platform-pilot-metrics:typecheck: cache miss, executing 0fe03c4f5a0716b8
+@nzila/platform-export:typecheck: cache miss, executing 902cb2f952954dcf
+@nzila/platform-export:typecheck: 
+@nzila/platform-export:typecheck: > @nzila/platform-export@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-export
+@nzila/platform-export:typecheck: > tsc --noEmit
+@nzila/platform-export:typecheck: 
+@nzila/platform-pilot-metrics:typecheck: 
+@nzila/platform-pilot-metrics:typecheck: > @nzila/platform-pilot-metrics@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-pilot-metrics
+@nzila/platform-pilot-metrics:typecheck: > tsc --noEmit
+@nzila/platform-pilot-metrics:typecheck: 
+@nzila/platform-performance:typecheck: cache miss, executing 4384f6485005fd85
+@nzila/platform-isolation:typecheck: cache miss, executing 955c735f85c99afa
+@nzila/platform-deploy:typecheck: cache miss, executing 4d5dc2b65d0ce9d4
+@nzila/qbo:typecheck: cache miss, executing 775620de724e47d5
+@nzila/platform-performance:typecheck: 
+@nzila/platform-performance:typecheck: > @nzila/platform-performance@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-performance
+@nzila/platform-performance:typecheck: > tsc --noEmit
+@nzila/platform-performance:typecheck: 
+@nzila/platform-isolation:typecheck: 
+@nzila/platform-isolation:typecheck: > @nzila/platform-isolation@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-isolation
+@nzila/platform-isolation:typecheck: > tsc --noEmit
+@nzila/platform-isolation:typecheck: 
+@nzila/platform-deploy:typecheck: 
+@nzila/platform-deploy:typecheck: > @nzila/platform-deploy@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-deploy
+@nzila/platform-deploy:typecheck: > tsc --noEmit
+@nzila/platform-deploy:typecheck: 
+@nzila/commerce-db:typecheck: cache miss, executing 4f1e60297ff6e051
+@nzila/qbo:typecheck: 
+@nzila/qbo:typecheck: > @nzila/qbo@0.1.0 typecheck C:\APPS\nzila-automation\packages\qbo
+@nzila/qbo:typecheck: > tsc --noEmit
+@nzila/qbo:typecheck: 
+@nzila/platform-cost:typecheck: cache miss, executing ea626491bc9098d7
+@nzila/trade-db:typecheck: cache miss, executing 55d125c28f7d553b
+@nzila/commerce-db:typecheck: 
+@nzila/commerce-db:typecheck: > @nzila/commerce-db@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-db
+@nzila/commerce-db:typecheck: > tsc --noEmit
+@nzila/commerce-db:typecheck: 
+@nzila/platform-proof:typecheck: cache miss, executing 6590ab4d85e66ab5
+@nzila/ml-sdk:typecheck: cache miss, executing de87411d10320b1b
+@nzila/platform-metrics:typecheck: cache miss, executing fd9d25161a8ef507
+@nzila/platform-shell:typecheck: cache miss, executing 03a25c8a7ada065d
+@nzila/platform-proof:typecheck: 
+@nzila/platform-proof:typecheck: > @nzila/platform-proof@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-proof
+@nzila/platform-proof:typecheck: > tsc --noEmit
+@nzila/platform-proof:typecheck: 
+@nzila/trade-db:typecheck: 
+@nzila/trade-db:typecheck: > @nzila/trade-db@0.1.0 typecheck C:\APPS\nzila-automation\packages\trade-db
+@nzila/trade-db:typecheck: > tsc --noEmit
+@nzila/trade-db:typecheck: 
+@nzila/platform-cost:typecheck: 
+@nzila/platform-cost:typecheck: > @nzila/platform-cost@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-cost
+@nzila/platform-cost:typecheck: > tsc --noEmit
+@nzila/platform-cost:typecheck: 
+@nzila/ml-sdk:typecheck: 
+@nzila/ml-sdk:typecheck: > @nzila/ml-sdk@0.1.0 typecheck C:\APPS\nzila-automation\packages\ml-sdk
+@nzila/ml-sdk:typecheck: > tsc --noEmit
+@nzila/ml-sdk:typecheck: 
+@nzila/os-core:typecheck: cache miss, executing b7982b75257ecb7b
+@nzila/integrations-runtime:typecheck: cache miss, executing 1ff878a1e7e43ddf
+@nzila/platform-metrics:typecheck: 
+@nzila/platform-metrics:typecheck: > @nzila/platform-metrics@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-metrics
+@nzila/platform-metrics:typecheck: > tsc --noEmit
+@nzila/platform-metrics:typecheck: 
+@nzila/platform-shell:typecheck: 
+@nzila/platform-shell:typecheck: > @nzila/platform-shell@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-shell
+@nzila/platform-shell:typecheck: > tsc --noEmit
+@nzila/platform-shell:typecheck: 
+@nzila/integrations-runtime:typecheck: 
+@nzila/integrations-runtime:typecheck: > @nzila/integrations-runtime@0.1.0 typecheck C:\APPS\nzila-automation\packages\integrations-runtime
+@nzila/integrations-runtime:typecheck: > tsc --noEmit
+@nzila/integrations-runtime:typecheck: 
+@nzila/os-core:typecheck: 
+@nzila/os-core:typecheck: > @nzila/os-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\os-core
+@nzila/os-core:typecheck: > tsc --noEmit
+@nzila/os-core:typecheck: 
+@nzila/trade-adapters:typecheck: cache miss, executing 37124f70a09266a0
+@nzila/trade-adapters:typecheck: 
+@nzila/trade-adapters:typecheck: > @nzila/trade-adapters@0.1.0 typecheck C:\APPS\nzila-automation\packages\trade-adapters
+@nzila/trade-adapters:typecheck: > tsc --noEmit
+@nzila/trade-adapters:typecheck: 
+@nzila/test-scaffold-gp:typecheck: cache miss, executing ad58b1ca0db566d3
+@nzila/test-scaffold-gp:typecheck: 
+@nzila/test-scaffold-gp:typecheck: > @nzila/test-scaffold-gp@0.1.0 typecheck C:\APPS\nzila-automation\apps\test-scaffold-gp
+@nzila/test-scaffold-gp:typecheck: > tsc --noEmit
+@nzila/test-scaffold-gp:typecheck: 
+@nzila/nar:typecheck: cache miss, executing e418cd1007290071
+@nzila/platform-events:typecheck: cache miss, executing 386a3d234180052d
+@nzila/ml-core:typecheck: cache miss, executing 75ef3fcc943597c1
+@nzila/veridian-admin:typecheck: cache miss, executing 58a4a1a6d497c25e
+@nzila/pipeline-alerting:typecheck: cache miss, executing 50e5d69ca272864d
+@nzila/nar:typecheck: 
+@nzila/nar:typecheck: > @nzila/nar@0.1.0 typecheck C:\APPS\nzila-automation\packages\nar
+@nzila/nar:typecheck: > tsc --noEmit
+@nzila/nar:typecheck: 
+@nzila/platform-events:typecheck: 
+@nzila/platform-events:typecheck: > @nzila/platform-events@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-events
+@nzila/platform-events:typecheck: > tsc --noEmit
+@nzila/platform-events:typecheck: 
+@nzila/ml-core:typecheck: 
+@nzila/ml-core:typecheck: > @nzila/ml-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\ml-core
+@nzila/ml-core:typecheck: > tsc --noEmit
+@nzila/ml-core:typecheck: 
+@nzila/veridian-admin:typecheck: 
+@nzila/veridian-admin:typecheck: > @nzila/veridian-admin@0.1.0 typecheck C:\APPS\nzila-automation\apps\veridian-admin
+@nzila/veridian-admin:typecheck: > tsc --noEmit
+@nzila/veridian-admin:typecheck: 
+@nzila/pipeline-alerting:typecheck: 
+@nzila/pipeline-alerting:typecheck: > @nzila/pipeline-alerting@0.1.0 typecheck C:\APPS\nzila-automation\packages\pipeline-alerting
+@nzila/pipeline-alerting:typecheck: > tsc --noEmit
+@nzila/pipeline-alerting:typecheck: 
+@nzila/otel-core:typecheck: cache miss, executing 4a917c3a19ad1b81
+@nzila/otel-core:typecheck: 
+@nzila/otel-core:typecheck: > @nzila/otel-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\otel-core
+@nzila/otel-core:typecheck: > tsc --noEmit
+@nzila/otel-core:typecheck: 
+@nzila/veridian-care:typecheck: cache miss, executing 5836a5678d8e3cd2
+@nzila/veridian-care:typecheck: 
+@nzila/veridian-care:typecheck: > @nzila/veridian-care@0.1.0 typecheck C:\APPS\nzila-automation\apps\veridian-care
+@nzila/veridian-care:typecheck: > tsc --noEmit
+@nzila/veridian-care:typecheck: 
+@nzila/veridian-site:typecheck: cache miss, executing a3dc2f99c98a74c9
+@nzila/veridian-site:typecheck: 
+@nzila/veridian-site:typecheck: > @nzila/veridian-site@0.1.0 typecheck C:\APPS\nzila-automation\apps\veridian-site
+@nzila/veridian-site:typecheck: > tsc --noEmit
+@nzila/veridian-site:typecheck: 
+@nzila/union-eyes-demo:typecheck: cache miss, executing 51909e11fbfcccbc
+@nzila/union-eyes-demo:typecheck: 
+@nzila/union-eyes-demo:typecheck: > @nzila/union-eyes-demo@0.1.0 typecheck C:\APPS\nzila-automation\apps\union-eyes-demo
+@nzila/union-eyes-demo:typecheck: > tsc --noEmit
+@nzila/union-eyes-demo:typecheck: 
+@nzila/tax:typecheck: cache miss, executing da16e2f0007723c6
+@nzila/finops:typecheck: cache miss, executing 5445046b16888047
+@nzila/finops:typecheck: 
+@nzila/finops:typecheck: > @nzila/finops@0.1.0 typecheck C:\APPS\nzila-automation\packages\finops
+@nzila/finops:typecheck: > tsc --noEmit
+@nzila/finops:typecheck: 
+@nzila/tax:typecheck: 
+@nzila/tax:typecheck: > @nzila/tax@0.1.0 typecheck C:\APPS\nzila-automation\packages\tax
+@nzila/tax:typecheck: > tsc --noEmit
+@nzila/tax:typecheck: 
+@nzila/secrets:typecheck: cache miss, executing 3d8feb6ba0b58ee7
+@nzila/payments-stripe:typecheck: cache miss, executing c428523289643ba0
+@nzila/secrets:typecheck: 
+@nzila/secrets:typecheck: > @nzila/secrets@0.1.0 typecheck C:\APPS\nzila-automation\packages\secrets
+@nzila/secrets:typecheck: > tsc --noEmit
+@nzila/secrets:typecheck: 
+@nzila/ai-registry:typecheck: cache miss, executing 99087123f333c89b
+@nzila/payments-stripe:typecheck: 
+@nzila/payments-stripe:typecheck: > @nzila/payments-stripe@0.1.0 typecheck C:\APPS\nzila-automation\packages\payments-stripe
+@nzila/payments-stripe:typecheck: > tsc --noEmit
+@nzila/payments-stripe:typecheck: 
+@nzila/ai-registry:typecheck: 
+@nzila/ai-registry:typecheck: > @nzila/ai-registry@0.1.0 typecheck C:\APPS\nzila-automation\packages\ai-registry
+@nzila/ai-registry:typecheck: > tsc --noEmit
+@nzila/ai-registry:typecheck: 
+@nzila/maestria:typecheck: cache miss, executing 22bfb0384ee410df
+@nzila/maestria:typecheck: 
+@nzila/maestria:typecheck: > @nzila/maestria@0.1.0 typecheck C:\APPS\nzila-automation\apps\maestria
+@nzila/maestria:typecheck: > tsc --noEmit
+@nzila/maestria:typecheck: 
+@nzila/trustcore:typecheck: cache miss, executing 57d5907e344eef78
+@nzila/nzila-hq:typecheck: cache miss, executing 9fb8e8376cdd0d23
+@nzila/trustcore:typecheck: 
+@nzila/trustcore:typecheck: > @nzila/trustcore@0.1.0 typecheck C:\APPS\nzila-automation\apps\trustcore
+@nzila/trustcore:typecheck: > tsc --noEmit
+@nzila/trustcore:typecheck: 
+@nzila/weekone:typecheck: cache miss, executing fe2235ac932a7ac8
+@nzila/nzila-hq:typecheck: 
+@nzila/nzila-hq:typecheck: > @nzila/nzila-hq@0.1.0 typecheck C:\APPS\nzila-automation\apps\nzila-hq
+@nzila/nzila-hq:typecheck: > tsc --noEmit
+@nzila/nzila-hq:typecheck: 
+@nzila/tools-runtime:typecheck: cache miss, executing 2e6bd0a865464f8b
+@nzila/weekone:typecheck: 
+@nzila/weekone:typecheck: > @nzila/weekone@0.1.0 typecheck C:\APPS\nzila-automation\apps\weekone
+@nzila/weekone:typecheck: > tsc --noEmit
+@nzila/weekone:typecheck: 
+@nzila/onboarding-core:typecheck: cache miss, executing 6e0014bd275b59ec
+@nzila/fsm-core:typecheck: cache miss, executing b2b189068d5df43e
+@nzila/tools-runtime:typecheck: 
+@nzila/tools-runtime:typecheck: > @nzila/tools-runtime@0.1.0 typecheck C:\APPS\nzila-automation\packages\tools-runtime
+@nzila/tools-runtime:typecheck: > tsc --noEmit
+@nzila/tools-runtime:typecheck: 
+@nzila/onboarding-core:typecheck: 
+@nzila/onboarding-core:typecheck: > @nzila/onboarding-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\onboarding-core
+@nzila/onboarding-core:typecheck: > tsc --noEmit
+@nzila/onboarding-core:typecheck: 
+@nzila/fsm-core:typecheck: 
+@nzila/fsm-core:typecheck: > @nzila/fsm-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\fsm-core
+@nzila/fsm-core:typecheck: > tsc --noEmit
+@nzila/fsm-core:typecheck: 
+@nzila/ue-assistant:typecheck: cache miss, executing 09c911db7474b218
+@nzila/ue-assistant:typecheck: 
+@nzila/ue-assistant:typecheck: > @nzila/ue-assistant@0.1.0 typecheck C:\APPS\nzila-automation\packages\ue-assistant
+@nzila/ue-assistant:typecheck: > tsc --noEmit
+@nzila/ue-assistant:typecheck: 
+@nzila/ingestion-core:typecheck: cache miss, executing dbf63d8839a130ba
+@nzila/ingestion-core:typecheck: 
+@nzila/ingestion-core:typecheck: > @nzila/ingestion-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\ingestion-core
+@nzila/ingestion-core:typecheck: > tsc --noEmit
+@nzila/ingestion-core:typecheck: 
+@nzila/platform-integrations-control-plane:typecheck: cache miss, executing 2e0f64068ff15b68
+@nzila/platform-integrations-control-plane:typecheck: 
+@nzila/platform-integrations-control-plane:typecheck: > @nzila/platform-integrations-control-plane@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-integrations-control-plane
+@nzila/platform-integrations-control-plane:typecheck: > tsc --noEmit
+@nzila/platform-integrations-control-plane:typecheck: 
+@nzila/pilot-mode:typecheck: cache miss, executing f5b12cc3783dbcdc
+@nzila/decision-intelligence:build: cache hit, replaying logs 3f24a836572adeb9
+@nzila/pilot-mode:typecheck: 
+@nzila/pilot-mode:typecheck: > @nzila/pilot-mode@0.1.0 typecheck C:\APPS\nzila-automation\packages\pilot-mode
+@nzila/pilot-mode:typecheck: > tsc --noEmit
+@nzila/pilot-mode:typecheck: 
+@nzila/decision-intelligence:build: 
+@nzila/decision-intelligence:build: > @nzila/decision-intelligence@0.1.0 build C:\APPS\nzila-automation\packages\decision-intelligence
+@nzila/decision-intelligence:build: > pnpm typecheck
+@nzila/decision-intelligence:build: 
+@nzila/decision-intelligence:build: 
+@nzila/decision-intelligence:build: > @nzila/decision-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\decision-intelligence
+@nzila/decision-intelligence:build: > tsc --noEmit
+@nzila/decision-intelligence:build: 
+@nzila/decision-intelligence:typecheck: cache miss, executing 22dd6ea133fb6db1
+@nzila/decision-intelligence:typecheck: 
+@nzila/decision-intelligence:typecheck: > @nzila/decision-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\decision-intelligence
+@nzila/decision-intelligence:typecheck: > tsc --noEmit
+@nzila/decision-intelligence:typecheck: 
+@nzila/commerce-state:typecheck: cache miss, executing 154f16f7efc63483
+@nzila/commerce-state:typecheck: 
+@nzila/commerce-state:typecheck: > @nzila/commerce-state@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-state
+@nzila/commerce-state:typecheck: > tsc --noEmit
+@nzila/commerce-state:typecheck: 
+@nzila/agri-core:typecheck: cache miss, executing 0d2d610428aa5801
+@nzila/agri-core:typecheck: 
+@nzila/agri-core:typecheck: > @nzila/agri-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-core
+@nzila/agri-core:typecheck: > tsc --noEmit
+@nzila/agri-core:typecheck: 
+@nzila/mobility-case-engine:typecheck: cache miss, executing db49202ab8b7b221
+@nzila/itsm-core:typecheck: cache miss, executing ee8606f523f87201
+@nzila/mobility-case-engine:typecheck: 
+@nzila/mobility-case-engine:typecheck: > @nzila/mobility-case-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\mobility-case-engine
+@nzila/mobility-case-engine:typecheck: > tsc --noEmit
+@nzila/mobility-case-engine:typecheck: 
+@nzila/governed-workflow:typecheck: cache miss, executing 848592c4728f27d0
+@nzila/itsm-core:typecheck: 
+@nzila/itsm-core:typecheck: > @nzila/itsm-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\itsm-core
+@nzila/itsm-core:typecheck: > tsc --noEmit
+@nzila/itsm-core:typecheck: 
+@nzila/governed-workflow:typecheck: 
+@nzila/governed-workflow:typecheck: > @nzila/governed-workflow@0.1.0 typecheck C:\APPS\nzila-automation\packages\governed-workflow
+@nzila/governed-workflow:typecheck: > tsc --noEmit
+@nzila/governed-workflow:typecheck: 
+@nzila/ai-core:typecheck: cache miss, executing 7a1a0cb91c05861f
+@nzila/ai-core:typecheck: 
+@nzila/ai-core:typecheck: > @nzila/ai-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\ai-core
+@nzila/ai-core:typecheck: > tsc --noEmit
+@nzila/ai-core:typecheck: 
+@nzila/policy-intelligence:typecheck: cache miss, executing 9b71920de0660fbe
+@nzila/policy-intelligence:typecheck: 
+@nzila/policy-intelligence:typecheck: > @nzila/policy-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\policy-intelligence
+@nzila/policy-intelligence:typecheck: > tsc --noEmit
+@nzila/policy-intelligence:typecheck: 
+@nzila/commerce-audit:typecheck: cache miss, executing 62de644fd09f3602
+@nzila/commerce-governance:typecheck: cache miss, executing fe2d3e1ce0d8fd43
+@nzila/commerce-audit:typecheck: 
+@nzila/commerce-audit:typecheck: > @nzila/commerce-audit@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-audit
+@nzila/commerce-audit:typecheck: > tsc --noEmit
+@nzila/commerce-audit:typecheck: 
+@nzila/commerce-governance:typecheck: 
+@nzila/commerce-governance:typecheck: > @nzila/commerce-governance@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-governance
+@nzila/commerce-governance:typecheck: > tsc --noEmit
+@nzila/commerce-governance:typecheck: 
+@nzila/orchestrator-api:typecheck: cache miss, executing 30d7abff681e9cb3
+@nzila/agri-intelligence:typecheck: cache miss, executing ac48f1788759c66a
+@nzila/orchestrator-api:typecheck: 
+@nzila/orchestrator-api:typecheck: > @nzila/orchestrator-api@0.1.0 typecheck C:\APPS\nzila-automation\apps\orchestrator-api
+@nzila/orchestrator-api:typecheck: > tsc --noEmit
+@nzila/orchestrator-api:typecheck: 
+@nzila/agri-supply-chain:typecheck: cache miss, executing d2ccb5311c480de5
+@nzila/agri-intelligence:typecheck: 
+@nzila/agri-intelligence:typecheck: > @nzila/agri-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-intelligence
+@nzila/agri-intelligence:typecheck: > tsc --noEmit
+@nzila/agri-intelligence:typecheck: 
+@nzila/agri-supply-chain:typecheck: 
+@nzila/agri-supply-chain:typecheck: > @nzila/agri-supply-chain@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-supply-chain
+@nzila/agri-supply-chain:typecheck: > tsc --noEmit
+@nzila/agri-supply-chain:typecheck: 
+@nzila/agri-traceability:typecheck: cache miss, executing d17af335da60a36a
+@nzila/agri-traceability:typecheck: 
+@nzila/agri-traceability:typecheck: > @nzila/agri-traceability@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-traceability
+@nzila/agri-traceability:typecheck: > tsc --noEmit
+@nzila/agri-traceability:typecheck: 
+@nzila/agri-provenance:typecheck: cache miss, executing 81fbdaf73e2bb1a8
+@nzila/agri-sync-contracts:typecheck: cache miss, executing c76b3e8259b04f15
+@nzila/agri-provenance:typecheck: 
+@nzila/agri-provenance:typecheck: > @nzila/agri-provenance@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-provenance
+@nzila/agri-provenance:typecheck: > tsc --noEmit
+@nzila/agri-provenance:typecheck: 
+@nzila/agri-sync-contracts:typecheck: 
+@nzila/agri-sync-contracts:typecheck: > @nzila/agri-sync-contracts@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-sync-contracts
+@nzila/agri-sync-contracts:typecheck: > tsc --noEmit
+@nzila/agri-sync-contracts:typecheck: 
+@nzila/agri-events:typecheck: cache miss, executing d17ff4504adbadab
+@nzila/agri-events:typecheck: 
+@nzila/agri-events:typecheck: > @nzila/agri-events@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-events
+@nzila/agri-events:typecheck: > tsc --noEmit
+@nzila/agri-events:typecheck: 
+@nzila/agri-db:typecheck: cache miss, executing 504a0f4f9a3cecef
+@nzila/agri-db:typecheck: 
+@nzila/agri-db:typecheck: > @nzila/agri-db@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-db
+@nzila/agri-db:typecheck: > tsc --noEmit
+@nzila/agri-db:typecheck: 
+@nzila/agri-adapters:typecheck: cache miss, executing aaadf57df41db46a
+@nzila/agri-adapters:typecheck: 
+@nzila/agri-adapters:typecheck: > @nzila/agri-adapters@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-adapters
+@nzila/agri-adapters:typecheck: > tsc --noEmit
+@nzila/agri-adapters:typecheck: 
+@nzila/mobility:typecheck: cache miss, executing d5dd421f90d31f97
+@nzila/mobility:typecheck: 
+@nzila/mobility:typecheck: > @nzila/mobility@0.0.1 typecheck C:\APPS\nzila-automation\apps\mobility
+@nzila/mobility:typecheck: > tsc --noEmit
+@nzila/mobility:typecheck: 
+@nzila/trade:typecheck: cache miss, executing 367a39173910a4f4
+@nzila/web:typecheck: cache miss, executing b9cbd0d9912254d5
+@nzila/trade:typecheck: 
+@nzila/trade:typecheck: > @nzila/trade@0.1.0 typecheck C:\APPS\nzila-automation\apps\trade
+@nzila/trade:typecheck: > tsc --noEmit
+@nzila/trade:typecheck: 
+@nzila/web:typecheck: 
+@nzila/web:typecheck: > @nzila/web@0.1.0 typecheck C:\APPS\nzila-automation\apps\web
+@nzila/web:typecheck: > tsc --noEmit
+@nzila/web:typecheck: 
+@nzila/mobility-client-portal:typecheck: cache miss, executing c4f3abcfe762e61f
+@nzila/platform-admin:typecheck: cache miss, executing f6387545b897cdcc
+@nzila/platform-admin:typecheck: 
+@nzila/platform-admin:typecheck: > @nzila/platform-admin@0.1.0 typecheck C:\APPS\nzila-automation\apps\platform-admin
+@nzila/platform-admin:typecheck: > tsc --noEmit
+@nzila/platform-admin:typecheck: 
+@nzila/mobility-client-portal:typecheck: 
+@nzila/mobility-client-portal:typecheck: > @nzila/mobility-client-portal@0.1.0 typecheck C:\APPS\nzila-automation\apps\mobility-client-portal
+@nzila/mobility-client-portal:typecheck: > tsc --noEmit
+@nzila/mobility-client-portal:typecheck: 
+@nzila/abr:typecheck: cache miss, executing d994ccaaedfbc297
+@nzila/platform-decision-engine:typecheck: cache miss, executing a2327dd0c3ba3176
+@nzila/commerce-evidence:typecheck: cache miss, executing b7dacd94025a495e
+@nzila/abr:typecheck: 
+@nzila/abr:typecheck: > @nzila/abr@0.1.0 typecheck C:\APPS\nzila-automation\apps\abr
+@nzila/abr:typecheck: > tsc --noEmit
+@nzila/abr:typecheck: 
+@nzila/platform-decision-engine:typecheck: 
+@nzila/platform-decision-engine:typecheck: > @nzila/platform-decision-engine@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-decision-engine
+@nzila/platform-decision-engine:typecheck: > tsc --noEmit
+@nzila/platform-decision-engine:typecheck: 
+@nzila/commerce-events:typecheck: cache miss, executing 8afe1164e61e07b9
+@nzila/commerce-evidence:typecheck: 
+@nzila/commerce-evidence:typecheck: > @nzila/commerce-evidence@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-evidence
+@nzila/commerce-evidence:typecheck: > tsc --noEmit
+@nzila/commerce-evidence:typecheck: 
+@nzila/agrimo-core:typecheck: cache miss, executing 5d26327b587c2180
+@nzila/commerce-events:typecheck: 
+@nzila/commerce-events:typecheck: > @nzila/commerce-events@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-events
+@nzila/commerce-events:typecheck: > tsc --noEmit
+@nzila/commerce-events:typecheck: 
+@nzila/agrimo-core:typecheck: 
+@nzila/agrimo-core:typecheck: > @nzila/agrimo-core@0.2.0 typecheck C:\APPS\nzila-automation\packages\agrimo-core
+@nzila/agrimo-core:typecheck: > tsc --noEmit
+@nzila/agrimo-core:typecheck: 
+@nzila/agri-forecasting:typecheck: cache miss, executing b8f936d5df33b7e8
+@nzila/agri-forecasting:typecheck: 
+@nzila/agri-forecasting:typecheck: > @nzila/agri-forecasting@0.1.0 typecheck C:\APPS\nzila-automation\packages\agri-forecasting
+@nzila/agri-forecasting:typecheck: > tsc --noEmit
+@nzila/agri-forecasting:typecheck: 
+@nzila/intelligence:typecheck: cache miss, executing 9c7d61c4c0fe5853
+@nzila/trustcore-trustops-app:typecheck: cache miss, executing 7f47347880aa55d3
+@nzila/intelligence:typecheck: 
+@nzila/intelligence:typecheck: > @nzila/intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\intelligence
+@nzila/intelligence:typecheck: > tsc --noEmit
+@nzila/intelligence:typecheck: 
+@nzila/platform-cognition-core:typecheck: cache miss, executing ebb6bb1cb7a0ae8c
+@nzila/trustcore-trustops-app:typecheck: 
+@nzila/trustcore-trustops-app:typecheck: > @nzila/trustcore-trustops-app@0.1.0 typecheck C:\APPS\nzila-automation\apps\trustcore-trustops
+@nzila/trustcore-trustops-app:typecheck: > tsc --noEmit
+@nzila/trustcore-trustops-app:typecheck: 
+@nzila/control-plane:typecheck: cache miss, executing 1349a48a26054106
+@nzila/platform-cognition-core:typecheck: 
+@nzila/platform-cognition-core:typecheck: > @nzila/platform-cognition-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-cognition-core
+@nzila/platform-cognition-core:typecheck: > tsc --noEmit
+@nzila/platform-cognition-core:typecheck: 
+@nzila/nacp-core:typecheck: cache miss, executing 6190e1f506f4ac36
+@nzila/zonga-core:typecheck: cache miss, executing adf702adbd3c17e6
+@nzila/control-plane:typecheck: 
+@nzila/control-plane:typecheck: > @nzila/control-plane@1.0.0 typecheck C:\APPS\nzila-automation\apps\control-plane
+@nzila/control-plane:typecheck: > tsc --noEmit
+@nzila/control-plane:typecheck: 
+@nzila/nacp-core:typecheck: 
+@nzila/nacp-core:typecheck: > @nzila/nacp-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\nacp-core
+@nzila/nacp-core:typecheck: > tsc --noEmit
+@nzila/nacp-core:typecheck: 
+@nzila/zonga-core:typecheck: 
+@nzila/zonga-core:typecheck: > @nzila/zonga-core@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-core
+@nzila/zonga-core:typecheck: > tsc --noEmit
+@nzila/zonga-core:typecheck: 
+@nzila/commerce-services:typecheck: cache miss, executing 58d910240a92e018
+@nzila/commerce-services:typecheck: 
+@nzila/commerce-services:typecheck: > @nzila/commerce-services@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-services
+@nzila/commerce-services:typecheck: > tsc --noEmit
+@nzila/commerce-services:typecheck: 
+@nzila/commerce-observability:typecheck: cache miss, executing 32340ad650437b61
+@nzila/agrimo:typecheck: cache miss, executing 9836aea414ece02e
+@nzila/commerce-observability:typecheck: 
+@nzila/commerce-observability:typecheck: > @nzila/commerce-observability@0.1.0 typecheck C:\APPS\nzila-automation\packages\commerce-observability
+@nzila/commerce-observability:typecheck: > tsc --noEmit
+@nzila/commerce-observability:typecheck: 
+@nzila/agrimo:typecheck: 
+@nzila/agrimo:typecheck: > @nzila/agrimo@0.1.0 typecheck C:\APPS\nzila-automation\apps\agrimo
+@nzila/agrimo:typecheck: > tsc --noEmit
+@nzila/agrimo:typecheck: 
+@nzila/cora:typecheck: cache miss, executing cc3e1b06543c8fc8
+@nzila/cora:typecheck: 
+@nzila/cora:typecheck: > @nzila/cora@0.1.0 typecheck C:\APPS\nzila-automation\apps\cora
+@nzila/cora:typecheck: > tsc --noEmit
+@nzila/cora:typecheck: 
+@nzila/workload-intelligence:typecheck: cache miss, executing 566329c1a567a5c7
+@nzila/workload-intelligence:typecheck: 
+@nzila/workload-intelligence:typecheck: > @nzila/workload-intelligence@0.1.0 typecheck C:\APPS\nzila-automation\packages\workload-intelligence
+@nzila/workload-intelligence:typecheck: > tsc --noEmit
+@nzila/workload-intelligence:typecheck: 
+@nzila/executive-os:typecheck: cache miss, executing 91094dc65861b4b4
+@nzila/executive-os:typecheck: 
+@nzila/executive-os:typecheck: > @nzila/executive-os@0.1.0 typecheck C:\APPS\nzila-automation\packages\executive-os
+@nzila/executive-os:typecheck: > tsc --noEmit
+@nzila/executive-os:typecheck: 
+@nzila/platform-growth-os:typecheck: cache miss, executing 0bdd2c48c65bb856
+@nzila/ue-cognition:typecheck: cache miss, executing 9c27425b2743501a
+@nzila/platform-growth-os:typecheck: 
+@nzila/platform-growth-os:typecheck: > @nzila/platform-growth-os@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-growth-os
+@nzila/platform-growth-os:typecheck: > tsc --noEmit
+@nzila/platform-growth-os:typecheck: 
+@nzila/nacp-exams:typecheck: cache miss, executing 4c60757608ececff
+@nzila/ue-cognition:typecheck: 
+@nzila/ue-cognition:typecheck: > @nzila/ue-cognition@0.1.0 typecheck C:\APPS\nzila-automation\packages\ue-cognition
+@nzila/ue-cognition:typecheck: > tsc --noEmit
+@nzila/ue-cognition:typecheck: 
+@nzila/nacp-exams:typecheck: 
+@nzila/nacp-exams:typecheck: > @nzila/nacp-exams@0.1.0 typecheck C:\APPS\nzila-automation\apps\nacp-exams
+@nzila/nacp-exams:typecheck: > tsc --noEmit
+@nzila/nacp-exams:typecheck: 
+@nzila/platform-commerce-org:typecheck: cache miss, executing de53e4cfef8220bc
+@nzila/platform-commerce-org:typecheck: 
+@nzila/platform-commerce-org:typecheck: > @nzila/platform-commerce-org@0.1.0 typecheck C:\APPS\nzila-automation\packages\platform-commerce-org
+@nzila/platform-commerce-org:typecheck: > tsc --noEmit
+@nzila/platform-commerce-org:typecheck: 
+@nzila/cfo:typecheck: cache miss, executing 847cbb50d4fdeaec
+@nzila/cfo:typecheck: 
+@nzila/cfo:typecheck: > @nzila/cfo@0.1.0 typecheck C:\APPS\nzila-automation\apps\cfo
+@nzila/cfo:typecheck: > tsc --noEmit
+@nzila/cfo:typecheck: 
+@nzila/partners:typecheck: cache miss, executing 27c0d77c77d02e5b
+@nzila/zonga-growth:typecheck: cache miss, executing 74ffe1b45b54b5cc
+@nzila/partners:typecheck: 
+@nzila/partners:typecheck: > @nzila/partners@0.1.0 typecheck C:\APPS\nzila-automation\apps\partners
+@nzila/partners:typecheck: > tsc --noEmit
+@nzila/partners:typecheck: 
+@nzila/zonga-analytics:typecheck: cache miss, executing df4fa7b002368dae
+@nzila/zonga-growth:typecheck: 
+@nzila/zonga-growth:typecheck: > @nzila/zonga-growth@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-growth
+@nzila/zonga-growth:typecheck: > tsc --noEmit
+@nzila/zonga-growth:typecheck: 
+@nzila/media-worker:typecheck: cache miss, executing 341dbcf75df582da
+@nzila/zonga-analytics:typecheck: 
+@nzila/zonga-analytics:typecheck: > @nzila/zonga-analytics@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-analytics
+@nzila/zonga-analytics:typecheck: > tsc --noEmit
+@nzila/zonga-analytics:typecheck: 
+@nzila/media-worker:typecheck: 
+@nzila/media-worker:typecheck: > @nzila/media-worker@0.1.0 typecheck C:\APPS\nzila-automation\services\media-worker
+@nzila/media-worker:typecheck: > tsc --noEmit
+@nzila/media-worker:typecheck: 
+@nzila/zonga-streaming:typecheck: cache miss, executing f5810d118d727614
+@nzila/union-eyes:typecheck: cache miss, executing 97978e9e53f7c9c5
+@nzila/console:typecheck: cache miss, executing 8389e3acd743452d
+@nzila/flow:typecheck: cache miss, executing 848d35c56906e321
+@nzila/zonga-monetization:typecheck: cache miss, executing 453bf026f4841dd9
+@nzila/union-eyes:typecheck: 
+@nzila/union-eyes:typecheck: > @nzila/union-eyes@1.0.0 typecheck C:\APPS\nzila-automation\apps\union-eyes
+@nzila/union-eyes:typecheck: > node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit
+@nzila/union-eyes:typecheck: 
+@nzila/zonga-streaming-aws:typecheck: cache miss, executing 6d7075c2ecb8f5db
+@nzila/zonga-streaming:typecheck: 
+@nzila/zonga-streaming:typecheck: > @nzila/zonga-streaming@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-streaming
+@nzila/zonga-streaming:typecheck: > tsc --noEmit
+@nzila/zonga-streaming:typecheck: 
+@nzila/flow:typecheck: 
+@nzila/flow:typecheck: > @nzila/flow@1.0.0 typecheck C:\APPS\nzila-automation\apps\flow
+@nzila/flow:typecheck: > tsc --noEmit
+@nzila/flow:typecheck: 
+@nzila/zonga-monetization:typecheck: 
+@nzila/zonga-monetization:typecheck: > @nzila/zonga-monetization@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-monetization
+@nzila/zonga-monetization:typecheck: > tsc --noEmit
+@nzila/zonga-monetization:typecheck: 
+@nzila/console:typecheck: 
+@nzila/console:typecheck: > @nzila/console@0.1.0 typecheck C:\APPS\nzila-automation\apps\console
+@nzila/console:typecheck: > tsc --noEmit
+@nzila/console:typecheck: 
+@nzila/zonga-streaming-aws:typecheck: 
+@nzila/zonga-streaming-aws:typecheck: > @nzila/zonga-streaming-aws@0.1.0 typecheck C:\APPS\nzila-automation\packages\zonga-streaming-aws
+@nzila/zonga-streaming-aws:typecheck: > tsc --noEmit
+@nzila/zonga-streaming-aws:typecheck: 
+@nzila/zonga:typecheck: cache miss, executing 171974604705c1d1
+@nzila/zonga:typecheck: 
+@nzila/zonga:typecheck: > @nzila/zonga@0.0.1 typecheck C:\APPS\nzila-automation\apps\zonga
+@nzila/zonga:typecheck: > tsc --noEmit
+@nzila/zonga:typecheck: 
+
+ Tasks:    236 successful, 236 total
+Cached:    5 cached, 236 total
+  Time:    41m52.874s 
+
+EXIT=0

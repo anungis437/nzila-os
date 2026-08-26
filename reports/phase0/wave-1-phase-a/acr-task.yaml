@@ -1,0 +1,23 @@
+# ACR Task file — Wave 1 Phase A (deadline engine)
+# See docs/union-eyes/reality-remediation/deadline-engine/00-charter.md
+version: v1.1.0
+stepTimeout: 3600
+steps:
+  - build: >-
+      --file Dockerfile
+      --target union-eyes
+      --platform linux/amd64
+      --tag {{.Run.Registry}}/nzila-os-union-eyes:{{.Values.tag}}
+      --tag {{.Run.Registry}}/nzila-os-union-eyes:staging-latest
+      --build-arg GITHUB_SHA={{.Values.sha}}
+      --build-arg BUILD_TIME={{.Values.buildTime}}
+      --build-arg ARTIFACT_ID={{.Values.tag}}
+      --build-arg RELEASE_ID=wave1-phase-a
+      --build-arg TURBO_FILTER=--filter=@nzila/union-eyes
+      --build-arg NODE_MAX_OLD_SPACE=3584
+      .
+    env:
+      - DOCKER_BUILDKIT=1
+  - push:
+      - "{{.Run.Registry}}/nzila-os-union-eyes:{{.Values.tag}}"
+      - "{{.Run.Registry}}/nzila-os-union-eyes:staging-latest"

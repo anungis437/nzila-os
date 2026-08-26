@@ -13,7 +13,7 @@
     "@nzila/enforcement": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
-    "next": "^15.0.0",
+    "next": "16.2.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

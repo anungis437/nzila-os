@@ -3,6 +3,12 @@ import { defineProject } from "vitest/config";
 export default defineProject({
   test: {
     name: "orchestrator-api",
+    // /ready and other route tests call buildApp() which dynamically loads
+    // Fastify + plugins; cold module resolution on Windows + monorepo-scale
+    // parallel runners can exceed the vitest defaults. 30s gives comfortable
+    // headroom.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary'],

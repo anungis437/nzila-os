@@ -5,9 +5,13 @@ const ROOT = resolve(__dirname, '../..')
 
 export default defineProject({
   test: {
+    // Dynamic-import barrel/route tests can exceed the 5s vitest default under
+    // monorepo-scale parallel runners on Windows; 30s provides comfortable headroom.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     name: 'cfo',
     environment: 'node',
-    include: ['lib/**/*.test.ts', 'tests/**/*.test.ts'],
+    include: ['lib/**/*.test.ts', 'tests/**/*.test.ts', 'app/api/**/*.test.ts'],
   },
   resolve: {
     alias: {
@@ -21,6 +25,7 @@ export default defineProject({
       '@nzila/os-core/policy': resolve(ROOT, 'packages/os-core/src/policy/index.ts'),
       '@nzila/os-core/config/super-admins': resolve(ROOT, 'packages/os-core/src/config/super-admins.ts'),
       '@nzila/os-core/config': resolve(ROOT, 'packages/os-core/src/config/env.ts'),
+      '@nzila/os-core/health': resolve(ROOT, 'packages/os-core/src/health.ts'),
       '@nzila/os-core/retention': resolve(ROOT, 'packages/os-core/src/retention/index.ts'),
       '@nzila/os-core': resolve(ROOT, 'packages/os-core/src/index.ts'),
       '@nzila/commerce-core': resolve(ROOT, 'packages/commerce-core/src/index.ts'),

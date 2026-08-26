@@ -98,13 +98,30 @@ function readInsightLibrary(): string {
   return fs.readFileSync(insightLibraryPath, 'utf8');
 }
 
+// Safe slug allowlist: lowercase alphanumerics + hyphens, no dots, no slashes.
+// Blocks path-traversal payloads ("..", "/etc/passwd", encoded separators, etc.)
+// before any filesystem lookup. Aikido SAST AIK_ts_generic_path_traversal.
+const SAFE_INSIGHT_SLUG = /^[a-z0-9](?:[a-z0-9-]{0,126}[a-z0-9])?$/;
+
 function readLocalizedInsightMarkdown(locale: string, slug: string): string | null {
   if (locale !== 'fr-CA') return null;
+  // Reject any slug that isn't in our safe allowlist BEFORE touching the filesystem.
+  if (!SAFE_INSIGHT_SLUG.test(slug)) return null;
 
-  const localizedPath = path.join(localizedInsightsRoot, `${slug}.md`);
-  if (!fs.existsSync(localizedPath)) return null;
-
-  return fs.readFileSync(localizedPath, 'utf8');
+  // Enumerate the localized insights directory (a trusted, module-owned root).
+  // We match the user slug against the directory listing rather than
+  // concatenating it into a path, so `fs.readFileSync` only ever receives a
+  // path built from module constants + a filename returned by `readdirSync`.
+  // Aikido SAST AIK_ts_generic_path_traversal.
+  if (!fs.existsSync(localizedInsightsRoot)) return null;
+  const expected = `${slug}.md`;
+  for (const entry of fs.readdirSync(localizedInsightsRoot, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    if (entry.name !== expected) continue;
+    const trustedPath = path.join(localizedInsightsRoot, entry.name);
+    return fs.readFileSync(trustedPath, 'utf8');
+  }
+  return null;
 }
 
 function splitInsightDocuments(markdown: string): string[] {
@@ -122,7 +139,11 @@ function parseInsightDocument(document: string): InsightArticle {
     throw new Error('Unable to parse insight markdown document.');
   }
 
-  const frontmatter = yaml.load(match[2]) as MarkdownInsightFrontmatter;
+  // Parse frontmatter with the JSON-subset schema: no custom tags, no !!js/function,
+  // no code-execution vectors — only null/bool/int/float/string. Aikido SAST
+  // AIK_ts_yaml_deserialize; js-yaml v4 default is already safe but JSON_SCHEMA
+  // makes the safety guarantee explicit and machine-checkable.
+  const frontmatter = yaml.load(match[2], { schema: yaml.JSON_SCHEMA }) as MarkdownInsightFrontmatter;
   const bodyMarkdown = match[3].trim();
   const categoryName = frontmatter.category === 'Institutional Continuity'
     ? 'Organizational Continuity'

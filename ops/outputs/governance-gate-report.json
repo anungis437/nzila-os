@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-11T04:55:02.569Z",
+  "timestamp": "2026-08-25T20:48:01.243Z",
   "total": 27,
   "passed": 27,
   "failed": 0,
@@ -92,7 +92,7 @@
     {
       "name": "GOV-GATE-018: Container seccomp profile exists",
       "status": "pass",
-      "detail": "Seccomp profile verified (deny-by-default, 7 allowlist entries, 8 services)"
+      "detail": "Seccomp profile verified (deny-by-default, 7 allowlist entries, 11 services)"
     },
     {
       "name": "GOV-GATE-019: Third-party risk register exists",

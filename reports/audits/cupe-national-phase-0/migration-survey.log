@@ -1,0 +1,11 @@
+[migrate] incrementals: 34 discovered; 13 already applied; 21 pending.
+[migrate] applying 0013_orchestrator_runtime_hardening.sql
+[migrate]   applied 0013_orchestrator_runtime_hardening.sql
+[migrate] applying 0014_rename_actor_user_id.sql
+[migrate]   applied 0014_rename_actor_user_id.sql
+[migrate] applying 0015_itsm_command_center.sql
+[migrate]   applied 0015_itsm_command_center.sql
+[migrate] applying 0016_pipeline_alerts.sql
+[migrate]   applied 0016_pipeline_alerts.sql
+[migrate] applying 0017_trustcore_law25.sql
+[migrate:fail] failure applying 0017_trustcore_law25.sql: syntax error at or near "NOT". Statements executed prior to this error remain committed. Either patch the database manually, add a healer migration, or (only for genuinely known-broken historical files) add an entry to packages/db/drizzle/.known-partial-failures.json naming the healer migration.

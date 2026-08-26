@@ -1,17 +1,29 @@
 /**
- * Overdue Notifications Cron Job (stub — not yet implemented)
- * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
+ * Overdue Notifications Cron Job — NOT_IMPLEMENTED
+ *
+ * Reality-remediation Wave 0: converted from HTTP 200 no-op to HTTP 501.
+ * Overdue detection is Wave 3 (grievance/deadline integrity) work.
+ *
+ * Capability: UE-CRON-OVERDUE-NOTIFICATIONS (state: NOT_IMPLEMENTED)
+ * Owner: platform-eng
+ * Runbook: docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md
  */
 import { withApi } from '@/lib/api/framework';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
     auth: { cron: true },
-    openapi: { tags: ['Cron'], summary: 'Overdue notifications (stub)' },
+    openapi: {
+      tags: ['Cron'],
+      summary: 'Overdue notifications — NOT_IMPLEMENTED (returns HTTP 501)',
+    },
   },
   async () => {
-    return { status: 'not_implemented', message: 'Overdue notifications cron not yet implemented', timestamp: new Date().toISOString() };
+    throw ApiError.notImplemented(
+      'Overdue-notifications cron is not implemented. Capability UE-CRON-OVERDUE-NOTIFICATIONS is registered as NOT_IMPLEMENTED pending Wave 3 (deadline integrity).',
+    );
   },
 );

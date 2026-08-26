@@ -50,8 +50,22 @@ vi.mock('node:fs', () => ({
       throw new Error(`unexpected readFileSync: ${p}`);
     },
     existsSync: (p: string) => {
+      // The parser now calls existsSync on the fr-CA directory (no ".md" suffix)
+      // to short-circuit before enumerating it. Return true so the enumeration
+      // path runs and hits our readdirSync mock; the per-file check happens via
+      // readdirSync results below.
+      if (/fr-CA$/.test(p) || /fr-CA[\\/]?$/.test(p)) return true;
       const m = p.match(/fr-CA[\\/]([^\\/]+)\.md$/);
       return Boolean(m && state.localized[m[1]]);
+    },
+    readdirSync: (p: string, _opts?: unknown) => {
+      // Only expose fr-CA localized files; mirror the withFileTypes shape.
+      if (!/fr-CA[\\/]?$/.test(p)) return [];
+      return Object.keys(state.localized).map((slug) => ({
+        name: `${slug}.md`,
+        isFile: () => true,
+        isDirectory: () => false,
+      }));
     },
   },
 }));

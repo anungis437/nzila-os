@@ -1,0 +1,48 @@
+{
+  "$schema": "./known-partial-failures.schema.json",
+  "description": "Explicit allowlist of incremental migrations that are historically known to abort partway (usually a PostgreSQL syntax defect that the DB accepted as far as it could) and whose partial-apply behavior is intentionally relied on by a later catch-up migration. The runner records each listed file as applied even if it errors, so that the catch-up migration can heal the schema. This file is the ONLY sanctioned mechanism for tolerating a mid-file failure; any error on a file not listed here still hard-fails the runner. Never widen this list without a linked ledger entry and a matching healer migration.",
+  "entries": [
+    {
+      "filename": "0010_pilot_alerting_hardening.sql",
+      "reason": "SQLSTATE 42601 — PostgreSQL does not support `ADD CONSTRAINT IF NOT EXISTS`. Empirical Phase 0A.1 clean-DB replay (see reports/audits/cupe-national-phase-0/migration-clean-run.log) shows PostgreSQL rejects the entire submitted file at parse time when this statement is present, so on an empty database 0010 commits NOTHING — pilot_alerts keeps only its 0009-era columns and pilot_alert_rules is never created. (On the pre-existing dev DB, prior out-of-band DDL had already added most columns and the table, which masked the true behavior during Phase 0A.) Healer 0037 restores the full intended terminal state: the 21 pilot_alerts columns, pilot_alert_rules, the FK, all indexes, pilot_alert_escalations, and the partial-open-dedup index. 0033 (the Phase 0A healer) is retained but is itself allowlisted below because it depends on artifacts 0037 provides.",
+      "healer": "0037_heal_pilot_alerting_hardening.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    },
+    {
+      "filename": "0013_orchestrator_runtime_hardening.sql",
+      "reason": "SQLSTATE 2BP01 — `DROP INDEX \"automation_commands_correlation_id_unique\"` fails because that name is a UNIQUE CONSTRAINT (declared inline in 0003_redundant_starfox.sql), not a bare index; the required primitive is `ALTER TABLE ... DROP CONSTRAINT`. Phase 0A.1 clean-DB replay (see reports/audits/cupe-national-phase-0/migration-clean-run.log) proved that PG 14+ executes multi-statement Query messages in a single implicit transaction, so this runtime error rolls back ALL of 0013 — none of the automation_commands ADD COLUMN, backfill, or SET NOT NULL statements commit on empty replay. (Dev DB was masked by prior out-of-band drizzle-kit push.) Healer 0034 therefore restores the FULL intended terminal state: 9 automation_commands columns + backfill + guarded SET NOT NULL + correct DROP CONSTRAINT + 5 indexes + automation_events org_id column + backfill + guarded SET NOT NULL + 2 indexes.",
+      "healer": "0034_heal_orchestrator_runtime_hardening.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    },
+    {
+      "filename": "0017_trustcore_law25.sql",
+      "reason": "SQLSTATE 42601 — `CREATE TYPE IF NOT EXISTS` is not valid PostgreSQL syntax through PG 17; the parser rejects the very first statement so nothing commits. Healer 0035 recreates all 14 enums (DO/EXCEPTION guarded), all 8 trustcore tables, and all 22 indexes.",
+      "healer": "0035_heal_trustcore_law25_chain.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    },
+    {
+      "filename": "0019_trustcore_policies.sql",
+      "reason": "SQLSTATE 42P01 — cascade failure from 0017. `ALTER TABLE trustcore_privacy_programs ADD COLUMN ... onboarding_completed_at` fails because the parent table was never created (0017 committed nothing). Phase 0A.1 clean-DB replay proved that under PG 14+ single-transaction semantics 0019's own preceding statements (tc_policy_type enum, trustcore_policies table, its two indexes) ALSO roll back — nothing from 0019 commits on empty replay. Healer 0035 therefore restores BOTH the failing ALTER TABLE and the tc_policy_type enum + trustcore_policies table + its indexes.",
+      "healer": "0035_heal_trustcore_law25_chain.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    },
+    {
+      "filename": "0025_trustcore_privacy_programs_org_name.sql",
+      "reason": "SQLSTATE 42P01 — cascade failure from 0017. `ALTER TABLE trustcore_privacy_programs ADD COLUMN org_name TEXT` fails because the parent table was never created. Healer 0035 restores the failing ALTER TABLE.",
+      "healer": "0035_heal_trustcore_law25_chain.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    },
+    {
+      "filename": "0032_audit_events_canonical_hash.sql",
+      "reason": "SQLSTATE 42703 — `CREATE INDEX audit_events_org_occurred_idx ON audit_events (org_id, occurred_at)` fails because audit_events.org_id was never added by any SQL migration; the dev database only carries it via an out-of-band `drizzle-kit push`. Phase 0A.1 clean-DB replay proved that under PG 14+ single-transaction semantics 0032's preceding ADD COLUMN occurred_at and ADD COLUMN hash_version ALSO roll back — nothing from 0032 commits on empty replay. Healer 0036 therefore restores all three columns (occurred_at, hash_version, org_id with FK + guarded SET NOT NULL) plus the missing index.",
+      "healer": "0036_heal_audit_events_canonical_hash.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    },
+    {
+      "filename": "0033_fix_pilot_alerts_rule_fk.sql",
+      "reason": "SQLSTATE 42P01 — Phase 0A's 0033 healer was authored under the mistaken assumption (recorded in the original Phase 0A allowlist for 0010) that 0010 partially committed pilot_alert_rules before aborting. Phase 0A.1 clean-DB replay proved that assumption false: PostgreSQL rejects 0010 entirely at parse time when `ADD CONSTRAINT IF NOT EXISTS` is present, so pilot_alert_rules does not exist when 0033 runs on any empty database. 0033's first executable statement — `ALTER TABLE pilot_alerts ADD CONSTRAINT pilot_alerts_rule_fk FOREIGN KEY (rule_id) REFERENCES pilot_alert_rules(id)` — therefore raises 42P01 and the whole file aborts. 0033 lies inside the historical range that must not be modified; healer 0037 supersedes it by creating pilot_alert_rules and adding the 21 pilot_alerts columns first, then attaching the same FK and indexes. On a fully healed DB (dev, staging, or a replayed probe past 0037), 0033 is a no-op via its DO/IF NOT EXISTS guard and this allowlist entry is unreachable.",
+      "healer": "0037_heal_pilot_alerting_hardening.sql",
+      "documentedIn": "reports/audits/cupe-national-phase-0/migration-lineage-gap.md"
+    }
+  ]
+}

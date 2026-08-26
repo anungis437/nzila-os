@@ -34,6 +34,7 @@ const ALLOWLISTED_PATHS = [
   'app/api/ready/',                    // K8s health probes (information_schema only)
   'app/api/health/',                   // K8s health probes
   'app/api/v2/ready/',                 // v2 K8s readiness probes
+  'app/api/staging-proof/',            // HMAC-gated system proof ledger; no user/org principal exists
   'app/api/ml/',                       // ML monitoring/predictions — admin-only analytics, RLS migration tracked
   'app/api/v2/ml/',                    // v2 ML routes — same as above
 ];

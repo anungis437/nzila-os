@@ -1,22 +1,24 @@
 /**
- * Dashboard Documents layout — server-side auth guard for all /dashboard/documents/* pages.
- * Requires authenticated user with at least 'officer' role (level 80).
- * Document management is restricted to union officers and above.
+ * Dashboard Documents layout — authentication gate for all /dashboard/documents/* pages.
+ *
+ * Authorization is enforced at the API and service layer per operation:
+ *   - Reading document categories: member+  (readRole: 'member')
+ *   - Writing document categories: steward+ (writeRole: 'steward')
+ *   - Sensitive document operations: officer+ (per API route)
+ *
+ * The sidebar exposes Documents to both member and staff experiences,
+ * so the layout must permit any authenticated user.  Fine-grained access
+ * is applied by the individual API routes, not this layout guard.
  */
 import { ReactNode } from "react";
-import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+import { requireUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 
 export default async function DashboardDocumentsLayout({ children }: { children: ReactNode }) {
-  await requireUser();
-
-  // Demo runtime bypasses the officer-level gate — steward-level demo users should reach the page.
-  if (!isCupe4373DemoRuntime()) {
-    const hasAccess = await hasMinRole("officer");
-    if (!hasAccess) {
-      redirect("/dashboard");
-    }
+  try {
+    await requireUser();
+  } catch {
+    redirect("/login");
   }
 
   return <>{children}</>;

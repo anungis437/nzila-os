@@ -34,9 +34,9 @@ import type { UserRole } from "@/lib/api-auth-guard";
  * authenticated user does not meet the minimum role requirement.
  *
  * Role resolution uses the canonical chain in `hasMinRole` →
- * `getUserRole(userId, getOrganizationIdForUser(userId))`. The CUPE 4373
- * demo runtime no longer bypasses this — demo personas are seeded with
- * real member/steward/officer roles in `user_management.organization_users`.
+ * `getUserRole(userId, getOrganizationIdForUser(userId))`. The operational
+ * package has no demo-runtime bypass; the demo experience lives in the
+ * separate `@nzila/union-eyes-demo` package.
  *
  * @param minRole - Minimum role in ROLE_HIERARCHY required to access this section.
  */

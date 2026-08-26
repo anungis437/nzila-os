@@ -31,6 +31,11 @@ export default defineConfig({
     actionTimeout: 20_000,
   },
 
+  // Increase global assertion timeout to 15s.
+  // Next.js App Router RSC streaming + client-side hydration can take
+  // several seconds on first render; 5s (default) is too tight.
+  expect: { timeout: 15_000 },
+
   projects: [
     {
       name: 'chromium',
@@ -54,6 +59,13 @@ export default defineConfig({
             NODE_ENV: 'test',
             PLAYWRIGHT_TEST_AUTH: process.env.PLAYWRIGHT_TEST_AUTH ?? 'true',
             UE_E2E_RISK_BYPASS: 'true',
+            // Give Next.js more Node heap headroom before it decides to
+            // self-restart on memory pressure. The default of ~4 GiB gets
+            // consumed midway through the sequential Playwright run once the
+            // marketing tree, dashboard tree, and pilot-mode-gating routes are
+            // all compiled; without this bump the dev server restarts and any
+            // in-flight page.goto() times out at 45s.
+            NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --max-old-space-size=8192`.trim(),
           },
         },
       }),

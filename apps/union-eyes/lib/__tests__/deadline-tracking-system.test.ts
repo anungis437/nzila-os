@@ -59,12 +59,30 @@ vi.mock("drizzle-orm", () => ({
   and: vi.fn((...a: any[]) => a),
   asc: vi.fn((a: any) => a),
   lte: vi.fn((...a: any[]) => a),
+  isNull: vi.fn((...a: any[]) => a),
+  isNotNull: vi.fn((...a: any[]) => a),
+  sql: (strings: TemplateStringsArray, ...values: any[]) => ({ strings, values }),
+  relations: vi.fn(() => ({})),
 }));
 
 vi.mock("date-fns", () => ({
   addDays: vi.fn((d: Date, n: number) => new Date(d.getTime() + n * 86400000)),
   addBusinessDays: vi.fn((d: Date, n: number) => new Date(d.getTime() + n * 86400000)),
   differenceInDays: vi.fn((_a: Date, _b: Date) => 5),
+}));
+
+// Wave 1 Phase A: scheduleReminders now delegates to the deadline engine.
+// The engine has its own dedicated test suite under lib/deadline-engine/__tests__ —
+// here we stub it so deadline-tracking-system tests continue to isolate the
+// tracking-system logic itself.
+vi.mock("@/lib/deadline-engine", () => ({
+  scheduleGrievanceDeadlineReminders: vi.fn(async () => ({
+    correlationId: "test-correlation-id",
+    scheduled: [],
+    cancelledForReschedule: [],
+    skipped: [],
+    skippedInPast: [],
+  })),
 }));
 
 /* ── imports ────────────────────────────────────────────────────────── */

@@ -1,0 +1,4 @@
+
+> nzila-os@1.0.3 test:fast C:\APPS\nzila-automation
+> vitest run --project=!contract-tests
+

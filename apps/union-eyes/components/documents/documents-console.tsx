@@ -2,8 +2,8 @@
 
 /**
  * DocumentsConsole — full document management UI (client component).
- * Extracted from documents/page.tsx so the page can be a server component
- * and conditionally render the demo version for CUPE 4373 demo runtime.
+ * Extracted from documents/page.tsx so the page can be a server component.
+ * Operational-only; the demo experience lives in `@nzila/union-eyes-demo`.
  */
 
 import * as React from "react";

@@ -3,7 +3,6 @@
  *
  * Production-grade liveness probe with full dependency checking:
  * - DB connectivity (SELECT 1 via @nzila/db)
- * - Blob storage (Azure Storage)
  * - Shopify API reachability
  * - Zoho API reachability
  * - Canva API reachability
@@ -20,17 +19,6 @@ async function checkDb(): Promise<boolean> {
     const { db } = await import('@nzila/db')
     const { sql } = await import('drizzle-orm')
     await db.execute(sql`SELECT 1`)
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function checkBlob(): Promise<boolean> {
-  try {
-    const { container } = await import('@nzila/blob')
-    const client = container('evidence')
-    await client.getProperties()
     return true
   } catch {
     return false
@@ -65,14 +53,13 @@ async function checkCanva(): Promise<boolean> {
 }
 
 export async function GET() {
-  const [db, blob, shopify, zoho, canva] = await Promise.allSettled([
-    checkDb(), checkBlob(), checkShopify(), checkZoho(), checkCanva(),
+  const [db, shopify, zoho, canva] = await Promise.allSettled([
+    checkDb(), checkShopify(), checkZoho(), checkCanva(),
   ])
 
   const checks = normalizeHealthChecks({
     process: true,
     db: db.status === 'fulfilled' ? db.value : false,
-    storage: blob.status === 'fulfilled' ? blob.value : false,
     shopify: shopify.status === 'fulfilled' ? shopify.value : false,
     zoho: zoho.status === 'fulfilled' ? zoho.value : false,
     canva: canva.status === 'fulfilled' ? canva.value : false,

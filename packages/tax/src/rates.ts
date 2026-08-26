@@ -124,7 +124,7 @@ export interface ProvincialTaxRate {
 /**
  * Provincial/territorial corporate income tax rates.
  * Source: CRA Schedule 510, provincial budget publications.
- * Current as of 2025.
+ * Current as of 2026.
  */
 export const PROVINCIAL_RATES: Record<Province, ProvincialTaxRate> = {
   ON: { province: 'ON', generalRate: 0.115, smallBusinessRate: 0.032, sbdLimit: 500_000, mpRate: 0.10, effectiveFrom: '2020-01-01' },
@@ -134,8 +134,8 @@ export const PROVINCIAL_RATES: Record<Province, ProvincialTaxRate> = {
   SK: { province: 'SK', generalRate: 0.12, smallBusinessRate: 0.01, sbdLimit: 600_000, effectiveFrom: '2022-07-01' },
   MB: { province: 'MB', generalRate: 0.12, smallBusinessRate: 0.00, sbdLimit: 500_000, effectiveFrom: '2019-01-01' },
   NB: { province: 'NB', generalRate: 0.14, smallBusinessRate: 0.025, sbdLimit: 500_000, effectiveFrom: '2021-04-01' },
-  NS: { province: 'NS', generalRate: 0.14, smallBusinessRate: 0.025, sbdLimit: 500_000, effectiveFrom: '2022-04-01' },
-  PE: { province: 'PE', generalRate: 0.16, smallBusinessRate: 0.01, sbdLimit: 500_000, effectiveFrom: '2021-01-01' },
+  NS: { province: 'NS', generalRate: 0.14, smallBusinessRate: 0.015, sbdLimit: 700_000, effectiveFrom: '2025-04-01' },
+  PE: { province: 'PE', generalRate: 0.15, smallBusinessRate: 0.01, sbdLimit: 600_000, effectiveFrom: '2025-07-01' },
   NL: { province: 'NL', generalRate: 0.15, smallBusinessRate: 0.03, sbdLimit: 500_000, effectiveFrom: '2022-01-01' },
   YT: { province: 'YT', generalRate: 0.12, smallBusinessRate: 0.00, sbdLimit: 500_000, effectiveFrom: '2021-01-01' },
   NT: { province: 'NT', generalRate: 0.115, smallBusinessRate: 0.02, sbdLimit: 500_000, effectiveFrom: '2021-01-01' },

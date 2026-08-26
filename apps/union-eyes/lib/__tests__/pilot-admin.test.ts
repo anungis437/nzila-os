@@ -149,6 +149,36 @@ describe('pilot-admin', () => {
         const result = runHealthChecks(baseConfig, mockCases);
         expect(result.status).toBe('critical');
       });
+
+      // Reality-remediation Wave 0: `unknown` checks must never be
+      // reported as green and must force `remediation_in_progress`.
+      it('reports unknown check when a config flag is null', () => {
+        const result = runHealthChecks({ ...baseConfig, vocabularyLoaded: null }, mockCases);
+        const vocab = result.checks.find(c => c.name === 'Vocabulary');
+        expect(vocab?.status).toBe('unknown');
+        expect(vocab?.message).toContain('NOT measured');
+      });
+
+      it('forces overall status to remediation_in_progress when any check is unknown', () => {
+        const result = runHealthChecks(
+          {
+            vocabularyLoaded: null,
+            orgConfigured: null,
+            usersInvited: null,
+            worksitesConfigured: null,
+            slaThresholdsSet: null,
+            auditTrailActive: null,
+          },
+          mockCases,
+        );
+        expect(result.status).toBe('remediation_in_progress');
+        expect(result.summary).toContain('unmeasured');
+      });
+
+      it('unknown is contagious — even a single unknown blocks healthy', () => {
+        const result = runHealthChecks({ ...baseConfig, slaThresholdsSet: null }, mockCases);
+        expect(result.status).toBe('remediation_in_progress');
+      });
   });
 
   describe('buildPilotStatus', () => {

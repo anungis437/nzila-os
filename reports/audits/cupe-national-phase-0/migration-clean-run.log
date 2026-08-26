@@ -1,0 +1,96 @@
+===== Phase 0A.1 · clean-DB replay proof · nzila_phase0a1_probe · 2026-07-22T17:49:08.6951729-04:00 =====
+
+----- STEP 1 · --bootstrap-apply -----
+[migrate] bootstrap: applying 0000_platform_schema_prerequisites.sql
+[migrate]   applied 0000_platform_schema_prerequisites.sql
+[migrate] bootstrap-apply complete. Executed 1 artifact(s).
+
+----- STEP 2 · default (incrementals + healers) -----
+[migrate] incrementals: 38 discovered; 0 already applied; 38 pending.
+[migrate] applying 0000_initial.sql
+[migrate]   applied 0000_initial.sql
+[migrate] applying 0001_solid_cargill.sql
+[migrate]   applied 0001_solid_cargill.sql
+[migrate] applying 0002_rich_marten_broadcloak.sql
+[migrate]   applied 0002_rich_marten_broadcloak.sql
+[migrate] applying 0003_redundant_starfox.sql
+[migrate]   applied 0003_redundant_starfox.sql
+[migrate] applying 0004_audit_events_immutable.sql
+[migrate]   applied 0004_audit_events_immutable.sql
+[migrate] applying 0005_ai_model_registry.sql
+[migrate]   applied 0005_ai_model_registry.sql
+[migrate] applying 0006_idempotency_cache.sql
+[migrate]   applied 0006_idempotency_cache.sql
+[migrate] applying 0007_flow_domain_tables.sql
+[migrate]   applied 0007_flow_domain_tables.sql
+[migrate] applying 0008_ai_governance_store.sql
+[migrate]   applied 0008_ai_governance_store.sql
+[migrate] applying 0009_pilot_metrics_layer.sql
+[migrate]   applied 0009_pilot_metrics_layer.sql
+[migrate] applying 0010_pilot_alerting_hardening.sql
+[migrate:warn] partial-apply tolerated for 0010_pilot_alerting_hardening.sql (SQLSTATE=42601; known defect: SQLSTATE 42601 ΓÇö PostgreSQL does not support `ADD CONSTRAINT IF NOT EXISTS`. Empirical Phase 0A.1 clean-DB replay (see reports/audits/cupe-national-phase-0/migration-clean-run.log) shows PostgreSQL rejects the entire submitted file at parse time when this statement is present, so on an empty database 0010 commits NOTHING ΓÇö pilot_alerts keeps only its 0009-era columns and pilot_alert_rules is never created. (On the pre-existing dev DB, prior out-of-band DDL had already added most columns and the table, which masked the true behavior during Phase 0A.) Healer 0037 restores the full intended terminal state: the 21 pilot_alerts columns, pilot_alert_rules, the FK, all indexes, pilot_alert_escalations, and the partial-open-dedup index. 0033 (the Phase 0A healer) is retained but is itself allowlisted below because it depends on artifacts 0037 provides.). Healer: 0037_heal_pilot_alerting_hardening.sql. Error: syntax error at or near "NOT"
+[migrate]   recorded 0010_pilot_alerting_hardening.sql (partial; healer 0037_heal_pilot_alerting_hardening.sql)
+[migrate] applying 0011_platform_integrations_connections.sql
+[migrate]   applied 0011_platform_integrations_connections.sql
+[migrate] applying 0012_platform_integrations_runtime.sql
+[migrate]   applied 0012_platform_integrations_runtime.sql
+[migrate] applying 0013_orchestrator_runtime_hardening.sql
+[migrate:warn] partial-apply tolerated for 0013_orchestrator_runtime_hardening.sql (SQLSTATE=2BP01; known defect: SQLSTATE 2BP01 ΓÇö `DROP INDEX "automation_commands_correlation_id_unique"` fails because that name is a UNIQUE CONSTRAINT (declared inline in 0003_redundant_starfox.sql), not a bare index; the required primitive is `ALTER TABLE ... DROP CONSTRAINT`. Phase 0A.1 clean-DB replay (see reports/audits/cupe-national-phase-0/migration-clean-run.log) proved that PG 14+ executes multi-statement Query messages in a single implicit transaction, so this runtime error rolls back ALL of 0013 ΓÇö none of the automation_commands ADD COLUMN, backfill, or SET NOT NULL statements commit on empty replay. (Dev DB was masked by prior out-of-band drizzle-kit push.) Healer 0034 therefore restores the FULL intended terminal state: 9 automation_commands columns + backfill + guarded SET NOT NULL + correct DROP CONSTRAINT + 5 indexes + automation_events org_id column + backfill + guarded SET NOT NULL + 2 indexes.). Healer: 0034_heal_orchestrator_runtime_hardening.sql. Error: cannot drop index automation_commands_correlation_id_unique because constraint automation_commands_correlation_id_unique on table automation_commands requires it
+[migrate]   recorded 0013_orchestrator_runtime_hardening.sql (partial; healer 0034_heal_orchestrator_runtime_hardening.sql)
+[migrate] applying 0014_rename_actor_user_id.sql
+[migrate]   applied 0014_rename_actor_user_id.sql
+[migrate] applying 0015_itsm_command_center.sql
+[migrate]   applied 0015_itsm_command_center.sql
+[migrate] applying 0016_pipeline_alerts.sql
+[migrate]   applied 0016_pipeline_alerts.sql
+[migrate] applying 0017_trustcore_law25.sql
+[migrate:warn] partial-apply tolerated for 0017_trustcore_law25.sql (SQLSTATE=42601; known defect: SQLSTATE 42601 ΓÇö `CREATE TYPE IF NOT EXISTS` is not valid PostgreSQL syntax through PG 17; the parser rejects the very first statement so nothing commits. Healer 0035 recreates all 14 enums (DO/EXCEPTION guarded), all 8 trustcore tables, and all 22 indexes.). Healer: 0035_heal_trustcore_law25_chain.sql. Error: syntax error at or near "NOT"
+[migrate]   recorded 0017_trustcore_law25.sql (partial; healer 0035_heal_trustcore_law25_chain.sql)
+[migrate] applying 0018_trustcore_snapshots.sql
+[migrate]   applied 0018_trustcore_snapshots.sql
+[migrate] applying 0019_trustcore_policies.sql
+[migrate:warn] partial-apply tolerated for 0019_trustcore_policies.sql (SQLSTATE=42P01; known defect: SQLSTATE 42P01 ΓÇö cascade failure from 0017. `ALTER TABLE trustcore_privacy_programs ADD COLUMN ... onboarding_completed_at` fails because the parent table was never created (0017 committed nothing). Phase 0A.1 clean-DB replay proved that under PG 14+ single-transaction semantics 0019's own preceding statements (tc_policy_type enum, trustcore_policies table, its two indexes) ALSO roll back ΓÇö nothing from 0019 commits on empty replay. Healer 0035 therefore restores BOTH the failing ALTER TABLE and the tc_policy_type enum + trustcore_policies table + its indexes.). Healer: 0035_heal_trustcore_law25_chain.sql. Error: relation "trustcore_privacy_programs" does not exist
+[migrate]   recorded 0019_trustcore_policies.sql (partial; healer 0035_heal_trustcore_law25_chain.sql)
+[migrate] applying 0020_trustcore_reminders.sql
+[migrate]   applied 0020_trustcore_reminders.sql
+[migrate] applying 0021_trustcore_subscriptions.sql
+[migrate]   applied 0021_trustcore_subscriptions.sql
+[migrate] applying 0022_trustcore_leads.sql
+[migrate]   applied 0022_trustcore_leads.sql
+[migrate] applying 0023_trustcore_risks.sql
+[migrate]   applied 0023_trustcore_risks.sql
+[migrate] applying 0024_trustops_foundations.sql
+[migrate]   applied 0024_trustops_foundations.sql
+[migrate] applying 0025_trustcore_privacy_programs_org_name.sql
+[migrate:warn] partial-apply tolerated for 0025_trustcore_privacy_programs_org_name.sql (SQLSTATE=42P01; known defect: SQLSTATE 42P01 ΓÇö cascade failure from 0017. `ALTER TABLE trustcore_privacy_programs ADD COLUMN org_name TEXT` fails because the parent table was never created. Healer 0035 restores the failing ALTER TABLE.). Healer: 0035_heal_trustcore_law25_chain.sql. Error: relation "trustcore_privacy_programs" does not exist
+[migrate]   recorded 0025_trustcore_privacy_programs_org_name.sql (partial; healer 0035_heal_trustcore_law25_chain.sql)
+[migrate] applying 0026_healthcare_discovery_surveys.sql
+[migrate]   applied 0026_healthcare_discovery_surveys.sql
+[migrate] applying 0027_seed_healthcare_unit_92.sql
+[migrate]   applied 0027_seed_healthcare_unit_92.sql
+[migrate] applying 0028_policy_lifecycle_governance.sql
+[migrate]   applied 0028_policy_lifecycle_governance.sql
+[migrate] applying 0029_itsm_automation_ticket_fields_entity_graph.sql
+[migrate]   applied 0029_itsm_automation_ticket_fields_entity_graph.sql
+[migrate] applying 0030_console_schema_bootstrap.sql
+[migrate]   applied 0030_console_schema_bootstrap.sql
+[migrate] applying 0031_idempotency_reservation_lease.sql
+[migrate]   applied 0031_idempotency_reservation_lease.sql
+[migrate] applying 0032_audit_events_canonical_hash.sql
+[migrate:warn] partial-apply tolerated for 0032_audit_events_canonical_hash.sql (SQLSTATE=42703; known defect: SQLSTATE 42703 ΓÇö `CREATE INDEX audit_events_org_occurred_idx ON audit_events (org_id, occurred_at)` fails because audit_events.org_id was never added by any SQL migration; the dev database only carries it via an out-of-band `drizzle-kit push`. Phase 0A.1 clean-DB replay proved that under PG 14+ single-transaction semantics 0032's preceding ADD COLUMN occurred_at and ADD COLUMN hash_version ALSO roll back ΓÇö nothing from 0032 commits on empty replay. Healer 0036 therefore restores all three columns (occurred_at, hash_version, org_id with FK + guarded SET NOT NULL) plus the missing index.). Healer: 0036_heal_audit_events_canonical_hash.sql. Error: column "org_id" does not exist
+[migrate]   recorded 0032_audit_events_canonical_hash.sql (partial; healer 0036_heal_audit_events_canonical_hash.sql)
+[migrate] applying 0033_fix_pilot_alerts_rule_fk.sql
+[migrate:warn] partial-apply tolerated for 0033_fix_pilot_alerts_rule_fk.sql (SQLSTATE=42P01; known defect: SQLSTATE 42P01 ΓÇö Phase 0A's 0033 healer was authored under the mistaken assumption (recorded in the original Phase 0A allowlist for 0010) that 0010 partially committed pilot_alert_rules before aborting. Phase 0A.1 clean-DB replay proved that assumption false: PostgreSQL rejects 0010 entirely at parse time when `ADD CONSTRAINT IF NOT EXISTS` is present, so pilot_alert_rules does not exist when 0033 runs on any empty database. 0033's first executable statement ΓÇö `ALTER TABLE pilot_alerts ADD CONSTRAINT pilot_alerts_rule_fk FOREIGN KEY (rule_id) REFERENCES pilot_alert_rules(id)` ΓÇö therefore raises 42P01 and the whole file aborts. 0033 lies inside the historical range that must not be modified; healer 0037 supersedes it by creating pilot_alert_rules and adding the 21 pilot_alerts columns first, then attaching the same FK and indexes. On a fully healed DB (dev, staging, or a replayed probe past 0037), 0033 is a no-op via its DO/IF NOT EXISTS guard and this allowlist entry is unreachable.). Healer: 0037_heal_pilot_alerting_hardening.sql. Error: relation "pilot_alert_rules" does not exist
+[migrate]   recorded 0033_fix_pilot_alerts_rule_fk.sql (partial; healer 0037_heal_pilot_alerting_hardening.sql)
+[migrate] applying 0034_heal_orchestrator_runtime_hardening.sql
+[migrate]   applied 0034_heal_orchestrator_runtime_hardening.sql
+[migrate] applying 0035_heal_trustcore_law25_chain.sql
+[migrate]   applied 0035_heal_trustcore_law25_chain.sql
+[migrate] applying 0036_heal_audit_events_canonical_hash.sql
+[migrate]   applied 0036_heal_audit_events_canonical_hash.sql
+[migrate] applying 0037_heal_pilot_alerting_hardening.sql
+[migrate]   applied 0037_heal_pilot_alerting_hardening.sql
+[migrate] Done. Applied 38 incremental migration(s).
+
+----- STEP 3 · --verify (Phase 0A.1 closure enforcement) -----
+[migrate] verify: bootstrap satisfied, no incremental migrations pending, every allowlisted partial is paired with an applied healer, no hash drift.

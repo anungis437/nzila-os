@@ -1,0 +1,15 @@
+
+> nzila-os@1.0.3 validate:docs C:\APPS\nzila-automation
+> tsx packages/platform-validation/src/doc-consistency.ts
+
+≡ƒô¥ Running Documentation Consistency Audit...
+
+Files scanned: 2260
+Findings:      2759
+  Errors:   0
+  Warnings: 1223
+  Info:     1536
+
+Γ£à No critical documentation errors
+Reports written to reports/doc-consistency.json and reports/doc-consistency.md
+EXIT=0

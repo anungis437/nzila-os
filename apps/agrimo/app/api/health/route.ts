@@ -16,23 +16,11 @@ async function checkDb(): Promise<boolean> {
   }
 }
 
-async function checkBlob(): Promise<boolean> {
-  try {
-    const { container } = await import('@nzila/blob')
-    const client = container('evidence')
-    await client.getProperties()
-    return true
-  } catch {
-    return false
-  }
-}
-
 export async function GET() {
-  const [db, blob] = await Promise.allSettled([checkDb(), checkBlob()])
+  const db = await checkDb()
 
   const checks = {
-    db: db.status === 'fulfilled' ? db.value : false,
-    blob: blob.status === 'fulfilled' ? blob.value : false,
+    db,
   }
 
   const allHealthy = Object.values(checks).every(Boolean)

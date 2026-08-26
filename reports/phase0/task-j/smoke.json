@@ -1,0 +1,64 @@
+{
+  "probedAt": "2026-07-21T13:38:26.9627549Z",
+  "fqdn": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+  "revision": "nzila-os-union-eyes-staging--0000090",
+  "previousRevision": "nzila-os-union-eyes-staging--0000089",
+  "imageDigest": "sha256:73b4b7bd61909a7f8e484b5244840a2ea05a62838e9494b41a859df46e8aa811",
+  "imageTags": [
+    "task-j-b328b38c4",
+    "staging-latest"
+  ],
+  "acrRunId": "cx6x",
+  "branch": "fix/union-eyes-reality-remediation",
+  "commitAtBuild": "b328b38c4b1e8e70b1b39b8faaa54100f4f4f7f5",
+  "healthState": "Healthy",
+  "runningState": "Running",
+  "version": {
+    "app": "union-eyes",
+    "environment": "production",
+    "gitSha": "b328b38c4b1e8e70b1b39b8faaa54100f4f4f7f5",
+    "buildTimestamp": "2026-07-21T13:31:11Z",
+    "artifactId": "task-j-b328b38c4",
+    "releaseId": "wave0-task-j",
+    "appVersion": "0.0.0",
+    "timestamp": "2026-07-21T13:38:25.781Z",
+    "configuredEnvironment": "production",
+    "surfaceEnvironment": "staging",
+    "runtimeEnvironment": "staging",
+    "deploymentType": "staging",
+    "featureProfile": "internal",
+    "demoProfile": null,
+    "requestHost": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
+  },
+  "health": {
+    "ok": true,
+    "status": "degraded",
+    "app": "union-eyes",
+    "environment": "production",
+    "timestamp": "2026-07-21T13:38:27.87Z",
+    "version": "0.0.0",
+    "checks": {
+      "process": {
+        "status": "ok"
+      },
+      "database": {
+        "status": "ok",
+        "critical": true,
+        "ms": 9
+      },
+      "auth": {
+        "status": "ok",
+        "critical": true
+      },
+      "redis": {
+        "status": "ok",
+        "ms": 112
+      },
+      "backend": {
+        "status": "degraded",
+        "ms": 2013,
+        "note": "returned 503"
+      }
+    }
+  }
+}

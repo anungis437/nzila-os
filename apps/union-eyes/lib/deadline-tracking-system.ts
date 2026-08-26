@@ -16,6 +16,7 @@ import {
 } from "@/db/schema";
 import { addDays, addBusinessDays, differenceInDays } from "date-fns";
 import { createLogger } from "@nzila/os-core/telemetry";
+import { scheduleGrievanceDeadlineReminders } from "@/lib/deadline-engine";
 
 const logger = createLogger("union-eyes.deadline-tracking-system");
 
@@ -518,35 +519,50 @@ function createDeadlineAlert(deadline: GrievanceDeadline): DeadlineAlert {
 // ============================================================================
 
 /**
- * Schedule reminder notifications for deadline
+ * Schedule reminder notifications for deadline via the durable deadline
+ * engine outbox (`deadline_reminders`). Wave 1 Phase A replaces the prior
+ * no-op with a real at-least-once scheduler + worker pipeline.
  */
 async function scheduleReminders(
   deadlineId: string,
-  _dueDate: Date,
-  _reminderSchedule: number[]
+  dueDate: Date,
+  reminderSchedule: number[]
 ): Promise<void> {
+  const deadline = await db.query.grievanceDeadlines.findFirst({
+    where: eq(grievanceDeadlines.id, deadlineId),
+  });
+
+  if (!deadline) return;
+
+  // Cancel legacy `notifications`-table reminders (belt-and-suspenders during
+  // the transitional period). The new outbox owns its own cancel semantics
+  // via scheduleGrievanceDeadlineReminders().
+  await cancelDeadlineReminders(deadlineId);
+
   try {
-    const deadline = await db.query.grievanceDeadlines.findFirst({
-      where: eq(grievanceDeadlines.id, deadlineId),
+    const result = await scheduleGrievanceDeadlineReminders({
+      sourceDeadlineId: deadlineId,
+      grievanceId: deadline.grievanceId,
+      dueDate,
+      reminderOffsetsInDays: reminderSchedule,
+      actor: { type: 'system', id: 'deadline-tracking-system' },
     });
 
-    if (!deadline) return;
-
-    // Cancel existing reminders
-    await cancelDeadlineReminders(deadlineId);
-
-    // NOT IMPLEMENTED: we cancel old reminders but never actually schedule new
-    // ones because the recipient/notification wiring (member + assigned
-    // steward + officer pulled from the related grievance) has not been built
-    // yet. Callers think reminders are scheduled — they are not. Warn loudly
-    // so this silent failure surfaces in deadline-tracking observability.
-    logger.warn('deadline-tracking: scheduleReminders is a no-op (cancels existing reminders only); new reminder notifications are NOT being created.', {
+    logger.info('deadline-tracking: reminders scheduled via deadline engine', {
       deadlineId,
-      dueDate: _dueDate.toISOString(),
-      reminderOffsets: _reminderSchedule,
+      correlationId: result.correlationId,
+      scheduledCount: result.scheduled.length,
+      cancelledForReschedule: result.cancelledForReschedule.length,
+      skippedRecipients: result.skipped.length,
+      skippedInPast: result.skippedInPast.length,
     });
-  } catch (_error) {
-}
+  } catch (error) {
+    logger.error('deadline-tracking: scheduleGrievanceDeadlineReminders failed', {
+      deadlineId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
 
 /**

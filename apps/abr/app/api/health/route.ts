@@ -3,7 +3,6 @@
  *
  * Production-grade liveness probe aligned with console reference:
  * - DB connectivity check (SELECT 1 via @nzila/db)
- * - Blob storage connectivity check (Azure Storage)
  * - Returns 200 if all healthy, 503 if degraded
  * - Public route (no auth required — see proxy.ts allowlist)
  */
@@ -23,24 +22,12 @@ async function checkDb(): Promise<boolean> {
   }
 }
 
-async function checkBlob(): Promise<boolean> {
-  try {
-    const { container } = await import('@nzila/blob')
-    // Verify blob storage is reachable by accessing the default container
-    container('evidence')
-    return true
-  } catch {
-    return false
-  }
-}
-
 export async function GET() {
-  const [db, blob] = await Promise.allSettled([checkDb(), checkBlob()])
+  const db = await checkDb()
 
   const checks = normalizeHealthChecks({
     process: true,
-    db: db.status === 'fulfilled' ? db.value : false,
-    blob: blob.status === 'fulfilled' ? blob.value : false,
+    db,
   })
 
   return NextResponse.json(

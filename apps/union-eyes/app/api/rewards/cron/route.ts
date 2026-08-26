@@ -119,11 +119,17 @@ return NextResponse.json({
 }
 
 /**
- * GET handler - health check
+ * GET handler — reachability probe only.
+ *
+ * Returns `reachable: true` when the process is up. Does NOT assert that
+ * scheduled tasks are running or that the reward pipeline is healthy —
+ * that would require checking queue depth, worker heartbeat, and last
+ * successful run, none of which are wired here. Do not mistake this
+ * probe for an operational status.
  */
 export async function GET(_request: NextRequest) {
   return NextResponse.json({
-    status: 'healthy',
+    reachable: true,
     service: 'rewards-cron',
     timestamp: new Date().toISOString(),
   });

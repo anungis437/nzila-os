@@ -152,8 +152,7 @@
         "/api/intelligence"
       ],
       "navLabels": [
-        "Institutional Intelligence",
-        "Institutional Intelligence Reports"
+        "Institutional Intelligence"
       ],
       "runtimeApis": [
         "/api/analytics/insights"
@@ -260,7 +259,8 @@
       "domain": "Institutional Intelligence",
       "allowedExperiences": ["staff", "executive", "governance", "admin"],
       "routePrefixes": [
-        "/dashboard/reports"
+        "/dashboard/intelligence",
+        "/dashboard/institutional-intelligence"
       ]
     }
   ],
@@ -361,8 +361,7 @@
       "Operations Continuity": "Operations",
       "Governance Continuity": "Governance Continuity",
       "Governance Trust & Oversight": "Governance Continuity",
-      "Institutional Intelligence": "Institutional Intelligence",
-      "Institutional Intelligence Reports": "Institutional Intelligence"
+      "Institutional Intelligence": "Institutional Intelligence"
     }
   },
   "constitution": {

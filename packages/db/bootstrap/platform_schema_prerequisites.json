@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Manifest for packages/db/bootstrap/0000_platform_schema_prerequisites.sql. See its header for the full narrative rationale. Introduced during Phase 0A · Migration Lineage Closure.",
+  "artifactId": "0000_platform_schema_prerequisites",
+  "artifactPath": "packages/db/bootstrap/0000_platform_schema_prerequisites.sql",
+  "runnerContract": {
+    "trackingSchema": "drizzle",
+    "trackingTable": "__platform_bootstrap",
+    "hashColumn": "hash",
+    "orderingRule": "All artifacts declared here execute before any file under packages/db/drizzle/*.sql.",
+    "failureBehavior": "The runner refuses to proceed with numbered migrations if any manifest object is missing on the target database and reconciliation has not been performed."
+  },
+  "reconciliationPolicy": {
+    "requiredChecks": [
+      "Table exists in target schema (default: public)",
+      "Every documented column exists with the declared PostgreSQL data type",
+      "Column nullability matches when the manifest declares 'notNull': true",
+      "Primary key columns exactly match 'primaryKey' in the manifest"
+    ],
+    "toleratedDifferences": [
+      "Extra columns not listed in the manifest are permitted (additive-strict).",
+      "Extra foreign keys to tables outside the baseline set are permitted.",
+      "Extra indexes are permitted.",
+      "Extra unique constraints are permitted."
+    ],
+    "driftAction": "Runner exits non-zero and lists each failed check. No baseline row is recorded. No numbered migrations run."
+  },
+  "objects": [
+    {
+      "type": "enum",
+      "name": "org_status",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/orgs.ts",
+        "export": "orgStatusEnum"
+      },
+      "reason": "Column orgs.status is typed org_status; the enum must exist before orgs is created.",
+      "firstDependentMigration": null,
+      "consumedByBaselineObject": "orgs",
+      "values": ["active", "inactive"]
+    },
+    {
+      "type": "enum",
+      "name": "commerce_order_status",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceOrderStatusEnum"
+      },
+      "reason": "Column commerce_orders.status is typed commerce_order_status.",
+      "firstDependentMigration": null,
+      "consumedByBaselineObject": "commerce_orders",
+      "values": [
+        "created",
+        "confirmed",
+        "fulfillment",
+        "shipped",
+        "delivered",
+        "completed",
+        "cancelled",
+        "return_requested",
+        "needs_attention"
+      ]
+    },
+    {
+      "type": "enum",
+      "name": "commerce_supplier_status",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceSupplierStatusEnum"
+      },
+      "reason": "Column commerce_suppliers.status is typed commerce_supplier_status.",
+      "firstDependentMigration": null,
+      "consumedByBaselineObject": "commerce_suppliers",
+      "values": ["active", "inactive", "pending", "blocked"]
+    },
+    {
+      "type": "enum",
+      "name": "commerce_product_status",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceProductStatusEnum"
+      },
+      "reason": "Column commerce_products.status is typed commerce_product_status.",
+      "firstDependentMigration": null,
+      "consumedByBaselineObject": "commerce_products",
+      "values": ["active", "inactive", "discontinued"]
+    },
+    {
+      "type": "enum",
+      "name": "commerce_purchase_order_status",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commercePurchaseOrderStatusEnum"
+      },
+      "reason": "Column commerce_purchase_orders.status is typed commerce_purchase_order_status.",
+      "firstDependentMigration": null,
+      "consumedByBaselineObject": "commerce_purchase_orders",
+      "values": [
+        "draft",
+        "sent",
+        "acknowledged",
+        "partial_received",
+        "received",
+        "cancelled"
+      ]
+    },
+    {
+      "type": "table",
+      "name": "orgs",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/orgs.ts",
+        "export": "orgs"
+      },
+      "reason": "Referenced by 15 numbered migrations (0007, 0009, 0010, 0017–0024, 0026, 0029, 0030, 0033). All org-scoped tables carry org_id uuid REFERENCES orgs(id).",
+      "firstDependentMigration": "packages/db/drizzle/0007_flow_domain_tables.sql",
+      "primaryKey": ["id"],
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "clerk_org_id", "type": "character varying", "notNull": false },
+        { "name": "legal_name", "type": "text", "notNull": true },
+        { "name": "jurisdiction", "type": "character varying", "notNull": true },
+        { "name": "incorporation_number", "type": "text", "notNull": false },
+        { "name": "registered_office_address", "type": "jsonb", "notNull": false },
+        { "name": "fiscal_year_end", "type": "character varying", "notNull": false },
+        { "name": "policy_config", "type": "jsonb", "notNull": false },
+        { "name": "status", "type": "USER-DEFINED", "notNull": true, "udtName": "org_status" },
+        { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        { "name": "updated_at", "type": "timestamp with time zone", "notNull": true }
+      ]
+    },
+    {
+      "type": "table",
+      "name": "commerce_customers",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceCustomers"
+      },
+      "reason": "Referenced by 0007_flow_domain_tables.sql (flow_payments.customer_id).",
+      "firstDependentMigration": "packages/db/drizzle/0007_flow_domain_tables.sql",
+      "primaryKey": ["id"],
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "org_id", "type": "uuid", "notNull": true },
+        { "name": "name", "type": "text", "notNull": true },
+        { "name": "email", "type": "text", "notNull": false },
+        { "name": "phone", "type": "text", "notNull": false },
+        { "name": "company", "type": "text", "notNull": false },
+        { "name": "address", "type": "jsonb", "notNull": false },
+        { "name": "notes", "type": "text", "notNull": false },
+        { "name": "metadata", "type": "jsonb", "notNull": false },
+        { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        { "name": "updated_at", "type": "timestamp with time zone", "notNull": true }
+      ]
+    },
+    {
+      "type": "table",
+      "name": "commerce_orders",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceOrders"
+      },
+      "reason": "Referenced by 0007_flow_domain_tables.sql (flow_payments.order_id, flow_production_jobs.order_id, and additional flow_* tables downstream in the same file).",
+      "firstDependentMigration": "packages/db/drizzle/0007_flow_domain_tables.sql",
+      "primaryKey": ["id"],
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "org_id", "type": "uuid", "notNull": true },
+        { "name": "customer_id", "type": "uuid", "notNull": true },
+        { "name": "quote_id", "type": "uuid", "notNull": false },
+        { "name": "ref", "type": "character varying", "notNull": true },
+        { "name": "status", "type": "USER-DEFINED", "notNull": true, "udtName": "commerce_order_status" },
+        { "name": "currency", "type": "character varying", "notNull": true },
+        { "name": "subtotal", "type": "numeric", "notNull": true },
+        { "name": "tax_total", "type": "numeric", "notNull": true },
+        { "name": "total", "type": "numeric", "notNull": true },
+        { "name": "shipping_address", "type": "jsonb", "notNull": false },
+        { "name": "billing_address", "type": "jsonb", "notNull": false },
+        { "name": "notes", "type": "text", "notNull": false },
+        { "name": "order_locked_at", "type": "timestamp with time zone", "notNull": false },
+        { "name": "metadata", "type": "jsonb", "notNull": false },
+        { "name": "payment_status", "type": "character varying", "notNull": false },
+        { "name": "production_status", "type": "character varying", "notNull": false },
+        { "name": "fulfillment_status", "type": "character varying", "notNull": false },
+        { "name": "margin_actual", "type": "numeric", "notNull": false },
+        { "name": "confirmed_at", "type": "timestamp with time zone", "notNull": false },
+        { "name": "created_by", "type": "text", "notNull": true },
+        { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        { "name": "updated_at", "type": "timestamp with time zone", "notNull": true }
+      ],
+      "notes": "quote_id FK to commerce_quotes is intentionally not asserted; commerce_quotes is not part of the baseline. Existing environments may carry a stricter FK — reconciliation treats it as additive-strict."
+    },
+    {
+      "type": "table",
+      "name": "commerce_suppliers",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceSuppliers"
+      },
+      "reason": "Referenced by 0007_flow_domain_tables.sql (flow_production_jobs.assigned_vendor_id).",
+      "firstDependentMigration": "packages/db/drizzle/0007_flow_domain_tables.sql",
+      "primaryKey": ["id"],
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "org_id", "type": "uuid", "notNull": true },
+        { "name": "name", "type": "text", "notNull": true },
+        { "name": "contact_name", "type": "text", "notNull": false },
+        { "name": "email", "type": "text", "notNull": false },
+        { "name": "phone", "type": "text", "notNull": false },
+        { "name": "address", "type": "jsonb", "notNull": false },
+        { "name": "payment_terms", "type": "character varying", "notNull": false },
+        { "name": "lead_time_days", "type": "integer", "notNull": true },
+        { "name": "rating", "type": "numeric", "notNull": false },
+        { "name": "status", "type": "USER-DEFINED", "notNull": true, "udtName": "commerce_supplier_status" },
+        { "name": "zoho_vendor_id", "type": "text", "notNull": false },
+        { "name": "notes", "type": "text", "notNull": false },
+        { "name": "tags", "type": "jsonb", "notNull": false },
+        { "name": "metadata", "type": "jsonb", "notNull": false },
+        { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        { "name": "updated_at", "type": "timestamp with time zone", "notNull": true }
+      ]
+    },
+    {
+      "type": "table",
+      "name": "commerce_products",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commerceProducts"
+      },
+      "reason": "Referenced by 0007_flow_domain_tables.sql via commerce_purchase_order_lines linkage transitively; used across Flow schema modules.",
+      "firstDependentMigration": "packages/db/drizzle/0007_flow_domain_tables.sql",
+      "primaryKey": ["id"],
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "org_id", "type": "uuid", "notNull": true },
+        { "name": "sku", "type": "character varying", "notNull": true },
+        { "name": "name", "type": "text", "notNull": true },
+        { "name": "name_fr", "type": "text", "notNull": false },
+        { "name": "description", "type": "text", "notNull": false },
+        { "name": "description_fr", "type": "text", "notNull": false },
+        { "name": "category", "type": "character varying", "notNull": true },
+        { "name": "subcategory", "type": "character varying", "notNull": false },
+        { "name": "base_price", "type": "numeric", "notNull": true },
+        { "name": "cost_price", "type": "numeric", "notNull": true },
+        { "name": "supplier_id", "type": "uuid", "notNull": false },
+        { "name": "status", "type": "USER-DEFINED", "notNull": true, "udtName": "commerce_product_status" },
+        { "name": "weight_grams", "type": "integer", "notNull": false },
+        { "name": "dimensions", "type": "text", "notNull": false },
+        { "name": "packaging_type", "type": "character varying", "notNull": false },
+        { "name": "image_url", "type": "text", "notNull": false },
+        { "name": "tags", "type": "jsonb", "notNull": false },
+        { "name": "customizable", "type": "boolean", "notNull": true },
+        { "name": "zoho_item_id", "type": "text", "notNull": false },
+        { "name": "metadata", "type": "jsonb", "notNull": false },
+        { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        { "name": "updated_at", "type": "timestamp with time zone", "notNull": true }
+      ]
+    },
+    {
+      "type": "table",
+      "name": "commerce_purchase_orders",
+      "canonicalSource": {
+        "file": "packages/db/src/schema/commerce.ts",
+        "export": "commercePurchaseOrders"
+      },
+      "reason": "Referenced by 0007_flow_domain_tables.sql (flow_production_jobs.purchase_order_id).",
+      "firstDependentMigration": "packages/db/drizzle/0007_flow_domain_tables.sql",
+      "primaryKey": ["id"],
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "org_id", "type": "uuid", "notNull": true },
+        { "name": "supplier_id", "type": "uuid", "notNull": true },
+        { "name": "order_id", "type": "uuid", "notNull": false },
+        { "name": "ref", "type": "character varying", "notNull": true },
+        { "name": "status", "type": "USER-DEFINED", "notNull": true, "udtName": "commerce_purchase_order_status" },
+        { "name": "currency", "type": "character varying", "notNull": true },
+        { "name": "subtotal", "type": "numeric", "notNull": true },
+        { "name": "tax_total", "type": "numeric", "notNull": true },
+        { "name": "shipping_cost", "type": "numeric", "notNull": true },
+        { "name": "total", "type": "numeric", "notNull": true },
+        { "name": "expected_delivery_date", "type": "timestamp with time zone", "notNull": false },
+        { "name": "actual_delivery_date", "type": "timestamp with time zone", "notNull": false },
+        { "name": "sent_at", "type": "timestamp with time zone", "notNull": false },
+        { "name": "notes", "type": "text", "notNull": false },
+        { "name": "zoho_po_id", "type": "text", "notNull": false },
+        { "name": "metadata", "type": "jsonb", "notNull": false },
+        { "name": "created_by", "type": "text", "notNull": true },
+        { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        { "name": "updated_at", "type": "timestamp with time zone", "notNull": true }
+      ]
+    }
+  ]
+}

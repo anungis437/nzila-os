@@ -1,0 +1,1231 @@
+
+> nzila-os@1.0.3 test:fast C:\APPS\nzila-automation
+> vitest run --project=!contract-tests
+
+
+ RUN  v4.1.2 C:/APPS/nzila-automation
+
+{"timestamp":"2026-07-23T05:53:06.480Z","level":"info","event":"observability.initialized","metadata":{"service":"test-app","exporter":"console","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.523Z","level":"info","event":"observability.initialized","metadata":{"service":"test-svc","exporter":"console","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.547Z","level":"info","event":"observability.initialized","metadata":{"service":"test-svc","exporter":"console","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.564Z","level":"info","event":"observability.initialized","metadata":{"service":"test","exporter":"console","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.588Z","level":"info","event":"observability.initialized","metadata":{"service":"custom","exporter":"fake","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.646Z","level":"info","event":"observability.initialized","metadata":{"service":"my-svc","exporter":"console","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.661Z","level":"info","event":"observability.initialized","metadata":{"service":"test","exporter":"console","environment":"unknown"}}
+{"timestamp":"2026-07-23T05:53:06.690Z","level":"info","event":"observability.initialized","metadata":{"service":"custom","exporter":"fake","environment":"unknown"}}
+[OTLP] Export error: fetch failed
+[OTLP] Export error: fetch failed
+{"timestamp":"2026-07-23T05:53:07.478Z","level":"info","event":"request.start","trace_id":"d335588d073c4258a5f193a1a39cd5ae","span_id":"b7cc565b9ef445a7","tenant_id":"system","actor_id":"anonymous","request_id":"4c669c8b-8988-4b0d-8c98-cc7e613170d7","metadata":{"service":"nzila","method":"GET","path":"/api/test"}}
+{"timestamp":"2026-07-23T05:53:07.486Z","level":"info","event":"request.end","trace_id":"d335588d073c4258a5f193a1a39cd5ae","span_id":"b7cc565b9ef445a7","tenant_id":"system","actor_id":"anonymous","request_id":"4c669c8b-8988-4b0d-8c98-cc7e613170d7","metadata":{"service":"nzila","method":"GET","path":"/api/test","status":200,"durationMs":11}}
+{"timestamp":"2026-07-23T05:53:07.500Z","level":"info","event":"request.start","trace_id":"d663b9678d6040d9bcc6ca4df56002dd","span_id":"4a02665d88294be4","tenant_id":"custom-tenant","actor_id":"custom-actor","request_id":"e68ee7a3-ea06-4504-a5f5-b26761cfb046","metadata":{"service":"nzila","method":"GET","path":"/api/test"}}
+{"timestamp":"2026-07-23T05:53:07.501Z","level":"info","event":"request.end","trace_id":"d663b9678d6040d9bcc6ca4df56002dd","span_id":"4a02665d88294be4","tenant_id":"custom-tenant","actor_id":"custom-actor","request_id":"e68ee7a3-ea06-4504-a5f5-b26761cfb046","metadata":{"service":"nzila","method":"GET","path":"/api/test","status":200,"durationMs":1}}
+{"timestamp":"2026-07-23T05:53:07.508Z","level":"info","event":"request.start","trace_id":"e9af894deb4549299e45a961b142d9af","span_id":"6b8457df33a44a0d","tenant_id":"system","actor_id":"anonymous","request_id":"81d532c9-73b2-4c8e-81c1-8768726d7098","metadata":{"service":"nzila","method":"GET","path":"/api/test"}}
+{"timestamp":"2026-07-23T05:53:07.497Z","level":"info","event":"observability.initialized","metadata":{"service":"test-svc","exporter":"test-exporter","environment":"test"}}
+{"timestamp":"2026-07-23T05:53:07.510Z","level":"error","event":"request.error","trace_id":"e9af894deb4549299e45a961b142d9af","span_id":"6b8457df33a44a0d","tenant_id":"system","actor_id":"anonymous","request_id":"81d532c9-73b2-4c8e-81c1-8768726d7098","metadata":{"service":"nzila","method":"GET","path":"/api/test","error":"crash"}}
+{"timestamp":"2026-07-23T05:53:07.515Z","level":"info","event":"request.start","trace_id":"b8f563021f8e49699fe00e101917fd22","span_id":"1aae957afc824ac4","tenant_id":"system","actor_id":"anonymous","request_id":"eb1dec43-2c96-4f1f-822e-40d7eeba70b3","metadata":{"service":"nzila","method":"GET","path":"/api/test"}}
+{"timestamp":"2026-07-23T05:53:07.518Z","level":"info","event":"request.end","trace_id":"b8f563021f8e49699fe00e101917fd22","span_id":"1aae957afc824ac4","tenant_id":"system","actor_id":"anonymous","request_id":"eb1dec43-2c96-4f1f-822e-40d7eeba70b3","metadata":{"service":"nzila","method":"GET","path":"/api/test","status":500,"durationMs":3}}
+{"timestamp":"2026-07-23T05:53:07.522Z","level":"info","event":"request.start","trace_id":"161e95fe08e641499c1fd1103f040d48","span_id":"f2a323a5d58c4749","tenant_id":"system","actor_id":"anonymous","request_id":"0ed36191-dcf8-4add-89fd-74dd16206c6a","metadata":{"service":"nzila","method":"GET","path":"/api/test"}}
+{"timestamp":"2026-07-23T05:53:07.523Z","level":"info","event":"request.end","trace_id":"161e95fe08e641499c1fd1103f040d48","span_id":"f2a323a5d58c4749","tenant_id":"system","actor_id":"anonymous","request_id":"0ed36191-dcf8-4add-89fd-74dd16206c6a","metadata":{"service":"nzila","method":"GET","path":"/api/test","status":200,"durationMs":1}}
+{"event":"Health check exception","severity":"warn","request_id":"d61e0826-ecdf-4729-a062-7f1d5051fe1b","correlation_id":"a2bd6ed1-72d2-4bf4-ad34-43d5aed5737e","org_id":"system","timestamp":"2026-07-23T05:53:21Z","metadata":{"check":"slow","error":"Health check 'slow' timed out after 50ms"}}
+{"event":"Span failed","severity":"error","request_id":"5c30560a-688a-4f3d-be00-bdec30cf310e","correlation_id":"de5f07a5-dcbc-4983-a232-a06631d8c94c","org_id":"system","timestamp":"2026-07-23T05:53:24Z","metadata":{"operationName":"fail-op","traceId":"e9702a2950dc0161d34ec6515a373b0a","error":"boom","durationMs":4.41}}
+{"event":"Span failed","severity":"error","request_id":"5c30560a-688a-4f3d-be00-bdec30cf310e","correlation_id":"de5f07a5-dcbc-4983-a232-a06631d8c94c","org_id":"system","timestamp":"2026-07-23T05:53:24Z","metadata":{"operationName":"fail-op-string","traceId":"fc31aa2a8dd2e0bc8f0309ad134049d1","error":"string-boom","durationMs":1.12}}
+{"event":"request_received","severity":"info","request_id":"d76a8c36-09a5-458f-bb2f-bdf129cf259d","correlation_id":"10a3580f-854b-4707-884f-14c41b7b81be","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"GET","path":"/api/test","service":"console"}}
+{"event":"request_received","severity":"info","request_id":"a29ba561-9407-45b3-b47c-5cc04d040d19","correlation_id":"5a7cac1c-a34c-4439-bcea-0843c11c204e","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"POST","path":"/api/test","service":"console"}}
+{"event":"auth_checked","severity":"info","request_id":"a29ba561-9407-45b3-b47c-5cc04d040d19","correlation_id":"5a7cac1c-a34c-4439-bcea-0843c11c204e","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"success":false,"method":"POST","path":"/api/test"}}
+{"event":"validation_passed","severity":"debug","request_id":"a29ba561-9407-45b3-b47c-5cc04d040d19","correlation_id":"5a7cac1c-a34c-4439-bcea-0843c11c204e","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"POST","path":"/api/test"}}
+{"event":"handler_started","severity":"debug","request_id":"a29ba561-9407-45b3-b47c-5cc04d040d19","correlation_id":"5a7cac1c-a34c-4439-bcea-0843c11c204e","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"POST","path":"/api/test"}}
+{"event":"handler_completed","severity":"info","request_id":"a29ba561-9407-45b3-b47c-5cc04d040d19","correlation_id":"5a7cac1c-a34c-4439-bcea-0843c11c204e","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"POST","path":"/api/test","statusCode":500,"durationMs":4}}
+{"event":"response_sent","severity":"info","request_id":"a29ba561-9407-45b3-b47c-5cc04d040d19","correlation_id":"5a7cac1c-a34c-4439-bcea-0843c11c204e","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"POST","path":"/api/test","statusCode":500,"durationMs":5,"service":"console"}}
+{"event":"request_received","severity":"info","request_id":"f2f073b1-dc0f-4f1e-b1cc-ce97da5b9a5a","correlation_id":"54f249bb-329b-4596-87bf-e43171091971","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"GET","path":"/api/test","service":"console"}}
+{"event":"auth_checked","severity":"info","request_id":"f2f073b1-dc0f-4f1e-b1cc-ce97da5b9a5a","correlation_id":"54f249bb-329b-4596-87bf-e43171091971","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"success":true,"method":"GET","path":"/api/test"}}
+{"event":"handler_completed","severity":"info","request_id":"f2f073b1-dc0f-4f1e-b1cc-ce97da5b9a5a","correlation_id":"54f249bb-329b-4596-87bf-e43171091971","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"method":"GET","path":"/api/test","statusCode":200,"durationMs":1}}
+{"event":"workflow_registered","severity":"info","request_id":"79ca8866-9ace-4fad-89f1-06b3e25acef0","correlation_id":"b2ac8db9-6193-4ebf-a4e3-ce14f74f60e1","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-1","workflowName":"procurement"}}
+{"event":"job_queued","severity":"info","request_id":"79ca8866-9ace-4fad-89f1-06b3e25acef0","correlation_id":"b2ac8db9-6193-4ebf-a4e3-ce14f74f60e1","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-1","workflowName":"procurement","jobId":"job-1"}}
+{"event":"job_started","severity":"info","request_id":"79ca8866-9ace-4fad-89f1-06b3e25acef0","correlation_id":"b2ac8db9-6193-4ebf-a4e3-ce14f74f60e1","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-1","workflowName":"procurement","jobId":"job-1"}}
+{"event":"step_completed","severity":"info","request_id":"79ca8866-9ace-4fad-89f1-06b3e25acef0","correlation_id":"b2ac8db9-6193-4ebf-a4e3-ce14f74f60e1","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-1","workflowName":"procurement","jobId":"job-1","stepName":"validate","stepIndex":0}}
+{"event":"job_succeeded","severity":"info","request_id":"79ca8866-9ace-4fad-89f1-06b3e25acef0","correlation_id":"b2ac8db9-6193-4ebf-a4e3-ce14f74f60e1","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-1","workflowName":"procurement","jobId":"job-1","durationMs":4}}
+{"event":"result_persisted","severity":"info","request_id":"79ca8866-9ace-4fad-89f1-06b3e25acef0","correlation_id":"b2ac8db9-6193-4ebf-a4e3-ce14f74f60e1","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-1","workflowName":"procurement","jobId":"job-1"}}
+{"event":"job_started","severity":"info","request_id":"3abc1dc0-0956-4450-ae62-83a325c29772","correlation_id":"ce369f55-8d1f-4e51-b87a-846681f98eed","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-2","workflowName":"onboarding","jobId":"job-2"}}
+{"event":"retry_triggered","severity":"warn","request_id":"3abc1dc0-0956-4450-ae62-83a325c29772","correlation_id":"ce369f55-8d1f-4e51-b87a-846681f98eed","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-2","workflowName":"onboarding","jobId":"job-2","attempt":2,"reason":"dependency timeout"}}
+{"event":"job_failed","severity":"error","request_id":"3abc1dc0-0956-4450-ae62-83a325c29772","correlation_id":"ce369f55-8d1f-4e51-b87a-846681f98eed","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"workflowId":"wf-2","workflowName":"onboarding","jobId":"job-2","error":"timeout","durationMs":32}}
+{"event":"webhook_received","severity":"info","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm","eventType":"contact.created"}}
+{"event":"payload_validated","severity":"info","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm","valid":true}}
+{"event":"adapter_executed","severity":"debug","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm"}}
+{"event":"provider_request","severity":"debug","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm"}}
+{"event":"provider_response","severity":"info","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm","statusCode":503,"latencyMs":320}}
+{"event":"retry_invoked","severity":"warn","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm","attempt":1,"reason":"provider unavailable"}}
+{"event":"mapping_applied","severity":"debug","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm","mappingId":"map-1"}}
+{"event":"audit_emitted","severity":"info","request_id":"dde2863a-a05b-4596-a3ab-3f6184132411","correlation_id":"aa0baf8f-da4a-436a-87fe-5b00a2b4db01","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"hubspot","channel":"crm","eventName":"integration.event"}}
+{"event":"sync_completed","severity":"info","request_id":"eb0e6ca0-e952-497d-ae1f-d4df0e797996","correlation_id":"56c2f925-1d12-43c3-8273-9b04bcefa510","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"provider":"stripe","channel":"webhooks","success":true,"durationMs":1}}
+{"event":"context_built","severity":"info","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","sourceCount":5}}
+{"event":"retrieval_performed","severity":"info","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","resultCount":10}}
+{"event":"model_invoked","severity":"info","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","model":"gpt-4o"}}
+{"event":"citations_attached","severity":"info","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","citationCount":3,"coveragePct":85}}
+{"event":"policy_checked","severity":"info","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","passed":true,"violations":0}}
+{"event":"approval_required","severity":"warn","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","reason":"manual override policy"}}
+{"event":"result_persisted","severity":"info","request_id":"aabcdd23-b6f4-4244-9e9d-1888bb3f5748","correlation_id":"c4d5716b-9b40-4958-8f57-bc412e5a5454","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-1","profileKey":"procurement-analysis","durationMs":4}}
+{"event":"model_invoked","severity":"info","request_id":"cbc0e4c5-311c-4030-b07c-862b7d2522b0","correlation_id":"c9ebc6c4-5d61-4753-9244-ee4305b1c549","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-2","profileKey":"risk-assessment","model":"gpt-4o"}}
+{"event":"unsafe_output_detected","severity":"error","request_id":"cbc0e4c5-311c-4030-b07c-862b7d2522b0","correlation_id":"c9ebc6c4-5d61-4753-9244-ee4305b1c549","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-2","profileKey":"risk-assessment","reason":"PII detected in output"}}
+{"event":"policy_checked","severity":"info","request_id":"cbc0e4c5-311c-4030-b07c-862b7d2522b0","correlation_id":"c9ebc6c4-5d61-4753-9244-ee4305b1c549","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"runId":"run-2","profileKey":"risk-assessment","passed":false,"violations":1}}
+{"event":"policy_evaluated","severity":"info","request_id":"5f34c6fe-6524-4bfe-924c-05d431e08764","correlation_id":"03b1d4dd-2564-4183-8ba5-a065ac01c6d0","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"policyId":"policy-1","passed":false}}
+{"event":"approval_requested","severity":"info","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"approvalId":"appr-1","requester":"user-1"}}
+{"event":"approval_granted","severity":"info","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"approvalId":"appr-1","approver":"admin-1"}}
+{"event":"approval_requested","severity":"info","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"approvalId":"appr-2","requester":"user-2"}}
+{"event":"approval_denied","severity":"info","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"approvalId":"appr-2","approver":"admin-1","reason":"missing evidence"}}
+{"event":"decision_recorded","severity":"info","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"decisionId":"decision-1","outcome":"approved"}}
+{"event":"audit_emitted","severity":"info","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"eventName":"approval.audit","source":"ui"}}
+{"event":"sensitive_action","severity":"warn","request_id":"08cd04ab-4d47-43a0-ad99-a31ab3f70ab0","correlation_id":"e3140968-d697-4dcd-bb7e-4b2de07c053a","org_id":"org-1","timestamp":"2026-07-23T05:53:25Z","metadata":{"action":"manual_override","actorId":"admin-1"}}
+{"event":"record_ingested","severity":"info","request_id":"c55a0489-572e-4e8c-be9f-749c562fdc76","correlation_id":"e445bdda-0970-4ecc-9a4f-66ca3e45ef18","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"hubspot","entityType":"contact"}}
+{"event":"conflict_detected","severity":"warn","request_id":"a2b8de9e-c083-45b6-bf66-5ff27cfa22f5","correlation_id":"8b9d71ec-cbd4-4417-b286-1632cfac99ef","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"qbo","recordId":"entity-1","field":"amount"}}
+{"event":"mapping_applied","severity":"info","request_id":"a2b8de9e-c083-45b6-bf66-5ff27cfa22f5","correlation_id":"8b9d71ec-cbd4-4417-b286-1632cfac99ef","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"qbo","ruleId":"map-42","entityType":"invoice"}}
+{"event":"reconciliation_performed","severity":"info","request_id":"a2b8de9e-c083-45b6-bf66-5ff27cfa22f5","correlation_id":"8b9d71ec-cbd4-4417-b286-1632cfac99ef","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"qbo","recordId":"rec-1","matched":false}}
+{"event":"reconciliation_performed","severity":"info","request_id":"a2b8de9e-c083-45b6-bf66-5ff27cfa22f5","correlation_id":"8b9d71ec-cbd4-4417-b286-1632cfac99ef","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"qbo","recordId":"rec-2","matched":true}}
+{"event":"lineage_updated","severity":"info","request_id":"a2b8de9e-c083-45b6-bf66-5ff27cfa22f5","correlation_id":"8b9d71ec-cbd4-4417-b286-1632cfac99ef","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"qbo","recordId":"rec-1"}}
+{"event":"sync_lag_updated","severity":"info","request_id":"a2b8de9e-c083-45b6-bf66-5ff27cfa22f5","correlation_id":"8b9d71ec-cbd4-4417-b286-1632cfac99ef","org_id":"platform","timestamp":"2026-07-23T05:53:25Z","metadata":{"sourceSystem":"qbo","lagMs":250}}
+{"event":"Span failed","severity":"error","request_id":"6482c96f-f770-444b-86aa-509913ea70f9","correlation_id":"075b6d5e-3de2-44c5-9c94-5aa81593f7d0","org_id":"system","timestamp":"2026-07-23T05:53:26Z","metadata":{"operationName":"explode","traceId":"a777fe6e33db1f7f3c79cdfd43d0f248","error":"operation failed","durationMs":4.42}}
+ Γ¥» |abr| app/[locale]/dashboard/courtlens/matters/[matterId]/__tests__/ReviewerActions.test.tsx (15 tests | 1 failed) 16592ms
+     ├ù Idempotency keys are unique per action (no reuse across separate mutations) 15206ms
+ Γ¥» |openapi-gen| src/__tests__/generator.test.ts (12 tests | 1 failed) 6918ms
+     ├ù includes path parameters for dynamic segments 669ms
+{"event":"request_received","severity":"info","request_id":"req-123","correlation_id":"corr-456","org_id":"platform","timestamp":"2026-07-23T05:57:15Z","metadata":{"method":"GET","path":"/health","service":"orchestrator-api"}}
+{"event":"request_received","severity":"info","request_id":"c7a5148b-6e36-4ed7-b2ff-326d108c5276","correlation_id":"abf996b9-8527-421c-a293-28ebb6d6b363","org_id":"platform","timestamp":"2026-07-23T05:57:15Z","metadata":{"method":"POST","path":"/commands","service":"orchestrator-api"}}
+{"event":"request_received","severity":"info","request_id":"8bef733c-54fc-4333-ad84-bf9035551e61","correlation_id":"944859ad-ee8a-4dfc-9160-cbf2371167c6","org_id":"platform","timestamp":"2026-07-23T05:57:15Z","metadata":{"method":"GET","path":"/health","service":"orchestrator-api"}}
+{"event":"handler_completed","severity":"info","request_id":"8bef733c-54fc-4333-ad84-bf9035551e61","correlation_id":"944859ad-ee8a-4dfc-9160-cbf2371167c6","org_id":"platform","timestamp":"2026-07-23T05:57:15Z","metadata":{"method":"GET","path":"/health","statusCode":200,"durationMs":1}}
+{"event":"response_sent","severity":"info","request_id":"8bef733c-54fc-4333-ad84-bf9035551e61","correlation_id":"944859ad-ee8a-4dfc-9160-cbf2371167c6","org_id":"platform","timestamp":"2026-07-23T05:57:15Z","metadata":{"method":"GET","path":"/health","statusCode":200,"durationMs":2,"service":"orchestrator-api"}}
+{"event":"provider_request","severity":"debug","request_id":"c907325b-0860-493b-8099-4183f9e08603","correlation_id":"faf656b1-1ced-473b-a592-572b64fcea81","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email"}}
+{"event":"provider_response","severity":"info","request_id":"c907325b-0860-493b-8099-4183f9e08603","correlation_id":"faf656b1-1ced-473b-a592-572b64fcea81","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email","statusCode":200,"latencyMs":42}}
+{"event":"sync_completed","severity":"info","request_id":"c907325b-0860-493b-8099-4183f9e08603","correlation_id":"faf656b1-1ced-473b-a592-572b64fcea81","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email","success":true,"durationMs":6}}
+{"event":"provider_response","severity":"info","request_id":"a9d01b70-b0c3-4d39-95ae-b24308ebdb13","correlation_id":"e7fdd787-4fbf-421c-a738-f0b6eeece773","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"slack","channel":"chatops","statusCode":504,"latencyMs":15001}}
+{"event":"provider_request","severity":"debug","request_id":"6a5e4730-6f72-4a28-8a8d-83b2daaaa2a4","correlation_id":"b54a1ee7-37b9-40bf-a3dc-320405e78540","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email"}}
+{"event":"provider_response","severity":"info","request_id":"6a5e4730-6f72-4a28-8a8d-83b2daaaa2a4","correlation_id":"b54a1ee7-37b9-40bf-a3dc-320405e78540","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email","statusCode":200,"latencyMs":50}}
+{"event":"sync_completed","severity":"info","request_id":"6a5e4730-6f72-4a28-8a8d-83b2daaaa2a4","correlation_id":"b54a1ee7-37b9-40bf-a3dc-320405e78540","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email","success":true,"durationMs":1}}
+{"event":"provider_request","severity":"debug","request_id":"407a1847-071e-485f-9d9f-07d80d27cb80","correlation_id":"d372cbdd-4b10-4b03-adf1-cebc0b77a0eb","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email"}}
+{"event":"provider_response","severity":"info","request_id":"407a1847-071e-485f-9d9f-07d80d27cb80","correlation_id":"d372cbdd-4b10-4b03-adf1-cebc0b77a0eb","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email","statusCode":200,"latencyMs":50}}
+{"event":"sync_completed","severity":"info","request_id":"407a1847-071e-485f-9d9f-07d80d27cb80","correlation_id":"d372cbdd-4b10-4b03-adf1-cebc0b77a0eb","org_id":"platform","timestamp":"2026-07-23T05:57:31Z","metadata":{"provider":"resend","channel":"email","success":true,"durationMs":1}}
+{"event":"record_ingested","severity":"info","request_id":"773b381a-46e8-4f0a-8b13-8838348e58d2","correlation_id":"c39f3246-a811-48c4-80c6-ac691f89c7d9","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","entityType":"Policy"}}
+{"event":"mapping_applied","severity":"info","request_id":"773b381a-46e8-4f0a-8b13-8838348e58d2","correlation_id":"c39f3246-a811-48c4-80c6-ac691f89c7d9","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","ruleId":"v1","entityType":"Policy"}}
+{"event":"data_fabric_mapping_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","sourceRecordId":"qb-inv-42","entityType":"Policy","entityId":"entity-1","mappingVersion":1}}
+{"event":"record_ingested","severity":"info","request_id":"0bfd1807-d3b4-4b90-9282-0a3dbd02b344","correlation_id":"c88404a4-44c7-4f14-955e-ce64fc5ec819","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","entityType":"Policy"}}
+{"event":"mapping_applied","severity":"info","request_id":"0bfd1807-d3b4-4b90-9282-0a3dbd02b344","correlation_id":"c88404a4-44c7-4f14-955e-ce64fc5ec819","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","ruleId":"v2","entityType":"Policy"}}
+{"event":"data_fabric_mapping_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","sourceRecordId":"custom-id-99","entityType":"Policy","entityId":"entity-2","mappingVersion":2}}
+{"event":"record_ingested","severity":"info","request_id":"09f152c2-da91-4c27-919d-a2093258092c","correlation_id":"ebacf06e-1790-459c-9612-b4affe5ff1b8","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","entityType":"Policy"}}
+{"event":"mapping_applied","severity":"info","request_id":"09f152c2-da91-4c27-919d-a2093258092c","correlation_id":"ebacf06e-1790-459c-9612-b4affe5ff1b8","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","ruleId":"v1","entityType":"Policy"}}
+{"event":"data_fabric_mapping_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","sourceRecordId":"qb-inv-42","entityType":"Policy","entityId":"entity-1","mappingVersion":1}}
+{"event":"reconciliation_performed","severity":"info","request_id":"4dc69fb0-9a8f-4f1b-82a3-c40cb061bc1a","correlation_id":"8615b513-9db6-4be2-8b60-cfe1a48f58ee","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","recordId":"entity-1","matched":true}}
+{"event":"lineage_updated","severity":"info","request_id":"4dc69fb0-9a8f-4f1b-82a3-c40cb061bc1a","correlation_id":"8615b513-9db6-4be2-8b60-cfe1a48f58ee","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","recordId":"entity-1"}}
+{"event":"audit_emitted","severity":"info","request_id":"83176e59-2009-4eac-b944-f1aa4d80bacf","correlation_id":"de92b91a-77e5-4e2c-906e-31c895640a7f","org_id":"tenant-1","timestamp":"2026-07-23T05:58:12Z","metadata":{"eventName":"data_fabric_reconciliation","entityId":"entity-1","entityType":"Policy","sourceSystem":"quickbooks","conflictCount":0,"durationMs":1}}
+{"event":"data_fabric_reconciliation_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"entityId":"entity-1","entityType":"Policy","sourceSystem":"quickbooks","persisted":true,"conflictCount":0,"durationMs":1}}
+{"event":"record_ingested","severity":"info","request_id":"e684df17-6da1-4dde-b626-c916eca4db27","correlation_id":"ad1808c3-0341-49b1-94f0-93bcd288a94d","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","entityType":"Policy"}}
+{"event":"mapping_applied","severity":"info","request_id":"e684df17-6da1-4dde-b626-c916eca4db27","correlation_id":"ad1808c3-0341-49b1-94f0-93bcd288a94d","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","ruleId":"v1","entityType":"Policy"}}
+{"event":"data_fabric_mapping_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","sourceRecordId":"qb-1","entityType":"Policy","entityId":"entity-1","mappingVersion":1}}
+{"event":"reconciliation_performed","severity":"info","request_id":"382bc3f4-464c-4ef7-af72-f13b1c7bfc50","correlation_id":"87be3445-1c2f-4115-b7f6-937151dfbffd","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","recordId":"entity-1","matched":true}}
+{"event":"lineage_updated","severity":"info","request_id":"382bc3f4-464c-4ef7-af72-f13b1c7bfc50","correlation_id":"87be3445-1c2f-4115-b7f6-937151dfbffd","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","recordId":"entity-1"}}
+{"event":"audit_emitted","severity":"info","request_id":"ecc29b79-d4c8-4007-b22b-465f1ece46e4","correlation_id":"3eb78326-e228-4d4e-a72d-d472c5960b4f","org_id":"tenant-1","timestamp":"2026-07-23T05:58:12Z","metadata":{"eventName":"data_fabric_reconciliation","entityId":"entity-1","entityType":"Policy","sourceSystem":"quickbooks","conflictCount":0,"durationMs":0}}
+{"event":"data_fabric_reconciliation_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"entityId":"entity-1","entityType":"Policy","sourceSystem":"quickbooks","persisted":true,"conflictCount":0,"durationMs":0}}
+{"event":"record_ingested","severity":"info","request_id":"dcdd52d6-3e8e-42f0-846f-327467c6f682","correlation_id":"c37a1ddd-6095-4a1d-ab11-c7d4ceeb49a0","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"xero","entityType":"Policy"}}
+{"event":"mapping_applied","severity":"info","request_id":"dcdd52d6-3e8e-42f0-846f-327467c6f682","correlation_id":"c37a1ddd-6095-4a1d-ab11-c7d4ceeb49a0","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"xero","ruleId":"v1","entityType":"Policy"}}
+{"event":"data_fabric_mapping_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"xero","sourceRecordId":"xero-1","entityType":"Policy","entityId":"entity-1","mappingVersion":1}}
+{"event":"reconciliation_performed","severity":"info","request_id":"10002e3a-22c2-48dc-b3a0-1fa13f347ebf","correlation_id":"5477efca-5a15-4973-aa3c-b44c3eee0244","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"xero","recordId":"entity-1","matched":false}}
+{"event":"conflict_detected","severity":"warn","request_id":"10002e3a-22c2-48dc-b3a0-1fa13f347ebf","correlation_id":"5477efca-5a15-4973-aa3c-b44c3eee0244","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"xero","recordId":"entity-1","field":"source_identity"}}
+{"event":"data_fabric_conflict_detected","severity":"warn","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"entityId":"entity-1","entityType":"Policy","sourceA":"quickbooks","sourceB":"xero","field":"source_identity"}}
+{"event":"lineage_updated","severity":"info","request_id":"10002e3a-22c2-48dc-b3a0-1fa13f347ebf","correlation_id":"5477efca-5a15-4973-aa3c-b44c3eee0244","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"xero","recordId":"entity-1"}}
+{"event":"audit_emitted","severity":"info","request_id":"7e61673a-675b-4e4e-a87b-a1799bf3b94a","correlation_id":"0e8a4120-6898-41fd-825d-4b5fe6ce0668","org_id":"tenant-1","timestamp":"2026-07-23T05:58:12Z","metadata":{"eventName":"data_fabric_reconciliation","entityId":"entity-1","entityType":"Policy","sourceSystem":"xero","conflictCount":1,"durationMs":2}}
+{"event":"data_fabric_reconciliation_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"entityId":"entity-1","entityType":"Policy","sourceSystem":"xero","persisted":true,"conflictCount":1,"durationMs":2}}
+{"event":"record_ingested","severity":"info","request_id":"61c99a14-7f98-4d5c-8c83-13b35300e9cb","correlation_id":"abaefa05-d7e4-45e4-bec0-c5ccc2517c75","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","entityType":"Policy"}}
+{"event":"mapping_applied","severity":"info","request_id":"61c99a14-7f98-4d5c-8c83-13b35300e9cb","correlation_id":"abaefa05-d7e4-45e4-bec0-c5ccc2517c75","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","ruleId":"v1","entityType":"Policy"}}
+{"event":"data_fabric_mapping_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","sourceRecordId":"qb-inv-42","entityType":"Policy","entityId":"new-entity","mappingVersion":1}}
+{"event":"reconciliation_performed","severity":"info","request_id":"f599f843-f4cd-41b2-b169-be15826ca47f","correlation_id":"9e703c80-5767-4f07-9d41-6d131dc29712","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","recordId":"new-entity","matched":true}}
+{"event":"lineage_updated","severity":"info","request_id":"f599f843-f4cd-41b2-b169-be15826ca47f","correlation_id":"9e703c80-5767-4f07-9d41-6d131dc29712","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"sourceSystem":"quickbooks","recordId":"new-entity"}}
+{"event":"audit_emitted","severity":"info","request_id":"c109b398-1f71-4c5d-8c49-728fa8fc0bce","correlation_id":"d67ffbc1-81cc-468f-98fc-b2244edea2fe","org_id":"tenant-1","timestamp":"2026-07-23T05:58:12Z","metadata":{"eventName":"data_fabric_reconciliation","entityId":"new-entity","entityType":"Policy","sourceSystem":"quickbooks","conflictCount":0,"durationMs":0}}
+{"event":"data_fabric_reconciliation_completed","severity":"info","request_id":"4692a265-34d3-4124-ac54-e508a1454142","correlation_id":"94e675cd-0937-4109-a589-dc160e84dd16","org_id":"platform","timestamp":"2026-07-23T05:58:12Z","metadata":{"entityId":"new-entity","entityType":"Policy","sourceSystem":"quickbooks","persisted":true,"conflictCount":0,"durationMs":0}}
+{"event":"event_subscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"53bf62b6-64f7-4503-90dd-9c96c488287b","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"69c6d97d-5210-49bf-a72d-a627f8b52d1a","correlation_id":"8f2156cb-a361-4fa1-9052-fa01793a1fd9","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"53bf62b6-64f7-4503-90dd-9c96c488287b"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"73ce67d0-0c37-4e59-867b-de35f7997ec5","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"88b0c7b5-e65b-4a4d-8afc-e1324f7e2f2f","correlation_id":"c4688c60-e313-4fd3-a810-161c5d7cf5e1","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"73ce67d0-0c37-4e59-867b-de35f7997ec5"}}
+{"event":"event_replay_requested","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","since":"2000-01-01"}}
+{"event":"event_subscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"a56238c0-c795-41ad-b2cd-365926428770","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"65dbf98e-b898-46ef-a853-c4f485d1b33c","correlation_id":"a5093459-645d-4f23-adf9-6c7a519b4647","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"a56238c0-c795-41ad-b2cd-365926428770"}}
+{"event":"event_handler_error","severity":"error","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"a56238c0-c795-41ad-b2cd-365926428770","error":"handler-boom"}}
+{"event":"event_subscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_subscribed_all","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{}}
+{"event":"event_unsubscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_unsubscribed_all","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{}}
+{"event":"event_subscribed_all","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"57b9f9b4-a074-42c1-a0cf-ff11021648a5","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"b8de56bc-0197-4cee-974b-cbbe33c6dc27","correlation_id":"39b42b1d-f6f8-44d7-83ab-3b6856fb9483","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"57b9f9b4-a074-42c1-a0cf-ff11021648a5"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.completed","eventId":"784a03de-a9ef-4a85-846f-d5e9f29e4f29","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"b8de56bc-0197-4cee-974b-cbbe33c6dc27","correlation_id":"39b42b1d-f6f8-44d7-83ab-3b6856fb9483","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.completed","eventId":"784a03de-a9ef-4a85-846f-d5e9f29e4f29"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"1fc10021-3ee0-429e-b45f-4b410e2fe405","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"795182e3-639c-4444-be94-b0be9bcd1e8c","correlation_id":"bcf02cc7-b024-4d30-9db1-9097af809dda","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"1fc10021-3ee0-429e-b45f-4b410e2fe405"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"cc66c879-cd5d-4c6a-96a2-fe73e29cd2fd","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"795182e3-639c-4444-be94-b0be9bcd1e8c","correlation_id":"bcf02cc7-b024-4d30-9db1-9097af809dda","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"cc66c879-cd5d-4c6a-96a2-fe73e29cd2fd"}}
+{"event":"event_replay_requested","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","since":"2000-01-01"}}
+{"event":"event_replay_requested","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","since":"2000-01-01"}}
+{"event":"event_subscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_bus_cleared","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"6547e345-80b8-4628-bc37-21d242d5c8b9","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"4b83e7b9-d57c-40af-bc30-704bafa7b4a3","correlation_id":"d252bf05-b57a-4ab1-be0a-ee49a964effb","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"6547e345-80b8-4628-bc37-21d242d5c8b9"}}
+{"event":"event_subscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"fff8b7c7-9424-418b-8788-e016506c4651","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"2c539079-7afa-47f5-9fc1-4a4046faa999","correlation_id":"531721ae-0a6a-4b92-88cd-103f426506b4","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"fff8b7c7-9424-418b-8788-e016506c4651"}}
+{"event":"event_handler_error","severity":"error","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"fff8b7c7-9424-418b-8788-e016506c4651","error":"no-callback-boom"}}
+{"event":"event_subscribed","severity":"debug","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started"}}
+{"event":"event_published","severity":"info","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"7307a043-c43e-47ab-ba9d-eeca57107b2b","source":"test","actorId":"test-user"}}
+{"event":"audit_emitted","severity":"info","request_id":"c3b1fbae-a2a9-4897-94bb-37861d8ffaa8","correlation_id":"fb04c39f-45b9-4fe7-a4e9-ca3eadd44969","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventName":"event_published","eventType":"workflow.started","eventId":"7307a043-c43e-47ab-ba9d-eeca57107b2b"}}
+{"event":"event_handler_error","severity":"error","request_id":"020349c2-68fd-4841-9393-e6f9d9faa75b","correlation_id":"095307bc-c5bc-4695-89d5-74f0abcdec5a","org_id":"platform","timestamp":"2026-07-23T05:58:35Z","metadata":{"eventType":"workflow.started","eventId":"7307a043-c43e-47ab-ba9d-eeca57107b2b","error":"string-error"}}
+{"event":"context_built","severity":"info","request_id":"921dc380-1719-4a6b-9350-b473cf08003c","correlation_id":"5221acea-877d-46b1-90d7-2b0f8e77205d","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"973c552e-3121-4f72-b681-a2e2eabd197d","profileKey":"classify","sourceCount":0}}
+{"event":"ai_run_started","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"973c552e-3121-4f72-b681-a2e2eabd197d","operationType":"classify","entityType":"policy","entityId":"policy-123","tenantId":"tenant-1","modelId":"gpt-4"}}
+{"event":"policy_checked","severity":"info","request_id":"921dc380-1719-4a6b-9350-b473cf08003c","correlation_id":"5221acea-877d-46b1-90d7-2b0f8e77205d","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"973c552e-3121-4f72-b681-a2e2eabd197d","profileKey":"classify","passed":true,"violations":0}}
+{"event":"model_invoked","severity":"info","request_id":"921dc380-1719-4a6b-9350-b473cf08003c","correlation_id":"5221acea-877d-46b1-90d7-2b0f8e77205d","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"973c552e-3121-4f72-b681-a2e2eabd197d","profileKey":"classify","model":"gpt-4"}}
+{"event":"result_persisted","severity":"info","request_id":"921dc380-1719-4a6b-9350-b473cf08003c","correlation_id":"5221acea-877d-46b1-90d7-2b0f8e77205d","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"973c552e-3121-4f72-b681-a2e2eabd197d","profileKey":"classify","durationMs":16}}
+{"event":"audit_emitted","severity":"info","request_id":"b2f98bf0-80db-4d47-9032-cbd0bf1e2c95","correlation_id":"c55e4a1b-8a25-43ef-b3aa-5437710b98ba","org_id":"tenant-1","timestamp":"2026-07-23T05:58:41Z","metadata":{"eventName":"ai_run_completed","runId":"10fdec85-f1ff-4aab-aa48-0a64a5ad8a03","operationType":"classify","modelId":"gpt-4","confidence":0.92}}
+{"event":"ai_run_completed","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"10fdec85-f1ff-4aab-aa48-0a64a5ad8a03","operationType":"classify","confidence":0.92,"latencyMs":0.5902999999998428}}
+{"event":"context_built","severity":"info","request_id":"385660b8-e97c-444b-8f0d-4a2cd3a1037d","correlation_id":"ff85064e-3d12-439a-908c-06ff39cf6b3c","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"03f9d95d-17fb-4b05-b2d5-5ae1e2ee7851","profileKey":"classify","sourceCount":0}}
+{"event":"ai_run_started","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"03f9d95d-17fb-4b05-b2d5-5ae1e2ee7851","operationType":"classify","entityType":"policy","entityId":"policy-123","tenantId":"tenant-1","modelId":"gpt-4"}}
+{"event":"policy_checked","severity":"info","request_id":"385660b8-e97c-444b-8f0d-4a2cd3a1037d","correlation_id":"ff85064e-3d12-439a-908c-06ff39cf6b3c","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"03f9d95d-17fb-4b05-b2d5-5ae1e2ee7851","profileKey":"classify","passed":false,"violations":1}}
+{"event":"policy_evaluated","severity":"info","request_id":"a9248774-19bd-4eac-9aba-2cf44790549c","correlation_id":"c2a37246-5738-4ad6-813c-b6447bc8862e","org_id":"tenant-1","timestamp":"2026-07-23T05:58:41Z","metadata":{"policyId":"classify","passed":false}}
+{"event":"ai_run_rejected_by_policy","severity":"warn","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"11ebfe9e-4e69-4e79-b2bb-7a90103201bc","operationType":"classify","violations":1,"reasoning":"Blocked by policies: data-residency","latencyMs":6.21769999999924}}
+{"event":"context_built","severity":"info","request_id":"77d10dfd-9dc9-4935-939f-5013281898ae","correlation_id":"e4490d08-d81d-493c-a2b7-33f30280b93e","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"fe02029d-a085-4921-b0c2-05ee199e0f4a","profileKey":"classify","sourceCount":0}}
+{"event":"ai_run_started","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"fe02029d-a085-4921-b0c2-05ee199e0f4a","operationType":"classify","entityType":"policy","entityId":"policy-123","tenantId":"tenant-1","modelId":"gpt-4"}}
+{"event":"policy_checked","severity":"info","request_id":"77d10dfd-9dc9-4935-939f-5013281898ae","correlation_id":"e4490d08-d81d-493c-a2b7-33f30280b93e","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"fe02029d-a085-4921-b0c2-05ee199e0f4a","profileKey":"classify","passed":true,"violations":0}}
+{"event":"model_invoked","severity":"info","request_id":"77d10dfd-9dc9-4935-939f-5013281898ae","correlation_id":"e4490d08-d81d-493c-a2b7-33f30280b93e","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"fe02029d-a085-4921-b0c2-05ee199e0f4a","profileKey":"classify","model":"gpt-4"}}
+{"event":"ai_run_failed","severity":"error","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"900b1706-8aef-438f-8b13-71ce1b4c7870","operationType":"classify","reasoning":"model-error","latencyMs":0.8048999999991793}}
+{"event":"context_built","severity":"info","request_id":"9794ffa5-fb18-4d49-a4fb-b039327b1f29","correlation_id":"5953aa9e-4e87-4c7a-a582-2c68d8116061","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"1240b3b0-d596-4861-af2d-a569aceed028","profileKey":"classify","sourceCount":1}}
+{"event":"ai_run_started","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"1240b3b0-d596-4861-af2d-a569aceed028","operationType":"classify","entityType":"policy","entityId":"policy-123","tenantId":"tenant-1","modelId":"gpt-4"}}
+{"event":"policy_checked","severity":"info","request_id":"9794ffa5-fb18-4d49-a4fb-b039327b1f29","correlation_id":"5953aa9e-4e87-4c7a-a582-2c68d8116061","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"1240b3b0-d596-4861-af2d-a569aceed028","profileKey":"classify","passed":true,"violations":0}}
+{"event":"model_invoked","severity":"info","request_id":"9794ffa5-fb18-4d49-a4fb-b039327b1f29","correlation_id":"5953aa9e-4e87-4c7a-a582-2c68d8116061","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"1240b3b0-d596-4861-af2d-a569aceed028","profileKey":"classify","model":"gpt-4"}}
+{"event":"citations_attached","severity":"info","request_id":"9794ffa5-fb18-4d49-a4fb-b039327b1f29","correlation_id":"5953aa9e-4e87-4c7a-a582-2c68d8116061","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"1240b3b0-d596-4861-af2d-a569aceed028","profileKey":"classify","citationCount":1,"coveragePct":92}}
+{"event":"result_persisted","severity":"info","request_id":"9794ffa5-fb18-4d49-a4fb-b039327b1f29","correlation_id":"5953aa9e-4e87-4c7a-a582-2c68d8116061","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"1240b3b0-d596-4861-af2d-a569aceed028","profileKey":"classify","durationMs":3}}
+{"event":"audit_emitted","severity":"info","request_id":"ff9cf042-4323-426c-8b18-cbac0a3a4745","correlation_id":"be4b4094-89f9-4ba3-875a-d474d9251107","org_id":"tenant-1","timestamp":"2026-07-23T05:58:41Z","metadata":{"eventName":"ai_run_completed","runId":"e4a21931-2c27-4ce2-8e7c-d85276336c61","operationType":"classify","modelId":"gpt-4","confidence":0.92}}
+{"event":"ai_run_completed","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"e4a21931-2c27-4ce2-8e7c-d85276336c61","operationType":"classify","confidence":0.92,"latencyMs":0.13650000000052387}}
+{"event":"context_built","severity":"info","request_id":"127e2eda-6ada-47b2-8934-881d24fa503f","correlation_id":"bba2897f-685a-45f9-8bc4-b0741ec08e12","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"013a0c85-8eb7-4afc-b2e0-4283204571a8","profileKey":"classify","sourceCount":0}}
+{"event":"ai_run_started","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"013a0c85-8eb7-4afc-b2e0-4283204571a8","operationType":"classify","entityType":"policy","entityId":"policy-123","tenantId":"tenant-1","modelId":"gpt-4"}}
+{"event":"policy_checked","severity":"info","request_id":"127e2eda-6ada-47b2-8934-881d24fa503f","correlation_id":"bba2897f-685a-45f9-8bc4-b0741ec08e12","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"013a0c85-8eb7-4afc-b2e0-4283204571a8","profileKey":"classify","passed":true,"violations":0}}
+{"event":"model_invoked","severity":"info","request_id":"127e2eda-6ada-47b2-8934-881d24fa503f","correlation_id":"bba2897f-685a-45f9-8bc4-b0741ec08e12","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"013a0c85-8eb7-4afc-b2e0-4283204571a8","profileKey":"classify","model":"gpt-4"}}
+{"event":"result_persisted","severity":"info","request_id":"127e2eda-6ada-47b2-8934-881d24fa503f","correlation_id":"bba2897f-685a-45f9-8bc4-b0741ec08e12","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"013a0c85-8eb7-4afc-b2e0-4283204571a8","profileKey":"classify","durationMs":2}}
+{"event":"audit_emitted","severity":"info","request_id":"c86cf314-7ed0-4a37-8224-a610fac146eb","correlation_id":"9a29813f-49a2-4407-a67b-17f414bf8672","org_id":"tenant-1","timestamp":"2026-07-23T05:58:41Z","metadata":{"eventName":"ai_run_completed","runId":"aeec87a0-2eb6-4d5a-8ba4-9dbf675ed0b5","operationType":"classify","modelId":"gpt-4","confidence":0.92}}
+{"event":"ai_run_completed","severity":"info","request_id":"4f8279de-cf10-408e-856d-9ca2141fc807","correlation_id":"b4bd4c96-6217-4fcc-b132-3da14ae2408f","org_id":"platform","timestamp":"2026-07-23T05:58:41Z","metadata":{"runId":"aeec87a0-2eb6-4d5a-8ba4-9dbf675ed0b5","operationType":"classify","confidence":0.92,"latencyMs":0.16669999999976426}}
+ΓÜá∩╕Å [2026-07-23T05:59:36.420Z] [WARN] [13e631f3-da8d-4223-be1d-a429b0924a91] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "File is required",
+  "statusCode": 400,
+  "traceId": "mrx3q5sx-d2f59391"
+}
+ΓÜá∩╕Å [2026-07-23T05:59:36.482Z] [WARN] [13e631f3-da8d-4223-be1d-a429b0924a91] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Forbidden",
+  "statusCode": 403,
+  "traceId": "mrx3q5up-b44a5ed6"
+}
+ΓÜá∩╕Å [2026-07-23T05:59:36.662Z] [WARN] [13e631f3-da8d-4223-be1d-a429b0924a91] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "organizationId is required",
+  "statusCode": 400,
+  "traceId": "mrx3q5zp-cc488c02"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:20.612Z] [WARN] [571e2d6c-a307-45cb-b54a-bf5e02a2868a] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "No organization found",
+  "statusCode": 403,
+  "traceId": "mrx3r3we-154d26bf"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:20.707Z] [WARN] [571e2d6c-a307-45cb-b54a-bf5e02a2868a] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrx3r3z6-c2c24602",
+  "details": {
+    "resetIn": 25
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:00:20.782Z] [WARN] [571e2d6c-a307-45cb-b54a-bf5e02a2868a] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid request data",
+  "statusCode": 400,
+  "traceId": "mrx3r419-4cc376ee",
+  "details": {
+    "value": "[object Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:00:20.812Z] [WARN] [571e2d6c-a307-45cb-b54a-bf5e02a2868a] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "Campaign ID required",
+  "statusCode": 400,
+  "traceId": "mrx3r423-13f47f6b"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:20.821Z] [WARN] [571e2d6c-a307-45cb-b54a-bf5e02a2868a] API Error Response
+  Context: {
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Campaign not found",
+  "statusCode": 404,
+  "traceId": "mrx3r42d-15d1399b"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:20.853Z] [WARN] [571e2d6c-a307-45cb-b54a-bf5e02a2868a] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid data type",
+  "statusCode": 400,
+  "traceId": "mrx3r439-670971bf"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:23.878Z] [WARN] [71d5bd5c-18bc-4f96-a1f3-71ecbb449f82] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "No organization found",
+  "statusCode": 403,
+  "traceId": "mrx3r6f7-ca87bb1e"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:23.976Z] [WARN] [71d5bd5c-18bc-4f96-a1f3-71ecbb449f82] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrx3r6i0-a325d6e5",
+  "details": {
+    "resetIn": 42
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:00:24.088Z] [WARN] [71d5bd5c-18bc-4f96-a1f3-71ecbb449f82] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Unsupported platform",
+  "statusCode": 400,
+  "traceId": "mrx3r6l4-fa883a1a"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:24.100Z] [WARN] [71d5bd5c-18bc-4f96-a1f3-71ecbb449f82] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "Account ID required",
+  "statusCode": 400,
+  "traceId": "mrx3r6lf-046cbf01"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:24.130Z] [WARN] [71d5bd5c-18bc-4f96-a1f3-71ecbb449f82] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrx3r6ma-0b44d96c"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:24.190Z] [WARN] [71d5bd5c-18bc-4f96-a1f3-71ecbb449f82] API Error Response
+  Context: {
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Account not found",
+  "statusCode": 404,
+  "traceId": "mrx3r6nx-e24322fa"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:41.314Z] [WARN] [8390a437-5081-45f9-89cc-de9eaf68ce11] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "No organization found",
+  "statusCode": 403,
+  "traceId": "mrx3rjvj-f2295f09"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:41.507Z] [WARN] [8390a437-5081-45f9-89cc-de9eaf68ce11] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrx3rk0y-c5a1c391",
+  "details": {
+    "resetIn": 17
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:00:41.581Z] [WARN] [8390a437-5081-45f9-89cc-de9eaf68ce11] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "At least one platform is required",
+  "statusCode": 400,
+  "traceId": "mrx3rk31-17ea0c33"
+}
+ΓÜá∩╕Å [2026-07-23T06:00:41.612Z] [WARN] [8390a437-5081-45f9-89cc-de9eaf68ce11] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Start date must be before end date",
+  "statusCode": 400,
+  "traceId": "mrx3rk3v-d18369ed"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:38.635Z] [WARN] [20fc6f06-40a7-4b20-b5e1-95f33a34660f] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrx3ss3o-ca340b6f"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:38.711Z] [WARN] [20fc6f06-40a7-4b20-b5e1-95f33a34660f] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires steward role or above",
+  "statusCode": 403,
+  "traceId": "mrx3ss5y-513449ac"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:40.292Z] [WARN] [1ca8c626-1520-4730-8d74-b78754f348d0] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrx3stds-d949c1e9"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:40.333Z] [WARN] [1074779c-3477-4be1-9f6e-b285a445b0ab] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing connection ID",
+  "statusCode": 400,
+  "traceId": "mrx3stey-e64cb79e"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:40.397Z] [WARN] [1ca8c626-1520-4730-8d74-b78754f348d0] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrx3stgt-29b5d9d7"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:40.420Z] [WARN] [1ca8c626-1520-4730-8d74-b78754f348d0] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Grievance not found",
+  "statusCode": 404,
+  "traceId": "mrx3sthg-dc2da3c7"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:40.444Z] [WARN] [1074779c-3477-4be1-9f6e-b285a445b0ab] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid sync payload",
+  "statusCode": 400,
+  "traceId": "mrx3sti3-4fa1ebdc",
+  "details": {
+    "formErrors": "[Object]",
+    "fieldErrors": "[Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:01:40.489Z] [WARN] [1ca8c626-1520-4730-8d74-b78754f348d0] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You can only view your own submissions.",
+  "statusCode": 403,
+  "traceId": "mrx3stjc-9a000c9c"
+}
+Γ¥î [2026-07-23T06:01:40.521Z] [ERROR] [1ca8c626-1520-4730-8d74-b78754f348d0] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to fetch grievance",
+  "statusCode": 500,
+  "traceId": "mrx3stk8-c6d69058"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:43.541Z] [WARN] [9798de90-e2f8-4f28-82d4-a852cfa5b140] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrx3svw1-2e7753ad"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:43.635Z] [WARN] [9798de90-e2f8-4f28-82d4-a852cfa5b140] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires steward role or above",
+  "statusCode": 403,
+  "traceId": "mrx3svyq-7180c05f"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:43.658Z] [WARN] [9798de90-e2f8-4f28-82d4-a852cfa5b140] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Grievance not found",
+  "statusCode": 404,
+  "traceId": "mrx3svzc-7562b3f3"
+}
+Γ¥î [2026-07-23T06:01:43.789Z] [ERROR] [9798de90-e2f8-4f28-82d4-a852cfa5b140] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to suggest clauses",
+  "statusCode": 500,
+  "traceId": "mrx3sw2z-ed047054"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:50.387Z] [WARN] [1ad0a98c-fb0f-474a-9d7c-b184137cb681] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid semantic search request",
+  "statusCode": 400,
+  "traceId": "mrx3t167-4e9760e1",
+  "details": {
+    "value": "[object Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:01:54.211Z] [WARN] [8c77a180-1187-4e16-a65b-39e872271bf1] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing grievance ID",
+  "statusCode": 400,
+  "traceId": "mrx3t44g-65c0786d"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:57.627Z] [WARN] [8df1cb44-aca7-449b-8144-7260c18297c6] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing grievance ID",
+  "statusCode": 400,
+  "traceId": "mrx3t6rc-81f6a4fc"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:57.647Z] [WARN] [b06df5df-bf24-471f-95be-b00ac70562b6] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Only a chief steward or above can override priorities.",
+  "statusCode": 403,
+  "traceId": "mrx3t6rv-95d8da97"
+}
+ΓÜá∩╕Å [2026-07-23T06:01:57.674Z] [WARN] [8df1cb44-aca7-449b-8144-7260c18297c6] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrx3t6sq-9186c183"
+}
+Γ¥î [2026-07-23T06:01:57.757Z] [ERROR] [b06df5df-bf24-471f-95be-b00ac70562b6] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to override priority",
+  "statusCode": 500,
+  "traceId": "mrx3t6v0-556f5dc5"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:16.810Z] [WARN] [68753227-cbf2-47c0-a3ad-1e5493a03a81] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Only steward or above can import cases",
+  "statusCode": 403,
+  "traceId": "mrx3tlk0-c3523575"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:16.889Z] [WARN] [68753227-cbf2-47c0-a3ad-1e5493a03a81] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON request body",
+  "statusCode": 400,
+  "traceId": "mrx3tlmh-0baaad3a"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:16.930Z] [WARN] [68753227-cbf2-47c0-a3ad-1e5493a03a81] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "No rows found in import payload",
+  "statusCode": 400,
+  "traceId": "mrx3tlnm-00f5b9df"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:16.951Z] [WARN] [68753227-cbf2-47c0-a3ad-1e5493a03a81] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Import session not found for this organization",
+  "statusCode": 404,
+  "traceId": "mrx3tlo7-b0ee66ec"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:27.145Z] [WARN] [8b5c827b-c2d7-42e4-8366-9872b1414776] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires officer role or above",
+  "statusCode": 403,
+  "traceId": "mrx3ttj5-ae6ea064"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:27.227Z] [WARN] [8b5c827b-c2d7-42e4-8366-9872b1414776] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Checklist item not found",
+  "statusCode": 404,
+  "traceId": "mrx3ttlm-f204e507"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:40.090Z] [WARN] [85bace32-f850-4ce7-a3a1-628453951773] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrx3u3it-88a2211d"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:40.173Z] [WARN] [85bace32-f850-4ce7-a3a1-628453951773] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Search query must be at least 2 characters",
+  "statusCode": 400,
+  "traceId": "mrx3u3l9-e5597451"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:47.311Z] [WARN] [b6a75c07-ce12-4e12-b5f0-0d9e51524adb] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrx3u93g-e30dffce"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:47.510Z] [WARN] [b6a75c07-ce12-4e12-b5f0-0d9e51524adb] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrx3u991-17a91c3c"
+}
+ΓÜá∩╕Å [2026-07-23T06:02:47.545Z] [WARN] [b6a75c07-ce12-4e12-b5f0-0d9e51524adb] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid document payload",
+  "statusCode": 400,
+  "traceId": "mrx3u9a0-81abc505",
+  "details": {
+    "formErrors": "[Object]",
+    "fieldErrors": "[Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:02:47.566Z] [WARN] [b6a75c07-ce12-4e12-b5f0-0d9e51524adb] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Blob does not exist",
+  "statusCode": 400,
+  "traceId": "mrx3u9al-87e6df90"
+}
+(node:7896) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7896) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:28084) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:28084) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:54876) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:54876) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ΓÜá∩╕Å [2026-07-23T06:04:17.979Z] [WARN] [5d605e63-5e86-4506-a0f4-246a23c81174] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "AI rate limit exceeded.",
+  "statusCode": 429,
+  "traceId": "mrx3w71e-a4f9117b"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:18.064Z] [WARN] [5d605e63-5e86-4506-a0f4-246a23c81174] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid copilot input",
+  "statusCode": 400,
+  "traceId": "mrx3w74e-55d11077",
+  "details": {
+    "formErrors": "[Object]",
+    "fieldErrors": "[Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:04:20.681Z] [WARN] [5afe3938-4438-4130-bf43-0d3c2034085a] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid request data",
+  "statusCode": 400,
+  "traceId": "mrx3w950-3b0f20f3",
+  "details": {
+    "value": "[object Object]"
+  }
+}
+Γ¥î [2026-07-23T06:04:20.782Z] [ERROR] [5afe3938-4438-4130-bf43-0d3c2034085a] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Internal server error",
+  "statusCode": 500,
+  "traceId": "mrx3w96y-a8fc449b",
+  "details": {
+    "message": "Cannot read properties of undefined (reading 'searchParams')",
+    "name": "TypeError"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:04:21.218Z] [WARN] [10b7796d-5b0e-47b2-8be0-5453d778f964] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid precedent matching request",
+  "statusCode": 400,
+  "traceId": "mrx3w9jz-df7ed6f0",
+  "details": {
+    "value": "[object Object],[object Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:04:22.150Z] [WARN] [184f1c1f-5773-4e9e-bc45-34d4490d6f41] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrx3wa9v-368aeeaa"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:22.236Z] [WARN] [184f1c1f-5773-4e9e-bc45-34d4490d6f41] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires steward role or above",
+  "statusCode": 403,
+  "traceId": "mrx3wacc-eb77635e"
+}
+Γ¥î [2026-07-23T06:04:22.232Z] [ERROR] [58063192-5b73-4f22-ba90-2367dfadd161] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to fetch user role",
+  "statusCode": 500,
+  "traceId": "mrx3waau-9843638b",
+  "details": {
+    "message": "Cannot read properties of undefined (reading 'searchParams')",
+    "name": "TypeError"
+  }
+}
+Γ¥î [2026-07-23T06:04:22.344Z] [ERROR] [58063192-5b73-4f22-ba90-2367dfadd161] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to fetch user role",
+  "statusCode": 500,
+  "traceId": "mrx3wafa-831f8c07",
+  "details": {
+    "message": "Cannot read properties of undefined (reading 'searchParams')",
+    "name": "TypeError"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:04:22.735Z] [WARN] [6eff4636-63e8-4eb5-abdc-ef3a21c2cdf0] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Authentication and organization context required",
+  "statusCode": 401,
+  "traceId": "mrx3waq4-c807f6d7"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:22.800Z] [WARN] [6eff4636-63e8-4eb5-abdc-ef3a21c2cdf0] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Authentication and organization context required",
+  "statusCode": 401,
+  "traceId": "mrx3wary-4c837a16"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.085Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.113Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.119Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.129Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "officer-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.135Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.174Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.177Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-2",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.212Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-fallback",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:42.221Z] [WARN] [f8055ccc-085e-43fd-8418-7f0498692034] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "officer-1",
+  "role": "union_steward"
+}
+Γ¥î [2026-07-23T06:04:58.930Z] [ERROR] [d532df8e-b775-4ed5-9e97-1cf86e968392] API Error Response
+  Context: {
+  "code": "NOT_IMPLEMENTED",
+  "message": "Legacy documents endpoint is disabled. Use /api/documents/repository.",
+  "statusCode": 501,
+  "traceId": "mrx3x2ng-8046af1d"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:58.943Z] [WARN] [88a83ec3-0ed7-484f-8869-4a403a20266b] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "organizationId is required",
+  "statusCode": 400,
+  "traceId": "mrx3x2nv-2208cea1"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.001Z] [WARN] [3d998766-0046-4585-92b9-527d523c6f1a] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You do not have access to this organization's documents",
+  "statusCode": 403,
+  "traceId": "mrx3x2pk-5882753a"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.051Z] [WARN] [84e67000-21e8-4fe0-9ed3-7f692f69667f] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "organizationId is required",
+  "statusCode": 400,
+  "traceId": "mrx3x2qz-599efa7a"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.075Z] [WARN] [75c81832-61dc-43cf-8221-9143faefb694] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You do not have access to this organization's documents",
+  "statusCode": 403,
+  "traceId": "mrx3x2rn-b8b51567"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.077Z] [WARN] [d24cf257-6ab3-4355-9f57-fb803bb6ad9a] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON in request body",
+  "statusCode": 400,
+  "traceId": "mrx3x2ro-d8cbc626"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.111Z] [WARN] [4013b8a1-b30c-4cda-ae47-224ae28316e4] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Forbidden",
+  "statusCode": 403,
+  "traceId": "mrx3x2sm-6c47195d"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.181Z] [WARN] [4f559bf4-7b37-45b6-bb09-2e489c97de41] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON in request body",
+  "statusCode": 400,
+  "traceId": "mrx3x2ul-dadfb0ab"
+}
+ΓÜá∩╕Å [2026-07-23T06:04:59.228Z] [WARN] [005f47fa-c0d6-4517-bed1-8473a3a37d0b] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Forbidden",
+  "statusCode": 403,
+  "traceId": "mrx3x2vw-0c6e1012"
+}
+Γä╣∩╕Å [2026-07-23T06:05:02.292Z] [INFO] [135c1d1a-aaaa-4fea-9e8c-ebcbbb69488a] Performance: test-operation
+  Context: {
+  "durationMs": 1
+}
+Γä╣∩╕Å [2026-07-23T06:05:02.451Z] [INFO] [test-corr-id] HTTP GET /api/test 200
+  Context: {
+  "method": "GET",
+  "path": "/api/test",
+  "status": 200,
+  "durationMs": 2,
+  "correlationId": "test-corr-id"
+}
+Γ¥î [2026-07-23T06:05:02.496Z] [ERROR] [bfba2286-3fb0-413d-966f-0d7691f3d916] Unhandled error in /api/fail
+  Context: {
+  "method": "GET",
+  "correlationId": "bfba2286-3fb0-413d-966f-0d7691f3d916",
+  "durationMs": 5,
+  "error": {
+    "name": "Error",
+    "message": "handler-boom",
+    "stack": "Error: handler-boom\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:195:49\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2316:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2313:10)\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2295:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2262:10)\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2945:64"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:05:02.529Z] [WARN] [bfba2286-3fb0-413d-966f-0d7691f3d916] server-warn
+  Context: {
+  "a": 1
+}
+ΓÜá∩╕Å [2026-07-23T06:05:02.537Z] [WARN] [113c3945-383d-4b2f-99f0-023c3dddc733] browser-warn-no-sentry
+Γ¥î [2026-07-23T06:05:02.550Z] [ERROR] [20a88a58-27a8-4f4e-8571-5490bde1614b] browser-error-no-sentry
+  Context: {
+  "error": {
+    "name": "Error",
+    "message": "x",
+    "stack": "Error: x\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:288:64\n    at Proxy.assertThrows (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:2798:5)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1215:12)\n    at Proxy.overwritingMethodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1750:33)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1551:16)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1155:15)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:288:85\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:05:02.557Z] [WARN] [20a88a58-27a8-4f4e-8571-5490bde1614b] Slow operation detected: slow-op
+  Context: {
+  "durationMs": 1505
+}
+{"level":"error","message":"prod-stack-branch","context":{"error":{"name":"Error","message":"prod-branch","stack":"a\nb\nc"}},"timestamp":"2026-07-23T06:05:02.560Z","correlationId":"20a88a58-27a8-4f4e-8571-5490bde1614b"}
+Γ¥î [2026-07-23T06:05:02.567Z] [ERROR] [20a88a58-27a8-4f4e-8571-5490bde1614b] error-with-sentry-fail
+  Context: {
+  "error": {
+    "name": "Error",
+    "message": "x",
+    "stack": "Error: x\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:317:72\n    at Proxy.assertThrows (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:2798:5)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1215:12)\n    at Proxy.overwritingMethodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1750:33)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1551:16)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1155:15)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:317:93\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:05:02.572Z] [WARN] [20a88a58-27a8-4f4e-8571-5490bde1614b] warn-no-sentry
+Γä╣∩╕Å [2026-07-23T06:05:02.556Z] [INFO] [20a88a58-27a8-4f4e-8571-5490bde1614b] Performance: slow-op
+  Context: {
+  "durationMs": 1505
+}
+ΓÜá∩╕Å [2026-07-23T06:05:02.573Z] [WARN] [20a88a58-27a8-4f4e-8571-5490bde1614b] warn-with-sentry
+Γ¥î [2026-07-23T06:05:02.576Z] [ERROR] [20a88a58-27a8-4f4e-8571-5490bde1614b] error-no-sentry
+  Context: {
+  "error": {
+    "name": "Error",
+    "message": "x",
+    "stack": "Error: x\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:359:43\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:05:15.346Z] [WARN] [f28976e3-6cc3-42ed-9ca6-af040c9686d7] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "Content is required",
+  "statusCode": 400,
+  "traceId": "mrx3xfbj-273d0ee9"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:52.907Z] [WARN] [0ba7e216-33ca-4b3d-a761-bf44c2486402] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "AI rate limit exceeded. Try again later.",
+  "statusCode": 429,
+  "traceId": "mrx3y8at-a92690cc"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:52.992Z] [WARN] [0ba7e216-33ca-4b3d-a761-bf44c2486402] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid reportType. Must be one of: trend_forecast, employer_hotspots, steward_capacity, arbitration_escalation, executive_summary",
+  "statusCode": 400,
+  "traceId": "mrx3y8dc-75273763"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:53.521Z] [WARN] [a5b619d0-045e-4535-9214-dac020273437] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrx3y8rx-e31a3111"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:53.606Z] [WARN] [a5b619d0-045e-4535-9214-dac020273437] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Entitlement missing",
+  "statusCode": 403,
+  "traceId": "mrx3y8ue-a80fcbb3"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:53.653Z] [WARN] [a5b619d0-045e-4535-9214-dac020273437] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "No billing account found",
+  "statusCode": 404,
+  "traceId": "mrx3y8vo-ea851bfd"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:53.701Z] [WARN] [a5b619d0-045e-4535-9214-dac020273437] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON",
+  "statusCode": 400,
+  "traceId": "mrx3y8wx-b523cfba"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:53.745Z] [WARN] [a5b619d0-045e-4535-9214-dac020273437] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "No billing account found",
+  "statusCode": 404,
+  "traceId": "mrx3y8y9-9c4bf3f6"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:58.041Z] [WARN] [1aa2b8e5-b6c2-4b80-a5d5-4327a1efdda3] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "CRON_SECRET not configured",
+  "statusCode": 401,
+  "traceId": "mrx3yc9i-9be33be5"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:58.089Z] [WARN] [1aa2b8e5-b6c2-4b80-a5d5-4327a1efdda3] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrx3ycaw-7a5d7f5f"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:58.690Z] [WARN] [0373f604-99cb-4ff8-ad80-696fdbcac7d9] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrx3ycrj-f737ee26"
+}
+ΓÜá∩╕Å [2026-07-23T06:05:58.730Z] [WARN] [0373f604-99cb-4ff8-ad80-696fdbcac7d9] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrx3ycsp-7a65cd67",
+  "details": {
+    "resetIn": 15
+  }
+}
+ΓÜá∩╕Å [2026-07-23T06:05:58.752Z] [WARN] [0373f604-99cb-4ff8-ad80-696fdbcac7d9] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid report configuration",
+  "statusCode": 400,
+  "traceId": "mrx3yctc-197780d3"
+}
+Γ¥î [2026-07-23T06:05:58.816Z] [ERROR] [0373f604-99cb-4ff8-ad80-696fdbcac7d9] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to execute report",
+  "statusCode": 500,
+  "traceId": "mrx3ycui-a1d68f5b",
+  "details": {
+    "message": "db down",
+    "name": "Error"
+  }
+}
+≡ƒÉ¢ [2026-07-23T06:06:19.282Z] [DEBUG] [8d9f7beb-cfbd-4507-a950-205b9b257929] Event subscriber registered
+  Context: {
+  "eventType": "claim_events"
+}
+≡ƒÉ¢ [2026-07-23T06:06:19.298Z] [DEBUG] [8d9f7beb-cfbd-4507-a950-205b9b257929] Emitting event
+  Context: {
+  "eventType": "claim_events",
+  "subscriberCount": 1,
+  "eventId": "evt_1784786779297_2wjf1pm17"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:06.814Z] [WARN] [5b6d442e-9e74-4dc7-8fab-8543dc254072] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrx3ztbt-61f216bb"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:06.867Z] [WARN] [5b6d442e-9e74-4dc7-8fab-8543dc254072] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Export type required",
+  "statusCode": 400,
+  "traceId": "mrx3ztdf-65a6ee2a"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:06.923Z] [WARN] [5b6d442e-9e74-4dc7-8fab-8543dc254072] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Unknown export type: unknown. Valid: master_invoice, allocation_statement, chargeback_report, gl_journal, evidence_pack",
+  "statusCode": 400,
+  "traceId": "mrx3ztey-f2f5468e"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:09.471Z] [WARN] [09f7b3f5-f5cb-462d-9fc8-dc4303973e44] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Calendar connection not found",
+  "statusCode": 404,
+  "traceId": "mrx3zvdl-e0ec806f"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:09.504Z] [WARN] [09f7b3f5-f5cb-462d-9fc8-dc4303973e44] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Local calendar is outside your organization scope",
+  "statusCode": 403,
+  "traceId": "mrx3zveo-450986ce"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:09.527Z] [WARN] [09f7b3f5-f5cb-462d-9fc8-dc4303973e44] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "localEventId is required for export mode",
+  "statusCode": 400,
+  "traceId": "mrx3zvfb-9291ccb8"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:40.996Z] [WARN] [fca55b93-e6d0-4e3d-8ade-0a9f3430f103] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Authentication required",
+  "statusCode": 401,
+  "traceId": "mrx40jpd-7f5c25d0"
+}
+Γ¥î [2026-07-23T06:07:41.067Z] [ERROR] [fca55b93-e6d0-4e3d-8ade-0a9f3430f103] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to initiate Google Calendar authorization",
+  "statusCode": 500,
+  "traceId": "mrx40jqq-bfefecb5",
+  "details": {
+    "message": "oauth-failed",
+    "name": "Error"
+  }
+}
+Γ¥î [2026-07-23T06:07:57.693Z] [ERROR] [2ec6dadf-540d-4543-87fc-d0aa493a86fa] API Error Response
+  Context: {
+  "code": "SERVICE_UNAVAILABLE",
+  "message": "Google OAuth did not return a refresh token. Reconnect with consent to enable continuous sync.",
+  "statusCode": 503,
+  "traceId": "mrx40wl5-fb486c28"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:57.744Z] [WARN] [2ec6dadf-540d-4543-87fc-d0aa493a86fa] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing OAuth authorization code",
+  "statusCode": 400,
+  "traceId": "mrx40wmo-055a577a"
+}
+ΓÜá∩╕Å [2026-07-23T06:07:57.753Z] [WARN] [2ec6dadf-540d-4543-87fc-d0aa493a86fa] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "OAuth state mismatch",
+  "statusCode": 403,
+  "traceId": "mrx40wmx-1ea0f665"
+}
+ΓÜá∩╕Å [2026-07-23T06:09:10.051Z] [WARN] [7de92759-3b31-4e9a-8ae7-7fd132043570] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You do not have access to this document",
+  "statusCode": 403,
+  "traceId": "mrx42gf4-c23ea23e"
+}
+ΓÜá∩╕Å [2026-07-23T06:09:16.029Z] [WARN] [533dcc58-9ffc-4f71-8906-5443be5a2b29] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing OAuth authorization code",
+  "statusCode": 400,
+  "traceId": "mrx42l15-0754214b"
+}
+Γ¥î [2026-07-23T06:09:16.071Z] [ERROR] [533dcc58-9ffc-4f71-8906-5443be5a2b29] API Error Response
+  Context: {
+  "code": "SERVICE_UNAVAILABLE",
+  "message": "Microsoft OAuth did not return a refresh token. Reconnect and grant offline access to enable continuous sync.",
+  "statusCode": 503,
+  "traceId": "mrx42l2e-23d1c163"
+}
+ΓÜá∩╕Å [2026-07-23T06:11:55.188Z] [WARN] [a58c637b-c0cd-4ff3-a791-007bf2a3ce1f] [organizational-topology] Failed to load institutional graph from persistence; returning empty graph
+  Context: {
+  "error": {}
+}
+ΓÜá∩╕Å [2026-07-23T06:11:55.220Z] [WARN] [a58c637b-c0cd-4ff3-a791-007bf2a3ce1f] [organizational-topology] Failed to load institutional graph from persistence; returning empty graph
+  Context: {
+  "error": {}
+}
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 2 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  |openapi-gen| src/__tests__/generator.test.ts > generator ΓÇö spec content > includes path parameters for dynamic segments
+Error: EPERM, Permission denied: \\?\C:\APPS\nzila-automation\tooling\openapi-gen\__test-gen-fixtures__ '\\?\C:\APPS\nzila-automation\tooling\openapi-gen\__test-gen-fixtures__'
+ Γ¥» teardown src/__tests__/generator.test.ts:16:24
+     14|
+     15| function teardown() {
+     16|   if (existsSync(TMP)) rmSync(TMP, { recursive: true })
+       |                        ^
+     17| }
+     18|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/2]ΓÄ»
+
+ FAIL  |abr| app/[locale]/dashboard/courtlens/matters/[matterId]/__tests__/ReviewerActions.test.tsx > ReviewerActions ΓÇö mutation contract > Idempotency keys are unique per action (no reuse across separate mutations)
+AssertionError: expected "vi.fn()" to be called 2 times, but got 1 times
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="space-y-4 p-6 text-sm"
+        data-testid="reviewer-actions"
+      >
+        <h3
+          class="font-poppins text-base font-semibold text-navy"
+        >
+          Reviewer actions
+        </h3>
+        <p
+          class="text-xs text-slate-500"
+        >
+          Actions record audited CourtLens events. AI review packet approval requires human sign-off.
+        </p>
+        <div
+          data-testid="ai-summary-actions"
+        >
+          <p
+            class="text-xs font-medium uppercase tracking-wide text-slate-500"
+          >
+            AI review packet
+          </p>
+          <div
+            class="mt-1 flex flex-wrap gap-2"
+          >
+            <button
+              class="rounded border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50"
+              data-testid="ai-action-approved"
+              type="button"
+            >
+              approved
+            </button>
+            <button
+              class="rounded border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50"
+              data-testid="ai-action-rejected"
+              type="button"
+            >
+              rejected
+            </button>
+            <button
+              class="rounded border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50"
+              data-testid="ai-action-revised_by_human"
+              type="button"
+            >
+              revised by human
+            </button>
+          </div>
+        </div>
+        <div
+          data-testid="referral-actions"
+        >
+          <p
+            class="text-xs font-medium uppercase tracking-wide text-slate-500"
+          >
+            Referral
+          </p>
+          <div
+            class="mt-1 flex flex-wrap gap-2"
+          >
+            <button
+              class="rounded border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50"
+              data-testid="referral-action-sent"
+              type="button"
+            >
+              sent
+            </button>
+          </div>
+        </div>
+        <div
+          data-testid="transition-actions"
+        >
+          <p
+            class="text-xs font-medium uppercase tracking-wide text-slate-500"
+          >
+            Matter status (ABR FSM)
+          </p>
+          <div
+            class="mt-1 flex flex-wrap gap-2"
+          >
+            <button
+              class="rounded border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50"
+              data-testid="transition-action-action_planning"
+              type="button"
+            >
+              action planning
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ Γ¥» waitFor.timeout app/[locale]/dashboard/courtlens/matters/[matterId]/__tests__/ReviewerActions.test.tsx:250:43
+    248|     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1), { ΓÇª
+    249|     fireEvent.click(screen.getByTestId('referral-action-sent'));
+    250|     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2), { ΓÇª
+       |                                           ^
+    251|
+    252|     const key1 = (fetchMock.mock.calls[0][1] as RequestInit).headers aΓÇª
+ Γ¥» runWithExpensiveErrorDiagnosticsDisabled ../../node_modules/@testing-library/dom/dist/config.js:47:12
+ Γ¥» checkCallback ../../node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ Γ¥» Timeout.checkRealTimersCallback ../../node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/2]ΓÄ»
+
+
+ Test Files  2 failed | 1975 passed | 2 skipped (1979)
+      Tests  2 failed | 27763 passed | 24 skipped (27789)
+   Start at  01:51:32
+   Duration  1279.79s (transform 2544.22s, setup 64.37s, import 5433.78s, tests 4522.45s, environment 2178.11s)
+
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
+EXIT=1

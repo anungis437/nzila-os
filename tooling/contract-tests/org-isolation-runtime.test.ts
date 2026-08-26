@@ -69,6 +69,7 @@ const ORG_GUARD_PATTERNS = [
   /await\s+auth\(\)/,           // const { userId } = await auth()
   /requirePlatformRole\s*\(/,   // platform-level admin guard
   /verifyWebhookSignature\s*\(/, // webhook signature verification
+  /verifyProofAuthorization\s*\(/, // staging proof HMAC verification
   /getAuth\s*\(/,                // Clerk getAuth() check
   /djangoProxy\s*\(/,            // Django backend handles auth & org isolation internally
   /requireApiAuth\s*\(/,         // UE API auth guard

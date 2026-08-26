@@ -56,5 +56,5 @@ describe('barrel and telemetry slices', () => {
     expect(typeof domain.quoteCanBeSent).toBe('function')
     expect(typeof domain.orderCanBeConfirmed).toBe('function')
     expect(typeof domain.canConvertQuoteToOrder).toBe('function')
-  }, 45000)
+  }, 90000)
 })

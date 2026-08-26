@@ -1,0 +1,42 @@
+{
+  "agentConfiguration": {
+    "cpu": 2
+  },
+  "agentPoolName": null,
+  "createTime": "2026-07-21T14:50:01.746310+00:00",
+  "customRegistries": null,
+  "finishTime": "2026-07-21T14:57:09.291150+00:00",
+  "id": "/subscriptions/5d819f33-d16f-429c-a3c0-5b0e94740ba3/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ContainerRegistry/registries/nzilacanadaacr/runs/cx70",
+  "imageUpdateTrigger": null,
+  "isArchiveEnabled": false,
+  "lastUpdatedTime": "2026-07-21T14:57:09+00:00",
+  "logArtifact": null,
+  "name": "cx70",
+  "outputImages": null,
+  "platform": {
+    "architecture": "amd64",
+    "os": "linux",
+    "variant": null
+  },
+  "provisioningState": "Succeeded",
+  "resourceGroup": "nzila-canada-staging-rg",
+  "runErrorMessage": "failed during run, err: exit status 1",
+  "runId": "cx70",
+  "runType": "QuickRun",
+  "sourceRegistryAuth": null,
+  "sourceTrigger": null,
+  "startTime": "2026-07-21T14:50:02.069838+00:00",
+  "status": "Failed",
+  "systemData": {
+    "createdAt": null,
+    "createdBy": null,
+    "createdByType": null,
+    "lastModifiedAt": "2026-07-21T14:50:01.523434+00:00",
+    "lastModifiedBy": "support@onelabtech.com",
+    "lastModifiedByType": "User"
+  },
+  "task": null,
+  "timerTrigger": null,
+  "type": "Microsoft.ContainerRegistry/registries/runs",
+  "updateTriggerToken": null
+}

@@ -3,7 +3,7 @@
  *
  * Verifies:
  *   1. /api/health route exists in console and partners apps
- *   2. Health routes check both DB and Blob (dual-dependency liveness)
+ *   2. Health routes check only application-required dependencies
  *   3. Health routes return 503 on degraded state (not just 200)
  *   4. /api/health is accessible without auth (in middleware allowlist)
  *   5. Health response shape includes { status, checks, buildInfo }
@@ -36,6 +36,9 @@ const HEALTH_APPS = [
   'zonga',
   'abr',
 ] as const
+
+const BLOB_REQUIRED_APPS = new Set(['console', 'partners', 'cfo', 'nacp-exams', 'zonga'])
+const BLOB_FREE_APPS = ['abr', 'flow', 'agrimo'] as const
 
 function healthRoutePath(app: string) {
   return `apps/${app}/app/api/health/route.ts`
@@ -70,13 +73,11 @@ describe('Health & Readiness Routes — REM-05 contract', () => {
       // ── Blob check ────────────────────────────────────────────────────────
       it('health route checks blob/storage connectivity', () => {
         const content = read(healthRoutePath(app))
-        expect(
-          content.includes('blob') ||
-          content.includes('Blob') ||
-          content.includes('storage') ||
-          content.includes('Storage'),
-          `apps/${app} health route must probe blob/storage connectivity`,
-        ).toBe(true)
+        if (BLOB_REQUIRED_APPS.has(app)) {
+          expect(content, `apps/${app} health route must probe blob/storage connectivity`).toContain('@nzila/blob')
+        } else {
+          expect(content, `apps/${app} health route must not probe blob/storage`).not.toContain('@nzila/blob')
+        }
       })
 
       // ── Degraded response ─────────────────────────────────────────────────
@@ -101,6 +102,14 @@ describe('Health & Readiness Routes — REM-05 contract', () => {
         const mw = read(middlewarePath(app))
         expect(mw).toContain('/api/health')
       })
+    })
+  }
+
+  for (const app of BLOB_FREE_APPS) {
+    it(`apps/${app} health route excludes blob/storage`, () => {
+      const content = read(healthRoutePath(app))
+      expect(content).not.toContain('@nzila/blob')
+      expect(content).not.toContain('checkBlob')
     })
   }
 })

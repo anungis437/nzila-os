@@ -31,7 +31,12 @@ type TransitionPayload = {
   reason?: string;
   source?: string;
   allowSkip?: boolean;
-  applyReferenceTemplate?: 'CUPE4373' | null;
+  /**
+   * Generic reference-template key. The operational package intentionally
+   * carries no customer-specific reference templates; any value provided here
+   * is rejected below to keep the operational surface free of demo fixtures.
+   */
+  applyReferenceTemplate?: string | null;
 };
 
 function parseTargetState(value: any): CommercialState | null {
@@ -117,15 +122,13 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       );
     }
 
-    if (body.applyReferenceTemplate === 'CUPE4373') {
-      responses.referenceTemplate = 'CUPE4373';
-      responses.championScore = 68;
-      responses.activityScore = 62;
-      responses.trainingCompleted = false;
-      responses.usersOnboarded = 0;
-      responses.documentsImported = 0;
-      responses.casesImported = 0;
-      responses.templateAppliedAt = nowIso;
+    if (body.applyReferenceTemplate) {
+      // Operational package MUST NOT ship customer-specific reference-template
+      // fixtures. The demo package (@nzila/union-eyes-demo) owns those.
+      return NextResponse.json(
+        { error: 'applyReferenceTemplate is not accepted by the operational application' },
+        { status: 400 },
+      );
     }
 
     const proposal = buildProposalPackage(

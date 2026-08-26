@@ -22,6 +22,11 @@ export default defineProject({
       '.next/**',
       'node_modules/**',
     ],
+    // React component tests use jsdom and testing-library waitFor loops; under
+    // monorepo-scale parallel runners on Windows, cold jsdom + async click
+    // handlers can exceed the 5s vitest default. 30s gives comfortable headroom.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     environmentMatchGlobs: [
       ['**/*.test.tsx', 'jsdom'],
     ],

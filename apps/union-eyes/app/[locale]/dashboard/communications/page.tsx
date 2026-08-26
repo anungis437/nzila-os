@@ -21,8 +21,12 @@ import { db } from "@/db";
 import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns } from "@/db/schema";
 import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
-import { Cupe4373CommunicationsPage } from "@/components/demo/cupe4373-communications-page";
+// NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
+// contained a runtime-gated branch that dynamically imported a demo
+// communications page from `@/components/demo/*`. Both the demo component
+// and the runtime gate have been removed from the operational build. Demo
+// behaviour now lives exclusively in the `@nzila/union-eyes-demo`
+// artifact (`apps/union-eyes-demo/`).
 
 /** Fetch all hub metrics in parallel */
 async function getHubMetrics(orgId: string) {
@@ -135,10 +139,6 @@ export default async function CommunicationsDashboard({
     user = await requireUser();
   } catch {
     redirect(`/${locale}/login`);
-  }
-
-  if (isCupe4373DemoRuntime()) {
-    return <Cupe4373CommunicationsPage />;
   }
 
   if (!(await hasMinRole("steward"))) {

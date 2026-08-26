@@ -31,7 +31,7 @@ twilio>=8.0.0
 
 # Clerk authentication
 pyjwt>=2.8.0
-cryptography>=46.0.5
+cryptography>=48.0.1
 
 # Utilities
 python-dotenv>=1.0.0

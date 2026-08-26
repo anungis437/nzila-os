@@ -1,0 +1,276 @@
+===== Phase 0A.1 · post-heal schema witness · nzila_phase0a1_probe · 2026-07-22T17:57:12.0960932-04:00 =====
+
+----- Table count -----
+ public_tables 
+---------------
+           168
+(1 row)
+
+
+----- Enums -----
+                typname                 
+----------------------------------------
+ ai_action_run_status
+ ai_action_status
+ ai_app_status
+ ai_budget_status
+ ai_environment
+ ai_governance_flag_priority
+ ai_governance_review_status
+ ai_governance_risk_level
+ ai_knowledge_ingestion_status
+ ai_knowledge_source_status
+ ai_knowledge_source_type
+ ai_prompt_status
+ ai_redaction_mode
+ ai_request_feature
+ ai_request_status
+ ai_risk_tier
+ api_env
+ approval_status
+ approval_subject_type
+ approval_type
+ cert_track_status
+ chain_integrity
+ close_approval_status
+ close_exception_severity
+ close_exception_status
+ close_period_status
+ close_task_status
+ command_alert_severity
+ command_alert_type
+ command_status
+ commerce_invoice_status
+ commerce_order_status
+ commerce_product_status
+ commerce_purchase_order_status
+ commerce_quote_status
+ commerce_supplier_status
+ commission_status
+ compliance_task_kind
+ compliance_task_status
+ control_family
+ deal_stage
+ document_category
+ document_classification
+ entity_member_role
+ entity_member_status
+ entity_role_kind
+ entity_status
+ evidence_event_type
+ evidence_pack_status
+ filing_kind
+ filing_status
+ flow_event_type
+ flow_invoice_status
+ flow_order_status
+ flow_payment_status
+ flow_production_job_status
+ flow_purchase_order_status
+ flow_quote_status
+ flow_shipment_status
+ founder_priority_type
+ governance_action_status
+ governance_action_type
+ gtm_request_status
+ healthcare_survey_confidence
+ healthcare_survey_insight_type
+ healthcare_survey_review_status
+ healthcare_survey_status
+ holder_type
+ itsm_approval_status
+ itsm_asset_lifecycle
+ itsm_asset_type
+ itsm_change_status
+ itsm_change_type
+ itsm_contract_status
+ itsm_kb_status
+ itsm_priority
+ itsm_problem_status
+ itsm_ticket_status
+ itsm_ticket_type
+ ledger_entry_type
+ meeting_kind
+ meeting_status
+ ml_model_status
+ ml_run_status
+ ops_client_health
+ ops_client_onboarding_stage
+ org_status
+ partner_status
+ partner_tier
+ partner_type
+ partner_user_role
+ person_type
+ platform_integration_connection_status
+ platform_integration_delivery_status
+ platform_integration_provider
+ playbook_name
+ policy_approval_action
+ policy_approval_chain_type
+ policy_conflict_severity
+ policy_conflict_type
+ policy_governance_event_type
+ policy_lifecycle_status
+ policy_risk_classification
+ qbo_report_type
+ qbo_sync_status
+ renewal_task_status
+ replay_session_status
+ replay_type
+ resolution_kind
+ resolution_status
+ retention_class
+ revenue_event_type
+ snapshot_trigger_type
+ stripe_connection_status
+ stripe_dispute_status
+ stripe_event_processing_status
+ stripe_payment_object_type
+ stripe_payout_status
+ stripe_refund_status
+ stripe_report_type
+ stripe_subscription_status
+ tax_filing_type
+ tax_installment_status
+ tax_year_status
+ tc_asset_status
+ tc_consent_method
+ tc_data_category
+ tc_dsr_request_type
+ tc_dsr_status
+ tc_incident_type
+ tc_lead_source
+ tc_pia_status
+ tc_pia_trigger
+ tc_policy_type
+ tc_program_status
+ tc_reminder_severity
+ tc_reminder_source_type
+ tc_reminder_status
+ tc_resolution_status
+ tc_risk_mitigation_status
+ tc_risk_register_category
+ tc_risk_register_severity
+ tc_risk_register_status
+ tc_sensitivity_level
+ tc_severity
+ tc_subscription_plan
+ tc_subscription_status
+ tc_vendor_risk
+ tc_vendor_status
+ trustops_creditor_classification
+ trustops_mandate_stage
+ trustops_proof_of_claim_status
+ trustops_transition_trigger
+ vote_choice
+(154 rows)
+
+
+----- audit_events canonical columns (must include occurred_at, hash_version, org_id) -----
+  column_name  |        data_type         | is_nullable 
+---------------+--------------------------+-------------
+ id            | uuid                     | NO
+ entity_id     | uuid                     | NO
+ actor_user_id | text                     | NO
+ actor_role    | text                     | YES
+ action        | text                     | NO
+ target_type   | text                     | NO
+ target_id     | uuid                     | YES
+ before_json   | jsonb                    | YES
+ after_json    | jsonb                    | YES
+ hash          | text                     | NO
+ previous_hash | text                     | YES
+ created_at    | timestamp with time zone | NO
+ occurred_at   | timestamp with time zone | NO
+ hash_version  | text                     | NO
+ org_id        | uuid                     | NO
+(15 rows)
+
+
+----- automation_commands columns (must have 21 columns including org_id, idempotency_key, version, attempt_count, execution_owner, lease_expires_at, last_heartbeat_at, started_at, completed_at) -----
+    column_name    |        data_type         | is_nullable 
+-------------------+--------------------------+-------------
+ id                | uuid                     | NO
+ correlation_id    | uuid                     | NO
+ playbook          | USER-DEFINED             | NO
+ status            | USER-DEFINED             | NO
+ dry_run           | boolean                  | NO
+ requested_by      | text                     | NO
+ args              | jsonb                    | NO
+ run_id            | text                     | YES
+ run_url           | text                     | YES
+ error_message     | text                     | YES
+ created_at        | timestamp with time zone | NO
+ updated_at        | timestamp with time zone | NO
+ org_id            | uuid                     | NO
+ idempotency_key   | text                     | NO
+ version           | integer                  | NO
+ attempt_count     | integer                  | NO
+ execution_owner   | text                     | YES
+ lease_expires_at  | timestamp with time zone | YES
+ last_heartbeat_at | timestamp with time zone | YES
+ started_at        | timestamp with time zone | YES
+ completed_at      | timestamp with time zone | YES
+(21 rows)
+
+
+----- automation_events (must include org_id NOT NULL) -----
+  column_name   |        data_type         | is_nullable 
+----------------+--------------------------+-------------
+ id             | uuid                     | NO
+ command_id     | uuid                     | NO
+ correlation_id | uuid                     | NO
+ event          | character varying        | NO
+ actor          | text                     | NO
+ payload        | jsonb                    | YES
+ hash           | text                     | NO
+ previous_hash  | text                     | YES
+ created_at     | timestamp with time zone | NO
+ org_id         | uuid                     | NO
+(10 rows)
+
+
+----- trustcore_* tables (must be 8 + trustcore_policies) -----
+           table_name           
+--------------------------------
+ trustcore_compliance_snapshots
+ trustcore_consent_records
+ trustcore_data_assets
+ trustcore_dsr_requests
+ trustcore_evidence_events
+ trustcore_incidents
+ trustcore_leads
+ trustcore_pias
+ trustcore_policies
+ trustcore_privacy_programs
+ trustcore_reminders
+ trustcore_risk_mitigations
+ trustcore_risk_reviews
+ trustcore_risks
+ trustcore_subscriptions
+ trustcore_vendors
+(16 rows)
+
+
+----- pilot_alert* tables + pilot_alerts columns (21 expected) -----
+       table_name        
+-------------------------
+ pilot_alert_escalations
+ pilot_alert_rules
+ pilot_alerts
+(3 rows)
+
+ pilot_alerts_columns 
+----------------------
+                   32
+(1 row)
+
+
+----- Constraint proofs -----
+            conname             | contype 
+--------------------------------+---------
+ audit_events_org_id_orgs_id_fk | f
+ pilot_alerts_rule_fk           | f
+(2 rows)
+

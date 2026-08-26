@@ -1,0 +1,98 @@
+# Wave 1 Phase A — local Docker build metadata
+sha:           8596a2a4f52371f899b45e7a24851dda00366c8c
+short_sha:     8596a2a4f523
+tag:           wave1a-8596a2a4f523
+build_time:    2026-07-21T17:56:49Z
+build_host:    AUBERT_PC
+docker_server: 29.2.0
+branch:        fix/union-eyes-reality-remediation
+reason_local:  ACR Basic quick-build runner (~4 GB) OOM-killed union-eyes builds cx6y/cx70/cx71/cx72 (exit 137). See acr-run-cx72-full.log. Local host build used to preserve immutability chain (SHA -> digest -> tag -> deployed revision).
+build_arg_NODE_MAX_OLD_SPACE: 8192
+target_stage:  union-eyes
+platform:      linux/amd64
+
+# --- POST-BUILD (populated after successful docker build) ---
+build_end:              2026-07-21T18:05:50Z
+image_ref:              nzilacanadaacr.azurecr.io/nzila-os-union-eyes:wave1a-8596a2a4f523
+image_id:               sha256:c13c227d822c78a05c4893166c4878c32676a1b1af3039e32c0dbb484b437d5f
+image_manifest_list:    sha256:c13c227d822c78a05c4893166c4878c32676a1b1af3039e32c0dbb484b437d5f
+image_manifest_amd64:   sha256:c5eeda690af86f6d467ad6dca7773fd96ccb789185cebdd0eec5170484433407
+image_config:           sha256:7877d180d4703ef471155c0235f0ddb5d2fd0a6319a7934e46f7654677df366b
+image_size_bytes:       273750195
+image_size_MB:          261.1
+build_result:           SUCCESS
+build_warnings:         "SecretsUsedInArgOrEnv: ARG 'BUILD_AUTH_PLACEHOLDER' name matches secret pattern (literal placeholder, no secret value)"
+turbo_task_duration:    2m10.976s
+turbo_tasks:            "3 successful, 3 total (cached: 0)"
+
+
+===================================================================
+# Wave 1 Phase A — HARDENED REBUILD (post-CVE-remediation)
+===================================================================
+sha:           4341f2f7025000e026f8d6848ecef18d0f44e17a
+short_sha:     4341f2f70250
+tag:           wave1a-4341f2f70250
+build_time:    2026-07-21T18:22:07Z
+build_end:     2026-07-21T18:43:37Z
+build_duration_wall: 21m30s
+build_host:    AUBERT_PC
+docker_server: 29.2.0
+branch:        fix/union-eyes-reality-remediation
+reason_rebuild: security hardening — commit adds strip layer removing bundled npm/pnpm/corepack from runtime image, and bumps pnpm.overrides.tar to '>=7.5.19' (fixes CVE-2026-59873, resolves tar@7.5.20). Rebuild verifies CVE reduction.
+
+# --- POST-BUILD ---
+image_ref:              nzilacanadaacr.azurecr.io/nzila-os-union-eyes:wave1a-4341f2f70250
+image_id:               sha256:b4130e8961e019bdd900fa863859c0ce6f6cb748f0362261344b997a5c7ae48d
+image_manifest_list:    sha256:b4130e8961e019bdd900fa863859c0ce6f6cb748f0362261344b997a5c7ae48d
+image_manifest_amd64:   sha256:be2580aedc62864b604aa9599bf869086b0db62a346a4db6b5b087bccba5c7b6
+image_config:           sha256:009c5d54d316314651f7fbb1291024395a13c8e731b63b6ff588279c73de9ed5
+image_size_bytes:       273764880
+image_size_MB:          261.1
+image_layers:           16 (vs 15 pre-hardening; +1 for strip layer)
+sbom_packages_indexed:  868 (vs 1084 pre-hardening; -216 = stripped npm/pnpm/corepack tree)
+runtime_user:           nextjs (uid 1001)
+runtime_workingdir:     /app
+runtime_cmd:            node apps/union-eyes/server.js
+runtime_entrypoint:     docker-entrypoint.sh
+build_result:           SUCCESS
+build_warnings:         "SecretsUsedInArgOrEnv: ARG 'BUILD_AUTH_PLACEHOLDER' (literal placeholder, no secret value)"
+turbo_task_duration:    16m26.226s
+turbo_tasks:            "22 successful, 22 total (cached: 0)"
+
+# --- STRIP LAYER PROOF (docker run) ---
+REMOVED /usr/local/bin/npm
+REMOVED /usr/local/bin/pnpm
+REMOVED /usr/local/bin/corepack
+REMOVED /usr/local/bin/npx
+REMOVED /usr/local/lib/node_modules/npm
+REMOVED /usr/local/lib/node_modules/pnpm
+REMOVED /usr/local/lib/node_modules/corepack
+
+# --- SECURITY SCAN RESULTS (Docker Scout, only critical+high) ---
+# Pre-hardening (wave1a-8596a2a4f523): 4 CRITICAL + 37 HIGH = 41 vulnerabilities across ~30+ packages
+# Post-hardening (wave1a-4341f2f70250): 1 CRITICAL + 3 HIGH =  4 vulnerabilities across  2 packages
+# Reduction: 41 -> 4 (90.2%%)
+
+# Residual vulnerabilities (all attributable to unreachable code paths):
+#   perl 5.36.0-7+deb12u3 (deb, bookworm)
+#     - CVE-2026-12087 CRITICAL  Socket <2.041 OOB heap read    UNFIXED upstream (Wave 1 Phase B: OS upgrade to Debian trixie)
+#     - CVE-2026-48959 HIGH      IO::Uncompress DoS             UNFIXED upstream
+#     - CVE-2026-48962 HIGH      IO::Compress arbitrary code    UNFIXED upstream
+#     Rationale: perl is Debian Essential (cannot remove without breaking apt/dpkg).
+#     Container CMD is 'node apps/union-eyes/server.js'; runtime user nextjs never invokes perl.
+#     No app code path spawns perl subprocess. Zero blast radius from Node app runtime.
+#
+#   brace-expansion 5.0.6 (npm)
+#     - CVE-2026-13149 HIGH 7.7  Exponential DoS in expand()     FIXED in 5.0.7 (deferred to Phase B override bump)
+#     Rationale: transitive dep of minimatch/glob. No union-eyes route calls glob/minimatch with
+#     user-supplied brace patterns. Reachable only if an attacker controls path patterns passed
+#     to fs globbing, which the app does not do.
+
+# --- SOURCE DEMO-CONTAM SCAN ---
+# tooling/reality/operational-build-scan.ts (source-side authoritative scan):
+#   scannedFiles:   5310
+#   filesWithHits:  1 (apps/union-eyes/lib/reality/capability-registry.ts)
+#   totalHits:      4  (allowedMaxHits: 6 under 'registry-evidence' permit)
+#   classification: registry-evidence — forensic evidence for UE-DEMO-SEPARATE-PACKAGE / UE-BUILD-OPERATIONAL-ISOLATION
+#   errors:         0
+#   verdict:        PASS
