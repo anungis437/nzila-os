@@ -347,7 +347,7 @@
       "esbuild": ">=0.25.0",
       "immutable": ">=5.1.8",
       "flatted": ">=3.4.2",
-      "undici": ">=7.28.0 <8",
+      "undici": ">=7.29.0 <8",
       "fast-xml-parser": ">=5.7.0",
       "fast-xml-builder": ">=1.1.7",
       "fast-uri": ">=4.1.1",
@@ -394,7 +394,8 @@
       "@opentelemetry/propagator-jaeger": ">=2.9.0",
       "@opentelemetry/exporter-prometheus": ">=0.217.0",
       "websocket-driver": ">=0.7.5",
-      "adm-zip": ">=0.6.0"
+      "adm-zip": ">=0.6.0",
+      "nanoid": ">=3.3.18"
     }
   },
   "dependencies": {}
