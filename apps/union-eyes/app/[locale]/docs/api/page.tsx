@@ -2,13 +2,17 @@
 
 
 export const dynamic = 'force-dynamic';
-import nextDynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import 'swagger-ui-react/swagger-ui.css';
+import Link from 'next/link';
 
-// Dynamic import to avoid SSR issues
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SwaggerUI = nextDynamic(() => import('swagger-ui-react'), { ssr: false }) as any;
+// NOTE: Interactive Swagger UI was previously rendered via `swagger-ui-react`,
+// but its transitive dep `swagger-client` uses a default import from `js-yaml`,
+// whose v4 ESM entry has no default export. Turbopack (Next 16 default builder)
+// refuses to bundle it and the app-scoped `turbopack.resolveAlias` in
+// next.config.ts is only honored by the dev server, not by `next build`. CSP
+// forbids loading swagger-ui from a public CDN. Until the upstream chain
+// ships an ESM-clean default export, this page links to the raw OpenAPI JSON,
+// which any external Swagger Editor / Redoc / Stoplight can consume.
 
 export default function APIDocsPage() {
   const t = useTranslations('docsApiPage');
@@ -23,18 +27,18 @@ export default function APIDocsPage() {
           </p>
         </div>
       </div>
-      
-      <div className="container mx-auto px-4 py-8">
-        <SwaggerUI 
-          url="/api/docs/openapi" 
-          docExpansion="list"
-          defaultModelsExpandDepth={1}
-          defaultModelExpandDepth={1}
-          displayOperationId={true}
-          filter={true}
-          showRequestHeaders={true}
-          tryItOutEnabled={true}
-        />
+
+      <div className="container mx-auto px-4 py-8 space-y-4">
+        <p>
+          The OpenAPI schema is served at:{' '}
+          <Link href="/api/docs/openapi" className="text-primary underline">
+            /api/docs/openapi
+          </Link>
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Load this URL in Swagger Editor, Redoc, Postman, or any OpenAPI
+          viewer for interactive exploration.
+        </p>
       </div>
     </div>
   );
