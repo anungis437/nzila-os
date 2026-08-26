@@ -14,7 +14,7 @@
   "gtmPosture": "hold",
   "proofLevel": "none",
   "strategicRole": "Agtech option retained for future demand, not current capital concentration. Staging/internal-validation only — not pilot-ready; tier-2 in deployment-inventory reflects promotion-track only, not portfolio strategic tier.",
-  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "generatedAt": "2026-08-26T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

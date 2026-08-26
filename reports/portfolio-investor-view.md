@@ -47,5 +47,4 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility Client Portal | frozen | Legacy mobility surface held only for archival continuity during retirement. | none | SUNSET |
 | Platform Admin | frozen | Legacy admin surface slated for retirement and minimal maintenance only. | none | SUNSET |
 | Test Scaffold GP | frozen | Internal scaffold template used to bootstrap new apps under the NzilaOS enforcement pipeline. Not a commercial product. | none | SUNSET |
-| Union Eyes (Demo) | frozen | Procurement/demo fabric for Union Eyes (Azure Container App nzila-os-union-eyes-demo); not a standalone product — mirrors Union Eyes for guided demos and CLC procurement flows. | none | SUNSET |
 

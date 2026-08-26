@@ -32,7 +32,6 @@
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
 | Platform Admin | 5 | frozen | sunset | sunsetting | none | low |
 | Test Scaffold GP | 5 | frozen | sunset | sunsetting | none | low |
-| Union Eyes (Demo) | 5 | frozen | sunset | pre-revenue | none | low |
 
 ## Operational Overlay
 
@@ -64,5 +63,4 @@
 | Mobility Client Portal | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Platform Admin | EXPERIMENTAL | internal-only | internal | SUNSET |
 | Test Scaffold GP | DEPRECATED | internal-only | internal | SUNSET |
-| Union Eyes (Demo) | UNREGISTERED | internal-only | internal | SUNSET |
 

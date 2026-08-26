@@ -130,8 +130,7 @@
     "zonga": "pilot",
     "mobility-client-portal": "frozen",
     "platform-admin": "frozen",
-    "test-scaffold-gp": "frozen",
-    "union-eyes-demo": "frozen"
+    "test-scaffold-gp": "frozen"
   },
   "app_status": {
     "abr": {
@@ -419,17 +418,6 @@
       "proof_level": "none",
       "revenue_status": "sunsetting",
       "priority": "low"
-    },
-    "union-eyes-demo": {
-      "registry_tier": "UNREGISTERED",
-      "deployment_status": "frozen",
-      "readiness_tier": "internal-only",
-      "exposure": "internal",
-      "portfolio_tier": 5,
-      "gtm_posture": "sunset",
-      "proof_level": "none",
-      "revenue_status": "pre-revenue",
-      "priority": "low"
     }
   },
   "blocking_gaps": [
@@ -474,8 +462,7 @@
       "TIER 5 — Sunset": [
         "mobility-client-portal",
         "platform-admin",
-        "test-scaffold-gp",
-        "union-eyes-demo"
+        "test-scaffold-gp"
       ]
     }
   },
@@ -516,8 +503,7 @@
       "sunset": [
         "mobility-client-portal",
         "platform-admin",
-        "test-scaffold-gp",
-        "union-eyes-demo"
+        "test-scaffold-gp"
       ],
       "internal_only": [
         "console",
