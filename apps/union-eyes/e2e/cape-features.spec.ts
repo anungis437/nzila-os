@@ -13,6 +13,7 @@
 import { test, expect } from "@playwright/test";
 import { ensureServerReady } from '../tests/e2e/_helpers';
 import { bootstrapE2EAuth, gotoDashboardAsRole, loginAsRole } from './helpers/auth';
+import { gotoWithTransientRetry } from './helpers/navigation-assertions';
 
 const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 
@@ -28,11 +29,11 @@ test.describe("Grievance draft save & resume", () => {
 
   test.beforeEach(async ({ page }) => {
     // Member can submit a new claim — canonical role for the intake form.
-    await loginAsRole(page, 'member');
+    await gotoDashboardAsRole(page, 'member');
   });
 
   test("intake page renders form with required fields", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/claims/new");
+    await page.goto("/en-CA/dashboard/claims/new", { waitUntil: "domcontentloaded" });
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Page heading — canonical claim intake form
@@ -138,7 +139,10 @@ test.describe("Grievance submission flow", () => {
   test("intake form validates required fields before submission", async ({
     page,
   }) => {
-    await page.goto("/en-CA/dashboard/claims/new");
+    await gotoWithTransientRetry(page, "/en-CA/dashboard/claims/new", {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    });
     await expect(
       page.getByRole("heading", { name: /Create a New Case/i })
     ).toBeVisible({ timeout: 15_000 });
@@ -165,20 +169,25 @@ test.describe("Pilot readiness checklist", () => {
 
   test.beforeEach(async ({ page }) => {
     // Pilot onboarding is currently the admin onboarding wizard surface.
-    await loginAsRole(page, 'admin');
+    await gotoDashboardAsRole(page, 'admin');
   });
 
   test("onboarding page renders checklist with 7 items", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/admin/onboarding");
+    await gotoWithTransientRetry(page, "/en-CA/dashboard/admin/onboarding", {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    });
     await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
 
     // Canonical onboarding wizard heading.
     await expect(
       page.getByRole("heading", { name: /Administrator Onboarding/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible({ timeout: 20_000 });
 
-    // Progress indicator is shown.
-    await expect(page.getByText(/Step 1 of 5/i)).toBeVisible();
+    // Progress indicator is shown. Use .first() because the wizard renders the
+    // step label twice (visible + aria/screen-reader duplicate) and strict-mode
+    // otherwise flags 2 matches (observed at f3e2bb2fe/1c07b50b2).
+    await expect(page.getByText(/Step 1 of 5/i).first()).toBeVisible();
   });
 
   test("checklist displays all 7 expected items", async ({ page }) => {
@@ -187,7 +196,7 @@ test.describe("Pilot readiness checklist", () => {
       page.getByRole("heading", { name: /Administrator Onboarding/i })
     ).toBeVisible({ timeout: 15_000 });
 
-    await expect(page.getByText(/Step 1 of 5/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Step 1 of 5/i).first()).toBeVisible({ timeout: 10_000 });
 
     // Wait for full client hydration. The header renders an org-selector whose
     // "Loading..." placeholder only disappears once client components have

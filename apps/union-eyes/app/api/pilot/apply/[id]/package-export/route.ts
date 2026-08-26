@@ -82,7 +82,7 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
     ].join('\n');
 
     const bundleMarkdown = [
-      '# CUPE4373 Pilot Package Export',
+      '# Pilot Package Export',
       '',
       `Generated at: ${proposal.generatedAt}`,
       `Pilot application ID: ${application.id}`,

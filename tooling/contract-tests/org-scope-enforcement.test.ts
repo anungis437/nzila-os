@@ -79,6 +79,7 @@ const EXEMPT_ROUTES = new Set([
   'icra',           // ICRA — pseudonymous public diagnostic (no PII, rate-limited, UUID-gated) [legacy alias]
   'ocra',           // OCRA — canonical alias of icra (OCI↔OCRA convergence Phase 2)
   'workbook',       // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
+  'staging-proof',  // HMAC-gated system proof route; no human organization principal exists
   '_perf',          // Web vitals sendBeacon endpoint (anonymous, no org context)
   'exit-interviews/institutional-', // Legacy public redirect aliases to organizational-* endpoints
 ])

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-15T01:29:51.766Z",
+  "generatedAt": "2026-08-04T14:17:29.284Z",
   "violations": [
     {
       "name": "ai:analyze",
@@ -427,6 +427,26 @@
       "pattern": "tsx-root"
     },
     {
+      "name": "reality:anti-theatre",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "reality:build-scan",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "reality:build-scan:with-bundle",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "reality:demo-guard",
+      "pattern": "tsx-root"
+    },
+    {
+      "name": "reality:inventory",
+      "pattern": "tsx-root"
+    },
+    {
       "name": "redteam",
       "pattern": "tsx-root"
     },
@@ -849,6 +869,10 @@
     {
       "name": "verify:data-residency:runtime:enforce",
       "pattern": "node-root"
+    },
+    {
+      "name": "verify:deadline-engine-schema",
+      "pattern": "tsx-root"
     },
     {
       "name": "verify:env",

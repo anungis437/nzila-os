@@ -38,6 +38,13 @@
       "expiresOn": "2027-01-01"
     },
     {
+      "path": "apps/union-eyes-demo",
+      "package": "platform-shell",
+      "owner": "platform-team",
+      "justification": "Standalone Union Eyes demo instance used to validate CUPE 4373 pilot flows without touching the live tenant. Uses a custom demo layout instead of the internal platform shell so the demo remains fully isolated from production tenant context.",
+      "expiresOn": "2027-04-01"
+    },
+    {
       "path": "apps/veridian-admin",
       "package": "platform-shell",
       "owner": "health-team",

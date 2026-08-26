@@ -128,7 +128,10 @@ ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
 # Build only apps that have deps installed in the Docker image (turbo filters)
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
 ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga --filter=@nzila/flow --filter=@nzila/agrimo --filter=@nzila/cora --filter=@nzila/trade --filter=@nzila/mobility --filter=@nzila/mobility-client-portal --filter=@nzila/control-plane --filter=@nzila/platform-admin --filter=@nzila/nacp-exams"
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+# Node heap ceiling for the build step. Overridable via --build-arg for constrained
+# runners (e.g. ACR Basic SKU quick-build agents ~4 GB). Local/full CI builds keep 8192.
+ARG NODE_MAX_OLD_SPACE=8192
+ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE}"
 # Build-time placeholder only. Real auth secret is injected at runtime via ACA secret refs.
 RUN AUTH_SECRET=${BUILD_AUTH_PLACEHOLDER} pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
@@ -237,6 +240,20 @@ COPY --from=builder /app/apps/union-eyes/messages ./apps/union-eyes/messages
 COPY --from=builder /app/docs/oci/whitepapers ./docs/oci/whitepapers
 COPY --from=builder /app/content ./content
 
+# Runtime hardening: remove build-time package managers baked into node:20-slim.
+# The container CMD is `node apps/union-eyes/server.js`; neither npm, corepack,
+# nor pnpm are invoked at runtime. Removing them eliminates their bundled
+# vulnerable transitive deps (tar, sigstore, glob, minimatch, brace-expansion,
+# cross-spawn, ...) from the runtime attack surface (Wave 1 Phase A hardening).
+RUN rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/lib/node_modules/corepack \
+           /usr/local/lib/node_modules/pnpm \
+           /usr/local/bin/npm \
+           /usr/local/bin/npx \
+           /usr/local/bin/corepack \
+           /usr/local/bin/pnpm \
+           /usr/local/bin/pnpx
+
 # Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 --no-create-home nextjs && \
@@ -312,12 +329,14 @@ RUN groupadd --system --gid 1001 nzila && \
 
 USER orchestrator
 
+WORKDIR /app/apps/orchestrator-api
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
 
 EXPOSE 4000
 
-CMD ["pnpm", "--filter", "@nzila/orchestrator-api", "start"]
+CMD ["node", "--import", "tsx", "src/index.ts"]
 
 # ============================================
 # CFO production stage

@@ -1,0 +1,45 @@
+{
+  "name": "@nzila/union-eyes-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Union Eyes CUPE 4373 demo artifact — separately-built app that ships demo pages, fixture data, and fixture-backed API handlers. See docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md.",
+  "scripts": {
+    "dev": "next dev --webpack --port 3012",
+    "build": "next build",
+    "start": "next start --port 3012",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "@nzila/reality-env": "workspace:*",
+    "@nzila/union-eyes-ui": "workspace:*",
+    "@sentry/nextjs": "^10.30.0",
+    "archiver": "^7.0.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.2",
+    "lucide-react": "^0.576.0",
+    "next": "16.2.12",
+    "next-intl": "^4.9.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@tailwindcss/postcss": "^4",
+    "@types/archiver": "^6.0.3",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^6",
+    "vitest": "^3.2.4"
+  }
+}

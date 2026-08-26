@@ -198,6 +198,95 @@
       "fieldConsent": "Consentement : ",
       "noRiskIndicators": "Aucun indicateur de risque enregistré."
     },
+    "badges": {
+      "urgency": {
+        "critical": "Critique",
+        "high": "Élevé",
+        "medium": "Moyen",
+        "low": "Standard"
+      },
+      "status": {
+        "new": "Nouvelle admission",
+        "triage": "Tri",
+        "assigned": "Assigné à un intervenant",
+        "investigating": "En examen",
+        "action_planning": "Dossier d’examen prêt",
+        "monitoring": "Accepté pour examen",
+        "resolved": "Référé / complété",
+        "closed": "Clôturé",
+        "archived": "Archivé"
+      },
+      "aiSummary": {
+        "ai_draft": "Brouillon IA — à réviser",
+        "needs_verification": "Vérification requise",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "revised_by_human": "Révisé par un humain"
+      },
+      "practiceArea": {
+        "housing": "Logement",
+        "employment": "Emploi",
+        "debt": "Dette à la consommation",
+        "unknown": "Non précisé"
+      }
+    },
+    "riskPanel": {
+      "harmSignalLevel": "Niveau de signal de préjudice",
+      "harmSignalDescription": "Urgence actuelle : {level}. Ce niveau est déterminé par les indicateurs de risque à l’admission et l’examen de l’intervenant.",
+      "detectedHarmSignals": "Signaux de préjudice détectés ({count})",
+      "noHarmSignals": "Aucun signal de préjudice détecté pour ce dossier.",
+      "flagsAutoDetected": "Les indicateurs sont détectés automatiquement à partir des champs d’admission et restent visibles pour le contexte de l’intervenant.",
+      "flags": {
+        "risk_lockout": "Verrouillage illégal",
+        "risk_eviction": "Risque d’expulsion",
+        "risk_utility_shutoff": "Coupure de services publics",
+        "risk_safety": "Sécurité personnelle",
+        "risk_homelessness": "Risque d’itinérance",
+        "risk_income_loss": "Perte de revenu",
+        "risk_unsafe_work": "Conditions de travail dangereuses",
+        "risk_retaliation": "Représailles",
+        "risk_garnishment": "Saisie de salaire",
+        "risk_bank_freeze": "Gel de compte bancaire",
+        "risk_identity_theft": "Vol d’identité",
+        "risk_essential_services": "Perte de services essentiels",
+        "risk_harassment": "Harcèlement"
+      },
+      "flagDescriptions": {
+        "risk_lockout": "Le propriétaire a changé les serrures ou refuse l’accès sans ordonnance du tribunal.",
+        "risk_eviction": "Une procédure d’expulsion formelle ou informelle est en cours ou menacée.",
+        "risk_utility_shutoff": "Électricité, gaz, eau ou chauffage coupé ou prévu pour interruption.",
+        "risk_safety": "La sécurité physique de la personne ou de ses proches est menacée de façon immédiate.",
+        "risk_homelessness": "La personne fait face à une perte imminente de logement sans solution de rechange.",
+        "risk_income_loss": "La personne a perdu ou est en voie de perdre sa principale source de revenu.",
+        "risk_unsafe_work": "Les conditions de travail mettent la santé ou la sécurité en danger.",
+        "risk_retaliation": "Employeur ou propriétaire a exercé des représailles contre la personne.",
+        "risk_garnishment": "Le salaire fait ou fera l’objet d’une saisie par un créancier.",
+        "risk_bank_freeze": "Un compte bancaire est gelé ou un prélèvement est imminent.",
+        "risk_identity_theft": "Des renseignements personnels ont été compromis.",
+        "risk_essential_services": "La personne perd l’accès à des soins, au transport ou à d’autres services essentiels.",
+        "risk_harassment": "Un harcèlement continu est signalé par la personne."
+      }
+    },
+    "caseTimeline": {
+      "title": "Chronologie du dossier",
+      "description": "Piste d’audit chronologique des événements CourtLens pour ce dossier.",
+      "filterLabel": "Filtrer par événement",
+      "filterAll": "Tous les événements ({count})",
+      "noEntries": "Aucune entrée ne correspond au filtre actuel.",
+      "actor": "Par : {id}",
+      "types": {
+        "created": "Admission créée",
+        "assignment_changed": "Attribution modifiée",
+        "status_changed": "Statut modifié",
+        "note_added": "Note ajoutée",
+        "evidence_added": "Preuve ajoutée",
+        "remediation_created": "Mesure corrective créée",
+        "remediation_status_changed": "Mesure corrective mise à jour",
+        "due_date_changed": "Date limite modifiée",
+        "closed": "Dossier clôturé",
+        "courtlens_event": "Événement CourtLens"
+      }
+    },
     "reviewerActions": {
       "sectionTitle": "Actions de l’intervenant",
       "sectionHint": "Les actions enregistrent des événements CourtLens vérifiés. L’approbation d’un dossier IA nécessite une signature humaine.",

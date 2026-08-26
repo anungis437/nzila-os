@@ -35,12 +35,68 @@ export const SCORING_VERSION = '1.0.0'
 
 const RISK_DIMENSIONS: Set<DimensionId> = new Set(['governance_fragility', 'trust_debt'])
 
+/**
+ * Public-sector kill switch for the free-text `note` field on `Answer`.
+ *
+ * When `OCI_PUBLIC_SECTOR_MODE=1` (or `=true`, case-insensitive) is set in the
+ * process environment, `buildAnswer` throws if a non-empty `note` is supplied.
+ * This turns the documented "callers must disable free text" posture in
+ * `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1
+ * into an enforced runtime control at the single source-of-entry for answers.
+ */
+export function isPublicSectorModeEnabled(): boolean {
+  const raw = process.env.OCI_PUBLIC_SECTOR_MODE
+  if (raw === undefined) return false
+  const normalized = raw.trim().toLowerCase()
+  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on'
+}
+
 export interface ComputeProfileInput {
   assessmentId: string
   answers: Answer[]
 }
 
+/**
+ * Build an `Answer` from a `Question` and its raw response value.
+ *
+ * @param question   The scoring question being answered.
+ * @param rawValue   The reviewer's response value.
+ * @param note       Optional reviewer note. **SENSITIVE FREE TEXT.**
+ *
+ *   `note` is not covered by the *"PII-free by construction"* property of the
+ *   derived scoring/finding/traceability artifacts (see
+ *   `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1).
+ *   Callers **must** treat any string passed here as potentially personal,
+ *   confidential, or otherwise sensitive material and are responsible for:
+ *
+ *   1. **Disabling capture** in engagements that cannot accept free-text; or
+ *   2. **Ephemeralizing** the field (do not persist the `Answer` beyond the
+ *      score computation, or drop `answer.note` immediately after scoring); or
+ *   3. **Routing** any retained value into a separately-secured evidence
+ *      repository outside the derived-artifact estate.
+ *
+ *   This value is intentionally read only by the caller who supplies it; it
+ *   is not used by any scoring, obligation, consequence, confidence, or
+ *   traceability logic in this package and is not surfaced by the government-
+ *   readiness layer.
+ *
+ * @throws {Error}
+ *   When `OCI_PUBLIC_SECTOR_MODE=1` (or `=true`) is set in the process
+ *   environment and a non-empty `note` is supplied. This is the deployment-
+ *   time kill switch that turns the documented "callers must disable" posture
+ *   into a hard runtime control for public-sector engagements. Set the flag
+ *   at process start (e.g. Container App env var) to guarantee that no
+ *   free-text sneaks in through this call site regardless of caller
+ *   discipline.
+ */
 export function buildAnswer(question: Question, rawValue: string | number, note?: string): Answer {
+  if (note !== undefined && note.trim() !== '' && isPublicSectorModeEnabled()) {
+    throw new Error(
+      'buildAnswer: free-text `note` is not permitted when OCI_PUBLIC_SECTOR_MODE is enabled. ' +
+        'Disable note capture, ephemeralize the field, or route it to a separately-secured evidence repository. ' +
+        'See docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md §2.1.',
+    )
+  }
   return {
     questionId: question.id,
     questionVersion: QUESTION_BANK_VERSION,
@@ -48,6 +104,7 @@ export function buildAnswer(question: Question, rawValue: string | number, note?
     normalizedScore: normalizeQuestionScore(question, rawValue),
     weightsSnapshot: { ...question.weights },
     riskInverted: question.riskInverted ?? false,
+    // SENSITIVE FREE TEXT — see docblock above. Not PII-safe by construction.
     note: note?.trim() || undefined,
     answeredAt: new Date().toISOString(),
   }

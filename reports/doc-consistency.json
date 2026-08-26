@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-19T11:34:31.100Z",
-  "filesScanned": 2179,
-  "totalFindings": 2720,
+  "generatedAt": "2026-08-26T13:25:41.014Z",
+  "filesScanned": 2243,
+  "totalFindings": 2766,
   "findingsByRule": {
     "stale-reference": 1032,
     "stale-package-ref": 68,
-    "naming-inconsistency": 1494,
-    "stale-date": 15,
+    "naming-inconsistency": 1527,
+    "stale-date": 28,
     "missing-package-readme": 111
   },
   "findingsBySeverity": {
     "error": 0,
     "warning": 1211,
-    "info": 1509
+    "info": 1555
   },
   "findings": [
     {
@@ -7810,21 +7810,21 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "README.business.md",
-      "line": 122,
+      "line": 125,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "README.business.md",
-      "line": 210,
+      "line": 213,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "README.business.md",
-      "line": 280,
+      "line": 283,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -7861,6 +7861,223 @@
       "file": "docs/architecture/authority-policy-registry-and-decision-events.md",
       "line": 161,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/AI-AUTHORING-POLICY.md",
+      "line": 72,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/CONTROLLED-VOCABULARY.md",
+      "line": 166,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/CONTROLLED-VOCABULARY.md",
+      "line": 228,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/CONTROLLED-VOCABULARY.md",
+      "line": 231,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md",
+      "line": 238,
+      "message": "\"Buyer Pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md",
+      "line": 423,
+      "message": "\"buyer pack\" should be \"procurement pack\" (procurement artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/01-Company.md",
+      "line": 81,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/04-Technology.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/05-Commercialization.md",
+      "line": 51,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/10-Evidence-Register.md",
+      "line": 9,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/11-Gap-Register.md",
+      "line": 15,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/BDC-U1-Underwriter-Attack-Review.md",
+      "line": 248,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/BDC-U1-Underwriter-Attack-Review.md",
+      "line": 252,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/BDC-U8-Decline-Memo-and-Rebuttal.md",
+      "line": 17,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/BDC-U9-Remediation-Register.md",
+      "line": 237,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "line": 273,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "line": 568,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "line": 720,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "line": 1156,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "line": 1203,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/evidence-book/Nzila-Evidence-and-Commercial-Readiness-Dossier.md",
+      "line": 10,
+      "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 179,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 181,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 217,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 219,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 235,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 243,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/REPOSITORY-GOVERNANCE-AUDIT.md",
+      "line": 245,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/SINGLE-SOURCE-OF-TRUTH.md",
+      "line": 141,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/SINGLE-SOURCE-OF-TRUTH.md",
+      "line": 143,
+      "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/business-plan/SINGLE-SOURCE-OF-TRUTH.md",
+      "line": 107,
+      "message": "\"buyer pack\" should be \"procurement pack\" (procurement artifact)"
     },
     {
       "rule": "naming-inconsistency",
@@ -15734,7 +15951,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 972,
+      "line": 1017,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16692,6 +16909,20 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/oci/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md",
+      "line": 4,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/oci/government-readiness/EVIDENCE_MANIFEST.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md",
       "line": 10,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
@@ -16707,7 +16938,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/oci/OCI_METHOD.md",
-      "line": 321,
+      "line": 327,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {
@@ -16924,14 +17155,14 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/clear-method-canonical.md",
-      "line": 112,
+      "line": 119,
       "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/public-service/clear-method-canonical.md",
-      "line": 379,
+      "line": 386,
       "message": "\"evidence package\" should be \"evidence pack\" (evidence artifact)"
     },
     {
@@ -18178,105 +18409,196 @@
       "severity": "info",
       "file": "AWS_ZONGA_SETUP.md",
       "line": 432,
-      "message": "Document date \"2026-04-19\" is 91 days old — may be stale"
+      "message": "Document date \"2026-04-19\" is 129 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
       "line": 343,
-      "message": "Document date \"2026-04-08\" is 102 days old — may be stale"
+      "message": "Document date \"2026-04-08\" is 140 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 128 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/ownership-registry.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 128 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 128 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md",
+      "line": 3,
+      "message": "Document date \"2026-05-04\" is 114 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md",
+      "line": 3,
+      "message": "Document date \"2026-05-04\" is 114 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 128 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md",
       "line": 3,
-      "message": "Document date \"2026-04-13\" is 97 days old — may be stale"
+      "message": "Document date \"2026-04-13\" is 135 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/platform/portfolio-matrix.md",
+      "line": 5,
+      "message": "Document date \"2026-05-07\" is 111 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md",
       "line": 10,
-      "message": "Document date \"2026-04-14\" is 96 days old — may be stale"
+      "message": "Document date \"2026-04-14\" is 134 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md",
+      "line": 3,
+      "message": "Document date \"2026-04-24\" is 124 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/security/static-analysis-suppressions.md",
+      "line": 3,
+      "message": "Document date \"2026-04-23\" is 125 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md",
+      "line": 3,
+      "message": "Document date \"2026-04-24\" is 124 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md",
+      "line": 3,
+      "message": "Document date \"2026-05-01\" is 117 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md",
+      "line": 3,
+      "message": "Document date \"2026-05-01\" is 117 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md",
+      "line": 3,
+      "message": "Document date \"2026-05-01\" is 117 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md",
+      "line": 3,
+      "message": "Document date \"2026-05-01\" is 117 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/buyer-faq.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 131 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/deployment-models.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 131 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/integration-readiness-matrix.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 131 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/pilot-readiness-checklist.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 131 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/product-capability-matrix.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 131 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/sla-support-model.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 93 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 131 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md",
+      "line": 475,
+      "message": "Document date \"April 23, 2026\" is 125 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/INDEX.md",
       "line": 179,
-      "message": "Document date \"2026-04-20\" is 90 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 128 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
+      "line": 3,
+      "message": "Document date \"2026-05-25\" is 93 days old — may be stale"
+    },
+    {
+      "rule": "stale-date",
+      "severity": "info",
+      "file": "docs/ops/sre/executive-reliability-dashboard.md",
+      "line": 3,
+      "message": "Document date \"2026-05-25\" is 93 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",

@@ -9,15 +9,48 @@ import { logger } from '@/lib/logger';
 
 /**
  * Currency Enforcement Service
- * 
+ *
  * CRA Requirements:
  * - All Canadian invoices must be in CAD
  * - Cross-border transactions require T106 filing if >$1M CAD
  * - FX conversions must use Bank of Canada noon rate
+ *
+ * Reality-remediation Wave 0: FX-rate calls now return a typed provenance
+ * record ({@link BocRateResult}). Cached-fallback rates are honestly
+ * labelled `bank_of_canada_cached` — never as a fresh BOC observation.
+ * Any downstream persistence or reporting must preserve `source` and
+ * `observationDate` verbatim.
+ *
+ * Capability: UE-FIN-FX-CAD (state: LIMITED — cached fallback preserved,
+ * durable authoritative rate cache pending Wave 7).
  */
 
 const _DEFAULT_CURRENCY = 'CAD';
 const T106_THRESHOLD = 1000000; // $1M CAD
+
+/**
+ * Result of a Bank of Canada FX-rate resolution.
+ *
+ * `source` MUST NOT be `'bank_of_canada'` unless the rate was retrieved
+ * from the Bank of Canada Valet API within this call. When a cached rate
+ * from a prior persisted transaction is returned, `source` MUST be
+ * `'bank_of_canada_cached'` and `observationDate` MUST be the date the
+ * cached rate was originally observed (NOT the current request date).
+ */
+export interface BocRateResult {
+  /** The FX rate as a number. */
+  rate: number;
+  /** Truthful provenance. */
+  source: 'bank_of_canada' | 'bank_of_canada_cached';
+  /** The date the observation is for (fresh: request date; cached: original observation date). */
+  observationDate: Date;
+  /** Instant this record was produced. */
+  retrievedAt: Date;
+  /** `fresh` = just retrieved from Valet API; `stale-fallback` = cached fallback used because Valet was unavailable. */
+  cacheStatus: 'fresh' | 'stale-fallback';
+  /** Human-readable source reference for audit logs / UI. */
+  sourceReference: string;
+}
 
 export class CurrencyEnforcementService {
   /**
@@ -47,69 +80,130 @@ export class CurrencyEnforcementService {
 
   /**
    * Convert USD to CAD
-   * Uses Bank of Canada noon rate (official FX rate)
+   * Uses Bank of Canada noon rate (official FX rate).
+   *
+   * Provenance is preserved through {@link BocRateResult.source} and
+   * {@link BocRateResult.cacheStatus}. Callers persisting the result
+   * MUST record these fields alongside the amount.
    */
   async convertUSDToCAD(amountUSD: number, date: Date): Promise<{
     amountCAD: number;
     exchangeRate: number;
     rateDate: Date;
+    /**
+     * Truthful source label. Values are:
+     *  - `Bank of Canada (FXUSDCAD)` when {@link BocRateResult.cacheStatus} is `fresh`
+     *  - `Bank of Canada (cached FXUSDCAD from YYYY-MM-DD)` when the cached fallback was used
+     */
     source: string;
+    /** Structured provenance record — prefer this over `source` for machine consumers. */
+    provenance: BocRateResult;
   }> {
-    const rate = await this.getBankOfCanadaNoonRate(date);
-    
+    const rateResult = await this.getBankOfCanadaNoonRateWithProvenance(date);
+
+    const sourceLabel =
+      rateResult.cacheStatus === 'fresh'
+        ? 'Bank of Canada (FXUSDCAD)'
+        : `Bank of Canada (cached FXUSDCAD from ${rateResult.observationDate.toISOString().split('T')[0]})`;
+
     return {
-      amountCAD: amountUSD * rate,
-      exchangeRate: rate,
-      rateDate: date,
-      source: 'Bank of Canada (FXUSDCAD)',
+      amountCAD: amountUSD * rateResult.rate,
+      exchangeRate: rateResult.rate,
+      // rateDate reflects the observation the rate was actually taken from,
+      // NOT the request date. Callers relying on the old semantics should
+      // migrate to `provenance.observationDate`.
+      rateDate: rateResult.observationDate,
+      source: sourceLabel,
+      provenance: rateResult,
     };
   }
 
   /**
-   * Get Bank of Canada Noon Rate
-   * Official FX rate published daily by Bank of Canada
+   * Get Bank of Canada Noon Rate (legacy numeric shim).
+   *
+   * Retained for backwards compatibility with existing callers that only
+   * need the number. New callers MUST prefer
+   * {@link getBankOfCanadaNoonRateWithProvenance} so provenance survives
+   * into audit trails.
    */
   async getBankOfCanadaNoonRate(date: Date): Promise<number> {
+    const result = await this.getBankOfCanadaNoonRateWithProvenance(date);
+    return result.rate;
+  }
+
+  /**
+   * Get Bank of Canada Noon Rate with full provenance.
+   *
+   * On successful Valet fetch: returns `source: 'bank_of_canada'`,
+   * `cacheStatus: 'fresh'`.
+   *
+   * On fetch failure: attempts to read the most recent prior observation
+   * from persisted cross-border transactions. If one is available, returns
+   * `source: 'bank_of_canada_cached'`, `cacheStatus: 'stale-fallback'`, and
+   * an `observationDate` reflecting when the cached rate was originally
+   * taken. **The label MUST NOT claim a fresh Bank of Canada observation.**
+   *
+   * If no cached rate exists: throws (no invented value).
+   */
+  async getBankOfCanadaNoonRateWithProvenance(date: Date): Promise<BocRateResult> {
+    const retrievedAt = new Date();
+    const dateStr = date.toISOString().split('T')[0];
+
     try {
       // Bank of Canada Valet API (public, no auth required)
       // https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json
-      const dateStr = date.toISOString().split('T')[0];
-      
       const response = await fetch(
         `https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json?start_date=${dateStr}&end_date=${dateStr}`
       );
-      
+
       if (!response.ok) {
         throw new Error(`Bank of Canada API error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (!data.observations || data.observations.length === 0) {
         throw new Error(`No FX rate available for date: ${dateStr}`);
       }
-      
+
       const rate = parseFloat(data.observations[0].FXUSDCAD.v);
-      
+
       if (isNaN(rate)) {
         throw new Error(`Invalid FX rate received: ${data.observations[0].FXUSDCAD.v}`);
       }
-      
-      return rate;
+
+      return {
+        rate,
+        source: 'bank_of_canada',
+        observationDate: date,
+        retrievedAt,
+        cacheStatus: 'fresh',
+        sourceReference: `https://www.bankofcanada.ca/valet/observations/FXUSDCAD (${dateStr})`,
+      };
     } catch (error) {
-      // Fallback to cached rate or manual entry
-        logger.error('Failed to fetch Bank of Canada rate', { error });
-      
-      // Get most recent cached rate
+      logger.error('Failed to fetch Bank of Canada rate', { error, dateStr });
+
+      // Attempt cached fallback. If it succeeds, provenance MUST clearly
+      // reflect that the value is a stale-cache fallback — never fresh BOC.
       const cachedRate = await this.getCachedBOCRate(date);
       if (cachedRate) {
-          logger.warn('Using cached BOC rate', {
-            date: cachedRate.date,
-            rate: cachedRate.rate,
-          });
-        return cachedRate.rate;
+        logger.warn('Using cached BOC rate (stale-fallback provenance)', {
+          requestedDate: dateStr,
+          cachedObservationDate: cachedRate.date.toISOString().split('T')[0],
+          rate: cachedRate.rate,
+        });
+        return {
+          rate: cachedRate.rate,
+          source: 'bank_of_canada_cached',
+          observationDate: cachedRate.date,
+          retrievedAt,
+          cacheStatus: 'stale-fallback',
+          sourceReference:
+            `bank_of_canada_cached (previously observed on ${cachedRate.date.toISOString().split('T')[0]}; ` +
+            `live Valet fetch failed for ${dateStr})`,
+        };
       }
-      
+
       throw new Error('Unable to fetch or find cached Bank of Canada FX rate');
     }
   }

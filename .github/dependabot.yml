@@ -19,12 +19,24 @@ updates:
           - "turbo"
           - "vitest*"
           - "@vitest/*"
+        # Keep majors out of the group — a group PR that mixes TS/ESLint major
+        # bumps with unrelated minor bumps is effectively unmergeable (e.g.
+        # TypeScript 6 dropped ts.Extension.Cjs, which typescript-eslint v8
+        # depends on). Majors get their own PRs for dedicated migration work.
+        update-types:
+          - "minor"
+          - "patch"
       next-js:
         patterns:
           - "next"
           - "react"
           - "react-dom"
           - "@types/react*"
+        # Same rationale: React/Next majors are large migrations — keep them
+        # out of the auto-grouped PR.
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
       # Only accept patch updates for Drizzle ORM (breaking changes are frequent)
       - dependency-name: "drizzle-orm"

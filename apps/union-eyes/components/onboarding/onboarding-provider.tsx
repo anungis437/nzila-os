@@ -16,7 +16,6 @@ import {
   OnboardingOverlay,
   toOnboardingRole,
 } from "@/components/onboarding/onboarding-overlay";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
 
 interface OnboardingProviderProps {
   /** Server-resolved RBAC role */
@@ -24,7 +23,6 @@ interface OnboardingProviderProps {
 }
 
 export function OnboardingProvider({ userRole }: OnboardingProviderProps) {
-  const suppressForCupeDemo = isCupe4373DemoRuntime();
   const { user } = useUser();
   const {
     showOverlay,
@@ -40,7 +38,7 @@ export function OnboardingProvider({ userRole }: OnboardingProviderProps) {
     return () => clearTimeout(t);
   }, []);
 
-  if (suppressForCupeDemo || !showOverlay || !delayPassed) return null;
+  if (!showOverlay || !delayPassed) return null;
 
   const onboardingRole = toOnboardingRole(userRole);
 

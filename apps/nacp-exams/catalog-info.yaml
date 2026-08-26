@@ -2,7 +2,10 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: nacp-exams
-  description: NACP examinations — exam management and integrity verification
+  description: DRC-native national education & examination infrastructure
+    (national → province → subdivision → pool → centre → school → candidate);
+    examination integrity and anti-corruption controls are capabilities within
+    the education product.
   annotations:
     github.com/project-slug: anungis437/nzila-os
     backstage.io/techdocs-ref: dir:./docs

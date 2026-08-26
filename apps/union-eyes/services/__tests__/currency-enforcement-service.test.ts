@@ -81,6 +81,26 @@ describe('currency-enforcement-service', () => {
       expect(r.exchangeRate).toBe(1.35);
       expect(r.source).toContain('Bank of Canada');
     });
+
+    it('returns truthful fresh-fetch provenance', async () => {
+      const r = await svc.convertUSDToCAD(100, new Date('2026-01-02'));
+      expect(r.provenance.source).toBe('bank_of_canada');
+      expect(r.provenance.cacheStatus).toBe('fresh');
+      expect(r.source).toBe('Bank of Canada (FXUSDCAD)');
+    });
+
+    it('does NOT claim fresh BOC when the value is a cached fallback', async () => {
+      // Reality-remediation guard: cached fallback MUST be labelled honestly.
+      // If this assertion ever regresses, the endpoint has resumed
+      // fabricating provenance and Wave 0 §12 has been violated.
+      h.fetch.mockResolvedValue({ ok: false, status: 503, json: async () => ({}) });
+      pushSel([{ bocNoonRate: '1.4', transactionDate: new Date('2026-01-01') }]);
+      const r = await svc.convertUSDToCAD(100, new Date('2026-01-02'));
+      expect(r.provenance.source).toBe('bank_of_canada_cached');
+      expect(r.provenance.cacheStatus).toBe('stale-fallback');
+      expect(r.source).toBe('Bank of Canada (cached FXUSDCAD from 2026-01-01)');
+      expect(r.source).not.toBe('Bank of Canada (FXUSDCAD)');
+    });
   });
 
   describe('getBankOfCanadaNoonRate', () => {

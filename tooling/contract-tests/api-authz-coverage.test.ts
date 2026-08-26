@@ -103,6 +103,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /requireUser\(/,           // UE user auth guard
       /getCurrentUser\(/,        // UE user auth utility
       /verifyShopifySignature\(/, // Shopify webhook signature verification
+      /verifyProofAuthorization\(/, // Staging proof HMAC verification
       /CRON_SECRET/,             // Cron job secret verification
       /withOrgScope\(/,           // Org-scoped composite guard (auth + context + org)
       /withOrgWrite\(/,           // Write-restricted org-scoped guard (withOrgScope + canWrite role check)

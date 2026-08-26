@@ -2,9 +2,20 @@
 
 CIVIC by Nzila is a public-service continuity initiative and thought-leadership front door.
 
+> **Positioning (canonical).** CIVIC is the **public-service front door for the OCI methodology** —
+> the same underlying method, presented in the language and posture a public-service leader
+> should receive on first touch. CIVIC is not a fork, a different product, or a different
+> scoring system. When CIVIC and OCI/OCRA doctrine appear to disagree, OCI/OCRA is
+> authoritative. See [CIVIC ↔ OCI Alignment](../CIVIC_OCI_ALIGNMENT.md).
+
 ## CIVIC definition
 
 CIVIC = Continuity, Implementation, Visibility, Integrity, and Capacity.
+
+These five letters are the public-service brand articulation of the same concerns that
+OCI/OCRA persists as scoring dimensions and CLEAR articulates as evidence pillars. The
+[alignment Rosetta table](../CIVIC_OCI_ALIGNMENT.md#4-rosetta-table-how-the-five-pillars-line-up)
+is the canonical mapping.
 
 ## Why this front door exists
 
@@ -26,10 +37,16 @@ The operating risk is whether those commitments remain traceable through workflo
 
 CIVIC focuses on that operating layer between policy commitment and institutional action.
 
-## Relationship to CLEAR and SAGE
+## Relationship to CLEAR, OCI/OCRA, and SAGE
 
-- CLEAR is the evidence discipline behind CIVIC.
-- SAGE is a future workspace direction for organizations that later need repeatable service-assurance and governance-evidence operations.
+- **CLEAR** is the public-service articulation of the evidence discipline behind CIVIC.
+  It maps to the OCI evidence ladder, obligation taxonomy, and explainability contract
+  — see the [Rosetta table](../CIVIC_OCI_ALIGNMENT.md#4-rosetta-table-how-the-five-pillars-line-up).
+- **OCI / OCRA** is the underlying methodology, product ladder, and (for OCRA)
+  procurement-facing assessment. CIVIC is how OCI presents itself to a public-service
+  reader on first touch. See [`docs/oci/OCI_METHOD.md`](../oci/OCI_METHOD.md).
+- **SAGE** is a future workspace direction for organizations that later need repeatable
+  service-assurance and governance-evidence operations.
 
 ## Front door first, product later
 

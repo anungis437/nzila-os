@@ -1,0 +1,6 @@
+
+> nzila-os@1.0.3 brand:leakage:check C:\APPS\nzila-automation
+> tsx scripts/check-brand-leakage.ts
+
+[brand-leakage] PASS
+brand-leakage exit=0

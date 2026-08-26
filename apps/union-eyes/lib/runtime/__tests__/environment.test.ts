@@ -43,8 +43,8 @@ describe('lib/runtime/environment', () => {
     });
 
     it('falls back to NEXT_PUBLIC_APP_ENV then NODE_ENV', () => {
-      process.env.NEXT_PUBLIC_APP_ENV = 'demo';
-      expect(getUeEnvironment()).toBe('demo');
+      process.env.NEXT_PUBLIC_APP_ENV = 'staging';
+      expect(getUeEnvironment()).toBe('staging');
       delete process.env.NEXT_PUBLIC_APP_ENV;
       process.env.NODE_ENV = 'production';
       expect(getUeEnvironment()).toBe('production');
@@ -73,35 +73,45 @@ describe('lib/runtime/environment', () => {
 
   describe('getDeploymentType', () => {
     it('reads explicit type', () => {
-      process.env.UE_DEPLOYMENT_TYPE = 'clc-demo';
-      expect(getDeploymentType()).toBe('clc-demo');
+      process.env.UE_DEPLOYMENT_TYPE = 'staging';
+      expect(getDeploymentType()).toBe('staging');
     });
 
     it('derives from environment', () => {
       process.env.UE_ENVIRONMENT = 'production';
       expect(getDeploymentType()).toBe('prod');
-      process.env.UE_ENVIRONMENT = 'demo';
-      expect(getDeploymentType()).toBe('cupe4373-demo');
       process.env.UE_ENVIRONMENT = 'pilot';
       expect(getDeploymentType()).toBe('pilot');
       process.env.UE_ENVIRONMENT = 'local';
+      expect(getDeploymentType()).toBe('staging');
+    });
+
+    it('ignores unknown deployment types and falls back to derivation', () => {
+      process.env.UE_DEPLOYMENT_TYPE = 'clc-demo';
+      process.env.UE_ENVIRONMENT = 'staging';
       expect(getDeploymentType()).toBe('staging');
     });
   });
 
   describe('getFeatureProfile', () => {
     it('reads explicit profile', () => {
-      process.env.UE_FEATURE_PROFILE = 'clc';
-      expect(getFeatureProfile()).toBe('clc');
+      process.env.UE_FEATURE_PROFILE = 'internal';
+      expect(getFeatureProfile()).toBe('internal');
     });
 
     it('derives from environment', () => {
-      process.env.UE_ENVIRONMENT = 'demo';
-      expect(getFeatureProfile()).toBe('cupe4373');
       process.env.UE_ENVIRONMENT = 'production';
+      expect(getFeatureProfile()).toBe('executive');
+      process.env.UE_ENVIRONMENT = 'pilot';
       expect(getFeatureProfile()).toBe('executive');
       process.env.UE_ENVIRONMENT = 'local';
       expect(getFeatureProfile()).toBe('internal');
+    });
+
+    it('ignores unknown feature profiles and falls back to derivation', () => {
+      process.env.UE_FEATURE_PROFILE = 'clc';
+      process.env.UE_ENVIRONMENT = 'production';
+      expect(getFeatureProfile()).toBe('executive');
     });
   });
 
@@ -110,8 +120,8 @@ describe('lib/runtime/environment', () => {
       expect(isPilotRuntime()).toBe(false);
       process.env.NZILA_MODE = 'pilot';
       expect(isPilotRuntime()).toBe(true);
-      process.env.NZILA_MODE = 'demo';
-      expect(isPilotRuntime()).toBe(true);
+      process.env.NZILA_MODE = 'staging';
+      expect(isPilotRuntime()).toBe(false);
     });
 
     it('isProductionEnvironment reflects environment', () => {

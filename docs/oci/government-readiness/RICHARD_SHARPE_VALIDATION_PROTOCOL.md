@@ -4,7 +4,7 @@
 > **Role of Richard Sharpe:** treated as a **senior public-sector validator** —
 > a deputy-minister-grade reviewer who must be able to defend OCI/OCRA in front of
 > an auditor general, a regulator, and a public accounts committee.
-> **Companion:** [GOVERNMENT_VALIDATION_REPORT_V1.md](./GOVERNMENT_VALIDATION_REPORT_V1.md)
+> **Companion (internal pre-mortem, not external validation):** [INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md](./INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md)
 
 ---
 
@@ -84,7 +84,8 @@ remediated.
 ## 5. Outputs
 
 1. **Validation verdicts** (per objective) → recorded in the
-   [validation report](./GOVERNMENT_VALIDATION_REPORT_V1.md).
+   [internal pre-mortem](./INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md)
+   (an *internal* red-team exercise, not external validation).
 2. **Conditions register** — the precise, ordered list of what must change.
 3. **Objection register** — top objections + mitigations.
 4. **Pilot recommendation** — ranked pilot candidates with failure modes.

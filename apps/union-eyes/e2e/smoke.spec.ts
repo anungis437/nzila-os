@@ -10,6 +10,30 @@ import { ensureServerReady, getBaseUrl } from '../tests/e2e/_helpers';
 test.describe('Public pages smoke tests', () => {
   test.beforeAll(async ({ request }) => {
     await ensureServerReady(request);
+    // Warm the marketing entry route so the first `page.goto('/')` below
+    // isn't racing Next.js cold compilation of the localized marketing tree
+    // (which can exceed the 45s per-test goto timeout on Windows after main
+    // added business-plan doc surfaces). Fire-and-forget with a 60s ceiling —
+    // any actual test.goto below still enforces its own timeout.
+    await request.get('/', { timeout: 60_000 }).catch(() => undefined);
+  });
+
+  // The dev server can restart mid-suite once it approaches the memory
+  // threshold — Next.js prints "Server is approaching the used memory
+  // threshold, restarting..." between specs. Any smoke test unlucky enough to
+  // run during the restart window sees an unresponsive server and times out
+  // its 45s page.goto. Guard each test with a short readiness probe so the
+  // navigation only starts once the server is answering again.
+  test.beforeEach(async ({ page, request }) => {
+    const startMs = Date.now();
+    while (Date.now() - startMs < 60_000) {
+      try {
+        const probe = await request.get('/api/health', { timeout: 5_000 });
+        if ([200, 503].includes(probe.status())) return;
+      } catch {
+        await page.waitForTimeout(1_500);
+      }
+    }
   });
 
   test('marketing page renders', async ({ page }) => {
@@ -36,8 +60,22 @@ test.describe('Public pages smoke tests', () => {
 });
 
 test.describe('Accessibility smoke tests', () => {
-  test('marketing page has no critical a11y violations', async ({ page }) => {
-    await page.goto('/');
+  test('marketing page has no critical a11y violations', async ({ page, request }) => {
+    // The dev server can restart after long sequential test runs that exhaust
+    // its memory threshold. Wait for the server to be ready before navigating.
+    // This does not mask application defects — it bounds the infrastructure
+    // recovery window that is an acknowledged dev-server limitation.
+    const startMs = Date.now();
+    while (Date.now() - startMs < 45_000) {
+      try {
+        const probe = await request.get('/', { timeout: 5_000 });
+        if ([200, 301, 302, 307, 308].includes(probe.status())) break;
+      } catch {
+        await page.waitForTimeout(1_500);
+      }
+    }
+
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30_000 });
 
     // Basic a11y checks without axe-core (structural)
     // 1. Page should have lang attribute

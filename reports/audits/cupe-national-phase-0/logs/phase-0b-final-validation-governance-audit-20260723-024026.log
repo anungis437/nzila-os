@@ -1,0 +1,47 @@
+
+> nzila-os@1.0.3 governance:audit C:\APPS\nzila-automation
+> pnpm validate:docs && pnpm ownership:audit && pnpm docs:index && pnpm release:audit && pnpm release:secrets:audit && pnpm repo:audit && pnpm governance:check-db-imports && pnpm financial-service:health
+
+
+> nzila-os@1.0.3 validate:docs C:\APPS\nzila-automation
+> tsx packages/platform-validation/src/doc-consistency.ts
+
+≡ƒô¥ Running Documentation Consistency Audit...
+
+Files scanned: 2260
+Findings:      2759
+  Errors:   0
+  Warnings: 1223
+  Info:     1536
+
+Γ£à No critical documentation errors
+Reports written to reports/doc-consistency.json and reports/doc-consistency.md
+
+> nzila-os@1.0.3 ownership:audit C:\APPS\nzila-automation
+> tsx scripts/build-ownership-registry.ts
+
+node:fs:2412
+    return binding.writeFileUtf8(
+                   ^
+
+Error: UNKNOWN: unknown error, open 'C:\APPS\nzila-automation\docs\ops\ownership-registry.md'
+    at writeFileSync (node:fs:2412:20)
+    at writeText (C:\APPS\nzila-automation\scripts\build-ownership-registry.ts:53:3)
+    at main (C:\APPS\nzila-automation\scripts\build-ownership-registry.ts:138:3)
+    at <anonymous> (C:\APPS\nzila-automation\scripts\build-ownership-registry.ts:148:1)
+    at Object.<anonymous> (C:\APPS\nzila-automation\scripts\build-ownership-registry.ts:148:6)
+    at Module._compile (node:internal/modules/cjs/loader:1804:14)
+    at Object.transformer (C:\APPS\nzila-automation\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1525:32)
+    at Module._load (node:internal/modules/cjs/loader:1327:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14) {
+  errno: -4094,
+  code: 'UNKNOWN',
+  syscall: 'open',
+  path: 'C:\\APPS\\nzila-automation\\docs\\ops\\ownership-registry.md'
+}
+
+Node.js v24.13.1
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
+EXIT=1

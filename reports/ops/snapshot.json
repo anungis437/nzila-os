@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": "2.0.0",
-    "generated_at": "2026-07-19T14:33:00.784Z",
+    "generated_at": "2026-08-26T14:17:58.242Z",
     "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
     "window_days": 30

@@ -72,20 +72,81 @@ export async function loginAsRole(page: Page, role: StakeholderRole): Promise<vo
 export async function gotoDashboardAsRole(page: Page, role: StakeholderRole): Promise<string> {
   const fixture = getFixture(role);
   await loginAsRole(page, role);
-  await page.goto(toLocalizedPath('/dashboard', fixture.locale), { waitUntil: 'domcontentloaded' });
+  const target = toLocalizedPath('/dashboard', fixture.locale);
   const landing = toLocalizedPath(getExpectedLanding(role), fixture.locale);
-  await expect(page).toHaveURL(new RegExp(`${escapeRegExp(landing)}(?:$|[/?#])`));
+  const maxAttempts = 3;
+  const transientNavigationPattern = /net::ERR_ABORTED|net::ERR_CONNECTION_REFUSED|ERR_CONNECTION_RESET|ERR_INTERNET_DISCONNECTED|timeout|net::ERR_FAILED/i;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!transientNavigationPattern.test(message)) {
+        throw error;
+      }
+    }
+
+    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
+    const currentUrl = page.url();
+    // Only accept the actual landing URL — NOT the root /dashboard target,
+    // which would be a false positive (redirect hasn't fired yet).
+    if (currentUrl.includes(landing)) {
+      // Ensure the landing page is fully loaded (JS executed, React hydrated)
+      // before the caller starts additional navigations.
+      await page.waitForLoadState('load', { timeout: 30_000 }).catch(() => undefined);
+      return landing;
+    }
+
+    if (currentUrl.startsWith('chrome-error://') && attempt < maxAttempts) {
+      await page.waitForTimeout(750 * attempt);
+      continue;
+    }
+
+    if (currentUrl.startsWith('chrome-error://')) {
+      break;
+    }
+
+    try {
+      await expect.poll(() => page.url(), { timeout: 20_000 }).toContain(landing);
+      return landing;
+    } catch {
+      if (attempt < maxAttempts) {
+        await page.waitForTimeout(750 * attempt);
+        continue;
+      }
+      throw new Error(`Dashboard redirect did not reach ${landing}; last URL was ${page.url()}`);
+    }
+  }
+
+  await expect.poll(() => page.url(), { timeout: 20_000 }).toContain(landing);
   return landing;
 }
 
 export async function assertPilotModeEnabled(page: Page): Promise<void> {
-  const response = await page.request.get('/api/feature-flags?flag=pilot-mode');
-  expect(response.ok()).toBeTruthy();
-  const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
-  const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
-  expect(enabled).toBe(true);
-}
+  const transientNetworkPattern = /ECONNRESET|ECONNREFUSED|ERR_CONNECTION_RESET|ERR_CONNECTION_REFUSED|ETIMEDOUT|timeout/i;
+  let lastError: unknown;
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    try {
+      const response = await page.request.get('/api/feature-flags?flag=pilot-mode', { timeout: 10_000 });
+      expect(response.ok()).toBeTruthy();
+      const payload = (await response.json()) as { enabled?: boolean; flags?: Record<string, boolean> };
+      const enabled = payload.enabled ?? payload.flags?.['pilot-mode'];
+      expect(enabled).toBe(true);
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      lastError = error;
+      if (!transientNetworkPattern.test(message) || attempt === 4) {
+        throw error;
+      }
+
+      // Allow the dev server to recover before retrying pilot-mode assertion.
+      await page.waitForTimeout(800 * attempt);
+      await page.request.get('/api/health', { timeout: 5_000 }).catch(() => undefined);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Failed to verify pilot mode');
 }

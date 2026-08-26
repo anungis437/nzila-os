@@ -1,6 +1,6 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-05-25T18:13:14.264Z",
+  "collected_at": "2026-08-25T20:47:21.481Z",
   "window_days": 30,
   "source": {
     "requested_branch": "main",
@@ -9,15 +9,16 @@
   },
   "metrics": {
     "deployment_frequency": {
-      "value": 9.3,
+      "value": 0.47,
       "unit": "deploys_per_week",
-      "raw_count_30d": 40,
-      "tier": "elite"
+      "raw_count_30d": 2,
+      "tier": "medium"
     },
     "lead_time_for_change": {
-      "value": 116.6,
+      "value": null,
       "unit": "hours",
-      "tier": "high"
+      "tier": "unknown",
+      "note": "Insufficient merge history to compute"
     },
     "change_failure_rate": {
       "value": 0,
@@ -40,21 +41,21 @@
     "predictive_signal": {
       "value": "elevated",
       "unit": "state",
-      "slope_per_week": -0.51,
-      "trailing_4_week_average": 9.75,
+      "slope_per_week": -0.75,
+      "trailing_4_week_average": 0,
       "projected_next_week_deploys": 0,
       "weekly_deploy_series": [
-        19,
-        18,
-        2,
-        6,
-        2,
-        32,
-        14,
+        0,
         1,
-        2,
-        26,
+        6,
+        8,
+        44,
+        9,
         11,
+        2,
+        0,
+        0,
+        0,
         0
       ]
     }

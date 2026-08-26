@@ -23,9 +23,9 @@ Decision = Input + Policy + Actor Authority + Outcome + Proof
 | **Agrimo** | Agricultural field operations | Incubating | 4 |
 | **Cora** | Agri intelligence dashboard | Incubating | 4 |
 | **Zonga** | Creator economy platform | Incubating | 4 |
-| **Trade** | Cross-border trade | Incubating | 4 |
+| **Trade** | Cross-border trade & deal infrastructure (distinct from 3CUO/DiasporaCore banking) | Incubating | 4 |
 | **Mobility** | Immigration & mobility | Incubating | 4 |
-| **NACP Exams** | Certification workflows | Incubating | 4 |
+| **NACP Exams** | DRC national education & examination infrastructure | Incubating | 4 |
 
 Portfolio truth source: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
 
@@ -52,7 +52,7 @@ Bootstrap and seed workflows are idempotent and safe to re-run multiple times.
 ## Repo Structure
 
 ```
-apps/              26 applications
+apps/              27 applications
 packages/          canonical inventory (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools

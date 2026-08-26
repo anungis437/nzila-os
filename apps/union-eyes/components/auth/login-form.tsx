@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 
 type Mode = 'password' | 'magic-link' | 'sso';
 
@@ -32,9 +31,7 @@ type LoginFormProps = {
 
 export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormProps) {
   const router = useRouter();
-  const postLoginPath =
-    configuredPostLoginPath
-    ?? (isCupe4373DemoRuntime() ? '/en-CA/dashboard' : '/en-CA/dashboard/priorities');
+  const postLoginPath = configuredPostLoginPath ?? '/en-CA/dashboard/priorities';
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

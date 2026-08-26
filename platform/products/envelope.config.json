@@ -162,6 +162,14 @@
       "launchStage": "sunset",
       "publicVisible": false
     },
+    "union-eyes-demo": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
+    },
     "veridian-admin": {
       "pricingTier": "n/a",
       "telemetryRequired": false,

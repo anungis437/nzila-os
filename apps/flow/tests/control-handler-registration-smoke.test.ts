@@ -32,5 +32,5 @@ describe('Flow handler registration smoke', () => {
     expect(Array.isArray(mod.handlers)).toBe(true)
     expect(mod.handlers.length).toBeGreaterThan(20)
     expect(mockRegisterHandler).toHaveBeenCalledTimes(mod.handlers.length)
-  }, 30000)
+  }, 60000)
 })

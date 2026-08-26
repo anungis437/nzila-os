@@ -24,7 +24,7 @@
 | [Benchmark Governance](./OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md) | 8 | What can we safely say vs. peers? |
 | [IRR Model](./OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md) | 9 | Would another reviewer agree? |
 | [Procurement Readiness](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md) | 10 | Are we ready to be bought? |
-| [Sharpe Protocol](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md) + [Validation Report](./GOVERNMENT_VALIDATION_REPORT_V1.md) | 11 | Does it survive senior scrutiny? |
+| [Validator Protocol](./RICHARD_SHARPE_VALIDATION_PROTOCOL.md) + [Internal Pre-Mortem](./INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md) *(red-team, not external)* | 11 | Does it survive senior scrutiny? |
 | **This document** | 5 + 12 + master | Government domains, validation strategy, the whole picture |
 
 ---
@@ -170,7 +170,8 @@ bank.
   [procurement assessment](./OCI_OCRA_PROCUREMENT_READINESS_ASSESSMENT.md).
 - **Sharpe validation:** all eight objectives clear at `Validated` or
   `Validated-with-conditions`; ordered conditions register drives the build.
-  Detail in the [validation report](./GOVERNMENT_VALIDATION_REPORT_V1.md).
+  Detail in the [internal pre-mortem](./INTERNAL_PRE_MORTEM_HYPOTHETICAL_REVIEWER_CHALLENGES.md)
+  *(internal red-team exercise, not external validation).*
 
 ---
 
@@ -250,10 +251,13 @@ legibility **without moving a single number.**
 
 ## 9. The single sentence to remember
 
-> OCI/OCRA becomes government-grade not by changing how it scores, but by making
-> every score **fully traceable to evidence, mapped to obligation, bounded by
-> honest confidence, and named in the currency of institutional consequence** —
-> all added as a read-only layer above a frozen, validated, universal core.
+> OCI/OCRA is being made **defensible for public-sector scrutiny without
+> changing how it scores**, by making every score **fully traceable to evidence,
+> mapped to obligation, bounded by honest confidence, and named in the currency
+> of institutional consequence** — all added as a read-only layer above a
+> frozen, universal core. Whether the result is *defensible in practice* depends
+> on the empirical, operational, legal, and external-validation gates recorded
+> in [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md).
 
 ---
 

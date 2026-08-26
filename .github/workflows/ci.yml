@@ -131,6 +131,9 @@ jobs:
       - name: Verify migration immutability manifest
         run: pnpm verify:migrations
 
+      - name: Verify deadline engine migration contract
+        run: pnpm verify:deadline-engine-schema -- --static
+
       # Applies the real migrations/0032..0044 chain to an in-process PostgreSQL
       # (PGlite/WASM) and drives the destruction lifecycle end-to-end. No service
       # database is required — the migrations execute exactly as they will in prod.

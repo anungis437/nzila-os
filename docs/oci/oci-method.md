@@ -10,6 +10,12 @@ takes its continuity seriously, and it binds each phase to a product layer.
 The Method is the IP that survives any single product, any single feature,
 and any single engagement.
 
+> **Public-service front door.** In public-service contexts this method is introduced
+> under the **CIVIC by Nzila** framing, with **CLEAR** as the public-service articulation
+> of its evidence discipline. CIVIC/CLEAR are the first-touch language; the method,
+> phases, and product ladder below remain canonical. See
+> [CIVIC ↔ OCI Alignment](../CIVIC_OCI_ALIGNMENT.md).
+
 ## The five phases
 
 | Phase | Name | What happens | OCI product layer |

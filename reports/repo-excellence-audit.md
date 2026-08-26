@@ -1,18 +1,18 @@
 # Repo Excellence Audit
 
-Generated: 2026-07-19T11:34:38.320Z
+Generated: 2026-08-26T13:01:54.900Z
 
-Overall score: 7.8 / 10
+Overall score: 7 / 10
 
 ## Category Scores
 
 | Category | Score |
 | --- | ---: |
-| runtime_proof | 8 |
+| runtime_proof | 9 |
 | duplication | 8 |
-| script_sprawl | 2.1 |
+| script_sprawl | 2 |
 | hidden_fragility | 8 |
-| docs_truth | 9 |
+| docs_truth | 0 |
 | naming_consistency | 10 |
 | ci_efficiency | 9 |
 | overengineering | 6.1 |
@@ -25,11 +25,12 @@ Overall score: 7.8 / 10
 
 ## Improvement Backlog
 
-- [runtime_proof] Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available.
+- [runtime_proof] Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available.
 - [duplication] Duplicate script bodies remain: contract-tests, contract:test
 - [duplication] Duplicate script bodies remain: inventory:check, docs:sync
-- [script_sprawl] Root script count is 299.
+- [script_sprawl] Root script count is 300.
 - [script_sprawl] Root command surface is still dense and benefits from continued pruning.
+- [docs_truth] 934 indexed documents are stale by repo-mtime policy (>90 days).
 - [ci_efficiency] Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml
 - [ci_efficiency] App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml
 - [ci_efficiency] Effective active workflow count is 49 (total 52, emergency/manual 3).

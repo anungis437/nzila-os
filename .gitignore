@@ -15,6 +15,10 @@ infotech/
 demo-output/
 logs/
 
+# Phase 0 audit evidence logs are governed audit artifacts, not generated build output.
+!reports/audits/cupe-national-phase-0/logs/
+!reports/audits/cupe-national-phase-0/logs/**
+
 # ----- Scratch / temporary working dirs (never commit) ------
 tmp-art/
 tmp-e2e-report/
@@ -136,6 +140,9 @@ MANIFEST
 
 # ----- Logs ------
 **/*.log
+
+# Phase 0 audit evidence logs are governed audit artifacts, not runtime logs.
+!reports/audits/cupe-national-phase-0/logs/*.log
 
 # ----- AI Eval artifacts (CI-generated, not committed) ------
 tooling/ai-evals/report.json

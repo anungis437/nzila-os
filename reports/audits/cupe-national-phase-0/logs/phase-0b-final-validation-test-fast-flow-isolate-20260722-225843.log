@@ -1,0 +1,393 @@
+
+> @nzila/flow@1.0.0 test C:\APPS\nzila-automation\apps\flow
+> vitest run
+
+
+ RUN  v4.1.2 C:/APPS/nzila-automation/apps/flow
+
+ Γ¥» |Flow-app| tests/repositories-layer-slice.test.ts (4 tests | 1 failed) 7664ms
+     ├ù covers customer/order/payment repositories 5083ms
+ Γ¥» |Flow-app| tests/quotes-detail-page-slice.test.ts (4 tests | 1 failed) 14725ms
+     ├ù renders full quote detail with client/workflow/ai/payment/profitability blocks 14496ms
+ Γ¥» |Flow-app| tests/analytics-profitability-page-slice.test.ts (6 tests | 1 failed) 15903ms
+     ├ù renders initial profitability shell with selector and disabled analyze button 13433ms
+ Γ¥» |Flow-app| tests/invoices-detail-page-slice.test.ts (4 tests | 1 failed) 12108ms
+     ├ù renders overdue invoice with payment controls, warning, and timeline 11844ms
+ Γ¥» |Flow-app| tests/purchase-orders-detail-page-slice.test.ts (4 tests | 1 failed) 12727ms
+     ├ù renders received progress, guidance, timeline, zoho synced and notes branches 12543ms
+ Γ¥» |Flow-app| tests/products-detail-page-slice.test.ts (4 tests | 1 failed) 13965ms
+     ├ù renders populated product detail with low-stock warning and movement variants 13800ms
+ Γ¥» |Flow-app| tests/orders-detail-page-slice.test.ts (3 tests | 1 failed) 14943ms
+     ├ù renders populated order detail with timeline, shipping, and guidance 14768ms
+ Γ¥» |Flow-app| tests/inventory-page-slice.test.ts (4 tests | 1 failed) 14371ms
+     ├ù renders populated inventory table, low-stock alerts, and recent movements 14296ms
+ Γ¥» |Flow-app| tests/suppliers-detail-page-slice.test.ts (4 tests | 1 failed) 15296ms
+     ├ù renders populated supplier detail with synced status and recent POs 15028ms
+ Γ¥» |Flow-app| tests/resolve-org-slice.test.ts (4 tests | 1 failed) 5441ms
+     ├ù throws when unauthenticated or missing org selection 5176ms
+ Γ¥» |Flow-app| tests/invoices-page-slice.test.ts (2 tests | 1 failed) 15146ms
+     ├ù renders full invoice table with stats, aging buckets, and status fallbacks 15073ms
+ Γ¥» |Flow-app| tests/locale-dashboard-page-slice.test.ts (1 test | 1 failed) 15733ms
+     ├ù renders the dashboard page with mocked workspace data 15676ms
+ Γ¥» |Flow-app| tests/quotes-page-slice.test.ts (2 tests | 1 failed) 15275ms
+     ├ù renders the empty state when no quotes exist 15190ms
+ Γ¥» |Flow-app| tests/analytics-page-slice.test.ts (1 test | 1 failed) 15343ms
+     ├ù renders the analytics dashboard with KPI, pipeline, client, and trend sections 15326ms
+ Γ¥» |Flow-app| tests/dashboard-actions-slice.test.ts (2 tests | 1 failed) 16759ms
+     ├ù renders PO action branches by status 14956ms
+ Γ¥» |Flow-app| tests/dashboard-components-slice.test.ts (3 tests | 1 failed) 20316ms
+     ├ù exports shared dashboard components from barrel 17103ms
+ Γ¥» |Flow-app| tests/quotes-dashboard-slice.test.ts (3 tests | 1 failed) 15731ms
+     ├ù renders quote detail action branches by status 14781ms
+ Γ¥» |Flow-app| tests/locale-layouts-slice.test.ts (2 tests | 1 failed) 15006ms
+     ├ù renders locale dashboard layout navigation and header 14573ms
+ Γ¥» |Flow-app| tests/quotes-new-page-slice.test.ts (1 test | 1 failed) 14395ms
+     ├ù renders the new quote shell with the default assistant and summary state 14379ms
+ Γ¥» |Flow-app| tests/invoices-new-page-slice.test.ts (1 test | 1 failed) 11336ms
+     ├ù renders the new invoice shell with the empty-state controls 11284ms
+ Γ¥» |Flow-app| tests/orders-new-page-slice.test.ts (1 test | 1 failed) 9519ms
+     ├ù renders the new order shell with the empty line-items state 9506ms
+ Γ¥» |Flow-app| tests/purchase-orders-new-page-slice.test.ts (1 test | 1 failed) 10099ms
+     ├ù renders the new purchase order shell with the empty line-items state 10083ms
+ Γ¥» |Flow-app| tests/dashboard-layout-ue-slice.test.ts (1 test | 1 failed) 10348ms
+     ├ù renders the sidebar shell, org picker, nav groups, and account area 10323ms
+ Γ¥» |Flow-app| tests/settings-form-slice.test.ts (1 test | 1 failed) 9486ms
+     ├ù renders settings form default tab fields and controls 9469ms
+ Γ¥» |Flow-app| tests/quotes-request-page-slice.test.ts (1 test | 1 failed) 8851ms
+     ├ù renders the request form shell and submission controls 8836ms
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 25 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  |Flow-app| tests/analytics-page-slice.test.ts > analytics page slice > renders the analytics dashboard with KPI, pipeline, client, and trend sections
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/analytics-page-slice.test.ts:57:3
+     55|   })
+     56|
+     57|   it('renders the analytics dashboard with KPI, pipeline, client, and ΓÇª
+       |   ^
+     58|     const { default: AnalyticsPage } = await import('@/app/(dashboard)ΓÇª
+     59|     const markup = renderToStaticMarkup(await AnalyticsPage())
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/analytics-profitability-page-slice.test.ts > analytics profitability page slice > renders initial profitability shell with selector and disabled analyze button
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/analytics-profitability-page-slice.test.ts:41:3
+     39|   })
+     40|
+     41|   it('renders initial profitability shell with selector and disabled aΓÇª
+       |   ^
+     42|     const { default: ProfitabilityReportPage } = await import('@/app/(ΓÇª
+     43|     const markup = renderToStaticMarkup(React.createElement(ProfitabilΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/dashboard-actions-slice.test.ts > dashboard actions slices > renders PO action branches by status
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/dashboard-actions-slice.test.ts:43:3
+     41|
+     42| describe('dashboard actions slices', () => {
+     43|   it('renders PO action branches by status', async () => {
+       |   ^
+     44|     const { POActions } = await import('@/app/(dashboard)/purchase-ordΓÇª
+     45|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/dashboard-components-slice.test.ts > dashboard shared components slices > exports shared dashboard components from barrel
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/dashboard-components-slice.test.ts:24:3
+     22|
+     23| describe('dashboard shared components slices', () => {
+     24|   it('exports shared dashboard components from barrel', async () => {
+       |   ^
+     25|     const barrel = await import('@/app/(dashboard)/components')
+     26|     expect(typeof barrel.StatusBadge).toBe('function')
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/dashboard-layout-ue-slice.test.ts > dashboard layout UE slice > renders the sidebar shell, org picker, nav groups, and account area
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/dashboard-layout-ue-slice.test.ts:14:3
+     12|
+     13| describe('dashboard layout UE slice', () => {
+     14|   it('renders the sidebar shell, org picker, nav groups, and account aΓÇª
+       |   ^
+     15|     const { default: DashboardLayout } = await import('@/app/(dashboarΓÇª
+     16|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/inventory-page-slice.test.ts > inventory page slice > renders populated inventory table, low-stock alerts, and recent movements
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/inventory-page-slice.test.ts:108:3
+    106|   })
+    107|
+    108|   it('renders populated inventory table, low-stock alerts, and recent ΓÇª
+       |   ^
+    109|     const { default: InventoryPage } = await import('@/app/(dashboard)ΓÇª
+    110|     const markup = renderToStaticMarkup(await InventoryPage())
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/invoices-detail-page-slice.test.ts > invoice detail page slice > renders overdue invoice with payment controls, warning, and timeline
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/invoices-detail-page-slice.test.ts:78:3
+     76|   })
+     77|
+     78|   it('renders overdue invoice with payment controls, warning, and timeΓÇª
+       |   ^
+     79|     const { default: InvoiceDetailPage } = await import('@/app/(dashboΓÇª
+     80|     const markup = renderToStaticMarkup(await InvoiceDetailPage({ paraΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/invoices-new-page-slice.test.ts > invoices new page slice > renders the new invoice shell with the empty-state controls
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/invoices-new-page-slice.test.ts:37:3
+     35|
+     36| describe('invoices new page slice', () => {
+     37|   it('renders the new invoice shell with the empty-state controls', asΓÇª
+       |   ^
+     38|     const { default: NewInvoicePage } = await import('@/app/(dashboardΓÇª
+     39|     const markup = renderToStaticMarkup(React.createElement(NewInvoiceΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[8/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/invoices-page-slice.test.ts > invoices page slice > renders full invoice table with stats, aging buckets, and status fallbacks
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/invoices-page-slice.test.ts:58:3
+     56|   })
+     57|
+     58|   it('renders full invoice table with stats, aging buckets, and statusΓÇª
+       |   ^
+     59|     const now = '2026-06-20T12:00:00.000Z'
+     60|     mockGetInvoices.mockResolvedValueOnce({
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[9/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/locale-dashboard-page-slice.test.ts > locale dashboard page slice > renders the dashboard page with mocked workspace data
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/locale-dashboard-page-slice.test.ts:79:3
+     77|
+     78| describe('locale dashboard page slice', () => {
+     79|   it('renders the dashboard page with mocked workspace data', async ()ΓÇª
+       |   ^
+     80|     const { default: DashboardPage } = await import('@/app/[locale]/daΓÇª
+     81|     const element = await DashboardPage({ params: Promise.resolve({ loΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[10/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/locale-layouts-slice.test.ts > locale layout slices > renders locale dashboard layout navigation and header
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/locale-layouts-slice.test.ts:57:3
+     55|   })
+     56|
+     57|   it('renders locale dashboard layout navigation and header', async ()ΓÇª
+       |   ^
+     58|     const { default: DashboardLayout } = await import('@/app/[locale]/ΓÇª
+     59|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[11/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/orders-detail-page-slice.test.ts > order detail page slice > renders populated order detail with timeline, shipping, and guidance
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/orders-detail-page-slice.test.ts:82:3
+     80|   })
+     81|
+     82|   it('renders populated order detail with timeline, shipping, and guidΓÇª
+       |   ^
+     83|     const { default: OrderDetailPage } = await import('@/app/(dashboarΓÇª
+     84|     const markup = renderToStaticMarkup(await OrderDetailPage({ paramsΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[12/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/orders-new-page-slice.test.ts > orders new page slice > renders the new order shell with the empty line-items state
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/orders-new-page-slice.test.ts:38:3
+     36|
+     37| describe('orders new page slice', () => {
+     38|   it('renders the new order shell with the empty line-items state', asΓÇª
+       |   ^
+     39|     const { default: NewOrderPage } = await import('@/app/(dashboard)/ΓÇª
+     40|     const markup = renderToStaticMarkup(React.createElement(NewOrderPaΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[13/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/products-detail-page-slice.test.ts > product detail page slice > renders populated product detail with low-stock warning and movement variants
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/products-detail-page-slice.test.ts:115:3
+    113|   })
+    114|
+    115|   it('renders populated product detail with low-stock warning and moveΓÇª
+       |   ^
+    116|     const { default: ProductDetailPage } = await import('@/app/(dashboΓÇª
+    117|     const markup = renderToStaticMarkup(await ProductDetailPage({ paraΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[14/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/purchase-orders-detail-page-slice.test.ts > purchase order detail page slice > renders received progress, guidance, timeline, zoho synced and notes branches
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/purchase-orders-detail-page-slice.test.ts:58:3
+     56|   })
+     57|
+     58|   it('renders received progress, guidance, timeline, zoho synced and nΓÇª
+       |   ^
+     59|     mockGetPurchaseOrderWithLines.mockResolvedValueOnce({
+     60|       id: 'po-1',
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[15/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/purchase-orders-new-page-slice.test.ts > purchase orders new page slice > renders the new purchase order shell with the empty line-items state
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/purchase-orders-new-page-slice.test.ts:38:3
+     36|
+     37| describe('purchase orders new page slice', () => {
+     38|   it('renders the new purchase order shell with the empty line-items sΓÇª
+       |   ^
+     39|     const { default: NewPurchaseOrderPage } = await import('@/app/(dasΓÇª
+     40|     const markup = renderToStaticMarkup(React.createElement(NewPurchasΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[16/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/quotes-dashboard-slice.test.ts > quotes dashboard slices > renders quote detail action branches by status
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/quotes-dashboard-slice.test.ts:26:3
+     24|
+     25| describe('quotes dashboard slices', () => {
+     26|   it('renders quote detail action branches by status', async () => {
+       |   ^
+     27|     const { QuoteDetailActions } = await import('@/app/(dashboard)/quoΓÇª
+     28|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[17/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/quotes-detail-page-slice.test.ts > quote detail page slice > renders full quote detail with client/workflow/ai/payment/profitability blocks
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/quotes-detail-page-slice.test.ts:181:3
+    179|   })
+    180|
+    181|   it('renders full quote detail with client/workflow/ai/payment/profitΓÇª
+       |   ^
+    182|     const { default: QuoteDetailPage } = await import('@/app/(dashboarΓÇª
+    183|     const markup = renderToStaticMarkup(await QuoteDetailPage({ paramsΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[18/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/quotes-new-page-slice.test.ts > quotes new page slice > renders the new quote shell with the default assistant and summary state
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/quotes-new-page-slice.test.ts:28:3
+     26|
+     27| describe('quotes new page slice', () => {
+     28|   it('renders the new quote shell with the default assistant and summaΓÇª
+       |   ^
+     29|     const { default: NewQuotePage } = await import('@/app/(dashboard)/ΓÇª
+     30|     const markup = renderToStaticMarkup(React.createElement(NewQuotePaΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[19/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/quotes-page-slice.test.ts > quotes page slice > renders the empty state when no quotes exist
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/quotes-page-slice.test.ts:52:3
+     50|   })
+     51|
+     52|   it('renders the empty state when no quotes exist', async () => {
+       |   ^
+     53|     mockFindAll.mockResolvedValue([])
+     54|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[20/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/quotes-request-page-slice.test.ts > quotes request page slice > renders the request form shell and submission controls
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/quotes-request-page-slice.test.ts:28:3
+     26|
+     27| describe('quotes request page slice', () => {
+     28|   it('renders the request form shell and submission controls', async (ΓÇª
+       |   ^
+     29|     const { default: QuoteRequestPage } = await import('@/app/(dashboaΓÇª
+     30|     const markup = renderToStaticMarkup(React.createElement(QuoteRequeΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[21/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/repositories-layer-slice.test.ts > repository layer slice > covers customer/order/payment repositories
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/repositories-layer-slice.test.ts:70:3
+     68|   })
+     69|
+     70|   it('covers customer/order/payment repositories', async () => {
+       |   ^
+     71|     const { customerRepo, orderRepo, paymentRepo } = await import('@/lΓÇª
+     72|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[22/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/resolve-org-slice.test.ts > resolve-org slice > throws when unauthenticated or missing org selection
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/resolve-org-slice.test.ts:46:3
+     44|   })
+     45|
+     46|   it('throws when unauthenticated or missing org selection', async () ΓÇª
+       |   ^
+     47|     const { resolveOrgContext } = await import('@/lib/resolve-org')
+     48|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[23/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/settings-form-slice.test.ts > settings form slice > renders settings form default tab fields and controls
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/settings-form-slice.test.ts:12:3
+     10|
+     11| describe('settings form slice', () => {
+     12|   it('renders settings form default tab fields and controls', async ()ΓÇª
+       |   ^
+     13|     const { SettingsForm } = await import('@/app/(dashboard)/settings/ΓÇª
+     14|
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[24/25]ΓÄ»
+
+ FAIL  |Flow-app| tests/suppliers-detail-page-slice.test.ts > supplier detail page slice > renders populated supplier detail with synced status and recent POs
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» tests/suppliers-detail-page-slice.test.ts:87:3
+     85|   })
+     86|
+     87|   it('renders populated supplier detail with synced status and recent ΓÇª
+       |   ^
+     88|     const { default: SupplierDetailPage } = await import('@/app/(dashbΓÇª
+     89|     const markup = renderToStaticMarkup(await SupplierDetailPage({ parΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[25/25]ΓÄ»
+
+
+ Test Files  25 failed | 82 passed (107)
+      Tests  25 failed | 587 passed (612)
+   Start at  22:58:55
+   Duration  71.23s (transform 221.14s, setup 0ms, import 184.66s, tests 466.11s, environment 160ms)
+
+ΓÇëELIFECYCLEΓÇë Test failed. See above for more details.
+EXIT=1

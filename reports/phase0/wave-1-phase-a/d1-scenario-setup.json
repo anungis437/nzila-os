@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-07-21T19:00:11.0892128Z",
+  "organizationId": "5ecb17ab-b5de-442e-a46f-93778ee496aa",
+  "D1_success": {
+    "source_deadline_id": "50495bf5-149e-45de-b31e-1226cb1b087f",
+    "recipient_email_hash": "44d56cbf87c619a096d38ba40f7467ee29ca58770a1d91f58a519fa16da61a98",
+    "expected_outcome": "sent",
+    "recipient_email": "delivered@resend.dev",
+    "reminder_kind": "overdue"
+  },
+  "D2_failure": {
+    "source_deadline_id": "ce01372c-f665-4efa-adb3-079360e0be64",
+    "recipient_email_hash": "e70b0e932b7b3340c924b67254bd4bc31441a4a19fb2b3b6deb8354ca0236a5c",
+    "expected_outcome": "dead_letter or permanent_failure",
+    "recipient_email": "bounced@resend.dev",
+    "reminder_kind": "overdue"
+  }
+}

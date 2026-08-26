@@ -245,9 +245,20 @@ describe('ReviewerActions — mutation contract', () => {
     );
 
     fireEvent.click(screen.getByTestId('ai-action-approved'));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1), { timeout: 15000 });
+    // The component uses React useTransition; the referral button is disabled while
+    // the first mutation's transition is pending. Wait for it to re-enable before
+    // clicking, otherwise fireEvent.click on a disabled button is a no-op and the
+    // second fetch never fires (flaky under monorepo-scale parallel runners on Windows).
+    await waitFor(
+      () => {
+        const btn = screen.getByTestId('referral-action-sent') as HTMLButtonElement;
+        expect(btn.disabled).toBe(false);
+      },
+      { timeout: 15000 },
+    );
     fireEvent.click(screen.getByTestId('referral-action-sent'));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2), { timeout: 15000 });
 
     const key1 = (fetchMock.mock.calls[0][1] as RequestInit).headers as Record<string, string>;
     const key2 = (fetchMock.mock.calls[1][1] as RequestInit).headers as Record<string, string>;

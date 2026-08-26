@@ -1,0 +1,50 @@
+
+Running 6 tests using 1 worker
+
+[1A[2K[1/6] [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ member: pilot excluded routes are hard-gated
+
+
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-22T20:32:15.619Z] [WARN] [43ccee74-2708-4cc0-a2a0-cfc3f8ee8fbb] [runtime-fail-closed] mode=advisory satisfied=false
+[WebServer]   - auth.webhook.secret: missing AUTH_WEBHOOK_SECRET ΓåÆ bounded runtime (related surface disabled)
+[WebServer]   - identity.entra.client_id: missing AZURE_AD_CLIENT_ID ΓåÆ continuity-safe fallback (Entra path disabled)
+[WebServer]   - identity.entra.tenant_id: missing AZURE_AD_TENANT_ID ΓåÆ continuity-safe fallback (Entra path disabled)
+[WebServer]   - identity.entra.client_secret: missing AZURE_AD_CLIENT_SECRET ΓåÆ continuity-safe fallback (Entra path disabled)
+[WebServer]   - lineage.secret_topology: missing SECRET_TOPOLOGY ΓåÆ explicit degradation (lineage banner)
+[WebServer]   - lineage.secret_authority: missing SECRET_AUTHORITY ΓåÆ explicit degradation (lineage banner)
+[WebServer]   - lineage.environment_isolation: missing ENVIRONMENT_ISOLATION ΓåÆ explicit degradation (lineage banner)
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-22T20:32:15.619Z] [WARN] [43ccee74-2708-4cc0-a2a0-cfc3f8ee8fbb] NZILA_MODE is not set; pilot demo mutation routes will remain fail-closed
+[WebServer]   Context: {
+[WebServer]   "runtimeMode": null
+[WebServer] }
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-22T20:32:19.818Z] [WARN] [43ccee74-2708-4cc0-a2a0-cfc3f8ee8fbb] Missing critical database tables
+[WebServer]   Context: {
+[WebServer]   "missingTables": "[REDACTED]",
+[WebServer]   "message": "Database migrations may not be up to date"
+[WebServer] }
+
+
+[1A[2K[WebServer] ΓÜá∩╕Å [2026-07-22T20:32:19.818Z] [WARN] [43ccee74-2708-4cc0-a2a0-cfc3f8ee8fbb] Database schema validation warnings detected
+[1A[2K  1) [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ member: pilot excluded routes are hard-gated 
+
+    [31m"beforeAll" hook timeout of 60000ms exceeded.[39m
+
+      10 |
+      11 | test.describe('UnionEyes hard pilot-mode gating', () => {
+    > 12 |   test.beforeAll(async ({ request }) => {
+         |        ^
+      13 |     await bootstrapE2EAuth(request);
+      14 |   });
+      15 |
+        at C:\APPS\nzila-automation\apps\union-eyes\e2e\pilot-mode-gating.spec.ts:12:8
+
+    Error Context: test-results\e2e-pilot-mode-gating-Unio-89ada-luded-routes-are-hard-gated-chromium\error-context.md
+
+
+[1A[2K[2/6] [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ steward: pilot excluded routes are hard-gated
+[1A[2K[3/6] [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ staff: pilot excluded routes are hard-gated
+[1A[2K[4/6] [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ executive: pilot excluded routes are hard-gated
+[1A[2K[5/6] [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ governance: pilot excluded routes are hard-gated
+[1A[2K[6/6] [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ admin: pilot excluded routes are hard-gated
+[1A[2K  1 failed
+    [chromium] ΓÇ║ e2e\pilot-mode-gating.spec.ts:17:9 ΓÇ║ UnionEyes hard pilot-mode gating ΓÇ║ member: pilot excluded routes are hard-gated 
+  5 did not run

@@ -1,6 +1,9 @@
 # Trade
 
-> Cross-border trade management — deals, listings, shipments, and commission tracking.
+> Cross-border trade infrastructure: deals, financing states, listings,
+> shipments, parties, commissions, invoices, and settlement with tamper-
+> evident evidence sealing. Trade sits alongside — not as a replacement for
+> — the 3CUO/DiasporaCore banking heritage.
 
 ## Stack
 
@@ -34,4 +37,13 @@ Copy `.env.example` → `.env.local` and fill required values:
 
 ## Domain
 
-End-to-end trade lifecycle management — deal origination, vehicle/goods listings, party management, shipment tracking, and commission settlement. Includes tamper-evident evidence sealing for compliance.
+End-to-end cross-border trade lifecycle: deal origination, financing states,
+vehicle and goods listings, party management, shipment tracking, invoicing,
+and commission settlement, with tamper-evident evidence sealing for
+compliance.
+
+**Portfolio boundary.** Trade covers cross-border trade and commercial-deal
+infrastructure. It is distinct from — not a successor to — the
+3CUO / DiasporaCore banking heritage (retail/business banking, lending,
+remittances, cards, KYC/AML admin, fraud & disputes, member administration).
+See `docs/categories/platform-and-operations/migration/app-alignment/3cuo.md`.

@@ -36,6 +36,7 @@ export function makeT(namespace: string) {
 
 export const clientMock = {
   useTranslations: (namespace: string) => makeT(namespace),
+  useLocale: () => 'en-CA',
 };
 
 export const serverMock = {

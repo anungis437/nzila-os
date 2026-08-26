@@ -46,13 +46,13 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@auth/core": "^0.34.3",
+    "@auth/core": "^0.41.3",
     "@nzila/db": "workspace:*",
     "@nzila/org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
     "argon2": "^0.41.1",
     "jose": "^6.2.2",
-    "next-auth": "5.0.0-beta.30",
+    "next-auth": "5.0.0-beta.32",
     "zod": "^3.24.0"
   },
   "peerDependencies": {

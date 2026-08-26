@@ -25,10 +25,6 @@ const ROOT = join(__dirname, '..', '..');
  * `isCupe4373DemoRuntime` may not occur anywhere in the file.
  */
 const NO_BYPASS_FILES = [
-  // POST /api/cases/[caseId]/decision — must require steward+ via hasMinRole
-  'apps/union-eyes/app/api/cases/[caseId]/decision/route.ts',
-  // GET /api/cases/[caseId]/proof-pack — must require any authenticated user
-  'apps/union-eyes/app/api/cases/[caseId]/proof-pack/route.ts',
   // Dashboard route guard — must always enforce minRole
   'apps/union-eyes/lib/dashboard/require-dashboard-access.ts',
   // GET/POST /api/members — must not short-circuit on demo profile

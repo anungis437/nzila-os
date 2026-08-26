@@ -95,6 +95,11 @@ export * from "./domains/employer-execution";
 // Board Packets
 export * from "./board-packet-schema";       // Governance meeting packet generation
 
+// Wave 1 Phase A — deadline engine (durable reminder outbox + audit trail).
+// See migrations/0045_union_eyes_deadline_engine.sql and
+// docs/union-eyes/reality-remediation/deadline-engine/00-charter.md.
+export * from "./deadline-engine-schema";
+
 // Dues & Finance (member dues ledger, arrears, employer remittances)
 export * from "./dues-finance-schema";
 

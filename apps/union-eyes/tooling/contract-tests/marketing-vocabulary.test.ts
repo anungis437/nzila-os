@@ -98,5 +98,5 @@ describe("marketing vocabulary (public surfaces)", () => {
           failures.map((f) => `  - ${f}`).join("\n"),
       );
     }
-  }, 30_000);
+  });
 });

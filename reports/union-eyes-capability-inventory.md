@@ -1,0 +1,126 @@
+# Union Eyes Capability Inventory
+
+- Generated: 2026-07-21T01:31:46.440Z
+- Surfaces discovered: **1714**
+- Registry entries: 8 (owning 10 paths)
+- Coverage: 7 / 1714
+- **Surfaces without a registry entry: 1707**
+- Registry paths with no matching surface: 3
+
+## By kind
+
+- api-route: 931
+- cron-route: 13
+- db-schema: 284
+- page: 347
+- server-action: 12
+- service: 127
+
+## Surfaces missing from the registry (first 100)
+
+- `actions/admin-actions.ts`
+- `actions/analytics-actions.ts`
+- `actions/credits-actions.ts`
+- `actions/icra/get-adaptive-resolution.ts`
+- `actions/icra/get-profile.ts`
+- `actions/member-employment-actions.ts`
+- `actions/member-segments-actions.ts`
+- `actions/pending-profiles-actions.ts`
+- `actions/profiles-actions.ts`
+- `actions/rewards-actions.ts`
+- `actions/stripe-actions.ts`
+- `actions/whop-actions.ts`
+- `app/(marketing)/[...slug]/page.tsx`
+- `app/(marketing)/case-studies/[slug]/page.tsx`
+- `app/(marketing)/case-studies/page.tsx`
+- `app/(marketing)/contact/page.tsx`
+- `app/(marketing)/executive-intelligence/page.tsx`
+- `app/(marketing)/features/ai-workbench/page.tsx`
+- `app/(marketing)/features/analytics/page.tsx`
+- `app/(marketing)/features/grievance-tracking/page.tsx`
+- `app/(marketing)/features/inbox/page.tsx`
+- `app/(marketing)/features/member-portal/page.tsx`
+- `app/(marketing)/features/priorities/page.tsx`
+- `app/(marketing)/governance/page.tsx`
+- `app/(marketing)/insights/[slug]/page.tsx`
+- `app/(marketing)/insights/category/[slug]/page.tsx`
+- `app/(marketing)/insights/page.tsx`
+- `app/(marketing)/institutional-continuity/page.tsx`
+- `app/(marketing)/organizational-continuity/page.tsx`
+- `app/(marketing)/page.tsx`
+- `app/(marketing)/pilot-request/page.tsx`
+- `app/(marketing)/platform/explainable-intelligence/page.tsx`
+- `app/(marketing)/platform/governance-intelligence/page.tsx`
+- `app/(marketing)/platform/operational-coherence/page.tsx`
+- `app/(marketing)/platform/organizational-memory/page.tsx`
+- `app/(marketing)/pricing/page.tsx`
+- `app/(marketing)/solutions/executive-leadership/page.tsx`
+- `app/(marketing)/solutions/governance-leadership/page.tsx`
+- `app/(marketing)/solutions/labour-leadership/page.tsx`
+- `app/(marketing)/solutions/operations-leadership/page.tsx`
+- `app/(marketing)/solutions/page.tsx`
+- `app/(marketing)/solutions/procurement/page.tsx`
+- `app/(marketing)/solutions/technology-leadership/page.tsx`
+- `app/(marketing)/status/page.tsx`
+- `app/(marketing)/story/page.tsx`
+- `app/(marketing)/trust/page.tsx`
+- `app/(marketing)/whitepaper/page.tsx`
+- `app/(marketing)/whitepapers/[slug]/page.tsx`
+- `app/(marketing)/whitepapers/page.tsx`
+- `app/[locale]/(auth)/login/[[...login]]/page.tsx`
+- `app/[locale]/(auth)/sign-in/[[...sign-in]]/page.tsx`
+- `app/[locale]/(auth)/sign-up/[[...sign-up]]/page.tsx`
+- `app/[locale]/(auth)/signup/[[...signup]]/page.tsx`
+- `app/[locale]/(dashboard)/analytics/page.tsx`
+- `app/[locale]/(marketing)/case-studies/page.tsx`
+- `app/[locale]/(marketing)/contact/page.tsx`
+- `app/[locale]/(marketing)/continuity-assessment/page.tsx`
+- `app/[locale]/(marketing)/conventions/page.tsx`
+- `app/[locale]/(marketing)/executive-intelligence/page.tsx`
+- `app/[locale]/(marketing)/features/ai-workbench/page.tsx`
+- `app/[locale]/(marketing)/features/analytics/page.tsx`
+- `app/[locale]/(marketing)/features/grievance-tracking/page.tsx`
+- `app/[locale]/(marketing)/features/inbox/page.tsx`
+- `app/[locale]/(marketing)/features/member-portal/page.tsx`
+- `app/[locale]/(marketing)/features/priorities/page.tsx`
+- `app/[locale]/(marketing)/for-clc/page.tsx`
+- `app/[locale]/(marketing)/for-federations/page.tsx`
+- `app/[locale]/(marketing)/for-leadership/page.tsx`
+- `app/[locale]/(marketing)/for-members/page.tsx`
+- `app/[locale]/(marketing)/for-representatives/page.tsx`
+- `app/[locale]/(marketing)/governance/page.tsx`
+- `app/[locale]/(marketing)/insights/[slug]/page.tsx`
+- `app/[locale]/(marketing)/insights/categories/page.tsx`
+- `app/[locale]/(marketing)/insights/category/[slug]/page.tsx`
+- `app/[locale]/(marketing)/insights/doctrine/page.tsx`
+- `app/[locale]/(marketing)/insights/methodology/page.tsx`
+- `app/[locale]/(marketing)/insights/page.tsx`
+- `app/[locale]/(marketing)/insights/resonance/page.tsx`
+- `app/[locale]/(marketing)/institutional-continuity/page.tsx`
+- `app/[locale]/(marketing)/legal/accessibility/page.tsx`
+- `app/[locale]/(marketing)/legal/privacy/page.tsx`
+- `app/[locale]/(marketing)/legal/security/page.tsx`
+- `app/[locale]/(marketing)/legal/terms/page.tsx`
+- `app/[locale]/(marketing)/organizational-continuity/page.tsx`
+- `app/[locale]/(marketing)/pilot-request/page.tsx`
+- `app/[locale]/(marketing)/pilot/apply/page.tsx`
+- `app/[locale]/(marketing)/platform/explainable-intelligence/page.tsx`
+- `app/[locale]/(marketing)/platform/governance-intelligence/page.tsx`
+- `app/[locale]/(marketing)/platform/operational-coherence/page.tsx`
+- `app/[locale]/(marketing)/platform/organizational-memory/page.tsx`
+- `app/[locale]/(marketing)/platform/page.tsx`
+- `app/[locale]/(marketing)/pricing/page.tsx`
+- `app/[locale]/(marketing)/proof/page.tsx`
+- `app/[locale]/(marketing)/solutions/executive-leadership/page.tsx`
+- `app/[locale]/(marketing)/solutions/governance-leadership/page.tsx`
+- `app/[locale]/(marketing)/solutions/labour-leadership/page.tsx`
+- `app/[locale]/(marketing)/solutions/operations-leadership/page.tsx`
+- `app/[locale]/(marketing)/solutions/page.tsx`
+- `app/[locale]/(marketing)/solutions/procurement/page.tsx`
+- `app/[locale]/(marketing)/solutions/technology-leadership/page.tsx`
+
+## Registry-owned paths not observed in code (first 50)
+
+- `.env.local`
+- `lib/feature-flags.ts`
+- `lib/pilot-admin.ts`

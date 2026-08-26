@@ -46,6 +46,16 @@ exceptions:
     owner: platform-team
     reviewDate: "2027-01-01"
 
+  - app: union-eyes-demo
+    missing: platform-shell
+    reason: >-
+      Standalone Union Eyes demo instance used to validate CUPE 4373 pilot
+      flows without touching the live tenant. Uses a custom demo layout
+      instead of the internal platform shell so the demo remains fully
+      isolated from production tenant context.
+    owner: platform-team
+    reviewDate: "2027-04-01"
+
   - app: veridian-admin
     missing: platform-shell
     reason: >-

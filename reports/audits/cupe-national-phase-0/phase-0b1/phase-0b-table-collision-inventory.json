@@ -1,0 +1,992 @@
+{
+  "total_collisions": 111,
+  "platform_source_root": "packages\\db\\drizzle",
+  "django_source_root": "apps\\union-eyes\\backend",
+  "classification_counts": {
+    "REQUIRES_DECISION": 100,
+    "DJANGO_INTERNAL": 9,
+    "SHARED_INTENT": 2
+  },
+  "inventory": [
+    {
+      "table": "ab_test_assignments",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ab_test_events",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ab_test_variants",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ab_tests",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "accessibility_audits",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "accessibility_issues",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "accessibility_test_suites",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "accessibility_user_testing",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "address_change_history",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "address_validation_cache",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ai_budgets",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ai_rate_limits",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ai_safety_filters",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ai_usage_metrics",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "analytics_metrics",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "analytics_scheduled_reports",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "arbitration_decisions",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "arbitration_precedents",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "arbitrator_profiles",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "auth_group",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "auth_group_permissions",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "auth_permission",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "auth_user",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "auth_user_groups",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "auth_user_user_permissions",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "bargaining_notes",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "bargaining_proposals",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "bargaining_team_members",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "benchmark_categories",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "benchmark_data",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "benefit_comparisons",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "cba_clauses",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "cba_contacts",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "cba_footnotes",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "cba_version_history",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "chat_messages",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "chat_sessions",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "chatbot_analytics",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "chatbot_suggestions",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "clause_comparisons",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "clause_comparisons_history",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "clause_library_tags",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "collective_agreements",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "commerce_customers",
+      "platform_files": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Commerce/billing surface; likely platform-owned but must be confirmed."
+    },
+    {
+      "table": "commerce_orders",
+      "platform_files": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Commerce/billing surface; likely platform-owned but must be confirmed."
+    },
+    {
+      "table": "commerce_products",
+      "platform_files": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Commerce/billing surface; likely platform-owned but must be confirmed."
+    },
+    {
+      "table": "commerce_purchase_orders",
+      "platform_files": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Commerce/billing surface; likely platform-owned but must be confirmed."
+    },
+    {
+      "table": "commerce_suppliers",
+      "platform_files": [
+        "packages/db/src/schema/commerce.ts"
+      ],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Commerce/billing surface; likely platform-owned but must be confirmed."
+    },
+    {
+      "table": "communication_analytics",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "comparative_analyses",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "contribution_rates",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "cost_of_living_data",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "country_address_formats",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "cross_org_access_log",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "django_admin_log",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "django_content_type",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "django_migrations",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "DJANGO_INTERNAL",
+      "rationale": "Django framework or contrib internal table; owner = Django."
+    },
+    {
+      "table": "documents",
+      "platform_files": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/operations.ts"
+      ],
+      "django_files": [
+        "content/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Cross-cutting artifact table; requires explicit boundary declaration."
+    },
+    {
+      "table": "evidence_packs",
+      "platform_files": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/operations.ts"
+      ],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Cross-cutting artifact table; requires explicit boundary declaration."
+    },
+    {
+      "table": "external_data_sync_log",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "feature_flags",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "insight_recommendations",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "international_addresses",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "knowledge_base",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "kpi_configurations",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "member_consents",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "member_contact_preferences",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "member_employment_details",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "member_history_events",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "mfa_configurations",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "ml_predictions",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "model_metadata",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "negotiation_sessions",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "negotiations",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "oauth_providers",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organization_benchmark_snapshots",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organization_members",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organization_relationships",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organization_sharing_grants",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organization_sharing_settings",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organization_users",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "organizations",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "SHARED_INTENT",
+      "rationale": "Shared organization contract (Outcome C: platform_tenant_id = organizations.id = orgs.id)."
+    },
+    {
+      "table": "orgs",
+      "platform_files": [
+        "packages/db/src/schema/orgs.ts"
+      ],
+      "django_files": [],
+      "classification": "SHARED_INTENT",
+      "rationale": "Shared organization contract (Outcome C: platform_tenant_id = organizations.id = orgs.id)."
+    },
+    {
+      "table": "page_analytics",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "pending_profiles",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "precedent_citations",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "precedent_tags",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "profiles",
+      "platform_files": [],
+      "django_files": [],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "report_delivery_history",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "report_executions",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "report_shares",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "report_templates",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "reports",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Cross-cutting artifact table; requires explicit boundary declaration."
+    },
+    {
+      "table": "scheduled_reports",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "scim_configurations",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "scim_events_log",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "shared_clause_library",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "sso_providers",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "sso_sessions",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "stripe_webhook_events",
+      "platform_files": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/payments.ts"
+      ],
+      "django_files": [
+        "billing/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Commerce/billing surface; likely platform-owned but must be confirmed."
+    },
+    {
+      "table": "tentative_agreements",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "trend_analyses",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "union_density",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "user_engagement_scores",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "User identity surface; ownership boundary must be declared explicitly."
+    },
+    {
+      "table": "user_sessions",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "User identity surface; ownership boundary must be declared explicitly."
+    },
+    {
+      "table": "user_uuid_mapping",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "User identity surface; ownership boundary must be declared explicitly."
+    },
+    {
+      "table": "users",
+      "platform_files": [],
+      "django_files": [
+        "auth_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "User identity surface; ownership boundary must be declared explicitly."
+    },
+    {
+      "table": "votes",
+      "platform_files": [
+        "drizzle/0000_initial.sql",
+        "packages/db/src/schema/governance.ts"
+      ],
+      "django_files": [
+        "unions/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "wage_benchmarks",
+      "platform_files": [],
+      "django_files": [
+        "analytics/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "wage_progressions",
+      "platform_files": [],
+      "django_files": [
+        "bargaining/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    },
+    {
+      "table": "wcag_success_criteria",
+      "platform_files": [],
+      "django_files": [
+        "ai_core/0001_initial.py"
+      ],
+      "classification": "REQUIRES_DECISION",
+      "rationale": "Duplicate DDL in both lineages; material compatibility not automatically verifiable."
+    }
+  ],
+  "generated_from": {
+    "collision_log": "reports\\audits\\cupe-national-phase-0\\logs\\phase-0b-true-lineage-conflicts.log",
+    "platform_drizzle_files_scanned": 39,
+    "django_migration_files_scanned": 32
+  }
+}

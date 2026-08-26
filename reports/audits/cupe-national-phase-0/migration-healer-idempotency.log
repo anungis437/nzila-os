@@ -1,0 +1,12 @@
+===== Phase 0A.1 · idempotency proof · second run on same DB · 2026-07-22T17:49:42.7834207-04:00 =====
+
+----- STEP 4 · --bootstrap-apply (idempotent) -----
+[migrate] bootstrap: 0000_platform_schema_prerequisites.sql already recorded; skipping.
+[migrate] bootstrap-apply complete. Executed 0 artifact(s).
+
+----- STEP 5 · default (idempotent) -----
+[migrate] incrementals: 38 discovered; 38 already applied; 0 pending.
+[migrate] All incremental migrations already applied.
+
+----- STEP 6 · --verify (idempotent) -----
+[migrate] verify: bootstrap satisfied, no incremental migrations pending, every allowlisted partial is paired with an applied healer, no hash drift.

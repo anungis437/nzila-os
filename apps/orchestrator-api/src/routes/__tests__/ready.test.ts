@@ -59,7 +59,7 @@ describe('GET /ready — critical-aware readiness', () => {
       ]),
     )
     await app.close()
-  }, 15000)
+  })
 
   it('returns 200/degraded_ready when DB ok but GITHUB_TOKEN missing (hard rule)', async () => {
     delete process.env.GITHUB_TOKEN

@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-07-21T18:06:51.741Z",
+  "workspace": "C:/APPS/nzila-automation",
+  "patterns": [
+    "cupe\\s*[-_]?\\s*4373",
+    "cupe\\s*local\\s*4373",
+    "CUPE4373_"
+  ],
+  "policy": "hardcoded-audit-trail-permit",
+  "source": {
+    "scannedFiles": 5310,
+    "filesWithHits": 1,
+    "totalHits": 4,
+    "files": [
+      {
+        "file": "apps/union-eyes/lib/reality/capability-registry.ts",
+        "hits": 4,
+        "classification": "registry-evidence",
+        "reason": "Forensic evidence for UE-DEMO-SEPARATE-PACKAGE / UE-BUILD-OPERATIONAL-ISOLATION: evidence arrays cite the paths of the CUPE4373 files that were physically deleted from the operational package during Wave 0 Task D. Not runtime code.",
+        "allowedMaxHits": 6
+      }
+    ]
+  },
+  "build": null,
+  "errors": []
+}

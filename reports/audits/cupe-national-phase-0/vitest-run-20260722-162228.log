@@ -1,0 +1,2465 @@
+
+> @nzila/union-eyes@1.0.0 test C:\APPS\nzila-automation\apps\union-eyes
+> vitest run "--reporter=default"
+
+
+ RUN  v4.1.2 C:/APPS/nzila-automation/apps/union-eyes
+
+ Γ£ô |union-eyes| app/api/__tests__/admin-pilot-status.route.test.ts (4 tests) 323ms
+ΓÜá∩╕Å [2026-07-22T20:22:33.703Z] [WARN] [2fb9f4c2-dfec-4a9d-b6a0-730036c1f823] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "File is required",
+  "statusCode": 400,
+  "traceId": "mrwj42qv-88bcf204"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:33.719Z] [WARN] [2fb9f4c2-dfec-4a9d-b6a0-730036c1f823] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Forbidden",
+  "statusCode": 403,
+  "traceId": "mrwj42rb-1fe7a77a"
+}
+stdout | app/api/__tests__/crud-routes-coverage.test.ts > admin/alerts/escalations/[id] > exports route handlers
+Γùç injecting env (27) from .env.local // tip: Γùê secrets for agents [www.dotenvx.com]
+
+stdout | app/api/__tests__/staging-proof-deadline-engine.route.test.ts > deadline-engine staging proof route boundary > conceals the route outside authorized staging (pilot)
+Γùç injecting env (27) from .env.local // tip: Γîÿ override existing { override: true }
+
+stdout | app/api/__tests__/social-media-campaigns.route.test.ts > social-media/campaigns route > returns forbidden when organization context is missing
+Γùç injecting env (27) from .env.local // tip: Γîÿ override existing { override: true }
+
+stdout | app/api/__tests__/ml-churn-risk.route.test.ts > ml/predictions/churn-risk route > returns 429 when GET is rate-limited
+Γùç injecting env (27) from .env.local // tip: Γîÿ enable debugging { debug: true }
+
+stdout | app/api/__tests__/pilot-commercial-transition.route.test.ts > pilot/apply/[id]/commercial-transition route > returns 403 when user lacks steward role
+Γùç injecting env (27) from .env.local // tip: Γîü auth for agents [www.vestauth.com]
+
+stdout | app/api/__tests__/pilot-reference-profile.route.test.ts > pilot/apply/[id]/reference-profile route > GET returns forbidden when caller lacks steward role
+Γùç injecting env (27) from .env.local // tip: Γùê secrets for agents [www.dotenvx.com]
+
+stdout | app/api/__tests__/social-media-accounts.route.test.ts > social-media/accounts route > returns forbidden when GET has no organization context
+Γùç injecting env (27) from .env.local // tip: Γîÿ custom filepath { path: '/custom/path/.env' }
+
+stdout | app/api/__tests__/pilot-commercialization-timeline.route.test.ts > pilot/apply/[id]/commercialization-timeline route > returns 403 when caller lacks steward role
+Γùç injecting env (27) from .env.local // tip: Γîÿ suppress logs { quiet: true }
+
+ Γ£ô |union-eyes| lib/__tests__/voting-crypto-service.test.ts (29 tests) 6780ms
+     Γ£ô is deterministic ΓÇö same inputs produce same key  464ms
+     Γ£ô different session IDs produce different keys  479ms
+     Γ£ô different secrets produce different keys  448ms
+     Γ£ô returns false when using wrong session key  412ms
+     Γ£ô detects tampering if wrong session key used for verification  441ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-id.route.test.ts (6 tests) 8404ms
+     Γ£ô GET returns document and logs audit event  7389ms
+ΓÜá∩╕Å [2026-07-22T20:22:41.569Z] [WARN] [2fb9f4c2-dfec-4a9d-b6a0-730036c1f823] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "organizationId is required",
+  "statusCode": 400,
+  "traceId": "mrwj48td-ba435972"
+}
+ Γ£ô |union-eyes| db/__tests__/db.test.ts (6 tests) 8844ms
+     Γ£ô lazily creates the postgres client and drizzle db on first access  7612ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-upload.route.test.ts (7 tests) 8928ms
+     Γ£ô returns error when file is missing  802ms
+     Γ£ô returns validation error when organizationId is missing  7842ms
+ Γ£ô |union-eyes| app/api/__tests__/payments-stripe-webhook.route.test.ts (10 tests) 9392ms
+     Γ£ô rejects requests without a stripe signature header  7340ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-escalate.route.test.ts (3 tests) 9960ms
+     Γ£ô returns 400 when caseId is missing  9940ms
+ΓÜá∩╕Å [2026-07-22T20:22:43.040Z] [WARN] [24933312-a1f3-4dd9-8094-407d7eacb22c] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "No organization found",
+  "statusCode": 403,
+  "traceId": "mrwj49y7-df7a1369"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:43.050Z] [WARN] [b7cb2977-b8a5-4238-97d4-9cbea90708b2] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "No organization found",
+  "statusCode": 403,
+  "traceId": "mrwj49yh-3b9a6087"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:43.055Z] [WARN] [24933312-a1f3-4dd9-8094-407d7eacb22c] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrwj49ym-8231eea6",
+  "details": {
+    "resetIn": 42
+  }
+}
+ Γ£ô |union-eyes| app/api/__tests__/pilot-reference-profile.route.test.ts (5 tests) 9913ms
+     Γ£ô GET returns forbidden when caller lacks steward role  9889ms
+ΓÜá∩╕Å [2026-07-22T20:22:43.069Z] [WARN] [b7cb2977-b8a5-4238-97d4-9cbea90708b2] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrwj49z1-21e65848",
+  "details": {
+    "resetIn": 17
+  }
+}
+ Γ£ô |union-eyes| app/api/__tests__/pilot-commercial-transition.route.test.ts (6 tests) 9910ms
+     Γ£ô returns 403 when user lacks steward role  9886ms
+ Γ£ô |union-eyes| app/api/__tests__/pilot-commercialization-timeline.route.test.ts (5 tests) 9918ms
+     Γ£ô returns 403 when caller lacks steward role  9893ms
+ΓÜá∩╕Å [2026-07-22T20:22:43.082Z] [WARN] [24933312-a1f3-4dd9-8094-407d7eacb22c] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Unsupported platform",
+  "statusCode": 400,
+  "traceId": "mrwj49zd-f99fc17f"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:43.085Z] [WARN] [24933312-a1f3-4dd9-8094-407d7eacb22c] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "Account ID required",
+  "statusCode": 400,
+  "traceId": "mrwj49zh-cc9a1281"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:43.088Z] [WARN] [24933312-a1f3-4dd9-8094-407d7eacb22c] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrwj49zk-45b6982f"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:43.083Z] [WARN] [b7cb2977-b8a5-4238-97d4-9cbea90708b2] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "At least one platform is required",
+  "statusCode": 400,
+  "traceId": "mrwj49zf-d5e9234c"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:43.092Z] [WARN] [b7cb2977-b8a5-4238-97d4-9cbea90708b2] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Start date must be before end date",
+  "statusCode": 400,
+  "traceId": "mrwj49zo-61b633de"
+}
+ Γ£ô |union-eyes| app/api/__tests__/ml-churn-risk.route.test.ts (5 tests) 9799ms
+     Γ£ô returns 429 when GET is rate-limited  9774ms
+ΓÜá∩╕Å [2026-07-22T20:22:43.116Z] [WARN] [24933312-a1f3-4dd9-8094-407d7eacb22c] API Error Response
+  Context: {
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Account not found",
+  "statusCode": 404,
+  "traceId": "mrwj4a0b-b3cc0d11"
+}
+ Γ£ô |union-eyes| app/api/__tests__/staging-proof-deadline-engine.route.test.ts (15 tests) 12575ms
+     Γ£ô conceals the route outside authorized staging (pilot)  12530ms
+ Γ£ô |union-eyes| app/api/__tests__/workflow-transition.route.test.ts (6 tests) 3593ms
+     Γ£ô returns 401 when auth middleware rejects  3547ms
+ Γ£ô |union-eyes| tooling/contract-tests/marketing-vocabulary.test.ts (1 test) 12385ms
+     Γ£ô contains zero hard-fail forbidden terms  12381ms
+ Γ£ô |union-eyes| lib/services/__tests__/document-storage-service.test.ts (26 tests) 4469ms
+       Γ£ô throws when AWS credentials are missing  4260ms
+ Γ£ô |union-eyes| app/api/__tests__/employer-remittance-runs.route.test.ts (5 tests) 3663ms
+     Γ£ô GET returns remittance runs for organization  3643ms
+ Γ£ô |union-eyes| app/api/__tests__/cron-sla-watchdog.route.test.ts (4 tests) 3654ms
+     Γ£ô returns empty counts when no active claims are found  3638ms
+ Γ£ô |union-eyes| app/api/__tests__/users-me-organizations.route.test.ts (4 tests) 3400ms
+     Γ£ô returns 401 when unauthenticated  3377ms
+ Γ£ô |union-eyes| lib/__tests__/scheduled-report-executor.test.ts (24 tests) 5696ms
+       Γ£ô succeeds with excel format (falls back to CSV if exceljs unavailable)  5157ms
+       Γ£ô succeeds with pdf format (falls back to text if jspdf unavailable)  463ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-organizations.route.test.ts (4 tests) 3612ms
+     Γ£ô GET returns mapped organizations with live counts and contacts  3598ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-publish.route.test.ts (4 tests) 3715ms
+     Γ£ô returns 404 when interview does not exist  3701ms
+ Γ£ô |union-eyes| app/api/__tests__/pilot-intelligence.route.test.ts (6 tests) 3747ms
+     Γ£ô GET returns 403 when caller lacks role  3721ms
+stderr | app/api/__tests__/all-routes-smoke.test.ts > union-eyes full api smoke matrix > admin/ai-usage executes exported handlers without throwing
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+NZILA OS ΓÇö BOOT ASSERTION FAILURES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  Γ£ù BOOT ASSERTION FAILED: DATABASE_URL is not set. The API cannot function without a database connection.
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The API will not serve traffic until all assertions pass.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > grievances/import executes its exported handlers without throwing
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+NZILA OS ΓÇö BOOT ASSERTION FAILURES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  Γ£ù BOOT ASSERTION FAILED: DATABASE_URL is not set. The API cannot function without a database connection.
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The API will not serve traffic until all assertions pass.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > grievances/import executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:22:48.815Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > grievances/import executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:22:48.817Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+ΓÜá∩╕Å [2026-07-22T20:22:49.603Z] [WARN] [bb4fecb5-d3a5-4290-a934-50abab5b17b3] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "No organization found",
+  "statusCode": 403,
+  "traceId": "mrwj4f0i-4e49fc5e"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:49.622Z] [WARN] [bb4fecb5-d3a5-4290-a934-50abab5b17b3] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrwj4f12-d7f2232a",
+  "details": {
+    "resetIn": 25
+  }
+}
+ΓÜá∩╕Å [2026-07-22T20:22:49.638Z] [WARN] [bb4fecb5-d3a5-4290-a934-50abab5b17b3] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid request data",
+  "statusCode": 400,
+  "traceId": "mrwj4f1i-1f1fc873",
+  "details": {
+    "value": "[object Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-22T20:22:49.653Z] [WARN] [bb4fecb5-d3a5-4290-a934-50abab5b17b3] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "Campaign ID required",
+  "statusCode": 400,
+  "traceId": "mrwj4f1x-7577b4ed"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:49.657Z] [WARN] [bb4fecb5-d3a5-4290-a934-50abab5b17b3] API Error Response
+  Context: {
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Campaign not found",
+  "statusCode": 404,
+  "traceId": "mrwj4f21-7f5f3925"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:49.666Z] [WARN] [bb4fecb5-d3a5-4290-a934-50abab5b17b3] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid data type",
+  "statusCode": 400,
+  "traceId": "mrwj4f2a-d74e45ee"
+}
+stderr | app/api/__tests__/all-routes-import-matrix.test.ts > union-eyes api route import matrix > admin\pilot-status\route.ts imports and exports a handler
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+NZILA OS ΓÇö BOOT ASSERTION FAILURES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  Γ£ù BOOT ASSERTION FAILED: DATABASE_URL is not set. The API cannot function without a database connection.
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The API will not serve traffic until all assertions pass.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+
+ Γ£ô |union-eyes| app/api/__tests__/social-media-accounts.route.test.ts (12 tests) 9849ms
+     Γ£ô returns forbidden when GET has no organization context  9766ms
+ Γ£ô |union-eyes| app/api/__tests__/employer-replay-run-id.route.test.ts (5 tests) 3475ms
+     Γ£ô throws when organization context is missing  3459ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-feedback.route.test.ts (8 tests) 3847ms
+     Γ£ô returns 429 when rate-limited  3811ms
+ Γ£ô |union-eyes| app/api/__tests__/social-media-campaigns.route.test.ts (9 tests) 10070ms
+     Γ£ô returns forbidden when organization context is missing  10025ms
+ Γ£ô |union-eyes| app/api/__tests__/dry-run-calibration.test.ts (6 tests) 17815ms
+     Γ£ô exports GET and POST handlers  9709ms
+     Γ£ô classifies a clause ΓÇö returns a response  7814ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-search.route.test.ts (6 tests) 3637ms
+     Γ£ô POST returns 429 when rate-limited  3614ms
+ Γ£ô |union-eyes| app/api/__tests__/communications-track-open.route.test.ts (3 tests) 3347ms
+     Γ£ô returns the tracking pixel even when token verification fails  3335ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-analytics.route.test.ts (2 tests) 3182ms
+     Γ£ô returns timeline with computed trend and counters  3176ms
+ Γ£ô |union-eyes| app/api/__tests__/employer-execution-payroll-runs.route.test.ts (4 tests) 3334ms
+     Γ£ô GET returns bad request without organization context  3318ms
+ Γ£ô |union-eyes| app/api/__tests__/communications-webhooks-resend.route.test.ts (8 tests) 3423ms
+     Γ£ô returns 500 when webhook configuration is missing  3389ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-dues-overview.route.test.ts (3 tests) 3303ms
+     Γ£ô throws when org context is missing  3293ms
+ Γ£ô |union-eyes| app/api/__tests__/employer-payroll-run-id.route.test.ts (4 tests) 3936ms
+     Γ£ô GET returns run details with chain verification  3922ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-governance.route.test.ts (4 tests) 3739ms
+     Γ£ô PATCH returns 400 when governance fields are missing  3724ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-results-id.route.test.ts (1 test) 3999ms
+     Γ£ô returns the ICRA profile payload  3995ms
+stdout | app/api/__tests__/cases-export.route.test.ts > cases/[caseId]/export route > returns 401 when unauthenticated
+Γùç injecting env (27) from .env.local // tip: Γîÿ override existing { override: true }
+
+ Γ£ô |union-eyes| lib/services/__tests__/voting-crypto-service.test.ts (11 tests) 2467ms
+       Γ£ô produces deterministic output for same inputs  460ms
+ Γ£ô |union-eyes| lib/db/__tests__/query-performance-monitor.test.ts (33 tests) 2810ms
+       Γ£ô generates recommendation for slow JOIN queries  510ms
+       Γ£ô generates recommendation for slow ORDER BY queries  311ms
+       Γ£ô generates recommendation for queries over 1 second  1012ms
+       Γ£ô shifts oldest slow query when history exceeds max  508ms
+ Γ£ô |union-eyes| app/api/__tests__/payroll-runs.route.test.ts (4 tests) 3174ms
+     Γ£ô GET returns 400 when organization context is missing  3153ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-export.route.test.ts (4 tests) 2854ms
+     Γ£ô returns 401 when unauthenticated  2841ms
+ Γ£ô |union-eyes| lib/services/__tests__/ocr-service.test.ts (28 tests) 2251ms
+       Γ£ô returns parsed lines and confidence from read results  1025ms
+       Γ£ô throws when azure processing does not succeed  1003ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-approvals.route.test.ts (5 tests) 2480ms
+     Γ£ô GET returns chains and actions  2464ms
+ Γ£ô |union-eyes| app/api/__tests__/communications-track-click.route.test.ts (7 tests) 3615ms
+     Γ£ô returns 400 when url is missing or invalid  3592ms
+ Γ£ô |union-eyes| app/api/__tests__/pilot-bootstrap-cupe.route.test.ts (2 tests) 3408ms
+     Γ£ô creates org when missing and returns seeded summary  3398ms
+ Γ£ô |union-eyes| lib/auth/__tests__/index.test.ts (6 tests) 3070ms
+ΓÜá∩╕Å [2026-07-22T20:22:55.478Z] [WARN] [e83728e6-6304-46ec-a742-266800d7f368] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid semantic search request",
+  "statusCode": 400,
+  "traceId": "mrwj4jjp-91c89485",
+  "details": {
+    "value": "[object Object]"
+  }
+}
+ Γ£ô |union-eyes| lib/__tests__/organization-utils.test.ts (26 tests) 2184ms
+       Γ£ô returns the default organization ID constant  2155ms
+ Γ£ô |union-eyes| app/api/__tests__/crud-routes-coverage.test.ts (324 tests) 23508ms
+     Γ£ô exports route handlers  10241ms
+ΓÜá∩╕Å [2026-07-22T20:22:56.304Z] [WARN] [29ed1b6d-0da9-463a-9bcd-59d6c1cc4e5d] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing connection ID",
+  "statusCode": 400,
+  "traceId": "mrwj4k6o-0ef995c8"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:56.322Z] [WARN] [29ed1b6d-0da9-463a-9bcd-59d6c1cc4e5d] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid sync payload",
+  "statusCode": 400,
+  "traceId": "mrwj4k76-f25a7a35",
+  "details": {
+    "formErrors": "[Object]",
+    "fieldErrors": "[Object]"
+  }
+}
+ Γ£ô |union-eyes| app/api/__tests__/grievances-assign.route.test.ts (3 tests) 2203ms
+     Γ£ô returns validation error when id missing  2190ms
+ Γ£ô |union-eyes| app/api/__tests__/social-media-analytics.route.test.ts (10 tests) 6958ms
+     Γ£ô returns forbidden when organization context is missing  6902ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-assign.route.test.ts (5 tests) 1889ms
+     Γ£ô returns 401 when unauthenticated  1868ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-bulk-import.route.test.ts (5 tests) 1937ms
+     Γ£ô returns 401 when unauthenticated  1912ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-intake.route.test.ts (7 tests) 2052ms
+     Γ£ô returns 401 when unauthenticated  2024ms
+ΓÜá∩╕Å [2026-07-22T20:22:57.778Z] [WARN] [1c2ca648-c93a-499c-856a-e8f03e083a47] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrwj4lbl-9e9be66d"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:57.821Z] [WARN] [1c2ca648-c93a-499c-856a-e8f03e083a47] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires steward role or above",
+  "statusCode": 403,
+  "traceId": "mrwj4lcs-a22fe66d"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:57.831Z] [WARN] [1c2ca648-c93a-499c-856a-e8f03e083a47] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Grievance not found",
+  "statusCode": 404,
+  "traceId": "mrwj4ld3-aab025c8"
+}
+Γ¥î [2026-07-22T20:22:57.848Z] [ERROR] [1c2ca648-c93a-499c-856a-e8f03e083a47] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to suggest clauses",
+  "statusCode": 500,
+  "traceId": "mrwj4ldk-f18ac3b7"
+}
+ Γ£ô |union-eyes| app/api/__tests__/grievances-status.route.test.ts (3 tests) 2085ms
+     Γ£ô returns validation error for missing id  2070ms
+ Γ£ô |union-eyes| services/case-intelligence/related-documents-service.test.ts (3 tests) 1787ms
+     Γ£ô filters unauthorized docs before ranking and keeps reasons  1735ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-convert.route.test.ts (3 tests) 2167ms
+     Γ£ô returns validation error when id is missing  2149ms
+ΓÜá∩╕Å [2026-07-22T20:22:58.147Z] [WARN] [c779f156-f5f8-4662-adb4-b7b367e0f3de] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrwj4llu-1b458e64"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:58.158Z] [WARN] [c779f156-f5f8-4662-adb4-b7b367e0f3de] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrwj4lm6-13791e8c"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:58.161Z] [WARN] [c779f156-f5f8-4662-adb4-b7b367e0f3de] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Grievance not found",
+  "statusCode": 404,
+  "traceId": "mrwj4lm9-74d96dfb"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:58.172Z] [WARN] [c779f156-f5f8-4662-adb4-b7b367e0f3de] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You can only view your own submissions.",
+  "statusCode": 403,
+  "traceId": "mrwj4lmk-712b00ad"
+}
+Γ¥î [2026-07-22T20:22:58.180Z] [ERROR] [c779f156-f5f8-4662-adb4-b7b367e0f3de] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to fetch grievance",
+  "statusCode": 500,
+  "traceId": "mrwj4lms-0f343ef6"
+}
+ Γ£ô |union-eyes| app/api/__tests__/cases-transition.route.test.ts (6 tests) 2037ms
+     Γ£ô returns 401 when unauthenticated  2005ms
+ΓÜá∩╕Å [2026-07-22T20:22:58.768Z] [WARN] [4a328163-f5cf-4a62-8821-0bbe0d5bd32a] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing grievance ID",
+  "statusCode": 400,
+  "traceId": "mrwj4m33-a9fe3185"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:58.782Z] [WARN] [4a328163-f5cf-4a62-8821-0bbe0d5bd32a] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrwj4m3i-d778ba6b"
+}
+ΓÜá∩╕Å [2026-07-22T20:22:58.951Z] [WARN] [d65f541c-5762-43a9-baae-6061b181fa24] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Only a chief steward or above can override priorities.",
+  "statusCode": 403,
+  "traceId": "mrwj4m86-4edcd9fb"
+}
+Γ¥î [2026-07-22T20:22:58.978Z] [ERROR] [d65f541c-5762-43a9-baae-6061b181fa24] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to override priority",
+  "statusCode": 500,
+  "traceId": "mrwj4m8y-55d229c7"
+}
+ Γ£ô |union-eyes| app/api/__tests__/cases-notes.route.test.ts (6 tests) 1910ms
+     Γ£ô GET returns 401 when unauthenticated  1885ms
+ Γ£ô |union-eyes| app/api/__tests__/organizations-path.route.test.ts (4 tests) 1588ms
+     Γ£ô GET returns 401 when unauthenticated  1569ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-intelligence.route.test.ts (3 tests) 1759ms
+     Γ£ô returns validation error when grievance id is missing  1748ms
+ΓÜá∩╕Å [2026-07-22T20:23:00.169Z] [WARN] [ecdb6776-06c4-4506-8636-31dcafeb666b] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing grievance ID",
+  "statusCode": 400,
+  "traceId": "mrwj4n60-7859c2f5"
+}
+ Γ£ô |union-eyes| app/api/__tests__/pilot-overview.route.test.ts (4 tests) 1828ms
+     Γ£ô GET returns 403 when role check fails  1806ms
+ Γ£ô |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts (15 tests) 1530ms
+     Γ£ô runAutomatedAudit completes with empty violations (real runAxeScan)  1501ms
+ Γ£ô |union-eyes| app/api/__tests__/organizations-switch.route.test.ts (8 tests) 1557ms
+     Γ£ô POST returns 401 when unauthenticated  1527ms
+ΓÜá∩╕Å [2026-07-22T20:23:00.481Z] [WARN] [dc6ed041-5ae6-4007-ab6d-169dbb6a93e6] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrwj4neo-01045d34"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:00.491Z] [WARN] [dc6ed041-5ae6-4007-ab6d-169dbb6a93e6] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires steward role or above",
+  "statusCode": 403,
+  "traceId": "mrwj4nez-0e2420de"
+}
+ Γ£ô |union-eyes| app/api/__tests__/ai-semantic-search.route.test.ts (9 tests) 2157ms
+     Γ£ô returns 429 when rate-limited  2123ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-submit.route.test.ts (5 tests) 1784ms
+     Γ£ô returns 429 when submission rate limit is exceeded  1760ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-id-documents.route.test.ts (6 tests) 2399ms
+     Γ£ô returns 403 when user lacks member role  2372ms
+ Γ£ô |union-eyes| app/api/__tests__/organizations-id.route.test.ts (6 tests) 1779ms
+     Γ£ô GET returns 401 when unauthenticated  1755ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances.route.test.ts (7 tests) 1902ms
+     Γ£ô POST returns validation error for bad input  1834ms
+ Γ£ô |union-eyes| app/api/__tests__/calendar-sync-connections-sync.route.test.ts (3 tests) 2132ms
+     Γ£ô returns validation error when connection id is missing  2112ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-report-review.route.test.ts (6 tests) 1599ms
+     Γ£ô returns 400 for invalid assessment id  1572ms
+ΓÜá∩╕Å [2026-07-22T20:23:02.981Z] [WARN] [48f7b339-45e0-4804-9d55-ebcf23e5ae87] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Only steward or above can import cases",
+  "statusCode": 403,
+  "traceId": "mrwj4pc5-d18c8fab"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:02.998Z] [WARN] [48f7b339-45e0-4804-9d55-ebcf23e5ae87] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON request body",
+  "statusCode": 400,
+  "traceId": "mrwj4pcl-0efe7d45"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:03.005Z] [WARN] [48f7b339-45e0-4804-9d55-ebcf23e5ae87] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "No rows found in import payload",
+  "statusCode": 400,
+  "traceId": "mrwj4pct-84e84b75"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:03.011Z] [WARN] [48f7b339-45e0-4804-9d55-ebcf23e5ae87] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Import session not found for this organization",
+  "statusCode": 404,
+  "traceId": "mrwj4pcz-4fc881ad"
+}
+ Γ£ô |union-eyes| lib/__tests__/cba-intelligence-integration.test.ts (12 tests) 1677ms
+     Γ£ô Step 1: creates a source via source-registry  966ms
+     Γ£ô Step 9: submits a review decision  475ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-id-suggest-clauses.route.test.ts (7 tests) 2119ms
+     Γ£ô returns validation error when id is missing  2080ms
+ΓÜá∩╕Å [2026-07-22T20:23:03.303Z] [WARN] [aad4b09c-01bc-4fb2-9255-436c2955b149] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrwj4pl2-5f671865"
+}
+ Γ£ô |union-eyes| lib/services/case-related-documents-service.test.ts (3 tests) 1548ms
+     Γ£ô returns deterministic order for tied scores and always includes reasons  1539ms
+ΓÜá∩╕Å [2026-07-22T20:23:03.331Z] [WARN] [aad4b09c-01bc-4fb2-9255-436c2955b149] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrwj4plv-d4ece2a8"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:03.339Z] [WARN] [aad4b09c-01bc-4fb2-9255-436c2955b149] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid document payload",
+  "statusCode": 400,
+  "traceId": "mrwj4pm2-bcfd7b76",
+  "details": {
+    "formErrors": "[Object]",
+    "fieldErrors": "[Object]"
+  }
+}
+ΓÜá∩╕Å [2026-07-22T20:23:03.343Z] [WARN] [aad4b09c-01bc-4fb2-9255-436c2955b149] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Blob does not exist",
+  "statusCode": 400,
+  "traceId": "mrwj4pm7-74406b16"
+}
+ Γ£ô |union-eyes| app/api/__tests__/admin-duplicates.route.test.ts (5 tests) 1574ms
+     Γ£ô GET returns 400 when organization context is missing  1551ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-id.route.test.ts (7 tests) 2105ms
+     Γ£ô returns validation error when id is missing  2077ms
+ Γ£ô |union-eyes| app/api/__tests__/workbook-export.route.test.ts (8 tests) 1487ms
+     Γ£ô returns 401 when unauthenticated  1463ms
+ Γ£ô |union-eyes| services/case-intelligence/precedent-matching-service.test.ts (2 tests) 1575ms
+     Γ£ô returns only authorized precedent documents and includes reasons  1557ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-priority-override.route.test.ts (2 tests) 1985ms
+     Γ£ô returns 403 when lacking chief_steward role  1964ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-related-documents.route.test.ts (3 tests) 1934ms
+     Γ£ô returns validation error when grievance id is missing  1922ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-documents.route.test.ts (2 tests) 1711ms
+     Γ£ô returns 400 when missing id  1697ms
+ Γ£ô |union-eyes| services/case-intelligence/case-pattern-detection-service.test.ts (2 tests) 1606ms
+     Γ£ô returns only authorized similar cases with matched dimensions  1593ms
+ Γ£ô |union-eyes| app/api/__tests__/pilot-demo-data.route.test.ts (5 tests) 1616ms
+     Γ£ô POST rejects when runtime mode is disabled  1601ms
+ Γ£ô |union-eyes| app/api/__tests__/calendar-sync-microsoft-callback.route.test.ts (7 tests) 1511ms
+     Γ£ô returns auth required when user id is missing  1490ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-ingest-retry.route.test.ts (5 tests) 1500ms
+     Γ£ô POST returns 400 when organization context is missing  1468ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-access.route.test.ts (3 tests) 1826ms
+     Γ£ô GET returns validation error when grievance id is missing  1810ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-suggest-clauses.route.test.ts (3 tests) 1822ms
+     Γ£ô returns validation error when id is missing  1810ms
+ΓÜá∩╕Å [2026-07-22T20:23:05.966Z] [WARN] [88ceda6e-be3c-4e78-9bd2-886996535626] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Unauthorized",
+  "statusCode": 403,
+  "traceId": "mrwj4rn2-89f1df30"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:05.979Z] [WARN] [88ceda6e-be3c-4e78-9bd2-886996535626] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Search query must be at least 2 characters",
+  "statusCode": 400,
+  "traceId": "mrwj4rne-07999473"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:06.005Z] [WARN] [b6f30129-2683-4857-b0ff-abc002b59c91] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires officer role or above",
+  "statusCode": 403,
+  "traceId": "mrwj4ro4-6e5bd70c"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:06.028Z] [WARN] [b6f30129-2683-4857-b0ff-abc002b59c91] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Checklist item not found",
+  "statusCode": 404,
+  "traceId": "mrwj4ros-760c332f"
+}
+stdout | lib/trust/__tests__/system-metrics.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîÿ enable debugging { debug: true }
+
+ Γ£ô |union-eyes| app/api/__tests__/admin-seed-cupe-pilot.route.test.ts (4 tests) 1506ms
+     Γ£ô returns 403 when user lacks required role  1485ms
+ Γ£ô |union-eyes| lib/services/document-authorization-service.test.ts (3 tests) 1356ms
+     Γ£ô allows privileged docs when explicit grant exists  1348ms
+ Γ£ô |union-eyes| app/api/__tests__/calendar-sync-google-callback.route.test.ts (7 tests) 1345ms
+     Γ£ô returns auth required when user id is missing  1326ms
+ Γ£ô |union-eyes| app/api/__tests__/scim-users.route.test.ts (3 tests) 1389ms
+     Γ£ô GET returns SCIM list response with pagination  1369ms
+ Γ£ô |union-eyes| app/api/__tests__/members-import.route.test.ts (5 tests) 1490ms
+     Γ£ô POST returns 400 when organization context is missing  1457ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-lifecycle-snapshots.route.test.ts (2 tests) 988ms
+     Γ£ô lists snapshots  974ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-report-assessmentId.route.test.ts (6 tests) 1094ms
+     Γ£ô returns 400 for missing assessment id  1079ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-next-actions.route.test.ts (3 tests) 1217ms
+     Γ£ô returns 401 when unauthenticated  1205ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-caseId-export.route.test.ts (5 tests) 1266ms
+     Γ£ô returns 401 when the user is not authenticated  1237ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-assessmentId-answer.route.test.ts (4 tests) 1301ms
+     Γ£ô returns 400 for invalid answer payload  1287ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-start.route.test.ts (6 tests) 1045ms
+     Γ£ô POST returns 400 for invalid payload  1023ms
+ Γ£ô |union-eyes| app/api/__tests__/ready.route.test.ts (3 tests) 1164ms
+     Γ£ô returns 200 when required checks are satisfied  1149ms
+(node:42016) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:42016) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ Γ£ô |union-eyes| lib/workers/__tests__/cleanup-worker.test.ts (11 tests) 978ms
+     Γ£ô exports a configured worker  935ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-import.route.test.ts (7 tests) 1775ms
+     Γ£ô returns forbidden when caller lacks steward role  1736ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-audit.route.test.ts (3 tests) 1202ms
+     Γ£ô returns 401 when not authenticated  1188ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-repository.route.test.ts (6 tests) 1705ms
+     Γ£ô returns forbidden on GET when caller lacks member role  1667ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-assessmentId-submit.route.test.ts (4 tests) 1268ms
+     Γ£ô returns 404 when assessment is missing  1250ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-board-packets-id.route.test.ts (2 tests) 1076ms
+     Γ£ô returns a board packet  1070ms
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > documents/repository executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:09.858Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > documents/repository executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:09.859Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-id.route.test.ts (2 tests) 1060ms
+     Γ£ô returns a governed policy  1055ms
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > grievances executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:09.910Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > grievances executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:09.912Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+ Γ£ô |union-eyes| app/api/__tests__/finance-per-capita-inbound.route.test.ts (2 tests) 991ms
+     Γ£ô returns an empty payload when the organization is not a parent  983ms
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > search/universal executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:10.027Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/extraction-service.test.ts (11 tests) 1030ms
+     Γ£ô creates, gets, completes, and lists extraction runs  997ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-elections-sessions.route.test.ts (2 tests) 1217ms
+     Γ£ô lists voting sessions  1207ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-users-id.route.test.ts (3 tests) 1325ms
+     Γ£ô PUT returns 403 when caller is not platform admin  1311ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-review.route.test.ts (2 tests) 1053ms
+     Γ£ô rejects non-officer users  1047ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-reserved-matters-class-b-vote.route.test.ts (2 tests) 966ms
+     Γ£ô records an approve vote  958ms
+ Γ£ô |union-eyes| lib/trust/__tests__/system-metrics.test.ts (1 test) 1715ms
+     Γ£ô returns a real PDF blob  1711ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-stats-activity.route.test.ts (1 test) 1088ms
+     Γ£ô returns recent member activity  1084ms
+ Γ£ô |union-eyes| lib/services/__tests__/satisfaction-service.test.ts (21 tests) 1175ms
+       Γ£ô returns existing survey if already created  1142ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/ingestion-service.test.ts (11 tests) 1053ms
+     Γ£ô lists and gets ingestion jobs  1025ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-elections-session-id.route.test.ts (3 tests) 958ms
+     Γ£ô returns a session by id  949ms
+ Γ£ô |union-eyes| services/__tests__/fcm-service.test.ts (39 tests) 999ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-repository-id.route.test.ts (6 tests) 1033ms
+     Γ£ô GET returns 403 when member read permission is denied  1008ms
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > pilot/onboarding executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:11.902Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > pilot/onboarding executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:11.904Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+ Γ£ô |union-eyes| services/__tests__/twilio-sms-service.test.ts (24 tests) 1070ms
+     Γ£ô sends to valid recipients and reports failures  1015ms
+ Γ£ô |union-eyes| lib/workers/__tests__/notification-worker.test.ts (17 tests) 973ms
+     Γ£ô exports a configured worker  895ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-council-elections.route.test.ts (2 tests) 957ms
+     Γ£ô lists council elections  947ms
+ Γ£ô |union-eyes| app/api/__tests__/pilot-onboarding.route.test.ts (4 tests) 1545ms
+     Γ£ô GET returns forbidden for users below officer  1523ms
+ Γ£ô |union-eyes| app/api/__tests__/organizations-hierarchy.route.test.ts (1 test) 956ms
+     Γ£ô returns the organization hierarchy  952ms
+stdout | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > employer-execution/remittance-runs executes its exported handlers without throwing
+Γùç injecting env (35) from .env // tip: Γîÿ enable debugging { debug: true }
+
+ Γ£ô |union-eyes| lib/workers/__tests__/report-worker.test.ts (14 tests) 981ms
+     Γ£ô exports a configured worker  896ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-assessmentId-profile.route.test.ts (2 tests) 1058ms
+     Γ£ô returns 404 when profile is not found  1046ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-snapshots-at.route.test.ts (1 test) 861ms
+     Γ£ô returns the snapshot at or before the requested time  858ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-repository-id-versions.route.test.ts (1 test) 1013ms
+     Γ£ô appends a new document version  1010ms
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > pilot/demo-data executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:12.614Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > pilot/demo-data executes its exported handlers without throwing
+{"level":"error","message":"[organization-middleware] withOrganizationAuth failed","timestamp":"2026-07-22T20:23:12.615Z","error":"Unauthorized","stack":"Error: Unauthorized\n    at requireUser (C:/APPS/nzila-automation/apps/union-eyes/lib/api-auth-guard.ts:501:11)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/organization-middleware.ts:48:24\n    at C:/APPS/nzila-automation/apps/union-eyes/app/api/__tests__/static-priority-smoke.test.ts:288:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"}
+
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-replay.route.test.ts (2 tests) 866ms
+     Γ£ô lists replay sessions  859ms
+ Γ£ô |union-eyes| app/api/__tests__/search-universal.route.test.ts (3 tests) 1597ms
+     Γ£ô returns forbidden when caller lacks member role  1573ms
+stdout | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > dashboard/export-csv executes its exported handlers without throwing
+{"level":"info","message":"[dashboard:export-csv] CSV export generated","timestamp":"2026-07-22T20:23:12.830Z","report":"cases","rows":0}
+stderr | app/api/__tests__/static-priority-smoke.test.ts > union-eyes static priority smoke matrix > dashboard/export-csv executes its exported handlers without throwing
+{"level":"warn","message":"[dashboard:export-csv] dashboard/export-csv: data source not wired; returning empty CSV (dev/test only)","timestamp":"2026-07-22T20:23:12.830Z","report":"cases"}
+
+
+ Γ£ô |union-eyes| app/api/__tests__/content-template-status.route.test.ts (5 tests) 907ms
+     Γ£ô PATCH returns 404 when content item is missing  880ms
+ Γ£ô |union-eyes| app/api/__tests__/static-priority-smoke.test.ts (41 tests) 39634ms
+     Γ£ô social-media/analytics executes its exported handlers without throwing  9560ms
+     Γ£ô payments/webhooks/stripe executes its exported handlers without throwing  2078ms
+     Γ£ô grievances/import executes its exported handlers without throwing  3667ms
+     Γ£ô social-media/accounts executes its exported handlers without throwing  378ms
+     Γ£ô ml/predictions/churn-risk executes its exported handlers without throwing  579ms
+     Γ£ô precedents executes its exported handlers without throwing  6450ms
+     Γ£ô communications/webhooks/resend executes its exported handlers without throwing  779ms
+     Γ£ô documents executes its exported handlers without throwing  408ms
+     Γ£ô cron/calendar-sync executes its exported handlers without throwing  7254ms
+     Γ£ô icra/submit executes its exported handlers without throwing  864ms
+     Γ£ô payments/webhooks/paypal executes its exported handlers without throwing  3574ms
+     Γ£ô workflow/transition executes its exported handlers without throwing  1630ms
+     Γ£ô employer-execution/remittance-runs executes its exported handlers without throwing  581ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-elections-session-results.route.test.ts (1 test) 947ms
+     Γ£ô returns aggregated election results  943ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-evidence.route.test.ts (4 tests) 835ms
+     Γ£ô GET lists normalized attachments for a case  799ms
+(node:48600) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48600) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ Γ£ô |union-eyes| lib/workers/__tests__/email-worker.test.ts (15 tests) 1064ms
+     Γ£ô exports a configured worker  972ms
+ Γ£ô |union-eyes| lib/services/__tests__/support-service.test.ts (20 tests) 920ms
+     Γ£ô getTicketById returns null when not found  882ms
+ Γ£ô |union-eyes| app/api/__tests__/communications-unsubscribe.route.test.ts (5 tests) 861ms
+     Γ£ô returns 401 for invalid tracking token  837ms
+ Γ£ô |union-eyes| app/api/__tests__/workbook-id-claim.route.test.ts (9 tests) 1028ms
+     Γ£ô returns 401 when unauthenticated  997ms
+ Γ£ô |union-eyes| app/api/__tests__/billing-subscriptions.route.test.ts (4 tests) 927ms
+     Γ£ô GET throws when organization context is missing  910ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-conflict-id.route.test.ts (1 test) 870ms
+     Γ£ô resolves a conflict  867ms
+ Γ£ô |union-eyes| app/api/__tests__/billing-subscriptions-id.route.test.ts (5 tests) 879ms
+     Γ£ô GET throws when organization context is missing  861ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-lineage.route.test.ts (1 test) 930ms
+     Γ£ô returns lineage nodes and edges  926ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-templates.route.test.ts (2 tests) 1070ms
+     Γ£ô lists policy templates  1060ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-summary.route.test.ts (2 tests) 954ms
+     Γ£ô throws bad request when organization context is missing  942ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-users.route.test.ts (1 test) 966ms
+     Γ£ô returns the user list  962ms
+ Γ£ô |union-eyes| app/api/__tests__/rewards-export.route.test.ts (5 tests) 1022ms
+     Γ£ô GET returns 401 when unauthenticated  1004ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/source-registry-service.test.ts (10 tests) 946ms
+     Γ£ô lists sources with pagination and filters  922ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-governance-timeline.route.test.ts (1 test) 915ms
+     Γ£ô returns the governance timeline  911ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-reserved-matters.route.test.ts (2 tests) 971ms
+     Γ£ô lists votes  961ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-mfa-enroll.route.test.ts (4 tests) 862ms
+     Γ£ô returns 401 when unauthenticated  843ms
+ Γ£ô |union-eyes| app/api/__tests__/organizations.route.test.ts (4 tests) 932ms
+     Γ£ô GET returns 401 when unauthenticated  914ms
+ Γ£ô |union-eyes| app/api/__tests__/targets-id.route.test.ts (1 test) 961ms
+     Γ£ô updates the target active state  957ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-email-results.route.test.ts (6 tests) 946ms
+     Γ£ô returns 429 when rate-limited  914ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-lifecycle-policies.route.test.ts (2 tests) 879ms
+     Γ£ô lists policies with filters  865ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-board-packets.route.test.ts (2 tests) 1048ms
+     Γ£ô lists board packets  1036ms
+ Γ£ô |union-eyes| app/api/__tests__/organizations-id-analytics.route.test.ts (1 test) 939ms
+     Γ£ô returns analytics for an organization  936ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-index.route.test.ts (2 tests) 922ms
+     Γ£ô returns not found when the interview does not exist  913ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-members-stats.route.test.ts (1 test) 921ms
+     Γ£ô returns aggregate member stats  918ms
+ Γ£ô |union-eyes| app/api/__tests__/activities.route.test.ts (2 tests) 937ms
+     Γ£ô returns empty list when no org context  932ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-assessmentId-claim.route.test.ts (9 tests) 1036ms
+     Γ£ô returns 401 when unauthenticated  991ms
+ Γ£ô |union-eyes| services/case-intelligence/case-knowledge-graph-service.test.ts (3 tests) 1001ms
+     Γ£ô returns an empty graph when the case cannot be found  988ms
+ Γ£ô |union-eyes| app/api/__tests__/cron-education-reminders.route.test.ts (5 tests) 982ms
+     Γ£ô GET returns success with empty reminder batches  923ms
+ Γ£ô |union-eyes| app/api/__tests__/ml-sla-breach-risk.route.test.ts (1 test) 956ms
+     Γ£ô creates an SLA breach prediction  952ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-checkout.route.test.ts (6 tests) 980ms
+     Γ£ô returns 400 for invalid json  956ms
+ Γ£ô |union-eyes| contexts/__tests__/organization-context.test.tsx (17 tests) 1228ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-ai-usage-list.route.test.ts (1 test) 1028ms
+     Γ£ô returns AI audit entries  1025ms
+ Γ£ô |union-eyes| app/api/__tests__/clause-library-compare.route.test.ts (1 test) 1002ms
+     Γ£ô compares multiple clauses  998ms
+ Γ£ô |union-eyes| app/api/__tests__/billing-send-batch.route.test.ts (1 test) 1030ms
+     Γ£ô batch-generates invoices  1027ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-golden-share.route.test.ts (2 tests) 1119ms
+     Γ£ô returns the latest share record  1110ms
+ Γ£ô |union-eyes| app/api/__tests__/agreements.route.test.ts (2 tests) 1163ms
+     Γ£ô returns agreements list  1151ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-lifecycle-conflicts.route.test.ts (1 test) 1317ms
+     Γ£ô lists active conflicts  1313ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-versions.route.test.ts (1 test) 1262ms
+     Γ£ô returns versions for a policy family  1258ms
+ Γ£ô |union-eyes| lib/services/__tests__/lro-metrics.test.ts (46 tests) 1231ms
+     Γ£ô aggregates metrics from grievances and analytics tables  1179ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-expertise-map.route.test.ts (1 test) 1149ms
+     Γ£ô returns an expertise map  1146ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/document-service.test.ts (9 tests) 1288ms
+     Γ£ô computes stable sha256 content hash  1259ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-stats-overview.route.test.ts (1 test) 1225ms
+     Γ£ô returns system overview metrics  1220ms
+(node:6848) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6848) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ Γ£ô |union-eyes| lib/workers/__tests__/sms-worker.test.ts (14 tests) 1367ms
+     Γ£ô exports a configured worker when Twilio env is present  1320ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-ai-usage.route.test.ts (1 test) 1288ms
+     Γ£ô returns paginated AI audit rows  1284ms
+ Γ£ô |union-eyes| app/api/__tests__/sla-breach-risk-feedback.route.test.ts (4 tests) 1517ms
+     Γ£ô POST returns 400 when organization context is missing  1500ms
+ Γ£ô |union-eyes| app/api/__tests__/pilot-current.route.test.ts (2 tests) 1178ms
+     Γ£ô returns 403 when lacks role  1165ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-database-health.route.test.ts (1 test) 984ms
+     Γ£ô returns database health metrics  981ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-timeline.route.test.ts (2 tests) 909ms
+     Γ£ô returns empty data when caseId is missing  901ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-policy-conflicts.route.test.ts (1 test) 922ms
+     Γ£ô returns conflicts for a policy  917ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-mission-audits.route.test.ts (2 tests) 1004ms
+     Γ£ô lists mission audits  994ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/benchmark-service.test.ts (12 tests) 1023ms
+     Γ£ô returns insufficientData when comparables are below threshold  987ms
+ Γ£ô |union-eyes| app/api/__tests__/precedents-jurisdiction-preferences.route.test.ts (2 tests) 952ms
+     Γ£ô returns default preferences when none exist  946ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-lifecycle-deprecation-watch.route.test.ts (1 test) 919ms
+     Γ£ô returns deprecation watch candidates  914ms
+ Γ£ô |union-eyes| app/api/__tests__/settings-organization.route.test.ts (3 tests) 932ms
+     Γ£ô returns organization settings  923ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-summarize.route.test.ts (5 tests) 976ms
+     Γ£ô returns 429 when rate-limited  946ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/review-service.test.ts (10 tests) 1004ms
+     Γ£ô gets review queue and pending agreement queue  979ms
+ Γ£ô |union-eyes| app/api/__tests__/audits-id.route.test.ts (1 test) 932ms
+     Γ£ô returns an audit log row  928ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/freshness-service.test.ts (12 tests) 1018ms
+     Γ£ô computeSourceFreshness returns derived freshness and counts  982ms
+ΓÜá∩╕Å [2026-07-22T20:23:20.524Z] [WARN] [46e3366b-df86-41dc-9016-ad9da2b91276] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "AI rate limit exceeded.",
+  "statusCode": 429,
+  "traceId": "mrwj52vf-e10d176c"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:20.537Z] [WARN] [46e3366b-df86-41dc-9016-ad9da2b91276] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid copilot input",
+  "statusCode": 400,
+  "traceId": "mrwj52vt-6b41fc81",
+  "details": {
+    "formErrors": "[Object]",
+    "fieldErrors": "[Object]"
+  }
+}
+ Γ£ô |union-eyes| i18n/__tests__/request.test.ts (3 tests) 392ms
+ Γ£ô |union-eyes| lib/icra/__tests__/antiGamificationInvariant.test.ts (4 tests) 375ms
+     Γ£ô no question text contains forbidden quiz / gamification vocabulary  350ms
+ Γ£ô |union-eyes| app/api/__tests__/whop-unauthenticated-checkout.route.test.ts (7 tests) 355ms
+     Γ£ô returns 400 when planId is missing  332ms
+ΓÜá∩╕Å [2026-07-22T20:23:21.081Z] [WARN] [c4544534-e364-482b-94c4-e0b6fd09a34d] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Authentication and organization context required",
+  "statusCode": 401,
+  "traceId": "mrwj53ax-e3855606"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:21.099Z] [WARN] [c4544534-e364-482b-94c4-e0b6fd09a34d] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Authentication and organization context required",
+  "statusCode": 401,
+  "traceId": "mrwj53bf-3b97d95c"
+}
+ Γ£ô |union-eyes| app/api/__tests__/billing-validate.route.test.ts (3 tests) 297ms
+ Γ£ô |union-eyes| app/api/__tests__/voice-upload.route.test.ts (9 tests) 207ms
+ Γ£ô |union-eyes| lib/workers/__tests__/message-queue-processor.test.ts (13 tests) 461ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-mamba.route.test.ts (3 tests) 317ms
+     Γ£ô returns validation error for empty input  308ms
+ΓÜá∩╕Å [2026-07-22T20:23:22.063Z] [WARN] [1bbabd7d-fbc6-42cf-8af4-4af26d191bd1] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing ID",
+  "statusCode": 400,
+  "traceId": "mrwj5427-54770ba3"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:22.074Z] [WARN] [1bbabd7d-fbc6-42cf-8af4-4af26d191bd1] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Requires steward role or above",
+  "statusCode": 403,
+  "traceId": "mrwj542i-845dd85a"
+}
+ Γ£ô |union-eyes| app/api/__tests__/auth-forgot-password.route.test.ts (3 tests) 313ms
+     Γ£ô returns 400 when email is invalid  303ms
+ΓÜá∩╕Å [2026-07-22T20:23:22.490Z] [WARN] [4e09325f-584e-4632-8e0d-bcfbd5a06181] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid precedent matching request",
+  "statusCode": 400,
+  "traceId": "mrwj54e1-04b63083",
+  "details": {
+    "value": "[object Object],[object Object]"
+  }
+}
+ Γ£ô |union-eyes| app/api/__tests__/ai-ingest.route.test.ts (3 tests) 405ms
+     Γ£ô returns 400 when file is missing  389ms
+ΓÜá∩╕Å [2026-07-22T20:23:23.190Z] [WARN] [0cabc385-7a97-4dcd-895d-a9dec71afa7a] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid request data",
+  "statusCode": 400,
+  "traceId": "mrwj54xh-0902ab11",
+  "details": {
+    "value": "[object Object]"
+  }
+}
+Γ¥î [2026-07-22T20:23:23.209Z] [ERROR] [0cabc385-7a97-4dcd-895d-a9dec71afa7a] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Internal server error",
+  "statusCode": 500,
+  "traceId": "mrwj54xv-4bad0ac1",
+  "details": {
+    "message": "Cannot read properties of undefined (reading 'searchParams')",
+    "name": "TypeError"
+  }
+}
+ Γ£ô |union-eyes| app/api/__tests__/carbon-validate.route.test.ts (3 tests) 292ms
+ Γ£ô |union-eyes| app/api/__tests__/whop-create-checkout.route.test.ts (5 tests) 302ms
+stdout | app/api/__tests__/all-routes-smoke.test.ts > union-eyes full api smoke matrix > dashboard/export-csv executes exported handlers without throwing
+{"level":"info","message":"[dashboard:export-csv] CSV export generated","timestamp":"2026-07-22T20:23:24.065Z","report":"cases","rows":0}
+
+stderr | app/api/__tests__/all-routes-smoke.test.ts > union-eyes full api smoke matrix > dashboard/export-csv executes exported handlers without throwing
+{"level":"warn","message":"[dashboard:export-csv] dashboard/export-csv: data source not wired; returning empty CSV (dev/test only)","timestamp":"2026-07-22T20:23:24.065Z","report":"cases"}
+
+ Γ£ô |union-eyes| lib/resilience/__tests__/circuit-breaker.test.ts (20 tests) 332ms
+ Γ£ô |union-eyes| lib/__tests__/workflow-transition-schema.fuzz.test.ts (3 tests) 343ms
+stdout | lib/organizational-chronology/__tests__/source.test.ts
+Γùç injecting env (27) from .env.local // tip: Γùê encrypted .env [www.dotenvx.com]
+
+stdout | lib/services/__tests__/dashboard-kpi-service.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîü auth for agents [www.vestauth.com]
+
+ Γ£ô |union-eyes| lib/organizational-chronology/__tests__/source.test.ts (2 tests) 519ms
+     Γ£ô every chronology projection passes assertNoProtectedKindsInProjections  496ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-seed-test-data.route.test.ts (2 tests) 361ms
+     Γ£ô seeds the hierarchy with GET  354ms
+ Γ£ô |union-eyes| lib/services/__tests__/dashboard-kpi-service.test.ts (19 tests) 354ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/push-notifications.test.ts (14 tests) 864ms
+ Γ£ô |union-eyes| lib/__tests__/useUEMlSignals.test.ts (8 tests) 592ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-copilot-query.route.test.ts (4 tests) 386ms
+     Γ£ô returns 429 on rate limit  361ms
+ Γ£ô |union-eyes| app/api/__tests__/compliance-validate.route.test.ts (4 tests) 361ms
+     Γ£ô returns auth required when user has no organization context  347ms
+ Γ£ô |union-eyes| lib/hooks/__tests__/useCUPEVocabulary.test.ts (10 tests) 811ms
+ Γ£ô |union-eyes| contexts/__tests__/pilot-mode-context.test.tsx (8 tests) 614ms
+ Γ£ô |union-eyes| lib/services/messaging/__tests__/sms-service.test.ts (34 tests) 272ms
+ Γ£ô |union-eyes| lib/hooks/__tests__/use-feature-flags.test.tsx (16 tests) 439ms
+ Γ£ô |union-eyes| lib/__tests__/org-context.test.tsx (11 tests) 616ms
+ Γ£ô |union-eyes| lib/__tests__/circuit-breaker.test.ts (11 tests) 270ms
+ Γ£ô |union-eyes| app/api/version/route.test.ts (5 tests) 395ms
+     Γ£ô prefers x-forwarded-host over host  382ms
+stdout | app/api/__tests__/all-routes-import-matrix.test.ts > union-eyes api route import matrix > employer-execution\payroll-runs\[id]\route.ts imports and exports a handler
+Γùç injecting env (35) from .env // tip: Γîÿ custom filepath { path: '/custom/path/.env' }
+
+stdout | app/api/__tests__/all-routes-smoke.test.ts > union-eyes full api smoke matrix > employer-execution/payroll-runs/[id] executes exported handlers without throwing
+Γùç injecting env (32) from .env // tip: Γùê secrets for agents [www.dotenvx.com]
+
+ Γ£ô |union-eyes| lib/reality/__tests__/route-reconciliation.test.ts (4 tests) 78ms
+Γ¥î [2026-07-22T20:23:27.555Z] [ERROR] [21afab95-1ccc-4236-a083-500427d97c7f] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to fetch user role",
+  "statusCode": 500,
+  "traceId": "mrwj58ai-0795b9d3",
+  "details": {
+    "message": "Cannot read properties of undefined (reading 'searchParams')",
+    "name": "TypeError"
+  }
+}
+Γ¥î [2026-07-22T20:23:27.567Z] [ERROR] [21afab95-1ccc-4236-a083-500427d97c7f] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to fetch user role",
+  "statusCode": 500,
+  "traceId": "mrwj58b2-1658d89b",
+  "details": {
+    "message": "Cannot read properties of undefined (reading 'searchParams')",
+    "name": "TypeError"
+  }
+}
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/notification-service.test.ts (20 tests) 250ms
+ Γ£ô |union-eyes| lib/services/__tests__/multi-provider-geocoding-service.test.ts (14 tests) 226ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-database-optimize.route.test.ts (3 tests) 266ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-mfa-status.route.test.ts (2 tests) 343ms
+     Γ£ô returns 401 when unauthenticated  334ms
+ Γ£ô |union-eyes| lib/__tests__/scheduled-jobs.test.ts (30 tests) 221ms
+ Γ£ô |union-eyes| hooks/__tests__/use-representation-protocol.test.ts (5 tests) 386ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-match-precedents.route.test.ts (3 tests) 455ms
+     Γ£ô returns 429 when rate limited  434ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-system-cache.route.test.ts (2 tests) 330ms
+     Γ£ô returns 403 for non-admin users  321ms
+ Γ£ô |union-eyes| lib/auth/__tests__/role-access-flows.test.ts (959 tests) 244ms
+ Γ£ô |union-eyes| app/api/__tests__/grievances-recommend-steward.route.test.ts (3 tests) 332ms
+     Γ£ô returns validation error when id missing  322ms
+ Γ£ô |union-eyes| components/icra/__tests__/AdaptiveExplanationCard.test.tsx (7 tests) 688ms
+     Γ£ô renders the heading and gives it focus on mount (a11y)  416ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/offline-storage.test.ts (24 tests) 132ms
+ Γ£ô |union-eyes| lib/services/__tests__/notification-service.test.ts (85 tests) 193ms
+ΓÜá∩╕Å [2026-07-22T20:23:28.804Z] [WARN] [ddc1c146-4836-40d9-99aa-93713e15b2f7] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrwj599f-ad743c79"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:28.815Z] [WARN] [ddc1c146-4836-40d9-99aa-93713e15b2f7] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Export type required",
+  "statusCode": 400,
+  "traceId": "mrwj599r-16763368"
+}
+ Γ£ô |union-eyes| lib/resilience/__tests__/retry.test.ts (14 tests) 139ms
+ΓÜá∩╕Å [2026-07-22T20:23:28.831Z] [WARN] [ddc1c146-4836-40d9-99aa-93713e15b2f7] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Unknown export type: unknown. Valid: master_invoice, allocation_statement, chargeback_report, gl_journal, evidence_pack",
+  "statusCode": 400,
+  "traceId": "mrwj59a6-700153ad"
+}
+ Γ£ô |union-eyes| i18n/__tests__/navigation.test.ts (1 test) 75ms
+ Γ£ô |union-eyes| app/api/__tests__/voice-transcribe.route.test.ts (7 tests) 216ms
+ Γ£ô |union-eyes| lib/tracing/__tests__/utils.test.ts (20 tests) 146ms
+ Γ£ô |union-eyes| app/api/__tests__/analytics-metrics.route.test.ts (3 tests) 331ms
+     Γ£ô POST returns 400 when metricName is missing  315ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-invoices.route.test.ts (8 tests) 149ms
+ Γ£ô |union-eyes| app/api/__tests__/ocra-aliases.route.test.ts (8 tests) 282ms
+ Γ£ô |union-eyes| app/api/__tests__/labour-standards-compliance-check.route.test.ts (2 tests) 132ms
+Γä╣∩╕Å [2026-07-22T20:23:29.750Z] [INFO] [557d0b59-2499-4594-86e8-09410bdca603] Performance: test-operation
+  Context: {
+  "durationMs": 0
+}
+Γä╣∩╕Å [2026-07-22T20:23:29.776Z] [INFO] [test-corr-id] HTTP GET /api/test 200
+  Context: {
+  "method": "GET",
+  "path": "/api/test",
+  "status": 200,
+  "durationMs": 0,
+  "correlationId": "test-corr-id"
+}
+ Γ£ô |union-eyes| lib/services/__tests__/break-glass-service.test.ts (19 tests) 189ms
+Γ¥î [2026-07-22T20:23:29.787Z] [ERROR] [4b6d425b-ca56-4168-8ace-cb497a3aae7f] Unhandled error in /api/fail
+  Context: {
+  "method": "GET",
+  "correlationId": "4b6d425b-ca56-4168-8ace-cb497a3aae7f",
+  "durationMs": 2,
+  "error": {
+    "name": "Error",
+    "message": "handler-boom",
+    "stack": "Error: handler-boom\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:195:49\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:26\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2316:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2313:10)\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2295:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2262:10)\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:2945:64"
+  }
+}
+ΓÜá∩╕Å [2026-07-22T20:23:29.797Z] [WARN] [4b6d425b-ca56-4168-8ace-cb497a3aae7f] server-warn
+  Context: {
+  "a": 1
+}
+ΓÜá∩╕Å [2026-07-22T20:23:29.799Z] [WARN] [3532b4f5-15e7-4c44-9787-742a30894317] browser-warn-no-sentry
+Γ¥î [2026-07-22T20:23:29.802Z] [ERROR] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] browser-error-no-sentry
+  Context: {
+  "error": {
+    "name": "Error",
+    "message": "x",
+    "stack": "Error: x\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:288:64\n    at Proxy.assertThrows (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:2798:5)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1215:12)\n    at Proxy.overwritingMethodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1750:33)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1551:16)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1155:15)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:288:85\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  }
+}
+ΓÜá∩╕Å [2026-07-22T20:23:29.805Z] [WARN] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] Slow operation detected: slow-op
+  Context: {
+  "durationMs": 1505
+}
+{"level":"error","message":"prod-stack-branch","context":{"error":{"name":"Error","message":"prod-branch","stack":"a\nb\nc"}},"timestamp":"2026-07-22T20:23:29.806Z","correlationId":"adf16ebb-9735-4d91-b55b-fa1abf6c0a77"}
+Γ¥î [2026-07-22T20:23:29.808Z] [ERROR] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] error-with-sentry-fail
+  Context: {
+  "error": {
+    "name": "Error",
+    "message": "x",
+    "stack": "Error: x\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:317:72\n    at Proxy.assertThrows (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:2798:5)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1215:12)\n    at Proxy.overwritingMethodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1750:33)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1551:16)\n    at Proxy.<anonymous> (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/dist/index.js:1155:15)\n    at Proxy.methodWrapper (file:///C:/APPS/nzila-automation/node_modules/@vitest/expect/node_modules/chai/index.js:1700:25)\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:317:93\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  }
+}
+Γä╣∩╕Å [2026-07-22T20:23:29.805Z] [INFO] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] Performance: slow-op
+  Context: {
+  "durationMs": 1505
+}
+ΓÜá∩╕Å [2026-07-22T20:23:29.812Z] [WARN] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] warn-no-sentry
+ΓÜá∩╕Å [2026-07-22T20:23:29.812Z] [WARN] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] warn-with-sentry
+Γ¥î [2026-07-22T20:23:29.814Z] [ERROR] [adf16ebb-9735-4d91-b55b-fa1abf6c0a77] error-no-sentry
+  Context: {
+  "error": {
+    "name": "Error",
+    "message": "x",
+    "stack": "Error: x\n    at C:/APPS/nzila-automation/apps/union-eyes/lib/__tests__/logger.test.ts:359:43\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///C:/APPS/nzila-automation/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:20"
+  }
+}
+ Γ£ô |union-eyes| lib/__tests__/azure-speech.test.ts (15 tests) 236ms
+ΓÜá∩╕Å [2026-07-22T20:23:29.935Z] [WARN] [887ce6ac-2b4f-45d6-96b0-7fb52a9034d1] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "CRON_SECRET not configured",
+  "statusCode": 401,
+  "traceId": "mrwj5a4v-0b179190"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:29.945Z] [WARN] [887ce6ac-2b4f-45d6-96b0-7fb52a9034d1] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrwj5a55-0586cf86"
+}
+ Γ£ô |union-eyes| lib/__tests__/rate-limiter.test.ts (25 tests) 164ms
+ Γ£ô |union-eyes| lib/services/__tests__/voting-service.test.ts (68 tests) 111ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-allocation.route.test.ts (7 tests) 110ms
+ Γ£ô |union-eyes| services/clc/__tests__/clc-api-integration.test.ts (16 tests) 160ms
+Γ¥î [2026-07-22T20:23:30.308Z] [ERROR] [3e3cda08-ef0a-4423-8a6d-65ef18012ca1] API Error Response
+  Context: {
+  "code": "NOT_IMPLEMENTED",
+  "message": "Legacy documents endpoint is disabled. Use /api/documents/repository.",
+  "statusCode": 501,
+  "traceId": "mrwj5af7-3e01cadc"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:30.329Z] [WARN] [abc37dbe-3528-44a8-b3b2-18738ad7373f] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "organizationId is required",
+  "statusCode": 400,
+  "traceId": "mrwj5aft-7ee9560e"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:30.345Z] [WARN] [6f48e6f9-6314-4e33-aa33-8789dd1485a9] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You do not have access to this organization's documents",
+  "statusCode": 403,
+  "traceId": "mrwj5ag9-c90c5e23"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:30.373Z] [WARN] [bbfd6973-17a3-4f8e-8af3-6c8d8a334bae] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON in request body",
+  "statusCode": 400,
+  "traceId": "mrwj5ah1-75570065"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:30.384Z] [WARN] [371a1c9d-5a1b-4a6b-a746-15834acfe625] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Forbidden",
+  "statusCode": 403,
+  "traceId": "mrwj5ahc-986c29f8"
+}
+ Γ£ô |union-eyes| lib/__tests__/csrf-client.test.ts (28 tests) 210ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-pricing-quote.route.test.ts (7 tests) 121ms
+ Γ£ô |union-eyes| lib/__tests__/pdf-generator.test.ts (18 tests) 180ms
+ Γ£ô |union-eyes| services/compliance/__tests__/audit-analysis.test.ts (1 test) 26ms
+ Γ£ô |union-eyes| app/api/__tests__/oci-assessment.route.test.ts (2 tests) 140ms
+ Γ£ô |union-eyes| lib/__tests__/azure-keyvault.test.ts (6 tests) 109ms
+ΓÜá∩╕Å [2026-07-22T20:23:31.929Z] [WARN] [517436a6-1a27-4eee-91f8-e2b6dd44a33f] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "organizationId is required",
+  "statusCode": 400,
+  "traceId": "mrwj5bo8-3413e2a2"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:31.945Z] [WARN] [c97b87df-0687-4248-82af-b0b0a775b8c7] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You do not have access to this organization's documents",
+  "statusCode": 403,
+  "traceId": "mrwj5boo-c6bd2b47"
+}
+ Γ£ô |union-eyes| app/api/__tests__/onboarding-suggest-clauses.route.test.ts (2 tests) 105ms
+ΓÜá∩╕Å [2026-07-22T20:23:31.966Z] [WARN] [49f2d488-dc37-426e-9e53-de56a5411882] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON in request body",
+  "statusCode": 400,
+  "traceId": "mrwj5bpa-8f23e7e7"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:31.974Z] [WARN] [3d2aa097-1bd2-4c12-9f23-67c75b8f0e49] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Forbidden",
+  "statusCode": 403,
+  "traceId": "mrwj5bpi-efb0b32b"
+}
+ Γ£ô |union-eyes| lib/services/__tests__/invoice-generator.test.ts (9 tests) 182ms
+ Γ£ô |union-eyes| lib/config/__tests__/env-validation.test.ts (24 tests) 128ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/service-worker-registration.test.ts (11 tests) 329ms
+ Γ£ô |union-eyes| lib/services/__tests__/cache-service.test.ts (43 tests) 112ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-user-role.route.test.ts (2 tests) 388ms
+     Γ£ô returns 401 when not authenticated  381ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/mobile-engine.test.ts (39 tests) 159ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-chargebacks.route.test.ts (2 tests) 86ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/ingestion-scheduler.test.ts (12 tests) 95ms
+ Γ£ô |union-eyes| app/api/__tests__/onboarding-discover-federation.route.test.ts (12 tests) 125ms
+ Γ£ô |union-eyes| app/api/__tests__/onboarding-smart-defaults.route.test.ts (10 tests) 82ms
+stdout | lib/__tests__/exit-interview-schema.fuzz.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîÿ suppress logs { quiet: true }
+
+ Γ£ô |union-eyes| lib/icra-pdf/__tests__/ExecutiveContinuityBriefTemplate.test.tsx (2 tests) 210ms
+ Γ£ô |union-eyes| lib/services/__tests__/signature-providers.test.ts (57 tests) 132ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/analytics.test.ts (19 tests) 126ms
+ Γ£ô |union-eyes| app/api/__tests__/correspondence-dispatch.route.test.ts (1 test) 122ms
+ Γ£ô |union-eyes| lib/__tests__/claim-notifications.test.ts (4 tests) 51ms
+ Γ£ô |union-eyes| components/cba-intelligence/__tests__/operational-health-panel.test.tsx (2 tests) 235ms
+ΓÜá∩╕Å [2026-07-22T20:23:34.230Z] [WARN] [627cef71-b19d-4470-a972-f63ff79bf88e] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrwj5dg5-5f1a373c"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:34.242Z] [WARN] [627cef71-b19d-4470-a972-f63ff79bf88e] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Entitlement missing",
+  "statusCode": 403,
+  "traceId": "mrwj5dgi-05a925af"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:34.245Z] [WARN] [627cef71-b19d-4470-a972-f63ff79bf88e] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "No billing account found",
+  "statusCode": 404,
+  "traceId": "mrwj5dgl-66a8877c"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:34.250Z] [WARN] [627cef71-b19d-4470-a972-f63ff79bf88e] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid JSON",
+  "statusCode": 400,
+  "traceId": "mrwj5dgq-3035ea37"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:34.271Z] [WARN] [627cef71-b19d-4470-a972-f63ff79bf88e] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "No billing account found",
+  "statusCode": 404,
+  "traceId": "mrwj5dhb-b05bd2e4"
+}
+ Γ£ô |union-eyes| app/api/__tests__/finance-exports.route.test.ts (6 tests) 102ms
+ Γ£ô |union-eyes| app/api/__tests__/dues-remittances-upload.route.test.ts (7 tests) 110ms
+ Γ£ô |union-eyes| app/api/__tests__/voting-verify.route.test.ts (4 tests) 57ms
+ Γ£ô |union-eyes| lib/__tests__/exit-interview-schema.fuzz.test.ts (3 tests) 180ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-invoices-id.route.test.ts (2 tests) 108ms
+ Γ£ô |union-eyes| lib/social-media/__tests__/social-media-clients-full.test.ts (31 tests) 122ms
+ Γ£ô |union-eyes| app/api/__tests__/ml-query.route.test.ts (6 tests) 160ms
+ Γ£ô |union-eyes| lib/icra-pdf/__tests__/continuityVisuals.test.tsx (9 tests) 125ms
+ Γ£ô |union-eyes| lib/tracing/__tests__/opentelemetry.test.ts (4 tests) 139ms
+ Γ£ô |union-eyes| lib/__tests__/data-export-import.test.ts (31 tests) 198ms
+ Γ£ô |union-eyes| lib/__tests__/logger.test.ts (35 tests) 189ms
+ Γ£ô |union-eyes| lib/social-media/__tests__/social-media-service.test.ts (28 tests) 117ms
+ Γ£ô |union-eyes| lib/__tests__/error-handler.test.ts (37 tests) 114ms
+ Γ£ô |union-eyes| app/api/__tests__/correspondence-revision.route.test.ts (1 test) 107ms
+ Γ£ô |union-eyes| lib/__tests__/auth-request-schemas.fuzz.test.ts (4 tests) 102ms
+ Γ£ô |union-eyes| app/api/__tests__/privacy-consent.route.test.ts (6 tests) 95ms
+ Γ£ô |union-eyes| app/api/__tests__/rewards-cron.route.test.ts (6 tests) 121ms
+ Γ£ô |union-eyes| lib/__tests__/stripe-elements.test.ts (3 tests) 129ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-extract-clauses.route.test.ts (5 tests) 93ms
+ Γ£ô |union-eyes| lib/signature/__tests__/providers.test.ts (72 tests) 120ms
+ Γ£ô |union-eyes| app/api/__tests__/correspondence-sign.route.test.ts (1 test) 106ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-legacy.route.test.ts (9 tests) 155ms
+ Γ£ô |union-eyes| lib/workbook-pdf/__tests__/GovernanceEntropyWorkbookTemplate.test.tsx (2 tests) 161ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-invoices-id-payments.route.test.ts (7 tests) 93ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-pricing-compare.route.test.ts (7 tests) 86ms
+ Γ£ô |union-eyes| app/api/__tests__/precedents-search.route.test.ts (1 test) 87ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-mfa-disable.route.test.ts (5 tests) 76ms
+ΓÜá∩╕Å [2026-07-22T20:23:36.708Z] [WARN] [2e7c40c9-81c5-4511-9115-884d43764423] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Unauthorized",
+  "statusCode": 401,
+  "traceId": "mrwj5fcz-6c6b82fc"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:36.717Z] [WARN] [2e7c40c9-81c5-4511-9115-884d43764423] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded",
+  "statusCode": 429,
+  "traceId": "mrwj5fd9-b3ce7c4b",
+  "details": {
+    "resetIn": 15
+  }
+}
+ΓÜá∩╕Å [2026-07-22T20:23:36.724Z] [WARN] [2e7c40c9-81c5-4511-9115-884d43764423] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid report configuration",
+  "statusCode": 400,
+  "traceId": "mrwj5fdg-597a0135"
+}
+Γ¥î [2026-07-22T20:23:36.753Z] [ERROR] [2e7c40c9-81c5-4511-9115-884d43764423] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to execute report",
+  "statusCode": 500,
+  "traceId": "mrwj5fe2-9b528c7c",
+  "details": {
+    "message": "db down",
+    "name": "Error"
+  }
+}
+ Γ£ô |union-eyes| app/api/__tests__/correspondence-cancel.route.test.ts (1 test) 113ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/esdc-adapter.test.ts (5 tests) 79ms
+ Γ£ô |union-eyes| services/__tests__/currency-enforcement-service.test.ts (27 tests) 96ms
+ Γ£ô |union-eyes| lib/__tests__/ml-client.test.ts (4 tests) 81ms
+ Γ£ô |union-eyes| lib/services/__tests__/payment-notifications.test.ts (34 tests) 97ms
+ Γ£ô |union-eyes| services/clc/__tests__/remittance-notifications.test.ts (14 tests) 97ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-allocation-run.route.test.ts (1 test) 69ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/index.test.ts (1 test) 64ms
+≡ƒÉ¢ [2026-07-22T20:23:37.518Z] [DEBUG] [a1257b5b-9b05-4ecb-9d6f-0b0ec791d041] Event subscriber registered
+  Context: {
+  "eventType": "claim_events"
+}
+≡ƒÉ¢ [2026-07-22T20:23:37.519Z] [DEBUG] [a1257b5b-9b05-4ecb-9d6f-0b0ec791d041] Emitting event
+  Context: {
+  "eventType": "claim_events",
+  "subscriberCount": 1,
+  "eventId": "evt_1784751817519_wd9tb4xiw"
+}
+ Γ£ô |union-eyes| app/api/__tests__/tenant-current.route.test.ts (4 tests) 55ms
+ΓÜá∩╕Å [2026-07-22T20:23:37.533Z] [WARN] [d8b255ce-5d7c-46f5-ab6f-2b596e4f0b9c] API Error Response
+  Context: {
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "AI rate limit exceeded. Try again later.",
+  "statusCode": 429,
+  "traceId": "mrwj5fzw-a1dc274f"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:37.545Z] [WARN] [d8b255ce-5d7c-46f5-ab6f-2b596e4f0b9c] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid reportType. Must be one of: trend_forecast, employer_hotspots, steward_capacity, arbitration_escalation, executive_summary",
+  "statusCode": 400,
+  "traceId": "mrwj5g09-fa04864e"
+}
+ Γ£ô |union-eyes| lib/__tests__/evidence-export.test.ts (12 tests) 123ms
+ Γ£ô |union-eyes| lib/__tests__/staging-hardening.integration.test.ts (23 tests) 102ms
+ Γ£ô |union-eyes| lib/__tests__/webhook-security.test.ts (29 tests) 86ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-folders.route.test.ts (6 tests) 90ms
+ Γ£ô |union-eyes| services/clc/__tests__/remittance-export.test.ts (10 tests) 89ms
+ Γ£ô |union-eyes| lib/__tests__/workbench-assign-schema.fuzz.test.ts (3 tests) 84ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-magic-link-request.route.test.ts (5 tests) 91ms
+ Γ£ô |union-eyes| services/__tests__/provincial-privacy-service.test.ts (23 tests) 105ms
+ΓÜá∩╕Å [2026-07-22T20:23:38.304Z] [WARN] [8c872645-ddf6-4f98-b56c-964b2f6f8da3] API Error Response
+  Context: {
+  "code": "MISSING_REQUIRED_FIELD",
+  "message": "Content is required",
+  "statusCode": 400,
+  "traceId": "mrwj5glb-86acd9d3"
+}
+ Γ£ô |union-eyes| lib/__tests__/validation.test.ts (82 tests) 93ms
+ Γ£ô |union-eyes| lib/__tests__/audit-logger.test.ts (20 tests) 86ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-finance-analysis.route.test.ts (1 test) 57ms
+ Γ£ô |union-eyes| lib/services/__tests__/financial-email-service.test.ts (30 tests) 81ms
+ Γ£ô |union-eyes| app/api/__tests__/documents.route.test.ts (7 tests) 132ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/entitlement-guard.test.ts (20 tests) 98ms
+ Γ£ô |union-eyes| lib/__tests__/document-service.test.ts (53 tests) 86ms
+ Γ£ô |union-eyes| app/api/__tests__/documents-bulk.route.test.ts (5 tests) 85ms
+ Γ£ô |union-eyes| lib/__tests__/db-validator.test.ts (9 tests) 95ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-simulation.route.test.ts (1 test) 62ms
+ Γ£ô |union-eyes| app/api/__tests__/tenant-switch.route.test.ts (4 tests) 56ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-pki-workflow-id.route.test.ts (6 tests) 81ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-route.route.test.ts (5 tests) 108ms
+ Γ£ô |union-eyes| lib/__tests__/grievance-notifications.test.ts (37 tests) 88ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/crash-reporting.test.ts (14 tests) 173ms
+ Γ£ô |union-eyes| app/api/__tests__/reconciliation-upload.route.test.ts (1 test) 187ms
+ΓÜá∩╕Å [2026-07-22T20:23:39.630Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.635Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.637Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.640Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "officer-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.641Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.654Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-1",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.654Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-2",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.663Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "off-fallback",
+  "role": "union_officer"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:39.665Z] [WARN] [86824640-1411-40fb-8b53-2662197b6c22] case-assignment-engine: officer has no matching metadata; scoring will use workload-only signals.
+  Context: {
+  "organizationId": "org-1",
+  "userId": "officer-1",
+  "role": "union_steward"
+}
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/extraction-orchestrator.test.ts (7 tests) 73ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-billing-cycles.route.test.ts (9 tests) 87ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/ingestion-extraction-pipeline.test.ts (8 tests) 91ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/provincial-board-adapter.test.ts (6 tests) 82ms
+ Γ£ô |union-eyes| lib/intelligence/__tests__/ociIntelligenceNetwork.test.ts (54 tests) 78ms
+ Γ£ô |union-eyes| app/api/__tests__/pki-workflows-id.route.test.ts (6 tests) 88ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-billing.route.test.ts (7 tests) 117ms
+ Γ£ô |union-eyes| lib/__tests__/representation-protocol.test.ts (33 tests) 58ms
+ Γ£ô |union-eyes| app/api/__tests__/cba-intelligence-documents.route.test.ts (2 tests) 56ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-cache-stats.route.test.ts (7 tests) 78ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-feature-flags.route.test.ts (6 tests) 85ms
+ Γ£ô |union-eyes| app/api/__tests__/satisfaction-id.route.test.ts (3 tests) 72ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-billing-cycles-trigger-scheduled.route.test.ts (4 tests) 111ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/canlii-adapter.test.ts (7 tests) 125ms
+ Γ£ô |union-eyes| db/queries/__tests__/union-structure-queries.test.ts (79 tests) 84ms
+ Γ£ô |union-eyes| lib/__tests__/cba-intelligence-adapters.test.ts (8 tests) 84ms
+ Γ£ô |union-eyes| lib/__tests__/smart-onboarding.test.ts (76 tests) 70ms
+ Γ£ô |union-eyes| lib/__tests__/websocket.test.ts (9 tests) 122ms
+ Γ£ô |union-eyes| lib/gdpr/__tests__/consent-manager.test.ts (17 tests) 80ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-policy.route.test.ts (5 tests) 86ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-jobs-action.route.test.ts (6 tests) 94ms
+ Γ£ô |union-eyes| app/api/__tests__/signatures-documents.route.test.ts (6 tests) 89ms
+ Γ£ô |union-eyes| app/api/__tests__/onboarding-peer-benchmarks.route.test.ts (8 tests) 62ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/webhook-service.test.ts (15 tests) 70ms
+ Γ£ô |union-eyes| lib/__tests__/date-utils.test.ts (50 tests) 77ms
+ Γ£ô |union-eyes| lib/__tests__/rate-limit.test.ts (7 tests) 69ms
+ Γ£ô |union-eyes| app/api/__tests__/integrations-shopify-webhooks.route.test.ts (10 tests) 78ms
+ Γ£ô |union-eyes| lib/api/__tests__/index.test.ts (17 tests) 86ms
+ Γ£ô |union-eyes| app/api/__tests__/cron-external-data-sync.route.test.ts (3 tests) 27ms
+ Γ£ô |union-eyes| app/api/__tests__/reports-execute.route.test.ts (6 tests) 117ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/union-bargaining-adapter.test.ts (6 tests) 80ms
+ Γ£ô |union-eyes| app/api/__tests__/dues-calculate.route.test.ts (5 tests) 92ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/fpslreb-adapter.test.ts (6 tests) 73ms
+ Γ£ô |union-eyes| app/api/__tests__/correspondence-approve.route.test.ts (2 tests) 77ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-ingest-batches-list.route.test.ts (1 test) 61ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/base-adapter.test.ts (6 tests) 75ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-insights-report-strong.route.test.ts (5 tests) 80ms
+ Γ£ô |union-eyes| services/clc/__tests__/compliance-reports.test.ts (12 tests) 74ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-billing-cycles-preview.route.test.ts (4 tests) 73ms
+ Γ£ô |union-eyes| lib/__tests__/env-validator.test.ts (16 tests) 71ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-representation-protocol.route.test.ts (2 tests) 76ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/statscan-csv-adapter.test.ts (3 tests) 72ms
+stdout | lib/api/__tests__/with-api.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîÿ multiple files { path: ['.env.local', '.env'] }
+
+ Γ£ô |union-eyes| app/api/__tests__/auth-mfa-verify-enroll.route.test.ts (5 tests) 90ms
+ Γ£ô |union-eyes| services/clc/__tests__/remittance-audit.test.ts (21 tests) 81ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-insights-report.route.test.ts (3 tests) 80ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-search.route.test.ts (1 test) 62ms
+ Γ£ô |union-eyes| lib/services/__tests__/api-cache.test.ts (4 tests) 71ms
+ Γ£ô |union-eyes| lib/__tests__/api-auth-guard.test.ts (84 tests) 92ms
+ Γ£ô |union-eyes| app/api/__tests__/precedents.route.test.ts (2 tests) 104ms
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createDeadline > creates deadline with matching rule (business days)
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.682Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createDeadline > creates deadline with customDays and calendar mode
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.686Z","deadlineId":"dl-2","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines > creates step deadlines when grievance exists
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.689Z","deadlineId":"dl-new","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines > creates step deadlines when grievance exists
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.689Z","deadlineId":"dl-new","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines > creates step deadlines when grievance exists
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.690Z","deadlineId":"dl-new","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > requestDeadlineExtension > applies extension immediately when no approval required
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.695Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > approveDeadlineExtension > approves pending extension
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.702Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > approveDeadlineExtension - edge cases > uses new Date() fallback when newDeadline is missing
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.711Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > requestDeadlineExtension - immediate vs approval > reschedules reminders when requiresApproval is false
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.714Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines ΓÇö dueDate branch > creates appeal deadline when step1 returns dueDate
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.719Z","deadlineId":"dl-step","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines ΓÇö dueDate branch > creates appeal deadline when step1 returns dueDate
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.719Z","deadlineId":"dl-step","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines ΓÇö dueDate branch > creates appeal deadline when step1 returns dueDate
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.720Z","deadlineId":"dl-step","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > createGrievanceStepDeadlines ΓÇö dueDate branch > skips appeal deadline when step1 fails (no dueDate)
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.721Z","deadlineId":"dl-inv","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > requestDeadlineExtension ΓÇö requiresApproval=true > applies immediate extension and reschedules reminders
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.728Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > requestDeadlineExtension ΓÇö requiresApproval=true > applies immediate extension with null reminderDays fallback
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.728Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > approveDeadlineExtension ΓÇö branches > approves extension with newDeadline
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.730Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+stdout | lib/__tests__/deadline-tracking-system.test.ts > deadline-tracking-system > approveDeadlineExtension ΓÇö branches > approves extension without newDeadline (fallback to new Date)
+{"level":"info","message":"[union-eyes.deadline-tracking-system] deadline-tracking: reminders scheduled via deadline engine","timestamp":"2026-07-22T20:23:44.732Z","deadlineId":"dl-1","correlationId":"test-correlation-id","scheduledCount":0,"cancelledForReschedule":0,"skippedRecipients":0,"skippedInPast":0}
+
+ Γ£ô |union-eyes| lib/__tests__/deadline-tracking-system.test.ts (59 tests) 68ms
+ Γ£ô |union-eyes| app/api/__tests__/claims-route.route.test.ts (4 tests) 84ms
+ Γ£ô |union-eyes| lib/ai/__tests__/transparency.test.ts (32 tests) 83ms
+ Γ£ô |union-eyes| app/api/__tests__/test-auth.route.test.ts (1 test) 41ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-classify.route.test.ts (5 tests) 109ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-jobs-retry.route.test.ts (2 tests) 69ms
+ Γ£ô |union-eyes| app/api/__tests__/reconciliation-process.route.test.ts (2 tests) 51ms
+ Γ£ô |union-eyes| lib/__tests__/observability.test.ts (6 tests) 97ms
+ Γ£ô |union-eyes| lib/__tests__/chart-utils.test.ts (20 tests) 76ms
+ Γ£ô |union-eyes| lib/__tests__/email-templates.test.tsx (5 tests) 75ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/ociRuntimeInfrastructure.test.ts (44 tests) 70ms
+ Γ£ô |union-eyes| services/__tests__/indigenous-data-service.test.ts (29 tests) 66ms
+ Γ£ô |union-eyes| lib/__tests__/case-assignment-engine.test.ts (48 tests) 74ms
+ Γ£ô |union-eyes| lib/__tests__/utils.test.ts (5 tests) 61ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/index-exports.test.ts (1 test) 74ms
+ Γ£ô |union-eyes| services/__tests__/geofence-privacy-service.test.ts (23 tests) 61ms
+ Γ£ô |union-eyes| services/__tests__/break-glass-service.test.ts (16 tests) 60ms
+ Γ£ô |union-eyes| lib/ai/__tests__/template-engine.test.ts (33 tests) 63ms
+ Γ£ô |union-eyes| services/pki/__tests__/certificate-manager.test.ts (17 tests) 82ms
+ Γ£ô |union-eyes| lib/auth/__tests__/policy-adapter.test.ts (9 tests) 61ms
+ Γ£ô |union-eyes| lib/services/__tests__/currency-service.test.ts (25 tests) 73ms
+ Γ£ô |union-eyes| lib/__tests__/cache-service.test.ts (55 tests) 68ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/backward-compat-scores.test.ts (5 tests) 64ms
+ Γ£ô |union-eyes| lib/__tests__/clause-service.test.ts (42 tests) 64ms
+ Γ£ô |union-eyes| lib/services/__tests__/strike-fund-tax-service.test.ts (21 tests) 57ms
+ Γ£ô |union-eyes| lib/events/__tests__/event-bus.test.ts (13 tests) 63ms
+ Γ£ô |union-eyes| lib/services/__tests__/audit-trail-service.test.ts (33 tests) 63ms
+ Γ£ô |union-eyes| services/__tests__/whiplash-prevention-service.test.ts (22 tests) 52ms
+ Γ£ô |union-eyes| lib/services/__tests__/transfer-pricing-service.test.ts (13 tests) 62ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-ingest.route.test.ts (4 tests) 75ms
+ Γ£ô |union-eyes| lib/services/__tests__/location-tracking-service.test.ts (23 tests) 47ms
+ Γ£ô |union-eyes| lib/__tests__/api-client.test.ts (27 tests) 66ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/source-instrument-traceability.test.ts (10 tests) 55ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/finding-completeness.test.ts (5 tests) 59ms
+ Γ£ô |union-eyes| lib/validation/__tests__/union-structure-schemas.test.ts (89 tests) 83ms
+ Γ£ô |union-eyes| lib/payment-processor/__tests__/payment-processor-core.test.ts (44 tests) 68ms
+ Γ£ô |union-eyes| app/api/__tests__/payments-paypal-webhook.route.test.ts (6 tests) 70ms
+ Γ£ô |union-eyes| lib/payment-processor/__tests__/paypal-processor.test.ts (39 tests) 70ms
+ Γ£ô |union-eyes| lib/integration/ociLifecycleIntegration.test.ts (11 tests) 67ms
+ Γ£ô |union-eyes| app/api/__tests__/all-routes-import-matrix.test.ts (949 tests) 75463ms
+     Γ£ô activities\route.ts imports and exports a handler  9973ms
+     Γ£ô admin\billing-cycles\preview\route.ts imports and exports a handler  851ms
+     Γ£ô admin\billing-cycles\trigger-scheduled\route.ts imports and exports a handler  1487ms
+     Γ£ô admin\clc\analytics\annual-report\route.ts imports and exports a handler  545ms
+     Γ£ô admin\pilot-status\route.ts imports and exports a handler  2211ms
+     Γ£ô ai\copilot\query\route.ts imports and exports a handler  649ms
+     Γ£ô ai\ingest\route.ts imports and exports a handler  350ms
+     Γ£ô analytics\metrics\route.ts imports and exports a handler  779ms
+     Γ£ô auth\forgot-password\route.ts imports and exports a handler  800ms
+     Γ£ô calendar-sync\connections\[id]\sync\route.ts imports and exports a handler  6659ms
+     Γ£ô cases\[caseId]\escalate\route.ts imports and exports a handler  7760ms
+     Γ£ô cases\[caseId]\export\route.ts imports and exports a handler  5061ms
+     Γ£ô cba-intelligence\ingestion\run\route.ts imports and exports a handler  355ms
+     Γ£ô cognition\cases\[id]\risk\route.ts imports and exports a handler  1508ms
+     Γ£ô cognition\health\route.ts imports and exports a handler  512ms
+     Γ£ô dashboard\leadership\route.ts imports and exports a handler  592ms
+     Γ£ô dues\create-payment-intent\route.ts imports and exports a handler  649ms
+     Γ£ô exit-interviews\adaptive-resilience\route.ts imports and exports a handler  2140ms
+     Γ£ô governance\board-packets\[id]\distribute\route.ts imports and exports a handler  1239ms
+     Γ£ô graphql\route.ts imports and exports a handler  3118ms
+     Γ£ô rewards\cron\route.ts imports and exports a handler  336ms
+     Γ£ô voice\transcribe\route.ts imports and exports a handler  1673ms
+     Γ£ô workbook\[id]\export\route.ts imports and exports a handler  861ms
+ Γ£ô |union-eyes| lib/icra-pdf/__tests__/reportDataMapperAdaptiveSlot.test.ts (2 tests) 48ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/billing-service.test.ts (38 tests) 71ms
+ Γ£ô |union-eyes| app/api/__tests__/billing-send-invoice.route.test.ts (2 tests) 67ms
+ Γ£ô |union-eyes| services/__tests__/joint-trust-fmv-service.test.ts (21 tests) 74ms
+ Γ£ô |union-eyes| lib/__tests__/report-executor.test.ts (82 tests) 73ms
+ Γ£ô |union-eyes| lib/__tests__/receipt-generator.test.ts (3 tests) 77ms
+stdout | lib/__tests__/cba-intelligence-bilingual.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîÿ override existing { override: true }
+
+ Γ£ô |union-eyes| services/__tests__/certification-management-service.test.ts (24 tests) 65ms
+ Γ£ô |union-eyes| lib/__tests__/cba-intelligence-bilingual.test.ts (16 tests) 80ms
+ Γ£ô |union-eyes| lib/__tests__/dues-calculation-engine.test.ts (18 tests) 57ms
+ Γ£ô |union-eyes| app/api/__tests__/cba-intelligence-extraction.route.test.ts (2 tests) 64ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/canonical-scoring-payload.test.ts (3 tests) 74ms
+ Γ£ô |union-eyes| lib/services/__tests__/precedent-service.test.ts (44 tests) 64ms
+ Γ£ô |union-eyes| lib/__tests__/i18n-utils.test.ts (8 tests) 60ms
+ Γ£ô |union-eyes| lib/services/__tests__/entitlements.test.ts (23 tests) 32ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/html-bulletin-adapter.test.ts (6 tests) 51ms
+ Γ£ô |union-eyes| services/pki/__tests__/workflow-engine.test.ts (20 tests) 58ms
+ Γ£ô |union-eyes| lib/__tests__/education-service.test.ts (36 tests) 65ms
+ Γ£ô |union-eyes| lib/icra/__tests__/scoringInvariant.test.ts (5 tests) 55ms
+ Γ£ô |union-eyes| lib/__tests__/analytics-performance.test.ts (36 tests) 65ms
+ Γ£ô |union-eyes| app/api/__tests__/cba-intelligence-freshness.route.test.ts (2 tests) 58ms
+ Γ£ô |union-eyes| hooks/__tests__/use-toast.test.ts (1 test) 38ms
+ Γ£ô |union-eyes| services/platform-economics/billing-service.test.ts (37 tests) 65ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/ingestion-orchestrator.test.ts (9 tests) 56ms
+ Γ£ô |union-eyes| lib/api/__tests__/with-api.test.ts (17 tests) 82ms
+ Γ£ô |union-eyes| lib/services/__tests__/indigenous-data-service.test.ts (38 tests) 57ms
+ Γ£ô |union-eyes| lib/services/__tests__/policy-engine.test.ts (7 tests) 59ms
+ Γ£ô |union-eyes| lib/payment-processor/__tests__/square-processor.test.ts (40 tests) 57ms
+ Γ£ô |union-eyes| lib/integration/ociEndToEndProgression.test.ts (6 tests) 61ms
+ Γ£ô |union-eyes| lib/integration/continuityEthicsRegression.test.ts (3 tests) 45ms
+ Γ£ô |union-eyes| lib/__tests__/member-service.test.ts (39 tests) 57ms
+ Γ£ô |union-eyes| services/__tests__/transfer-pricing-service.test.ts (19 tests) 60ms
+ Γ£ô |union-eyes| lib/middleware/__tests__/request-validation.test.ts (24 tests) 53ms
+ Γ£ô |union-eyes| lib/__tests__/audit-trail-service.test.ts (22 tests) 73ms
+ Γ£ô |union-eyes| services/__tests__/founder-conflict-service.test.ts (23 tests) 64ms
+ Γ£ô |union-eyes| lib/hooks/__tests__/use-debounce.test.ts (5 tests) 65ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/constructInvariant.test.ts (6 tests) 57ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/catalogue-governance.test.ts (16 tests) 48ms
+ Γ£ô |union-eyes| lib/__tests__/enterprise-role-middleware.test.ts (26 tests) 67ms
+ Γ£ô |union-eyes| lib/utils/__tests__/user-uuid-helpers.test.ts (2 tests) 42ms
+ Γ£ô |union-eyes| lib/observability/__tests__/distributed-tracing.test.ts (27 tests) 54ms
+ Γ£ô |union-eyes| lib/services/__tests__/exchange-rate-service.test.ts (27 tests) 59ms
+ Γ£ô |union-eyes| lib/movement-insights/__tests__/aggregation-service.test.ts (15 tests) 60ms
+ Γ£ô |union-eyes| app/api/__tests__/billing-replay-invoice.route.test.ts (2 tests) 82ms
+ Γ£ô |union-eyes| lib/hooks/__tests__/use-toast.test.ts (6 tests) 77ms
+ Γ£ô |union-eyes| lib/auth/__tests__/roles.test.ts (49 tests) 64ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/no-orphan-recommendations.test.ts (5 tests) 77ms
+ Γ£ô |union-eyes| lib/services/__tests__/negotiations-service.test.ts (16 tests) 43ms
+ Γ£ô |union-eyes| services/pki/__tests__/signature-service.test.ts (22 tests) 56ms
+ Γ£ô |union-eyes| lib/integration/continuityReplayIntegrity.test.ts (5 tests) 54ms
+ Γ£ô |union-eyes| lib/validation/__tests__/member-employment-schemas.test.ts (79 tests) 54ms
+ Γ£ô |union-eyes| app/api/__tests__/voting-session-results.route.test.ts (4 tests) 40ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/worldClassComplexityValidation.test.ts (4 tests) 58ms
+ Γ£ô |union-eyes| app/api/auth_core/health/route.test.ts (6 tests) 45ms
+ Γ£ô |union-eyes| services/__tests__/employer-non-interference-service.test.ts (20 tests) 64ms
+ Γ£ô |union-eyes| lib/__tests__/hierarchy-validation.test.ts (33 tests) 44ms
+ Γ£ô |union-eyes| lib/validation/__tests__/rewards-schemas.test.ts (51 tests) 52ms
+ Γ£ô |union-eyes| lib/__tests__/workflow-engine.test.ts (38 tests) 55ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/ledger.test.ts (11 tests) 55ms
+ Γ£ô |union-eyes| services/__tests__/lmbp-immigration-service.test.ts (21 tests) 62ms
+ Γ£ô |union-eyes| app/api/__tests__/icra-telemetry.route.test.ts (4 tests) 45ms
+ Γ£ô |union-eyes| lib/ai/__tests__/rag-pipeline.test.ts (35 tests) 55ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/background-sync.test.ts (19 tests) 57ms
+ Γ£ô |union-eyes| lib/services/__tests__/member-service.test.ts (38 tests) 46ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/obligation-mapping-isolation.test.ts (5 tests) 46ms
+ Γ£ô |union-eyes| lib/services/__tests__/feature-flags-service.test.ts (25 tests) 54ms
+ Γ£ô |union-eyes| lib/services/__tests__/bargaining-notes-service.test.ts (40 tests) 52ms
+ Γ£ô |union-eyes| lib/services/__tests__/dues-notifications.test.ts (23 tests) 59ms
+ Γ£ô |union-eyes| app/api/__tests__/dues-arrears-id-payment.route.test.ts (3 tests) 94ms
+ Γ£ô |union-eyes| lib/icra/__tests__/narrativeConsistency.test.ts (3 tests) 48ms
+ Γ£ô |union-eyes| lib/services/__tests__/multi-currency-treasury-service.test.ts (26 tests) 64ms
+ Γ£ô |union-eyes| actions/__tests__/member-segments-actions.test.ts (17 tests) 38ms
+ Γ£ô |union-eyes| lib/validation/__tests__/member-segments-schemas.test.ts (45 tests) 58ms
+ Γ£ô |union-eyes| services/clc/__tests__/chart-of-accounts.test.ts (23 tests) 56ms
+ Γ£ô |union-eyes| services/__tests__/tax-slip-service.test.ts (11 tests) 59ms
+ Γ£ô |union-eyes| lib/integration/crossProductStateEvolution.test.ts (3 tests) 49ms
+ Γ£ô |union-eyes| lib/services/__tests__/calendar-service.test.ts (45 tests) 42ms
+ Γ£ô |union-eyes| services/platform-economics/pricing-calculator.test.ts (76 tests) 49ms
+ Γ£ô |union-eyes| app/api/__tests__/all-routes-smoke.test.ts (946 tests) 81099ms
+     Γ£ô activities executes exported handlers without throwing  9648ms
+     Γ£ô admin/ai-usage executes exported handlers without throwing  5490ms
+     Γ£ô ai/cache-stats executes exported handlers without throwing  6560ms
+     Γ£ô calendar-sync/connections/[id]/sync executes exported handlers without throwing  6050ms
+     Γ£ô cases/[caseId]/escalate executes exported handlers without throwing  6451ms
+     Γ£ô cases/[caseId]/export executes exported handlers without throwing  5038ms
+     Γ£ô cognition/cases/[id]/risk executes exported handlers without throwing  1224ms
+     Γ£ô cognition/health executes exported handlers without throwing  515ms
+     Γ£ô dashboard/leadership executes exported handlers without throwing  311ms
+     Γ£ô dues/create-payment-intent executes exported handlers without throwing  697ms
+     Γ£ô exit-interviews/adaptive-resilience executes exported handlers without throwing  1968ms
+     Γ£ô governance/board-packets/[id]/distribute executes exported handlers without throwing  892ms
+     Γ£ô graphql executes exported handlers without throwing  1934ms
+     Γ£ô voice/transcribe executes exported handlers without throwing  1261ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/transaction-fee-engine.test.ts (19 tests) 55ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-alerts-executions-test.route.test.ts (3 tests) 22ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/adapters/__tests__/types.test.ts (1 test) 73ms
+ Γ£ô |union-eyes| app/api/__tests__/cron-observability-alerts.route.test.ts (2 tests) 29ms
+ Γ£ô |union-eyes| lib/payment-processor/__tests__/stripe-processor.test.ts (26 tests) 55ms
+ Γ£ô |union-eyes| lib/__tests__/email-service.test.ts (9 tests) 49ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/stabilizationWorkflowEngine.test.ts (8 tests) 49ms
+ Γ£ô |union-eyes| lib/__tests__/deadline-service.test.ts (44 tests) 47ms
+ Γ£ô |union-eyes| app/api/__tests__/dues-arrears-calculate.route.test.ts (4 tests) 33ms
+ Γ£ô |union-eyes| db/queries/__tests__/organization-queries.test.ts (37 tests) 60ms
+ Γ£ô |union-eyes| lib/__tests__/blob-client.test.ts (6 tests) 52ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/allocation-engine.test.ts (13 tests) 40ms
+ Γ£ô |union-eyes| lib/graphql/__tests__/resolvers.test.ts (27 tests) 52ms
+ Γ£ô |union-eyes| lib/icra/__tests__/adaptiveTelemetryPrivacyRegression.test.ts (10 tests) 46ms
+ Γ£ô |union-eyes| lib/services/__tests__/audit-service.test.ts (15 tests) 42ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/__tests__/habit-culture-effectiveness.test.ts (8 tests) 54ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-invite-create.route.test.ts (5 tests) 56ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/contract-service.test.ts (17 tests) 35ms
+ Γ£ô |union-eyes| lib/services/__tests__/pci-compliance-service.test.ts (23 tests) 51ms
+ Γ£ô |union-eyes| db/queries/__tests__/analytics-queries.test.ts (37 tests) 49ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts (7 tests) 39ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signalContributionIntegrity.test.ts (9 tests) 47ms
+ Γ£ô |union-eyes| services/case-intelligence/__tests__/types.test.ts (1 test) 19ms
+ Γ£ô |union-eyes| domain/__tests__/index.test.ts (1 test) 28ms
+ Γ£ô |union-eyes| db/queries/__tests__/member-segments-queries.test.ts (27 tests) 49ms
+ Γ£ô |union-eyes| lib/services/external-data/__tests__/statcan-client.test.ts (30 tests) 75ms
+ Γ£ô |union-eyes| lib/services/messaging/__tests__/email-service.test.ts (27 tests) 46ms
+ Γ£ô |union-eyes| lib/services/__tests__/signature-workflow-service.test.ts (17 tests) 46ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/redistributionExecution.test.ts (16 tests) 47ms
+ Γ£ô |union-eyes| services/__tests__/force-majeure-integration.test.ts (17 tests) 55ms
+ Γ£ô |union-eyes| app/api/__tests__/billing-credits-check-expired.route.test.ts (3 tests) 40ms
+ Γ£ô |union-eyes| lib/integration/antiBlameInvariant.test.ts (5 tests) 48ms
+ Γ£ô |union-eyes| lib/integration/executiveExportConsistency.test.ts (3 tests) 49ms
+ Γ£ô |union-eyes| lib/__tests__/document-management-system.test.ts (34 tests) 50ms
+ Γ£ô |union-eyes| lib/database/__tests__/multi-db-client.test.ts (37 tests) 39ms
+ Γ£ô |union-eyes| lib/chaos-engineering/__tests__/chaos-monkey.test.ts (25 tests) 53ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/template-service.test.ts (43 tests) 39ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/finance-outputs.test.ts (9 tests) 51ms
+ Γ£ô |union-eyes| lib/__tests__/calendar-reminder-scheduler.test.ts (25 tests) 42ms
+ Γ£ô |union-eyes| services/platform-economics/transaction-fee-engine.test.ts (29 tests) 43ms
+ Γ£ô |union-eyes| lib/ai/__tests__/safety.test.ts (62 tests) 37ms
+ Γ£ô |union-eyes| lib/integration/pilotReadinessVerification.test.ts (3 tests) 45ms
+ Γ£ô |union-eyes| lib/services/__tests__/general-ledger-service.test.ts (19 tests) 43ms
+ Γ£ô |union-eyes| lib/icra/__tests__/personaDeterminism.test.ts (3 tests) 43ms
+ Γ£ô |union-eyes| lib/services/__tests__/cba-service.test.ts (34 tests) 46ms
+ Γ£ô |union-eyes| lib/__tests__/insights-parser.test.ts (14 tests) 39ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/biometric-auth.test.ts (25 tests) 42ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/seed-sources.test.ts (3 tests) 38ms
+ Γ£ô |union-eyes| lib/__tests__/role-middleware.test.ts (28 tests) 45ms
+ Γ£ô |union-eyes| app/api/__tests__/cba-intelligence-health.route.test.ts (1 test) 32ms
+ Γ£ô |union-eyes| lib/integration/doctrineExecutionIntegrity.test.ts (3 tests) 49ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/interventionTracking.test.ts (14 tests) 47ms
+ Γ£ô |union-eyes| lib/db/__tests__/with-rls-context.test.ts (34 tests) 42ms
+ Γ£ô |union-eyes| app/api/__tests__/finance-dashboard.route.test.ts (5 tests) 56ms
+ Γ£ô |union-eyes| lib/__tests__/clc-governance.test.ts (27 tests) 45ms
+ Γ£ô |union-eyes| lib/icra/__tests__/maturityProgression.test.ts (4 tests) 49ms
+ Γ£ô |union-eyes| lib/integration/multiSessionContinuityIntegrity.test.ts (3 tests) 50ms
+stdout | app/api/employer-execution/__tests__/execution-scenario-pack.test.ts
+Γùç injecting env (35) from .env // tip: Γùê secrets for agents [www.dotenvx.com]
+
+ Γ£ô |union-eyes| services/clc/__tests__/per-capita-calculator.test.ts (22 tests) 53ms
+stdout | app/api/employer-execution/__tests__/execution-hardening.test.ts
+Γùç injecting env (35) from .env // tip: Γîÿ enable debugging { debug: true }
+
+ Γ£ô |union-eyes| lib/oci/conversations/__tests__/continuityConversationPrompts.test.ts (6 tests) 45ms
+ Γ£ô |union-eyes| app/api/employer-execution/__tests__/execution-scenario-pack.test.ts (15 tests) 46ms
+ Γ£ô |union-eyes| app/api/employer-execution/__tests__/execution-hardening.test.ts (9 tests) 40ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/facilitatorRuntime.test.ts (12 tests) 43ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/executiveStabilizationOps.test.ts (9 tests) 42ms
+ΓÜá∩╕Å [2026-07-22T20:23:59.607Z] [WARN] [15cb1b18-0cb5-48e3-9bd0-06a66cd6bce1] API Error Response
+  Context: {
+  "code": "NOT_FOUND",
+  "message": "Calendar connection not found",
+  "statusCode": 404,
+  "traceId": "mrwj5x13-b9a22724"
+}
+ Γ£ô |union-eyes| lib/intelligence/__tests__/antiExposureValidation.test.ts (4 tests) 43ms
+ΓÜá∩╕Å [2026-07-22T20:23:59.613Z] [WARN] [15cb1b18-0cb5-48e3-9bd0-06a66cd6bce1] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "Local calendar is outside your organization scope",
+  "statusCode": 403,
+  "traceId": "mrwj5x19-f2e1cbc3"
+}
+ΓÜá∩╕Å [2026-07-22T20:23:59.617Z] [WARN] [15cb1b18-0cb5-48e3-9bd0-06a66cd6bce1] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "localEventId is required for export mode",
+  "statusCode": 400,
+  "traceId": "mrwj5x1c-77f22e86"
+}
+ Γ£ô |union-eyes| app/api/__tests__/admin-clc-analytics-trends.route.test.ts (4 tests) 45ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/subscription-lifecycle-service.test.ts (12 tests) 36ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/questionSignalIntegrity.test.ts (11 tests) 35ms
+ΓÜá∩╕Å [2026-07-22T20:24:00.046Z] [WARN] [b4eb06d8-84ab-4c9f-af4b-d0ff509b43d4] API Error Response
+  Context: {
+  "code": "AUTH_REQUIRED",
+  "message": "Authentication required",
+  "statusCode": 401,
+  "traceId": "mrwj5xd9-08077c70"
+}
+Γ¥î [2026-07-22T20:24:00.062Z] [ERROR] [b4eb06d8-84ab-4c9f-af4b-d0ff509b43d4] API Error Response
+  Context: {
+  "code": "INTERNAL_ERROR",
+  "message": "Failed to initiate Google Calendar authorization",
+  "statusCode": 500,
+  "traceId": "mrwj5xdk-0382bd48",
+  "details": {
+    "message": "oauth-failed",
+    "name": "Error"
+  }
+}
+ Γ£ô |union-eyes| lib/icra/__tests__/extremeInputResilience.test.ts (4 tests) 43ms
+ Γ£ô |union-eyes| lib/services/__tests__/feature-flags.test.ts (43 tests) 55ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-login-logout-me-signup.route.test.ts (4 tests) 26ms
+ Γ£ô |union-eyes| lib/services/__tests__/spatial-query-service.test.ts (10 tests) 53ms
+ Γ£ô |union-eyes| actions/__tests__/admin-actions.test.ts (28 tests) 39ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-clc-analytics-forecast.route.test.ts (3 tests) 46ms
+ Γ£ô |union-eyes| lib/services/__tests__/case-timeline-service.test.ts (22 tests) 41ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/pricing-template-service.test.ts (15 tests) 43ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-clc-analytics-multi-year-trends.route.test.ts (4 tests) 41ms
+ Γ£ô |union-eyes| lib/__tests__/autopay-utils.test.ts (21 tests) 54ms
+ Γ£ô |union-eyes| lib/services/messaging/__tests__/campaign-service.test.ts (20 tests) 40ms
+ Γ£ô |union-eyes| lib/__tests__/excel-generator.test.ts (33 tests) 41ms
+ Γ£ô |union-eyes| app/api/__tests__/dues-arrears-id-reminder.route.test.ts (3 tests) 33ms
+ Γ£ô |union-eyes| lib/intelligence/__tests__/sectorContinuityObservatory.test.ts (4 tests) 38ms
+ Γ£ô |union-eyes| app/api/__tests__/calendar-sync-google-auth.route.test.ts (3 tests) 38ms
+Γ¥î [2026-07-22T20:24:01.241Z] [ERROR] [513118ae-6af9-4ebd-bd19-4e82f0e775b2] API Error Response
+  Context: {
+  "code": "SERVICE_UNAVAILABLE",
+  "message": "Google OAuth did not return a refresh token. Reconnect with consent to enable continuous sync.",
+  "statusCode": 503,
+  "traceId": "mrwj5yag-a5737133"
+}
+ΓÜá∩╕Å [2026-07-22T20:24:01.250Z] [WARN] [513118ae-6af9-4ebd-bd19-4e82f0e775b2] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing OAuth authorization code",
+  "statusCode": 400,
+  "traceId": "mrwj5yaq-9ba9f637"
+}
+ΓÜá∩╕Å [2026-07-22T20:24:01.252Z] [WARN] [513118ae-6af9-4ebd-bd19-4e82f0e775b2] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "OAuth state mismatch",
+  "statusCode": 403,
+  "traceId": "mrwj5yas-05b27af0"
+}
+ Γ£ô |union-eyes| services/pki/__tests__/verification-service.test.ts (23 tests) 42ms
+ Γ£ô |union-eyes| lib/pilot/__tests__/readiness-assessment.test.ts (53 tests) 40ms
+ Γ£ô |union-eyes| lib/__tests__/encryption.test.ts (28 tests) 47ms
+ Γ£ô |union-eyes| lib/services/__tests__/payment-service.test.ts (11 tests) 34ms
+ Γ£ô |union-eyes| db/queries/__tests__/deadline-queries.test.ts (31 tests) 46ms
+ Γ£ô |union-eyes| lib/intelligence/__tests__/kAnonymityRegression.test.ts (4 tests) 36ms
+ Γ£ô |union-eyes| lib/__tests__/feature-flags.test.ts (28 tests) 39ms
+ Γ£ô |union-eyes| lib/services/ai/__tests__/auto-classification-service.test.ts (25 tests) 38ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/statisticalInterpretability.test.ts (5 tests) 38ms
+ Γ£ô |union-eyes| db/queries/__tests__/scheduled-reports-queries.test.ts (21 tests) 42ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/mitigation-effectiveness/__tests__/effectiveness-tracker.test.ts (2 tests) 36ms
+ Γ£ô |union-eyes| lib/ml/__tests__/predictive-analytics.test.ts (42 tests) 41ms
+ Γ£ô |union-eyes| lib/monitoring/__tests__/status-page.test.ts (13 tests) 38ms
+ Γ£ô |union-eyes| lib/notification-templates/__tests__/dues-notifications.test.ts (61 tests) 35ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/export-service.test.ts (32 tests) 37ms
+ Γ£ô |union-eyes| lib/middleware/__tests__/sql-injection-prevention.test.ts (25 tests) 35ms
+ Γ£ô |union-eyes| services/clc/__tests__/remittance-exporter.test.ts (11 tests) 32ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/redemption-service.test.ts (25 tests) 37ms
+ Γ£ô |union-eyes| actions/__tests__/credits-actions.test.ts (31 tests) 41ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-clc-analytics-annual-report.route.test.ts (4 tests) 37ms
+ Γ£ô |union-eyes| actions/__tests__/whop-actions.test.ts (24 tests) 35ms
+ Γ£ô |union-eyes| lib/__tests__/job-queue.test.ts (18 tests) 45ms
+ Γ£ô |union-eyes| app/api/__tests__/ai-insights-summary.route.test.ts (5 tests) 50ms
+ Γ£ô |union-eyes| lib/__tests__/workflow-automation-engine.test.ts (23 tests) 36ms
+ Γ£ô |union-eyes| db/queries/__tests__/member-employment-queries.test.ts (24 tests) 38ms
+ Γ£ô |union-eyes| app/api/__tests__/dues-arrears.route.test.ts (2 tests) 23ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/dunning-service.test.ts (14 tests) 42ms
+ Γ£ô |union-eyes| lib/integration/runtimePersistenceValidation.test.ts (5 tests) 33ms
+ Γ£ô |union-eyes| lib/oci/audit/__tests__/entropyAuditPacketBuilder.test.ts (4 tests) 37ms
+ Γ£ô |union-eyes| lib/api/__tests__/signature-service-api.test.ts (17 tests) 35ms
+ Γ£ô |union-eyes| lib/ai/__tests__/chatbot-service.test.ts (17 tests) 36ms
+ Γ£ô |union-eyes| lib/external-calendar-sync/__tests__/microsoft-calendar-service.test.ts (10 tests) 37ms
+ Γ£ô |union-eyes| app/api/__tests__/analytics-weekly-summary.route.test.ts (3 tests) 47ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/governance-adaptation/__tests__/adaptation-engine.test.ts (3 tests) 41ms
+ Γ£ô |union-eyes| lib/pilot/__tests__/pilot-ownership.test.ts (20 tests) 42ms
+ Γ£ô |union-eyes| db/queries/__tests__/claims-queries.test.ts (16 tests) 37ms
+ Γ£ô |union-eyes| actions/__tests__/rewards-actions.test.ts (29 tests) 34ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-dues-send-reminders.route.test.ts (4 tests) 35ms
+ Γ£ô |union-eyes| lib/integration/continuityLedgerReplay.test.ts (3 tests) 35ms
+ Γ£ô |union-eyes| app/api/members/__tests__/route.cross-org.test.ts (4 tests) 53ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/longitudinalSignalStability.test.ts (5 tests) 57ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/wallet-service.test.ts (13 tests) 37ms
+ Γ£ô |union-eyes| lib/integration/runtimeRoundTripPersistence.test.ts (2 tests) 33ms
+ Γ£ô |union-eyes| app/api/__tests__/organization-members-search.route.test.ts (2 tests) 34ms
+ Γ£ô |union-eyes| lib/intelligence/__tests__/aggregationPrivacyIntegrity.test.ts (2 tests) 35ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/budget-service.test.ts (28 tests) 35ms
+ Γ£ô |union-eyes| lib/ai/__tests__/resilience.test.ts (19 tests) 37ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/continuityReplayRuntime.test.ts (2 tests) 40ms
+ Γ£ô |union-eyes| lib/__tests__/claim-workflow-fsm.test.ts (41 tests) 32ms
+ Γ£ô |union-eyes| lib/services/cba-intelligence/__tests__/health-service.test.ts (4 tests) 35ms
+ΓÜá∩╕Å [2026-07-22T20:24:05.203Z] [WARN] [33eee01e-885e-4443-bec7-3a8d8fd2c4d2] API Error Response
+  Context: {
+  "code": "VALIDATION_ERROR",
+  "message": "Missing OAuth authorization code",
+  "statusCode": 400,
+  "traceId": "mrwj61cj-4e462de4"
+}
+Γ¥î [2026-07-22T20:24:05.216Z] [ERROR] [33eee01e-885e-4443-bec7-3a8d8fd2c4d2] API Error Response
+  Context: {
+  "code": "SERVICE_UNAVAILABLE",
+  "message": "Microsoft OAuth did not return a refresh token. Reconnect and grant offline access to enable continuous sync.",
+  "statusCode": 503,
+  "traceId": "mrwj61cw-38231a71"
+}
+ Γ£ô |union-eyes| services/platform-economics/__tests__/ledger-service.test.ts (9 tests) 30ms
+ Γ£ô |union-eyes| lib/deadline-engine/__tests__/reminder-scheduler.test.ts (7 tests) 32ms
+ Γ£ô |union-eyes| db/queries/__tests__/profiles-queries.test.ts (17 tests) 32ms
+ Γ£ô |union-eyes| lib/services/__tests__/defensibility-pack.test.ts (14 tests) 29ms
+ Γ£ô |union-eyes| db/queries/__tests__/enhanced-rbac-queries.test.ts (20 tests) 34ms
+ Γ£ô |union-eyes| lib/oci/benchmark/__tests__/stewardshipBurdenPatterns.test.ts (5 tests) 35ms
+ Γ£ô |union-eyes| lib/services/external-data/__tests__/lrb-unified-service.test.ts (14 tests) 32ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/governanceReplayIntegrity.test.ts (3 tests) 38ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-members-export.route.test.ts (3 tests) 27ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/xero-adapter.test.ts (13 tests) 33ms
+ Γ£ô |union-eyes| lib/__tests__/rewards-stats-utils.test.ts (13 tests) 36ms
+ Γ£ô |union-eyes| lib/services/__tests__/steward-assignment.test.ts (7 tests) 37ms
+ Γ£ô |union-eyes| lib/services/__tests__/committee-workspace-service.test.ts (16 tests) 35ms
+ Γ£ô |union-eyes| app/api/calendar-sync/connections/[id]/sync/route.test.ts (4 tests) 44ms
+ Γ£ô |union-eyes| services/__tests__/governance-service.test.ts (17 tests) 35ms
+ Γ£ô |union-eyes| lib/external-calendar-sync/__tests__/google-calendar-service.test.ts (10 tests) 30ms
+ Γ£ô |union-eyes| app/api/calendar-sync/google/auth/route.test.ts (3 tests) 41ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/quickbooks-adapter.test.ts (13 tests) 35ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/social-media.test.ts (25 tests) 34ms
+ Γ£ô |union-eyes| lib/ingestion/__tests__/post-import-verification.test.ts (9 tests) 36ms
+ Γ£ô |union-eyes| lib/ingestion/__tests__/batch-ingest.test.ts (13 tests) 35ms
+ Γ£ô |union-eyes| lib/integration/intelligenceAggregationPersistence.test.ts (2 tests) 33ms
+ Γ£ô |union-eyes| lib/__tests__/action-dtos.test.ts (26 tests) 38ms
+ Γ£ô |union-eyes| lib/services/__tests__/correspondence-service.test.ts (8 tests) 32ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/manulife-adapter.test.ts (9 tests) 30ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-payments-retry-failed.route.test.ts (4 tests) 37ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/sync-engine.test.ts (14 tests) 35ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/graph-query/__tests__/graph-reasoner.test.ts (20 tests) 32ms
+ Γ£ô |union-eyes| lib/integrations/adapters/communication/__tests__/teams-client.test.ts (13 tests) 29ms
+ Γ£ô |union-eyes| lib/mobile/__tests__/deep-linker.test.ts (33 tests) 28ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/trajectoryReconstruction.test.ts (2 tests) 33ms
+ Γ£ô |union-eyes| lib/ai/services/__tests__/rate-limiter.test.ts (3 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/manulife-client.test.ts (12 tests) 26ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/award-service.test.ts (14 tests) 28ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/xero-client.test.ts (17 tests) 34ms
+ Γ£ô |union-eyes| lib/observability/__tests__/metrics.test.ts (26 tests) 34ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/core-framework.test.ts (23 tests) 31ms
+ Γ£ô |union-eyes| lib/services/__tests__/claim-workflow-fsm.test.ts (36 tests) 28ms
+ Γ£ô |union-eyes| lib/integrations/adapters/communication/__tests__/teams-adapter.test.ts (12 tests) 34ms
+ Γ£ô |union-eyes| actions/__tests__/analytics-actions.test.ts (25 tests) 31ms
+ Γ£ô |union-eyes| db/queries/__tests__/dues-queries.test.ts (17 tests) 35ms
+ Γ£ô |union-eyes| lib/ai/__tests__/entity-extraction.test.ts (14 tests) 39ms
+ Γ£ô |union-eyes| app/api/__tests__/calendar-sync-microsoft-auth.route.test.ts (3 tests) 36ms
+ Γ£ô |union-eyes| lib/pension-processor/__tests__/base-processor.test.ts (11 tests) 29ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/adaptiveNarrative.test.ts (17 tests) 28ms
+ Γ£ô |union-eyes| app/api/calendar-sync/google/callback/route.test.ts (5 tests) 41ms
+ Γ£ô |union-eyes| app/api/__tests__/auth-remaining-wrappers.route.test.ts (4 tests) 42ms
+ Γ£ô |union-eyes| lib/marketing/__tests__/organizer-impact.test.ts (43 tests) 29ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/inter-rater-reliability.test.ts (14 tests) 29ms
+ Γ£ô |union-eyes| lib/ml/__tests__/predictive-scoring.test.ts (41 tests) 31ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/freshbooks-client.test.ts (14 tests) 29ms
+ Γ£ô |union-eyes| lib/migrations/__tests__/data-integrity.test.ts (7 tests) 27ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/sage-intacct-client.test.ts (14 tests) 36ms
+ Γ£ô |union-eyes| app/api/cron/calendar-sync/route.test.ts (2 tests) 30ms
+ Γ£ô |union-eyes| lib/services/__tests__/dispatch-engine.test.ts (22 tests) 33ms
+ Γ£ô |union-eyes| lib/integrations/adapters/hris/__tests__/bamboohr-adapter.test.ts (11 tests) 31ms
+ Γ£ô |union-eyes| lib/ai/__tests__/data-ingestion.test.ts (25 tests) 31ms
+ Γ£ô |union-eyes| lib/whitepaper/__tests__/markdown-renderer.test.tsx (5 tests) 31ms
+ Γ£ô |union-eyes| lib/integrations/adapters/lms/__tests__/linkedin-learning-adapter.test.ts (9 tests) 28ms
+ Γ£ô |union-eyes| lib/services/__tests__/board-packet-generator.test.ts (8 tests) 29ms
+ Γ£ô |union-eyes| lib/services/__tests__/geofence-privacy-service.test.ts (24 tests) 28ms
+ Γ£ô |union-eyes| lib/integrations/adapters/hris/__tests__/bamboohr-client.test.ts (15 tests) 37ms
+ Γ£ô |union-eyes| lib/middleware/__tests__/auth-middleware.test.ts (19 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/timeline-integration.test.ts (9 tests) 41ms
+ Γ£ô |union-eyes| lib/__tests__/cupe-pilot-readiness.test.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/integrations/adapters/documents/__tests__/sharepoint-adapter.test.ts (11 tests) 31ms
+ Γ£ô |union-eyes| lib/__tests__/ai-feature-guard.test.ts (10 tests) 28ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/sunlife-adapter.test.ts (9 tests) 30ms
+ Γ£ô |union-eyes| lib/__tests__/evidence-export.lifecycle.test.ts (6 tests) 33ms
+ Γ£ô |union-eyes| app/api/__tests__/organization-members.route.test.ts (2 tests) 28ms
+ Γ£ô |union-eyes| lib/services/external-data/__tests__/clc-partnership-service.test.ts (9 tests) 28ms
+ Γ£ô |union-eyes| lib/ai/__tests__/learning.test.ts (33 tests) 26ms
+ Γ£ô |union-eyes| lib/__tests__/organization-middleware.test.ts (10 tests) 33ms
+ Γ£ô |union-eyes| lib/ingestion/__tests__/validation-pipeline.test.ts (27 tests) 25ms
+ Γ£ô |union-eyes| lib/integrations/adapters/hris/__tests__/adp-client.test.ts (12 tests) 30ms
+ Γ£ô |union-eyes| actions/__tests__/profiles-actions.test.ts (21 tests) 27ms
+ Γ£ô |union-eyes| lib/governance-observability/__tests__/telemetry.test.ts (13 tests) 30ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/freshbooks-adapter.test.ts (10 tests) 29ms
+ Γ£ô |union-eyes| app/api/__tests__/alerts-realtime.route.test.ts (3 tests) 35ms
+ Γ£ô |union-eyes| lib/integrations/adapters/hris/__tests__/workday-client.test.ts (13 tests) 30ms
+stdout | lib/ingestion/__tests__/fuzzy-dedup.test.ts
+Γùç injecting env (27) from .env.local // tip: Γùê secrets for agents [www.dotenvx.com]
+
+ Γ£ô |union-eyes| lib/ingestion/__tests__/fuzzy-dedup.test.ts (22 tests) 24ms
+ Γ£ô |union-eyes| lib/__tests__/dapl-platform-economics.test.ts (36 tests) 35ms
+ Γ£ô |union-eyes| lib/integrations/adapters/communication/__tests__/slack-adapter.test.ts (10 tests) 31ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/wave-client.test.ts (14 tests) 30ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/hris-sync-utils.test.ts (13 tests) 34ms
+ Γ£ô |union-eyes| lib/__tests__/csv-export.test.ts (26 tests) 29ms
+ Γ£ô |union-eyes| db/queries/__tests__/organization-members-queries.test.ts (13 tests) 29ms
+ Γ£ô |union-eyes| lib/integrations/adapters/communication/__tests__/slack-client.test.ts (13 tests) 31ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/canadalife-adapter.test.ts (9 tests) 30ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/accounting-sync-utils.test.ts (16 tests) 33ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/factory.test.ts (11 tests) 35ms
+ Γ£ô |union-eyes| lib/services/ai/__tests__/vector-search-service.test.ts (13 tests) 30ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/adaptiveTelemetry.test.ts (8 tests) 27ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/foundationIntegration.test.ts (29 tests) 30ms
+ Γ£ô |union-eyes| app/api/calendar-sync/microsoft/callback/route.test.ts (3 tests) 40ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/simulation.test.ts (13 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/sunlife-client.test.ts (12 tests) 31ms
+ Γ£ô |union-eyes| lib/integrations/adapters/hris/__tests__/adp-adapter.test.ts (9 tests) 27ms
+ Γ£ô |union-eyes| lib/chaos-engineering/__tests__/experiments.test.ts (12 tests) 31ms
+ Γ£ô |union-eyes| lib/__tests__/safe-sql-identifiers.test.ts (33 tests) 38ms
+ Γ£ô |union-eyes| services/observability/__tests__/realtime-alerting-service.test.ts (4 tests) 29ms
+ Γ£ô |union-eyes| lib/social-media/__tests__/social-media-clients.test.ts (13 tests) 29ms
+ Γ£ô |union-eyes| lib/ai/__tests__/employer-risk.test.ts (7 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/quickbooks-client.test.ts (12 tests) 29ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/canadalife-client.test.ts (11 tests) 26ms
+ Γ£ô |union-eyes| lib/migrations/__tests__/tenant-to-org-mapper.test.ts (19 tests) 30ms
+ Γ£ô |union-eyes| lib/services/ai/__tests__/embedding-cache.test.ts (11 tests) 27ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/ia-adapter.test.ts (9 tests) 34ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/greenshield-adapter.test.ts (9 tests) 31ms
+ Γ£ô |union-eyes| lib/ai/__tests__/insights-generator.test.ts (10 tests) 30ms
+ Γ£ô |union-eyes| lib/integrations/adapters/lms/__tests__/linkedin-learning-client.test.ts (12 tests) 29ms
+ Γ£ô |union-eyes| actions/__tests__/member-employment-actions.test.ts (20 tests) 27ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/webhook-router.test.ts (7 tests) 28ms
+ Γ£ô |union-eyes| lib/services/external-data/__tests__/wage-enrichment-service.test.ts (11 tests) 27ms
+ Γ£ô |union-eyes| lib/__tests__/cape-demo-data.test.ts (14 tests) 20ms
+ Γ£ô |union-eyes| lib/integrations/adapters/documents/__tests__/sharepoint-client.test.ts (12 tests) 31ms
+ Γ£ô |union-eyes| lib/services/__tests__/vote-crypto-service.test.ts (17 tests) 24ms
+ΓÜá∩╕Å [2026-07-22T20:24:14.537Z] [WARN] [351af15f-bdb5-45e3-816e-c29a88cad56e] API Error Response
+  Context: {
+  "code": "FORBIDDEN",
+  "message": "You do not have access to this document",
+  "statusCode": 403,
+  "traceId": "mrwj68js-13d8213c"
+}
+ Γ£ô |union-eyes| lib/ai/__tests__/token-cost-calculator.test.ts (27 tests) 32ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/automation-service.test.ts (14 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/greenshield-client.test.ts (12 tests) 28ms
+ Γ£ô |union-eyes| lib/hubspot/__tests__/icraPropertyMapper.test.ts (27 tests) 25ms
+ Γ£ô |union-eyes| lib/runtime/fail-closed.test.ts (8 tests) 29ms
+ Γ£ô |union-eyes| lib/__tests__/pilot-metrics.test.ts (13 tests) 24ms
+ Γ£ô |union-eyes| lib/observability/__tests__/telemetry.test.ts (11 tests) 28ms
+ Γ£ô |union-eyes| lib/governance-observability/__tests__/ledger.test.ts (7 tests) 25ms
+ Γ£ô |union-eyes| lib/integrations/adapters/insurance/__tests__/ia-client.test.ts (12 tests) 25ms
+ Γ£ô |union-eyes| lib/migrations/__tests__/batch-migration.test.ts (12 tests) 26ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/email-service.test.ts (20 tests) 38ms
+ Γ£ô |union-eyes| lib/runtime/identity/__tests__/legacyIcraCompatibility.test.ts (24 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/sage-intacct-adapter.test.ts (9 tests) 29ms
+ Γ£ô |union-eyes| lib/__tests__/api-guards.test.ts (6 tests) 26ms
+stdout | lib/__tests__/billing-cycle-service.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîÿ custom filepath { path: '/custom/path/.env' }
+
+ Γ£ô |union-eyes| services/__tests__/carbon-accounting-integration.test.ts (11 tests) 29ms
+ Γ£ô |union-eyes| lib/__tests__/action-flows.integration.test.ts (8 tests) 26ms
+ Γ£ô |union-eyes| lib/mobile/providers/__tests__/fcm-provider.test.ts (13 tests) 27ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/assessor-governance.test.ts (17 tests) 24ms
+ Γ£ô |union-eyes| lib/integrations/adapters/accounting/__tests__/wave-adapter.test.ts (9 tests) 27ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/reconciliation-service.test.ts (10 tests) 26ms
+ Γ£ô |union-eyes| lib/deadline-engine/__tests__/reminder-worker.test.ts (9 tests) 34ms
+ Γ£ô |union-eyes| lib/trust-center/__tests__/evidence.test.ts (22 tests) 20ms
+ Γ£ô |union-eyes| services/clc/__tests__/remittance-validation.test.ts (13 tests) 26ms
+ Γ£ô |union-eyes| lib/oci/benchmark/__tests__/publicationGuard.test.ts (12 tests) 26ms
+ Γ£ô |union-eyes| lib/services/__tests__/lro-signals.test.ts (18 tests) 30ms
+ Γ£ô |union-eyes| lib/__tests__/billing-cycle-service.test.ts (29 tests) 22ms
+ Γ£ô |union-eyes| lib/__tests__/org-scope-middleware.test.ts (4 tests) 22ms
+ Γ£ô |union-eyes| app/api/__tests__/governance-dashboard.route.test.ts (2 tests) 37ms
+ Γ£ô |union-eyes| lib/pension-processor/__tests__/pension-factory.test.ts (13 tests) 25ms
+ Γ£ô |union-eyes| components/workspace/__tests__/workspace-config.test.ts (11 tests) 26ms
+ Γ£ô |union-eyes| app/api/claims/__tests__/claims-post.test.ts (7 tests) 29ms
+ Γ£ô |union-eyes| services/__tests__/carbon-accounting-service.test.ts (21 tests) 26ms
+ Γ£ô |union-eyes| lib/geo/__tests__/ip-geolocation.test.ts (21 tests) 26ms
+ Γ£ô |union-eyes| lib/governance-observability/__tests__/correlation.test.ts (16 tests) 26ms
+ Γ£ô |union-eyes| lib/__tests__/clc-nil-briefing.test.ts (24 tests) 26ms
+ Γ£ô |union-eyes| lib/integrations/adapters/hris/__tests__/workday-adapter.test.ts (9 tests) 28ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/integration-fabric-hooks.test.ts (8 tests) 27ms
+ Γ£ô |union-eyes| lib/clc/__tests__/data-products.test.ts (13 tests) 25ms
+ Γ£ô |union-eyes| lib/deadline-engine/__tests__/recipient-resolver.test.ts (8 tests) 26ms
+ Γ£ô |union-eyes| lib/services/__tests__/multi-currency-gl-helper.test.ts (12 tests) 28ms
+ Γ£ô |union-eyes| lib/__tests__/cape-pilot-polish.test.ts (26 tests) 24ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/deterministicReportPersistence.test.ts (3 tests) 24ms
+ Γ£ô |union-eyes| lib/pilot/__tests__/commercialization-wave1.test.ts (12 tests) 24ms
+ Γ£ô |union-eyes| lib/services/__tests__/ip-geolocation-service.test.ts (15 tests) 22ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/shopify-service.test.ts (9 tests) 27ms
+ Γ£ô |union-eyes| lib/__tests__/pilot-admin.test.ts (16 tests) 21ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/environment.test.ts (14 tests) 28ms
+ Γ£ô |union-eyes| services/case-intelligence/ml-relevance-service.test.ts (1 test) 35ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/simulation.test.ts (11 tests) 23ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/usage-metering-service.test.ts (11 tests) 26ms
+ Γ£ô |union-eyes| app/api/__tests__/worksites-id.route.test.ts (2 tests) 29ms
+ Γ£ô |union-eyes| lib/ai/__tests__/embeddings-service.test.ts (10 tests) 26ms
+ Γ£ô |union-eyes| lib/pilot/__tests__/health-scoring.test.ts (32 tests) 26ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/pricing-calculator.test.ts (18 tests) 25ms
+ Γ£ô |union-eyes| lib/auth/__tests__/rbac-server.test.ts (12 tests) 26ms
+ Γ£ô |union-eyes| lib/__tests__/engagement-scoring.test.ts (8 tests) 25ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/downstreamAdapters.test.ts (17 tests) 25ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/scoring.test.ts (8 tests) 24ms
+ Γ£ô |union-eyes| config/__tests__/public-api-routes.test.ts (11 tests) 22ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/confidence-evidence-floor.test.ts (6 tests) 21ms
+ Γ£ô |union-eyes| tests/api/operational-endpoints.spec.ts (32 tests) 26ms
+ Γ£ô |union-eyes| lib/ai/__tests__/experiments.test.ts (13 tests) 24ms
+ Γ£ô |union-eyes| lib/ab-testing/__tests__/ab-test-engine.test.ts (12 tests) 24ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts (3 tests) 22ms
+ Γ£ô |union-eyes| lib/__tests__/sanitize.test.ts (13 tests) 23ms
+ Γ£ô |union-eyes| app/api/__tests__/admin-ingest-batches-id.route.test.ts (2 tests) 78ms
+ Γ£ô |union-eyes| lib/workers/employer-execution/__tests__/employer-execution-workers.test.ts (9 tests) 19ms
+ Γ£ô |union-eyes| lib/ai/__tests__/selective-context.test.ts (25 tests) 26ms
+ Γ£ô |union-eyes| lib/oci/benchmark/__tests__/sectorBaselines.test.ts (5 tests) 24ms
+ Γ£ô |union-eyes| lib/ai/__tests__/performance-monitor.test.ts (13 tests) 21ms
+ Γ£ô |union-eyes| lib/services/__tests__/case-workflow-fsm.test.ts (28 tests) 22ms
+ Γ£ô |union-eyes| lib/__tests__/stagingSeed.test.ts (6 tests) 24ms
+ Γ£ô |union-eyes| lib/__tests__/audited-case-mutations.test.ts (4 tests) 19ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-continuity-risk.route.test.ts (1 test) 20ms
+ Γ£ô |union-eyes| lib/organizational-topology/__tests__/source.test.ts (4 tests) 20ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/stabilizationStateMachine.test.ts (18 tests) 25ms
+ Γ£ô |union-eyes| lib/services/ai/__tests__/precedent-matching-service.test.ts (6 tests) 19ms
+ Γ£ô |union-eyes| lib/ai/services/__tests__/cost-tracking-wrapper.test.ts (3 tests) 26ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/dues-alignment.test.ts (11 tests) 20ms
+ Γ£ô |union-eyes| lib/__tests__/csrf-protection.test.ts (9 tests) 25ms
+ Γ£ô |union-eyes| actions/__tests__/stripe-actions.test.ts (9 tests) 25ms
+ Γ£ô |union-eyes| app/api/__tests__/cases-outcomes.route.test.ts (1 test) 36ms
+ Γ£ô |union-eyes| lib/icra/__tests__/adaptiveReportConsistency.test.ts (7 tests) 21ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/reasoning-sessions/__tests__/session-manager.test.ts (9 tests) 20ms
+ Γ£ô |union-eyes| lib/icra/__tests__/claimTokenIntegrity.test.ts (6 tests) 19ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/delegation.test.ts (12 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/config.test.ts (24 tests) 21ms
+ Γ£ô |union-eyes| lib/__tests__/recurring-events-service.test.ts (16 tests) 22ms
+ Γ£ô |union-eyes| lib/__tests__/rollout-governance.test.ts (5 tests) 20ms
+ Γ£ô |union-eyes| lib/__tests__/dashboard-metrics.test.ts (14 tests) 21ms
+ Γ£ô |union-eyes| lib/migrations/__tests__/rollback.test.ts (13 tests) 22ms
+ Γ£ô |union-eyes| lib/auth/__tests__/hierarchy-access-control.test.ts (13 tests) 19ms
+ Γ£ô |union-eyes| lib/security/__tests__/clamav.test.ts (6 tests) 23ms
+ Γ£ô |union-eyes| lib/__tests__/pilot-admin-operational.test.ts (21 tests) 25ms
+ Γ£ô |union-eyes| lib/deadline-engine/__tests__/email-adapter.test.ts (8 tests) 22ms
+ Γ£ô |union-eyes| lib/services/__tests__/clause-intelligence.test.ts (10 tests) 23ms
+ Γ£ô |union-eyes| lib/services/__tests__/sla-calculator.test.ts (12 tests) 22ms
+ Γ£ô |union-eyes| lib/gdpr/__tests__/consent-purposes.test.ts (12 tests) 19ms
+ Γ£ô |union-eyes| lib/services/__tests__/t106-compliance-service.test.ts (4 tests) 22ms
+ Γ£ô |union-eyes| lib/oci/benchmark/__tests__/aggregateIntelligence.test.ts (13 tests) 26ms
+ Γ£ô |union-eyes| lib/services/ai/__tests__/clause-extraction-service.test.ts (8 tests) 20ms
+ Γ£ô |union-eyes| lib/workflow/__tests__/case-lifecycle.test.ts (19 tests) 23ms
+ Γ£ô |union-eyes| lib/services/rewards/__tests__/program-service.test.ts (13 tests) 23ms
+ Γ£ô |union-eyes| lib/icra-ai/__tests__/aiPromptBoundary.test.ts (35 tests) 23ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/topologyExtractionIntegrity.test.ts (5 tests) 25ms
+ Γ£ô |union-eyes| app/api/__tests__/worksites.route.test.ts (2 tests) 39ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/deterministicReportEngine.test.ts (3 tests) 21ms
+ Γ£ô |union-eyes| lib/deadline-engine/__tests__/audit.test.ts (7 tests) 23ms
+ Γ£ô |union-eyes| lib/oci/frameworks/__tests__/stewardship-density-index.test.ts (22 tests) 26ms
+ Γ£ô |union-eyes| app/api/__tests__/calendar-events.route.test.ts (1 test) 21ms
+ Γ£ô |union-eyes| lib/auth/__tests__/types.test.ts (8 tests) 13ms
+ Γ£ô |union-eyes| lib/icra/__tests__/insight-engine.test.ts (12 tests) 24ms
+ Γ£ô |union-eyes| lib/__tests__/analytics-middleware.test.ts (6 tests) 22ms
+ Γ£ô |union-eyes| lib/icra-ai/__tests__/aiNarrativeValidation.test.ts (10 tests) 25ms
+ Γ£ô |union-eyes| lib/ai/__tests__/mamba-service.test.ts (11 tests) 19ms
+ Γ£ô |union-eyes| lib/__tests__/grievance-lifecycle.test.ts (24 tests) 24ms
+ Γ£ô |union-eyes| lib/governance-policy/__tests__/evaluation.test.ts (12 tests) 20ms
+ Γ£ô |union-eyes| app/api/documents/[id]/download/route.test.ts (2 tests) 30ms
+ Γ£ô |union-eyes| lib/intelligence/ethics/__tests__/intelligenceEthicsValidators.test.ts (19 tests) 19ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts (6 tests) 18ms
+ Γ£ô |union-eyes| lib/organizational-narratives/__tests__/index.test.ts (6 tests) 20ms
+ Γ£ô |union-eyes| lib/__tests__/evidence.test.ts (4 tests) 20ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/questionRoutingEngine.test.ts (11 tests) 24ms
+ Γ£ô |union-eyes| services/case-intelligence/__tests__/ml-relevance-service.test.ts (7 tests) 21ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/autonomy.test.ts (14 tests) 18ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/ledger.test.ts (14 tests) 17ms
+ Γ£ô |union-eyes| lib/__tests__/auth-emails.test.ts (7 tests) 19ms
+ Γ£ô |union-eyes| lib/__tests__/clc-nil-prompts.test.ts (21 tests) 20ms
+ Γ£ô |union-eyes| lib/__tests__/executive-insights.test.ts (9 tests) 22ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/simulation/__tests__/continuity-simulator.test.ts (4 tests) 20ms
+ Γ£ô |union-eyes| app/api/__tests__/cognition-health.route.test.ts (1 test) 23ms
+ Γ£ô |union-eyes| lib/member-experience/__tests__/timeline-builder.test.ts (9 tests) 20ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/public-sector-note-killswitch.test.ts (10 tests) 20ms
+ Γ£ô |union-eyes| lib/cognition/__tests__/ue-adapter.test.ts (6 tests) 20ms
+ Γ£ô |union-eyes| lib/oci/frameworks/__tests__/governance-entropy-scale.test.ts (13 tests) 19ms
+ Γ£ô |union-eyes| lib/jobs/__tests__/failed-payment-retry.test.ts (5 tests) 18ms
+ Γ£ô |union-eyes| lib/services/__tests__/provincial-privacy-service.test.ts (14 tests) 18ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/deterministicReportGuardrails.test.ts (8 tests) 17ms
+ Γ£ô |union-eyes| lib/ai/__tests__/role-templates.test.ts (15 tests) 17ms
+ Γ£ô |union-eyes| lib/icra/__tests__/questionMetadataIntegrity.test.ts (7 tests) 19ms
+ Γ£ô |union-eyes| lib/graphql/__tests__/schema.test.ts (34 tests) 21ms
+ Γ£ô |union-eyes| lib/staging-proof/__tests__/deadline-engine-auth.test.ts (10 tests) 17ms
+ Γ£ô |union-eyes| app/api/__tests__/bargaining-proposals.route.test.ts (1 test) 28ms
+stdout | lib/__tests__/clc-strategic-signals.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîÿ multiple files { path: ['.env.local', '.env'] }
+
+ Γ£ô |union-eyes| lib/integrations/__tests__/marketing-notifications.test.ts (8 tests) 19ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/adaptiveRouteDepth.test.ts (6 tests) 20ms
+ Γ£ô |union-eyes| lib/__tests__/clc-strategic-signals.test.ts (10 tests) 21ms
+ Γ£ô |union-eyes| lib/__tests__/case-fsm-enforcement.test.ts (9 tests) 18ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/coordination.test.ts (13 tests) 21ms
+ Γ£ô |union-eyes| db/queries/__tests__/pending-profiles-queries.test.ts (7 tests) 19ms
+ Γ£ô |union-eyes| app/api/__tests__/exit-interviews-organizational-cognition.route.test.ts (1 test) 18ms
+ Γ£ô |union-eyes| lib/__tests__/employer-risk.test.ts (12 tests) 21ms
+ Γ£ô |union-eyes| lib/icra-ai/__tests__/antiSurveillanceAiInvariant.test.ts (3 tests) 19ms
+ Γ£ô |union-eyes| lib/alerts/__tests__/alert-rules.test.ts (6 tests) 19ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/inheritance.test.ts (16 tests) 18ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts (4 tests) 17ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/scenarios.test.ts (10 tests) 19ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/governanceRecoveryEngine.test.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/__tests__/orchestrator-dispatch.test.ts (6 tests) 19ms
+ Γ£ô |union-eyes| lib/auth/__tests__/permissions.test.ts (12 tests) 19ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/runtimeTransitionAndOperationalization.test.ts (11 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/member-data-utils.test.ts (13 tests) 20ms
+ Γ£ô |union-eyes| lib/__tests__/analytics-cache.test.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts (4 tests) 16ms
+ Γ£ô |union-eyes| lib/oci/__tests__/crosswalkCoverageIntegrity.test.ts (15 tests) 19ms
+ Γ£ô |union-eyes| lib/governance-policy/__tests__/inheritance.test.ts (16 tests) 19ms
+ Γ£ô |union-eyes| lib/runtime/contracts/__tests__/runtimeEnvelopeValidators.test.ts (9 tests) 17ms
+ Γ£ô |union-eyes| lib/hubspot/__tests__/icraAdaptiveProperties.test.ts (7 tests) 19ms
+ Γ£ô |union-eyes| lib/governance-observability/__tests__/classification.test.ts (22 tests) 16ms
+ Γ£ô |union-eyes| services/platform-economics/__tests__/proration-engine.test.ts (6 tests) 14ms
+ Γ£ô |union-eyes| lib/oci/frameworks/__tests__/continuity-survivability-matrix.test.ts (9 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/institutional-legitimacy.test.ts (9 tests) 17ms
+ Γ£ô |union-eyes| tests/api/rbac.spec.ts (7 tests) 19ms
+ Γ£ô |union-eyes| lib/services/__tests__/precedent-document-service.test.ts (4 tests) 14ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/stabilizationProgression.test.ts (12 tests) 16ms
+ Γ£ô |union-eyes| lib/governance-policy/__tests__/registry.test.ts (5 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/console-wrapper.test.ts (4 tests) 16ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/indexing/__tests__/semantic-indexer.test.ts (8 tests) 18ms
+ Γ£ô |union-eyes| lib/ai/__tests__/pipeline.test.ts (6 tests) 16ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/adaptiveScoringModel.test.ts (11 tests) 18ms
+ Γ£ô |union-eyes| lib/multi-domain-cognition/__tests__/cognitionEngines.test.ts (5 tests) 18ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/federation.test.ts (8 tests) 18ms
+ Γ£ô |union-eyes| lib/ai/__tests__/ai-feature-guard.test.ts (6 tests) 15ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/orgContextClassifier.test.ts (9 tests) 18ms
+ Γ£ô |union-eyes| lib/utils/__tests__/member-data-utils.test.ts (14 tests) 21ms
+ Γ£ô |union-eyes| db/__tests__/schema-organizations.test.ts (8 tests) 19ms
+ Γ£ô |union-eyes| lib/oci/facilitation/__tests__/discoveryFramework.test.ts (4 tests) 19ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/search/__tests__/hybrid-search.test.ts (3 tests) 15ms
+ Γ£ô |union-eyes| lib/oci/facilitation/__tests__/facilitationGuide.test.ts (4 tests) 17ms
+ Γ£ô |union-eyes| lib/federation-sovereignty/__tests__/conflicts.test.ts (17 tests) 16ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/topic-graph/__tests__/topic-graph-builder.test.ts (3 tests) 17ms
+ Γ£ô |union-eyes| lib/oci/frameworks/__tests__/reconstruction-burden-index.test.ts (14 tests) 15ms
+ Γ£ô |union-eyes| lib/__tests__/decimal-safe.test.ts (17 tests) 16ms
+ Γ£ô |union-eyes| lib/services/document-blob-integrity-service.test.ts (4 tests) 16ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/stewardshipRedistributionEngine.test.ts (7 tests) 15ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/resilience-habits/__tests__/habit-tracker.test.ts (3 tests) 15ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts (3 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/workbench-utils.test.ts (14 tests) 15ms
+ Γ£ô |union-eyes| lib/icra-pdf/__tests__/stabilizationMovementNarrative.test.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/__tests__/settlement-recommendation-engine.test.ts (4 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/db-adapter.test.ts (14 tests) 17ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/forecasting/__tests__/forecast-models.test.ts (11 tests) 18ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/adaptivePrivacyInvariant.test.ts (4 tests) 15ms
+ Γ£ô |union-eyes| lib/oci/frameworks/__tests__/continuity-burden-map.test.ts (11 tests) 16ms
+ Γ£ô |union-eyes| services/case-intelligence/__tests__/scoring-engine.test.ts (6 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/error-codes.test.ts (9 tests) 19ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/institutional-learning/__tests__/learning-engine.test.ts (5 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/blob-manager.test.ts (16 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/schema-error.test.ts (7 tests) 16ms
+ Γ£ô |union-eyes| actions/__tests__/pending-profiles-actions.test.ts (5 tests) 15ms
+ Γ£ô |union-eyes| tests/api/audit.spec.ts (8 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/clause-intelligence.test.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/icra-ai/__tests__/narrativeSummaryWrappers.test.ts (2 tests) 17ms
+ Γ£ô |union-eyes| lib/oci/statistics/__tests__/calculateGini.test.ts (7 tests) 19ms
+ Γ£ô |union-eyes| lib/__tests__/cape-audit-events.test.ts (8 tests) 15ms
+ Γ£ô |union-eyes| lib/__tests__/site-topology.test.ts (7 tests) 14ms
+ Γ£ô |union-eyes| lib/oci/facilitation/__tests__/executiveWorkshopFlows.test.ts (5 tests) 15ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts (6 tests) 15ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/transformationRoadmapEngine.test.ts (5 tests) 16ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts (3 tests) 15ms
+ Γ£ô |union-eyes| lib/icra/__tests__/adaptiveLiveFlowRouting.test.ts (6 tests) 18ms
+ Γ£ô |union-eyes| lib/__tests__/entitlement-sat-validator.test.ts (10 tests) 16ms
+ Γ£ô |union-eyes| lib/ai/services/__tests__/token-cost-calculator.test.ts (9 tests) 18ms
+ Γ£ô |union-eyes| lib/services/__tests__/email-templates.test.ts (7 tests) 19ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts (3 tests) 16ms
+ Γ£ô |union-eyes| lib/ai/__tests__/steward-copilot.test.ts (4 tests) 17ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/errors.test.ts (6 tests) 14ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts (3 tests) 15ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/mitigation-comparison/__tests__/mitigation-comparator.test.ts (2 tests) 16ms
+ Γ£ô |union-eyes| tests/api/ai-audit.spec.ts (13 tests) 19ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/forecasting/__tests__/continuity-forecaster.test.ts (2 tests) 14ms
+ Γ£ô |union-eyes| lib/__tests__/org-id-from-context.test.ts (6 tests) 16ms
+ Γ£ô |union-eyes| lib/icra/__tests__/adaptiveLiveFlowRecovery.test.ts (3 tests) 14ms
+ Γ£ô |union-eyes| lib/governance-observability/__tests__/retention.test.ts (24 tests) 17ms
+ Γ£ô |union-eyes| lib/__tests__/analytics-aggregation.test.ts (3 tests) 17ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/runtimeFailClosedScenarios.test.ts (5 tests) 15ms
+ Γ£ô |union-eyes| lib/__tests__/locale-routing.test.ts (9 tests) 14ms
+ Γ£ô |union-eyes| lib/oci/statistics/__tests__/calculateHHI.test.ts (7 tests) 16ms
+ Γ£ô |union-eyes| lib/icra/__tests__/assessmentModalityInvariant.test.ts (8 tests) 14ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts (3 tests) 15ms
+ Γ£ô |union-eyes| lib/services/__tests__/claims-service.test.ts (6 tests) 15ms
+ Γ£ô |union-eyes| lib/ai/__tests__/grievance-triage.test.ts (3 tests) 20ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/orgComplexityModel.test.ts (12 tests) 16ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/institutionalReliability.test.ts (3 tests) 13ms
+ Γ£ô |union-eyes| lib/quebec/__tests__/labour-law-engine.test.ts (10 tests) 16ms
+ Γ£ô |union-eyes| lib/reality/__tests__/demo-deployment-guard.test.ts (7 tests) 13ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/modernizationAlignmentEngine.test.ts (4 tests) 14ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/evidenceStrengthCoverage.test.ts (7 tests) 15ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/continuityLineageEngine.test.ts (4 tests) 15ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/adaptiveTopologyDepth.test.ts (5 tests) 14ms
+ Γ£ô |union-eyes| services/case-intelligence/__tests__/similarity-provider.test.ts (7 tests) 11ms
+ Γ£ô |union-eyes| services/case-intelligence/__tests__/feature-extractor.test.ts (3 tests) 12ms
+ Γ£ô |union-eyes| lib/ai/__tests__/clause-reasoning.test.ts (3 tests) 20ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/expertise/__tests__/expertise-extractor.test.ts (3 tests) 13ms
+ Γ£ô |union-eyes| lib/__tests__/action-enforcer.test.ts (12 tests) 17ms
+ Γ£ô |union-eyes| lib/workbook-pdf/__tests__/chapter08Narrative.test.ts (3 tests) 13ms
+ Γ£ô |union-eyes| tests/api/concurrency.spec.ts (6 tests) 19ms
+ Γ£ô |union-eyes| lib/__tests__/steward-copilot.test.ts (8 tests) 15ms
+ Γ£ô |union-eyes| lib/__tests__/institutional-context.test.ts (8 tests) 14ms
+ Γ£ô |union-eyes| lib/__tests__/jurisdiction-helpers.test.ts (7 tests) 14ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/continuityBreakpointEngine.test.ts (4 tests) 14ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/continuityMappingEngine.test.ts (4 tests) 15ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/confidenceGenerationCoverage.test.ts (12 tests) 17ms
+ Γ£ô |union-eyes| lib/__tests__/jurisdiction-helpers-client.test.ts (15 tests) 15ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/explainability/__tests__/insight-explainer.test.ts (3 tests) 13ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/continuity.test.ts (9 tests) 15ms
+ Γ£ô |union-eyes| tests/api/intelligence.spec.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/stewardshipCartography.test.ts (5 tests) 14ms
+ Γ£ô |union-eyes| lib/workflow/__tests__/state-bridge.test.ts (5 tests) 16ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/scenarios/__tests__/scenario-modeler.test.ts (3 tests) 15ms
+ Γ£ô |union-eyes| lib/icra-ai/__tests__/reviewWorkflowIntegrity.test.ts (6 tests) 15ms
+ Γ£ô |union-eyes| lib/__tests__/ui-tooltips.test.ts (7 tests) 13ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/cascade-analysis/__tests__/cascade-analyzer.test.ts (2 tests) 11ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/maturity-personalities/__tests__/personality-profiler.test.ts (4 tests) 13ms
+ Γ£ô |union-eyes| lib/__tests__/public-routes.test.ts (16 tests) 14ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/contradictionCoverage.test.ts (7 tests) 17ms
+ Γ£ô |union-eyes| lib/icra/__tests__/adaptiveI18nIntegrity.test.ts (3 tests) 12ms
+ Γ£ô |union-eyes| lib/icra/__tests__/claim-tokens.test.ts (8 tests) 15ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/modernizationFragilityCoverage.test.ts (10 tests) 14ms
+ Γ£ô |union-eyes| lib/__tests__/user-uuid-helpers.test.ts (3 tests) 14ms
+ Γ£ô |union-eyes| lib/ai/__tests__/executive-insights.test.ts (2 tests) 16ms
+stdout | lib/__tests__/cba-intelligence-freshness.test.ts
+Γùç injecting env (27) from .env.local // tip: Γîü auth for agents [www.vestauth.com]
+
+ Γ£ô |union-eyes| lib/__tests__/cba-intelligence-freshness.test.ts (13 tests) 18ms
+ Γ£ô |union-eyes| lib/icra/__tests__/routingExplainabilitySnapshot.test.ts (9 tests) 15ms
+ Γ£ô |union-eyes| db/queries/__tests__/users-queries.test.ts (6 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/api.test.ts (6 tests) 15ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/federated-intelligence/__tests__/federated-engine.test.ts (3 tests) 12ms
+ Γ£ô |union-eyes| lib/__tests__/solutions-carousel.test.ts (5 tests) 13ms
+ Γ£ô |union-eyes| lib/intelligence/__tests__/rankingPreventionInvariant.test.ts (4 tests) 13ms
+ Γ£ô |union-eyes| lib/__tests__/seed-cape-acep.test.ts (6 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/grievance-triage.test.ts (6 tests) 15ms
+ Γ£ô |union-eyes| lib/dashboard/__tests__/role-experience.test.ts (6 tests) 14ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/institutionalProfileLens.test.ts (6 tests) 12ms
+ Γ£ô |union-eyes| lib/icra/__tests__/government-readiness/source-instrument-authority.test.ts (5 tests) 13ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/longitudinalStabilization.test.ts (9 tests) 14ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/workbookSynthesisEngine.test.ts (5 tests) 13ms
+ Γ£ô |union-eyes| actions/__tests__/icra-actions.test.ts (6 tests) 13ms
+ Γ£ô |union-eyes| lib/services/document-governance-service.test.ts (8 tests) 13ms
+ Γ£ô |union-eyes| lib/__tests__/setup-checklist.test.ts (8 tests) 14ms
+ Γ£ô |union-eyes| lib/__tests__/api-server.test.ts (5 tests) 16ms
+ Γ£ô |union-eyes| lib/governance-simulation/__tests__/ai-simulation.test.ts (8 tests) 14ms
+ Γ£ô |union-eyes| lib/oci/audit/__tests__/evidenceSufficiencyEngine.test.ts (5 tests) 14ms
+ Γ£ô |union-eyes| lib/icra/__tests__/questions.i18n.test.ts (9 tests) 14ms
+ Γ£ô |union-eyes| lib/__tests__/marketing-seo.test.ts (6 tests) 12ms
+ Γ£ô |union-eyes| i18n/__tests__/config.test.ts (6 tests) 16ms
+ Γ£ô |union-eyes| services/__tests__/email.test.ts (2 tests) 13ms
+ Γ£ô |union-eyes| lib/__tests__/clause-reasoning.test.ts (5 tests) 13ms
+ Γ£ô |union-eyes| lib/api/__tests__/cognition-route.test.ts (1 test) 12ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/resilience-strategies/__tests__/strategy-modeler.test.ts (3 tests) 14ms
+ Γ£ô |union-eyes| lib/monitoring/__tests__/status-utils.test.ts (16 tests) 13ms
+ Γ£ô |union-eyes| lib/whitepaper/__tests__/source-path.test.ts (3 tests) 13ms
+ Γ£ô |union-eyes| lib/icra/__tests__/adaptiveTelemetryWiring.test.ts (4 tests) 12ms
+ Γ£ô |union-eyes| tests/api/external-tester-containment.spec.ts (6 tests) 14ms
+ Γ£ô |union-eyes| lib/icra/__tests__/routedSubmissionValidator.test.ts (6 tests) 13ms
+ Γ£ô |union-eyes| db/data/__tests__/communication.test.ts (3 tests) 13ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/adaptive-resilience/__tests__/adaptive-engine.test.ts (3 tests) 12ms
+ Γ£ô |union-eyes| lib/runtime/identity/__tests__/compatibilityFallbacks.test.ts (8 tests) 13ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts (4 tests) 10ms
+ Γ£ô |union-eyes| lib/workbook-pdf/__tests__/workbookNarrativeEngine.test.ts (3 tests) 11ms
+ Γ£ô |union-eyes| db/__tests__/db-misc.test.ts (5 tests) 15ms
+ Γ£ô |union-eyes| lib/workbook/engines/__tests__/governanceEntropyEngine.test.ts (4 tests) 13ms
+ Γ£ô |union-eyes| lib/services/__tests__/billing-cycle-service.test.ts (4 tests) 11ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts (3 tests) 11ms
+ Γ£ô |union-eyes| lib/services/__tests__/payroll-integration-service.test.ts (4 tests) 11ms
+ Γ£ô |union-eyes| lib/hubspot/__tests__/workbookPropertyMapper.test.ts (4 tests) 11ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/entropyCoverage.test.ts (11 tests) 11ms
+ Γ£ô |union-eyes| lib/__tests__/locales.test.ts (2 tests) 11ms
+ Γ£ô |union-eyes| lib/icra/adaptation/__tests__/questionPriorityModel.test.ts (4 tests) 10ms
+ Γ£ô |union-eyes| lib/ai/__tests__/ai-client.test.ts (10 tests) 12ms
+ Γ£ô |union-eyes| app/api/cases/intake/__tests__/cross-org-idempotency.test.ts (4 tests) 12ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/summaries/__tests__/knowledge-summarizer.test.ts (2 tests) 12ms
+ Γ£ô |union-eyes| lib/__tests__/cba-intelligence-adapter-registry.test.ts (3 tests) 11ms
+ Γ£ô |union-eyes| lib/icra/contradictions/__tests__/contradictionConfidence.test.ts (5 tests) 11ms
+ Γ£ô |union-eyes| lib/ingestion/__tests__/migration-metrics.test.ts (5 tests) 11ms
+ Γ£ô |union-eyes| lib/runtime/__tests__/governanceIntegrityRegression.test.ts (3 tests) 10ms
+ Γ£ô |union-eyes| lib/oci/statistics/__tests__/statisticalConfidenceModel.test.ts (2 tests) 11ms
+ Γ£ô |union-eyes| lib/icra-ai/__tests__/aiDisclosureIntegrity.test.ts (4 tests) 11ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/v2/confidenceSignalDensity.test.ts (5 tests) 10ms
+ Γ£ô |union-eyes| tests/api/cases.spec.ts (7 tests) 16ms
+ Γ£ô |union-eyes| lib/__tests__/stripe.test.ts (2 tests) 10ms
+ Γ£ô |union-eyes| lib/knowledge-transfer/simulation-explainability/__tests__/simulation-explainer.test.ts (2 tests) 10ms
+ Γ£ô |union-eyes| lib/integration/eventSerializationIntegrity.test.ts (4 tests) 10ms
+ Γ£ô |union-eyes| lib/services/document-retention-guard.test.ts (3 tests) 10ms
+ Γ£ô |union-eyes| tests/api/state-machine.spec.ts (3 tests) 11ms
+ Γ£ô |union-eyes| lib/intelligence/drift/__tests__/continuityDestabilizationSignals.test.ts (2 tests) 8ms
+ Γ£ô |union-eyes| lib/__tests__/marketing-hero-imagery.test.ts (2 tests) 10ms
+ Γ£ô |union-eyes| lib/__tests__/shared-ui.test.ts (1 test) 9ms
+ Γ£ô |union-eyes| lib/oci/audit/__tests__/reviewerVarianceModel.test.ts (5 tests) 11ms
+ Γ£ô |union-eyes| lib/deadline-engine/__tests__/no-op-regression.test.ts (3 tests) 10ms
+ Γ£ô |union-eyes| lib/whitepaper/__tests__/continuity-gap.test.ts (3 tests) 8ms
+ Γ£ô |union-eyes| lib/wil/__tests__/authority.test.ts (6 tests) 11ms
+ Γ£ô |union-eyes| lib/__tests__/insights-content.test.ts (1 test) 7ms
+ Γ£ô |union-eyes| lib/monitoring/__tests__/status-actions.test.ts (1 test) 9ms
+ Γ£ô |union-eyes| lib/icra/__tests__/signal-integrity/maturitySelectCeiling.test.ts (3 tests) 8ms
+ Γ£ô |union-eyes| lib/__tests__/ai-client.test.ts (1 test) 7ms
+ Γ£ô |union-eyes| lib/__tests__/marketing-feature-flags.test.ts (1 test) 6ms
+ Γ£ô |union-eyes| lib/__tests__/db.test.ts (2 tests) 9ms
+ Γ£ô |union-eyes| lib/__tests__/client-logger.test.ts (2 tests) 13ms
+ Γ£ô |union-eyes| lib/__tests__/dispatch-engine.test.ts (6 tests) 6ms
+ Γ£ô |union-eyes| lib/integrations/__tests__/index.test.ts (1 test) 5ms
+ Γ£ô |union-eyes| app/[locale]/dashboard/cba-intelligence/cba-intelligence-client.test.ts (2 tests) 5ms
+
+ Test Files  1103 passed (1103)
+      Tests  16036 passed (16036)
+   Start at  16:22:31
+   Duration  127.23s (transform 210.45s, setup 0ms, import 449.47s, tests 719.86s, environment 112.79s)
+

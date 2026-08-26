@@ -16,18 +16,19 @@ import { useOrganization } from "@/contexts/organization-context";
 import { BookOpen } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
-import { Cupe4373CasesConsole } from "@/components/demo/cupe4373-cases-console";
-import { isCupe4373DemoRuntime } from "@/lib/dashboard/role-experience";
+
+// NOTE (Wave 0 §3 — semantic demo isolation): the prior implementation
+// short-circuited to a demo cases console from `@/components/demo/*`
+// under a runtime gate. Both the demo component and the runtime gate
+// have been removed from the operational build. Demo behaviour lives
+// exclusively in the `@nzila/union-eyes-demo` artifact
+// (`apps/union-eyes-demo/`).
 
 export function WorkSurface() {
   const t = useTranslations();
   const tWork = useTranslations("workSurface");
   const locale = useLocale();
   const { organizationId } = useOrganization();
-
-  if (isCupe4373DemoRuntime()) {
-    return <Cupe4373CasesConsole />;
-  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

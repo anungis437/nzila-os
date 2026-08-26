@@ -43,13 +43,29 @@ vi.mock('node:fs', () => ({
   default: {
     readFileSync: (p: string) => {
       if (p.includes('union_eyes_insights_markdown_library')) return state.library;
-      const m = p.match(/fr-CA\/([^/]+)\.md$/);
+      // Accept both POSIX ("/") and Windows ("\") path separators so the mock
+      // works regardless of the platform running the test.
+      const m = p.match(/fr-CA[\\/]([^\\/]+)\.md$/);
       if (m && state.localized[m[1]]) return state.localized[m[1]];
       throw new Error(`unexpected readFileSync: ${p}`);
     },
     existsSync: (p: string) => {
-      const m = p.match(/fr-CA\/([^/]+)\.md$/);
+      // The parser now calls existsSync on the fr-CA directory (no ".md" suffix)
+      // to short-circuit before enumerating it. Return true so the enumeration
+      // path runs and hits our readdirSync mock; the per-file check happens via
+      // readdirSync results below.
+      if (/fr-CA$/.test(p) || /fr-CA[\\/]?$/.test(p)) return true;
+      const m = p.match(/fr-CA[\\/]([^\\/]+)\.md$/);
       return Boolean(m && state.localized[m[1]]);
+    },
+    readdirSync: (p: string, _opts?: unknown) => {
+      // Only expose fr-CA localized files; mirror the withFileTypes shape.
+      if (!/fr-CA[\\/]?$/.test(p)) return [];
+      return Object.keys(state.localized).map((slug) => ({
+        name: `${slug}.md`,
+        isFile: () => true,
+        isDirectory: () => false,
+      }));
     },
   },
 }));

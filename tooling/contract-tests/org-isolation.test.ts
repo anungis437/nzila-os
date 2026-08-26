@@ -45,6 +45,7 @@ const AUTH_CALL_PATTERNS = [
   /authenticateUser\s*\(/,
   /requirePlatformRole\s*\(/,
   /verifyWebhookSignature\s*\(/,
+  /verifyProofAuthorization\s*\(/, // Staging proof HMAC verification
   /currentUser\s*\(/,           // Clerk user resolution
   /auth\s*\(\)/,                 // Clerk auth()
   /withApi\s*\(/,                // UE/Flow unified handler (resolves organizationId)

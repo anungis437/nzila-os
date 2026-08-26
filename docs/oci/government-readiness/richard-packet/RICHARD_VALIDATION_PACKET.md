@@ -7,6 +7,14 @@
 > structured workbook.
 > **Protocol:** [RICHARD_SHARPE_VALIDATION_PROTOCOL.md](../RICHARD_SHARPE_VALIDATION_PROTOCOL.md)
 > · **Workbook:** [VALIDATION_WORKBOOK.md](./VALIDATION_WORKBOOK.md)
+>
+> **Not to be confused with the CIVIC front-door outreach.** This packet is *inbound*
+> validation of OCI/OCRA architecture by a senior public-sector reviewer. The *outbound*
+> public-service forwardable introduction (CIVIC front door) is a separate track — see
+> [`docs/public-service/forwardable/richard-first-send-package.md`](../../../public-service/forwardable/richard-first-send-package.md).
+> The two tracks share only the reviewer's first name; they must not be conflated in
+> preparation, sequencing, or attachments. See
+> [CIVIC ↔ OCI Alignment §6](../../../CIVIC_OCI_ALIGNMENT.md#6-the-two-richard-tracks-resolved).
 
 ---
 
@@ -14,9 +22,14 @@
 
 ### The claim
 
-> OCI/OCRA becomes government-grade **without changing how it scores**. We add a
-> read-only **traceability / obligation / consequence / confidence /
-> explainability** layer above a **frozen, validated, universal scoring core.**
+> OCI/OCRA is being made **defensible for public-sector scrutiny without changing
+> how it scores**. A read-only **traceability / obligation / consequence /
+> confidence / explainability** layer sits above a **frozen, universal scoring
+> core** and is entering structured external review.
+>
+> The label *"government-grade"* is not asserted; see the honest limits and open
+> external-validation gate in
+> [IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md).
 
 ### What is frozen (must not change)
 
@@ -67,12 +80,24 @@
 > **Data handling for this session:** see the
 > [Security & Data-Handling Brief](../SECURITY_AND_DATA_HANDLING_BRIEF.md) —
 > what is collected, what is not, residency, retention, access, anonymization,
-> the AI boundary, and withdrawal/export/deletion. Persisted artifacts are
-> PII-free by construction and verified by automated tests.
+> the AI boundary, and withdrawal/export/deletion. The *derived* persisted
+> artifacts (scoring trace, findings, traceability record) are **designed to
+> exclude direct personal identifiers by schema** and are covered by an
+> automated PII-marker regression test. The complete data flow — including
+> the source `Answer.note` free-text field and the security-assurance items
+> that remain per-engagement — is not yet independently attested (see
+> [IMPLEMENTATION_STATUS.md §3](../IMPLEMENTATION_STATUS.md#3-security-privacy-and-data-handling)).
 
 ---
 
 ## Part 2 — One finding rendered through the seven-answer contract
+
+> **Illustrative example — not an exact reproduction.** The numeric values,
+> version stamps (`vX`/`vY`), and "e.g." contributions below are chosen to make
+> the *shape* of the chain legible on one page. For an exact, byte-reproducible
+> fixture with commit SHA, canonical-payload hash, and pinned scoring/question-
+> bank versions, see the reproducible fixture referenced in
+> [EVIDENCE_MANIFEST.md](../EVIDENCE_MANIFEST.md).
 
 A single, concrete worked example. Every value below is a **persisted field**;
 the prose is rendered *from* the fields, never invented.
@@ -105,26 +130,35 @@ the prose is rendered *from* the fields, never invented.
 
 ### 3B — Which specific instrument creates the obligation? *(Phase G)*
 
-- **Governance → candidate source:** `si.governance_bylaws` — institutional
-  governance bylaws / delegation instrument. **`referenced`, not asserted:**
-  evidence (`VERBAL`) is below the `DOCUMENTED` floor; and the instrument itself is
-  **`UNVERIFIED`**, so the citation is **not `defensible`**.
-- **Statutory → candidate source:** `si.enabling_statute` — **withheld/referenced
-  only.** A statute is never `asserted` below `VERIFIED` evidence.
-- **No clause number is shown.** `clauseRef` is `null` until a validator confirms
-  it. *The system names where a citation would go; it does not fabricate one.*
-- This is the step a deputy minister actually probes. See
-  [Source Instrument Traceability](../OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md).
+- **Governance → candidate source-instrument record:** `si.governance_bylaws`
+  — institutional governance bylaws / delegation instrument. **`referenced`,
+  not asserted:** evidence (`VERBAL`) is below the `DOCUMENTED` floor; and the
+  instrument itself is **`UNVERIFIED`**, so the citation is **not
+  `defensible`**.
+- **Statutory → candidate source-instrument record:** `si.enabling_statute`
+  — **withheld / referenced only.** A statute is never `asserted` below
+  `VERIFIED` evidence.
+- **No clause number is shown.** `clauseRef` is `null` until an authorised
+  policy owner or qualified counsel confirms it. *The system names where a
+  citation would go; it does not fabricate one.*
+- Please identify which entries you can assess from a public-administration
+  perspective, which require confirmation by the responsible **policy owner**
+  inside a sponsoring institution, and which require **qualified legal
+  counsel** before any `verificationStatus` may be promoted to
+  `VALIDATOR_CONFIRMED`.
+- Context: [Source Instrument Traceability](../OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md).
 
 ### 4 — What dimension does it affect, and by how much?
 
-- Contributes to `transition_readiness` (continuity-positive) and elevates
-  `governance_fragility` (risk dimension, inverted before composition).
+- Contributes to `transition_readiness` (continuity-positive dimension) and
+  **reduces** the continuity-positive `governance_resilience` dimension.
+  (Earlier drafts said *"elevates governance_fragility"*; that framing was
+  ambiguous after the fragility → resilience inversion and has been retired.)
 - Exact weighted contribution is read from
   `questionTraces[].dimensionContributions` — e.g. `Q-GOV-03` answer
   `effectiveScore = 0.25`, weight to `transition_readiness = 0.40` →
-  contribution `0.10`. **The traceability layer reads this; it does not compute or
-  alter it.**
+  contribution `0.10`. **The traceability layer reads this; it does not
+  compute or alter it.**
 
 ### 5 — What is the confidence?
 
@@ -153,117 +187,66 @@ the prose is rendered *from* the fields, never invented.
 ### Chain-integrity attestation (institution-level, one line)
 
 > ✅ Every surfaced finding is evidence-linked, obligation-mapped,
-> confidence-bounded, and recommendation-complete. Scoring version `vX`,
-> obligation taxonomy version `vY`.
+> confidence-bounded, and recommendation-complete. Scoring version and
+> obligation taxonomy version are pinned per assessment; see
+> [EVIDENCE_MANIFEST.md](../EVIDENCE_MANIFEST.md) for the exact version stamps,
+> commit SHA, and canonical-payload hash of the reproducible fixture.
 
 ---
 
-## Part 3 — Five questions for Richard
+## Part 3 — Five decisions only a senior public-sector reviewer can make
 
-These are the decisions the architecture **cannot make for itself** — they require
-senior public-sector judgment.
+The fifteen questions previously spread across Parts 3, 3B, and 3C have been
+consolidated into **five core decisions** an external reviewer is genuinely
+best placed to make. The prior fifteen (source-instrument nuance, assessor-
+certification detail, confidence-vs-usability trade-offs) remain in the
+[Validation Workbook](./VALIDATION_WORKBOOK.md) as prompts under O2–O11 for a
+reviewer who wants to go deeper. This section is the honest short list.
 
-1. **Category language.** Is *"institutional continuity"* a credible,
-   non-overclaiming category to a deputy minister and an auditor general — framed
-   as the human/governance continuity fabric that ISO 22301 BCMS *assumes but does
-   not measure* — or does it read as risk management rebranded? *(What language
-   would you defend in a public accounts committee?)*
+1. **Category credibility.** Is *"institutional continuity"* — framed as the
+   human/governance continuity fabric that ISO 22301 BCMS *assumes but does
+   not measure* — a credible, non-overclaiming category to a deputy minister,
+   an Auditor General, and a Public Accounts Committee? What language would
+   you defend in that room?
 
-2. **Statutory evidence floor.** We refuse to assert a **Statutory** obligation on
-   anything below `DOCUMENTED` evidence. Is `DOCUMENTED` the right floor, or should
-   statutory implications require `VERIFIED`/`CROSS_VALIDATED`? *(Where is the line
-   between useful and reckless?)*
+2. **Evidence → confidence → obligation coupling.** OCI/OCRA refuses to
+   assert a **Statutory** obligation below `DOCUMENTED` evidence and never
+   emits a probability (only ordinal `HIGH/MODERATE/LOW/INSUFFICIENT` with
+   attached rationale). Is that coupling defensible and usable to a
+   public-sector buyer, or is it either too permissive (still cites law under
+   uncertainty) or too austere (feels evasive to a decision-maker)?
 
-3. **Obligation conflict handling.** When obligations conflict (e.g. operational
-   efficiency vs. a regulatory control duty), we **name the tension, lead with the
-   higher tier, and never numerically arbitrate** (obligations never touch the
-   score). Is "name it, don't net it" the defensible public-sector posture?
+3. **Obligation-hierarchy posture.** When obligations conflict (operational
+   efficiency vs. a regulatory control duty; fiduciary care vs. reputational
+   management), OCI/OCRA **names the tension, leads with the higher tier,
+   and never numerically arbitrates.** Obligations never touch the score. Is
+   "name it, don't net it" the defensible public-sector posture, and is the
+   seven-class taxonomy (Statutory, Regulatory, Fiduciary, Governance,
+   Procedural, Operational, Continuity) the right shape — or are categories
+   missing?
 
-4. **Confidence honesty vs. usability.** We publish only ordinal bands
-   (HIGH/MODERATE/LOW/INSUFFICIENT) with rationale, never a percentage, and a
-   weak factor *caps* the whole envelope. Does this conservative, non-probabilistic
-   posture satisfy auditor scrutiny without making the product feel evasive to a
-   buyer?
+4. **Blocker to a real Crown/municipal pilot.** Given the honest open items
+   in [IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md) — unmeasured
+   inter-rater reliability, an unverified source-instrument catalogue, zero
+   certified assessors, security-assurance items that are `PROPOSED`
+   per-engagement, no executed pilot, and no legal/commercial packet —
+   **what is the single item most likely to block a Crown corporation or
+   municipality from proceeding**, and what evidence would unblock it?
 
-5. **Regulator staging.** We hold **Regulator** endorsement at **No-Go until
-   inter-rater reliability is measured**, while pursuing Advisory/Crown/Municipal/
-   Pilot now. Is staged, disclosed honesty the right go-to-market — or does the IRR
-   gap need to close *before* any public-sector engagement?
+5. **Where specialist review is required.** Which of the open items in this
+   packet can you assess directly from a public-administration perspective,
+   which require confirmation by the responsible **policy owner** inside a
+   sponsoring institution, and which require **qualified counsel, a security
+   auditor, a procurement authority, or a methodology specialist** before an
+   external claim is defensible? A short attribution of *who* must sign off
+   on *what* is more valuable than a single overall verdict.
 
----
-
-## Part 3B — Five questions on source-instrument traceability (Phase G)
-
-The highest-leverage gap is no longer privacy — it is *"show me the **specific**
-obligation."* Phase G extends the chain to **Source Instrument → Citation** but
-seeds the catalogue as **entirely `UNVERIFIED`** (no asserted clause numbers).
-These five questions are the ones a deputy minister, Auditor General, or Public
-Accounts Committee will actually press on:
-
-1. **Missing obligation categories.** If you were defending this assessment before
-   Treasury Board, an Auditor General, or a Public Accounts Committee, **what
-   obligation categories are missing** from the seven-class taxonomy?
-
-2. **Citation-mandatory classes.** **Which obligation classes should *always* be
-   supported by an explicit citation** before they may be surfaced at all (vs.
-   classes where a named-but-`referenced` candidate is acceptable)?
-
-3. **Evidence threshold for citing law.** **At what evidence threshold should
-   OCI/OCRA be allowed to reference a statute, policy, directive, or mandate
-   letter?** Our current floors: statute/regulation = `VERIFIED`; policy/
-   directive/standard/TB-instrument/bylaw/mandate = `DOCUMENTED`. Raise? Lower?
-
-4. **Act-without-a-consultant test.** **What would make a deputy minister trust
-   the finding artifact enough to act without a consultant in the room?** Which
-   fields, attestations, or citation states are the unlock?
-
-5. **Unanticipated procurement questions.** **Which public-sector procurement
-   questions are we not anticipating** — in the security/data brief, the
-   traceability chain, or the source-instrument model?
-
-> For each confirmed instrument, Richard (or counsel) supplies the correct
-> `clauseRef` and promotes `verificationStatus` to `VALIDATOR_CONFIRMED`. Only then
-> does a citation become `defensible` at and above its evidence floor.
-
----
-
-## Part 3C — Five questions on assessor governance & procurement defensibility
-
-The session also tests two governance objectives beyond the methodology itself:
-**who may conduct OCI/OCRA** (O10) and **whether a public body can defend acting on
-its findings** (O11). See the
-[Assessor Certification & Governance Standard](../OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md)
-and the [Validation Binder](../OCI_OCRA_VALIDATION_BINDER.md).
-
-1. **Certification levels.** The standard defines five assessor levels (Trained →
-   Calibration Authority), with independent assessment gated at **Level 3**. Are
-   five levels — and that gate — the right shape for a Crown corporation or
-   ministry to adopt as policy?
-
-2. **Calibration bar.** An assessor's calibration is judged against the **same IRR
-   thresholds** the program uses for procurement (κ ≥ 0.60, ICC ≥ 0.80, band-exact
-   ≥ 0.70), so the personal bar can never drift below the program bar. Is reusing
-   the procurement IRR thresholds as the *individual* calibration gate defensible?
-
-3. **Suspend-by-default.** Standing is suspend-dominant: drift, lapsed
-   recertification, or under-sampling each suspends live-assessment authority until
-   remediated. Is "suspend first, restore on evidence" the posture an Auditor
-   General would expect?
-
-4. **The committee-challenge test.** A department acts on a finding and is
-   challenged at a parliamentary or board committee. Walk the chain that survives:
-   evidence → finding → obligation → (validated) authority → confidence →
-   consequence → certified assessor. **What single link is most likely to break,
-   and what hardens it?**
-
-5. **Residual gap honesty.** The Procurement Readiness Assessment holds Regulator
-   at 9.5/10 — the final half-point earned only with **measured real-world IRR
-   data**. Is disclosing that residual limit a procurement asset, or should it be
-   closed before any regulator conversation?
-
-> **Objective mapping for the workbook:** Part 3B feeds **O9** (source-instrument
-> traceability); Part 3C questions 1–3 feed **O10** (assessor governance); Part 3C
-> questions 4–5 feed **O11** (procurement defensibility).
+> **Legal, security, and procurement scope.** Verifying legal instruments,
+> attesting security controls, and shaping commercial/liability terms are
+> **out of scope** for this validation. Where an item requires that
+> expertise, please flag it and (if possible) suggest the profile of
+> reviewer we should engage next. There is no expectation of endorsement:
+> the deliverable is independent judgment and a next-step recommendation.
 
 ---
 
@@ -271,8 +254,9 @@ and the [Validation Binder](../OCI_OCRA_VALIDATION_BINDER.md).
 
 1. Read Part 1 (5 minutes).
 2. Walk Part 2 with the scoring trace open; try to break the chain.
-3. Answer Parts 3, 3B, and 3C in writing.
-4. Complete the [validation workbook](./VALIDATION_WORKBOOK.md) — one verdict per
-   objective (O1–O11), with conditions.
-5. Record dispositions in
-   [GOVERNMENT_VALIDATION_REPORT_V1.md](../GOVERNMENT_VALIDATION_REPORT_V1.md).
+3. Answer Part 3's five decisions in writing.
+4. Optionally, use the [Validation Workbook](./VALIDATION_WORKBOOK.md) to record
+   objective-level verdicts (O1–O11) with conditions.
+5. Return your independent verdicts on the reviewer response form (do **not**
+   fill in Nzila's internal pre-mortem; that is a self-critique, not your
+   deliverable).

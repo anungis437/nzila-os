@@ -50,9 +50,9 @@ not a greenfield formula.
 
 ## 3. The government requirement vs. the existing model
 
-The brief lists five factors a government-grade confidence model should consider:
-**evidence strength, completeness, consistency, source reliability,
-corroboration.** Mapping these to what exists:
+The brief lists five factors a confidence model designed for public-sector
+scrutiny should consider: **evidence strength, completeness, consistency, source
+reliability, corroboration.** Mapping these to what exists:
 
 | Required factor | Covered today? | By what |
 | --- | --- | --- |

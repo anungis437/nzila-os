@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import AuthPageLayout from '@/components/auth/auth-page-layout';
 import { LoginForm } from '@/components/auth/login-form';
-import { isCupe4373DemoRuntime } from '@/lib/dashboard/role-experience';
 
 export const metadata: Metadata = {
   title: 'Log In | UnionEyes',
@@ -17,8 +16,6 @@ const stats = [
 ];
 
 export default function LoginPage() {
-  const postLoginPath = isCupe4373DemoRuntime() ? '/en-CA/dashboard' : undefined;
-
   return (
     <AuthPageLayout
       appName="UnionEyes"
@@ -26,7 +23,7 @@ export default function LoginPage() {
       subtitle="From intake to outcome — casework, intelligence, and member services in one system."
       stats={stats}
     >
-      <LoginForm postLoginPath={postLoginPath} />
+      <LoginForm />
     </AuthPageLayout>
   );
 }

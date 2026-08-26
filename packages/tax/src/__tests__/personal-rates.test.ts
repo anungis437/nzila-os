@@ -19,8 +19,8 @@ describe('FEDERAL_BRACKETS_2025', () => {
     expect(FEDERAL_BRACKETS_2025).toHaveLength(5)
   })
 
-  it('starts at 15%', () => {
-    expect(FEDERAL_BRACKETS_2025[0].rate).toBe(0.15)
+  it('starts at 14%', () => {
+    expect(FEDERAL_BRACKETS_2025[0].rate).toBe(0.14)
   })
 
   it('top bracket is 33%', () => {
@@ -28,8 +28,8 @@ describe('FEDERAL_BRACKETS_2025', () => {
     expect(FEDERAL_BRACKETS_2025[4].to).toBeNull()
   })
 
-  it('BPA is $16,692', () => {
-    expect(FEDERAL_BPA_2025).toBe(16_692)
+  it('BPA is $16,452', () => {
+    expect(FEDERAL_BPA_2025).toBe(16_452)
   })
 })
 
@@ -42,8 +42,8 @@ describe('PROVINCIAL_PERSONAL_BRACKETS', () => {
     expect(PROVINCIAL_PERSONAL_BRACKETS.ON.brackets).toHaveLength(5)
   })
 
-  it('Alberta lowest rate is 10%', () => {
-    expect(PROVINCIAL_PERSONAL_BRACKETS.AB.brackets[0].rate).toBe(0.10)
+  it('Alberta lowest rate is 8%', () => {
+    expect(PROVINCIAL_PERSONAL_BRACKETS.AB.brackets[0].rate).toBe(0.08)
   })
 })
 
@@ -53,22 +53,22 @@ describe('calculateBracketTax', () => {
   })
 
   it('calculates tax in the first bracket', () => {
-    // $50,000 * 15% = $7,500
-    expect(calculateBracketTax(50_000, FEDERAL_BRACKETS_2025)).toBe(7_500)
+    // $50,000 * 14% = $7,000
+    expect(calculateBracketTax(50_000, FEDERAL_BRACKETS_2025)).toBe(7_000)
   })
 
   it('calculates across multiple brackets', () => {
-    // First bracket: $59,412 * 0.15 = $8,911.80
-    // Second bracket: ($100,000 - $59,412) * 0.205 = $40,588 * 0.205 = $8,320.54
-    // Total: $17,232.34
+    // First bracket: $58,523 * 0.14 = $8,193.22
+    // Second bracket: ($100,000 - $58,523) * 0.205 = $41,477 * 0.205 = $8,502.79
+    // Total: $16,696.01
     const tax = calculateBracketTax(100_000, FEDERAL_BRACKETS_2025)
-    expect(tax).toBeCloseTo(17_232.34, 0)
+    expect(tax).toBeCloseTo(16_696.01, 0)
   })
 })
 
 describe('getMarginalRate', () => {
   it('returns first bracket rate for low income', () => {
-    expect(getMarginalRate(30_000, FEDERAL_BRACKETS_2025)).toBe(0.15)
+    expect(getMarginalRate(30_000, FEDERAL_BRACKETS_2025)).toBe(0.14)
   })
 
   it('returns top bracket rate for high income', () => {

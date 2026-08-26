@@ -25,6 +25,10 @@ describe('ready route', () => {
     vi.clearAllMocks();
     delete process.env.READY_REQUIRE_QUEUE;
     delete process.env.DJANGO_API_URL;
+    delete process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS;
+    delete process.env.READY_REQUIRE_EMAIL_DELIVERY;
+    delete process.env.READY_REQUIRE_CALENDAR_TOKEN_ENCRYPTION;
+    delete process.env.READY_REQUIRE_CALENDAR_SCHEDULER;
     process.env.NODE_ENV = 'test';
     m.dbExecute.mockResolvedValue(undefined);
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true })) as any);
@@ -37,6 +41,22 @@ describe('ready route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.ready).toBe(true);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('keeps optional capabilities out of production readiness by default', async () => {
+    process.env.NODE_ENV = 'production';
+    const { GET } = await loadRoute();
+
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.ready).toBe(true);
+    expect(json.checks).not.toHaveProperty('calendarIntegrations');
+    expect(json.checks).not.toHaveProperty('emailDelivery');
+    expect(json.checks).not.toHaveProperty('calendarTokenEncryption');
+    expect(json.checks).not.toHaveProperty('calendarScheduler');
   });
 
   it('returns 503 when queue is required and queue health fails', async () => {
@@ -49,6 +69,20 @@ describe('ready route', () => {
     expect(response.status).toBe(503);
     const json = await response.json();
     expect(json.ready).toBe(false);
+    expect(fetch).toHaveBeenCalledWith(
+      'https://django.local/api/auth_core/ready/',
+      expect.objectContaining({ cache: 'no-store' }),
+    );
+  });
+
+  it('fails when queue is required but Django is not configured', async () => {
+    process.env.READY_REQUIRE_QUEUE = 'true';
+    const { GET } = await loadRoute();
+
+    const response = await GET();
+
+    expect(response.status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('includes optional readiness checks when enabled', async () => {

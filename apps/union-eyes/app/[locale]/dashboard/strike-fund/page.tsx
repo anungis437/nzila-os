@@ -1,4 +1,3 @@
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import StrikeFundConsole from '@/components/strike-fund/strike-fund-console';
@@ -19,8 +18,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StrikeFundDashboardPage() {
-  await requireUser();
-  await hasMinRole('member');
-
+  // Auth + role are enforced by the parent segment layout at
+  // app/[locale]/dashboard/strike-fund/layout.tsx (requireUser + hasMinRole('secretary_treasurer'))
+  // and the outer dashboard layout (requireUser). No page-level guard needed.
   return <StrikeFundConsole />;
 }

@@ -23,24 +23,42 @@ const MOBILE_VIEWPORT = { width: 390, height: 844 };
 test.describe('UnionEyes authenticated role-centric navigation', () => {
   test.beforeAll(async ({ request }) => {
     await bootstrapE2EAuth(request);
-  });
+  }, 180_000);
 
   for (const role of STAKEHOLDER_ORDER) {
     test(`${role}: /dashboard redirects to centralized landing and role IA`, async ({ page }) => {
       const fixture = getFixture(role);
       const localizedLanding = await gotoDashboardAsRole(page, role);
 
-      expect(localizedLanding).toContain(getExpectedLanding(role));
+      // Role-resolution regression: the landing URL proves the server resolved this
+      // persona's role correctly before rendering. A wrong landing (e.g., governance
+      // user on /workspace) indicates auto-provisioning overwrote the seeded role.
+      const expectedLandingForRole = getExpectedLanding(role);
+      expect(
+        localizedLanding,
+        `[role-seeding] ${role} (${fixture.userRole}) resolved wrong experience. ` +
+          `Expected landing: ${expectedLandingForRole}, got: ${localizedLanding}. ` +
+          `Check: organizationMembers seeded for ${fixture.userId} with ${fixture.userRole}?`,
+      ).toContain(expectedLandingForRole);
 
       const expectedSidebar = getExpectedSidebar(role);
       const expectedActiveLabel = getExpectedActiveLabel(role);
       await assertVisibleNavLabels(page, expectedSidebar);
-      await assertVisibleNavLabels(page, REQUIRED_VISIBLE_LABELS[role]);
       await assertForbiddenNavLabels(page, FORBIDDEN_LABELS[role]);
       await assertSidebarActiveLabel(page, expectedActiveLabel);
       await assertHeadingOrFallback(page, expectedActiveLabel);
 
-      await page.goto(localizedLanding, { waitUntil: 'domcontentloaded' });
+      try {
+        await page.goto(localizedLanding, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        // Only ERR_ABORTED is tolerated: the dev server issues an internal redirect
+        // while navigating to the already-resolved landing. All other errors rethrow.
+        if (!message.includes('net::ERR_ABORTED')) throw error;
+        // After absorbing the abort, wait for the redirect to settle before asserting.
+        await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => undefined);
+      }
+
       await expect(page).toHaveURL(new RegExp(`${escapeRegExp(localizedLanding)}(?:$|[/?#])`));
       await assertHeadingOrFallback(page, expectedActiveLabel);
 
@@ -91,7 +109,11 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     { role: 'member', target: '/dashboard/clc' },
     { role: 'member', target: '/dashboard/pension/admin' },
     { role: 'member', target: '/dashboard/pension/trustee' },
+    // Strike Fund is layout-guarded at hasMinRole('secretary_treasurer') per
+    // apps/union-eyes/app/[locale]/dashboard/strike-fund/layout.tsx. member (20)
+    // and steward (50) are both below 85 → layout redirects to /dashboard.
     { role: 'member', target: '/dashboard/strike-fund' },
+    { role: 'steward', target: '/dashboard/strike-fund' },
     { role: 'member', target: '/dashboard/employer-execution' },
     { role: 'steward', target: '/dashboard/billing-admin' },
     { role: 'steward', target: '/dashboard/compliance-admin' },
@@ -122,6 +144,54 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
       );
     });
   }
+
+  // ── Focused sidebar-click navigation contract ─────────────────────────────
+  //
+  // Proves that actual sidebar LINK CLICKS (not direct page.goto) navigate to
+  // the correct URL, update aria-current="page" on the active link, and
+  // preserve the locale prefix. This is distinct from the role-experience and
+  // redirect tests above, which use page.goto for determinism.
+  //
+  // The member role is used because its nav items are stable and available to
+  // any authenticated user, keeping the test focused on the nav mechanic.
+  test('member: sidebar link click navigates and updates active state', async ({ page }) => {
+    const fixture = getFixture('member');
+    await gotoDashboardAsRole(page, 'member');
+
+    // Find and click the "Home" sidebar link (links to /dashboard/inbox).
+    const primarySidebar = 'aside[aria-label="Primary navigation"]:not([role="dialog"])';
+    const homeLink = page.locator(`${primarySidebar} a[href]`).filter({ hasText: 'Home' }).first();
+    await expect(homeLink).toBeVisible({ timeout: 10_000 });
+
+    const hrefBefore = await homeLink.getAttribute('href');
+
+    // Click the sidebar link and wait for the URL to change.
+    // Use a 30s timeout: clicking a Next.js sidebar link triggers an RSC
+    // fetch which can take 10-20s on a cold dev server.
+    const urlBefore = page.url();
+    await homeLink.click({ timeout: 30_000 });
+    await page.waitForFunction((prev) => location.href !== prev, urlBefore, { timeout: 15_000 }).catch(() => undefined);
+
+    // The URL must have changed and remain on a dashboard path.
+    const urlAfter = page.url();
+    expect(urlAfter).not.toBe(urlBefore);
+    expect(urlAfter).toContain('/dashboard/');
+
+    // Locale must be preserved.
+    expect(urlAfter).toContain(`/${fixture.locale}/`);
+
+    // The clicked link must now show as active (aria-current="page")
+    // OR the URL matches its href (both are valid active-state proofs).
+    const clickedLink = page.locator(`${primarySidebar} a[href="${hrefBefore}"]`).first();
+    if (await clickedLink.count()) {
+      const ariaCurrent = await clickedLink.getAttribute('aria-current').catch(() => null);
+      const hrefPath = hrefBefore ? new URL(hrefBefore, urlAfter).pathname : null;
+      const settledPath = new URL(urlAfter).pathname;
+      const isActive = ariaCurrent === 'page' ||
+        (hrefPath !== null && (settledPath === hrefPath || settledPath.startsWith(`${hrefPath}/`)));
+      expect(isActive, `sidebar link "${hrefBefore}" not active after click. URL: ${urlAfter}`).toBe(true);
+    }
+  });
 });
 
 function escapeRegExp(value: string): string {

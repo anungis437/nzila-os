@@ -116,6 +116,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'constructEvent(',          // Stripe webhook signature verification
     'verifyHmac(',              // QBO webhook verification
     'verifyWebhookSignature(',  // @nzila/payments-stripe webhook verification
+    'verifyProofAuthorization(', // Staging proof HMAC verification
     'await auth(',              // Clerk auth() direct call (e.g., OAuth callbacks)
     'await auth()',             // Clerk auth() direct call (no args)
     'stripe.webhooks',          // Stripe webhook verification pattern

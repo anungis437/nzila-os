@@ -18,9 +18,9 @@
 
 Benchmarks are the most dangerous public-sector claim a methodology can make. "You
 are below average for your sector" can become a headline, a budget weapon, or a
-defamation exposure. A government-grade benchmark capability must be **honest about
-what it cannot say** as much as what it can. This document defines the governance
-rules that keep OCI/OCRA benchmarking defensible.
+defamation exposure. A benchmark capability designed for public-sector scrutiny
+must be **honest about what it cannot say** as much as what it can. This document
+defines the governance rules that keep OCI/OCRA benchmarking defensible.
 
 ---
 

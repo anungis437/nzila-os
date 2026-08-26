@@ -45,6 +45,8 @@ const eslintConfig = defineConfig([
     '*.cjs',
     'backend/.venv/**',
     'backend/**/migrations/**',
+    'playwright-report/**',
+    'test-results/**',
   ]),
   {
     plugins: {

@@ -1,9 +1,9 @@
 {
   "_schema": "1.0",
-  "collected_at": "2026-05-25T18:08:32.081Z",
+  "collected_at": "2026-08-25T20:47:41.069Z",
   "currency": "USD",
-  "period": "2026-05-01..2026-05-31",
-  "total_monthly_cost_usd": 843.98,
+  "period": "2026-08-01..2026-08-31",
+  "total_monthly_cost_usd": 4241.2,
   "data_source": "azure-cost-management-api",
   "unresolved_app_count": 0,
   "errors": [],
@@ -37,7 +37,7 @@
       "tier": "PRODUCTION",
       "domain": "commerce",
       "owner": "commerce",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -61,7 +61,7 @@
       "tier": "PRODUCTION",
       "domain": "platform",
       "owner": "platform",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -109,7 +109,7 @@
       "tier": "PRODUCTION",
       "domain": "finance",
       "owner": "finance",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -157,7 +157,7 @@
       "tier": "PILOT",
       "domain": "platform",
       "owner": "platform",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -181,7 +181,7 @@
       "tier": "INCUBATING",
       "domain": "media",
       "owner": "media",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -205,7 +205,7 @@
       "tier": "INCUBATING",
       "domain": "audit",
       "owner": "platform",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -229,7 +229,7 @@
       "tier": "INCUBATING",
       "domain": "compliance",
       "owner": "platform",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -253,7 +253,7 @@
       "tier": "INCUBATING",
       "domain": "trade",
       "owner": "commerce",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -277,7 +277,7 @@
       "tier": "INCUBATING",
       "domain": "analytics",
       "owner": "platform",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -349,7 +349,7 @@
       "tier": "INCUBATING",
       "domain": "platform",
       "owner": "platform",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
@@ -397,7 +397,7 @@
       "tier": "EXPERIMENTAL",
       "domain": "mobility",
       "owner": "mobility",
-      "monthly_cost_usd": 32.91,
+      "monthly_cost_usd": 282.47,
       "breakdown": {
         "compute_usd": null,
         "database_usd": null,
