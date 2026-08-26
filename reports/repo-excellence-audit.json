@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-04T00:55:48.722Z",
-  "overallScore": 7.9,
+  "generatedAt": "2026-08-26T13:01:54.900Z",
+  "overallScore": 7,
   "categories": {
     "runtime_proof": {
       "score": 9,
@@ -16,9 +16,9 @@
       ]
     },
     "script_sprawl": {
-      "score": 1.8,
+      "score": 2,
       "findings": [
-        "Root script count is 305.",
+        "Root script count is 300.",
         "Root command surface is still dense and benefits from continued pruning."
       ]
     },
@@ -27,9 +27,9 @@
       "findings": []
     },
     "docs_truth": {
-      "score": 8.9,
+      "score": 0,
       "findings": [
-        "1 indexed documents are stale by repo-mtime policy (>90 days)."
+        "934 indexed documents are stale by repo-mtime policy (>90 days)."
       ]
     },
     "naming_consistency": {
@@ -41,11 +41,11 @@
       "findings": [
         "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml",
         "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml",
-        "Effective active workflow count is 50 (total 53, emergency/manual 3)."
+        "Effective active workflow count is 49 (total 52, emergency/manual 3)."
       ]
     },
     "overengineering": {
-      "score": 6,
+      "score": 6.1,
       "findings": [
         "Effective workflow surface remains larger than ideal for a disciplined canonical release path."
       ]
@@ -77,7 +77,7 @@
     },
     {
       "category": "script_sprawl",
-      "finding": "Root script count is 305."
+      "finding": "Root script count is 300."
     },
     {
       "category": "script_sprawl",
@@ -85,7 +85,7 @@
     },
     {
       "category": "docs_truth",
-      "finding": "1 indexed documents are stale by repo-mtime policy (>90 days)."
+      "finding": "934 indexed documents are stale by repo-mtime policy (>90 days)."
     },
     {
       "category": "ci_efficiency",
@@ -97,7 +97,7 @@
     },
     {
       "category": "ci_efficiency",
-      "finding": "Effective active workflow count is 50 (total 53, emergency/manual 3)."
+      "finding": "Effective active workflow count is 49 (total 52, emergency/manual 3)."
     },
     {
       "category": "overengineering",

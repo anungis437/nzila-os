@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-04T00:00:00.000Z",
+  "generatedAt": "2026-08-26T00:00:00.000Z",
   "requiredApps": [
     "abr",
     "cfo",
@@ -25,7 +25,6 @@
     "test-scaffold-gp",
     "trustcore",
     "trustcore-trustops",
-    "union-eyes-demo",
     "veridian-admin",
     "veridian-care",
     "veridian-site",

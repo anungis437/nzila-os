@@ -3,6 +3,13 @@
 > **Source**: `C:\APPS\legacy\nacp` (read-only, DO NOT import)
 > **Scanned**: 2026-02-24
 > **Status**: Phase 0 — Inventory complete, migrated to NzilaOS (apps/nacp-exams)
+>
+> **Doctrine note**: NACP is DRC-native national education and examination
+> infrastructure. Its canonical hierarchy is national → province → subdivision
+> → pool → examination centre → school → candidate. Examination integrity and
+> anti-corruption controls are capabilities within this education-system
+> product, not the market category. Do not re-scope NACP as "generic
+> anti-corruption exams".
 
 ---
 

@@ -3,24 +3,8 @@ import {withSentryConfig} from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import webpack from 'webpack';
-import path from 'path';
 
 const withNextIntl = createNextIntlPlugin('./i18n.ts');
-
-// Resolve the CJS entry of js-yaml at config-load time so both webpack and
-// Turbopack aliases point at a real, importable file (not an exports-blocked
-// subpath). js-yaml v4 ships `dist/js-yaml.mjs` (named-only exports) and
-// `index.js` (CJS with a default-shaped export); we always want the CJS entry
-// for consumers doing `import yaml from 'js-yaml'` (swagger-client / swagger-ui-react).
-const jsYamlCjsPath = require.resolve('js-yaml');
-
-// Turbopack's `resolveAlias` rejects POSIX-style absolute paths (leading `/`)
-// on Linux CI, coercing them to server-relative imports and failing with
-// "server relative imports are not implemented yet". Windows paths (`C:\...`)
-// happen to bypass this coercion. Compute a config-dir-relative POSIX path so
-// the alias is portable across Linux CI and Windows dev.
-const jsYamlCjsRelativePath =
-  './' + path.relative(__dirname, jsYamlCjsPath).replace(/\\/g, '/');
 
 // Gate security headers that break local HTTP dev server
 const isDev = process.env.NODE_ENV === 'development';
@@ -200,7 +184,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       immutable: 'immutable/dist/immutable.js',
-      'js-yaml': jsYamlCjsRelativePath,
+      'js-yaml': 'js-yaml/dist/js-yaml.cjs.js',
     },
   },
 
@@ -330,19 +314,6 @@ const nextConfig: NextConfig = {
   // Disabled on Windows dev builds: Turbopack generates filenames with colons
   // (e.g. node:crypto) which are invalid on NTFS. CI/Docker builds run on Linux.
   output: process.platform === 'win32' ? undefined : 'standalone',
-
-  // Wave 0 Task F — hard-exclude the sibling demo package from output file
-  // tracing. The @nzila/union-eyes-demo package is a physically separate
-  // artifact and MUST NOT appear in this package's `.nft.json` traces or
-  // standalone output. Without this, pnpm workspace symlinks cause
-  // @vercel/nft to walk into ../union-eyes-demo/ and list its
-  // customer-fixture files as traced dependencies of operational pages.
-  outputFileTracingExcludes: {
-    '*': [
-      '../union-eyes-demo/**',
-      '**/apps/union-eyes-demo/**',
-    ],
-  },
   
   // Skip API route static analysis during build (speeds up Docker builds)
   // API routes are inherently dynamic and don't need static generation
@@ -415,7 +386,7 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       immutable: require.resolve('immutable/dist/immutable.js'),
-      'js-yaml': jsYamlCjsPath,
+      'js-yaml': require.resolve('js-yaml/dist/js-yaml.cjs'),
     };
 
     // Reduce memory usage

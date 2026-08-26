@@ -55,7 +55,7 @@ Purpose: Operational backbone for small and mid-size businesses — invoicing, s
 
 ## Tier 4 — Incubating (Hold)
 
-Agrimo (agtech), Cora (agri intelligence), Zonga (creator economy), Trade (cross-border), Mobility (immigration), NACP Exams (certification).
+Agrimo (agtech), Cora (agri intelligence), Zonga (creator economy), Trade (cross-border trade & deal infrastructure — distinct from 3CUO/DiasporaCore banking heritage), Mobility (immigration), NACP Exams (DRC-native national education & examination infrastructure).
 
 These products are retained as strategic options. No active capital concentration.
 

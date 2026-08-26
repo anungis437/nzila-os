@@ -1,6 +1,6 @@
 # Ownership Registry
 
-Generated: 2026-08-04T00:55:45.260Z
+Generated: 2026-08-26T13:01:51.709Z
 
 Coverage: 100% (27/27 serious systems owned)
 

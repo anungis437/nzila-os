@@ -60,7 +60,9 @@ Multi-vertical commerce operating system spanning the full order-to-cash and pro
 Dashboard surfaces: orders, quotes, invoices, products, inventory, clients, suppliers, purchase orders, payments, production, analytics, integrations.
 
 ### Trade
-Cross-border trade and vehicle-commerce platform with tamper-evident evidence sealing for compliance-sensitive deals.
+Cross-border trade platform: deal origination, financing states, vehicle- and goods-listings, shipments, parties, commissions, invoices, and settlement, with tamper-evident evidence sealing for compliance-sensitive deals.
+
+> **Portfolio boundary.** Trade covers cross-border trade and commercial-deal infrastructure. It sits *alongside* — not as a replacement for — the **3CUO / DiasporaCore** banking heritage (retail & business banking, lending, remittances, cards, KYC/AML admin, fraud & disputes, member administration). See `docs/categories/platform-and-operations/migration/app-alignment/3cuo.md`.
 
 - **Deal origination & lifecycle** — end-to-end trade deal management from lead to settlement
 - **Vehicle commerce** — specialised workflows for vehicle listings, inspections, and cross-border movements (`@nzila/trade-cars`)
@@ -92,13 +94,14 @@ Full-stack **union case management platform** for Canadian labour unions operati
 - **Enterprise security** — Row-Level Security on every table, field-level encryption, 12 hardened HTTP headers
 - **Compliance** — GDPR, PIPEDA, provincial privacy regimes, Indigenous data sovereignty, AODA accessibility
 
-### Professional Exams — NACP
-Examination and assessment platform for the National Anti-Corruption Programme — purpose-built for regulated exam administration.
+### Education & Examinations — NACP
+DRC-native national education and examination infrastructure. Modeled on the Congolese schooling hierarchy: **national → province → subdivision → pool → examination centre → school → candidate**, across provinces including Kinshasa, Kongo Central, Kwilu, Nord-Kivu, and Sud-Kivu.
 
-- **Exam authoring & delivery** — exam creation, candidate dashboards, secure delivery
+- **National education administration** — school registry, candidate registry, examiner and marking workflows, attendance, results, appeals, certificates
+- **Examination operations** — exam authoring & delivery, secure delivery, OMR and handwriting processing, public candidate portal ("NACP — République Démocratique du Congo")
 - **AI-assisted content** — AI-generated question banks, analytics, and scoring assistance via `@nzila/ai-sdk` / `@nzila/ml-sdk`
-- **Assessment scoring** — rule-based scoring with audit trail
-- **Compliance reporting** — regulator-ready exports with 7-year record retention
+- **Integrity & anti-corruption controls** — examination integrity, anomaly detection, and anti-corruption features are *capabilities within* the education product — not the vertical framing
+- **Compliance reporting** — regulator-ready exports with multi-year record retention
 - **Audit & state management** — `@nzila/commerce-audit` + `@nzila/commerce-state` for every candidate interaction
 - **Document storage** — `@nzila/blob` for exam artifacts, candidate submissions, and sealed grading evidence
 

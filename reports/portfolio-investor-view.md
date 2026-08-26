@@ -1,6 +1,6 @@
 # Portfolio Investor View
 
-Generated: 2026-08-04
+Generated: 2026-08-26
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
@@ -21,9 +21,8 @@ Authority: governance/portfolio/product-catalog.json
 | Cora | incubating | Early-stage concept kept as an option rather than a current operating priority. | none | HOLD |
 | Maestria | incubating | Premium Canadian SME operating system built on Flow Engine for Boutique, Comptoir, Atelier, and Réseau operating packs. | internal-proof | HOLD |
 | Mobility | incubating | Mobility option retained for future demand rather than current execution focus. | none | HOLD |
-| NACP Exams | incubating | Certification workflow option with limited current commercial proof. | none | HOLD |
-| Trade | incubating | Trade venture option that stays in incubation until evidence improves. | none | HOLD |
-| Union Eyes Demo | incubating | Standalone Union Eyes demo instance used to validate CUPE 4373 pilot flows without touching the live tenant. Sales-enablement and design-validation surface, not a commercial product. | internal-proof | HOLD |
+| NACP Exams | incubating | DRC-native national education and examination infrastructure modeled on the Congolese schooling hierarchy (national → province → subdivision → pool → examination centre → school → candidate); examination integrity, anomaly detection, and anti-corruption controls are capabilities within the education product, not its category. | none | HOLD |
+| Trade | incubating | Cross-border trade and deal infrastructure: origination, financing, vehicle and goods listings, shipments, parties, commissions, invoices, and settlement with tamper-evident evidence sealing. Sits alongside — not as a replacement for — the 3CUO/DiasporaCore banking heritage. | none | HOLD |
 | Veridian Admin | incubating | Healthcare governance console for access controls, readiness, and audit operations supporting Veridian pilots. Internal-demo only; no live PHI. | internal-proof | HOLD |
 | Veridian Care | incubating | Clinical workflow operating system for piloting care-team coordination and patient timeline intelligence. Synthetic-demo pilot-ready; no live PHI. | internal-proof | HOLD |
 | Veridian Site | incubating | Healthcare trust and demand-generation surface validating market pull for the Veridian suite. Synthetic-demo pilot-ready; no live PHI. | internal-proof | HOLD |
@@ -39,7 +38,6 @@ Authority: governance/portfolio/product-catalog.json
 | Nzila HQ | incubating | Executive intelligence cockpit — portfolio scoring, domain health, venture snapshot, and capital allocation. | internal-proof | HOLD |
 | Orchestrator API | internal | Shared orchestration backbone that remains important operationally but is not a standalone commercial SKU. | internal-proof | HOLD |
 | Maestria | incubating | Premium Canadian SME operating system built on Flow Engine for Boutique, Comptoir, Atelier, and Réseau operating packs. | internal-proof | HOLD |
-| Union Eyes Demo | incubating | Standalone Union Eyes demo instance used to validate CUPE 4373 pilot flows without touching the live tenant. Sales-enablement and design-validation surface, not a commercial product. | internal-proof | HOLD |
 | WeekOne | frozen | Onboarding and first-week activation surface for new tenants across the portfolio. Parked / successor-track; excluded from active commercial scorecards. | internal-proof | HOLD |
 
 ## Frozen Assets

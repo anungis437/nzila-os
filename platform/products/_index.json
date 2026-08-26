@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-04T00:00:00.000Z",
-  "count": 27,
+  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "count": 26,
   "products": [
     {
       "slug": "abr",
@@ -121,12 +121,6 @@
       "tier": 1,
       "tierLabel": "flagship",
       "publicVisible": true
-    },
-    {
-      "slug": "union-eyes-demo",
-      "tier": 4,
-      "tierLabel": "lab",
-      "publicVisible": false
     },
     {
       "slug": "veridian-admin",

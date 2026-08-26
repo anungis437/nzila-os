@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import { logger } from '@/lib/logger';
 
 export async function GET() {

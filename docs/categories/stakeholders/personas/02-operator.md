@@ -31,10 +31,10 @@
 | console | Internal ops | 3002 | Production |
 | agrimo | Agri field ops | 3010 | Pilot |
 | cora | Agri intelligence | 3011 | Pilot |
-| trade | Cross-border trade | 3012 | Pilot |
+| trade | Cross-border trade & deals | 3012 | Pilot |
 | zonga | Mobility | 3013 | Pilot |
 | abr | Audit & compliance | 3014 | Pilot |
-| nacp-exams | Professional exams | 3015 | Pilot |
+| nacp-exams | DRC national education & exams | 3015 | Pilot |
 | mobility | Global mobility | 3016 | Pilot |
 | mobility-client-portal | Client portal | 3017 | Pilot |
 | control-plane | Platform admin | 3018 | Pilot |

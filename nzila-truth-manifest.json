@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-08-04",
+  "last_audit": "2026-08-26",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -123,7 +123,6 @@
     "mobility": "incubating",
     "nacp-exams": "incubating",
     "trade": "incubating",
-    "union-eyes-demo": "incubating",
     "veridian-admin": "incubating",
     "veridian-care": "incubating",
     "veridian-site": "incubating",
@@ -332,17 +331,6 @@
       "revenue_status": "pre-revenue",
       "priority": "low"
     },
-    "union-eyes-demo": {
-      "registry_tier": "INCUBATING",
-      "deployment_status": "incubating",
-      "readiness_tier": "internal-only",
-      "exposure": "internal",
-      "portfolio_tier": 4,
-      "gtm_posture": "internal-only",
-      "proof_level": "internal-proof",
-      "revenue_status": "internal-cost-center",
-      "priority": "medium"
-    },
     "veridian-admin": {
       "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
@@ -465,7 +453,6 @@
         "mobility",
         "nacp-exams",
         "trade",
-        "union-eyes-demo",
         "veridian-admin",
         "veridian-care",
         "veridian-site",
@@ -507,7 +494,6 @@
         "mobility",
         "nacp-exams",
         "trade",
-        "union-eyes-demo",
         "veridian-admin",
         "veridian-care",
         "veridian-site",
@@ -525,7 +511,6 @@
         "nzila-hq",
         "orchestrator-api",
         "maestria",
-        "union-eyes-demo",
         "weekone"
       ]
     }

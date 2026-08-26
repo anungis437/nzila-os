@@ -1,9 +1,17 @@
 /**
  * API Documentation Page
  * 
- * Interactive Swagger UI for exploring the UnionEyes API
- * 
  * Route: /api-docs
+ *
+ * NOTE: Interactive Swagger UI was previously rendered via `swagger-ui-react`,
+ * but its transitive dep `swagger-client` uses a default import from
+ * `js-yaml`, whose v4 ESM entry has no default export. Turbopack (Next 16
+ * default builder) refuses to bundle it and the app-scoped
+ * `turbopack.resolveAlias` in next.config.ts is only honored by the dev
+ * server, not by `next build`. CSP forbids loading swagger-ui from a public
+ * CDN. Until the upstream chain ships an ESM-clean default export, this
+ * page links to the raw OpenAPI JSON, which any external Swagger Editor /
+ * Redoc / Stoplight can consume.
  */
 
 'use client';
@@ -11,12 +19,6 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { useTranslations } from "next-intl";
-
-import nextDynamic from 'next/dynamic';
-import 'swagger-ui-react/swagger-ui.css';
-
-// Dynamically import SwaggerUI to avoid SSR issues
-const SwaggerUI = nextDynamic(() => import('swagger-ui-react'), { ssr: false });
 
 export default function ApiDocsPage() {
   const t = useTranslations("apiDocs");
@@ -43,15 +45,18 @@ export default function ApiDocsPage() {
         </div>
       </div>
 
-      {/* Swagger UI */}
-      <div className="container mx-auto">
-        <SwaggerUI 
-          url="/api/docs"
-          docExpansion="list"
-          defaultModelsExpandDepth={1}
-          filter={true}
-          tryItOutEnabled={true}
-        />
+      {/* OpenAPI JSON link */}
+      <div className="container mx-auto px-4 py-8 space-y-4">
+        <p>
+          The OpenAPI schema is served at:{' '}
+          <Link href="/api/docs" className="text-primary underline">
+            /api/docs
+          </Link>
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Load this URL in Swagger Editor, Redoc, Postman, or any OpenAPI
+          viewer for interactive exploration.
+        </p>
       </div>
 
       {/* Footer Notice */}

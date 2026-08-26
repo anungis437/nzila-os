@@ -1,28 +1,28 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-04T00:55:44.347Z
+> Generated: 2026-08-26T13:25:41.014Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2315 |
-| Total Findings | 2795 |
+| Files Scanned | 2243 |
+| Total Findings | 2766 |
 | Errors | 0 |
-| Warnings | 1222 |
-| Info | 1573 |
+| Warnings | 1211 |
+| Info | 1555 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1548 |
-| stale-reference | 1034 |
-| missing-package-readme | 112 |
-| stale-package-ref | 76 |
-| stale-date | 25 |
+| naming-inconsistency | 1527 |
+| stale-reference | 1032 |
+| missing-package-readme | 111 |
+| stale-package-ref | 68 |
+| stale-date | 28 |
 
-## stale-reference (1034)
+## stale-reference (1032)
 
 - 🟡 `ARCHITECTURE.md:113` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:117` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -825,8 +825,6 @@
 - 🟡 `docs/README.md:32` — Possible broken link: [Status Authority Model](platform/STATUS_AUTHORITY_MODEL.md)
 - 🟡 `docs/README.md:33` — Possible broken link: [CUPE Pilot Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
 - 🟡 `docs/README.md:38` — Possible broken link: [Golden Path Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
-- 🟡 `docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md:103` — Possible broken link: [`tooling/reality/operational-build-demo-allowlist.json`](../../../tooling/reality/operational-build-demo-allowlist.json)
-- 🟡 `docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md:38` — Possible broken link: [`../../../tooling/reality/operational-build-demo-allowlist.json`](../../../tooling/reality/operational-build-demo-allowlist.json)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:279` — Possible broken link: [portfolio-5yr-projections.md](portfolio-5yr-projections.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:280` — Possible broken link: [flagship-unit-economics.md](flagship-unit-economics.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:281` — Possible broken link: [platform-revenue-models.md](platform-revenue-models.md)
@@ -1059,7 +1057,7 @@
 - 🟡 `governance/foundations/content/README.md:73` — Possible broken link: [`governance/privacy/ai-pia/surfaces/`](../privacy/ai-pia/surfaces/)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 
-## stale-package-ref (76)
+## stale-package-ref (68)
 
 - 🟡 `CHANGELOG.md:10` — References @nzila/institutional-cognition-core but package does not exist
 - 🟡 `docs/categories/historical-archive/archive/iterations/institutional-operating-intelligence/architecture.md:20` — References @nzila/institutional-cognition-core but package does not exist
@@ -1129,16 +1127,8 @@
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:25` — References @nzila/platform-consent but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
 - 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md:5` — References @nzila/union-eyes but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md:38` — References @nzila/union-eyes-demo but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md:39` — References @nzila/union-eyes but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md:60` — References @nzila/union-eyes-demo but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md:3` — References @nzila/union-eyes but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md:60` — References @nzila/union-eyes but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md:27` — References @nzila/union-eyes-demo but package does not exist
-- 🟡 `docs/union-eyes/reality-remediation/deadline-engine/00-charter.md:38` — References @nzila/union-eyes-demo but package does not exist
 
-## naming-inconsistency (1548)
+## naming-inconsistency (1527)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1153,9 +1143,9 @@
 - ℹ️ `README.business.md:24` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:30` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:39` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:122` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:210` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:280` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:125` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:213` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:283` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:96` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:157` — "orgId" should be "org_id" (tenant identifier)
@@ -2316,7 +2306,7 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:1019` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:1017` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:164` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:123` — "evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:153` — "Evidence bundle" should be "evidence pack" (evidence artifact)
@@ -2332,13 +2322,6 @@
 - ℹ️ `docs/INDEX.md:70` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/INDEX.md:124` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/INDEX.md:137` — "Buyer Pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/institutional-engineering/governance/SEED-CORPUS-REGISTER.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/institutional-engineering/qualification/cross-volume-consistency-matrix.md:9` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/institutional-engineering/qualification/foundations-claim-register.md:12` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/institutional-engineering/qualification/foundations-claim-register.md:33` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/institutional-engineering/qualification/IEBOK-QUAL-I.2.md:22` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/institutional-engineering/qualification/IEBOK-QUAL-I.3.md:22` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/institutional-engineering/registries/terminology-collision-register.md:10` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:9` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:10` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-finalization/canonical-operating-system-navigation.md:11` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2618,20 +2601,6 @@
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:37` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:1` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/qa/rbac-reality-map.md:29` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md:82` — "evidence bundle" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md:146` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md:38` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md:98` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/19_AUTHORIZATION_VIOLATION.md:37` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/19_AUTHORIZATION_VIOLATION.md:40` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md:49` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md:64` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md:71` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md:101` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md:111` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md:123` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md:136` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md:99` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md:11` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-live-runtime-experience-certification.md:28` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `governance/business/BUYER_FAQ.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2689,35 +2658,38 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:15` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
 
-## stale-date (25)
+## stale-date (28)
 
-- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 107 days old — may be stale
-- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 118 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 106 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 106 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 106 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-04" is 92 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md:3` — Document date "2026-05-04" is 92 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 106 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 113 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 112 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 102 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 103 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 102 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 95 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 95 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 95 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 95 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 109 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 109 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 109 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 109 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 109 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 109 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 102 days old — may be stale
-- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 106 days old — may be stale
+- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 129 days old — may be stale
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 140 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 128 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 128 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 128 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-04" is 114 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md:3` — Document date "2026-05-04" is 114 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 128 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 135 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 111 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 134 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 124 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 125 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 124 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 117 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 117 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 117 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 117 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 131 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 131 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 131 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 131 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 131 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 131 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 125 days old — may be stale
+- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 128 days old — may be stale
+- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 93 days old — may be stale
+- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 93 days old — may be stale
 
-## missing-package-readme (112)
+## missing-package-readme (111)
 
 - 🟡 `packages/agri-adapters` — Package agri-adapters missing README.md
 - 🟡 `packages/agri-core` — Package agri-core missing README.md
@@ -2799,7 +2771,6 @@
 - 🟡 `packages/policy-intelligence` — Package policy-intelligence missing README.md
 - 🟡 `packages/pricing-engine` — Package pricing-engine missing README.md
 - 🟡 `packages/quebec-vocabulary` — Package quebec-vocabulary missing README.md
-- 🟡 `packages/reality-env` — Package reality-env missing README.md
 - 🟡 `packages/sage-core` — Package sage-core missing README.md
 - 🟡 `packages/schema-core` — Package schema-core missing README.md
 - 🟡 `packages/secrets` — Package secrets missing README.md

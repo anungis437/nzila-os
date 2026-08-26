@@ -1,6 +1,10 @@
 # NACP Exams
 
-> National Anti-Corruption Programme examination and assessment platform.
+> DRC-native national education and examination infrastructure. Modeled on the
+> Congolese schooling hierarchy: **national → province → subdivision → pool →
+> examination centre → school → candidate**. Examination integrity, anomaly
+> detection, and anti-corruption controls are capabilities within this
+> education-system product, not its market category.
 
 ## Stack
 
@@ -26,7 +30,14 @@ No `.env.example` — see `@nzila/os-core` env schema for required variables.
 
 ## Domain
 
-Anti-corruption examination management — exam creation, candidate dashboards, assessment scoring, and compliance reporting. Integrates AI/ML for question generation and analytics.
+DRC national education and examination administration — provincial and
+subdivision administration (Kinshasa, Kongo Central, Kwilu, Nord-Kivu,
+Sud-Kivu and beyond), pool and examination-centre operations, school and
+candidate registries, examiner and marking workflows, attendance, results,
+appeals, certificates, OMR and handwriting processing, and public candidate
+services. Examination-integrity, anomaly detection, and anti-corruption
+controls are features of the education system, not the vertical. AI/ML
+assists question generation, marking, and analytics.
 
 ## Environment Variables
 

@@ -13,8 +13,8 @@
   "publicVisible": false,
   "gtmPosture": "hold",
   "proofLevel": "none",
-  "strategicRole": "Certification workflow option with limited current commercial proof.",
-  "generatedAt": "2026-08-04T00:00:00.000Z",
+  "strategicRole": "DRC-native national education and examination infrastructure modeled on the Congolese schooling hierarchy (national → province → subdivision → pool → examination centre → school → candidate); examination integrity, anomaly detection, and anti-corruption controls are capabilities within the education product, not its category.",
+  "generatedAt": "2026-08-26T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

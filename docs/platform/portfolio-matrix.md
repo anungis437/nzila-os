@@ -2,7 +2,7 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-08-04
+> Generated: 2026-08-26
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -24,7 +24,6 @@
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
-| Union Eyes Demo | 4 | incubating | internal-only | internal-cost-center | internal-proof | medium |
 | Veridian Admin | 4 | incubating | hold | pre-revenue | internal-proof | high |
 | Veridian Care | 4 | incubating | hold | pre-revenue | internal-proof | high |
 | Veridian Site | 4 | incubating | hold | pre-revenue | internal-proof | medium |
@@ -56,7 +55,6 @@
 | Mobility | INCUBATING | internal-only | internal | HOLD |
 | NACP Exams | INCUBATING | internal-only | internal | HOLD |
 | Trade | INCUBATING | internal-only | internal | HOLD |
-| Union Eyes Demo | INCUBATING | internal-only | internal | HOLD |
 | Veridian Admin | INCUBATING | internal-only | internal | HOLD |
 | Veridian Care | INCUBATING | internal-only | internal | HOLD |
 | Veridian Site | INCUBATING | internal-only | internal | HOLD |
