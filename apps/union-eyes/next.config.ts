@@ -184,7 +184,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       immutable: 'immutable/dist/immutable.js',
-      'js-yaml': 'js-yaml/dist/js-yaml.cjs',
+      'js-yaml': 'js-yaml/dist/js-yaml.cjs.js',
     },
   },
 
