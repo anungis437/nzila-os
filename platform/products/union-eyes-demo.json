@@ -14,7 +14,7 @@
   "gtmPosture": "internal-only",
   "proofLevel": "internal-proof",
   "strategicRole": "Standalone Union Eyes demo instance used to validate CUPE 4373 pilot flows without touching the live tenant. Sales-enablement and design-validation surface, not a commercial product.",
-  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "generatedAt": "2026-08-04T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"
