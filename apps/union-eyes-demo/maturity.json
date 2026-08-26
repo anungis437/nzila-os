@@ -1,14 +1,14 @@
 {
   "generated_from": "governance/portfolio/product-catalog.json",
   "generated_at": "2026-08-26",
-  "status": "internal",
+  "status": "frozen",
   "exposure": "internal",
   "data_integrity": "partial",
   "contracts_complete": false,
   "observability": "partial",
-  "portfolio_tier": "TIER 3",
-  "gtm_posture": "internal-only",
-  "proof_level": "internal-proof",
-  "revenue_status": "internal-cost-center",
+  "portfolio_tier": "TIER 5",
+  "gtm_posture": "sunset",
+  "proof_level": "none",
+  "revenue_status": "pre-revenue",
   "last_validated": "2026-08-26"
 }

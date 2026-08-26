@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-05-22",
+  "last_audit": "2026-08-26",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -130,7 +130,8 @@
     "zonga": "pilot",
     "mobility-client-portal": "frozen",
     "platform-admin": "frozen",
-    "test-scaffold-gp": "frozen"
+    "test-scaffold-gp": "frozen",
+    "union-eyes-demo": "frozen"
   },
   "app_status": {
     "abr": {
@@ -418,6 +419,17 @@
       "proof_level": "none",
       "revenue_status": "sunsetting",
       "priority": "low"
+    },
+    "union-eyes-demo": {
+      "registry_tier": "UNREGISTERED",
+      "deployment_status": "frozen",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 5,
+      "gtm_posture": "sunset",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "low"
     }
   },
   "blocking_gaps": [
@@ -462,7 +474,8 @@
       "TIER 5 — Sunset": [
         "mobility-client-portal",
         "platform-admin",
-        "test-scaffold-gp"
+        "test-scaffold-gp",
+        "union-eyes-demo"
       ]
     }
   },
@@ -503,7 +516,8 @@
       "sunset": [
         "mobility-client-portal",
         "platform-admin",
-        "test-scaffold-gp"
+        "test-scaffold-gp",
+        "union-eyes-demo"
       ],
       "internal_only": [
         "console",

@@ -1,6 +1,6 @@
 # Portfolio Status
 
-Generated: 2026-05-22
+Generated: 2026-08-26
 Authority: governance/portfolio/product-catalog.json
 
 ## Executive Matrix
@@ -33,13 +33,14 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility Client Portal | 5 | frozen | sunset | sunsetting | none | low |
 | Platform Admin | 5 | frozen | sunset | sunsetting | none | low |
 | Test Scaffold GP | 5 | frozen | sunset | sunsetting | none | low |
+| Union Eyes (Demo) | 5 | frozen | sunset | pre-revenue | none | low |
 
 ## Allocation Summary
 
 - Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
 - Internal only: console, control-plane, nzila-hq, orchestrator-api, maestria, weekone
-- Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
+- Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp, union-eyes-demo
 
 ## Engine Topology
 
@@ -82,4 +83,5 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Mobility Client Portal | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
 | Platform Admin | 2.0 | SUNSET | EXPERIMENTAL | internal-only |
 | Test Scaffold GP | 2.0 | SUNSET | DEPRECATED | internal-only |
+| Union Eyes (Demo) | 2.4 | SUNSET | UNREGISTERED | internal-only |
 

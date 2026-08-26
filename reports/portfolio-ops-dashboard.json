@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-05-22",
+  "generated_at": "2026-08-26",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 26,
+    "total_products": 27,
     "total_engines": 4,
     "sell_now_count": 3,
     "internal_only_count": 6,
-    "frozen_count": 3
+    "frozen_count": 4
   },
   "engines": [
     {
@@ -115,7 +115,7 @@
       },
       {
         "tier": 5,
-        "count": 3
+        "count": 4
       }
     ],
     "by_status": [
@@ -137,7 +137,7 @@
       },
       {
         "status": "frozen",
-        "count": 4
+        "count": 5
       },
       {
         "status": "sunset",
@@ -467,6 +467,18 @@
       "readiness_tier": "internal-only",
       "registry_tier": "DEPRECATED",
       "dev_port": 3017
+    },
+    {
+      "id": "union-eyes-demo",
+      "name": "Union Eyes (Demo)",
+      "tier": 5,
+      "status": "frozen",
+      "gtm_posture": "sunset",
+      "recommendation": "SUNSET",
+      "weighted_score": 2.4,
+      "readiness_tier": "internal-only",
+      "registry_tier": "UNREGISTERED",
+      "dev_port": null
     }
   ]
 }

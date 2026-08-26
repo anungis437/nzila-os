@@ -2,7 +2,9 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: trade
-  description: Trade management — vehicle trading, inventory, deal tracking
+  description: Cross-border trade & deal infrastructure (origination, financing
+    states, listings, shipments, parties, commissions, invoices, settlement,
+    evidence sealing); distinct from the 3CUO/DiasporaCore banking heritage.
   annotations:
     github.com/project-slug: anungis437/nzila-os
     backstage.io/techdocs-ref: dir:./docs

@@ -1,50 +1,62 @@
-# App Alignment: 3CUO (Three-Tier Capital Utilisation Optimiser)
+# App Alignment: 3CUO / DiasporaCore
 
-> Status: **PLANNED** — App not yet created. Defines required conventions.
+> Status: **DOCTRINE CORRECTION** — this file previously described 3CUO as a
+> "Three-Tier Capital Utilisation Optimiser". That framing is documented
+> doctrine drift and is superseded. See canonical fintech doctrine below.
 
-## Overview
+## Canonical identity
 
-`apps/3cuo` will be the capital utilisation optimisation tool. It models
-three-tier capital allocation scenarios and provides decision-support
-recommendations.
+**3CUO / DiasporaCore is Nzila's digital banking and financial-services
+heritage** — evidenced by the original `c3-uo-connect` application and the
+already-authoritative fintech governance documents. Its historical product
+surface includes:
 
----
+- Consumer and business banking; accounts and account detail; transactions and
+  transfers; bill payments; payees.
+- Lending: personal loans, mortgages, credit cards, business loans, business
+  lines of credit, equipment financing.
+- Remittances and international transfers; multi-currency wallet.
+- Investments; rates, fees, and financial calculators.
+- KYC and AML administration; fraud and disputes; member and business-member
+  administration; approvals and transaction administration.
+- Digital-banking security, MFA, consent/privacy/data controls; AI-facing
+  banking functionality.
 
-## Alignment Checklist (to follow at creation time)
+The corrected identity is captured in the fintech doctrine at:
 
-### INV-01: No Shadow AI
+- `governance/business/verticals/fintech/README.md`
+- `governance/business/verticals/fintech/strategy/technical-architecture.md`
+- `governance/business/verticals/fintech/strategy/market-strategy.md`
+- `governance/business/verticals/fintech/strategy/product-roadmap.md`
+- `governance/business/verticals/fintech/strategy/business-model.md`
+- `governance/business/verticals/fintech/strategy/compliance-privacy.md`
+- `governance/docs/PORTFOLIO_DEEP_DIVE.md` (explicit "wrong vertical" correction)
+- `governance/corporate/intellectual-property/IP_PORTFOLIO_PROTECTION_STRATEGY.md`
 
-- [ ] All recommendation AI calls through `@nzila/ai-sdk`
-- [ ] Financial model inference routes use `@nzila/ai-sdk` control plane
-- [ ] ESLint no-shadow-ai rule active at scaffold
+## Portfolio boundary
 
-### INV-02: No Shadow ML
+- **3CUO / DiasporaCore** — banking / financial-services heritage.
+- **Trade** — cross-border trade + deal / financing / commercial-transaction
+  infrastructure. Trade **did not replace** 3CUO. Trade implements part of the
+  commercial and trade-finance surface only; the broader banking, lending,
+  remittances, cards, and KYC/AML surface is not part of Trade.
+- **CFO** — enterprise finance / accounting / financial intelligence.
+- **Flow** — commerce / operational layer.
 
-- [ ] Optimisation model outputs via `@nzila/ml-sdk`
-- [ ] No direct `mlScores*` table queries
+## About the earlier "Three-Tier Capital Utilisation Optimiser" framing
 
-### INV-03: Evidence SSoT
+The prior contents of this file described a planned `apps/3cuo` capital
+utilisation optimiser. That is not the 3CUO identity, and the description is
+**not** to be reused for a new product under the same name.
 
-- [ ] Model runs produce evidence artifacts via `@nzila/os-core/evidence/collectors/ai-evals`
+If a three-tier capital-utilisation-optimisation capability remains
+strategically desired, it must be scoped under a **different product or
+capability identity** and must not overwrite the 3CUO / DiasporaCore banking
+lineage. Any such capability should be proposed as its own alignment record.
 
-### INV-04: RBAC via Policy Engine
+## Non-goals for this file
 
-- [ ] All routes use `authorize()` — optimisation scenarios are entity-scoped
-- [ ] New roles (`3cuo:analyst`, `3cuo:viewer`) defined in `ConsoleRole` or extension
-
-### INV-05: No DEFAULT_ENTITY_ID
-
-- [ ] All scenario computations are tied to an explicit entity ID
-
----
-
-## Key Integrations
-
-- **AI SDK**: Scenario generation uses AI-powered recommendations
-- **ML SDK**: Capital allocation optimisation models
-- **Stripe**: Revenue inputs sourced via `@nzila/payments-stripe`
-- **Telemetry**: `initOtel()` + structured logging throughout
-
----
-
-## Estimated Effort: 7–10 engineering days (greenfield, complex domain)
+- This file is not a scaffold spec. Do not create `apps/3cuo` from this
+  document.
+- Do not reintroduce the "capital utilisation optimiser" identity here.
+- Do not describe Trade as the successor to, or replacement for, 3CUO.

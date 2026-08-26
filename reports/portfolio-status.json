@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-05-22",
+  "generated_at": "2026-08-26",
   "authority": "governance/portfolio/product-catalog.json",
   "summary": {
-    "total_products": 26,
+    "total_products": 27,
     "total_engines": 4,
     "by_tier": {
       "TIER 1 — Sell Now": 3,
       "TIER 2 — Strategic Growth": 2,
       "TIER 3 — Maintain": 7,
       "TIER 4 — Incubate": 11,
-      "TIER 5 — Sunset": 3
+      "TIER 5 — Sunset": 4
     },
     "by_status": {
       "production": 0,
       "pilot": 7,
       "incubating": 12,
       "internal": 3,
-      "frozen": 4,
+      "frozen": 5,
       "sunset": 0
     },
     "by_gtm_posture": {
@@ -24,7 +24,7 @@
       "hold": 11,
       "maintain": 3,
       "internal-only": 6,
-      "sunset": 3
+      "sunset": 4
     },
     "sell_now": [
       "abr",
@@ -34,7 +34,8 @@
     "frozen_assets": [
       "mobility-client-portal",
       "platform-admin",
-      "test-scaffold-gp"
+      "test-scaffold-gp",
+      "union-eyes-demo"
     ]
   },
   "engines": [
@@ -1217,7 +1218,7 @@
       "proof_level": "none",
       "owner": "Nzila Ventures",
       "priority": "low",
-      "strategic_role": "Certification workflow option with limited current commercial proof.",
+      "strategic_role": "DRC-native national education and examination infrastructure modeled on the Congolese schooling hierarchy (national → province → subdivision → pool → examination centre → school → candidate); examination integrity, anomaly detection, and anti-corruption controls are capabilities within the education product, not its category.",
       "last_reviewed": "2026-04-18",
       "monthly_burn": 9000,
       "monthly_revenue": 0,
@@ -1279,7 +1280,7 @@
       "proof_level": "none",
       "owner": "Nzila Ventures",
       "priority": "low",
-      "strategic_role": "Trade venture option that stays in incubation until evidence improves.",
+      "strategic_role": "Cross-border trade and deal infrastructure: origination, financing, vehicle and goods listings, shipments, parties, commissions, invoices, and settlement with tamper-evident evidence sealing. Sits alongside — not as a replacement for — the 3CUO/DiasporaCore banking heritage.",
       "last_reviewed": "2026-04-18",
       "monthly_burn": 9000,
       "monthly_revenue": 0,
@@ -1823,6 +1824,68 @@
       },
       "registry_tier": "DEPRECATED",
       "dev_port": 3017
+    },
+    {
+      "id": "union-eyes-demo",
+      "name": "Union Eyes (Demo)",
+      "tier": 5,
+      "status": "frozen",
+      "deployment": "internal",
+      "gtm_posture": "sunset",
+      "revenue_status": "pre-revenue",
+      "customers": 0,
+      "pilots": 0,
+      "proof_level": "none",
+      "owner": "Nzila Ventures",
+      "priority": "low",
+      "strategic_role": "Procurement/demo fabric for Union Eyes (Azure Container App nzila-os-union-eyes-demo); not a standalone product — mirrors Union Eyes for guided demos and CLC procurement flows.",
+      "last_reviewed": "2026-05-01",
+      "monthly_burn": 0,
+      "monthly_revenue": 0,
+      "annual_recurring_revenue": 0,
+      "pipeline_value": 0,
+      "expected_12m_revenue": 0,
+      "gross_margin_pct": 0,
+      "eng_hours_required_monthly": 4,
+      "founder_attention_hours": 1,
+      "support_hours": 1,
+      "customer_concentration_risk": 1,
+      "execution_risk": 1,
+      "churn_risk": 1,
+      "moat_score": 1,
+      "strategic_option_value": 1,
+      "ecosystem_synergy": 3,
+      "probability_of_close": 0,
+      "runway_priority": 1,
+      "pipeline_assumptions": "Demo environment — no revenue attribution.",
+      "data_quality": "estimated",
+      "commercial_motion": "grant_funded",
+      "avg_deal_size": 0,
+      "sales_cycle_days": 0,
+      "close_rate_pct": 0,
+      "renewal_rate_pct": 0,
+      "expansion_rate_pct": 0,
+      "gross_logo_target_12m": 0,
+      "primary_buyer": "Program Sponsor",
+      "proof_stage": "none",
+      "market_pull_score": 1,
+      "tier_label": "TIER 5 — Sunset",
+      "gtm_label": "sunset",
+      "proof_label": "none",
+      "exposure": "internal",
+      "readiness_tier": "internal-only",
+      "recommendation": "SUNSET",
+      "weighted_score": 2.4,
+      "score_inputs": {
+        "revenue": 2,
+        "traction": 1,
+        "strategic_fit": 1.5,
+        "maintenance_burden": 1,
+        "readiness": 1,
+        "margin_potential": 0
+      },
+      "registry_tier": "UNREGISTERED",
+      "dev_port": null
     }
   ]
 }
