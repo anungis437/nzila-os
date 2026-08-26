@@ -1,10 +1,10 @@
 # Anti-Theatre Scan Report
 
-- Generated: 2026-07-21T14:09:29.305Z
-- Files scanned: 4792
+- Generated: 2026-08-26T17:39:41.506Z
+- Files scanned: 4825
 - Rules: R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8
 - **Errors: 0**
-- Warnings: 1264
+- Warnings: 1266
 
 ## Findings
 
@@ -258,9 +258,8 @@
 | warning | R-6 | `apps/union-eyes/lib/client-logger.ts` | 29 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/cognition/ue-adapter.ts` | 127 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/db/with-rls-context.ts` | 152 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 548 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 567 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 588 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 583 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 604 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/document-management-system.ts` | 797 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/document-management-system.ts` | 862 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/documents/batch-operations-service.ts` | 97 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -510,3 +509,4 @@
 | warning | R-7 | `apps/union-eyes/app/api/bargaining-notes/route.ts` | 1 | Production API route `app/api/bargaining-notes/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/bargaining/negotiations/[id]/route.ts` | 1 | Production API route `app/api/bargaining/negotiations/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/bargaining/negotiations/route.ts` | 1 | Production API route `app/api/bargaining/negotiations/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
+| warning | R-7 | `apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts` | 1 | Production API route `app/api/bargaining/proposals/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |

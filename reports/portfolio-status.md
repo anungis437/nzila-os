@@ -25,6 +25,7 @@ Authority: governance/portfolio/product-catalog.json
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
+| Union Eyes Demo | 4 | incubating | internal-only | internal-cost-center | internal-proof | medium |
 | Veridian Admin | 4 | incubating | hold | pre-revenue | internal-proof | high |
 | Veridian Care | 4 | incubating | hold | pre-revenue | internal-proof | high |
 | Veridian Site | 4 | incubating | hold | pre-revenue | internal-proof | medium |
@@ -38,7 +39,7 @@ Authority: governance/portfolio/product-catalog.json
 
 - Sell now: abr, flow, union-eyes
 - Strategic growth: cfo, partners
-- Internal only: console, control-plane, nzila-hq, orchestrator-api, maestria, weekone
+- Internal only: console, control-plane, nzila-hq, orchestrator-api, maestria, union-eyes-demo, weekone
 - Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
 
 ## Engine Topology
@@ -74,6 +75,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Mobility | 3.6 | HOLD | INCUBATING | internal-only |
 | NACP Exams | 3.6 | HOLD | INCUBATING | internal-only |
 | Trade | 3.6 | HOLD | INCUBATING | internal-only |
+| Union Eyes Demo | 4.6 | HOLD | INCUBATING | internal-only |
 | Veridian Admin | 5.2 | HOLD | INCUBATING | internal-only |
 | Veridian Care | 5.2 | HOLD | INCUBATING | internal-only |
 | Veridian Site | 4.6 | HOLD | INCUBATING | internal-only |
