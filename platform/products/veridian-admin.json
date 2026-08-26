@@ -14,7 +14,7 @@
   "gtmPosture": "hold",
   "proofLevel": "internal-proof",
   "strategicRole": "Healthcare governance console for access controls, readiness, and audit operations supporting Veridian pilots. Internal-demo only; no live PHI.",
-  "generatedAt": "2026-05-07T00:00:00.000Z",
+  "generatedAt": "2026-08-26T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-22",
+  "generated_at": "2026-08-26",
   "authority": "governance/portfolio/product-catalog.json",
   "summary": {
     "total_products": 26,
@@ -1217,7 +1217,7 @@
       "proof_level": "none",
       "owner": "Nzila Ventures",
       "priority": "low",
-      "strategic_role": "Certification workflow option with limited current commercial proof.",
+      "strategic_role": "DRC-native national education and examination infrastructure modeled on the Congolese schooling hierarchy (national → province → subdivision → pool → examination centre → school → candidate); examination integrity, anomaly detection, and anti-corruption controls are capabilities within the education product, not its category.",
       "last_reviewed": "2026-04-18",
       "monthly_burn": 9000,
       "monthly_revenue": 0,
@@ -1279,7 +1279,7 @@
       "proof_level": "none",
       "owner": "Nzila Ventures",
       "priority": "low",
-      "strategic_role": "Trade venture option that stays in incubation until evidence improves.",
+      "strategic_role": "Cross-border trade and deal infrastructure: origination, financing, vehicle and goods listings, shipments, parties, commissions, invoices, and settlement with tamper-evident evidence sealing. Sits alongside — not as a replacement for — the 3CUO/DiasporaCore banking heritage.",
       "last_reviewed": "2026-04-18",
       "monthly_burn": 9000,
       "monthly_revenue": 0,

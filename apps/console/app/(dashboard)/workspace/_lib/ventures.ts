@@ -157,7 +157,7 @@ export const VENTURE_DOMAINS: VentureDomain[] = [
   { key: 'institutional-intelligence', name: 'Institutional Intelligence', tagline: 'Market-validation observatory & assessments', productIds: [] },
   { key: 'health', name: 'Health', tagline: 'Veridian — care, site, and admin surfaces', productIds: ['veridian-site', 'veridian-care', 'veridian-admin'] },
   { key: 'civic', name: 'Civic', tagline: 'Future civic-sector vertical', productIds: [] },
-  { key: 'education', name: 'Education', tagline: 'NACP exams & credentialing', productIds: ['nacp-exams'] },
+  { key: 'education', name: 'Education', tagline: 'DRC national education & examination infrastructure (NACP)', productIds: ['nacp-exams'] },
 ]
 
 export interface VentureDomainView extends VentureDomain {

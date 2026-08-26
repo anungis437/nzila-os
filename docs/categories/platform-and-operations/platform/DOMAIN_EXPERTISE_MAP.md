@@ -57,7 +57,7 @@ This map prevents knowledge silos by making domain ownership explicit, identifyi
 **Apps**: `mobility`, `mobility-client-portal`, `nacp-exams`
 **Primary owner**: Mobility team
 **Deputy**: Finance team (shared compliance patterns)
-**Key knowledge areas**: NACP exam workflows, client portal auth, mobility scoring
+**Key knowledge areas**: DRC-native national education & examination administration (national → province → subdivision → pool → centre → school → candidate) with integrity/anti-corruption controls, client portal auth, mobility scoring
 **Bus factor risk**: NACP exam state machine — underdocumented, target for Q2 2026 ADR
 
 ---
