@@ -104,13 +104,23 @@ describe('CI-004: Governance and enforcement infrastructure', () => {
 
 // ── CI-005: Cost-aware deploy orchestration ────────────────────────────────
 
-describe('CI-005: GitOps deploy avoids documentation-only churn', () => {
-  it('broad GitOps deploy ignores docs, governance, product metadata, and reports paths', () => {
+describe('CI-005: GitOps deploy avoids documentation and Union Eyes churn', () => {
+  it('broad GitOps deploy ignores docs, governance, product metadata, reports, and UE-owned paths', () => {
     const workflowPath = join(ROOT, '.github', 'workflows', 'gitops-deploy.yml')
     expect(existsSync(workflowPath), 'gitops-deploy.yml must exist').toBe(true)
 
     const src = readSafe(workflowPath)
-    for (const ignoredPath of ['**.md', 'docs/**', 'governance/**', 'platform/products/**', 'reports/**']) {
+    for (const ignoredPath of [
+      '**.md',
+      'docs/**',
+      'governance/**',
+      'platform/products/**',
+      'reports/**',
+      'apps/union-eyes/**',
+      'packages/**',
+      '.github/workflows/deploy-union-eyes.yml',
+      '.github/workflows/auto-promote-union-eyes.yml',
+    ]) {
       expect(src, `GitOps deploy must ignore ${ignoredPath}`).toContain(`- '${ignoredPath}'`)
     }
   })

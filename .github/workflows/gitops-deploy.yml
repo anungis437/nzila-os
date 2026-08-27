@@ -5,8 +5,9 @@
 # using environment-aware configuration from infrastructure/gitops/.
 #
 # Supports: development/staging/pilot deployment through manual dispatch and
-# app-affecting mainline changes. Documentation/governance/report-only changes
-# must not wake the broad non-Union Eyes deployment matrix.
+# non-Union Eyes app-affecting mainline changes. Documentation/governance/report-only
+# changes and Union Eyes-owned source changes must not wake the broad dormant-app
+# deployment matrix.
 ##
 
 name: GitOps Deploy
@@ -20,6 +21,12 @@ on:
       - 'governance/**'
       - 'platform/products/**'
       - 'reports/**'
+      # Union Eyes live deployment is owned by auto-promote-union-eyes.yml.
+      # Dormant non-UE apps should not build/deploy on UE-focused changes.
+      - 'apps/union-eyes/**'
+      - 'packages/**'
+      - '.github/workflows/deploy-union-eyes.yml'
+      - '.github/workflows/auto-promote-union-eyes.yml'
   workflow_dispatch:
     inputs:
       environment:
