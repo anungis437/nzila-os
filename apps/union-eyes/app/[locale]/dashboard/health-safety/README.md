@@ -319,7 +319,10 @@ All pages are fully responsive with mobile-first design.
 
 ## 📝 Notes
 
-- All pages currently use mock data - replace with API calls
+- Overview stats, findings, and CRUD calls hit real endpoints under
+  `/api/health-safety/*` (dashboard, incidents/stats, hazards/stats,
+  inspections/stats, inspections/findings, training/stats). Handlers fall
+  back to zeroed metrics on DB errors, never mock data.
 - Toast notifications use Sonner library
 - All components are from `@/components/health-safety`
 - Animation delays create smooth sequential loading

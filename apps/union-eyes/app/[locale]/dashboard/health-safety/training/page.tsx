@@ -65,15 +65,14 @@ export default function TrainingPage() {
     if (!organizationId) return;
     setLoading(true);
     try {
-      // Use health-safety stats for overview
-      const res = await fetch(`/api/v2/health-safety/stats?organizationId=${organizationId}&period=30d`);
+      const res = await fetch(`/api/health-safety/training/stats?organizationId=${organizationId}`);
       if (res.ok) {
         const json = await res.json();
         setStats({
-          totalRecords: json.trainingDue ?? 0,
-          certifiedMembers: 0,
-          expiringSoon: json.trainingDue ?? 0,
-          overdue: 0,
+          totalRecords: json.totalRecords ?? 0,
+          certifiedMembers: json.certifiedMembers ?? 0,
+          expiringSoon: json.expiringSoon ?? 0,
+          overdue: json.overdue ?? 0,
         });
       }
     } catch (error) {

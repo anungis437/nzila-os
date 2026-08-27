@@ -81,7 +81,7 @@ export default function InspectionsPage() {
 
   const loadFindings = useCallback(async () => {
     try {
-      const res = await fetch(`/api/v2/health-safety/inspections/findings?organizationId=${organizationId}`);
+      const res = await fetch(`/api/health-safety/inspections/findings?organizationId=${organizationId}`);
       if (res.ok) {
         const json = await res.json();
         const items = Array.isArray(json) ? json : json?.findings ?? json?.data ?? [];
@@ -94,7 +94,7 @@ export default function InspectionsPage() {
 
   const loadStats = useCallback(async () => {
     try {
-      const res = await fetch(`/api/v2/health-safety/inspections/stats?organizationId=${organizationId}`);
+      const res = await fetch(`/api/health-safety/inspections/stats?organizationId=${organizationId}`);
       if (res.ok) {
         const json = await res.json();
         setStats({
