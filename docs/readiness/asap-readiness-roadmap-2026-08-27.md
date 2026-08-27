@@ -63,17 +63,25 @@ Local follow-on validation for this record passed:
 | B3 Ops evidence freshness | CLOSED / PROVEN | CI Ops Documentation Pack passed on final green SHA |
 | DORA deployment frequency threshold | DISPOSITIONED / NON-BLOCKING FOR PR #673 | Treated as operational health signal during structured convergence, not a per-PR merge invariant |
 | Operational proving corpus | CLOSED / PROVEN | Active proving docs restored from governed archive; `pnpm ops:prove` passes |
-| Union Eyes Blob topology | OPEN / ARCHITECTURE_DECISION_REQUIRED | Architecture |
-| Zonga middleware readiness | SOURCE_FIX_APPLIED / REMOTE_PENDING | Product/runtime |
-| Agrimo authority readiness | OPEN / AUTHORITY_BINDING_REQUIRED | Product/runtime |
+| Union Eyes live-first cost posture | ACCEPTED / COST_OPTIMIZED | `reports/governance/union-eyes-live-first-cost-strategy-2026-08-27.md` |
+| Union Eyes Blob topology | OPEN / ADR_REQUIRED | Architecture; resolve before claiming full document Blob capability |
+| Zonga middleware readiness | SOURCE_FIX_APPLIED / DEFERRED | Non-UE app; deploy proof deferred until Zonga is reactivated |
+| Agrimo authority readiness | OPEN / DEFERRED | Non-UE app; authority binding deferred until Agrimo is reactivated |
 | EV-R seal | ELIGIBLE | Evidence Seal Verification and Final GO are green |
 
 ## Remaining Non-Blocking Backlog
 
 1. Resolve the Union Eyes Blob topology as a separate architecture decision.
-2. Deploy and verify the Zonga readiness public-route fix.
-3. Bind Agrimo to an authoritative Django authority health endpoint.
-4. Continue monitoring DORA deployment frequency as an operational KPI without
+2. Make Union Eyes document/evidence storage explicit and real in the accepted
+   live environment only.
+3. Reduce default GitOps/image-build churn for dormant non-Union Eyes apps.
+4. Scale or keep non-Union Eyes apps at on-demand replica floors unless an
+   active customer, pilot, or governance proof requires them live.
+5. Deploy and verify the Zonga readiness public-route fix only if Zonga is
+   reactivated.
+6. Bind Agrimo to an authoritative Django authority health endpoint only if
+   Agrimo is reactivated.
+7. Continue monitoring DORA deployment frequency as an operational KPI without
    fabricating deployments or changing the metric threshold.
 
 ## Roadmap Classification
