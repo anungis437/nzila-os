@@ -16,6 +16,7 @@ const BRANCH_PATTERNS: RegExp[] = [
   /^ci\/.+/,
   /^hotfix\/.+/,
   /^integration\/.+/,
+  /^ops\/.+/,
   /^release\/[0-9]+\.[0-9]+\.[0-9]+$/,
   // Dated production-readiness certification branches (release-engineering
   // checkpoints, distinct from semver releases). Strict YYYY-MM-DD suffix
@@ -46,7 +47,7 @@ function validateBranch(ref: string): void {
   const matched = BRANCH_PATTERNS.some((pattern) => pattern.test(ref))
   if (!matched) {
     fail(
-      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*`,
+      `Branch '${ref}' does not match policy. Allowed examples: feat/*, fix/*, chore/*, docs/*, refactor/*, perf/*, test/*, ci/*, hotfix/*, integration/*, ops/*, release/X.Y.Z, release/prod-readiness-YYYY-MM-DD, main, develop, dependabot/*, renovate/*, copilot/*`,
     )
   }
   ok(`Branch '${ref}' is policy-compliant`)

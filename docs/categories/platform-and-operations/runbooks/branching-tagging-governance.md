@@ -18,9 +18,13 @@ Allowed branch names:
 - test/<summary>
 - ci/<summary>
 - hotfix/<summary>
+- integration/<summary>
+- ops/<summary>  (operational branches, e.g. change-record lifecycle updates)
 - release/X.Y.Z
+- release/prod-readiness-YYYY-MM-DD
 - dependabot/<summary>
 - renovate/<summary>
+- copilot/<summary>
 
 Rules:
 
