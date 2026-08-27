@@ -1,36 +1,28 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-const m = vi.hoisted(() => ({
-  delegateGet: vi.fn(async () => new Response(JSON.stringify({ success: true, method: 'GET' }))),
-  delegatePost: vi.fn(async () => new Response(JSON.stringify({ success: true, method: 'POST' }))),
-}));
-
-vi.mock('../onboarding/route', () => ({
-  dynamic: 'force-dynamic',
-  GET: m.delegateGet,
-  POST: m.delegatePost,
-}));
-
+// The continuity/inheritance route mirrors the onboarding route's crudRoutes()
+// config inline so Next.js Turbopack (which rejects re-exporting `dynamic`) and
+// the textual contract scanners (which require an auth-pattern match in the
+// file itself) are both satisfied. This test enforces the mirrored contract.
 describe('continuity inheritance route', () => {
-  it('delegates to the governed onboarding route auth contract', async () => {
-    const { GET, POST, dynamic } = await import('../continuity/inheritance/route');
-    const context = { params: Promise.resolve({}) };
+  it('mirrors the governed onboarding crudRoutes auth+org-scope contract', () => {
+    const source = readFileSync(
+      resolve(__dirname, '../continuity/inheritance/route.ts'),
+      'utf8',
+    );
 
-    const getRequest = new Request('http://localhost/api/continuity/inheritance');
-    const postRequest = new Request('http://localhost/api/continuity/inheritance', {
-      method: 'POST',
-      body: JSON.stringify({ itemId: 'org-seeded', completed: true }),
-    });
-
-    await GET(getRequest as never, context as never);
-    await POST(postRequest as never, context as never);
-
-    expect(dynamic).toBe('force-dynamic');
-    expect(m.delegateGet).toHaveBeenCalledWith(getRequest, context);
-    expect(m.delegatePost).toHaveBeenCalledWith(postRequest, context);
+    expect(source).toContain("import { crudRoutes } from '@/lib/api/crud-factory'");
+    expect(source).toContain("import { pendingProfilesTable } from '@/db/schema'");
+    expect(source).toContain('crudRoutes({');
+    expect(source).toContain('table: pendingProfilesTable');
+    expect(source).toContain('orgScoped: true');
+    expect(source).toContain("readRole: 'member'");
+    expect(source).toContain("writeRole: 'steward'");
+    expect(source).toContain("export const dynamic = 'force-dynamic'");
+    expect(source).toContain('export { GET, POST }');
   });
 
   it('does not keep a local placeholder organization guard', () => {
@@ -41,6 +33,5 @@ describe('continuity inheritance route', () => {
 
     expect(source).not.toMatch(/function\s+requireOrgAccess/);
     expect(source).not.toMatch(/return\s+true\s*;/);
-    expect(source).toContain("export { GET, POST, dynamic } from '../../onboarding/route'");
   });
 });
