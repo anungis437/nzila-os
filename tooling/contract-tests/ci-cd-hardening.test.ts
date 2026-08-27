@@ -101,3 +101,29 @@ describe('CI-004: Governance and enforcement infrastructure', () => {
     expect(existsSync(boundaryPath), 'eslint-arch-boundary.mjs must exist').toBe(true)
   })
 })
+
+// ── CI-005: Cost-aware deploy orchestration ────────────────────────────────
+
+describe('CI-005: GitOps deploy avoids documentation-only churn', () => {
+  it('broad GitOps deploy ignores docs, governance, product metadata, and reports paths', () => {
+    const workflowPath = join(ROOT, '.github', 'workflows', 'gitops-deploy.yml')
+    expect(existsSync(workflowPath), 'gitops-deploy.yml must exist').toBe(true)
+
+    const src = readSafe(workflowPath)
+    for (const ignoredPath of ['**.md', 'docs/**', 'governance/**', 'platform/products/**', 'reports/**']) {
+      expect(src, `GitOps deploy must ignore ${ignoredPath}`).toContain(`- '${ignoredPath}'`)
+    }
+  })
+
+  it('broad GitOps deploy does not own Union Eyes image fanout', () => {
+    const workflowPath = join(ROOT, '.github', 'workflows', 'gitops-deploy.yml')
+    const src = readSafe(workflowPath)
+
+    expect(src, 'GitOps deploy must preserve the Union Eyes ownership comment').toContain(
+      'union-eyes is owned by .github/workflows/auto-promote-union-eyes.yml',
+    )
+    expect(src, 'GitOps matrix must not include union-eyes').not.toMatch(
+      /app:\s*\[[^\]]*\bunion-eyes\b[^\]]*\]/,
+    )
+  })
+})

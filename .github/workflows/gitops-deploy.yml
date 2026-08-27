@@ -4,7 +4,9 @@
 # Deploys Nzila OS apps to Azure Container Apps
 # using environment-aware configuration from infrastructure/gitops/.
 #
-# Supports: development (auto), staging (auto on main), production (manual approval).
+# Supports: development/staging/pilot deployment through manual dispatch and
+# app-affecting mainline changes. Documentation/governance/report-only changes
+# must not wake the broad non-Union Eyes deployment matrix.
 ##
 
 name: GitOps Deploy
@@ -12,6 +14,12 @@ name: GitOps Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'governance/**'
+      - 'platform/products/**'
+      - 'reports/**'
   workflow_dispatch:
     inputs:
       environment:
