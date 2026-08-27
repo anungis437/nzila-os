@@ -65,15 +65,15 @@ Local follow-on validation for this record passed:
 | Operational proving corpus | CLOSED / PROVEN | Active proving docs restored from governed archive; `pnpm ops:prove` passes |
 | Union Eyes live-first cost posture | ACCEPTED / COST_OPTIMIZED | `reports/governance/union-eyes-live-first-cost-strategy-2026-08-27.md` |
 | SCALE1 - non-Union Eyes replica floors | CLOSED / PROVEN | `reports/governance/scale1-non-ue-replica-floor-reduction-2026-08-27.md` |
-| Union Eyes Blob topology | SOURCE_AND_AZURE_WIRING_APPLIED / DEPLOY_PROOF_PENDING | Dedicated private containers and UE readiness contract added; enable `READY_REQUIRE_STORAGE=true` after image deployment |
+| Union Eyes Blob topology | CLOSED / PROVEN | Dedicated private containers, UE readiness contract, and live `storage=ok` probes proven |
 | Zonga middleware readiness | SOURCE_FIX_APPLIED / DEFERRED | Non-UE app; deploy proof deferred until Zonga is reactivated |
 | Agrimo authority readiness | OPEN / DEFERRED | Non-UE app; authority binding deferred until Agrimo is reactivated |
 | EV-R seal | ELIGIBLE | Evidence Seal Verification and Final GO are green |
 
 ## Remaining Non-Blocking Backlog
 
-1. Deploy the Union Eyes readiness contract and enable `READY_REQUIRE_STORAGE=true`
-   after the new image is latest ready.
+1. Consider a separately costed Union Eyes private endpoint/VNet or managed
+   identity hardening tranche.
 2. Reduce default GitOps/image-build churn for dormant non-Union Eyes apps.
 3. Keep non-Union Eyes apps at on-demand replica floors unless an active
    customer, pilot, or governance proof requires them live.
