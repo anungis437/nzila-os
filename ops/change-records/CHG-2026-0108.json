@@ -1,0 +1,29 @@
+{
+  "change_id": "CHG-2026-0108",
+  "title": "Deploy union-eyes to production (August 2026 cadence — CourtLens doctrine convergence)",
+  "description": "Successor to CHG-2026-0107 (window closed 2026-08-03). Covers the union-eyes PROD deployment triggered by merge of PR #693 (CourtLens doctrine convergence) into main on 2026-08-27. PR #693 is documentation- and SoT-scoped (governance/portfolio/product-catalog.json, platform/products/*.json, tooling/repo-inventory/output/*, docs/, apps/abr surface). It does NOT modify any code under apps/union-eyes/ or shared runtime packages consumed by union-eyes at runtime; the deploy runs because the shared portfolio-catalog and inventory artifacts are regenerated on main and the pipeline treats any main push as a deployable event. All governance gates on PR #693 passed (74 checks green, 0 fail) including doctrine validator (7 checks), tier-focus, portfolio drift, and inventory lock.",
+  "service": "union-eyes",
+  "environment": "PROD",
+  "change_type": "STANDARD",
+  "risk_level": "LOW",
+  "impact_summary": "Documentation and SoT-only deploy for union-eyes. No union-eyes app-code changes, no schema migrations, no runtime dependency changes. Rollback via previous image digest if needed.",
+  "requested_by": "platform-team",
+  "approvers_required": ["anungis437"],
+  "approved_by": ["anungis437"],
+  "approval_status": "APPROVED",
+  "implementation_window_start": "2026-08-27T00:00:00.000Z",
+  "implementation_window_end": "2026-09-27T23:59:59.000Z",
+  "rollback_plan": "Revert to previous stable union-eyes container image digest (the digest deployed under CHG-2026-0107 window). Since PR #693 introduced no union-eyes runtime code changes, rollback risk is minimal.",
+  "test_evidence_refs": [
+    "https://github.com/anungis437/nzila-os/pull/693"
+  ],
+  "linked_prs": [
+    "#693"
+  ],
+  "linked_commits": [
+    "0ef66af3d1202e42e2d009a8570fe6c9f860e1b1"
+  ],
+  "status": "APPROVED",
+  "created_at": "2026-08-27T11:40:00.000Z",
+  "updated_at": "2026-08-27T11:45:00.000Z"
+}
