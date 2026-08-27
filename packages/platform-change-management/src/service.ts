@@ -11,6 +11,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { changeRecordSchema } from './schemas'
+import { isWithinApprovedWindow } from './calendar'
 import type { ChangeRecord, Environment } from './types'
 
 // ── Constants ───────────────────────────────────────────────────────────────
@@ -139,20 +140,38 @@ export function listChangesByService(
 /**
  * Find change records matching environment + service + approved status.
  * Used by the deploy validation script.
+ *
+ * Selection order (when multiple candidates are APPROVED):
+ *   1. Prefer a record whose implementation window contains `now`.
+ *   2. Otherwise fall back to the record with the latest window start,
+ *      so the newest approved cadence wins over a stale predecessor.
+ *
+ * This prevents an alphabetically-earlier stale record (window closed but
+ * status still `APPROVED`) from shadowing an active successor.
  */
 export function findApprovedChange(
   env: Environment,
   service: string,
-  opts?: { baseDir?: string },
+  opts?: { baseDir?: string; now?: Date },
 ): ChangeRecord | null {
   const all = loadAllChanges(opts)
-  return (
-    all.find(
-      (c) =>
-        c.environment === env &&
-        c.service === service &&
-        c.approval_status === 'APPROVED' &&
-        (c.status === 'APPROVED' || c.status === 'SCHEDULED' || c.status === 'IMPLEMENTING'),
-    ) ?? null
+  const candidates = all.filter(
+    (c) =>
+      c.environment === env &&
+      c.service === service &&
+      c.approval_status === 'APPROVED' &&
+      (c.status === 'APPROVED' || c.status === 'SCHEDULED' || c.status === 'IMPLEMENTING'),
+  )
+
+  if (candidates.length === 0) return null
+
+  const now = opts?.now ?? new Date()
+  const active = candidates.filter((c) => isWithinApprovedWindow(c, now))
+  const pool = active.length > 0 ? active : candidates
+
+  return pool.reduce((best, cur) =>
+    Date.parse(cur.implementation_window_start) > Date.parse(best.implementation_window_start)
+      ? cur
+      : best,
   )
 }

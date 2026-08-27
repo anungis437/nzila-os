@@ -35,7 +35,7 @@ export function validateChangeWindow(input: ValidateChangeInput): ChangeValidati
   const now = input.now ?? new Date()
 
   // 1. Find an approved change record for this env + service
-  const change = findApprovedChange(input.env, input.service, { baseDir: input.baseDir })
+  const change = findApprovedChange(input.env, input.service, { baseDir: input.baseDir, now })
 
   if (!change) {
     errors.push(
