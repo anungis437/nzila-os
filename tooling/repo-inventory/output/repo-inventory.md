@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-08-26 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-08-27 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -18,7 +18,7 @@
 
 | App | Framework | Port | README | .env.example | platform-shell | platform-auth | Code Files | Purpose |
 |-----|-----------|------|--------|--------------|----------------|---------------|------------|---------|
-| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 304 | FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Blac |
+| abr | Next.js + Django | 3014 | ✅ | ✅ | ✅ | ✅ | 304 | CourtLens — governed access-to-justice and legal matter-intelligence platform. |
 | agrimo | Next.js + Django | 3007 | ✅ | ✅ | ✅ | ✅ | 106 | Agricultural field operations — harvest tracking, production management, logisti |
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 238 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 448 | Internal operations console — platform governance, compliance, analytics, integr |
