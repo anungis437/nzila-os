@@ -69,7 +69,7 @@ export function SiteNavigation() {
               scrolled ? "text-navy" : "text-white"
             )}
           >
-            ABR Insights
+            CourtLens
           </span>
         </Link>
 

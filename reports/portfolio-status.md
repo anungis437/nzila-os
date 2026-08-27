@@ -1,13 +1,13 @@
 # Portfolio Status
 
-Generated: 2026-08-26
+Generated: 2026-08-27
 Authority: governance/portfolio/product-catalog.json
 
 ## Executive Matrix
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
-| FAIRCASE | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
+| CourtLens | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | Flow | 1 | pilot | sell-now | pilot-contracting | internal-proof | high |
 | Union Eyes | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | CFO | 2 | pilot | maintain | pre-revenue | internal-proof | medium |
@@ -57,7 +57,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 
 | Product | Weighted Score | Recommendation | Operational Tier | Readiness |
 | --- | ---: | --- | --- | --- |
-| FAIRCASE | 8.0 | KEEP | EXPERIMENTAL | pilot-safe |
+| CourtLens | 8.0 | KEEP | EXPERIMENTAL | pilot-safe |
 | Flow | 7.0 | KEEP | PILOT | pilot-safe |
 | Union Eyes | 8.0 | KEEP | PRODUCTION | pilot-safe |
 | CFO | 5.6 | HOLD | PILOT | pilot-safe |

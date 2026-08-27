@@ -59,7 +59,7 @@ const faq = [
   {
     question: "Do we need to replace our current systems?",
     answer:
-      "No. FAIRCASE can be deployed as the specialized complaints and investigations operating layer while existing systems remain in place.",
+      "No. CourtLens can be deployed as the specialized intake, triage, and matter-management operating layer while existing systems remain in place.",
   },
   {
     question: "Can we start with one department before enterprise rollout?",
@@ -69,7 +69,7 @@ const faq = [
   {
     question: "How do you handle security and procurement review?",
     answer:
-      "FAIRCASE includes procurement-ready security and governance collateral to support enterprise and public-sector review cycles.",
+      "CourtLens includes procurement-ready security and governance collateral to support enterprise and public-sector review cycles.",
   },
   {
     question: "What is a realistic pilot timeline?",
@@ -84,7 +84,7 @@ export default function MarketingPage() {
       <div className="fixed bottom-4 left-1/2 z-50 w-[92%] max-w-2xl -translate-x-1/2 rounded-2xl border border-white/20 bg-navy/95 p-3 shadow-2xl backdrop-blur md:bottom-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-            FAIRCASE Revenue Motion
+            CourtLens Revenue Motion
           </p>
           <div className="flex gap-2">
             <Link
@@ -115,23 +115,26 @@ export default function MarketingPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-32">
           <ScrollReveal>
             <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-200">
-              FAIRCASE Flagship Platform
+              CourtLens Flagship Platform
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="max-w-4xl font-poppins text-5xl font-bold leading-tight text-white md:text-7xl">
-              FairCase
+              CourtLens
               <span className="mt-3 block bg-linear-to-r from-electric-light via-gold to-electric-light bg-clip-text text-transparent">
-                Fairness. Accountability. Resolution.
+                Access to justice. Evidence-backed. Referral-ready.
               </span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-slate-200 md:text-xl">
-              Modern case management for complaints, investigations, and
-              trust-sensitive workflows.
+              Governed access-to-justice and legal matter-intelligence platform.
+              Converts intake into triaged, evidence-backed, human-reviewed matters
+              and referral-ready outputs — currently configured for housing,
+              employment and debt practice areas. Built on the ABR technical
+              substrate; retains FAIRCASE tribunal-intelligence capabilities.
             </p>
           </ScrollReveal>
 
@@ -322,7 +325,7 @@ export default function MarketingPage() {
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
           <ScrollReveal>
             <h2 className="font-poppins text-3xl font-bold text-white md:text-5xl">
-              Ready to Move FAIRCASE from Interest to Contract?
+              Ready to Move CourtLens from Interest to Contract?
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300">
               Book a focused demo or launch an 8-week pilot to prove value and

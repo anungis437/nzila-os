@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "FAIRCASE",
-    "tagline": "AI-Powered Legal Intelligence",
-    "description": "Advanced legal research and case analysis platform powered by artificial intelligence"
+    "name": "CourtLens",
+    "tagline": "Access-to-justice and legal matter intelligence",
+    "description": "Governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs."
   },
   "nav": {
     "home": "Home",
@@ -49,12 +49,12 @@
   },
   "mission": {
     "title": "Defending Justice with Intelligence",
-    "description": "FAIRCASE empowers legal professionals with AI-driven tools that reduce research time by 80%, surface critical precedents in seconds, and ensure compliance across every jurisdiction where you operate.",
+    "description": "CourtLens empowers legal professionals with AI-driven tools that reduce research time by 80%, surface critical precedents in seconds, and ensure compliance across every jurisdiction where you operate.",
     "highlight": "Built in Canada for the world's most demanding legal environments."
   },
   "cta": {
     "title": "Ready to Transform Your Legal Practice?",
-    "subtitle": "Join hundreds of firms using FAIRCASE to deliver better outcomes faster.",
+    "subtitle": "Join hundreds of firms using CourtLens to deliver better outcomes faster.",
     "button": "Get Started Today"
   },
   "footer": {

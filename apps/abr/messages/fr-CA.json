@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "FAIRCASE",
-    "tagline": "Intelligence Juridique Propulsée par l'IA",
-    "description": "Plateforme avancée de recherche juridique et d'analyse de cas propulsée par l'intelligence artificielle"
+    "name": "CourtLens",
+    "tagline": "Accès à la justice et intelligence des dossiers juridiques",
+    "description": "Plateforme gouvernée d'accès à la justice et d'intelligence des dossiers juridiques qui convertit l'admission en dossiers triés, adossés à des preuves, révisés par des humains et prêts à être référés."
   },
   "nav": {
     "home": "Accueil",
@@ -49,12 +49,12 @@
   },
   "mission": {
     "title": "Défendre la Justice avec Intelligence",
-    "description": "FAIRCASE donne aux professionnels du droit des outils propulsés par l'IA qui réduisent le temps de recherche de 80 %, révèlent les précédents critiques en quelques secondes et assurent la conformité dans chaque juridiction.",
+    "description": "CourtLens donne aux professionnels du droit des outils propulsés par l'IA qui réduisent le temps de recherche de 80 %, révèlent les précédents critiques en quelques secondes et assurent la conformité dans chaque juridiction.",
     "highlight": "Conçu au Canada pour les environnements juridiques les plus exigeants au monde."
   },
   "cta": {
     "title": "Prêt à Transformer Votre Pratique Juridique ?",
-    "subtitle": "Rejoignez des centaines de cabinets utilisant FAIRCASE pour obtenir de meilleurs résultats plus rapidement.",
+    "subtitle": "Rejoignez des centaines de cabinets utilisant CourtLens pour obtenir de meilleurs résultats plus rapidement.",
     "button": "Commencer Aujourd'hui"
   },
   "footer": {
