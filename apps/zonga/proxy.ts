@@ -33,6 +33,7 @@ const isPublicRoute = createRouteMatcher([
   '/reset-password(.*)',
   '/api/auth(.*)',
   '/api/health(.*)',
+  '/api/ready(.*)',
 ])
 
 const isMarketingPath = (pathname: string) =>

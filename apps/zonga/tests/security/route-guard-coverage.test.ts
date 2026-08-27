@@ -44,9 +44,10 @@ describe('Scenario 6 — public marketing routes remain accessible', () => {
     expect(proxySrc).toMatch(/isMarketingPath\s*\(/)
   })
 
-  it('proxy.ts whitelists /api/auth and /api/health public APIs', () => {
+  it('proxy.ts whitelists auth and health/readiness public APIs', () => {
     expect(proxySrc).toContain("'/api/auth(.*)'")
     expect(proxySrc).toContain("'/api/health(.*)'")
+    expect(proxySrc).toContain("'/api/ready(.*)'")
   })
 })
 

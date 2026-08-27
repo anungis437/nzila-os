@@ -63,16 +63,16 @@ Local follow-on validation for this record passed:
 | B3 Ops evidence freshness | CLOSED / PROVEN | CI Ops Documentation Pack passed on final green SHA |
 | DORA deployment frequency threshold | DISPOSITIONED / NON-BLOCKING FOR PR #673 | Treated as operational health signal during structured convergence, not a per-PR merge invariant |
 | Operational proving corpus | CLOSED / PROVEN | Active proving docs restored from governed archive; `pnpm ops:prove` passes |
-| Union Eyes Blob topology | Open separate architecture decision | Architecture |
-| Zonga middleware readiness | Open non-AZ core item | Product/runtime |
-| Agrimo authority readiness | Open non-AZ core item | Product/runtime |
+| Union Eyes Blob topology | OPEN / ARCHITECTURE_DECISION_REQUIRED | Architecture |
+| Zonga middleware readiness | SOURCE_FIX_APPLIED / REMOTE_PENDING | Product/runtime |
+| Agrimo authority readiness | OPEN / AUTHORITY_BINDING_REQUIRED | Product/runtime |
 | EV-R seal | ELIGIBLE | Evidence Seal Verification and Final GO are green |
 
 ## Remaining Non-Blocking Backlog
 
 1. Resolve the Union Eyes Blob topology as a separate architecture decision.
-2. Work Zonga middleware readiness as a non-AZ product/runtime item.
-3. Work Agrimo authority readiness as a non-AZ product/runtime item.
+2. Deploy and verify the Zonga readiness public-route fix.
+3. Bind Agrimo to an authoritative Django authority health endpoint.
 4. Continue monitoring DORA deployment frequency as an operational KPI without
    fabricating deployments or changing the metric threshold.
 

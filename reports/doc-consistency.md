@@ -1,6 +1,6 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-27T14:42:48.223Z
+> Generated: 2026-08-27T15:51:27.616Z
 
 ## Summary
 
