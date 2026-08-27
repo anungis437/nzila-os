@@ -244,17 +244,13 @@ function scanWorkflows(): string[] {
 }
 
 function scanContractTests(): number {
-  const ctDir = join(ROOT, 'tooling', 'contract-tests');
-  return countFiles(ctDir, /\.test\.(ts|tsx|js|jsx)$/);
+  return countTrackedFiles('tooling/contract-tests', /\.test\.(ts|tsx|js|jsx)$/);
 }
 
 function scanTsTests(): number {
   let count = 0;
   for (const dir of ['apps', 'packages', 'tooling']) {
-    const fullDir = join(ROOT, dir);
-    if (existsSync(fullDir)) {
-      count += countFiles(fullDir, /\.(test|spec)\.(ts|tsx|js|jsx)$/);
-    }
+    count += countTrackedFiles(dir, /\.(test|spec)\.(ts|tsx|js|jsx)$/);
   }
   return count;
 }
@@ -262,10 +258,7 @@ function scanTsTests(): number {
 function scanPythonTests(): number {
   let count = 0;
   for (const dir of ['apps', 'packages']) {
-    const fullDir = join(ROOT, dir);
-    if (existsSync(fullDir)) {
-      count += countFiles(fullDir, /^test_.*\.py$|.*_test\.py$/);
-    }
+    count += countTrackedFiles(dir, /(^|\/)test_[^/]*\.py$|(^|\/)[^/]*_test\.py$/);
   }
   return count;
 }
