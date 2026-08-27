@@ -75,10 +75,10 @@ export function SiteFooter() {
           <div className="col-span-2">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-electric font-poppins text-sm font-bold text-white">
-                AB
+                CL
               </div>
               <span className="font-poppins text-lg font-semibold text-navy">
-                ABR Insights
+                CourtLens
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">

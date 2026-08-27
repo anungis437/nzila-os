@@ -1,6 +1,6 @@
 {
   "slug": "abr",
-  "name": "FAIRCASE",
+  "name": "CourtLens",
   "tier": 1,
   "tierLabel": "flagship",
   "status": "pilot",
@@ -13,8 +13,8 @@
   "publicVisible": true,
   "gtmPosture": "sell-now",
   "proofLevel": "pilot-proof",
-  "strategicRole": "Flagship justice-and-equity commercial wedge with enterprise governance readiness.",
-  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "strategicRole": "Governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs. Evolved and productized on the ABR technical substrate; retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage.",
+  "generatedAt": "2026-08-27T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

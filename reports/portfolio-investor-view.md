@@ -1,13 +1,13 @@
 # Portfolio Investor View
 
-Generated: 2026-08-26
+Generated: 2026-08-27
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
 
 | Product | Status | Strategic Role | Proof | Recommendation |
 | --- | --- | --- | --- | --- |
-| FAIRCASE | pilot | Flagship justice-and-equity commercial wedge with enterprise governance readiness. | pilot-proof | KEEP |
+| CourtLens | pilot | Governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs. Evolved and productized on the ABR technical substrate; retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage. | pilot-proof | KEEP |
 | Flow | pilot | Second flagship revenue wedge for SMB operations and commerce. | internal-proof | KEEP |
 | Union Eyes | pilot | Flagship labourtech wedge with the clearest near-term commercial path. Production infrastructure approved; product go-live restricted to pilot only — unrestricted production not yet approved. | pilot-proof | KEEP |
 

@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FAIRCASE Objection War Room v2
 
 ## 1) "Too expensive"

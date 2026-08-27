@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FairCase — Landing Page Copy
 
 ## faircase.ca | Equity Intelligence Platform

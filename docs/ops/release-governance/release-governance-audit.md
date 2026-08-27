@@ -1,6 +1,6 @@
 # Release Governance Audit
 
-Generated: 2026-08-26T13:01:53.275Z
+Generated: 2026-08-27T01:23:49.859Z
 
 ## Scores
 
@@ -27,7 +27,7 @@ Generated: 2026-08-26T13:01:53.275Z
 ## Inventory Coverage
 
 - Governed applications: 27
-- Active workflow files discovered: 52
+- Active workflow files discovered: 53
 
 ## Risk Notes
 

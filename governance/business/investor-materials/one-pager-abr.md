@@ -1,20 +1,22 @@
-# 🏆 ABR Insights — EdTech + LegalTech Flagship
-## Canada's Leading Anti-Black Racism Training & Analytics Platform
+# 🏆 CourtLens — Access-to-Justice + LegalTech Flagship
+## Governed access-to-justice and legal matter-intelligence platform (evolved on the ABR technical substrate; retains FAIRCASE tribunal-intelligence lineage)
 
 **Last Updated:** February 17, 2026  
-**Status:** Production-Ready | **Complexity:** EXTREME | **Readiness:** 9.1/10
+**Status:** Pilot / active MVP (Phases 2A–2F shipped) | **Complexity:** EXTREME | **Readiness:** 9.1/10
+
+> **Lineage:** CourtLens is the current commercial product identity. It was evolved and productized on the ABR technical substrate (`apps/abr/`, package `@nzila/abr`) and retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage. Previous framings under "ABR Insights" and "FAIRCASE" describe the same substrate that now ships as CourtLens.
 
 ---
 
 ## 🎯 THE OPPORTUNITY
 
-Canada faces **systemic anti-Black racism** across institutions, workplaces, and communities. Organizations need **evidence-based training**, tribunals need **case law databases**, and professionals need **continuing education credits**. The **$1.5B+ Canadian DEI training market** demands specialized, data-driven solutions.
+Canada faces **systemic access-to-justice gaps** across legal aid clinics, community legal clinics, and public-interest counsel — with FAIRCASE tribunal-intelligence and Anti-Black-racism accountability needs retained as lineage capabilities. Organizations need **auditable matter intake and triage**, tribunals need **case law databases**, and legal professionals need **evidence-backed review packets and referral-ready outputs**. The **$1.5B+ Canadian legal-services and DEI training market** demands specialized, data-driven solutions.
 
-**ABR Insights** is **Canada's most comprehensive anti-Black racism platform** combining:
-1. **Learning Management System (LMS)** with 50+ courses
-2. **Tribunal Database** with 10,000+ CanLII cases (AI-analyzed)
-3. **AI-Powered Coach** (Azure GPT-4) for personalized learning
-4. **Gamification Engine** with certifications & continuing education credits
+**CourtLens** is **Canada's governed access-to-justice and legal matter-intelligence platform** combining:
+1. **Matter Intake & Triage** with evidence-backed, human-reviewed workflows
+2. **Tribunal Database** with 10,000+ CanLII cases (AI-analyzed) — FAIRCASE lineage
+3. **AI-Powered Review Packet Generation** (Azure GPT-4) with human-in-the-loop approval
+4. **Learning & Certification Engine** with certifications & continuing education credits
 
 ---
 

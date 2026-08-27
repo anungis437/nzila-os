@@ -26,11 +26,11 @@ interface AuthPageLayoutProps {
 }
 
 const defaults = {
-  appName: "ABR Insights",
-  appAbbrev: "AB",
-  tagline: "AI-Powered Legal Intelligence",
+  appName: "CourtLens",
+  appAbbrev: "CL",
+  tagline: "Access-to-justice and legal matter intelligence",
   subtitle:
-    "Analyze case law, track precedents, and generate compliance reports with unmatched accuracy.",
+    "Governed intake, triage, evidence-backed review, and referral-ready outputs.",
   stats: [
     { value: "10K+", label: "Cases Analyzed" },
     { value: "99.7%", label: "Accuracy" },

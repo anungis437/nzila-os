@@ -2,11 +2,11 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-08-26
+> Generated: 2026-08-27
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
-| FAIRCASE | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
+| CourtLens | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | Flow | 1 | pilot | sell-now | pilot-contracting | internal-proof | high |
 | Union Eyes | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | CFO | 2 | pilot | maintain | pre-revenue | internal-proof | medium |
@@ -38,7 +38,7 @@
 
 | Product | Registry Tier | Readiness | Deployment | Recommendation |
 | --- | --- | --- | --- | --- |
-| FAIRCASE | EXPERIMENTAL | pilot-safe | internal | KEEP |
+| CourtLens | EXPERIMENTAL | pilot-safe | internal | KEEP |
 | Flow | PILOT | pilot-safe | internal | KEEP |
 | Union Eyes | PRODUCTION | pilot-safe | internal | KEEP |
 | CFO | PILOT | pilot-safe | internal | HOLD |

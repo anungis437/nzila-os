@@ -56,7 +56,7 @@ export async function buildExecutiveSummaryExport(
   ]);
 
   const markdown = [
-    '# FAIRCASE Executive Summary',
+    '# CourtLens Executive Summary',
     '',
     `Generated: ${generatedAt}`,
     `Organization: ${context.orgId}`,
@@ -88,7 +88,7 @@ export async function buildExecutiveSummaryExport(
 
   return {
     generatedAt,
-    title: 'FAIRCASE Executive Summary',
+    title: 'CourtLens Executive Summary',
     format: 'markdown',
     filename: `faircase-executive-summary-${context.orgId}-${context.dataMode}.md`,
     payload: {

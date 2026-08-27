@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FAIRCASE GTM Audit (90-Day Revenue Readiness)
 
 ## Scope

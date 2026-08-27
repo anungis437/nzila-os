@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "generatedAt": "2026-08-27T00:00:00.000Z",
   "products": [
     {
       "slug": "abr",
-      "name": "FAIRCASE",
+      "name": "CourtLens",
       "trustProfile": "tier-1-public",
       "launchStage": "pilot"
     },

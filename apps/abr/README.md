@@ -1,14 +1,22 @@
 # @nzila/abr
 
-> FAIRCASE (formerly ABR) — Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.
+> CourtLens — governed access-to-justice and legal matter-intelligence platform.
 
-FAIRCASE is NzilaOS's Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.
+CourtLens is a governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs. Its current implemented practice-area configuration includes housing, employment and debt.
 
-FAIRCASE is not a generic DEI LMS, generic complaint tracker, or generic legaltech tool. It is institutional accountability infrastructure.
+## Product lineage: ABR → FAIRCASE → CourtLens
+
+- **ABR** established the underlying incident, evidence, governance and accountability platform.
+- **FAIRCASE** applied that platform to institutional accountability and Anti-Black-racism / case-intelligence use cases.
+- **CourtLens** evolves and productizes that foundation into an access-to-justice and legal matter-intelligence platform, adding public intake, matter triage, AI-assisted analysis, human review, referral workflows and review-ready evidence packages.
+
+FAIRCASE capabilities and Anti-Black-racism tribunal intelligence remain part of the product lineage and may remain active capabilities; they no longer define the canonical commercial product identity.
+
+The package identifier `@nzila/abr`, the `apps/abr/` folder, container app `nzila-os-abr`, environment variables (`NEXT_PUBLIC_ABR_URL`, `ABR_*`), routes under `/api/abr/*`, and persisted `faircase.*` audit event names are retained unchanged. They preserve technical lineage; the commercial product identity is CourtLens.
 
 ## Canonical Product Definition
 
-FAIRCASE is designed for serious Canadian institutions that need auditable, privacy-safe, evidence-based operating workflows for Anti-Black racism governance.
+CourtLens is designed for legal aid organizations, community legal clinics, and public-interest counsel who need auditable, privacy-safe, evidence-based operating workflows for matter intake, triage, and referral — with FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities available as part of the same governed platform.
 
 Core principles:
 
@@ -16,7 +24,7 @@ Core principles:
 - Bilingual by design (EN/FR)
 - Privacy-first evidence handling and access controls
 - Evidence-based operations, not symbolic reporting
-- Measurable outcomes tied to policy, learning, and remediation
+- Measurable outcomes tied to intake, triage, review, and referral
 
 ## Stack
 

@@ -78,7 +78,7 @@ export default async function FaircaseRevenuePage() {
   if (!data) {
     return (
       <CommandPageShell className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">FAIRCASE Revenue Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">CourtLens Revenue Dashboard</h1>
         <p className="text-sm text-gray-500">Unable to load governance/commercial/faircase-funnel.json.</p>
         <Link href="/revenue" className="text-sm text-blue-600 hover:underline">Back to Revenue</Link>
       </CommandPageShell>
@@ -94,7 +94,7 @@ export default async function FaircaseRevenuePage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
             <ArrowTrendingUpIcon className="h-8 w-8 text-gray-300" />
-            FAIRCASE Revenue Dashboard
+            CourtLens Revenue Dashboard
           </h1>
           <p className="text-sm text-gray-400 mt-1">Leads -&gt; Meetings -&gt; Demos -&gt; Proposals -&gt; Pilots -&gt; Close</p>
           <p className="text-xs text-gray-400 mt-1">As of {data.as_of_date} · {data.confidence_note}</p>
@@ -197,7 +197,7 @@ export default async function FaircaseRevenuePage() {
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Active FAIRCASE Deals</h2>
+          <h2 className="font-semibold text-gray-900">Active CourtLens Deals</h2>
         </div>
         <table className="w-full text-sm">
           <thead>

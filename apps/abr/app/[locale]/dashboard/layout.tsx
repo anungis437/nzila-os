@@ -33,10 +33,10 @@ export default function DashboardLayout({
       <aside className="hidden w-64 border-r border-slate-200 bg-white lg:block">
         <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-6">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-electric font-poppins text-xs font-bold text-white">
-            AB
+            CL
           </div>
           <span className="font-poppins text-sm font-semibold text-navy">
-            ABR Insights
+            CourtLens
           </span>
         </div>
         <nav className="space-y-1 p-4">

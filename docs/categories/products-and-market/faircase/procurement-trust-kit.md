@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FairCase — Procurement Trust Kit
 
 ## For Institutional Buyers, Vendor Risk Teams, and Procurement Officers

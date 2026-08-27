@@ -12,14 +12,14 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "ABR Insights | AI-Powered Legal Intelligence",
+  title: "CourtLens | Access-to-justice and legal matter intelligence",
   description:
-    "Advanced legal research and case analysis platform powered by AI. Analyze case law, track precedents, and generate compliance reports.",
+    "Governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs.",
   metadataBase: new URL("https://abr.nzilaventures.com"),
   openGraph: {
-    title: "ABR Insights | AI-Powered Legal Intelligence",
+    title: "CourtLens | Access-to-justice and legal matter intelligence",
     description:
-      "Analyze case law, track precedents, and generate compliance reports with unmatched accuracy.",
+      "Triaged matters, evidence-backed review packets, and referral-ready outputs for legal aid, community clinics, and public-interest counsel.",
     type: "website",
   },
 };

@@ -95,7 +95,7 @@ export const legacyNavGroups: NavGroupConfig[] = [
     items: [
       { name: 'Pipeline', href: '/revenue', icon: 'ArrowTrendingUpIcon', description: 'Sales command center showing quotes, active pilots, prospect pipeline, and revenue playbooks by account.' },
       { name: 'UE Revenue Cockpit', href: '/ue-revenue-cockpit', icon: 'RocketLaunchIcon', description: 'Union Eyes revenue agent surface tracking commerce opportunities, growth signals, and deal velocity.' },
-      { name: 'FAIRCASE Funnel', href: '/revenue/faircase', icon: 'ChartBarIcon', description: 'FAIRCASE-specific funnel view tracking leads through meetings, demos, proposals, pilots to close.' },
+      { name: 'CourtLens Funnel', href: '/revenue/faircase', icon: 'ChartBarIcon', description: 'CourtLens revenue funnel view (persisted under faircase-funnel governance filename) tracking leads through meetings, demos, proposals, pilots to close.' },
       { name: 'Pilot Export', href: '/pilot/export', icon: 'DocumentArrowDownIcon', description: 'Export active pilots and revenue events for cross-venture analysis and reporting.' },
     ],
   },

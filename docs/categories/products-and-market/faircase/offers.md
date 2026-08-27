@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FAIRCASE Offer Stack
 
 ## 1) Discovery Call (Free)

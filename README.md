@@ -13,7 +13,7 @@ Decision = Input + Policy + Actor Authority + Outcome + Proof
 | Product | Domain | Status | Tier |
 |---------|--------|--------|------|
 | **Union Eyes** | Labour representation & case management | Pilot — sell-now | 1 |
-| **FairCase** | Justice & equity governance (formerly ABR) | Pilot — sell-now | 1 |
+| **CourtLens** | Access-to-justice & legal matter intelligence (on ABR substrate; retains FAIRCASE tribunal-intelligence lineage) | Pilot — sell-now | 1 |
 | **Flow** | SMB operations & commerce automation | Pilot — sell-now | 1 |
 | **CFO** | Finance workflows | Pilot | 2 |
 | **Partners** | Partner enablement portal | Pilot | 2 |
