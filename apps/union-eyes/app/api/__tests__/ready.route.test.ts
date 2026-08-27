@@ -3,9 +3,13 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   dbExecute: vi.fn(),
+  containerExists: vi.fn(),
 }));
 
 vi.mock('@nzila/db', () => ({ db: { execute: m.dbExecute } }));
+vi.mock('@nzila/blob', () => ({
+  container: vi.fn(() => ({ exists: m.containerExists })),
+}));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, sql: vi.fn((s: any) => s) };
@@ -24,13 +28,16 @@ describe('ready route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env.READY_REQUIRE_QUEUE;
+    delete process.env.READY_REQUIRE_STORAGE;
     delete process.env.DJANGO_API_URL;
+    delete process.env.AZURE_BLOB_CONTAINER;
     delete process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS;
     delete process.env.READY_REQUIRE_EMAIL_DELIVERY;
     delete process.env.READY_REQUIRE_CALENDAR_TOKEN_ENCRYPTION;
     delete process.env.READY_REQUIRE_CALENDAR_SCHEDULER;
     process.env.NODE_ENV = 'test';
     m.dbExecute.mockResolvedValue(undefined);
+    m.containerExists.mockResolvedValue(true);
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true })) as any);
   });
 
@@ -83,6 +90,34 @@ describe('ready route', () => {
 
     expect(response.status).toBe(503);
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('requires the configured Azure Blob container when storage readiness is enabled', async () => {
+    const { GET } = await loadRoute();
+    process.env.READY_REQUIRE_STORAGE = 'true';
+    process.env.AZURE_BLOB_CONTAINER = 'union-eyes-documents-staging';
+
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.ready).toBe(true);
+    expect(json.checks.storage).toBe(true);
+    expect(m.containerExists).toHaveBeenCalledOnce();
+  });
+
+  it('fails readiness when storage is required but the container is unavailable', async () => {
+    const { GET } = await loadRoute();
+    process.env.READY_REQUIRE_STORAGE = 'true';
+    process.env.AZURE_BLOB_CONTAINER = 'union-eyes-documents-staging';
+    m.containerExists.mockResolvedValue(false);
+
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(json.ready).toBe(false);
+    expect(json.checks.storage).toBe(false);
   });
 
   it('includes optional readiness checks when enabled', async () => {

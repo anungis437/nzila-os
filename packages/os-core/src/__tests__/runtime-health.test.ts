@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildRuntimeHealthResponse,
+  getBuildMetadata,
   runtimeStatusFromChecks,
   type RuntimeHealthCheck,
 } from '../health'
@@ -130,5 +131,29 @@ describe('buildRuntimeHealthResponse', () => {
     expect(res).not.toHaveProperty('customDomainStatus')
     expect(res).not.toHaveProperty('fallbackRuntimeStatus')
     expect(res).not.toHaveProperty('reason')
+  })
+})
+
+describe('getBuildMetadata', () => {
+  it('prefers the UnionEyes runtime environment over public build metadata', () => {
+    const originalUeEnvironment = process.env.UE_ENVIRONMENT
+    const originalNextPublicAppEnv = process.env.NEXT_PUBLIC_APP_ENV
+
+    process.env.UE_ENVIRONMENT = 'production'
+    process.env.NEXT_PUBLIC_APP_ENV = 'staging'
+
+    expect(getBuildMetadata('union-eyes').environment).toBe('production')
+
+    if (originalUeEnvironment === undefined) {
+      delete process.env.UE_ENVIRONMENT
+    } else {
+      process.env.UE_ENVIRONMENT = originalUeEnvironment
+    }
+
+    if (originalNextPublicAppEnv === undefined) {
+      delete process.env.NEXT_PUBLIC_APP_ENV
+    } else {
+      process.env.NEXT_PUBLIC_APP_ENV = originalNextPublicAppEnv
+    }
   })
 })

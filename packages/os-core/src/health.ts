@@ -159,6 +159,7 @@ export function getBuildMetadata(app: string): BuildMetadata {
   return {
     app,
     environment:
+      process.env.UE_ENVIRONMENT ??
       process.env.NEXT_PUBLIC_APP_ENV ??
       process.env.APP_ENV ??
       process.env.NODE_ENV ??

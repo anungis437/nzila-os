@@ -37,6 +37,20 @@ async function checkQueueReady(): Promise<boolean> {
   }
 }
 
+async function checkStorageReady(): Promise<boolean> {
+  const containerName = process.env.AZURE_BLOB_CONTAINER
+  if (!containerName) {
+    return false
+  }
+
+  try {
+    const { container } = await import('@nzila/blob')
+    return await container(containerName).exists()
+  } catch {
+    return false
+  }
+}
+
 function hasAll(values: Array<string | undefined>): boolean {
   return values.every((value) => typeof value === 'string' && value.trim().length > 0)
 }
@@ -91,9 +105,11 @@ function checkCalendarSchedulerReady(): boolean {
 
 export async function GET() {
   const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
-  const [database, queue] = await Promise.all([
+  const requireStorage = parseBoolEnv(process.env.READY_REQUIRE_STORAGE, false)
+  const [database, queue, storage] = await Promise.all([
     checkDatabaseReady(),
     requireQueue ? checkQueueReady() : Promise.resolve(false),
+    requireStorage ? checkStorageReady() : Promise.resolve<'unknown'>('unknown'),
   ])
   const requireCalendarIntegrations = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS, false)
   const requireEmailDelivery = parseBoolEnv(process.env.READY_REQUIRE_EMAIL_DELIVERY, false)
@@ -106,7 +122,7 @@ export async function GET() {
   const checksInput: Record<string, boolean | 'unknown'> = {
     process: true,
     database,
-    storage: 'unknown',
+    storage,
     thirdParty: 'unknown',
   }
 
@@ -135,6 +151,7 @@ export async function GET() {
   const requiredChecks = [
     'process',
     'database',
+    ...(requireStorage ? ['storage'] : []),
     ...(requireQueue ? ['queue'] : []),
     ...(requireCalendarIntegrations ? ['calendarIntegrations'] : []),
     ...(requireEmailDelivery ? ['emailDelivery'] : []),
