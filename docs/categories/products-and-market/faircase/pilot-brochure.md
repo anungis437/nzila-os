@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FAIRCASE Pilot Brochure (8 Weeks)
 
 ## Pilot Objective

@@ -1,8 +1,8 @@
-# CourtLens Migration Planning (Phase 0)
+# CourtLens (Pilot / active MVP)
 
-This folder contains migration planning documents for bringing the legacy CourtLens Access product model into the current NzilaOS ABR stack.
+CourtLens is the governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs. It is evolved and productized on the ABR technical substrate (`apps/abr/`, package `@nzila/abr`) and retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage.
 
-Phase 0 scope is documentation and domain mapping only.
+**Status:** Pilot / active MVP (Phases 2A–2F shipped). This folder retains the Phase 0 planning artifacts as historical context and continues to host the doctrine and reuse mapping.
 
 ## CourtLens Doctrine
 

@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FairCase — Methodology Memo
 
 ## The FPSLREB Classification Signal: What It Is, What It Isn't, and What It Means

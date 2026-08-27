@@ -12,15 +12,15 @@ Nzila operates one company with a shared Institutional Intelligence platform exp
 |---|---|---|
 | **Union Eyes** | Labour | Controlled pilot GO — strongest commercial evidence |
 | **CIVIC** | Public institutions | Market engagement and discovery phase |
-| **CourtLens** | Legal / access-to-justice | Planning and pipeline — ABR reuse-first architecture |
+| **CourtLens** | Legal / access-to-justice | Pilot / active MVP (Phases 2A–2F shipped) — evolved on the ABR technical substrate; retains FAIRCASE tribunal-intelligence lineage |
 
-> **Note on FairCase:** FairCase (ABR) was an earlier naming and framing for what became the justice and institutional-governance platform. Its implemented codebase (`apps/abr/`) now serves as the reuse-first technical foundation for CourtLens. FairCase is retained here as historical lineage and technical context only — it is not an active commercial offering.
+> **Note on lineage:** CourtLens is the current commercial product identity. It was evolved and productized on the ABR technical substrate and retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as part of the same governed platform. FAIRCASE materials retained in `docs/categories/products-and-market/faircase/**` and `governance/commercial/faircase-funnel.json` preserve the positioning that CourtLens now productizes. Persisted audit event names (`faircase.*`), the `apps/abr/` folder, `@nzila/abr` package, container `nzila-os-abr`, environment variables (`NEXT_PUBLIC_ABR_URL`, `ABR_*`), and `/api/abr/*` routes are retained unchanged as technical lineage; they do not indicate a separate active product.
 
 ## Evidence Summary
 
 - **Union Eyes is the most evidenced commercial product in the repository.** **Confidence: Demonstrated.** Evidence: `apps/union-eyes/README.md`, `apps/union-eyes/maturity.json`, `docs/union-eyes/pilot-evidence-pack/`, `docs/categories/products-and-market/union-eyes/`, `docs/readiness/production-certification.md`.
 - **CIVIC is the public-sector implementation of the Institutional Intelligence platform, with documented thesis, market-engagement materials, and a distinct front-door narrative for government and institutional audiences.** **Confidence: Documented.** Evidence: `docs/public-service/civic-thesis.md`, `docs/public-service/civic-one-page-brief.md`, `docs/public-service/civic-faq.md`, `docs/CIVIC_OCI_ALIGNMENT.md`.
-- **CourtLens currently exists as a migration and pilot-planning workstream built to reuse the ABR codebase.** **Confidence: Verified.** Evidence: `docs/courtlens/README.md`, `docs/courtlens/target-architecture.md`, `docs/courtlens/pilot-readiness-plan.md`.
+- **CourtLens is a pilot / active MVP: Phases 2A–2F have shipped on the ABR technical substrate, retaining FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage.** **Confidence: Verified.** Evidence: `apps/abr/`, `apps/abr/README.md`, `apps/abr/maturity.json`, `docs/courtlens/README.md`, `docs/courtlens/target-architecture.md`, `docs/courtlens/pilot-readiness-plan.md`.
 
 ---
 
@@ -145,17 +145,21 @@ Publish a CIVIC discovery report from executive engagements and open a formal CI
 
 ---
 
-## FairCase — Historical Lineage
+## FAIRCASE — Retained Lineage in CourtLens
 
-> **This section documents FairCase as historical lineage only. FairCase is not an active commercial offering.**
+> **This section documents FAIRCASE as retained lineage inside CourtLens. FAIRCASE is not a separate commercial product; its tribunal-intelligence and Anti-Black-racism accountability capabilities are retained within the CourtLens governed platform.**
 
-FairCase (internally coded as ABR) was the earlier product framing for Nzila's justice, equity-governance, and accountability platform. The implemented codebase (`apps/abr/`) — including tribunal intelligence, incident governance, executive exports, analytics, learning workflows, and bilingual coverage — now serves as the technical reuse foundation for CourtLens.
+FAIRCASE (internally coded as ABR) was the earlier product framing for Nzila's justice, equity-governance, and accountability platform. The implemented codebase (`apps/abr/`) — including tribunal intelligence, incident governance, executive exports, analytics, learning workflows, and bilingual coverage — is the technical substrate on which CourtLens was evolved and productized. FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities remain active in CourtLens.
 
-**Why FairCase is not an active product:**
+**Why FAIRCASE is no longer a separate commercial identity:**
 
-- The strategic decision has been made to route institutional and equity-governance use cases through CourtLens (legal/access-to-justice sector) rather than maintaining FairCase as a separate commercial brand.
-- Public-sector institutions, equity offices, and CHRO functions are now addressed through the CIVIC public-sector implementation of the platform.
-- Union Eyes continues to serve labour-sector complaints and casework.
+- The commercial product identity has converged to CourtLens: a governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs.
+- FAIRCASE positioning materials preserved under `docs/categories/products-and-market/faircase/**` and `governance/commercial/faircase-funnel.json` remain valid GTM assets: they describe the accountability positioning that CourtLens now productizes.
+- Persisted audit event names (`faircase.*`), the `apps/abr/` folder, `@nzila/abr` package, container `nzila-os-abr`, environment variables, and `/api/abr/*` routes are retained unchanged as technical lineage.
+
+**Technical heritage value:**
+
+The `apps/abr/` codebase is the substrate CourtLens ships on: tribunal intelligence, matter workflows, RBAC, audit chains, evidence handling, governance exports, and bilingual coverage. This substrate is the reason CourtLens can be presented as a pilot / active MVP rather than a planning-stage product.
 
 **Technical heritage value:**
 
@@ -185,9 +189,9 @@ The `apps/abr/` codebase provides CourtLens with a proven implementation of: tri
 
 | Dimension | Assessment | Confidence | Evidence |
 |---|---|---|---|
-| Product stage | Phase 0 planning and migration design | Verified | `docs/courtlens/README.md` |
-| Technical posture | Reuse-first design on ABR primitives | Verified | `docs/courtlens/target-architecture.md` |
-| Pilot posture | Smallest credible pilot is defined, but implementation is not yet complete | Planned | `docs/courtlens/pilot-readiness-plan.md` |
+| Product stage | Pilot / active MVP (Phases 2A–2F shipped) on the ABR technical substrate; retains FAIRCASE tribunal-intelligence lineage | Verified | `apps/abr/`, `apps/abr/README.md`, `apps/abr/maturity.json`, `docs/courtlens/README.md` |
+| Technical posture | Evolved and productized on ABR primitives; FAIRCASE tribunal-intelligence capabilities retained as lineage | Verified | `docs/courtlens/target-architecture.md`, `apps/abr/modules/` |
+| Pilot posture | Smallest credible pilot defined; MVP capability set active | Documented | `docs/courtlens/pilot-readiness-plan.md` |
 
 ### Implemented Capabilities
 

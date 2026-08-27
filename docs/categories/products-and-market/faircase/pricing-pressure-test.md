@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FAIRCASE Pricing Pressure Test
 
 ## Scenario 1: 25-seat Union

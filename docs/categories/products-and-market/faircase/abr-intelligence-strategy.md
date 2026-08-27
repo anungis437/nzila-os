@@ -1,3 +1,5 @@
+> **Lineage banner:** These materials preserve the FAIRCASE positioning that CourtLens now productizes.
+
 # FairCase — ABR Intelligence & Investigations Strategy
 
 ## Anchored on the FPSLREB 4% Signal

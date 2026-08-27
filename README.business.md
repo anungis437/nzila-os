@@ -121,15 +121,15 @@ Purpose-built **investment migration advisory platform** for firms helping high-
 - **Mobility** (advisor-facing) — full advisory lifecycle: client intake with wealth-tier classification (HNWI/UHNWI), eligibility assessment against 40+ Citizenship-by-Investment / Residency-by-Investment / Golden Visa programs, KYC/AML screening, document collection, government submission tracking, and post-approval compliance. Integrates with HubSpot, Microsoft 365, and WhatsApp.
 - **Mobility Client Portal** (applicant-facing) — secure self-service surface for HNWI/UHNWI clients and their families: document uploads, family-member management, case-status tracking, and encrypted messaging with the advisory team.
 
-### Institutional Accountability — FAIRCASE (formerly ABR)
-**FAIRCASE is Nzila OS's Canada-first enterprise operating system for Anti-Black racism prevention, response, accountability, learning, and measurable institutional change.** Built for serious Canadian institutions (universities, health authorities, public-sector employers, regulated enterprises) that need auditable, privacy-safe, evidence-based workflows — not a generic DEI LMS, complaint tracker, or legaltech tool.
+### Access to Justice — CourtLens (evolved from ABR; retains FAIRCASE tribunal-intelligence lineage)
+**CourtLens is Nzila OS's governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs.** Evolved and productized on the ABR technical substrate; retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage. Designed for legal aid organizations, community legal clinics, and public-interest counsel who need auditable, privacy-safe, evidence-based operating workflows for matter intake, triage, and referral.
 
-- **Tribunal Intelligence** — Canadian ABR case law explorer with source registry, ingestion governance, freshness tracking, and manual review queue
-- **Incident Response** — strict-lifecycle incident engine (intake → triage → action → remediation → close) with chronology timeline, role-scoped notes, and query-time redaction
-- **Accountability Analytics** — operational dashboards, remediation trackers with owner/due-date/evidence fields, executive exports
+- **Tribunal Intelligence (FAIRCASE lineage)** — Canadian ABR case law explorer with source registry, ingestion governance, freshness tracking, and manual review queue
+- **Incident / Matter Response** — strict-lifecycle engine (intake → triage → action → remediation → close) with chronology timeline, role-scoped notes, and query-time redaction
+- **Accountability & Matter Analytics** — operational dashboards, remediation trackers with owner/due-date/evidence fields, executive exports
 - **Learning & Certification** — courses, cohorts, assignments, certifications, and incident-linked learning recommendations
 - **Executive Governance** — dedicated CHRO, CEO/COO, Board, and public-sector views; bilingual EN-CA / FR-CA throughout
-- **Export Layer** — role-aware executive-summary, incident, and remediation exports for procurement, audit, and regulatory submission
+- **Export Layer** — role-aware executive-summary, matter, and remediation exports for procurement, audit, and regulatory submission
 
 Bilingual by design (EN-CA / FR-CA), privacy-first, evidence-based — outcomes tied to policy, learning, and remediation rather than symbolic reporting.
 
