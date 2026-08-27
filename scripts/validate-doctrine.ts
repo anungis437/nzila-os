@@ -121,6 +121,77 @@ const CHECKS: DoctrineCheck[] = [
     },
   },
   {
+    id: 'courtlens-identity-in-catalog',
+    description:
+      'ABR product entry in the catalog must carry the CourtLens identity, FAIRCASE lineage stanza, and the "evolved and productized on the ABR technical substrate" framing.',
+    run: (root) => {
+      const catalog = JSON.parse(
+        readFileSync(join(root, 'governance/portfolio/product-catalog.json'), 'utf8'),
+      ) as {
+        products: Array<{
+          id: string
+          name?: string
+          lineage?: string[]
+          historical_names?: string[]
+          strategic_role?: string
+        }>
+      }
+      const abr = catalog.products.find((p) => p.id === 'abr')
+      if (!abr) return 'abr entry not found in product-catalog.json'
+      if (abr.name !== 'CourtLens') {
+        return `abr.name must be "CourtLens" (found: "${abr.name}")`
+      }
+      const lineage = abr.lineage ?? []
+      if (!lineage.includes('ABR') || !lineage.includes('FAIRCASE')) {
+        return `abr.lineage must include both "ABR" and "FAIRCASE" (found: ${JSON.stringify(lineage)})`
+      }
+      const historical = abr.historical_names ?? []
+      if (!historical.includes('FAIRCASE')) {
+        return `abr.historical_names must include "FAIRCASE" (found: ${JSON.stringify(historical)})`
+      }
+      const role = (abr.strategic_role ?? '').toLowerCase()
+      if (!role.includes('evolved and productized on the abr technical substrate')) {
+        return `abr.strategic_role must contain the phrase "evolved and productized on the ABR technical substrate".`
+      }
+      if (role.includes('narrowing') || role.includes('narrowed')) {
+        return `abr.strategic_role must NOT use "narrowing/narrowed" framing for the ABR\u2192FAIRCASE\u2192CourtLens evolution.`
+      }
+      return null
+    },
+  },
+  {
+    id: 'courtlens-not-shipped-as-faircase',
+    description:
+      'Non-lineage-allowlisted governed surfaces must not present FAIRCASE as the live commercial product identity.',
+    run: (root) => {
+      const surfaces = [
+        'README.md',
+        'README.business.md',
+        'apps/abr/README.md',
+        'apps/abr/catalog-info.yaml',
+        'apps/abr/app/layout.tsx',
+        'apps/abr/app/(marketing)/page.tsx',
+        'docs/business-plan/evidence-book/03-Products.md',
+      ]
+      // Match FAIRCASE only when it is presented as the LIVE product identity
+      // ("# FAIRCASE" / "FAIRCASE Platform" / "FAIRCASE Product" as a heading).
+      const forbidden = /^#\s+FAIRCASE\b|FAIRCASE (Platform|Product) heading/i
+      for (const rel of surfaces) {
+        const path = join(root, rel)
+        let text: string
+        try {
+          text = readFileSync(path, 'utf8')
+        } catch {
+          continue
+        }
+        if (forbidden.test(text)) {
+          return `Non-lineage surface ${rel} presents FAIRCASE as the live product identity. Rename to CourtLens and add lineage stanza.`
+        }
+      }
+      return null
+    },
+  },
+  {
     id: '3cuo-alignment-doc-preserves-heritage',
     description:
       '3cuo.md alignment doc must contain the DOCTRINE CORRECTION notice and reference the banking heritage.',
