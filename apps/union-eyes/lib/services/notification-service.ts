@@ -16,7 +16,8 @@ import {
   notificationDeliveryLog,
   notificationTemplates,
 } from "@/db/schema/domains/communications";
-import { eq, and, or, lt } from "drizzle-orm";
+import { organizationMembers } from "@/db/schema";
+import { eq, and, or, lt, isNull } from "drizzle-orm";
 
 let firebaseAdmin: typeof import('firebase-admin') | null = null;
 let firebaseApp: import('firebase-admin').app.App | null = null;
@@ -537,6 +538,15 @@ export class NotificationService {
    */
   async send(payload: NotificationPayload): Promise<NotificationResponse> {
     try {
+      const recipientActive = await isNotificationRecipientActive(payload);
+      if (!recipientActive) {
+        return {
+          id: uuid(),
+          status: "failed",
+          failureReason: "Recipient is not active in organization",
+        };
+      }
+
       const provider = this.providers.get(payload.type);
 
       if (!provider) {
@@ -903,6 +913,27 @@ export class NotificationService {
       return { retried: 0, succeeded: 0, failed: 0 };
     }
   }
+}
+
+async function isNotificationRecipientActive(payload: NotificationPayload): Promise<boolean> {
+  if (!payload.recipientId) {
+    return true;
+  }
+
+  const [membership] = await db
+    .select({ id: organizationMembers.id })
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.userId, payload.recipientId),
+        eq(organizationMembers.organizationId, payload.organizationId),
+        eq(organizationMembers.status, "active"),
+        isNull(organizationMembers.deletedAt),
+      ),
+    )
+    .limit(1);
+
+  return Boolean(membership);
 }
 
 // ============================================================================

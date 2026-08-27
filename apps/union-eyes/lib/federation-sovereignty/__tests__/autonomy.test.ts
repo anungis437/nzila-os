@@ -140,5 +140,22 @@ describe('autonomy engine', () => {
       expect(policy.federatedScopeAllowed).toBe(true);
       expect(policy.nationalEscalationsOnly).toBe(true);
     });
+
+    it('keeps synthetic LIUNA local raw detail local while allowing OPDC-style summaries only when configured', () => {
+      const liunaLocal: SovereignGovernanceContract = {
+        ...baseContract,
+        federationId: 'liuna-local-900-synthetic',
+        sovereigntyTier: 'local',
+        sovereigntyMode: 'federation-aligned',
+        auditVisibility: 'regional',
+      };
+
+      const policy = resolveAuditVisibilityPolicy(liunaLocal);
+
+      expect(policy.localDetailVisible).toBe(true);
+      expect(policy.regionalSummaryVisible).toBe(true);
+      expect(policy.nationalEscalationsOnly).toBe(false);
+      expect(policy.federatedScopeAllowed).toBe(false);
+    });
   });
 });

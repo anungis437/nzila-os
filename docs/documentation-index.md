@@ -1,9 +1,9 @@
 # Documentation Index
 
-Generated: 2026-08-27T01:23:47.965Z
+Generated: 2026-08-27T20:40:33.534Z
 
-Total documents indexed: 1656
-Stale documents (>90 days since repo validation): 903
+Total documents indexed: 1726
+Stale documents (>90 days since repo validation): 927
 
 ## Category Summary
 
@@ -16,7 +16,7 @@ Stale documents (>90 days since repo validation): 903
 | architecture | 3 | 3 |
 | backlog | 1 | 1 |
 | business-plan | 43 | 0 |
-| categories | 925 | 725 |
+| categories | 953 | 725 |
 | compliance | 6 | 1 |
 | courtlens | 14 | 0 |
 | disaster-recovery.md | 1 | 0 |
@@ -29,10 +29,13 @@ Stale documents (>90 days since repo validation): 903
 | institutional-engineering | 39 | 0 |
 | migration | 2 | 2 |
 | nzila | 5 | 0 |
+| nzila-field-operations | 15 | 12 |
 | nzila-finalization | 11 | 0 |
 | nzila-infrastructure-convergence | 12 | 0 |
 | nzila-live-audit | 11 | 0 |
+| nzila-operational-proving | 11 | 5 |
 | nzila-residual-closure | 13 | 10 |
+| nzila-rollout-governance | 15 | 7 |
 | nzila-runtime-integrity | 11 | 9 |
 | nzila-sovereignty-proving | 9 | 7 |
 | nzila-tier2-hardening | 9 | 9 |
@@ -44,7 +47,7 @@ Stale documents (>90 days since repo validation): 903
 | proof-center | 1 | 0 |
 | public | 1 | 1 |
 | public-service | 108 | 0 |
-| readiness | 18 | 0 |
+| readiness | 19 | 0 |
 | root | 4 | 3 |
 | runbooks | 2 | 0 |
 | sred | 87 | 0 |
@@ -642,7 +645,7 @@ Stale documents (>90 days since repo validation): 903
 | [docs/categories/platform-and-operations/risk/nzila-ai-risk-register-memora-deferred.md](docs/categories/platform-and-operations/risk/nzila-ai-risk-register-memora-deferred.md) | categories | 2026-05-11 | stale |
 | [docs/categories/platform-and-operations/risk/nzila-ai-risk-register.md](docs/categories/platform-and-operations/risk/nzila-ai-risk-register.md) | categories | 2026-05-11 | stale |
 | [docs/categories/platform-and-operations/risk/nzila-issdlc-capabilities-assessment.md](docs/categories/platform-and-operations/risk/nzila-issdlc-capabilities-assessment.md) | categories | 2026-05-11 | stale |
-| [docs/categories/platform-and-operations/runbooks/branching-tagging-governance.md](docs/categories/platform-and-operations/runbooks/branching-tagging-governance.md) | categories | 2026-07-18 | current |
+| [docs/categories/platform-and-operations/runbooks/branching-tagging-governance.md](docs/categories/platform-and-operations/runbooks/branching-tagging-governance.md) | categories | 2026-08-27 | current |
 | [docs/categories/platform-and-operations/runbooks/cloudflare-dns-migration.md](docs/categories/platform-and-operations/runbooks/cloudflare-dns-migration.md) | categories | 2026-07-18 | current |
 | [docs/categories/platform-and-operations/runbooks/conference-playbook.md](docs/categories/platform-and-operations/runbooks/conference-playbook.md) | categories | 2026-05-11 | stale |
 | [docs/categories/platform-and-operations/runbooks/data-recovery.md](docs/categories/platform-and-operations/runbooks/data-recovery.md) | categories | 2026-05-11 | stale |
@@ -839,6 +842,34 @@ Stale documents (>90 days since repo validation): 903
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/operational-embedding-refactor.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/operational-embedding-refactor.md) | categories | 2026-05-11 | stale |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/procurement-positioning-refactor.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/procurement-positioning-refactor.md) | categories | 2026-05-11 | stale |
 | [docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/stewardship-continuity-architecture.md](docs/categories/products-and-market/union-eyes/labor-continuity-intelligence/stewardship-continuity-architecture.md) | categories | 2026-05-11 | stale |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/00-audit-charter-and-baseline.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/00-audit-charter-and-baseline.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/01-institutional-profile-and-assumptions.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/01-institutional-profile-and-assumptions.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/02-surface-inventory.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/02-surface-inventory.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/03-domain-and-scenario-matrix.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/03-domain-and-scenario-matrix.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/04-evidence-and-validation-register.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/04-evidence-and-validation-register.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/05-findings-and-remediation-backlog.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/05-findings-and-remediation-backlog.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/06-video-claim-proof-matrix.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/06-video-claim-proof-matrix.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/07-oci-workshop-opportunity.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/07-oci-workshop-opportunity.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/09-pre-video-synthetic-scenario.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/09-pre-video-synthetic-scenario.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/10-recording-script-and-shot-list.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/10-recording-script-and-shot-list.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/11-pre-video-claim-lock.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/11-pre-video-claim-lock.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/12-gate-2-continuity-authorization-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/12-gate-2-continuity-authorization-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/13-gate-3a-confidential-document-boundary-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/13-gate-3a-confidential-document-boundary-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/15-gate-4-leadership-transition-fixture.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/15-gate-4-leadership-transition-fixture.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/16-gate-5-federated-visibility-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/16-gate-5-federated-visibility-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/18-gate-7-evidence-export-boundary-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/18-gate-7-evidence-export-boundary-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/19-gate-8-legal-hold-retention-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/19-gate-8-legal-hold-retention-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/20-gate-9-ai-advisory-boundary-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/20-gate-9-ai-advisory-boundary-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/22-gate-10-notification-offboarding-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/22-gate-10-notification-offboarding-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/23-gate-10b-session-direct-link-offboarding-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/23-gate-10b-session-direct-link-offboarding-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/24-gate-10c-pending-ai-action-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/24-gate-10c-pending-ai-action-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/25-gate-11-case-evidence-legal-hold-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/25-gate-11-case-evidence-legal-hold-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/26-gate-12-central-aggregate-reporting-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/26-gate-12-central-aggregate-reporting-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md](docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md) | categories | 2026-05-11 | stale |
 | [docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md](docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md) | categories | 2026-05-11 | stale |
 | [docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md](docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md) | categories | 2026-07-18 | current |
@@ -1175,6 +1206,21 @@ Stale documents (>90 days since repo validation): 903
 | [docs/institutional-engineering/registries/unresolved-matters.md](docs/institutional-engineering/registries/unresolved-matters.md) | institutional-engineering | 2026-08-26 | current |
 | [docs/migration/trade/canonical-domain-map.md](docs/migration/trade/canonical-domain-map.md) | migration | 2026-05-11 | stale |
 | [docs/migration/trade/cars-vertical-scope.md](docs/migration/trade/cars-vertical-scope.md) | migration | 2026-05-11 | stale |
+| [docs/nzila-field-operations/cross-app-field-operations-consistency.md](docs/nzila-field-operations/cross-app-field-operations-consistency.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/environment-lifecycle-governance.md](docs/nzila-field-operations/environment-lifecycle-governance.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/executive-briefing-rhythm.md](docs/nzila-field-operations/executive-briefing-rhythm.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/field-operations-readiness-review.md](docs/nzila-field-operations/field-operations-readiness-review.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/field-operations-workflow-fabric.md](docs/nzila-field-operations/field-operations-workflow-fabric.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/governance-review-cadence.md](docs/nzila-field-operations/governance-review-cadence.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/institutional-field-operations-framework.md](docs/nzila-field-operations/institutional-field-operations-framework.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/live-operational-readiness-system.md](docs/nzila-field-operations/live-operational-readiness-system.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/master-field-operations-index.md](docs/nzila-field-operations/master-field-operations-index.md) | nzila-field-operations | 2026-08-27 | current |
+| [docs/nzila-field-operations/onboarding-governance-operations.md](docs/nzila-field-operations/onboarding-governance-operations.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/operational-legitimacy-audit-system.md](docs/nzila-field-operations/operational-legitimacy-audit-system.md) | nzila-field-operations | 2026-07-18 | current |
+| [docs/nzila-field-operations/operational-rehearsal-governance.md](docs/nzila-field-operations/operational-rehearsal-governance.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/operator-cadence-system.md](docs/nzila-field-operations/operator-cadence-system.md) | nzila-field-operations | 2026-07-18 | current |
+| [docs/nzila-field-operations/pilot-execution-discipline.md](docs/nzila-field-operations/pilot-execution-discipline.md) | nzila-field-operations | 2026-05-11 | stale |
+| [docs/nzila-field-operations/stabilization-operations-system.md](docs/nzila-field-operations/stabilization-operations-system.md) | nzila-field-operations | 2026-05-11 | stale |
 | [docs/nzila-finalization/canonical-operating-system-navigation.md](docs/nzila-finalization/canonical-operating-system-navigation.md) | nzila-finalization | 2026-07-18 | current |
 | [docs/nzila-finalization/cross-app-e2e-validation-matrix.md](docs/nzila-finalization/cross-app-e2e-validation-matrix.md) | nzila-finalization | 2026-07-18 | current |
 | [docs/nzila-finalization/executive-operating-system-finalization.md](docs/nzila-finalization/executive-operating-system-finalization.md) | nzila-finalization | 2026-07-18 | current |
@@ -1209,6 +1255,17 @@ Stale documents (>90 days since repo validation): 903
 | [docs/nzila-live-audit/README.md](docs/nzila-live-audit/README.md) | nzila-live-audit | 2026-07-18 | current |
 | [docs/nzila-live-audit/test-persona-credentials-audit.md](docs/nzila-live-audit/test-persona-credentials-audit.md) | nzila-live-audit | 2026-07-18 | current |
 | [docs/nzila-live-audit/ue-whole-system-review.md](docs/nzila-live-audit/ue-whole-system-review.md) | nzila-live-audit | 2026-07-18 | current |
+| [docs/nzila-operational-proving/cross-app-operational-convergence-proving.md](docs/nzila-operational-proving/cross-app-operational-convergence-proving.md) | nzila-operational-proving | 2026-07-18 | current |
+| [docs/nzila-operational-proving/environment-restoration-proving.md](docs/nzila-operational-proving/environment-restoration-proving.md) | nzila-operational-proving | 2026-07-18 | current |
+| [docs/nzila-operational-proving/executive-operational-readability-proving.md](docs/nzila-operational-proving/executive-operational-readability-proving.md) | nzila-operational-proving | 2026-05-11 | stale |
+| [docs/nzila-operational-proving/full-environment-traversal-rehearsal.md](docs/nzila-operational-proving/full-environment-traversal-rehearsal.md) | nzila-operational-proving | 2026-05-11 | stale |
+| [docs/nzila-operational-proving/live-cadence-sustainability-validation.md](docs/nzila-operational-proving/live-cadence-sustainability-validation.md) | nzila-operational-proving | 2026-05-11 | stale |
+| [docs/nzila-operational-proving/live-operator-walkthrough-program.md](docs/nzila-operational-proving/live-operator-walkthrough-program.md) | nzila-operational-proving | 2026-07-18 | current |
+| [docs/nzila-operational-proving/live-pilot-operations-proving.md](docs/nzila-operational-proving/live-pilot-operations-proving.md) | nzila-operational-proving | 2026-05-11 | stale |
+| [docs/nzila-operational-proving/live-rollback-proving.md](docs/nzila-operational-proving/live-rollback-proving.md) | nzila-operational-proving | 2026-07-18 | current |
+| [docs/nzila-operational-proving/master-operational-proving-index.md](docs/nzila-operational-proving/master-operational-proving-index.md) | nzila-operational-proving | 2026-07-18 | current |
+| [docs/nzila-operational-proving/phase-c-final-readiness-review.md](docs/nzila-operational-proving/phase-c-final-readiness-review.md) | nzila-operational-proving | 2026-07-18 | current |
+| [docs/nzila-operational-proving/promotion-refusal-proving.md](docs/nzila-operational-proving/promotion-refusal-proving.md) | nzila-operational-proving | 2026-05-11 | stale |
 | [docs/nzila-residual-closure/full-residual-elimination-review.md](docs/nzila-residual-closure/full-residual-elimination-review.md) | nzila-residual-closure | 2026-07-18 | current |
 | [docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-closure.md](docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-closure.md) | nzila-residual-closure | 2026-05-11 | stale |
 | [docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md](docs/nzila-residual-closure/r1-pilot-django-sidecar-binding-log.md) | nzila-residual-closure | 2026-07-18 | current |
@@ -1222,6 +1279,21 @@ Stale documents (>90 days since repo validation): 903
 | [docs/nzila-residual-closure/r9-org-resolver-callsite-audit.md](docs/nzila-residual-closure/r9-org-resolver-callsite-audit.md) | nzila-residual-closure | 2026-05-11 | stale |
 | [docs/nzila-residual-closure/README.md](docs/nzila-residual-closure/README.md) | nzila-residual-closure | 2026-07-18 | current |
 | [docs/nzila-residual-closure/rotation-log.md](docs/nzila-residual-closure/rotation-log.md) | nzila-residual-closure | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/continuity-safe-rollout-system.md](docs/nzila-rollout-governance/continuity-safe-rollout-system.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/cross-environment-governance-fabric.md](docs/nzila-rollout-governance/cross-environment-governance-fabric.md) | nzila-rollout-governance | 2026-08-27 | current |
+| [docs/nzila-rollout-governance/demo-governance-system.md](docs/nzila-rollout-governance/demo-governance-system.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/environment-legitimacy-visibility.md](docs/nzila-rollout-governance/environment-legitimacy-visibility.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/environment-promotion-governance.md](docs/nzila-rollout-governance/environment-promotion-governance.md) | nzila-rollout-governance | 2026-08-27 | current |
+| [docs/nzila-rollout-governance/governed-rollback-system.md](docs/nzila-rollout-governance/governed-rollback-system.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/institutional-onboarding-governance.md](docs/nzila-rollout-governance/institutional-onboarding-governance.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/master-rollout-governance-index.md](docs/nzila-rollout-governance/master-rollout-governance-index.md) | nzila-rollout-governance | 2026-07-18 | current |
+| [docs/nzila-rollout-governance/operational-rollout-workflows.md](docs/nzila-rollout-governance/operational-rollout-workflows.md) | nzila-rollout-governance | 2026-07-18 | current |
+| [docs/nzila-rollout-governance/operator-rollout-workflows.md](docs/nzila-rollout-governance/operator-rollout-workflows.md) | nzila-rollout-governance | 2026-07-18 | current |
+| [docs/nzila-rollout-governance/pilot-governance-system.md](docs/nzila-rollout-governance/pilot-governance-system.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/release-governance-cadence.md](docs/nzila-rollout-governance/release-governance-cadence.md) | nzila-rollout-governance | 2026-05-11 | stale |
+| [docs/nzila-rollout-governance/rollout-attestation-fabric.md](docs/nzila-rollout-governance/rollout-attestation-fabric.md) | nzila-rollout-governance | 2026-07-18 | current |
+| [docs/nzila-rollout-governance/rollout-governance-readiness-review.md](docs/nzila-rollout-governance/rollout-governance-readiness-review.md) | nzila-rollout-governance | 2026-07-18 | current |
+| [docs/nzila-rollout-governance/rollout-legitimacy-review-system.md](docs/nzila-rollout-governance/rollout-legitimacy-review-system.md) | nzila-rollout-governance | 2026-07-18 | current |
 | [docs/nzila-runtime-integrity/final-runtime-integrity-review.md](docs/nzila-runtime-integrity/final-runtime-integrity-review.md) | nzila-runtime-integrity | 2026-05-11 | stale |
 | [docs/nzila-runtime-integrity/full-auth-role-lineage-audit.md](docs/nzila-runtime-integrity/full-auth-role-lineage-audit.md) | nzila-runtime-integrity | 2026-05-11 | stale |
 | [docs/nzila-runtime-integrity/full-dashboard-runtime-failure-integrity.md](docs/nzila-runtime-integrity/full-dashboard-runtime-failure-integrity.md) | nzila-runtime-integrity | 2026-05-11 | stale |
@@ -1542,6 +1614,7 @@ Stale documents (>90 days since repo validation): 903
 | [docs/public-service/validation/signal-classification-rubric.md](docs/public-service/validation/signal-classification-rubric.md) | public-service | 2026-08-26 | current |
 | [docs/public-service/workforce-transition-and-institutional-memory.md](docs/public-service/workforce-transition-and-institutional-memory.md) | public-service | 2026-08-26 | current |
 | [docs/public/restore-readiness-summary.md](docs/public/restore-readiness-summary.md) | public | 2026-05-11 | stale |
+| [docs/readiness/asap-readiness-roadmap-2026-08-27.md](docs/readiness/asap-readiness-roadmap-2026-08-27.md) | readiness | 2026-08-27 | current |
 | [docs/readiness/azure-production-baseline.md](docs/readiness/azure-production-baseline.md) | readiness | 2026-07-18 | current |
 | [docs/readiness/backup-restore-certification.md](docs/readiness/backup-restore-certification.md) | readiness | 2026-07-18 | current |
 | [docs/readiness/br6-org-context-closure.md](docs/readiness/br6-org-context-closure.md) | readiness | 2026-07-18 | current |

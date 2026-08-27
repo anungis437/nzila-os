@@ -8,6 +8,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { putBlob, deleteBlob } from '@/lib/blob-client';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 import { isMalwareScanError } from '@/lib/security/clamav';
+import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 
 interface AttachmentMetadata {
   url: string;
@@ -24,12 +25,14 @@ interface AttachmentMetadata {
     signature?: string;
     reason?: string;
   };
+  metadata?: Record<string, unknown>;
 }
 
 interface CaseRecord {
   claimId: string;
   claimNumber: string | null;
   attachments?: any;
+  metadata?: any;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -69,7 +72,7 @@ async function resolveCaseRecord(caseId: string, organizationId: string | null, 
       : sql`AND FALSE`;
 
   const rows = await withRLSContext(async (tx) => tx.execute(sql`
-    SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments
+    SELECT c.claim_id AS "claimId", c.claim_number AS "claimNumber", c.attachments, c.metadata
     FROM claims c
     WHERE (c.claim_number = ${caseId} OR c.claim_id::text = ${caseId})
       ${orgFilter}
@@ -225,6 +228,15 @@ export const DELETE = withApi(
 
     if (!attachment) {
       throw ApiError.notFound('Attachment');
+    }
+
+    const mutabilityBlockReason = getDocumentMutabilityBlockReason({ metadata: claim.metadata })
+      ?? getDocumentMutabilityBlockReason({ metadata: attachment.metadata });
+    if (mutabilityBlockReason) {
+      throw ApiError.badRequest(mutabilityBlockReason, {
+        caseId: claim.claimId,
+        attachmentUrl: attachment.url,
+      });
     }
 
     await deleteBlob(attachment.pathname || attachment.url);

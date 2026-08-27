@@ -62,6 +62,16 @@ vi.mock('@/db/schema/domains/communications', () => ({
   notificationTemplates: { id: 'id', templateKey: 'template_key' },
 }));
 
+vi.mock('@/db/schema', () => ({
+  organizationMembers: {
+    id: 'organization_member_id',
+    userId: 'organization_member_user_id',
+    organizationId: 'organization_member_organization_id',
+    status: 'organization_member_status',
+    deletedAt: 'organization_member_deleted_at',
+  },
+}));
+
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
   and: vi.fn((...conditions: any[]) => conditions),
@@ -780,6 +790,10 @@ describe('NotificationService', () => {
         name: 'mock-app',
         send: vi.fn().mockResolvedValue({ id: 'app-1', status: 'sent', sentAt: new Date() }),
       });
+      mocks.mockLimit.mockResolvedValueOnce([{ id: 'member-42' }]);
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
 
       await service.send({
         organizationId: 'org-1',
@@ -1447,6 +1461,38 @@ describe('processPendingNotifications', () => {
 
     const result = await processPendingNotifications(10);
     expect(result).toEqual({ processed: 1, succeeded: 0, failed: 1 });
+  });
+
+  it('does not deliver queued notifications to inactive former recipients', async () => {
+    const service = getNotificationService();
+    const sendSpy = vi.spyOn(service, 'send');
+
+    mocks.mockLimit
+      .mockResolvedValueOnce([
+        {
+          id: 'q-former',
+          payload: {
+            organizationId: 'org-1',
+            recipientId: 'former-user',
+            recipientEmail: 'former@example.com',
+            type: 'email',
+            body: 'Sensitive case update',
+          },
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+    mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+    mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+
+    const result = await processPendingNotifications(10);
+    const sendResult = await sendSpy.mock.results[0].value;
+
+    expect(result).toEqual({ processed: 1, succeeded: 0, failed: 1 });
+    expect(sendResult).toMatchObject({
+      status: 'failed',
+      failureReason: 'Recipient is not active in organization',
+    });
   });
 });
 

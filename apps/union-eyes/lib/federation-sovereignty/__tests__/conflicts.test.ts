@@ -131,6 +131,27 @@ describe('conflict resolver', () => {
       const result = detectAuditVisibilityDisagreement(national, 'national');
       expect(result.conflictDetected).toBe(false);
     });
+
+    it('treats synthetic LIUNA central raw-detail requests beyond local visibility as a governance disagreement', () => {
+      const liunaLocal: SovereignGovernanceContract = {
+        ...local,
+        federationId: 'liuna-local-900-synthetic',
+        auditVisibility: 'regional',
+      };
+
+      const nationalRawRequest = detectAuditVisibilityDisagreement(liunaLocal, 'national');
+      const federatedRawRequest = detectAuditVisibilityDisagreement(liunaLocal, 'federated');
+      const opdcSummaryRequest = detectAuditVisibilityDisagreement(liunaLocal, 'regional');
+
+      expect(nationalRawRequest.conflictDetected).toBe(true);
+      expect(nationalRawRequest.conflictType).toBe('audit-visibility-disagreement');
+      expect(nationalRawRequest.diagnostics).toMatchObject({
+        permittedScope: 'regional',
+        requestedScope: 'national',
+      });
+      expect(federatedRawRequest.conflictDetected).toBe(true);
+      expect(opdcSummaryRequest.conflictDetected).toBe(false);
+    });
   });
 
   describe('detectEscalationDeadlock', () => {

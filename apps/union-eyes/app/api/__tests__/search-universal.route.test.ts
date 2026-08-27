@@ -129,4 +129,38 @@ describe('search/universal route', () => {
     expect(payload.data.groups.cases.length).toBeGreaterThan(0);
     expect(payload.data.groups.documents.length).toBeGreaterThan(0);
   });
+
+  it('filters governance-denied documents out of search results', async () => {
+    const { GET } = await loadRoute();
+    m.hasMinRole.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false });
+    m.isDocumentVisibleByPolicy.mockReturnValue(false);
+
+    m.queueSelect(
+      [],
+      [
+        {
+          id: 'doc_privileged',
+          title: 'Privileged transition memo',
+          filename: 'privileged-transition-memo.pdf',
+          documentType: 'memo',
+          privacyLabel: 'privileged',
+          updatedAt: new Date().toISOString(),
+          linkedEntityType: 'grievance',
+          linkedEntityId: 'case_restricted',
+        },
+      ],
+      [],
+      [],
+      [],
+      [],
+    );
+
+    const response = await GET(new NextRequest('http://localhost/api/search/universal?q=transition'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.groups.documents).toEqual([]);
+    expect(payload.data.totals.documents).toBe(0);
+  });
 });

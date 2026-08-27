@@ -1,6 +1,6 @@
 # Repo Excellence Audit
 
-Generated: 2026-08-27T01:23:55.323Z
+Generated: 2026-08-27T20:40:36.543Z
 
 Overall score: 7 / 10
 
@@ -30,7 +30,7 @@ Overall score: 7 / 10
 - [duplication] Duplicate script bodies remain: inventory:check, docs:sync
 - [script_sprawl] Root script count is 304.
 - [script_sprawl] Root command surface is still dense and benefits from continued pruning.
-- [docs_truth] 903 indexed documents are stale by repo-mtime policy (>90 days).
+- [docs_truth] 927 indexed documents are stale by repo-mtime policy (>90 days).
 - [ci_efficiency] Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml
 - [ci_efficiency] App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml
 - [ci_efficiency] Effective active workflow count is 50 (total 53, emergency/manual 3).

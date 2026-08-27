@@ -7,7 +7,7 @@
 
 import { db } from "@/db/db";
 import { organizations, organizationMembers } from "@/db/schema-organizations";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { authOrganizationUsers } from '@nzila/db/schema'
 import { cookies } from "next/headers";
 import { logger } from "./logger";
@@ -86,7 +86,9 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
           .where(
             and(
               eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID)
+              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID),
+              eq(organizationMembers.status, 'active'),
+              isNull(organizationMembers.deletedAt),
             )
           )
           .limit(1);
@@ -104,7 +106,9 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
           .where(
             and(
               eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, orgById[0].id)
+              eq(organizationMembers.organizationId, orgById[0].id),
+              eq(organizationMembers.status, 'active'),
+              isNull(organizationMembers.deletedAt),
             )
           )
           .limit(1);
@@ -157,7 +161,9 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
           .where(
             and(
               eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID)
+              eq(organizationMembers.organizationId, DEFAULT_ORGANIZATION_ID),
+              eq(organizationMembers.status, 'active'),
+              isNull(organizationMembers.deletedAt),
             )
           )
           .limit(1);
@@ -177,7 +183,9 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
           .where(
             and(
               eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, org[0].id)
+              eq(organizationMembers.organizationId, org[0].id),
+              eq(organizationMembers.status, 'active'),
+              isNull(organizationMembers.deletedAt),
             )
           )
           .limit(1);
@@ -243,7 +251,13 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
     const userOrgs = await db
       .select({ organizationId: organizationMembers.organizationId })
       .from(organizationMembers)
-      .where(eq(organizationMembers.userId, userId))
+      .where(
+        and(
+          eq(organizationMembers.userId, userId),
+          eq(organizationMembers.status, 'active'),
+          isNull(organizationMembers.deletedAt),
+        ),
+      )
       .limit(1);
     
     if (userOrgs.length > 0 && userOrgs[0].organizationId) {
@@ -362,7 +376,9 @@ export async function userHasOrganizationAccess(
       .where(
         and(
           eq(organizationMembers.userId, userId),
-          eq(organizationMembers.organizationId, organizationId)
+          eq(organizationMembers.organizationId, organizationId),
+          eq(organizationMembers.status, 'active'),
+          isNull(organizationMembers.deletedAt),
         )
       )
       .limit(1);
@@ -421,7 +437,8 @@ export async function getUserRoleInOrganization(
         and(
           eq(organizationMembers.userId, userId),
           eq(organizationMembers.organizationId, organizationId),
-          eq(organizationMembers.status, 'active')
+          eq(organizationMembers.status, 'active'),
+          isNull(organizationMembers.deletedAt),
         )
       )
       .limit(1);
@@ -476,4 +493,3 @@ export async function getUserRoleInOrganization(
     return null;
   }
 }
-
