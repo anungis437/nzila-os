@@ -402,6 +402,79 @@ describe('file storage', () => {
   it('getChangeRecordsDir resolves explicit base dir', () => {
     expect(getChangeRecordsDir(testDir)).toBe(testDir)
   })
+
+  describe('findApprovedChange', () => {
+    const activeStart = new Date(now.getTime() - 86400_000).toISOString()
+    const activeEnd = new Date(now.getTime() + 86400_000).toISOString()
+    const staleStart = new Date(now.getTime() - 30 * 86400_000).toISOString()
+    const staleEnd = new Date(now.getTime() - 5 * 86400_000).toISOString()
+    const futureStart = new Date(now.getTime() + 5 * 86400_000).toISOString()
+    const futureEnd = new Date(now.getTime() + 10 * 86400_000).toISOString()
+
+    it('prefers a record whose window contains now over a stale APPROVED predecessor', () => {
+      saveChangeRecord(
+        baseChange({
+          change_id: 'CHG-2026-0001',
+          service: 'union-eyes',
+          environment: 'PROD',
+          implementation_window_start: staleStart,
+          implementation_window_end: staleEnd,
+        }),
+        { baseDir: testDir },
+      )
+      saveChangeRecord(
+        baseChange({
+          change_id: 'CHG-2026-0002',
+          service: 'union-eyes',
+          environment: 'PROD',
+          implementation_window_start: activeStart,
+          implementation_window_end: activeEnd,
+        }),
+        { baseDir: testDir },
+      )
+
+      const picked = findApprovedChange('PROD', 'union-eyes', { baseDir: testDir, now })
+      expect(picked?.change_id).toBe('CHG-2026-0002')
+    })
+
+    it('falls back to the record with the latest window start when none are active', () => {
+      saveChangeRecord(
+        baseChange({
+          change_id: 'CHG-2026-0001',
+          service: 'union-eyes',
+          environment: 'PROD',
+          implementation_window_start: staleStart,
+          implementation_window_end: staleEnd,
+        }),
+        { baseDir: testDir },
+      )
+      saveChangeRecord(
+        baseChange({
+          change_id: 'CHG-2026-0002',
+          service: 'union-eyes',
+          environment: 'PROD',
+          implementation_window_start: futureStart,
+          implementation_window_end: futureEnd,
+        }),
+        { baseDir: testDir },
+      )
+
+      const picked = findApprovedChange('PROD', 'union-eyes', { baseDir: testDir, now })
+      expect(picked?.change_id).toBe('CHG-2026-0002')
+    })
+
+    it('returns null when no APPROVED records match env + service', () => {
+      saveChangeRecord(
+        baseChange({
+          change_id: 'CHG-2026-0001',
+          service: 'web',
+          environment: 'PROD',
+        }),
+        { baseDir: testDir },
+      )
+      expect(findApprovedChange('PROD', 'union-eyes', { baseDir: testDir, now })).toBeNull()
+    })
+  })
 })
 
 // ── Deployment Validation ───────────────────────────────────────────────────
