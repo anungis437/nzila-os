@@ -8,9 +8,9 @@
   "risk_level": "LOW",
   "impact_summary": "Documentation and SoT-only deploy for union-eyes. No union-eyes app-code changes, no schema migrations, no runtime dependency changes. Rollback via previous image digest if needed.",
   "requested_by": "platform-team",
-  "approvers_required": [],
-  "approved_by": [],
-  "approval_status": "PROPOSED",
+  "approvers_required": ["anungis437"],
+  "approved_by": ["anungis437"],
+  "approval_status": "APPROVED",
   "implementation_window_start": "2026-08-27T00:00:00.000Z",
   "implementation_window_end": "2026-09-27T23:59:59.000Z",
   "rollback_plan": "Revert to previous stable union-eyes container image digest (the digest deployed under CHG-2026-0107 window). Since PR #693 introduced no union-eyes runtime code changes, rollback risk is minimal.",
@@ -23,7 +23,7 @@
   "linked_commits": [
     "0ef66af3d1202e42e2d009a8570fe6c9f860e1b1"
   ],
-  "status": "PROPOSED",
+  "status": "APPROVED",
   "created_at": "2026-08-27T11:40:00.000Z",
-  "updated_at": "2026-08-27T11:40:00.000Z"
+  "updated_at": "2026-08-27T11:45:00.000Z"
 }
