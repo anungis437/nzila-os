@@ -2,7 +2,9 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: abr
-  description: CourtLens (package @nzila/abr) — governed access-to-justice and legal matter-intelligence platform on the ABR technical substrate; retains FAIRCASE tribunal-intelligence capabilities.
+  description: CourtLens (package @nzila/abr) — governed access-to-justice and
+    legal matter-intelligence platform on the ABR technical substrate; retains
+    FAIRCASE tribunal-intelligence capabilities.
   annotations:
     github.com/project-slug: anungis437/nzila-os
     backstage.io/techdocs-ref: dir:./docs
