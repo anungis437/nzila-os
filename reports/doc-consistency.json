@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-27T01:23:27.718Z",
-  "filesScanned": 2324,
+  "generatedAt": "2026-08-27T13:27:24.614Z",
+  "filesScanned": 2325,
   "totalFindings": 2802,
   "findingsByRule": {
     "stale-reference": 1032,
@@ -18822,7 +18822,7 @@
       "severity": "info",
       "file": "docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md",
       "line": 475,
-      "message": "Document date \"April 23, 2026\" is 125 days old — may be stale"
+      "message": "Document date \"April 23, 2026\" is 126 days old — may be stale"
     },
     {
       "rule": "stale-date",
