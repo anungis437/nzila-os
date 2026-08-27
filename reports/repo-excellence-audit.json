@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T01:23:55.323Z",
+  "generatedAt": "2026-08-27T20:40:36.543Z",
   "overallScore": 7,
   "categories": {
     "runtime_proof": {
@@ -29,7 +29,7 @@
     "docs_truth": {
       "score": 0,
       "findings": [
-        "903 indexed documents are stale by repo-mtime policy (>90 days)."
+        "927 indexed documents are stale by repo-mtime policy (>90 days)."
       ]
     },
     "naming_consistency": {
@@ -85,7 +85,7 @@
     },
     {
       "category": "docs_truth",
-      "finding": "903 indexed documents are stale by repo-mtime policy (>90 days)."
+      "finding": "927 indexed documents are stale by repo-mtime policy (>90 days)."
     },
     {
       "category": "ci_efficiency",

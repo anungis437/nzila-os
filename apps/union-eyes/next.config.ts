@@ -386,7 +386,7 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       immutable: require.resolve('immutable/dist/immutable.js'),
-      'js-yaml': require.resolve('js-yaml/dist/js-yaml.cjs'),
+      'js-yaml': require.resolve('js-yaml'),
     };
 
     // Reduce memory usage

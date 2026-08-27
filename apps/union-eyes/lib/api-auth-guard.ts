@@ -45,7 +45,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser as platformCurrentUser } from '@nzila/platform-auth/entra/server';
 import { cookies } from 'next/headers';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema';
 import { users } from '@/db/schema/domains/member';
@@ -402,6 +402,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
               and(
                 eq(organizationMembers.userId, pgUser.id),
                 eq(organizationMembers.organizationId, pgUser.organizationId),
+                eq(organizationMembers.status, 'active'),
+                isNull(organizationMembers.deletedAt),
               ),
             )
             .limit(1);
@@ -516,6 +518,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
                   and(
                     eq(organizationMembers.userId, userId),
                     eq(organizationMembers.organizationId, cookieOrgId),
+                    eq(organizationMembers.status, 'active'),
+                    isNull(organizationMembers.deletedAt),
                   ),
                 )
                 .limit(1);
@@ -2148,4 +2152,3 @@ export async function requireAuth(): Promise<AuthUser> {
   
   return user;
 }
-

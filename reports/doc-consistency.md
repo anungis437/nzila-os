@@ -1,12 +1,12 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-27T16:51:42.854Z
+> Generated: 2026-08-27T20:40:31.319Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2366 |
+| Files Scanned | 2394 |
 | Total Findings | 2802 |
 | Errors | 0 |
 | Warnings | 1224 |
@@ -2320,7 +2320,7 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:1019` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:1050` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:164` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:123` — "evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:153` — "Evidence bundle" should be "evidence pack" (evidence artifact)

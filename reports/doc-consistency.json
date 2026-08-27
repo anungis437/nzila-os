@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-27T16:51:42.854Z",
-  "filesScanned": 2366,
+  "generatedAt": "2026-08-27T20:40:31.319Z",
+  "filesScanned": 2394,
   "totalFindings": 2802,
   "findingsByRule": {
     "stale-reference": 1032,
@@ -16049,7 +16049,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/documentation-index.md",
-      "line": 1019,
+      "line": 1050,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
     },
     {

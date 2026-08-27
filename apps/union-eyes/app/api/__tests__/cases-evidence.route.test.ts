@@ -126,4 +126,58 @@ describe('cases/[caseId]/evidence route', () => {
     expect(result).toMatchObject({ deleted: true });
     expect(m.deleteBlob).toHaveBeenCalled();
   });
+
+  it('DELETE blocks evidence removal when the case is under legal hold', async () => {
+    const { DELETE } = await loadRoute();
+    m.executeQueue.push([{
+      claimId: 'claim_1',
+      claimNumber: 'CLM-1',
+      metadata: { legalHold: { active: true, matterId: 'liuna-sensitive-matter' } },
+      attachments: [{ url: 'https://blob/evidence.pdf', pathname: 'cases/claim_1/evidence.pdf', fileName: 'evidence.pdf' }],
+    }]);
+
+    await expect(
+      DELETE({
+        params: { caseId: 'CLM-1' },
+        organizationId: 'org_1',
+        userId: 'user_1',
+        request: new NextRequest('http://localhost/api/cases/CLM-1/evidence?fileUrl=https://blob/evidence.pdf', { method: 'DELETE' }),
+      } as any),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: 'Document is under legal hold',
+    });
+
+    expect(m.deleteBlob).not.toHaveBeenCalled();
+    expect(m.auditCaseMutation).not.toHaveBeenCalled();
+  });
+
+  it('DELETE blocks evidence removal when the attachment is retained', async () => {
+    const { DELETE } = await loadRoute();
+    m.executeQueue.push([{
+      claimId: 'claim_1',
+      claimNumber: 'CLM-1',
+      attachments: [{
+        url: 'https://blob/evidence.pdf',
+        pathname: 'cases/claim_1/evidence.pdf',
+        fileName: 'evidence.pdf',
+        metadata: { retention: { until: '2099-01-01T00:00:00.000Z' } },
+      }],
+    }]);
+
+    await expect(
+      DELETE({
+        params: { caseId: 'CLM-1' },
+        organizationId: 'org_1',
+        userId: 'user_1',
+        request: new NextRequest('http://localhost/api/cases/CLM-1/evidence?fileUrl=https://blob/evidence.pdf', { method: 'DELETE' }),
+      } as any),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: 'Document is retained until 2099-01-01T00:00:00.000Z',
+    });
+
+    expect(m.deleteBlob).not.toHaveBeenCalled();
+    expect(m.auditCaseMutation).not.toHaveBeenCalled();
+  });
 });

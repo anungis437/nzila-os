@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-27T01:23:47.965Z",
-  "totalDocuments": 1656,
-  "staleDocuments": 903,
+  "generatedAt": "2026-08-27T20:40:33.534Z",
+  "totalDocuments": 1726,
+  "staleDocuments": 927,
   "categories": [
     {
       "category": "CIVIC_OCI_ALIGNMENT.md",
@@ -40,7 +40,7 @@
     },
     {
       "category": "categories",
-      "count": 925,
+      "count": 953,
       "staleCount": 725
     },
     {
@@ -104,6 +104,11 @@
       "staleCount": 0
     },
     {
+      "category": "nzila-field-operations",
+      "count": 15,
+      "staleCount": 12
+    },
+    {
       "category": "nzila-finalization",
       "count": 11,
       "staleCount": 0
@@ -119,9 +124,19 @@
       "staleCount": 0
     },
     {
+      "category": "nzila-operational-proving",
+      "count": 11,
+      "staleCount": 5
+    },
+    {
       "category": "nzila-residual-closure",
       "count": 13,
       "staleCount": 10
+    },
+    {
+      "category": "nzila-rollout-governance",
+      "count": 15,
+      "staleCount": 7
     },
     {
       "category": "nzila-runtime-integrity",
@@ -180,7 +195,7 @@
     },
     {
       "category": "readiness",
-      "count": 18,
+      "count": 19,
       "staleCount": 0
     },
     {
@@ -3735,7 +3750,7 @@
     {
       "path": "docs/categories/platform-and-operations/runbooks/branching-tagging-governance.md",
       "category": "categories",
-      "lastValidated": "2026-07-18",
+      "lastValidated": "2026-08-27",
       "stale": false
     },
     {
@@ -4913,6 +4928,174 @@
       "category": "categories",
       "lastValidated": "2026-05-11",
       "stale": true
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/00-audit-charter-and-baseline.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/01-institutional-profile-and-assumptions.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/02-surface-inventory.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/03-domain-and-scenario-matrix.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/04-evidence-and-validation-register.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/05-findings-and-remediation-backlog.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/06-video-claim-proof-matrix.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/07-oci-workshop-opportunity.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/09-pre-video-synthetic-scenario.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/10-recording-script-and-shot-list.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/11-pre-video-claim-lock.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/12-gate-2-continuity-authorization-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/13-gate-3a-confidential-document-boundary-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/15-gate-4-leadership-transition-fixture.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/16-gate-5-federated-visibility-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/18-gate-7-evidence-export-boundary-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/19-gate-8-legal-hold-retention-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/20-gate-9-ai-advisory-boundary-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/22-gate-10-notification-offboarding-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/23-gate-10b-session-direct-link-offboarding-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/24-gate-10c-pending-ai-action-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/25-gate-11-case-evidence-legal-hold-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/26-gate-12-central-aggregate-reporting-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md",
+      "category": "categories",
+      "lastValidated": "2026-08-27",
+      "stale": false
     },
     {
       "path": "docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md",
@@ -6931,6 +7114,96 @@
       "stale": true
     },
     {
+      "path": "docs/nzila-field-operations/cross-app-field-operations-consistency.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/environment-lifecycle-governance.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/executive-briefing-rhythm.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/field-operations-readiness-review.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/field-operations-workflow-fabric.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/governance-review-cadence.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/institutional-field-operations-framework.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/live-operational-readiness-system.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/master-field-operations-index.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-field-operations/onboarding-governance-operations.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/operational-legitimacy-audit-system.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-field-operations/operational-rehearsal-governance.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/operator-cadence-system.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-field-operations/pilot-execution-discipline.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-field-operations/stabilization-operations-system.md",
+      "category": "nzila-field-operations",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
       "path": "docs/nzila-finalization/canonical-operating-system-navigation.md",
       "category": "nzila-finalization",
       "lastValidated": "2026-07-18",
@@ -7135,6 +7408,72 @@
       "stale": false
     },
     {
+      "path": "docs/nzila-operational-proving/cross-app-operational-convergence-proving.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-operational-proving/environment-restoration-proving.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-operational-proving/executive-operational-readability-proving.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-operational-proving/full-environment-traversal-rehearsal.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-operational-proving/live-cadence-sustainability-validation.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-operational-proving/live-operator-walkthrough-program.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-operational-proving/live-pilot-operations-proving.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-operational-proving/live-rollback-proving.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-operational-proving/master-operational-proving-index.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-operational-proving/phase-c-final-readiness-review.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-operational-proving/promotion-refusal-proving.md",
+      "category": "nzila-operational-proving",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
       "path": "docs/nzila-residual-closure/full-residual-elimination-review.md",
       "category": "nzila-residual-closure",
       "lastValidated": "2026-07-18",
@@ -7211,6 +7550,96 @@
       "category": "nzila-residual-closure",
       "lastValidated": "2026-05-11",
       "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/continuity-safe-rollout-system.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/cross-environment-governance-fabric.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/demo-governance-system.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/environment-legitimacy-visibility.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/environment-promotion-governance.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-08-27",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/governed-rollback-system.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/institutional-onboarding-governance.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/master-rollout-governance-index.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/operational-rollout-workflows.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/operator-rollout-workflows.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/pilot-governance-system.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/release-governance-cadence.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-05-11",
+      "stale": true
+    },
+    {
+      "path": "docs/nzila-rollout-governance/rollout-attestation-fabric.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/rollout-governance-readiness-review.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-07-18",
+      "stale": false
+    },
+    {
+      "path": "docs/nzila-rollout-governance/rollout-legitimacy-review-system.md",
+      "category": "nzila-rollout-governance",
+      "lastValidated": "2026-07-18",
+      "stale": false
     },
     {
       "path": "docs/nzila-runtime-integrity/final-runtime-integrity-review.md",
@@ -9131,6 +9560,12 @@
       "category": "public",
       "lastValidated": "2026-05-11",
       "stale": true
+    },
+    {
+      "path": "docs/readiness/asap-readiness-roadmap-2026-08-27.md",
+      "category": "readiness",
+      "lastValidated": "2026-08-27",
+      "stale": false
     },
     {
       "path": "docs/readiness/azure-production-baseline.md",

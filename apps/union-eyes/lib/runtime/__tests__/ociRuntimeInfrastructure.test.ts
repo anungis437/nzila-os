@@ -459,6 +459,205 @@ describe('onboarding runtime layers', () => {
   });
 });
 
+describe('LIUNA-style leadership transition fixture', () => {
+  const LIUNA_SCOPE = 'institution:liuna-opdc-cecof-synthetic';
+
+  it('composes a planned leadership transition as successor-readable institutional context', () => {
+    const onboarding = readOnboardingSurvivability(
+      [
+        fxOnboarding({
+          recordId: 'liuna-onboarding-1',
+          institutionScope: LIUNA_SCOPE,
+          workflowRefId: 'workflow:ontario-infrastructure-continuity-review',
+          completionsRecorded: 8,
+          contextPreservedBand: 'holding',
+          reconstructionBurdenBand: 'stabilizing',
+        }),
+      ],
+      LIUNA_SCOPE,
+    );
+    const transfer = readTransferContinuity(
+      [
+        fxTransfer({
+          transferId: 'liuna-transfer-1',
+          institutionScope: LIUNA_SCOPE,
+          originRoleState: 'role:outgoing-senior-officer',
+          destinationRoleState: 'role:authorized-successor-reviewer',
+          continuityCarriedBand: 'holding',
+        }),
+      ],
+      LIUNA_SCOPE,
+    );
+
+    const successor = readSuccessorStewardship(onboarding, transfer);
+
+    expect(successor.institutionScope).toBe(LIUNA_SCOPE);
+    expect(successor.survivabilityBand).toBe('stabilizing');
+    expect(successor.continuityCarriedBand).toBe('holding');
+    expect(successor.successorReadinessBand).toBe('stabilizing');
+    expect(successor.statement).toContain('stabilizing');
+    for (const signal of successor.signals) assertTone(signal.statement);
+  });
+
+  it('refuses to compose OPDC and local readings when institution scopes differ', () => {
+    const opdcOnboarding = readOnboardingSurvivability(
+      [
+        fxOnboarding({
+          recordId: 'opdc-onboarding-1',
+          institutionScope: LIUNA_SCOPE,
+          workflowRefId: 'workflow:opdc-review',
+        }),
+      ],
+      LIUNA_SCOPE,
+    );
+    const localTransfer = readTransferContinuity(
+      [
+        fxTransfer({
+          transferId: 'local-transfer-1',
+          institutionScope: 'institution:local-900-synthetic',
+          originRoleState: 'role:local-outgoing',
+          destinationRoleState: 'role:local-successor',
+        }),
+      ],
+      'institution:local-900-synthetic',
+    );
+
+    const successor = readSuccessorStewardship(opdcOnboarding, localTransfer);
+
+    expect(successor.successorReadinessBand).toBe('not_yet_readable');
+    expect(successor.signals[0]?.signalId).toBe('successor_stewardship:institution_scope_mismatch');
+    assertTone(successor.statement);
+  });
+
+  it('builds a human-readable continuity narrative from synthetic transition evidence', () => {
+    const store = createInMemoryLineageStore();
+    recordRationale(
+      fxRationale('liuna-memory-1', {
+        institutionScope: LIUNA_SCOPE,
+        subjectRefId: 'GRV-ONT-2041',
+        rationaleStatement: 'The transition review team recorded why the next action remains assigned to the authorized successor.',
+      }),
+      store,
+    );
+    const memory = summarizeGovernanceMemory(store, {
+      reviewerRefId: 'reviewer:authorized-successor',
+      institutionScope: LIUNA_SCOPE,
+    });
+
+    const ledger = createContinuityLedger();
+    ledger.appendFromEvent(
+      fxEvent({
+        eventId: 'liuna-event-1',
+        institutionScope: LIUNA_SCOPE,
+        statement: 'A leadership transition review was recorded for a synthetic matter.',
+      }),
+      'governance_lineage',
+      'liuna-ledger-1',
+    );
+    const ledgerSum = readLedgerSummary(ledger, {
+      reviewerRefId: 'reviewer:authorized-successor',
+      institutionScope: LIUNA_SCOPE,
+    });
+
+    const onboarding = readOnboardingSurvivability(
+      [
+        fxOnboarding({
+          recordId: 'liuna-onboarding-2',
+          institutionScope: LIUNA_SCOPE,
+          completionsRecorded: 8,
+          contextPreservedBand: 'holding',
+          reconstructionBurdenBand: 'holding',
+        }),
+      ],
+      LIUNA_SCOPE,
+    );
+    const transfer = readTransferContinuity(
+      [
+        fxTransfer({
+          transferId: 'liuna-transfer-2',
+          institutionScope: LIUNA_SCOPE,
+          continuityCarriedBand: 'holding',
+        }),
+      ],
+      LIUNA_SCOPE,
+    );
+    const successor = readSuccessorStewardship(onboarding, transfer);
+    const stewardship = readStewardshipConcentration(
+      [
+        fxTransfer({
+          transferId: 'liuna-transfer-2',
+          institutionScope: LIUNA_SCOPE,
+          destinationRoleState: 'role:authorized-successor-reviewer',
+        }),
+        fxTransfer({
+          transferId: 'liuna-transfer-3',
+          institutionScope: LIUNA_SCOPE,
+          destinationRoleState: 'role:central-review-backup',
+        }),
+        fxTransfer({
+          transferId: 'liuna-transfer-4',
+          institutionScope: LIUNA_SCOPE,
+          destinationRoleState: 'role:local-review-backup',
+        }),
+      ],
+      LIUNA_SCOPE,
+    );
+    const traceability = readGovernanceTraceability({
+      institutionScope: LIUNA_SCOPE,
+      events: [
+        fxEvent({
+          eventId: 'liuna-event-1',
+          institutionScope: LIUNA_SCOPE,
+        }),
+      ],
+      lineageReferences: [
+        {
+          refKind: 'governance_ratification',
+          refId: 'transition-review-approval',
+          institutionScope: LIUNA_SCOPE,
+          statedAt: '2026-01-01T00:00:00Z',
+        },
+      ],
+      memoryReferences: [
+        {
+          memoryId: 'liuna-memory-1',
+          recordedAt: '2026-01-02T00:00:00Z',
+          institutionScope: LIUNA_SCOPE,
+          subjectKind: 'governance_decision',
+          reviewerRefId: 'reviewer:authorized-successor',
+        },
+      ],
+    });
+    const readiness = readRuntimeReadiness(
+      {
+        stabilizationMaturity: 'sufficient',
+        governanceRatification: 'sufficient',
+        redistributionPathways: 'sufficient',
+        continuityDebt: 'not_yet_sufficient',
+        onboardingSurvivability: 'sufficient',
+        runtimeEthicsAlignment: 'sufficient',
+      },
+      LIUNA_SCOPE,
+    );
+
+    const narrative = composeRuntimeContinuityNarrative({
+      institutionScope: LIUNA_SCOPE,
+      memory,
+      ledger: ledgerSum,
+      onboarding,
+      successor,
+      stewardship,
+      traceability,
+      readiness,
+    });
+
+    expect(narrative.readableForExecutive).toBe(true);
+    expect(narrative.paragraphs.length).toBeGreaterThanOrEqual(8);
+    expect(narrative.paragraphs.join('\n')).toContain(LIUNA_SCOPE);
+    for (const paragraph of narrative.paragraphs) assertTone(paragraph);
+  });
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Workflow runtime + hooks
 // ─────────────────────────────────────────────────────────────────────────────
