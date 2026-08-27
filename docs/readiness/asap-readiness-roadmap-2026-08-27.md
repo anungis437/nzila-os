@@ -6,16 +6,16 @@ Local path: `C:\APPS\nzila-automation`
 
 ## Current Position
 
-ASAP readiness has moved out of application-runtime remediation and into final
-governance/evidence disposition.
+ASAP readiness has moved out of application-runtime remediation, security
+cleanup, and CI/GitOps stabilization into final evidence sealing.
 
 PR #673 was merged into `main` and the follow-on mainline convergence commits
 have passed the principal repository and deployment gates. As of this record,
 `main` includes:
 
 - PR #673 merge commit: `a39a818b44fcbc2162285eb4873d9ee61030099a`
-- Last verified pre-record main SHA: `79cb6b1053af51f3e02e3654bde4730c499b1af3`
-- GitOps deployment at `e1be4834f1c6f791b78960d91748daaa99bac4da`: `SUCCESS`
+- Final green mainline SHA: `408d23847c3daca8f3dc7b52a2af2c31d58e4136`
+- GitOps deployment at `408d23847c3daca8f3dc7b52a2af2c31d58e4136`: `SUCCESS`
 
 ## Closed Roots
 
@@ -34,13 +34,16 @@ have passed the principal repository and deployment gates. As of this record,
 
 ## Current Gate Evidence
 
-At `e1be4834f1c6f791b78960d91748daaa99bac4da`, GitHub Actions reported
-successful terminal status for CI, E2E Tests, Reliability Guard, Nzila Governance
-Gate, Nzila GA Gate, Release Governance, Portfolio Governance, Secret Scan,
-SBOM Generation, CodeQL, and GitOps Deploy.
+At `408d23847c3daca8f3dc7b52a2af2c31d58e4136`, GitHub Actions reported
+successful terminal status for CI, Reliability Guard, GitOps Deploy, Nzila
+Governance Gate, Nzila GA Gate, Release Governance, Portfolio Governance,
+Secret Scan, SBOM Generation, CodeQL, Dependency Audit, Supply Chain Waiver
+Expiry, Ops Documentation Pack, Evidence Pack Generation, and Evidence Seal
+Verification.
 
 The GitOps deployment completed staging deploy, post-deploy health checks, smoke
-tests, version drift check, and deployment evidence upload successfully.
+tests, version drift check, deployment evidence upload, and smoke report upload
+successfully.
 
 Local follow-on validation for this record passed:
 
@@ -49,34 +52,42 @@ Local follow-on validation for this record passed:
 - `pnpm contract-tests -- tooling/contract-tests/app-maturity-enforcement.test.ts tooling/contract-tests/portfolio-governance.test.ts`
 - `pnpm audit --audit-level high`
 - `pnpm test:fast`
+- `pnpm final:go`
+- `pnpm gate-authority:validate`
+- `pnpm ops:prove`
 
-## Open Items
+## Final Dispositions
 
 | Item | State | Disposition |
 | --- | --- | --- |
-| B3 Ops evidence freshness | Needs re-evaluation on current main | Engineering/evidence |
-| DORA deployment frequency threshold | Governance disposition required if below threshold | Governance |
+| B3 Ops evidence freshness | CLOSED / PROVEN | CI Ops Documentation Pack passed on final green SHA |
+| DORA deployment frequency threshold | DISPOSITIONED / NON-BLOCKING FOR PR #673 | Treated as operational health signal during structured convergence, not a per-PR merge invariant |
+| Operational proving corpus | CLOSED / PROVEN | Active proving docs restored from governed archive; `pnpm ops:prove` passes |
 | Union Eyes Blob topology | Open separate architecture decision | Architecture |
 | Zonga middleware readiness | Open non-AZ core item | Product/runtime |
 | Agrimo authority readiness | Open non-AZ core item | Product/runtime |
-| EV-R seal | Open until final evidence/governance decision | Release governance |
+| EV-R seal | ELIGIBLE | Evidence Seal Verification and Final GO are green |
 
-## Next Authorized Sequence
+## Remaining Non-Blocking Backlog
 
-1. Re-evaluate B3 Ops evidence on current `main` without changing thresholds or
-   fabricating Azure Cost Management data.
-2. If cost evidence is available, refresh only canonical Ops evidence and run
-   the Ops pack validator.
-3. Preserve any DORA threshold miss as a truthful governance blocker, not an
-   engineering freshness defect.
-4. Refresh release narrative only after B3/DORA disposition is final.
-5. Decide EV-R seal only after the final evidence ledger and governance
-   disposition are explicit.
+1. Resolve the Union Eyes Blob topology as a separate architecture decision.
+2. Work Zonga middleware readiness as a non-AZ product/runtime item.
+3. Work Agrimo authority readiness as a non-AZ product/runtime item.
+4. Continue monitoring DORA deployment frequency as an operational KPI without
+   fabricating deployments or changing the metric threshold.
 
 ## Roadmap Classification
 
 ASAP_READINESS_ENGINEERING: CLOSED / PROVEN
 
-ASAP_READINESS_GOVERNANCE: OPEN / FINAL_DISPOSITION_REQUIRED
+ASAP_READINESS_SECURITY: CLOSED / PROVEN
 
-EV-R: OPEN / UNSEALED
+ASAP_READINESS_OPS_GATES: CLOSED / PROVEN
+
+ASAP_READINESS_CI: CLOSED / PROVEN
+
+ASAP_READINESS_GITOPS: CLOSED / PROVEN
+
+ASAP_READINESS: GREEN / CONVERGED
+
+EV-R: ELIGIBLE_FOR_SEAL

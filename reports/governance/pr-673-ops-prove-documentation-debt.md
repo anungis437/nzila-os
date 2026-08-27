@@ -1,8 +1,10 @@
 # PR #673 — `ops:prove` Documentation-Corpus Debt (Follow-Up)
 
-**Status:** `FOLLOW_UP_DOCUMENTATION_DEBT`
+**Status:** `CLOSED / PROVEN`
 **Recorded:** 2026-08-25
-**Not blocking:** This validator (`pnpm ops:prove`) is **not** in the GitHub Actions gate set for PR #673. All 92 non-DORA CI checks pass on `96fb43f47`.
+**Not blocking:** This validator (`pnpm ops:prove`) was **not** in the GitHub Actions gate set for PR #673. All final same-SHA mainline gates pass on `408d23847c3daca8f3dc7b52a2af2c31d58e4136`.
+
+**Closure:** The active operational-proving, field-operations, and rollout-governance corpora have been restored from the governed historical archive into the paths expected by the validator. `pnpm ops:prove` now passes.
 
 **Explicit scope boundary:** this record is **not** part of the DORA deployment-frequency disposition ([pr-673-dora-deployment-frequency-disposition.md](pr-673-dora-deployment-frequency-disposition.md)). Do not fold.
 
@@ -29,18 +31,21 @@ Full envelope for reproduction: `pnpm ops:prove` at HEAD `96fb43f47`.
 - No same-SHA CI gate depends on `ops:prove` output for merge eligibility.
 - Blocking PR #673 on these would be scope creep.
 
-## Recommended follow-up
+## Closure result
 
-Open a separate issue titled *"Ops proving corpus: restore master index cross-refs and add phase-c-final-readiness-review.md"* with:
+The following active corpora are present and linked:
 
-- Reproduction command: `pnpm ops:prove`
-- Full 14-item failure list from the validator output
-- Owner: Ops governance / documentation
-- Priority: normal (not merge-blocking)
-- Suggested SLA: independent from PR #673 merge
+- `docs/nzila-operational-proving/`
+- `docs/nzila-field-operations/`
+- `docs/nzila-rollout-governance/`
+
+Validation result:
+
+`pnpm ops:prove` -> `Operational proving: OK. (22 checks)`
 
 ## Non-actions
 
 - No product source modification.
-- No fabrication of doc content to make the validator green.
-- No suppression of the failing checks.
+- No fabricated documentation.
+- No suppressed checks.
+- Existing governed corpus content was promoted back to active documentation paths.

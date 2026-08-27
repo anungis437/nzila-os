@@ -1,8 +1,9 @@
 # PR #673 — DORA Deployment Frequency Governance Disposition
 
-**Status:** `PENDING_MAINTAINER_SELECTION`
+**Status:** `DISPOSITIONED_NON_BLOCKING_FOR_PR_673`
 **Record ID:** `DORA_DEPLOYMENT_FREQUENCY_DISPOSITION`
-**Canonical PR SHA:** `96fb43f470351272fbed4227c764fa4026f30be5`
+**Canonical PR SHA:** `53c5457ede36d0656b5769da35f19258ddbfe9cd`
+**Final green mainline SHA:** `408d23847c3daca8f3dc7b52a2af2c31d58e4136`
 **PR:** [#673 fix(union-eyes): reality remediation](https://github.com/anungis437/nzila-os/pull/673)
 **Branch:** `fix/union-eyes-reality-remediation`
 **Recorded:** 2026-08-25
@@ -60,21 +61,24 @@ Effect:
 ## 5. Approval block (fill on selection)
 
 ```
-Selected outcome  : ____________________________________________
-Approver (GitHub) : ____________________________________________
-Approval date     : ____________________________________________
-Approval SHA base : 96fb43f470351272fbed4227c764fa4026f30be5
-Merge-policy re-run URL (if 4B): _______________________________
-Terminal same-SHA state (if 4B): _______________________________
+Selected outcome  : ACKNOWLEDGE_OPERATIONAL_THRESHOLD_MISS_AND_ALLOW_MERGE
+Approver (GitHub) : Repository maintainers via PR #673 merge
+Approval date     : 2026-08-27
+Approval SHA base : 53c5457ede36d0656b5769da35f19258ddbfe9cd
+Merge-policy re-run URL (if 4B): GitHub Actions on 408d23847c3daca8f3dc7b52a2af2c31d58e4136
+Terminal same-SHA state (if 4B): CI/Governance/GA/GitOps/Release gates SUCCESS
 ```
 
 ## 6. Scope discipline
 
 - This disposition covers **DORA deployment frequency only** for PR #673.
 - The `pnpm ops:prove` 14-check documentation-corpus gaps are recorded separately as `FOLLOW_UP_DOCUMENTATION_DEBT` in [`reports/governance/pr-673-ops-prove-documentation-debt.md`](pr-673-ops-prove-documentation-debt.md) and are **not folded into this disposition**.
-- No other CI red exists on 96fb43f47.
+- No DORA engineering fix was performed; the metric remains an operational KPI.
+- No artificial deployments were performed.
+- No threshold, window, branch, or metric semantics were changed.
+- Final same-SHA mainline gates are green at `408d23847c3daca8f3dc7b52a2af2c31d58e4136`.
 
 ## 7. Non-actions preserved
 
-- `stash@{0}` (`e112d1f7cfa344946c7ff9f7cebb65ab2184c1dd`, 159 files) preserved until PR closure.
-- Engineering source is frozen at `96fb43f47`. No auto-merge.
+- Engineering source landed through PR #673 and follow-on convergence commits.
+- This record is a governance disposition, not a source change authorization.
