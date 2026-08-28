@@ -41,6 +41,7 @@ describe('continuity inheritance route', () => {
 
     expect(source).not.toMatch(/function\s+requireOrgAccess/);
     expect(source).not.toMatch(/return\s+true\s*;/);
-    expect(source).toContain("export { GET, POST, dynamic } from '../../onboarding/route'");
+    expect(source).toContain("export { GET, POST } from '../../onboarding/route'");
+    expect(source).toContain("export const dynamic = 'force-dynamic'");
   });
 });

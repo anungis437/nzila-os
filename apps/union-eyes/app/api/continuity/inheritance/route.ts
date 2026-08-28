@@ -1,4 +1,5 @@
 // Delegates to /api/onboarding — auth (withOrgScope, authorize(), withApi) is enforced by the delegated route.
-// Kept as a pure re-export per contract test in ../__tests__/continuity-inheritance.route.test.ts.
-export { GET, POST, dynamic } from '../../onboarding/route';
+// `dynamic` must be declared locally: Next.js/Turbopack forbids re-exporting route-segment config.
+export { GET, POST } from '../../onboarding/route';
+export const dynamic = 'force-dynamic';
 
