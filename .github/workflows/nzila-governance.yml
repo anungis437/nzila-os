@@ -70,19 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Dependency Audit
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Audit (fail on critical)
         run: node tooling/security/npm-bulk-audit.mjs --audit-level=critical --output=audit-report.json || true
@@ -163,19 +151,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Contract Tests
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run contract tests
         run: pnpm contract-tests
@@ -201,19 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     name: UE Evidence Pack + Verify
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Collect UE evidence artifacts
         working-directory: apps/union-eyes
@@ -391,19 +355,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Supply Chain Waiver Expiry
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Check waiver expiry dates
         run: |
@@ -434,19 +386,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Evidence Pack Generation
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Generate governance evidence pack (pack.json)
         run: |
@@ -528,19 +468,7 @@ jobs:
     name: Evidence Seal Verification
     needs: [evidence-pack]
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run evidence seal contract tests
         run: |
@@ -557,19 +485,7 @@ jobs:
     name: Red-Team Adversarial
     if: ${{ inputs.run-red-team == true || github.event_name == 'schedule' }}
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run red-team tests
         run: npx vitest run --config security/redteam/vitest.config.ts
@@ -596,19 +512,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Gate Authority
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Validate gate authority registry [BLOCKING]
         # Fails CI if any gate is missing/has an invalid classification, or if a

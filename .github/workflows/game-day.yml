@@ -64,17 +64,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Build resilience packages
         run: |
           pnpm --filter @nzila/os-core build 2>/dev/null || true

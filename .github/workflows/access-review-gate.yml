@@ -46,18 +46,7 @@ jobs:
     name: Access Review Attestation
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Validate access review attestation
         env:
           ACCESS_REVIEW_BYPASS: ${{ (github.event.inputs.bypass == 'true' || vars.ACCESS_REVIEW_BYPASS) && 'true' || 'false' }}

@@ -25,18 +25,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Typecheck all packages
         run: pnpm turbo run typecheck
 
@@ -79,20 +68,9 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
         with:
-          fetch-depth: 0
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+          fetch-depth: "0"
       - name: pnpm audit (no critical vulnerabilities)
         run: |
           node tooling/security/npm-bulk-audit.mjs --audit-level=critical
@@ -117,18 +95,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Build all apps
         run: pnpm turbo run build
 

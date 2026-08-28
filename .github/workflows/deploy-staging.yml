@@ -50,18 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Staging Pre-Deploy Gates
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Emergency acknowledgement gate (manual dispatch only)
         if: github.event_name == 'workflow_dispatch'
         run: |
@@ -108,18 +97,7 @@ jobs:
     outputs:
       artifact_digest: ${{ steps.digest.outputs.digest }}
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Build
         run: pnpm build
         env:
@@ -188,18 +166,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     environment: staging    # BR-4: binds the staging-scoped GitHub Environment identity
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       # BR-4: staging-scoped deployment identity. Fail closed if not configured;
       # never fall back to a shared credential that can reach production.
       - name: Assert staging deployment identity is configured (fail-closed)

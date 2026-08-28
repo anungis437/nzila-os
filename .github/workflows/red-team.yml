@@ -27,19 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Red-Team Adversarial Suite
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run red-team adversarial tests
         run: npx vitest run --config security/redteam/vitest.config.ts --reporter=verbose

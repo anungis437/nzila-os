@@ -18,18 +18,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Validate PR branch naming policy
         run: pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode branch --ref "${{ github.head_ref }}"
 
@@ -40,17 +29,6 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Validate tag naming policy
         run: pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode tag --ref "${{ github.ref_name }}"
