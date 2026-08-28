@@ -29,6 +29,11 @@ const requiredFiles = [
   '25-gate-11-case-evidence-legal-hold-proof.md',
   '26-gate-12-central-aggregate-reporting-proof.md',
   '27-gate-13-background-job-provider-artifact-cancellation-proof.md',
+  '28-oci-workshop-pack.md',
+  '29-recording-package-v1-handoff-baseline.md',
+  '30-synthetic-fixtures-manifest.md',
+  '31-synthetic-fixtures-v1.json',
+  '32-opdc-cecof-provisional-vocabulary.md',
 ];
 
 function readPackFile(file: string) {
@@ -193,5 +198,91 @@ describe('LIUNA readiness pack contract', () => {
     expect(ledger).toContain(
       '`LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION`',
     );
+  });
+
+  it('pins the OCI workshop pack scope, evidence classes, and facilitator anti-patterns', () => {
+    const workshop = readPackFile('28-oci-workshop-pack.md');
+
+    expect(workshop).toContain('`WORKSHOP_PACK_V1_READY_FOR_INTERNAL_REVIEW`');
+    expect(workshop).toContain('`NOT_CLIENT_VALIDATED`');
+    expect(workshop).toContain('`DATE_TBD`');
+    expect(workshop).toContain('6 to 10');
+    expect(workshop).toContain('remote-first');
+    for (const cls of [
+      '`OBSERVED_FACT`',
+      '`PARTICIPANT_ASSERTION`',
+      '`PROPOSED_FUTURE_STATE`',
+      '`UNRESOLVED_ASSUMPTION`',
+    ]) {
+      expect(workshop).toContain(cls);
+    }
+    expect(workshop).toContain('Candidate Gate Promotion Matrix Template');
+    expect(workshop).toContain('`SURFACED_AS_UNIVERSAL_PLATFORM_CONTROL_ONLY`');
+    expect(workshop).toContain('Do not pitch Union Eyes');
+    expect(workshop).toContain('Do not promise timelines');
+  });
+
+  it('keeps the recording package frozen as V1 handoff baseline, not final take', () => {
+    const rec = readPackFile('29-recording-package-v1-handoff-baseline.md');
+
+    expect(rec).toContain('`LIUNA_RECORDING_PACKAGE = V1_HANDOFF_BASELINE`');
+    expect(rec).toContain('`NOT_CLIENT_VALIDATED`');
+    expect(rec).toContain('`NOT_FINAL_TAKE`');
+    expect(rec).toContain('`INTERNAL_REHEARSAL_ONLY`');
+    expect(rec).toContain('Not LIUNA production data');
+    expect(rec).toContain('Does not imply LIUNA endorsement');
+  });
+
+  it('keeps the synthetic fixtures manifest deterministic and obviously synthetic', () => {
+    const manifest = readPackFile('30-synthetic-fixtures-manifest.md');
+    const fixtures = readPackFile('31-synthetic-fixtures-v1.json');
+    const parsed = JSON.parse(fixtures) as {
+      status: string;
+      notClientValidated: boolean;
+      noRealMemberData: boolean;
+      seed: string;
+      dateCorridor: { start: string; end: string };
+      organizations: unknown[];
+      matters: unknown[];
+      documents: unknown[];
+    };
+
+    expect(manifest).toContain('`LIUNA_SYNTHETIC_FIXTURES = V1_DETERMINISTIC`');
+    expect(manifest).toContain('`NO_REAL_MEMBER_DATA`');
+    expect(manifest).toContain('LIUNA_UE_FIXTURE_SEED_V1');
+    expect(manifest).toContain('@example.invalid');
+    expect(manifest).toContain('2099-01-01');
+
+    expect(parsed.status).toBe('V1_DETERMINISTIC');
+    expect(parsed.notClientValidated).toBe(true);
+    expect(parsed.noRealMemberData).toBe(true);
+    expect(parsed.seed).toBe('LIUNA_UE_FIXTURE_SEED_V1');
+    expect(parsed.dateCorridor.start.startsWith('2099-')).toBe(true);
+    expect(parsed.dateCorridor.end.startsWith('2099-')).toBe(true);
+    expect(parsed.organizations.length).toBeGreaterThanOrEqual(2);
+    expect(parsed.matters.length).toBeGreaterThanOrEqual(3);
+    expect(parsed.documents.length).toBeGreaterThanOrEqual(9);
+    expect(fixtures).toContain('SYNTHETIC_DOCUMENT_FOR_DEMO_USE');
+    expect(fixtures).not.toMatch(/@(?!example\.invalid)[a-z0-9.-]+\.[a-z]{2,}/i);
+  });
+
+  it('keeps the provisional vocabulary sheet flagged as unvalidated and status-tagged', () => {
+    const vocab = readPackFile('32-opdc-cecof-provisional-vocabulary.md');
+
+    expect(vocab).toContain(
+      '`LIUNA_VOCABULARY_SHEET = SYNTHETIC_WORKING_DRAFT_PENDING_CLIENT_VALIDATION`',
+    );
+    expect(vocab).toContain('`NOT_ENDORSED_BY_LIUNA_OPDC_CECOF`');
+    for (const status of [
+      '`SYNTHETIC_WORKING_TERM`',
+      '`REPO_DERIVED`',
+      '`CLIENT_VALIDATED`',
+      '`REJECTED`',
+    ]) {
+      expect(vocab).toContain(status);
+    }
+    expect(vocab).toContain('Terms Explicitly NOT Adopted Provisionally');
+    expect(vocab).toContain('LIUNA-approved');
+    expect(vocab).toContain('production-ready for LIUNA');
   });
 });

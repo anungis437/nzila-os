@@ -1,0 +1,106 @@
+{
+  "$schema": "internal://liuna-synthetic-fixtures/v1",
+  "manifest": "See 30-synthetic-fixtures-manifest.md",
+  "status": "V1_DETERMINISTIC",
+  "notClientValidated": true,
+  "noRealMemberData": true,
+  "seed": "LIUNA_UE_FIXTURE_SEED_V1",
+  "dateCorridor": { "start": "2099-01-01", "end": "2099-12-31" },
+  "organizations": [
+    {
+      "id": "SYN-ORG-CENTRAL-DEMO",
+      "code": "SYNTHETIC-CENTRAL-DEMO",
+      "label_en": "Synthetic Central Overseer (demo)",
+      "label_fr": "Organisme central synthetique (demo)",
+      "role_pattern": "central_overseer",
+      "synthetic": true
+    },
+    {
+      "id": "SYN-ORG-LOCAL-1836-DEMO",
+      "code": "SYNTHETIC-LOCAL-1836-DEMO",
+      "label_en": "Synthetic Affiliated Local 1836 (demo)",
+      "label_fr": "Section locale affiliee synthetique 1836 (demo)",
+      "role_pattern": "affiliated_local",
+      "synthetic": true
+    }
+  ],
+  "roles": [
+    { "id": "SYN-ROLE-STEWARD", "label_en": "Steward (demo)", "label_fr": "Delegue (demo)" },
+    { "id": "SYN-ROLE-STAFF", "label_en": "Staff representative (demo)", "label_fr": "Representant du personnel (demo)" },
+    { "id": "SYN-ROLE-COUNSEL", "label_en": "Counsel (demo)", "label_fr": "Conseiller juridique (demo)" },
+    { "id": "SYN-ROLE-CENTRAL-ANALYST", "label_en": "Central analyst (demo)", "label_fr": "Analyste central (demo)" },
+    { "id": "SYN-ROLE-MEMBER", "label_en": "Member (demo)", "label_fr": "Membre (demo)" }
+  ],
+  "people": [
+    { "id": "SYN-PERSON-01", "display_name": "Demo Steward Alpha", "email": "demo.steward.alpha@example.invalid", "role": "SYN-ROLE-STEWARD", "org": "SYN-ORG-LOCAL-1836-DEMO", "synthetic": true },
+    { "id": "SYN-PERSON-02", "display_name": "Demo Staff Beta", "email": "demo.staff.beta@example.invalid", "role": "SYN-ROLE-STAFF", "org": "SYN-ORG-LOCAL-1836-DEMO", "synthetic": true },
+    { "id": "SYN-PERSON-03", "display_name": "Demo Counsel Gamma", "email": "demo.counsel.gamma@example.invalid", "role": "SYN-ROLE-COUNSEL", "org": "SYN-ORG-CENTRAL-DEMO", "synthetic": true },
+    { "id": "SYN-PERSON-04", "display_name": "Demo Central Delta", "email": "demo.central.delta@example.invalid", "role": "SYN-ROLE-CENTRAL-ANALYST", "org": "SYN-ORG-CENTRAL-DEMO", "synthetic": true },
+    { "id": "SYN-PERSON-05", "display_name": "Demo Member Epsilon", "email": "demo.member.epsilon@example.invalid", "role": "SYN-ROLE-MEMBER", "org": "SYN-ORG-LOCAL-1836-DEMO", "synthetic": true },
+    { "id": "SYN-PERSON-06", "display_name": "Demo Steward Zeta (successor)", "email": "demo.steward.zeta@example.invalid", "role": "SYN-ROLE-STEWARD", "org": "SYN-ORG-LOCAL-1836-DEMO", "synthetic": true }
+  ],
+  "matters": [
+    {
+      "id": "SYN-MATTER-A",
+      "code": "MATTER-DEMO-A",
+      "title_en": "Continuity handover rehearsal matter (demo)",
+      "title_fr": "Dossier de repetition de transfert de continuite (demo)",
+      "org": "SYN-ORG-LOCAL-1836-DEMO",
+      "opened": "2099-02-14",
+      "closed": null,
+      "timeline": [
+        { "at": "2099-02-14", "event": "opened", "actor": "SYN-PERSON-01" },
+        { "at": "2099-03-02", "event": "steward_reassigned", "from": "SYN-PERSON-01", "to": "SYN-PERSON-06" }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "SYN-MATTER-B",
+      "code": "MATTER-DEMO-B",
+      "title_en": "Restricted-document boundary rehearsal matter (demo)",
+      "title_fr": "Dossier de repetition de la limite des documents restreints (demo)",
+      "org": "SYN-ORG-LOCAL-1836-DEMO",
+      "opened": "2099-04-10",
+      "closed": null,
+      "restricted": true,
+      "timeline": [
+        { "at": "2099-04-10", "event": "opened", "actor": "SYN-PERSON-02" },
+        { "at": "2099-04-11", "event": "marked_restricted", "actor": "SYN-PERSON-03" }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "SYN-MATTER-C",
+      "code": "MATTER-DEMO-C",
+      "title_en": "Evidence export rehearsal matter (demo)",
+      "title_fr": "Dossier de repetition d'exportation de preuves (demo)",
+      "org": "SYN-ORG-LOCAL-1836-DEMO",
+      "opened": "2099-06-01",
+      "closed": "2099-08-15",
+      "timeline": [
+        { "at": "2099-06-01", "event": "opened", "actor": "SYN-PERSON-02" },
+        { "at": "2099-08-15", "event": "closed", "actor": "SYN-PERSON-02" }
+      ],
+      "synthetic": true
+    }
+  ],
+  "documents": [
+    { "id": "SYN-DOC-A1", "matter": "SYN-MATTER-A", "title": "Handover briefing (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true },
+    { "id": "SYN-DOC-A2", "matter": "SYN-MATTER-A", "title": "Prior steward notes (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true },
+    { "id": "SYN-DOC-A3", "matter": "SYN-MATTER-A", "title": "Successor authorization stub (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true },
+    { "id": "SYN-DOC-B1", "matter": "SYN-MATTER-B", "title": "Restricted memo (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "restricted": true, "synthetic": true },
+    { "id": "SYN-DOC-B2", "matter": "SYN-MATTER-B", "title": "Restricted attachment (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "restricted": true, "synthetic": true },
+    { "id": "SYN-DOC-B3", "matter": "SYN-MATTER-B", "title": "Cover note (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true },
+    { "id": "SYN-DOC-C1", "matter": "SYN-MATTER-C", "title": "Timeline export stub (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true },
+    { "id": "SYN-DOC-C2", "matter": "SYN-MATTER-C", "title": "Evidence bundle stub (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true },
+    { "id": "SYN-DOC-C3", "matter": "SYN-MATTER-C", "title": "Closing note (demo)", "body_marker": "SYNTHETIC_DOCUMENT_FOR_DEMO_USE", "synthetic": true }
+  ],
+  "auditEvents": [
+    { "id": "SYN-AUD-0001", "correlation": "SYN-CORR-A-OPEN", "matter": "SYN-MATTER-A", "kind": "matter.opened", "at": "2099-02-14T14:00:00Z", "actor": "SYN-PERSON-01" },
+    { "id": "SYN-AUD-0002", "correlation": "SYN-CORR-A-REASSIGN", "matter": "SYN-MATTER-A", "kind": "matter.steward_reassigned", "at": "2099-03-02T09:30:00Z", "actor": "SYN-PERSON-01" },
+    { "id": "SYN-AUD-0003", "correlation": "SYN-CORR-B-OPEN", "matter": "SYN-MATTER-B", "kind": "matter.opened", "at": "2099-04-10T15:15:00Z", "actor": "SYN-PERSON-02" },
+    { "id": "SYN-AUD-0004", "correlation": "SYN-CORR-B-RESTRICT", "matter": "SYN-MATTER-B", "kind": "matter.marked_restricted", "at": "2099-04-11T10:00:00Z", "actor": "SYN-PERSON-03" },
+    { "id": "SYN-AUD-0005", "correlation": "SYN-CORR-C-OPEN", "matter": "SYN-MATTER-C", "kind": "matter.opened", "at": "2099-06-01T13:00:00Z", "actor": "SYN-PERSON-02" },
+    { "id": "SYN-AUD-0006", "correlation": "SYN-CORR-C-CLOSE", "matter": "SYN-MATTER-C", "kind": "matter.closed", "at": "2099-08-15T16:45:00Z", "actor": "SYN-PERSON-02" }
+  ]
+}

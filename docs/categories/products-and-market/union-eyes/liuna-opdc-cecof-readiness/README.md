@@ -36,6 +36,11 @@ The governing question is whether Union Eyes can truthfully demonstrate leadersh
 - [25-gate-11-case-evidence-legal-hold-proof.md](./25-gate-11-case-evidence-legal-hold-proof.md)
 - [26-gate-12-central-aggregate-reporting-proof.md](./26-gate-12-central-aggregate-reporting-proof.md)
 - [27-gate-13-background-job-provider-artifact-cancellation-proof.md](./27-gate-13-background-job-provider-artifact-cancellation-proof.md)
+- [28-oci-workshop-pack.md](./28-oci-workshop-pack.md)
+- [29-recording-package-v1-handoff-baseline.md](./29-recording-package-v1-handoff-baseline.md)
+- [30-synthetic-fixtures-manifest.md](./30-synthetic-fixtures-manifest.md)
+- [31-synthetic-fixtures-v1.json](./31-synthetic-fixtures-v1.json)
+- [32-opdc-cecof-provisional-vocabulary.md](./32-opdc-cecof-provisional-vocabulary.md)
 
 ## Scope Lock
 
