@@ -29,17 +29,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       # Audit at critical level — capture report for waiver evaluation.
       # Exit code is intentionally suppressed here; the waiver policy step
       # is the authoritative gate (it accounts for accepted/waived CVEs).

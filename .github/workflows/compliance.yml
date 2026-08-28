@@ -45,16 +45,7 @@ jobs:
       github.event.inputs.report_type == 'full-audit'
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Prepare evidence directory
         run: mkdir -p evidence
 
@@ -215,16 +206,7 @@ jobs:
     name: Secret Hygiene Audit
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Audit .env files
         run: |
           echo "=== Checking for committed .env files ==="

@@ -81,16 +81,7 @@ jobs:
     name: AI Code Quality
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Typecheck AI packages
         run: |
           pnpm --filter @nzila/ai-core typecheck
@@ -203,16 +194,7 @@ jobs:
     name: Governance Contract Tests
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@v5
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: AI inventory integrity (AIGOV-INV-01)
         run: npx vitest run tooling/contract-tests/ai-inventory-integrity.test.ts
 
