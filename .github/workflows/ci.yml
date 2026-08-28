@@ -35,28 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint & Typecheck
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: ./.github/actions/setup-monorepo
         with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore turbo cache
-        uses: actions/cache@v5
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
-          restore-keys: |
-            turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-            turbo-lint-${{ runner.os }}-
+          turbo-cache-key: lint
 
       - name: Lint
         run: pnpm lint
@@ -84,19 +65,7 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run migrations
         run: pnpm --filter @nzila/db db:migrate
@@ -129,19 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     name: SAGE Live PostgreSQL (records lifecycle)
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       # Released migrations are immutable: fail if a locked migration changed
       # without a documented override in migrations/migration-manifest.json.
@@ -175,19 +132,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       # Proves the SERVER-level behaviour PGlite cannot: independent sessions,
       # SKIP LOCKED, transaction isolation, concurrent legal-hold vs destruction
@@ -203,28 +148,9 @@ jobs:
     name: Build All
     needs: [lint-and-typecheck, test]
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: ./.github/actions/setup-monorepo
         with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore turbo cache
-        uses: actions/cache@v5
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
-          restore-keys: |
-            turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-            turbo-build-${{ runner.os }}-
+          turbo-cache-key: build
 
       - name: Build
         run: pnpm build
@@ -315,21 +241,9 @@ jobs:
     name: Governance Gates
     needs: [lint-and-typecheck, test]
     steps:
-      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
         with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          fetch-depth: "0"
 
       - name: Script alias regression guard
         run: node tooling/scripts/check-script-alias-regression.mjs
@@ -548,17 +462,7 @@ jobs:
     name: AI Eval Gate
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run AI eval harness (CI stub mode)
         run: pnpm tsx tooling/ai-evals/run-evals-ci.ts
@@ -580,17 +484,7 @@ jobs:
     name: Contract Tests (Architectural Invariants)
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run contract tests
         run: pnpm contract-tests
@@ -600,17 +494,7 @@ jobs:
     name: Operating Layer Gate
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run operating-layer contract suite
         run: pnpm test:operating-layer
@@ -620,17 +504,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ops Documentation Pack
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Validate ops pack completeness
         run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
@@ -640,17 +514,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Schema Drift Detection
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Verify schema snapshot (no drift)
         run: pnpm tsx tooling/db/schema-snapshot.ts verify
@@ -670,17 +534,7 @@ jobs:
     name: Red-Team Adversarial
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run red-team adversarial tests
         run: npx vitest run --config security/redteam/vitest.config.ts --reporter=verbose
@@ -691,17 +545,7 @@ jobs:
     name: Hash Chain Drift
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Run hash chain drift tests
         run: |
@@ -715,17 +559,7 @@ jobs:
     name: Enterprise Hardening Gate
     needs: [lint-and-typecheck, test, contract-tests]
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Verify build environment
         run: pnpm exec tsx tooling/build-env-check.ts
