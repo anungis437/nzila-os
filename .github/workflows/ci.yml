@@ -3,8 +3,22 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/CODEOWNERS"
+      - ".gitignore"
+      - ".editorconfig"
+      - "LICENSE"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/CODEOWNERS"
+      - ".gitignore"
+      - ".editorconfig"
+      - "LICENSE"
 
 permissions:
   contents: read
@@ -13,6 +27,9 @@ permissions:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint-and-typecheck:
     runs-on: ubuntu-latest
@@ -92,21 +109,30 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
+      # Pre-tar keeps the upload to a single file: workspace-wide **/coverage-final.json
+      # glob-walking was the dominant cost across 250+ packages. tar is ~10-30x faster
+      # than upload-artifact's per-file API for many small JSON files.
+      - name: Package coverage
+        if: always()
+        run: |
+          set -e
+          tar --exclude='node_modules' --exclude='.pnpm-store' --exclude='.git' --exclude='.turbo' \
+              -czf coverage-reports.tar.gz \
+              $( [ -d coverage ]       && echo coverage       || true ) \
+              $( [ -f coverage.xml ]   && echo coverage.xml   || true ) \
+              $( [ -d coverage_html ]  && echo coverage_html  || true ) || true
+          ls -lh coverage-reports.tar.gz || true
+
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage-reports-${{ github.run_id }}
-          path: |
-            coverage/
-            coverage.xml
-            coverage_html/
-            **/coverage-final.json
-            !**/node_modules/**
-            !**/.pnpm-store/**
-            !**/.git/**
-            !**/.turbo/**
+          path: coverage-reports.tar.gz
+          if-no-files-found: warn
           retention-days: 30
+          compression-level: 0
+          overwrite: true
 
   sage-live-postgres:
     runs-on: ubuntu-latest

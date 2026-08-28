@@ -1,0 +1,49 @@
+name: Setup Nzila Monorepo
+description: Checkout + pnpm + Node + install with lockfile-frozen deps and turbo cache restore.
+
+inputs:
+  node-version:
+    description: Node.js version to install.
+    required: false
+    default: "22"
+  fetch-depth:
+    description: git fetch depth for checkout.
+    required: false
+    default: "1"
+  install:
+    description: Whether to run pnpm install --frozen-lockfile.
+    required: false
+    default: "true"
+  turbo-cache-key:
+    description: Cache key prefix for the local turbo cache. Empty = skip cache restore.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+    - uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+
+    - name: Install dependencies
+      if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Restore turbo cache
+      if: inputs.turbo-cache-key != ''
+      uses: actions/cache@v5
+      with:
+        path: node_modules/.cache/turbo
+        key: turbo-${{ inputs.turbo-cache-key }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+        restore-keys: |
+          turbo-${{ inputs.turbo-cache-key }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+          turbo-${{ inputs.turbo-cache-key }}-${{ runner.os }}-

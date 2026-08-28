@@ -41,6 +41,9 @@ env:
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
   TRIVY_JAVA_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db
 
+# NOTE: Reusable workflow — caller owns concurrency. A workflow-level
+# concurrency block here would inherit the caller's ${{ github.workflow }}
+# and can cancel the caller mid-run (see GitHub docs on reusable workflows).
 jobs:
   # ── Secret Scanning ──────────────────────────────────────────────────────
   secret-scan:

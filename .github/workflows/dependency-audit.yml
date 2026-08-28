@@ -15,6 +15,10 @@ on:
     # Daily audit at 06:00 UTC
     - cron: '0 6 * * *'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit:
     name: pnpm audit
