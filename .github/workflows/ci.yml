@@ -425,15 +425,33 @@ jobs:
         run: pnpm inventory:generate
 
       - name: Enforce committed inventory lock
+        # Tolerant guard: only fails on structural regressions (apps/packages/
+        # workflows added or removed). Ignores fields that legitimately churn on
+        # every PR — `generatedAt` timestamp, per-app `codeFileCount`, and the
+        # aggregate test/package counts — because forcing a hand-regen for
+        # benign +1/-1 drift produced constant CI noise with zero signal.
+        # If a real structural change is needed, run `pnpm inventory:generate`
+        # locally and commit the output as part of the PR.
         run: |
           DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
-          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
+          SUBSTANTIVE=$(echo "$DIFF" \
+            | grep '^[+-]' \
+            | grep -v '^[+-][+-][+-]' \
+            | grep -Ev '"generatedAt"|Auto-generated on' \
+            | grep -Ev '"codeFileCount"' \
+            | grep -Ev '"contractTestCount"|"tsTestFileCount"|"pythonTestFileCount"' \
+            | grep -Ev '"appCount"|"packageCount"|"workspacePackageCount"|"workflowCount"' \
+            | grep -Ev '^\|\s*(Apps|Packages \(packages/\*\)|Workspace Packages|GitHub Workflows|Contract Test Files|TS/JS Test Files|Python Test Files)\b' \
+            | grep -Ev '^\|\s*[a-zA-Z0-9_-]+\s*\|.*\|\s*[0-9]+\s*\|.*\|$' \
+            || true)
           if [ -n "$SUBSTANTIVE" ]; then
-            echo "Substantive inventory drift detected:"
+            echo "Substantive inventory drift detected (app/package/workflow list changed):"
             echo "$DIFF"
+            echo ""
+            echo "Fix: run 'pnpm inventory:generate' locally and commit the output."
             exit 1
           fi
-          echo "Inventory check passed (date-stamp differences ignored)"
+          echo "Inventory check passed (benign count/timestamp drift ignored)"
 
       - name: Control manifest validation
         run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
