@@ -1,1 +1,3 @@
-export { GET, POST, dynamic } from '../../onboarding/route';
+export { GET, POST } from '../../onboarding/route';
+
+export const dynamic = 'force-dynamic';
