@@ -78,6 +78,24 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
+      # Consolidate per-package coverage into ./coverage BEFORE upload so the
+      # artifact step doesn't walk the whole monorepo tree with `**/coverage-final.json`.
+      # `!**/node_modules/**` excludes in upload-artifact don't prevent enumeration —
+      # the walker still touches every file first, adding many minutes on a large repo.
+      - name: Aggregate per-package coverage
+        if: always()
+        run: |
+          mkdir -p coverage/packages
+          # Copy only the specific files we care about; -path prunes the heavy dirs
+          # before descent, so this is O(source files) not O(everything).
+          find . \
+            \( -path ./node_modules -o -path ./.pnpm-store -o -path ./.git -o -path ./.turbo -o -path ./coverage \) -prune -o \
+            -type f -name coverage-final.json -print \
+            | while read -r f; do
+                dest="coverage/packages/$(echo "$f" | sed 's|^\./||; s|/|__|g')"
+                cp "$f" "$dest" 2>/dev/null || true
+              done
+
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -87,11 +105,6 @@ jobs:
             coverage/
             coverage.xml
             coverage_html/
-            **/coverage-final.json
-            !**/node_modules/**
-            !**/.pnpm-store/**
-            !**/.git/**
-            !**/.turbo/**
           retention-days: 30
 
   sage-live-postgres:
