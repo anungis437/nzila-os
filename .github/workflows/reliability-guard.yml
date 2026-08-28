@@ -17,6 +17,7 @@ jobs:
   reliability-validation:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Typecheck
         run: pnpm typecheck

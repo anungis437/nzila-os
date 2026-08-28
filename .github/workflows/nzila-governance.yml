@@ -70,6 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Dependency Audit
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Audit (fail on critical)
@@ -151,6 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Contract Tests
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Run contract tests
@@ -177,6 +179,7 @@ jobs:
     runs-on: ubuntu-latest
     name: UE Evidence Pack + Verify
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Collect UE evidence artifacts
@@ -355,6 +358,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Supply Chain Waiver Expiry
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Check waiver expiry dates
@@ -386,6 +390,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Evidence Pack Generation
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Generate governance evidence pack (pack.json)
@@ -468,6 +473,7 @@ jobs:
     name: Evidence Seal Verification
     needs: [evidence-pack]
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Run evidence seal contract tests
@@ -485,6 +491,7 @@ jobs:
     name: Red-Team Adversarial
     if: ${{ inputs.run-red-team == true || github.event_name == 'schedule' }}
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Run red-team tests
@@ -512,6 +519,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Gate Authority
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Validate gate authority registry [BLOCKING]

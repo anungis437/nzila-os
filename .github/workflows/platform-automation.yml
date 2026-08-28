@@ -58,6 +58,7 @@ jobs:
       github.event.schedule == '0 6 * * *'
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Build FinOps package
         run: pnpm --filter @nzila/finops build 2>/dev/null || true
@@ -307,6 +308,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Resolve target month
         id: resolve-month

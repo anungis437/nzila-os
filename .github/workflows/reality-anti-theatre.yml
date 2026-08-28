@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Anti-theatre scanner + inventory + demo guard
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Anti-theatre scan

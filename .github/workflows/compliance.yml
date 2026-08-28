@@ -44,6 +44,7 @@ jobs:
       github.event.inputs.report_type == 'evidence-collection' ||
       github.event.inputs.report_type == 'full-audit'
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Prepare evidence directory
         run: mkdir -p evidence
@@ -204,6 +205,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Secret Hygiene Audit
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Audit .env files
         run: |

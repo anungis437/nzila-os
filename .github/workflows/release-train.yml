@@ -25,6 +25,7 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Typecheck all packages
         run: pnpm turbo run typecheck
@@ -68,9 +69,10 @@ jobs:
       security-events: write
 
     steps:
-      - uses: ./.github/actions/setup-monorepo
+      - uses: actions/checkout@v5
         with:
-          fetch-depth: "0"
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
       - name: pnpm audit (no critical vulnerabilities)
         run: |
           node tooling/security/npm-bulk-audit.mjs --audit-level=critical
@@ -95,6 +97,7 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Build all apps
         run: pnpm turbo run build

@@ -99,6 +99,7 @@ jobs:
       AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       # ── CT-01  DR restore test (quarterly) ───────────────────────────────
       - name: 'CT-01: Apply migrations to clean DB'

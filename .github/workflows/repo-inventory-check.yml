@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Inventory Drift Check
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Generate inventory

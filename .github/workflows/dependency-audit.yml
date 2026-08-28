@@ -28,6 +28,7 @@ jobs:
       security-events: write
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       # Audit at critical level — capture report for waiver evaluation.
       # Exit code is intentionally suppressed here; the waiver policy step

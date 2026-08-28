@@ -18,6 +18,7 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Validate PR branch naming policy
         run: pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode branch --ref "${{ github.head_ref }}"
@@ -29,6 +30,7 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Validate tag naming policy
         run: pnpm exec tsx scripts/release/validate-branch-tag-policy.ts --mode tag --ref "${{ github.ref_name }}"

@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Pre-Deploy Gates
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Emergency acknowledgement gate
         run: |

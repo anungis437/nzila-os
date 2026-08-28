@@ -74,6 +74,7 @@ jobs:
       requested_apps: ${{ steps.plan.outputs.requested_apps }}
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Determine deployment parameters
         id: plan
@@ -113,6 +114,7 @@ jobs:
     name: Pre-Deploy Validation
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Type check
         run: pnpm typecheck
@@ -322,6 +324,7 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       # BR-4: environment-scoped deployment identity. This job sets
       # `environment.name: ${{ needs.plan.outputs.environment }}`, so the

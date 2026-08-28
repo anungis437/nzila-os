@@ -46,6 +46,7 @@ jobs:
     name: Access Review Attestation
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Validate access review attestation
         env:

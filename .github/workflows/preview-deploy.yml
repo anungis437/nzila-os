@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Preview Build & Deploy
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Lint
         run: pnpm lint

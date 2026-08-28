@@ -99,6 +99,7 @@ jobs:
       approved_apps: ${{ steps.resolve.outputs.approved_apps }}
       source_run_id: ${{ steps.resolve.outputs.source_run_id }}
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Resolve source staging run and approved app set
         id: resolve
@@ -189,6 +190,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Download staging artifacts
         env:
@@ -212,6 +214,7 @@ jobs:
     environment:
       name: production    # W2-9: Requires manual approval via GitHub Environment protection rules
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Azure login (OIDC)
         uses: azure/login@v3

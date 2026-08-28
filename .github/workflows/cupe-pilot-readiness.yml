@@ -39,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Pilot Contract Tests
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Restore turbo cache
@@ -82,6 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint & Typecheck
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Lint
@@ -116,6 +118,7 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Build workspace dependencies
@@ -134,6 +137,7 @@ jobs:
     name: Financial Service Health Gate
     needs: [lint-and-typecheck, unit-tests]
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Financial Service Health
@@ -159,6 +163,7 @@ jobs:
     needs: [contract-tests, lint-and-typecheck, unit-tests, financial-service-health]
     if: github.event_name == 'push' && github.ref == 'refs/heads/release/cupe-pilot-0.1'
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Create Evidence Marker

@@ -80,6 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     name: AI Code Quality
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Typecheck AI packages
         run: |
@@ -192,6 +193,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Governance Contract Tests
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: AI inventory integrity (AIGOV-INV-01)
         run: npx vitest run tooling/contract-tests/ai-inventory-integrity.test.ts

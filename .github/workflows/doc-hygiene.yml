@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Doc Hygiene Check
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Check internal links

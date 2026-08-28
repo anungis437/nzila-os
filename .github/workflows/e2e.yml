@@ -52,6 +52,7 @@ jobs:
           - app: control-plane
             port: 3010
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Install Playwright browsers

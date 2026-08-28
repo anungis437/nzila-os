@@ -50,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Staging Pre-Deploy Gates
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Emergency acknowledgement gate (manual dispatch only)
         if: github.event_name == 'workflow_dispatch'
@@ -97,6 +98,7 @@ jobs:
     outputs:
       artifact_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Build
         run: pnpm build
@@ -166,6 +168,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     environment: staging    # BR-4: binds the staging-scoped GitHub Environment identity
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       # BR-4: staging-scoped deployment identity. Fail closed if not configured;
       # never fall back to a shared credential that can reach production.

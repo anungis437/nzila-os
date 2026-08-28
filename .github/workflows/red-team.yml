@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Red-Team Adversarial Suite
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
 
       - name: Run red-team adversarial tests
