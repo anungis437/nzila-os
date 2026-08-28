@@ -96,6 +96,20 @@ describe('LIUNA readiness pack contract', () => {
     expect(ledger).toContain('Do not claim sensitive pilot readiness');
   });
 
+  it('keeps case access revocation proof bounded to app auth and notification containment', () => {
+    const gate3b = readPackFile('14-gate-3b-case-access-revocation-proof.md');
+    const ledger = readPackFile('21-current-readiness-ledger.md');
+
+    expect(gate3b).toContain(
+      'LIUNA_GATE_3B_CASE_ACCESS_REVOCATION = CLOSED_FOR_APP_AUTH_BOUNDARY_WITH_NOTIFICATION_CONTAINMENT',
+    );
+    expect(gate3b).toContain('does not prove identity-provider token revocation latency');
+    expect(gate3b).toContain('OPEN_OPERATING_LIMITATION');
+    expect(ledger).toContain(
+      '`CLOSED_FOR_APP_AUTH_BOUNDARY_WITH_NOTIFICATION_CONTAINMENT`',
+    );
+  });
+
   it('keeps notification offboarding proof bounded to queued delivery', () => {
     const gate10 = readPackFile('22-gate-10-notification-offboarding-proof.md');
 

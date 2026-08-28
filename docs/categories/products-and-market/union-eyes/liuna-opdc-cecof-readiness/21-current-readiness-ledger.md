@@ -64,7 +64,7 @@ Union Eyes remains the only app that needs live investment for this LIUNA path. 
 | Gate 1 - pre-video synthetic scenario and claim lock | `CLOSED` |
 | Gate 2 - continuity authorization facade | `CLOSED` |
 | Gate 3A - restricted document/search/download boundary | `CLOSED` |
-| Gate 3B - case access revocation foundation | `PARTIAL_WITH_NOTIFICATION_CONTAINMENT` |
+| Gate 3B - case access revocation foundation | `CLOSED_FOR_APP_AUTH_BOUNDARY_WITH_NOTIFICATION_CONTAINMENT` |
 | Gate 4 - leadership transition runtime fixture | `CLOSED_FOR_RECORDING` |
 | Gate 5 - federated visibility model | `CLOSED_FOR_RECORDING` |
 | Gate 6 - bilingual/mobile recording language | `CLOSED_FOR_RECORDING` |
