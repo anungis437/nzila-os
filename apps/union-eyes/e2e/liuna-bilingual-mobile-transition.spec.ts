@@ -15,7 +15,14 @@ test.describe('LIUNA bilingual mobile transition journey', () => {
   });
 
   async function assertMobileRoute(page: Parameters<typeof loginAsRole>[0], path: string) {
-    await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    // Retry once on net::ERR_ABORTED — dashboard RSC layouts occasionally
+    // race a client-side router.replace() against domcontentloaded on first hit.
+    try {
+      await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    } catch (err) {
+      if (!(err instanceof Error) || !/ERR_ABORTED/.test(err.message)) throw err;
+      await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    }
     await expect(page.locator('body')).toBeVisible();
     await expect(page).not.toHaveURL(/404|not-found/i);
 
