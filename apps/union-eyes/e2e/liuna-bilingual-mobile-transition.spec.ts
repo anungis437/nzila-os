@@ -15,9 +15,26 @@ test.describe('LIUNA bilingual mobile transition journey', () => {
   });
 
   async function assertMobileRoute(page: Parameters<typeof loginAsRole>[0], path: string) {
-    await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    // Next.js dev-mode cold compile can abort the first navigation; retry once.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+        break;
+      } catch (err) {
+        if (attempt === 0 && /ERR_ABORTED|net::ERR_/.test(String(err))) {
+          await page.waitForTimeout(2_000);
+          continue;
+        }
+        throw err;
+      }
+    }
     await expect(page.locator('body')).toBeVisible();
     await expect(page).not.toHaveURL(/404|not-found/i);
+
+    // Settle any auth/i18n redirects before evaluating so the execution context
+    // isn't destroyed mid-call.
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(250);
 
     const layout = await page.evaluate(() => ({
       width: document.documentElement.clientWidth,
