@@ -3,8 +3,22 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/CODEOWNERS"
+      - ".gitignore"
+      - ".editorconfig"
+      - "LICENSE"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/CODEOWNERS"
+      - ".gitignore"
+      - ".editorconfig"
+      - "LICENSE"
 
 permissions:
   contents: read
@@ -13,6 +27,9 @@ permissions:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint-and-typecheck:
     runs-on: ubuntu-latest

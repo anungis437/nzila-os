@@ -24,6 +24,10 @@ permissions:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
