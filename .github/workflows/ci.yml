@@ -159,7 +159,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build All
-    needs: [lint-and-typecheck, test]
+    # `test` intentionally omitted: build is compilation, tests are runtime — they are
+    # independent and can execute in parallel. Downstream jobs that need both (contract
+    # tests, perf regression) still gate on `test` via their own `needs:`.
+    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
