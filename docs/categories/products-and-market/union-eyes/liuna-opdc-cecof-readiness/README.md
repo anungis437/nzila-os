@@ -35,6 +35,7 @@ The governing question is whether Union Eyes can truthfully demonstrate leadersh
 - [24-gate-10c-pending-ai-action-proof.md](./24-gate-10c-pending-ai-action-proof.md)
 - [25-gate-11-case-evidence-legal-hold-proof.md](./25-gate-11-case-evidence-legal-hold-proof.md)
 - [26-gate-12-central-aggregate-reporting-proof.md](./26-gate-12-central-aggregate-reporting-proof.md)
+- [27-gate-13-background-job-provider-artifact-cancellation-proof.md](./27-gate-13-background-job-provider-artifact-cancellation-proof.md)
 
 ## Scope Lock
 

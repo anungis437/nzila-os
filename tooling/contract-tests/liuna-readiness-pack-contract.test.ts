@@ -28,6 +28,7 @@ const requiredFiles = [
   '24-gate-10c-pending-ai-action-proof.md',
   '25-gate-11-case-evidence-legal-hold-proof.md',
   '26-gate-12-central-aggregate-reporting-proof.md',
+  '27-gate-13-background-job-provider-artifact-cancellation-proof.md',
 ];
 
 function readPackFile(file: string) {
@@ -92,7 +93,7 @@ describe('LIUNA readiness pack contract', () => {
     expect(ledger).toContain('READY_TO_RECORD_WITH_EXPLICIT_LIMITATIONS');
     expect(ledger).toContain('Sensitive Legal Pilot');
     expect(ledger).toContain('NOT_READY');
-    expect(ledger).toContain('LIUNA_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION');
+    expect(ledger).toContain('LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION');
     expect(ledger).toContain('Do not claim sensitive pilot readiness');
   });
 
@@ -154,5 +155,43 @@ describe('LIUNA readiness pack contract', () => {
     expect(gate12).toContain('rawRowsExposed: false');
     expect(gate12).toContain('does not prove a complete OPDC/CECOF dashboard workflow');
     expect(ledger).toContain('central aggregate reporting API without raw local rows');
+  });
+
+  it('pins the closed foundational gates by classification token', () => {
+    const gate2 = readPackFile('12-gate-2-continuity-authorization-proof.md');
+    const gate3a = readPackFile('13-gate-3a-confidential-document-boundary-proof.md');
+    const gate4 = readPackFile('15-gate-4-leadership-transition-fixture.md');
+    const gate5 = readPackFile('16-gate-5-federated-visibility-proof.md');
+    const gate7 = readPackFile('18-gate-7-evidence-export-boundary-proof.md');
+    const gate8 = readPackFile('19-gate-8-legal-hold-retention-proof.md');
+
+    expect(gate2).toContain('LIUNA_GATE_2A_CONTINUITY_INHERITANCE_AUTH = CLOSED');
+    expect(gate3a).toContain('LIUNA_GATE_3A_CONFIDENTIAL_DOCUMENT_BOUNDARY = CLOSED');
+    expect(gate4).toContain('LIUNA_GATE_4_LEADERSHIP_TRANSITION_FIXTURE = CLOSED_FOR_RUNTIME_PROOF');
+    expect(gate5).toContain('LIUNA_GATE_5_FEDERATED_VISIBILITY_MODEL = CLOSED_FOR_GOVERNANCE_MODEL');
+    expect(gate7).toContain('LIUNA_GATE_7_EVIDENCE_EXPORT = STAFF_SCOPED_SAFE_SNAPSHOT_PROVEN');
+    expect(gate8).toContain('LIUNA_GATE_8_DOCUMENT_MUTATION_GUARD = PROVEN');
+  });
+
+  it('keeps Gate 13 scoped as a bounded operating control, not yet proven', () => {
+    const gate13 = readPackFile('27-gate-13-background-job-provider-artifact-cancellation-proof.md');
+    const ledger = readPackFile('21-current-readiness-ledger.md');
+
+    expect(gate13).toContain(
+      'LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION = SCOPED_NOT_YET_PROVEN',
+    );
+    expect(gate13).toContain('bounded operating control');
+    expect(gate13).toContain('will not claim provider-side deletion');
+    expect(gate13).toContain('Local cancellation and terminal state');
+    expect(gate13).toContain('Prevention of further dispatch');
+    expect(gate13).toContain('Idempotency');
+    expect(gate13).toContain('Reconciliation');
+    expect(gate13).toContain('Observable provider-side residual state');
+    expect(gate13).toContain('Operator escalation and manual cancellation procedure');
+    expect(gate13).toContain('Evidence capture');
+    expect(gate13).toContain('`NONE_YET`');
+    expect(ledger).toContain(
+      '`LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION`',
+    );
   });
 });
