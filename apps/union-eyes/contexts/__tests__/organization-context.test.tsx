@@ -339,14 +339,17 @@ describe('contexts/organization-context', () => {
     // First fetch never resolves so the 10s timeout callback fires.
     mocks.mockFetch.mockImplementation(() => new Promise(() => {}));
 
-    renderHook(() => useOrganization(), { wrapper });
+    try {
+      renderHook(() => useOrganization(), { wrapper });
 
-    await act(async () => {
-      vi.advanceTimersByTime(10000);
-    });
+      await act(async () => {
+        vi.advanceTimersByTime(10000);
+      });
 
-    expect(mocks.mockFetch).toHaveBeenCalled();
-    vi.useRealTimers();
+      expect(mocks.mockFetch).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   describe('hooks', () => {

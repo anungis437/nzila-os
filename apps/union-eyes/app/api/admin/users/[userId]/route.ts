@@ -9,6 +9,7 @@ import { organizationMembers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,7 +67,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     } catch (_eventError) {
       // Log event emission failure but don't block the response
       // (status update is durable; event emission is async enhancement)
-      console.error('Failed to emit member.status_changed event', { userId });
+      logger.error('member_lifecycle:event_emission_failed', { userId });
     }
 
     return NextResponse.json({ success: true, status: newStatus });
