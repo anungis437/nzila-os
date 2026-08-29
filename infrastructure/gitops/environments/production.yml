@@ -40,6 +40,16 @@ apps:
         value: production
       - name: NEXT_PUBLIC_APP_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-web
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   console:
     image_tag: "${VERSION}"
@@ -59,6 +69,16 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-console
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   partners:
     image_tag: "${VERSION}"
@@ -73,6 +93,16 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-partners
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   # union-eyes is deployed via .github/workflows/auto-promote-union-eyes.yml
   # which fans out to the dedicated `-prod`, `-demo`, `-pilot`, `-staging` CAs.
@@ -86,6 +116,16 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-abr
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   cfo:
     image_tag: "${VERSION}"
@@ -95,6 +135,16 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-cfo
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   flow:
     image_tag: "${VERSION}"
@@ -104,6 +154,16 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-flow
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   orchestrator-api:
     image_tag: "${VERSION}"
@@ -123,6 +183,16 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-orchestrator
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "0.5"
 
   # zonga intentionally excluded from default production manifest.
   # Pilot promotion requires explicit override through deploy-production workflow.
