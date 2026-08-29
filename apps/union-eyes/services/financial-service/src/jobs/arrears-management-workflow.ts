@@ -16,6 +16,13 @@ import {
 import { eq, and, lt, sql } from 'drizzle-orm';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
+import { JobCancellationService } from '../services/job-cancellation-service';
+import { v4 as uuidv4 } from 'uuid';
+
+function generateJobIdempotencyKey(jobType: string, date: Date): string {
+  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+  return `${jobType}::${dateStr}`;
+}
 
 /**
  * Scan for overdue dues and create/update arrears records
@@ -32,15 +39,35 @@ export async function processArrearsManagement(params: {
 }> {
   const { tenantId, scanDate = new Date() } = params;
   
-  logger.info('Starting arrears management scan', { 
-    tenantId, 
-    scanDate: scanDate.toISOString() 
-  });
+  const jobCancellationService = new JobCancellationService();
+  const jobRunId = uuidv4();
+  const idempotencyKey = generateJobIdempotencyKey('arrears-management-workflow', scanDate);
+  
+  let executionStateId: string | undefined;
+  
+  try {
+    // Start job execution tracking
+    const executionState = await jobCancellationService.startJobExecution({
+      organizationId: tenantId,
+      jobType: 'arrears-management-workflow',
+      jobRunId,
+      scheduledAt: scanDate,
+      metadata: {
+        scanDate: scanDate.toISOString(),
+      },
+    });
+    executionStateId = executionState.id;
+    
+    logger.info('Starting arrears management scan', { 
+      tenantId, 
+      scanDate: scanDate.toISOString(),
+      jobRunId,
+    });
 
-  let overdueTransactions = 0;
-  let arrearsCreated = 0;
-  let notificationsSent = 0;
-  const errors: Array<{ transactionId: string; error: string }> = [];
+    let overdueTransactions = 0;
+    let arrearsCreated = 0;
+    let notificationsSent = 0;
+    const errors: Array<{ transactionId: string; error: string }> = [];
 
   try {
     // Find all overdue transactions (due date passed, status not 'paid')
@@ -69,6 +96,18 @@ export async function processArrearsManagement(params: {
     overdueTransactions = overdueRecords.length;
 
     for (const record of overdueRecords) {
+      // Check for cancellation request
+      if (executionStateId) {
+        const isCancelled = await jobCancellationService.isJobCancelled({
+          organizationId: tenantId,
+          executionStateId,
+        });
+        if (isCancelled) {
+          logger.info('Job cancellation requested, stopping arrears management', { jobRunId });
+          break;
+        }
+      }
+      
       try {
         // Check if arrears record already exists
         const existingArrears = await db
@@ -167,6 +206,20 @@ export async function processArrearsManagement(params: {
       errorsCount: errors.length,
     });
 
+    // Complete job execution tracking
+    if (executionStateId) {
+      await jobCancellationService.completeJob({
+        organizationId: tenantId,
+        executionStateId,
+        result: {
+          overdueTransactions,
+          arrearsCreated,
+          notificationsSent,
+          errorsCount: errors.length,
+        },
+      });
+    }
+
     return {
       success: true,
       overdueTransactions,
@@ -177,6 +230,16 @@ export async function processArrearsManagement(params: {
 
   } catch (error) {
     logger.error('Error in arrears management', { error });
+    
+    // Record failure in job execution tracking
+    if (executionStateId) {
+      await jobCancellationService.failJob({
+        organizationId: tenantId,
+        executionStateId,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
+    
     return {
       success: false,
       overdueTransactions,
@@ -185,6 +248,17 @@ export async function processArrearsManagement(params: {
       errors: [{ transactionId: 'system', error: String(error) }],
     };
   }
+} catch (setupError) {
+  logger.error('Error starting job execution', { error: setupError });
+  
+  return {
+    success: false,
+    overdueTransactions: 0,
+    arrearsCreated: 0,
+    notificationsSent: 0,
+    errors: [{ transactionId: 'system', error: String(setupError) }],
+  };
+}
 }
 
 /**

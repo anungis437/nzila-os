@@ -16,6 +16,17 @@ import {
 } from '../db/schema';
 import { eq, and, lte, gte, isNull, or, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { JobCancellationService } from '../services/job-cancellation-service';
+import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * Generate an idempotency key for this job run based on job type and date.
+ * Ensures that multiple runs on the same day are idempotent.
+ */
+function generateJobIdempotencyKey(jobType: string, effectiveDate: Date): string {
+  const dateStr = effectiveDate.toISOString().split('T')[0];
+  return `${jobType}::${dateStr}`;
+}
 
 /**
  * Calculate dues for all active members based on their assignments
@@ -40,7 +51,22 @@ export async function processMonthlyDuesCalculation(params: {
   let transactionsCreated = 0;
   const errors: Array<{ memberId: string; error: string }> = [];
 
+  const jobCancellationService = new JobCancellationService();
+  const jobRunId = uuidv4();
+  const jobIdempotencyKey = generateJobIdempotencyKey('dues-calculation-workflow', effectiveDate);
+  let executionStateId: string | undefined;
+
   try {
+    // Start job execution tracking
+    const executionState = await jobCancellationService.startJobExecution({
+      organizationId: tenantId,
+      jobType: 'dues-calculation-workflow',
+      jobRunId,
+      scheduledAt: effectiveDate,
+      metadata: { effectiveDate: effectiveDate.toISOString() },
+    });
+    executionStateId = executionState.id;
+
     // Get all active members with dues assignments
     const activeMembers = await db
       .select({
@@ -73,6 +99,18 @@ export async function processMonthlyDuesCalculation(params: {
 
     // Process each member
     for (const member of activeMembers) {
+      // Check for cancellation request before processing each member
+      if (await jobCancellationService.isJobCancelled(executionStateId, tenantId)) {
+        logger.info('Job cancellation requested, stopping dues calculation');
+        await jobCancellationService.cancelJob(executionStateId, tenantId, 'cancellation-request');
+        return {
+          success: false,
+          membersProcessed,
+          transactionsCreated,
+          errors: [{ memberId: 'system', error: 'Job cancelled by request' }],
+        };
+      }
+
       try {
         // Get the dues rule details
         const [rule] = await db
@@ -160,6 +198,17 @@ export async function processMonthlyDuesCalculation(params: {
       errorsCount: errors.length,
     });
 
+    // Mark job as completed with result metadata
+    await jobCancellationService.completeJob(
+      executionStateId,
+      tenantId,
+      {
+        membersProcessed,
+        transactionsCreated,
+        errorsCount: errors.length,
+      }
+    );
+
     return {
       success: true,
       membersProcessed,
@@ -169,6 +218,19 @@ export async function processMonthlyDuesCalculation(params: {
 
   } catch (error) {
     logger.error('Error in monthly dues calculation', { error });
+    
+    // Mark job as failed if execution state was created
+    if (executionStateId) {
+      await jobCancellationService.failJob(
+        executionStateId,
+        tenantId,
+        {
+          message: String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        }
+      );
+    }
+
     return {
       success: false,
       membersProcessed,

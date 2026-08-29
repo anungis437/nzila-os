@@ -95,6 +95,9 @@ export * from "./domains/employer-execution";
 // Board Packets
 export * from "./board-packet-schema";       // Governance meeting packet generation
 
+// Gate 13 — Job Execution State Tracking & Cancellation Governance
+export * from "./gate-13-job-cancellation-governance";
+
 // Wave 1 Phase A — deadline engine (durable reminder outbox + audit trail).
 // See migrations/0045_union_eyes_deadline_engine.sql and
 // docs/union-eyes/reality-remediation/deadline-engine/00-charter.md.

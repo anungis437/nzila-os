@@ -41,3 +41,10 @@ export * from "../schema/icra-schema";
 // operational entities. Hybrid claim model (pseudonymous → account-claim
 // on purchase) is documented in docs/oci/oci-product-ladder.md.
 export * from "../schema/workbook-schema";
+
+// Gate 13: Background Job & Provider Artifact Cancellation — Governance Runtime
+// Tracks local state for background job cancellation with idempotency guarantees
+// and comprehensive audit trails. Enables Union Eyes to record cancellation requests
+// and enforce terminal state without relying on provider-side coordination.
+// See: docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md
+export * from "../schema/gate-13-job-cancellation-governance";
