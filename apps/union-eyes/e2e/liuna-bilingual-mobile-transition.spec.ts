@@ -32,15 +32,21 @@ test.describe('LIUNA bilingual mobile transition journey', () => {
     await expect(page).not.toHaveURL(/404|not-found/i);
 
     // Settle any auth/i18n redirects before evaluating so the execution context
-    // isn't destroyed mid-call.
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(250);
+    // isn't destroyed mid-call. Use networkidle to ensure all redirects complete.
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
 
-    const layout = await page.evaluate(() => ({
-      width: document.documentElement.clientWidth,
-      scrollWidth: document.documentElement.scrollWidth,
-      bodyText: document.body.innerText.toLowerCase(),
-    }));
+    const layout = await page.evaluate(() => {
+      const docElement = document.documentElement;
+      if (!docElement) {
+        return { width: 0, scrollWidth: 0, bodyText: '' };
+      }
+      return {
+        width: docElement.clientWidth || 0,
+        scrollWidth: docElement.scrollWidth || 0,
+        bodyText: document.body?.innerText?.toLowerCase() || '',
+      };
+    });
 
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.width + 2);
     expect(layout.bodyText).not.toMatch(/finite state machine|workflow engine|orchestration engine/i);
