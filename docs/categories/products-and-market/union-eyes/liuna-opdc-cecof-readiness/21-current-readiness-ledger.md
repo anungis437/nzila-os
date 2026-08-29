@@ -64,7 +64,7 @@ Union Eyes remains the only app that needs live investment for this LIUNA path. 
 | Gate 1 - pre-video synthetic scenario and claim lock | `CLOSED` |
 | Gate 2 - continuity authorization facade | `CLOSED` |
 | Gate 3A - restricted document/search/download boundary | `CLOSED` |
-| Gate 3B - case access revocation foundation | `PARTIAL_WITH_NOTIFICATION_CONTAINMENT` |
+| Gate 3B - case access revocation foundation | `CLOSED_FOR_APP_AUTH_BOUNDARY_WITH_NOTIFICATION_CONTAINMENT` |
 | Gate 4 - leadership transition runtime fixture | `CLOSED_FOR_RECORDING` |
 | Gate 5 - federated visibility model | `CLOSED_FOR_RECORDING` |
 | Gate 6 - bilingual/mobile recording language | `CLOSED_FOR_RECORDING` |
@@ -77,11 +77,12 @@ Union Eyes remains the only app that needs live investment for this LIUNA path. 
 | Gate 10C - pending AI action cancellation | `CLOSED_FOR_STEWARD_COPILOT` |
 | Gate 11 - case evidence delete legal-hold/retention guard | `CLOSED_FOR_DESTRUCTIVE_DELETE` |
 | Gate 12 - central aggregate reporting | `CLOSED_FOR_AGGREGATE_API` |
-| Background job/provider artifact cancellation | `OPEN_OPERATING_LIMITATION` |
+| Gate 13 - background-job / provider-artifact cancellation | `SCOPED_NOT_YET_PROVEN` |
+| Background job/provider artifact cancellation (legacy line) | `OPEN_OPERATING_LIMITATION` (superseded by Gate 13 scope) |
 
 ## Next Engineering Gate
 
-`LIUNA_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION`
+`LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION`
 
 Prove or define operating controls for revoked/former-user effects through:
 

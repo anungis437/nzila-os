@@ -31,7 +31,7 @@ Union Eyes is not yet ready to be represented as a fully proven LIUNA federated 
 - LIUNA approval, endorsement, sponsorship, pilot, or deployment.
 - That Union Eyes guarantees solicitor-client privilege.
 - That OPDC/CECOF can safely see all affiliated-local records.
-- That access revocation is proven across sessions, direct URLs, notifications, and queued actions.
+- That access revocation is proven end-to-end across identity-provider token revocation latency, browser cache, already-issued provider artifacts (for example SAS URLs), external email/SMS delivery after provider handoff, or non-copilot background jobs. (Case access revocation is closed at the app-auth boundary with notification containment via Gates 3B, 10A, 10B, and 10C; residual scope is tracked by Gate 13.)
 - That AI makes decisions or gives legal advice.
 - That LIUNA-specific bilingual/mobile workflows are complete.
 - That the current CUPE vocabulary is LIUNA-ready.
@@ -47,7 +47,7 @@ Union Eyes is not yet ready to be represented as a fully proven LIUNA federated 
 - Org/RLS controls are present and contract-tested.
 - Restricted case/document access primitives exist.
 - The audit did not prove OPDC, CECOF, affiliated-local, central-overseer, former-user, and external-counsel boundaries end-to-end.
-- `/api/continuity/inheritance` now reuses the governed onboarding route contract, but broader restricted-matter and revocation proof is still required before sensitive legal pilot claims.
+- `/api/continuity/inheritance` now reuses the governed onboarding route contract. Case access revocation is closed at the app-auth boundary with notification containment through the composition of Gates 3B, 10A, 10B, and 10C. Residual revocation scope (identity-provider token latency, browser cache, external delivery recall, already-issued SAS URLs, non-copilot background jobs) is tracked as `LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION = SCOPED_NOT_YET_PROVEN` and must not be cited as proven in a sensitive legal pilot claim until Gate 13 records passing evidence.
 
 ## 7. Tailored-Video Readiness Decision
 
@@ -122,7 +122,7 @@ Current detailed gate status is maintained in `21-current-readiness-ledger.md`.
 
 Proceed gate-by-gate:
 
-1. prove full former-user session/direct-link revocation and queued notification handling;
+1. prove Gate 13 bounded operating control for non-copilot background jobs and observable provider-side residuals (see `27-gate-13-background-job-provider-artifact-cancellation-proof.md`); do not claim provider-side cancellation where the provider API cannot prove it;
 2. prove matter-wide legal-hold/disposition lifecycle beyond document mutation and destructive evidence deletion;
 3. prove central aggregate reporting UI workflow, consent, suppression, and LIUNA taxonomy beyond the aggregate API boundary;
 4. execute a real bilingual mobile transition journey before claiming product-level mobile readiness.
