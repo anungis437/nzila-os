@@ -42,19 +42,7 @@ jobs:
     name: Agri Core Enforcement
     steps:
       - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Agri shared-core enforcement
         run: pnpm tsx scripts/agri-core-enforcement.ts
 

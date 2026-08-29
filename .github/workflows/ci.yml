@@ -256,9 +256,9 @@ jobs:
     needs: [lint-and-typecheck, test]
     steps:
       - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-monorepo
         with:
-          fetch-depth: "0"
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
 
       - name: Script alias regression guard
         run: node tooling/scripts/check-script-alias-regression.mjs
@@ -655,4 +655,3 @@ jobs:
           name: k6-perf-results
           path: tests/load/
           retention-days: 30
-

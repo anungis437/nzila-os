@@ -100,17 +100,7 @@ jobs:
       source_run_id: ${{ steps.resolve.outputs.source_run_id }}
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Resolve source staging run and approved app set
         id: resolve
         env:
@@ -201,17 +191,7 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Download staging artifacts
         env:
           GH_TOKEN: ${{ github.token }}
@@ -235,17 +215,7 @@ jobs:
       name: production    # W2-9: Requires manual approval via GitHub Environment protection rules
     steps:
       - uses: actions/checkout@v5
-
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      - uses: ./.github/actions/setup-monorepo
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
