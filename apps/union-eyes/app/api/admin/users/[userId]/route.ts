@@ -1,6 +1,8 @@
 /**
  * PUT /api/admin/users/[userId] — Toggle user status (active/inactive)
  * DELETE /api/admin/users/[userId] — Soft-delete user (set deleted_at)
+ * 
+ * Phase 2 Domain 5: Member status enforcement + event-driven access revocation
  */
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
@@ -28,18 +30,44 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   try {
     // Find current status and toggle
-    const [member] = await db
-      .select({ status: organizationMembers.status })
+    const [memberRecord] = await db
+      .select({ status: organizationMembers.status, organizationId: organizationMembers.organizationId })
       .from(organizationMembers)
       .where(eq(organizationMembers.id, userId))
       .limit(1);
 
-    const newStatus = member?.status === 'active' ? 'inactive' : 'active';
+    if (!memberRecord) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
 
+    const newStatus = memberRecord.status === 'active' ? 'inactive' : 'active';
+    const oldStatus = memberRecord.status;
+
+    // Update member status
     await db
       .update(organizationMembers)
       .set({ status: newStatus, updatedAt: new Date() })
       .where(eq(organizationMembers.id, userId));
+
+    // Phase 2 Domain 5: Emit member.status_changed event to trigger access revocation
+    // This enables event-driven enforcement of member lifecycle (sessions, case access)
+    try {
+      // Dynamic import to avoid circular dependency
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { eventBus } = await import('@/lib/events/event-bus');
+      
+      await eventBus.emitAndWait('member.status_changed', {
+        userId,
+        organizationId: memberRecord.organizationId,
+        oldStatus,
+        newStatus,
+        timestamp: new Date(),
+      });
+    } catch (_eventError) {
+      // Log event emission failure but don't block the response
+      // (status update is durable; event emission is async enhancement)
+      console.error('Failed to emit member.status_changed event', { userId });
+    }
 
     return NextResponse.json({ success: true, status: newStatus });
   } catch {
