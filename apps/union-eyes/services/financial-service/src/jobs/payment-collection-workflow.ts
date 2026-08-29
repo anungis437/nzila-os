@@ -30,6 +30,18 @@ function generateJobIdempotencyKey(jobType: string, date: Date): string {
   return `${jobType}::${dateStr}`;
 }
 
+function toErrorMeta(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return { message: String(error) };
+}
+
 /**
  * Process payment collection for a tenant
  * Matches incoming payments to dues transactions and updates statuses
@@ -124,10 +136,7 @@ export async function processPaymentCollection(params: {
     for (const payment of pendingPayments) {
       // Check for cancellation request
       if (executionStateId) {
-        const isCancelled = await jobCancellationService.isJobCancelled({
-          organizationId: tenantId,
-          executionStateId,
-        });
+        const isCancelled = await jobCancellationService.isJobCancelled(executionStateId, tenantId);
         if (isCancelled) {
           logger.info('Job cancellation requested, stopping payment collection', { jobRunId });
           break;
@@ -296,7 +305,7 @@ export async function processPaymentCollection(params: {
           logger.error('Failed to send payment receipt', {
             paymentId: payment.id,
             memberId,
-            error: receiptError,
+            error: toErrorMeta(receiptError),
           });
           // Don't fail the entire payment process if receipt fails
         }
@@ -304,7 +313,7 @@ export async function processPaymentCollection(params: {
       } catch (paymentError) {
         logger.error('Error processing payment', {
           paymentId: payment.id,
-          error: paymentError,
+          error: toErrorMeta(paymentError),
         });
         errors.push({
           paymentId: payment.id,
@@ -339,16 +348,12 @@ export async function processPaymentCollection(params: {
 
     // Complete job execution tracking
     if (executionStateId) {
-      await jobCancellationService.completeJob({
-        organizationId: tenantId,
-        executionStateId,
-        result: {
-          paymentsProcessed,
-          transactionsUpdated,
-          receiptsIssued,
-          arrearsUpdated,
-          errorsCount: errors.length,
-        },
+      await jobCancellationService.completeJob(tenantId, executionStateId, {
+        paymentsProcessed,
+        transactionsUpdated,
+        receiptsIssued,
+        arrearsUpdated,
+        errors: errors.slice(0, 20),
       });
     }
 
@@ -366,21 +371,16 @@ export async function processPaymentCollection(params: {
     
     // Record failure in job execution tracking
     if (executionStateId) {
-      await jobCancellationService.failJob({
-        organizationId: tenantId,
-        executionStateId,
-        error: error instanceof Error ? error : new Error(String(error)),
-      });
+      await jobCancellationService.failJob(tenantId, executionStateId, toErrorMeta(error));
     }
     
     return {
       success: false,
-      paymentsProcessed,
-      transactionsUpdated,
-      receiptsIssued,
-      arrearsUpdated,
-      errorsCount: errors.length,
-      errors,
+      paymentsProcessed: 0,
+      transactionsUpdated: 0,
+      receiptsIssued: 0,
+      arrearsUpdated: 0,
+      errors: [],
     };
   }
 }

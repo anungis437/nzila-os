@@ -50,6 +50,16 @@ apps:
         value: http://nzila-os-union-eyes-django-pilot
       - name: READY_REQUIRE_QUEUE
         value: "true"
+      - name: OTEL_ENABLED
+        value: "true"
+      - name: OTEL_SERVICE_NAME
+        value: nzila-union-eyes-pilot
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "${OTEL_COLLECTOR_ENDPOINT}"
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_traceidratio
+      - name: OTEL_TRACES_SAMPLER_ARG
+        value: "1.0"
 
 database:
   name: nzila-canada-pilot-db

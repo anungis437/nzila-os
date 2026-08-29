@@ -18,6 +18,18 @@ function generateJobIdempotencyKey(jobType: string, date: Date): string {
   return `${jobType}::${dateStr}`;
 }
 
+function toErrorMeta(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return { message: String(error) };
+}
+
 /**
  * Process hourly alerts with Gate 13 execution tracking
  */
@@ -50,12 +62,8 @@ async function processHourlyAlertsWithTracking(params: {
     
     // Complete job execution tracking
     if (executionStateId) {
-      await jobCancellationService.completeJob({
-        organizationId,
-        executionStateId,
-        result: {
-          alertsSent: result.alertsSent,
-        },
+      await jobCancellationService.completeJob(organizationId, executionStateId, {
+        alertsSent: result.alertsSent,
       });
     }
     
@@ -66,11 +74,7 @@ async function processHourlyAlertsWithTracking(params: {
   } catch (error) {
     // Record failure in job execution tracking
     if (executionStateId) {
-      await jobCancellationService.failJob({
-        organizationId,
-        executionStateId,
-        error: error instanceof Error ? error : new Error(String(error)),
-      });
+      await jobCancellationService.failJob(organizationId, executionStateId, toErrorMeta(error));
     }
     
     return {
@@ -113,15 +117,11 @@ async function processWeeklyForecastWithTracking(params: {
     
     // Complete job execution tracking
     if (executionStateId) {
-      await jobCancellationService.completeJob({
-        organizationId,
-        executionStateId,
-        result: {
-          totalFunds: result.totalFunds,
-          criticalFunds: result.criticalFunds,
-          warningFunds: result.warningFunds,
-          reportGenerated: result.reportGenerated,
-        },
+      await jobCancellationService.completeJob(organizationId, executionStateId, {
+        totalFunds: result.totalFunds,
+        criticalFunds: result.criticalFunds,
+        warningFunds: result.warningFunds,
+        reportGenerated: result.reportGenerated,
       });
     }
     
@@ -132,11 +132,7 @@ async function processWeeklyForecastWithTracking(params: {
   } catch (error) {
     // Record failure in job execution tracking
     if (executionStateId) {
-      await jobCancellationService.failJob({
-        organizationId,
-        executionStateId,
-        error: error instanceof Error ? error : new Error(String(error)),
-      });
+      await jobCancellationService.failJob(organizationId, executionStateId, toErrorMeta(error));
     }
     
     return {

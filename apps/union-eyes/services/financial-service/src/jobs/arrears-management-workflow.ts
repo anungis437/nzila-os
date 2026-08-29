@@ -24,6 +24,18 @@ function generateJobIdempotencyKey(jobType: string, date: Date): string {
   return `${jobType}::${dateStr}`;
 }
 
+function toErrorMeta(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return { message: String(error) };
+}
+
 /**
  * Scan for overdue dues and create/update arrears records
  */
@@ -98,10 +110,7 @@ export async function processArrearsManagement(params: {
     for (const record of overdueRecords) {
       // Check for cancellation request
       if (executionStateId) {
-        const isCancelled = await jobCancellationService.isJobCancelled({
-          organizationId: tenantId,
-          executionStateId,
-        });
+        const isCancelled = await jobCancellationService.isJobCancelled(executionStateId, tenantId);
         if (isCancelled) {
           logger.info('Job cancellation requested, stopping arrears management', { jobRunId });
           break;
@@ -208,15 +217,11 @@ export async function processArrearsManagement(params: {
 
     // Complete job execution tracking
     if (executionStateId) {
-      await jobCancellationService.completeJob({
-        organizationId: tenantId,
-        executionStateId,
-        result: {
-          overdueTransactions,
-          arrearsCreated,
-          notificationsSent,
-          errorsCount: errors.length,
-        },
+      await jobCancellationService.completeJob(tenantId, executionStateId, {
+        overdueTransactions,
+        arrearsCreated,
+        notificationsSent,
+        errors: errors.slice(0, 20),
       });
     }
 
@@ -233,11 +238,7 @@ export async function processArrearsManagement(params: {
     
     // Record failure in job execution tracking
     if (executionStateId) {
-      await jobCancellationService.failJob({
-        organizationId: tenantId,
-        executionStateId,
-        error: error instanceof Error ? error : new Error(String(error)),
-      });
+      await jobCancellationService.failJob(tenantId, executionStateId, toErrorMeta(error));
     }
     
     return {

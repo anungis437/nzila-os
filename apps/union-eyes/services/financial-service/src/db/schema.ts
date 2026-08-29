@@ -6593,3 +6593,14 @@ export const vendors = pgTable("vendors", {
 		uniqueVendorName: unique("unique_vendor_name").on(table.organizationId, table.vendorName),
 	}
 });
+
+// Re-export Gate 13 tables and relations from global schema for financial-service consumers
+export {
+	jobExecutionState,
+	jobCancellationRequest,
+	jobCancellationAuditEvent,
+	jobReconciliationPass,
+	jobExecutionStateRelations,
+	jobCancellationRequestRelations,
+	jobCancellationAuditEventRelations,
+} from "@/db/schema";
