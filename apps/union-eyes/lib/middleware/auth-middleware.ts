@@ -161,6 +161,19 @@ return null;
       const roles = (publicMetadata?.roles as string[]) || ['member'];
       const organizationId = (publicMetadata?.organizationId as string) || '';
 
+      // Validate member status: enforce that only 'active' members can authenticate
+      // (Phase 2 Domain 5 enforcement: member.status must be 'active')
+      try {
+        const memberStatus = await this.validateMemberStatus(userId, organizationId);
+        if (!memberStatus) {
+          // Member is inactive, offboarded, or suspended - deny access
+          return null;
+        }
+      } catch (_statusCheckError) {
+        // If member status check fails, fail-closed and deny access
+        return null;
+      }
+
       return {
         id: userId,
         email: ((sessionData?.emailAddresses as Array<{ emailAddress: string }> | undefined)?.[0]?.emailAddress) || null,
@@ -172,6 +185,45 @@ return null;
       };
     } catch (_error) {
 return null;
+    }
+  }
+
+  /**
+   * Validate that member status is 'active' (Phase 2 Domain 5)
+   * Returns true if member is active, false otherwise
+   * Fail-closed: any error returns false (deny access)
+   */
+  private static async validateMemberStatus(userId: string, organizationId: string): Promise<boolean> {
+    try {
+      // Dynamic import to avoid circular dependency
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getMemberById } = await import('@/lib/services/member-service');
+      
+      const member = await getMemberById(userId);
+      
+      // Member not found = not active
+      if (!member) {
+        return false;
+      }
+      
+      // Verify member belongs to organization and is active
+      const memberStatus = (member as any).status as string | undefined;
+      const memberOrgId = (member as any).organizationId as string | undefined;
+      
+      // Only active members can authenticate
+      if (memberStatus !== 'active') {
+        return false;
+      }
+      
+      // Cross-org access: deny
+      if (memberOrgId !== organizationId) {
+        return false;
+      }
+      
+      return true;
+    } catch (_error) {
+      // Fail-closed: if we can't verify member status, deny access
+      return false;
     }
   }
 

@@ -22,6 +22,13 @@ import {
 import { eq, and, inArray } from 'drizzle-orm';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
+import { JobCancellationService } from '../services/job-cancellation-service';
+import { v4 as uuidv4 } from 'uuid';
+
+function generateJobIdempotencyKey(jobType: string, date: Date): string {
+  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+  return `${jobType}::${dateStr}`;
+}
 
 /**
  * Process payment collection for a tenant
@@ -40,18 +47,37 @@ export async function processPaymentCollection(params: {
 }> {
   const { tenantId, processingDate = new Date() } = params;
   
-  logger.info('Starting payment collection workflow', { 
-    tenantId, 
-    processingDate: processingDate.toISOString() 
-  });
-
-  const errors: Array<{ paymentId: string; error: string }> = [];
-  let paymentsProcessed = 0;
-  let transactionsUpdated = 0;
-  let receiptsIssued = 0;
-  let arrearsUpdated = 0;
-
+  const jobCancellationService = new JobCancellationService();
+  const jobRunId = uuidv4();
+  const idempotencyKey = generateJobIdempotencyKey('payment-collection-workflow', processingDate);
+  
+  let executionStateId: string | undefined;
+  
   try {
+    // Start job execution tracking
+    const executionState = await jobCancellationService.startJobExecution({
+      organizationId: tenantId,
+      jobType: 'payment-collection-workflow',
+      jobRunId,
+      scheduledAt: processingDate,
+      metadata: {
+        processingDate: processingDate.toISOString(),
+      },
+    });
+    executionStateId = executionState.id;
+    
+    logger.info('Starting payment collection workflow', { 
+      tenantId, 
+      processingDate: processingDate.toISOString(),
+      jobRunId,
+    });
+
+    const errors: Array<{ paymentId: string; error: string }> = [];
+    let paymentsProcessed = 0;
+    let transactionsUpdated = 0;
+    let receiptsIssued = 0;
+    let arrearsUpdated = 0;
+
     // Find all unprocessed payments (status='pending' or 'processing')
     // Join with members to get member details for notifications
     const pendingPayments = await db
@@ -96,6 +122,18 @@ export async function processPaymentCollection(params: {
 
     // Process each payment
     for (const payment of pendingPayments) {
+      // Check for cancellation request
+      if (executionStateId) {
+        const isCancelled = await jobCancellationService.isJobCancelled({
+          organizationId: tenantId,
+          executionStateId,
+        });
+        if (isCancelled) {
+          logger.info('Job cancellation requested, stopping payment collection', { jobRunId });
+          break;
+        }
+      }
+      
       try {
         if (!payment.memberId) {
           errors.push({
@@ -299,6 +337,21 @@ export async function processPaymentCollection(params: {
       errors: errors.length,
     });
 
+    // Complete job execution tracking
+    if (executionStateId) {
+      await jobCancellationService.completeJob({
+        organizationId: tenantId,
+        executionStateId,
+        result: {
+          paymentsProcessed,
+          transactionsUpdated,
+          receiptsIssued,
+          arrearsUpdated,
+          errorsCount: errors.length,
+        },
+      });
+    }
+
     return {
       success,
       paymentsProcessed,
@@ -310,7 +363,25 @@ export async function processPaymentCollection(params: {
 
   } catch (error) {
     logger.error('Payment collection workflow failed', { error });
-    throw error;
+    
+    // Record failure in job execution tracking
+    if (executionStateId) {
+      await jobCancellationService.failJob({
+        organizationId: tenantId,
+        executionStateId,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
+    
+    return {
+      success: false,
+      paymentsProcessed,
+      transactionsUpdated,
+      receiptsIssued,
+      arrearsUpdated,
+      errorsCount: errors.length,
+      errors,
+    };
   }
 }
 

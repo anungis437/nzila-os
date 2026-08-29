@@ -26,6 +26,8 @@ import { eq, and, gte, lte, sql, inArray } from 'drizzle-orm';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
+import { v4 as uuid } from 'uuid';
+import { JobCancellationService } from '../services/job-cancellation-service';
 
 // Initialize Stripe via platform wrapper
 const stripe = getStripeClient();
@@ -57,6 +59,14 @@ const DEFAULT_STIPEND_RULES: StipendRules = {
 };
 
 /**
+ * Generate idempotency key for stipend processing jobs
+ */
+function generateJobIdempotencyKey(jobType: string, date: Date): string {
+  const dateStr = date.toISOString().split('T')[0];
+  return `${jobType}::${dateStr}`;
+}
+
+/**
  * Process weekly stipend calculations for a tenant
  */
 export async function processWeeklyStipends(params: {
@@ -82,6 +92,12 @@ export async function processWeeklyStipends(params: {
   const weekEndDate = new Date(weekStartDate);
   weekEndDate.setDate(weekEndDate.getDate() + 6); // 7-day week
 
+  // Gate 13: Job execution tracking
+  const jobRunId = uuid();
+  const idempotencyKey = generateJobIdempotencyKey('stipend-processing-weekly', weekStartDate);
+  const jobCancellationService = new JobCancellationService();
+  let executionStateId: string | undefined;
+
   logger.info('Starting weekly stipend processing', {
     tenantId,
     weekStart: weekStartDate.toISOString().split('T')[0],
@@ -96,6 +112,15 @@ export async function processWeeklyStipends(params: {
   let autoApproved = 0;
 
   try {
+    // Gate 13: Initialize job execution tracking
+    executionStateId = await jobCancellationService.startJobExecution({
+      organizationId: tenantId,
+      jobType: 'stipend-processing-weekly',
+      jobRunId,
+      scheduledAt: new Date(),
+      metadata: { weekStartDate: weekStartDate.toISOString().split('T')[0] },
+    }).then((state) => state.id);
+
     // Verify strike fund has sufficient balance
     const fundBalance = await checkStrikeFundBalance(tenantId, rules.fundId);
     logger.info('Strike fund balance check', { fundId: rules.fundId, balance: fundBalance });
@@ -137,6 +162,12 @@ export async function processWeeklyStipends(params: {
     }>();
 
     for (const record of attendanceRecords) {
+      // Gate 13: Check for cancellation before processing
+      if (executionStateId && await jobCancellationService.isJobCancelled(tenantId, executionStateId)) {
+        logger.info('Stipend processing cancelled', { executionStateId });
+        break;
+      }
+
       const hours = parseFloat(record.hoursWorked || '0');
       
       // Check if this day qualifies for stipend
@@ -267,6 +298,17 @@ export async function processWeeklyStipends(params: {
       errors: errors.length,
     });
 
+    // Gate 13: Mark job as complete
+    if (executionStateId) {
+      await jobCancellationService.completeJob(tenantId, executionStateId, {
+        stipendsCalculated,
+        totalAmount,
+        pendingApproval,
+        autoApproved,
+        errors: errors.length,
+      });
+    }
+
     return {
       success,
       stipendsCalculated,
@@ -279,6 +321,12 @@ export async function processWeeklyStipends(params: {
 
   } catch (error) {
     logger.error('Weekly stipend processing failed', { error });
+    
+    // Gate 13: Mark job as failed
+    if (executionStateId) {
+      await jobCancellationService.failJob(tenantId, executionStateId, error instanceof Error ? error : new Error(String(error)));
+    }
+    
     throw error;
   }
 }
@@ -347,7 +395,23 @@ export async function processDisbursements(params: {
   let failed = 0;
   let totalAmount = 0;
 
+  // Gate 13: Job execution tracking
+  const jobRunId = uuid();
+  const idempotencyKey = generateJobIdempotencyKey('stipend-disbursal', new Date());
+  const jobCancellationService = new JobCancellationService();
+  let executionStateId: string | undefined;
+
   try {
+    // Gate 13: Initialize job execution tracking
+    executionStateId = await jobCancellationService.startJobExecution(
+      tenantId,
+      'stipend-disbursal',
+      jobRunId,
+      idempotencyKey,
+      new Date(),
+      { stipendIds: stipendIds?.length || 0 }
+    );
+
     // Find approved stipends ready for disbursement
     const conditions = [
       eq(stipendDisbursements.tenantId, tenantId),
@@ -366,6 +430,12 @@ export async function processDisbursements(params: {
     logger.info(`Found ${approvedStipends.length} approved stipends to disburse`);
 
     for (const stipend of approvedStipends) {
+      // Gate 13: Check for cancellation before processing
+      if (executionStateId && await jobCancellationService.isJobCancelled(tenantId, executionStateId)) {
+        logger.info('Stipend disbursement processing cancelled', { executionStateId });
+        break;
+      }
+
       try {
         const amount = parseFloat(stipend.totalAmount);
         let paymentIntentId: string | null = null;
@@ -473,10 +543,26 @@ export async function processDisbursements(params: {
       totalAmount,
     });
 
+    // Gate 13: Mark job as complete
+    if (executionStateId) {
+      await jobCancellationService.completeJob(tenantId, executionStateId, {
+        disbursed,
+        failed,
+        totalAmount,
+        errors: errors.length,
+      });
+    }
+
     return { success, disbursed, failed, totalAmount, errors };
 
   } catch (error) {
     logger.error('Stipend disbursement failed', { error });
+    
+    // Gate 13: Mark job as failed
+    if (executionStateId) {
+      await jobCancellationService.failJob(tenantId, executionStateId, error instanceof Error ? error : new Error(String(error)));
+    }
+    
     throw error;
   }
 }
