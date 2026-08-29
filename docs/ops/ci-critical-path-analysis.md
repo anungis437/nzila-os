@@ -1,6 +1,6 @@
 # CI Critical Path Analysis (Phase 4)
 
-Baseline: run 33101255112 on `main` (2026-04-27).
+Baseline: run 33101255112 on `main` (2026-08-27).
 
 ## Job Durations (top 5)
 
@@ -25,7 +25,7 @@ Wall clock ≈ **max(test) + build + summary ≈ 40 + 12 + 1 = 53m** to full gre
 
 ## Phase 4 Applied Change
 
-**Drop `test` from `build.needs`.** Build is TypeScript compilation; unit tests are runtime validation — they don't depend on each other. Contract tests and perf regression still gate on `test` via their own `needs:`, so behaviour for downstream jobs is unchanged.
+**Drop `test` from `build.needs`.** Build is TypeScript compilation; unit tests are runtime validation — they don't depend on each other. Downstream jobs keep their own explicit dependencies, so behaviour for the rest of the graph is unchanged.
 
 ### New Critical Path
 
