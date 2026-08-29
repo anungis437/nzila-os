@@ -159,7 +159,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build All
-    needs: [lint-and-typecheck, test]
+    # `test` intentionally omitted: build is compilation, tests are runtime — they are
+    # independent and can execute in parallel. Unit tests remain an independent CI gate,
+    # and downstream jobs declare their own dependencies explicitly.
+    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
