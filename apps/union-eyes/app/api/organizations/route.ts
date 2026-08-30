@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@nzila/platform-auth/entra/server';
+import { auth, requireSystemAdmin } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
 import { eq, and, sql, type SQL } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { MAX_HIERARCHY_DEPTH } from '@/lib/utils/hierarchy-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,6 +122,15 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Organization/tenant creation fails closed to platform/system administration.
+  // Delegated tenant-admin child-org provisioning is a separate, not-yet-proven
+  // permission model and is intentionally not implemented here.
+  try {
+    await requireSystemAdmin();
+  } catch {
+    return NextResponse.json({ error: 'Forbidden: system administrator privileges required' }, { status: 403 });
+  }
+
   const body = await req.json();
 
   // Known callers post the organization type under three different field names
@@ -155,6 +165,12 @@ export async function POST(req: NextRequest) {
     }
     hierarchyPath = [...(parent.hierarchyPath ?? []), parentId];
     hierarchyLevel = (parent.hierarchyLevel ?? 0) + 1;
+    if (hierarchyPath.length > MAX_HIERARCHY_DEPTH) {
+      return NextResponse.json(
+        { error: `Hierarchy depth ${hierarchyPath.length} would exceed maximum ${MAX_HIERARCHY_DEPTH}` },
+        { status: 400 },
+      );
+    }
   }
 
   const [created] = await withRLSContext(async () =>

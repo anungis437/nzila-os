@@ -18,14 +18,17 @@ import { logger } from '@/lib/logger';
 // =============================================================================
 
 export const MAX_HIERARCHY_DEPTH = 10;
+// Canonical organization types (types/organization.ts). Numeric values are
+// display/ordering hints only — they are not used to restrict parent/child
+// placement (see validateTypeHierarchy: warnings only, never errors).
 export const HIERARCHY_TYPES = {
   platform: -1, // SaaS platform provider (above congress)
   congress: 0,
   federation: 1,
   union: 2,
-  charter: 2,
-  local: 3,
-  branch: 4,
+  region: 3,
+  district: 3,
+  local: 4,
 } as const;
 
 // =============================================================================
@@ -185,8 +188,11 @@ export async function validatePathConsistency(
 
   // Root organization check
   if (!parentId) {
-    if (hierarchyPath.length !== 1 || hierarchyPath[0] !== organizationId) {
-      errors.push(`Root organization must have hierarchyPath = [${organizationId}]`);
+    // Canonical convention (matches createOrganization() and the descendant/
+    // ancestor queries that rely on it): hierarchyPath holds ANCESTOR ids only,
+    // never the organization's own id. A root organization has no ancestors.
+    if (hierarchyPath.length !== 0) {
+      errors.push(`Root organization must have an empty hierarchyPath (ancestors-only convention), got: [${hierarchyPath.join(', ')}]`);
       return { valid: false, errors, warnings };
     }
     return { valid: true, errors, warnings };
@@ -203,7 +209,8 @@ export async function validatePathConsistency(
     return { valid: false, errors, warnings };
   }
 
-  const expectedPath = [...(parent.hierarchyPath || []), organizationId];
+  // Ancestors-only: append the PARENT's id (not this organization's own id).
+  const expectedPath = [...(parent.hierarchyPath || []), parentId];
 
   // Check if path matches expected
   if (JSON.stringify(hierarchyPath) !== JSON.stringify(expectedPath)) {

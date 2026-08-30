@@ -425,11 +425,12 @@ export async function getOrganizationAncestors(
 
       logger.info("Fetching organization ancestors", { path: child.hierarchyPath });
 
-      // Query all ancestors using slugs from hierarchy_path (hierarchyPath contains slugs, not UUIDs)
+      // hierarchyPath holds ancestor UUIDs (see createOrganization: parent's
+      // hierarchyPath + parent's own id) — not slugs.
       const ancestors = await dbOrTx
         .select()
         .from(organizations)
-        .where(inArray(organizations.slug, child.hierarchyPath))
+        .where(inArray(organizations.id, child.hierarchyPath))
         .orderBy(asc(organizations.hierarchyLevel));
 
       logger.info("Found organization ancestors", { count: ancestors.length });
@@ -1203,38 +1204,29 @@ export async function getOrganizationMemberStats(
 
 /**
  * Validate organization type hierarchy
- * 
- * Enforces business rules:
- * - Congress (CLC) has no parent
- * - Federations are under Congress
- * - Unions are under Congress or Federation
- * - Locals are under Unions
- * - Chapters are under Locals
- * - Sector Councils are under Congress/Federation/Union
- * 
- * @throws Error if hierarchy is invalid
+ *
+ * Structural validation only: both parent and child must be one of the
+ * canonical organization types (types/organization.ts). Does not enforce a
+ * parent/child placement matrix — the previous hard-coded CLC-specific
+ * matrix (chapter/sector_council-only children, no path for region/district)
+ * was unproven product policy, not a structural invariant, and blocked
+ * creating region/district organizations entirely. Placement policy, if
+ * needed, should be designed as an explicit, evidence-backed product
+ * decision rather than re-encoded here.
+ *
+ * @throws Error if either type is not a canonical organization type
  */
 function validateOrganizationHierarchy(
   parentType: string,
   childType: string
 ): void {
-  const validHierarchies: Record<string, string[]> = {
-    platform: ["congress", "federation", "union"], // SaaS platform can host any org
-    congress: ["federation", "union", "sector_council"],
-    federation: ["union", "sector_council"],
-    union: ["local", "sector_council"],
-    local: ["chapter"],
-    chapter: [],
-    sector_council: [],
-  };
+  const CANONICAL_TYPES = ["platform", "congress", "federation", "union", "local", "region", "district"];
 
-  const allowedChildren = validHierarchies[parentType] || [];
-
-  if (!allowedChildren.includes(childType)) {
-    throw new Error(
-      `Invalid hierarchy: ${childType} cannot be a child of ${parentType}. ` +
-      `Allowed children of ${parentType}: ${allowedChildren.join(", ") || "none"}`
-    );
+  if (!CANONICAL_TYPES.includes(parentType)) {
+    throw new Error(`Invalid hierarchy: unknown parent organization type "${parentType}". Must be one of: ${CANONICAL_TYPES.join(", ")}`);
+  }
+  if (!CANONICAL_TYPES.includes(childType)) {
+    throw new Error(`Invalid hierarchy: unknown organization type "${childType}". Must be one of: ${CANONICAL_TYPES.join(", ")}`);
   }
 }
 

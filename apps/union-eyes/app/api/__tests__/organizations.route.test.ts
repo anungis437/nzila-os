@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
+  requireSystemAdmin: vi.fn(),
   withRLSContext: vi.fn(),
   rowsQueue: [] as unknown[][],
   executeQueue: [] as unknown[][],
@@ -23,7 +24,7 @@ const mockDb: any = {
   })),
 };
 
-vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
+vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
@@ -53,6 +54,7 @@ describe('organizations route', () => {
     m.executeQueue = [];
     m.inserted = { ...orgRow };
     m.auth.mockResolvedValue({ userId: 'u1' });
+    m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
   });
 
@@ -84,6 +86,18 @@ describe('organizations route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Org' }),
     }));
     expect(response.status).toBe(401);
+  });
+
+  it('POST returns 403 when the authenticated user is not a system administrator', async () => {
+    const { POST } = await loadRoute();
+    m.requireSystemAdmin.mockRejectedValueOnce(new Error('System administrator privileges required'));
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Org', slug: 'org', type: 'local' }),
+    }));
+
+    expect(response.status).toBe(403);
   });
 
   it('POST creates organization and returns 201', async () => {
@@ -138,6 +152,20 @@ describe('organizations route', () => {
     expect(insertedValues.parentId).toBe('parent-id');
     expect(insertedValues.hierarchyPath).toEqual(['root-id', 'parent-id']);
     expect(insertedValues.hierarchyLevel).toBe(2);
+  });
+
+  it('POST returns 400 when the parent is already at maximum hierarchy depth', async () => {
+    const { POST } = await loadRoute();
+    // Parent's own hierarchyPath is already 10 ancestors deep (MAX_HIERARCHY_DEPTH).
+    const deepPath = Array.from({ length: 10 }, (_, i) => `ancestor-${i}`);
+    m.rowsQueue.push([{ hierarchyPath: deepPath, hierarchyLevel: 10 }]);
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Too Deep', slug: 'too-deep', type: 'local', parent_id: 'parent-id' }),
+    }));
+
+    expect(response.status).toBe(400);
   });
 
   it('POST accepts the organizationType/parentOrganizationId field-name convention used by OrganizationHierarchyAdmin', async () => {

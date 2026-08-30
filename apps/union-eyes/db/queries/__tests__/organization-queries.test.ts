@@ -223,11 +223,23 @@ describe('organization-queries — mutations', () => {
       q.createOrganization({ name: 'X', organizationType: 'local', parentId: 'missing' } as never),
     ).rejects.toThrow('Failed to create organization');
   });
-  it('createOrganization throws on invalid hierarchy', async () => {
+  it('createOrganization throws when the child type is not a canonical organization type', async () => {
     push([{ id: 'p1', hierarchyPath: [], hierarchyLevel: 0, organizationType: 'local' }]);
     await expect(
-      q.createOrganization({ name: 'X', organizationType: 'congress', parentId: 'p1' } as never),
+      q.createOrganization({ name: 'X', organizationType: 'chapter', parentId: 'p1' } as never),
     ).rejects.toThrow('Failed to create organization');
+  });
+  it('createOrganization allows any canonical type under any canonical parent (no hard-coded placement matrix)', async () => {
+    push(
+      [{ id: 'p1', hierarchyPath: [], hierarchyLevel: 0, organizationType: 'local' }],
+      [{ id: 'new', name: 'Congress Under Local' }],
+    );
+    const r = await q.createOrganization({
+      name: 'Congress Under Local',
+      organizationType: 'congress',
+      parentId: 'p1',
+    } as never);
+    expect(r).toEqual({ id: 'new', name: 'Congress Under Local' });
   });
 
   it('updateOrganization without parent change', async () => {
