@@ -163,7 +163,7 @@ export async function processWeeklyStipends(params: {
 
     for (const record of attendanceRecords) {
       // Gate 13: Check for cancellation before processing
-      if (executionStateId && await jobCancellationService.isJobCancelled(tenantId, executionStateId)) {
+      if (executionStateId && await jobCancellationService.isJobCancelled({ executionStateId, organizationId: tenantId })) {
         logger.info('Stipend processing cancelled', { executionStateId });
         break;
       }
@@ -300,12 +300,16 @@ export async function processWeeklyStipends(params: {
 
     // Gate 13: Mark job as complete
     if (executionStateId) {
-      await jobCancellationService.completeJob(tenantId, executionStateId, {
-        stipendsCalculated,
-        totalAmount,
-        pendingApproval,
-        autoApproved,
-        errors: errors.length,
+      await jobCancellationService.completeJob({
+        executionStateId,
+        organizationId: tenantId,
+        result: {
+          stipendsCalculated,
+          totalAmount,
+          pendingApproval,
+          autoApproved,
+          errors: errors.length,
+        },
       });
     }
 
@@ -324,7 +328,11 @@ export async function processWeeklyStipends(params: {
     
     // Gate 13: Mark job as failed
     if (executionStateId) {
-      await jobCancellationService.failJob(tenantId, executionStateId, error instanceof Error ? error : new Error(String(error)));
+      await jobCancellationService.failJob({
+        executionStateId,
+        organizationId: tenantId,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
     }
     
     throw error;
@@ -403,14 +411,13 @@ export async function processDisbursements(params: {
 
   try {
     // Gate 13: Initialize job execution tracking
-    executionStateId = await jobCancellationService.startJobExecution(
-      tenantId,
-      'stipend-disbursal',
+    executionStateId = await jobCancellationService.startJobExecution({
+      organizationId: tenantId,
+      jobType: 'stipend-disbursal',
       jobRunId,
-      idempotencyKey,
-      new Date(),
-      { stipendIds: stipendIds?.length || 0 }
-    );
+      scheduledAt: new Date(),
+      metadata: { stipendIds: stipendIds?.length || 0 },
+    }).then((state) => state.id);
 
     // Find approved stipends ready for disbursement
     const conditions = [
@@ -431,7 +438,7 @@ export async function processDisbursements(params: {
 
     for (const stipend of approvedStipends) {
       // Gate 13: Check for cancellation before processing
-      if (executionStateId && await jobCancellationService.isJobCancelled(tenantId, executionStateId)) {
+      if (executionStateId && await jobCancellationService.isJobCancelled({ executionStateId, organizationId: tenantId })) {
         logger.info('Stipend disbursement processing cancelled', { executionStateId });
         break;
       }
@@ -545,11 +552,15 @@ export async function processDisbursements(params: {
 
     // Gate 13: Mark job as complete
     if (executionStateId) {
-      await jobCancellationService.completeJob(tenantId, executionStateId, {
-        disbursed,
-        failed,
-        totalAmount,
-        errors: errors.length,
+      await jobCancellationService.completeJob({
+        executionStateId,
+        organizationId: tenantId,
+        result: {
+          disbursed,
+          failed,
+          totalAmount,
+          errors: errors.length,
+        },
       });
     }
 
@@ -560,7 +571,11 @@ export async function processDisbursements(params: {
     
     // Gate 13: Mark job as failed
     if (executionStateId) {
-      await jobCancellationService.failJob(tenantId, executionStateId, error instanceof Error ? error : new Error(String(error)));
+      await jobCancellationService.failJob({
+        executionStateId,
+        organizationId: tenantId,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
     }
     
     throw error;

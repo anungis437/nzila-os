@@ -61,6 +61,21 @@ vi.mock("../../db", () => ({ db: h.db }));
 vi.mock("../../db/schema", () => h.schema);
 vi.mock("../../services/notification-service", () => ({ queueNotification: h.queueNotification }));
 vi.mock("@/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+// Gate 13 governance tracking is exercised by dedicated job-cancellation-service tests;
+// stub it here so it doesn't consume the shared business-logic mock db queue above.
+vi.mock("../../services/job-cancellation-service", () => {
+  class JobCancellationService {
+    async startJobExecution() { return { id: "test-exec-state-id" }; }
+    async requestCancellation() { /* no-op */ }
+    async isJobCancelled() { return false; }
+    async completeJob() { /* no-op */ }
+    async failJob() { /* no-op */ }
+    async cancelJob() { /* no-op */ }
+    async recordAuditEvent() { /* no-op */ }
+    async getExecutionState() { return null; }
+  }
+  return { JobCancellationService, jobCancellationService: new JobCancellationService() };
+});
 
 import {
   processPaymentCollection,
@@ -148,9 +163,14 @@ describe("processPaymentCollection", () => {
     expect(result.errors[0].error).toBe("match failed");
   });
 
-  it("throws when the top-level query fails", async () => {
+  it("returns a graceful failure result when the top-level query fails", async () => {
+    // Regression test for #713: a variable-scoping bug previously caused this
+    // path to throw a ReferenceError instead of returning {success:false,...},
+    // matching the contract used by arrears/dues/analytics workflows.
     enqueue(new Error("db down"));
-    await expect(processPaymentCollection({ tenantId: "org-1" })).rejects.toThrow("db down");
+    const result = await processPaymentCollection({ tenantId: "org-1" });
+    expect(result.success).toBe(false);
+    expect(result.errors).toEqual([]);
   });
 
   it("logs but tolerates a failed 'unmatched' status update", async () => {

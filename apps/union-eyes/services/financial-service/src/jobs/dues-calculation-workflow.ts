@@ -100,9 +100,9 @@ export async function processMonthlyDuesCalculation(params: {
     // Process each member
     for (const member of activeMembers) {
       // Check for cancellation request before processing each member
-      if (await jobCancellationService.isJobCancelled(executionStateId, tenantId)) {
+      if (await jobCancellationService.isJobCancelled({ executionStateId, organizationId: tenantId })) {
         logger.info('Job cancellation requested, stopping dues calculation');
-        await jobCancellationService.cancelJob(executionStateId, tenantId, 'cancellation-request');
+        await jobCancellationService.cancelJob({ executionStateId, organizationId: tenantId, cancelledBy: 'cancellation-request' });
         return {
           success: false,
           membersProcessed,
@@ -199,15 +199,15 @@ export async function processMonthlyDuesCalculation(params: {
     });
 
     // Mark job as completed with result metadata
-    await jobCancellationService.completeJob(
+    await jobCancellationService.completeJob({
       executionStateId,
-      tenantId,
-      {
+      organizationId: tenantId,
+      result: {
         membersProcessed,
         transactionsCreated,
         errorsCount: errors.length,
-      }
-    );
+      },
+    });
 
     return {
       success: true,
@@ -221,14 +221,14 @@ export async function processMonthlyDuesCalculation(params: {
     
     // Mark job as failed if execution state was created
     if (executionStateId) {
-      await jobCancellationService.failJob(
+      await jobCancellationService.failJob({
         executionStateId,
-        tenantId,
-        {
+        organizationId: tenantId,
+        error: {
           message: String(error),
           stack: error instanceof Error ? error.stack : undefined,
-        }
-      );
+        },
+      });
     }
 
     return {

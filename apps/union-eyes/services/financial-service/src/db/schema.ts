@@ -6593,3 +6593,117 @@ export const vendors = pgTable("vendors", {
 		uniqueVendorName: unique("unique_vendor_name").on(table.organizationId, table.vendorName),
 	}
 });
+
+// Gate 13: Background job cancellation governance (issue #713 regression correction)
+export const jobExecutionStatus = pgEnum("job_execution_status", ['pending', 'running', 'completed', 'failed', 'cancelled'])
+export const jobAuditEventType = pgEnum("job_audit_event_type", ['job_started', 'job_completed', 'job_failed', 'cancellation_requested', 'cancellation_acknowledged', 'job_cancelled', 'reconciliation_event'])
+
+/**
+ * Job Execution State - Gate 13 background-job cancellation tracking.
+ * One row per (organization, job type, job run); records lifecycle and
+ * cancellation-request state for financial-service scheduled/background jobs.
+ */
+export const jobExecutionState = pgTable("ue_governance_job_execution_state", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	organizationId: uuid("organization_id").notNull(),
+	jobType: varchar("job_type", { length: 100 }).notNull(),
+	jobRunId: varchar("job_run_id", { length: 100 }).notNull(),
+	jobBatchId: varchar("job_batch_id", { length: 100 }),
+	status: jobExecutionStatus("status").default('pending').notNull(),
+	startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }),
+	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
+	failedAt: timestamp("failed_at", { withTimezone: true, mode: 'string' }),
+	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'string' }),
+	cancellationRequested: boolean("cancellation_requested").default(false).notNull(),
+	cancellationIdempotencyKey: varchar("cancellation_idempotency_key", { length: 255 }),
+	cancellationRequestedAt: timestamp("cancellation_requested_at", { withTimezone: true, mode: 'string' }),
+	cancellationAcknowledgedAt: timestamp("cancellation_acknowledged_at", { withTimezone: true, mode: 'string' }),
+	cancelledBy: varchar("cancelled_by", { length: 255 }),
+	cancellationReason: text("cancellation_reason"),
+	context: jsonb("context"),
+	result: jsonb("result"),
+	error: jsonb("error"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+},
+(table) => {
+	return {
+		idxJobExecStateOrg: index("idx_ue_gov_job_exec_state_org").using("btree", table.organizationId.asc().nullsLast()),
+		idxJobExecStateStatus: index("idx_ue_gov_job_exec_state_status").using("btree", table.status.asc().nullsLast()),
+		idxJobExecStateCancelKey: index("idx_ue_gov_job_exec_state_cancel_key").using("btree", table.organizationId.asc().nullsLast(), table.cancellationIdempotencyKey.asc().nullsLast()),
+		jobExecutionStateOrganizationIdFkey: foreignKey({
+			columns: [table.organizationId],
+			foreignColumns: [organizations.id],
+			name: "ue_governance_job_execution_state_organization_id_fkey"
+		}).onDelete("cascade"),
+		uniqueJobExecutionRun: unique("unique_ue_gov_job_execution_run").on(table.organizationId, table.jobType, table.jobRunId),
+	}
+});
+
+/**
+ * Job Cancellation Request - Gate 13 idempotent cancellation intent record.
+ * One row per (organization, idempotency key); duplicate requests are
+ * absorbed via ON CONFLICT DO NOTHING at the application layer.
+ */
+export const jobCancellationRequest = pgTable("ue_governance_job_cancellation_request", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	organizationId: uuid("organization_id").notNull(),
+	jobExecutionStateId: uuid("job_execution_state_id").notNull(),
+	idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
+	requestedBy: varchar("requested_by", { length: 255 }).notNull(),
+	reason: text("reason"),
+	metadata: jsonb("metadata"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+},
+(table) => {
+	return {
+		idxJobCancelReqOrg: index("idx_ue_gov_job_cancel_req_org").using("btree", table.organizationId.asc().nullsLast()),
+		idxJobCancelReqExecState: index("idx_ue_gov_job_cancel_req_exec_state").using("btree", table.jobExecutionStateId.asc().nullsLast()),
+		jobCancellationRequestOrganizationIdFkey: foreignKey({
+			columns: [table.organizationId],
+			foreignColumns: [organizations.id],
+			name: "ue_governance_job_cancellation_request_organization_id_fkey"
+		}).onDelete("cascade"),
+		jobCancellationRequestExecutionStateIdFkey: foreignKey({
+			columns: [table.jobExecutionStateId],
+			foreignColumns: [jobExecutionState.id],
+			name: "ue_governance_job_cancellation_request_execution_state_id_fkey"
+		}).onDelete("cascade"),
+		uniqueJobCancellationIdempotencyKey: unique("unique_ue_gov_job_cancellation_idempotency_key").on(table.organizationId, table.idempotencyKey),
+	}
+});
+
+/**
+ * Job Cancellation Audit Event - Gate 13 append-only governance audit trail.
+ * Application layer only ever inserts rows here (see 0001_ue_governance_job_cancellation
+ * migration for the immutability trigger); no UPDATE/DELETE code path exists.
+ */
+export const jobCancellationAuditEvent = pgTable("ue_governance_job_cancellation_audit_event", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	organizationId: uuid("organization_id").notNull(),
+	jobExecutionStateId: uuid("job_execution_state_id").notNull(),
+	eventType: jobAuditEventType("event_type").notNull(),
+	eventSequence: varchar("event_sequence", { length: 255 }).notNull(),
+	actor: varchar("actor", { length: 255 }).notNull(),
+	actorType: varchar("actor_type", { length: 50 }).notNull(),
+	message: text("message"),
+	details: jsonb("details"),
+	isTerminal: boolean("is_terminal").default(false).notNull(),
+	timestamp: timestamp("timestamp", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+},
+(table) => {
+	return {
+		idxJobAuditEventOrg: index("idx_ue_gov_job_audit_event_org").using("btree", table.organizationId.asc().nullsLast()),
+		idxJobAuditEventExecState: index("idx_ue_gov_job_audit_event_exec_state").using("btree", table.jobExecutionStateId.asc().nullsLast()),
+		jobCancellationAuditEventOrganizationIdFkey: foreignKey({
+			columns: [table.organizationId],
+			foreignColumns: [organizations.id],
+			name: "ue_governance_job_cancellation_audit_event_organization_id_fkey"
+		}).onDelete("cascade"),
+		jobCancellationAuditEventExecutionStateIdFkey: foreignKey({
+			columns: [table.jobExecutionStateId],
+			foreignColumns: [jobExecutionState.id],
+			name: "ue_governance_job_cancellation_audit_event_execution_state_id_fkey"
+		}).onDelete("cascade"),
+	}
+});

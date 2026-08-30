@@ -52,7 +52,13 @@ export async function processPaymentCollection(params: {
   const idempotencyKey = generateJobIdempotencyKey('payment-collection-workflow', processingDate);
   
   let executionStateId: string | undefined;
-  
+
+  const errors: Array<{ paymentId: string; error: string }> = [];
+  let paymentsProcessed = 0;
+  let transactionsUpdated = 0;
+  let receiptsIssued = 0;
+  let arrearsUpdated = 0;
+
   try {
     // Start job execution tracking
     const executionState = await jobCancellationService.startJobExecution({
@@ -71,12 +77,6 @@ export async function processPaymentCollection(params: {
       processingDate: processingDate.toISOString(),
       jobRunId,
     });
-
-    const errors: Array<{ paymentId: string; error: string }> = [];
-    let paymentsProcessed = 0;
-    let transactionsUpdated = 0;
-    let receiptsIssued = 0;
-    let arrearsUpdated = 0;
 
     // Find all unprocessed payments (status='pending' or 'processing')
     // Join with members to get member details for notifications
@@ -379,7 +379,6 @@ export async function processPaymentCollection(params: {
       transactionsUpdated,
       receiptsIssued,
       arrearsUpdated,
-      errorsCount: errors.length,
       errors,
     };
   }
