@@ -66,7 +66,7 @@ export default function TrainingPage() {
     setLoading(true);
     try {
       // Use health-safety stats for overview
-      const res = await fetch(`/api/v2/health-safety/stats?organizationId=${organizationId}&period=30d`);
+      const res = await fetch(`/api/health-safety/stats?organizationId=${organizationId}&period=30d`);
       if (res.ok) {
         const json = await res.json();
         setStats({

@@ -1698,6 +1698,46 @@ describe('health-safety/hazards', () => {
   });
 })
 
+describe('health-safety/hazards/stats', () => {
+  it('exports route handlers', async () => {
+    const mod = await import('../health-safety/hazards/stats/route');
+    const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
+    expect(handlers.length).toBeGreaterThan(0);
+  });
+})
+
+describe('health-safety/incidents/stats', () => {
+  it('exports route handlers', async () => {
+    const mod = await import('../health-safety/incidents/stats/route');
+    const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
+    expect(handlers.length).toBeGreaterThan(0);
+  });
+})
+
+describe('health-safety/inspections/findings', () => {
+  it('exports route handlers', async () => {
+    const mod = await import('../health-safety/inspections/findings/route');
+    const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
+    expect(handlers.length).toBeGreaterThan(0);
+  });
+})
+
+describe('health-safety/inspections/stats', () => {
+  it('exports route handlers', async () => {
+    const mod = await import('../health-safety/inspections/stats/route');
+    const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
+    expect(handlers.length).toBeGreaterThan(0);
+  });
+})
+
+describe('health-safety/stats', () => {
+  it('exports route handlers', async () => {
+    const mod = await import('../health-safety/stats/route');
+    const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
+    expect(handlers.length).toBeGreaterThan(0);
+  });
+})
+
 describe('health-safety/incidents/[id]', () => {
   it('exports route handlers', async () => {
     const mod = await import('../health-safety/incidents/[id]/route');

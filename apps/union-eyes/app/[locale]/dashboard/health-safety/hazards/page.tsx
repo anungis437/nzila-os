@@ -80,7 +80,7 @@ export default function HazardsPage() {
 
   const loadStats = useCallback(async () => {
     try {
-      const res = await fetch(`/api/v2/health-safety/hazards/stats?organizationId=${organizationId}`);
+      const res = await fetch(`/api/health-safety/hazards/stats?organizationId=${organizationId}`);
       if (res.ok) {
         const json = await res.json();
         setStats({
@@ -109,12 +109,16 @@ export default function HazardsPage() {
     router.push(`/dashboard/health-safety/hazards/${hazardId}`);
   };
 
-  const handleReportSubmit = async () => {
+  const handleReportSubmit = async (data: Record<string, unknown>) => {
     try {
-      await fetch('/api/v2/health-safety/hazards', {
+      const res = await fetch('/api/health-safety/hazards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, organizationId }),
       });
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
       toast.success("Hazard report submitted successfully");
       setShowReportForm(false);
       loadStats();

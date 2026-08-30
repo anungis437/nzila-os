@@ -73,6 +73,17 @@ export interface CrudOptions {
    * Use for FSM-governed fields like `status` that must only change via explicit workflow APIs.
    */
   blockedPatchFields?: string[];
+  /**
+   * Optional transform applied to the insert payload before create, after
+   * organizationId/createdBy are auto-set. Use this to normalize client field
+   * names to schema column names, derive required unique identifiers (e.g.
+   * report numbers), or fill in server-computed defaults. Must not remove
+   * organizationId/createdBy auto-set values.
+   */
+  beforeCreate?: (
+    values: Record<string, unknown>,
+    ctx: { organizationId?: string | null; userId?: string | null },
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
 }
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
@@ -226,7 +237,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           values.createdBy = userId;
         }
 
-        const [row] = await db.insert(table).values(values).returning();
+        const finalValues = opts.beforeCreate
+          ? await opts.beforeCreate(values, { organizationId, userId })
+          : values;
+
+        const [row] = await db.insert(table).values(finalValues).returning();
         return { data: row };
       },
     );
