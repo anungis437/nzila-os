@@ -44,7 +44,17 @@ const h = vi.hoisted(() => {
       has: () => true,
     },
   );
-  return { queue, cronFns, db, schema };
+  const jobCancellation = {
+    startJobExecution: vi.fn(async () => ({ id: "test-exec-state-id" })),
+    requestCancellation: vi.fn(async () => undefined),
+    isJobCancelled: vi.fn(async () => false),
+    completeJob: vi.fn(async () => undefined),
+    failJob: vi.fn(async () => undefined),
+    cancelJob: vi.fn(async () => undefined),
+    recordAuditEvent: vi.fn(async () => undefined),
+    getExecutionState: vi.fn(async () => null),
+  };
+  return { queue, cronFns, db, schema, jobCancellation };
 });
 
 vi.mock("node-cron", () => ({
@@ -58,6 +68,21 @@ vi.mock("node-cron", () => ({
 vi.mock("../../db", () => ({ db: h.db }));
 vi.mock("../../db/schema", () => h.schema);
 vi.mock("@/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+// Gate 13 governance tracking is exercised by dedicated job-cancellation-service tests;
+// stub it here so it doesn't consume the shared business-logic mock db queue above.
+vi.mock("../../services/job-cancellation-service", () => {
+  class JobCancellationService {
+    startJobExecution = h.jobCancellation.startJobExecution;
+    requestCancellation = h.jobCancellation.requestCancellation;
+    isJobCancelled = h.jobCancellation.isJobCancelled;
+    completeJob = h.jobCancellation.completeJob;
+    failJob = h.jobCancellation.failJob;
+    cancelJob = h.jobCancellation.cancelJob;
+    recordAuditEvent = h.jobCancellation.recordAuditEvent;
+    getExecutionState = h.jobCancellation.getExecutionState;
+  }
+  return { JobCancellationService, jobCancellationService: new JobCancellationService() };
+});
 
 import {
   processMonthlyDuesCalculation,
@@ -75,6 +100,9 @@ beforeEach(() => {
   h.db.select.mockClear();
   h.db.insert.mockClear();
   h.db.update.mockClear();
+  h.jobCancellation.isJobCancelled.mockReset().mockResolvedValue(false);
+  h.jobCancellation.completeJob.mockClear();
+  h.jobCancellation.cancelJob.mockClear();
 });
 
 describe("processMonthlyDuesCalculation", () => {
@@ -126,6 +154,19 @@ describe("processMonthlyDuesCalculation", () => {
     const result = await processMonthlyDuesCalculation({ tenantId: "org-1" });
     expect(result.success).toBe(false);
     expect(result.errors[0].memberId).toBe("system");
+  });
+
+  it("3/8. stops processing and records cancellation instead of false completion when cancelled", async () => {
+    h.jobCancellation.isJobCancelled.mockResolvedValue(true);
+    enqueue([{ memberId: "m1", ruleId: "r1", assignmentId: "a1" }]);
+
+    const result = await processMonthlyDuesCalculation({ tenantId: "org-1" });
+
+    expect(result.success).toBe(false);
+    expect(result.errors[0].error).toContain("cancelled");
+    // A cancelled run must be recorded as cancelled, never as a normal completion.
+    expect(h.jobCancellation.cancelJob).toHaveBeenCalledTimes(1);
+    expect(h.jobCancellation.completeJob).not.toHaveBeenCalled();
   });
 });
 

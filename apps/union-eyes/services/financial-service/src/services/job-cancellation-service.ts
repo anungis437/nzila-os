@@ -53,6 +53,43 @@ export interface CancellationRequest {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Named reference to a specific job execution, scoped to its organization.
+ * Used by all post-start state-transition methods (isJobCancelled, completeJob,
+ * failJob, cancelJob, getExecutionState) to avoid same-typed positional string
+ * arguments, which have previously been transposed at call sites (see #713).
+ */
+export interface JobExecutionRef {
+  executionStateId: string;
+  organizationId: string;
+}
+
+export interface CompleteJobConfig extends JobExecutionRef {
+  result?: Record<string, unknown>;
+}
+
+export interface FailJobConfig extends JobExecutionRef {
+  error: Error | Record<string, unknown>;
+}
+
+export interface CancelJobConfig extends JobExecutionRef {
+  cancelledBy?: string;
+}
+
+/**
+ * Normalize an Error or plain object into a JSON-storable detail record.
+ */
+function serializeError(error: Error | Record<string, unknown>): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+  return error;
+}
+
 export interface JobExecutionState {
   id: string;
   organizationId: string;
@@ -60,21 +97,21 @@ export interface JobExecutionState {
   jobRunId: string;
   jobBatchId?: string | null;
   status: JobExecutionStatus;
-  startedAt?: Date | null;
-  completedAt?: Date | null;
-  failedAt?: Date | null;
-  cancelledAt?: Date | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  failedAt?: string | null;
+  cancelledAt?: string | null;
   cancellationRequested: boolean;
   cancellationIdempotencyKey?: string | null;
-  cancellationRequestedAt?: Date | null;
-  cancellationAcknowledgedAt?: Date | null;
+  cancellationRequestedAt?: string | null;
+  cancellationAcknowledgedAt?: string | null;
   cancelledBy?: string | null;
   cancellationReason?: string | null;
   context?: Record<string, unknown> | null;
   result?: Record<string, unknown> | null;
   error?: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuditEventRecord {
@@ -88,7 +125,7 @@ export interface AuditEventRecord {
   details?: Record<string, unknown> | null;
   message?: string | null;
   isTerminal: boolean;
-  timestamp: Date;
+  timestamp: string;
 }
 
 // ============================================================================
@@ -121,7 +158,7 @@ export class JobCancellationService {
           jobRunId: config.jobRunId,
           jobBatchId: config.jobBatchId || null,
           status: 'running',
-          startedAt: new Date(),
+          startedAt: new Date().toISOString(),
           context: Object.keys(fullContext).length > 0 ? fullContext : null,
         })
         .returning();
@@ -192,11 +229,11 @@ export class JobCancellationService {
             .update(jobExecutionState)
             .set({
               cancellationRequested: true,
-              cancellationRequestedAt: new Date(),
+              cancellationRequestedAt: new Date().toISOString(),
               cancellationIdempotencyKey: config.idempotencyKey,
               cancelledBy: config.requestedBy,
               cancellationReason: config.reason,
-              updatedAt: new Date(),
+              updatedAt: new Date().toISOString(),
             })
             .where(eq(jobExecutionState.id, executionState.id));
 
@@ -216,9 +253,9 @@ export class JobCancellationService {
               .update(jobExecutionState)
               .set({
                 cancellationRequested: true,
-                cancellationRequestedAt: new Date(),
+                cancellationRequestedAt: new Date().toISOString(),
                 cancellationIdempotencyKey: config.idempotencyKey,
-                updatedAt: new Date(),
+                updatedAt: new Date().toISOString(),
               })
               .where(eq(jobExecutionState.id, executionState.id));
           }
@@ -247,7 +284,8 @@ export class JobCancellationService {
    * Check if a job should be cancelled.
    * Call regularly from job processing loops to enable graceful exit.
    */
-  async isJobCancelled(executionStateId: string, organizationId: string): Promise<boolean> {
+  async isJobCancelled(ref: JobExecutionRef): Promise<boolean> {
+    const { executionStateId, organizationId } = ref;
     try {
       const [state] = await db
         .select()
@@ -279,19 +317,16 @@ export class JobCancellationService {
   /**
    * Mark a job as completed successfully.
    */
-  async completeJob(
-    executionStateId: string,
-    organizationId: string,
-    result?: Record<string, unknown>,
-  ): Promise<void> {
+  async completeJob(config: CompleteJobConfig): Promise<void> {
+    const { executionStateId, organizationId, result } = config;
     try {
       await db
         .update(jobExecutionState)
         .set({
           status: 'completed',
-          completedAt: new Date(),
+          completedAt: new Date().toISOString(),
           result: result || null,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         })
         .where(
           and(
@@ -322,19 +357,17 @@ export class JobCancellationService {
   /**
    * Mark a job as failed.
    */
-  async failJob(
-    executionStateId: string,
-    organizationId: string,
-    error: Record<string, unknown>,
-  ): Promise<void> {
+  async failJob(config: FailJobConfig): Promise<void> {
+    const { executionStateId, organizationId } = config;
+    const error = serializeError(config.error);
     try {
       await db
         .update(jobExecutionState)
         .set({
           status: 'failed',
-          failedAt: new Date(),
+          failedAt: new Date().toISOString(),
           error,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         })
         .where(
           and(
@@ -353,33 +386,30 @@ export class JobCancellationService {
         details: error,
         isTerminal: true,
       });
-    } catch (error) {
+    } catch (recordError) {
       logger.error('Failed to record job failure', {
-        error,
+        error: recordError,
         executionStateId,
         organizationId,
       });
-      throw error;
+      throw recordError;
     }
   }
 
   /**
    * Mark a job as cancelled.
    */
-  async cancelJob(
-    executionStateId: string,
-    organizationId: string,
-    cancelledBy: string = 'system',
-  ): Promise<void> {
+  async cancelJob(config: CancelJobConfig): Promise<void> {
+    const { executionStateId, organizationId, cancelledBy = 'system' } = config;
     try {
       await db
         .update(jobExecutionState)
         .set({
           status: 'cancelled',
-          cancelledAt: new Date(),
-          cancellationAcknowledgedAt: new Date(),
+          cancelledAt: new Date().toISOString(),
+          cancellationAcknowledgedAt: new Date().toISOString(),
           cancelledBy,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         })
         .where(
           and(
@@ -446,10 +476,8 @@ export class JobCancellationService {
   /**
    * Get current execution state for a job.
    */
-  async getExecutionState(
-    executionStateId: string,
-    organizationId: string,
-  ): Promise<JobExecutionState | null> {
+  async getExecutionState(ref: JobExecutionRef): Promise<JobExecutionState | null> {
+    const { executionStateId, organizationId } = ref;
     try {
       const [state] = await db
         .select()
