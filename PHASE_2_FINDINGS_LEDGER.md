@@ -30,8 +30,8 @@
 | 2 | Data Integrity (Prevention & Detection Triggers) | `CLOSED_AND_PROVEN` | Schema validation + trigger pattern audit |
 | 3 | Observability (OTel Architecture) | `CLOSED_AND_PROVEN` | 52-file instrumentation audit + telemetry coverage proof |
 | 4 | Access Review Enforcement | `CLOSED_AND_PROVEN` | Database RLS + middleware checks + audit trails |
-| 5 | Authentication/Offboarding Residuals | `REOPENED_FOR_REGRESSION_CORRECTION` | Gate 13 dependency invalidated — see #713 |
-| 6 | Background Jobs & Provider Artifacts | `REOPENED_FOR_REGRESSION_CORRECTION` | Gate 13 implementation does not typecheck; missing persistence + API/workflow defects — see #713 |
+| 5 | Authentication/Offboarding Residuals | `CLOSED_AND_PROVEN` | Member status enforcement + Gate 13 dependency fixed — see #715 |
+| 6 | Background Jobs & Provider Artifacts | `CLOSED_AND_PROVEN` | Gate 13 persistence/API/workflow regression fixed and merged — see #715 (narrower scope than LIUNA_GATE_13; see note) |
 | 7 | Case & Grievance Lifecycle Integrity | `CLOSED_AND_PROVEN` | FSM enforcement + terminal state guards + 16,077 tests PASS |
 | 8 | Org & RLS Isolation | `CLOSED_AND_PROVEN` | Database RLS policies + multi-tenant boundary contracts + 16,077 tests PASS |
 | 9 | Evidence Export & Chain of Custody | `CLOSED_AND_PROVEN` | PKCS#7 signing + export audit trail + cryptographic validation + 16,077 tests PASS |
@@ -43,7 +43,7 @@
 | 15 | Deployment & Runbook Readiness | `CLOSED_AND_PROVEN` | GitOps architecture + pre-deploy validation + smoke tests + 9m cycle time |
 | 16 | Legal Hold Lifecycle | `CLOSED_AND_PROVEN` | Matter-wide transitive hold + mutation guard + release workflow |
 
-**Phase 2 Status**: 🔴 **REOPENED_FOR_REGRESSION_CORRECTION** (Domains 5 & 6 / Gate 13) — Phase 3 on HOLD pending #713. 14 of 16 domains remain `CLOSED_AND_PROVEN`; see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30).
+**Phase 2 Status**: ✅ **ALL 16 DOMAINS CLOSED_AND_PROVEN (CORRECTED)** / Ready for Phase 3 — see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30) for the 2026-08-30 correction history. **Note**: Domain 6's `CLOSED_AND_PROVEN` here is a Phase-2 engineering-domain disposition (financial-service typechecks, lints, builds, and its Gate 13 code has focused proof tests). It is **not** the same as the stricter `LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION` bar in [21-current-readiness-ledger.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md), which remains `SCOPED_NOT_YET_PROVEN` (reconciliation pass and idempotency-key-based re-dispatch prevention are still unimplemented).
 
 ---
 
@@ -122,13 +122,13 @@
 
 ### 5. Authentication & Offboarding Lifecycle
 
-**Status**: `REOPENED_FOR_REGRESSION_CORRECTION` (was `CLOSED_AND_PROVEN`)
-**Disposition**: `REOPENED_FOR_REGRESSION_CORRECTION` — see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30) and [#713](https://github.com/anungis437/nzila-os/issues/713)
+**Status**: `CLOSED_AND_PROVEN` (regression corrected 2026-08-30, see #715)
+**Disposition**: `CLOSED_AND_PROVEN`
 **Implementation Complete (member status enforcement only)**:
-- Gate 13 (background job cancellation) claimed implemented & validated on 2026-08-29, but `financial-service` does not typecheck against current `main` (24 TS errors) — the regression tests cited below did not exercise a compiling build of the Gate 13 code path
+- Gate 13 (background job cancellation) claimed implemented & validated on 2026-08-29, but `financial-service` did not typecheck against `main` (24 TS errors) — fixed by [#715](https://github.com/anungis437/nzila-os/pull/715)
 - Member status enforcement: Auth middleware fail-closed validation + event-driven session/case access revocation
 - Authentication/offboarding enforcement: Both synchronous (auth layer) and asynchronous (event listener) paths implemented
-- Commits: `af983b3c4` (Gate 13), `CURRENT_HEAD` (member status enforcement)
+- Commits: `af983b3c4` (Gate 13), `d446311f1` (regression fix, #715)
 
 **Evidence**:
 - Gate 13 workstream: 5 financial jobs (Payroll, Benefits, Expenses, TimekeepingAdvance, ComplianceTraining) with idempotent cancellation, safe-point guards, terminal handlers
@@ -147,40 +147,40 @@
 
 ### 6. Background Jobs & Provider Artifact Lifecycle
 
-**Status**: `REOPENED_FOR_REGRESSION_CORRECTION` (was `CLOSED_AND_PROVEN`)
-**Disposition**: `REOPENED_FOR_REGRESSION_CORRECTION` — see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30) and [#713](https://github.com/anungis437/nzila-os/issues/713)
-**Regression found post-merge (2026-08-30)**:
-- `JobCancellationService` imports `jobExecutionState`, `jobCancellationRequest`, `jobCancellationAuditEvent` from `../db/schema` — **none of these tables exist in schema or migrations**
-- `isJobCancelled` / `completeJob` / `failJob` are declared with positional-arg signatures; all call sites pass object literals — API contract mismatch across 4 workflow files
-- `payment-collection-workflow.ts` has a variable-scoping bug (vars declared in `try`, referenced in `catch`)
-- `stipend-processing-workflow.ts` has additional type errors (`Error` vs `Record<string, unknown>`, wrong arg counts, `JobExecutionState` typing)
-- Net effect: `financial-service#typecheck` fails with 24 errors on current `main`; the "16,077 tests PASS" evidence below did not catch this because typecheck and test execution diverged for this package
-- Previously claimed (now invalidated) implementation notes:
-- Idempotent cancellation with per-run jobRunId isolation, safe-point guards, terminal handlers
-- Observable residuals documented as `ACCEPTED_OPERATING_LIMITATION` (provider-side effects cannot be guaranteed)
-- Commits: `af983b3c4` (Gate 13 background job implementation + validation)
+**Status**: `CLOSED_AND_PROVEN` (regression corrected 2026-08-30, see #715)
+**Disposition**: `CLOSED_AND_PROVEN` — Phase-2 engineering-domain scope only (see note in Summary Overview above; the stricter LIUNA-facing Gate 13 bar is separate and still open)
+**Regression found post-merge (2026-08-29) and fixed (2026-08-30, #715)**:
+- Added the three persistence tables `JobCancellationService` always assumed (`ue_governance_job_execution_state`, `ue_governance_job_cancellation_request`, `ue_governance_job_cancellation_audit_event`) plus a hand-authored migration and an audit-immutability trigger
+- Replaced the mismatched positional-arg API (`isJobCancelled`/`completeJob`/`failJob`/`cancelJob`/`getExecutionState`) with a single `{ executionStateId, organizationId, ... }` config object, eliminating a real argument-transposition bug in `stipend-processing-workflow.ts`
+- Fixed a variable-scoping bug in `payment-collection-workflow.ts` and a broken 6-arg `startJobExecution` call in `stipend-processing-workflow.ts`
+- Added focused Gate 13 proof tests (`job-cancellation-service.test.ts`, 9 tests) plus a cancellation-path test in `dues-calculation-workflow.test.ts`
+- `financial-service` typecheck/lint/build/test now pass (551/551 tests); `main` CI green
+- Commits: `af983b3c4` (original Gate 13 implementation), `d446311f1` (regression fix, #715)
 
-**Bounded Scope (In-Scope & PROVEN)**:
-  - Local cancellation control and prevention of re-dispatch: ✅ Terminal handlers enforced per job
-  - Terminal state enforcement: ✅ Safe-point architecture prevents mid-run cancellation
-  - Idempotency guarantees: ✅ Per-run jobRunId isolation ensures re-runs are deterministic
-  - Reconciliation pass to identify orphaned provider artifacts: ✅ Audit events captured (visible in logs)
-  - Observable residuals documentation: ✅ Explicit limitations documented below
-  - Operator escalation runbook: ✅ No-op / escalation paths identified
-  - Audit event capture: ✅ All cancellation events logged with trace context
+**What this closes (Phase-2 engineering-domain scope)**:
+  - Execution-state lifecycle (create/complete/fail/cancel) is schema-backed, type-correct, and unit-test-proven
+  - Organization-boundary isolation is proven on every state-transition query
+  - Audit events are persisted (append-only, immutability-trigger-enforced) for every lifecycle transition
+  - Repeated cancellation requests are idempotent
 
-**Out-of-Scope (ACCEPTED OPERATING LIMITATIONS)**:
+**What remains open (LIUNA-specific `LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION`, see [27-gate-13-background-job-provider-artifact-cancellation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md))**:
+  - Re-dispatch prevention: `jobRunId` is freshly generated per invocation (uuidv4), not derived from the computed `idempotencyKey`, so a cancelled job's *type* can still be re-scheduled on the next cron tick under a new run id
+  - Reconciliation pass: no scheduled job scans for executions whose owning identity/membership/authorization context has since become invalid
+  - Operator escalation runbook for provider-side residuals (SAS URLs, external email/SMS, IdP tokens): documented as prose limitations only, not a standalone runbook artifact
+  - Contract-test-level (not just unit-test-level) pinning of the scoped Gate 13 assertions
+
+**Out-of-Scope (ACCEPTED OPERATING LIMITATIONS, unchanged)**:
   - Automatic provider-side artifact invalidation: Provider APIs do not expose cancellation; must be manual
   - Instant IdP token revocation: IdP token invalidation has inherent latency (provider-controlled)
   - Browser cache clearing: Cannot be guaranteed (client-side cache outside application control)
   - SAS recall / cross-tenant cleanup: Storage provider does not expose revocation APIs
 
 **Test Evidence**:
-- Regression validation: 16,077 tests PASS (1,111 files, 177.98s runtime) validating Gate 13 implementation
-- No failures in financial job pathways (Payroll, Benefits, Expenses, TimekeepingAdvance, ComplianceTraining)
-- Event-driven job cancellation works end-to-end
+- `financial-service` unit tests: 551/551 passing (29/29 files)
+- Focused Gate 13 proof suite: 9/9 passing
+- Contract tests referencing financial-service (control-plane-authority, db-boundary, governance-no-bypass, revenue-enforcement, ue-no-raw-db): 338/338 passing
 
-**Blocker for Phase 3**: ❌ No (implementation complete, limitations documented)
+**Blocker for Phase 3**: ❌ No (Phase-2 engineering-domain scope complete; LIUNA-specific pilot gate tracked separately, does not block Phase 3)
 
 **Owner**: Phase 2 Engineering (COMPLETE)
 
@@ -560,3 +560,13 @@ Phase 2 is **COMPLETE** when:
 - `MAIN_CI = GREEN`
 
 This is an evidence correction to the existing audit, not a rollback of the other 14 domains.
+
+**Closed 2026-08-30** via [#715](https://github.com/anungis437/nzila-os/pull/715) (merge commit `d446311f1f83718ab168d2b4666aacdb7f2bffaf`):
+- `FINANCIAL_SERVICE_TYPECHECK = PASS`
+- `GATE_13_PERSISTENCE = PROVEN` (Phase-2 engineering-domain scope: schema/migration/immutability trigger added, unit-test-proven)
+- `GATE_13_WORKFLOW_INTEGRATION = PROVEN` (all 4 workflow files + the previously-correct 5th aligned to the canonical object API)
+- `MAIN_CI = GREEN`
+
+`PHASE_2 = COMPLETE / CORRECTED`, `PHASE_3 = AUTHORIZABLE`.
+
+**Scope caveat carried forward**: closure above is at the Phase-2 engineering-domain level only. It does **not** by itself close `LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION` in [21-current-readiness-ledger.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md) / [27-gate-13-background-job-provider-artifact-cancellation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md), which additionally requires a reconciliation pass, idempotency-key-based re-dispatch prevention, and an operator runbook artifact — none of which were in scope for the #713 regression fix. That LIUNA-specific gate remains `SCOPED_NOT_YET_PROVEN` and the Sensitive Legal Pilot remains `NOT_READY`.
