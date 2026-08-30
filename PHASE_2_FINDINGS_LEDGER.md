@@ -30,8 +30,8 @@
 | 2 | Data Integrity (Prevention & Detection Triggers) | `CLOSED_AND_PROVEN` | Schema validation + trigger pattern audit |
 | 3 | Observability (OTel Architecture) | `CLOSED_AND_PROVEN` | 52-file instrumentation audit + telemetry coverage proof |
 | 4 | Access Review Enforcement | `CLOSED_AND_PROVEN` | Database RLS + middleware checks + audit trails |
-| 5 | Authentication/Offboarding Residuals | `CLOSED_AND_PROVEN` | Member status enforcement + Gate 13 + 16,077 tests PASS |
-| 6 | Background Jobs & Provider Artifacts | `CLOSED_AND_PROVEN` | Gate 13 implementation validated + provider limitations documented |
+| 5 | Authentication/Offboarding Residuals | `REOPENED_FOR_REGRESSION_CORRECTION` | Gate 13 dependency invalidated — see #713 |
+| 6 | Background Jobs & Provider Artifacts | `REOPENED_FOR_REGRESSION_CORRECTION` | Gate 13 implementation does not typecheck; missing persistence + API/workflow defects — see #713 |
 | 7 | Case & Grievance Lifecycle Integrity | `CLOSED_AND_PROVEN` | FSM enforcement + terminal state guards + 16,077 tests PASS |
 | 8 | Org & RLS Isolation | `CLOSED_AND_PROVEN` | Database RLS policies + multi-tenant boundary contracts + 16,077 tests PASS |
 | 9 | Evidence Export & Chain of Custody | `CLOSED_AND_PROVEN` | PKCS#7 signing + export audit trail + cryptographic validation + 16,077 tests PASS |
@@ -43,7 +43,7 @@
 | 15 | Deployment & Runbook Readiness | `CLOSED_AND_PROVEN` | GitOps architecture + pre-deploy validation + smoke tests + 9m cycle time |
 | 16 | Legal Hold Lifecycle | `CLOSED_AND_PROVEN` | Matter-wide transitive hold + mutation guard + release workflow |
 
-**Phase 2 Status**: ✅ **ALL 16 DOMAINS CLOSED_AND_PROVEN** / Ready for Phase 3
+**Phase 2 Status**: 🔴 **REOPENED_FOR_REGRESSION_CORRECTION** (Domains 5 & 6 / Gate 13) — Phase 3 on HOLD pending #713. 14 of 16 domains remain `CLOSED_AND_PROVEN`; see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30).
 
 ---
 
@@ -122,10 +122,10 @@
 
 ### 5. Authentication & Offboarding Lifecycle
 
-**Status**: `CLOSED_AND_PROVEN`
-**Disposition**: `CLOSED_AND_PROVEN`
-**Implementation Complete**:
-- Gate 13 (background job cancellation) implemented & validated: ✅ 16,077 regression tests PASS (2026-08-29T17:02:40Z)
+**Status**: `REOPENED_FOR_REGRESSION_CORRECTION` (was `CLOSED_AND_PROVEN`)
+**Disposition**: `REOPENED_FOR_REGRESSION_CORRECTION` — see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30) and [#713](https://github.com/anungis437/nzila-os/issues/713)
+**Implementation Complete (member status enforcement only)**:
+- Gate 13 (background job cancellation) claimed implemented & validated on 2026-08-29, but `financial-service` does not typecheck against current `main` (24 TS errors) — the regression tests cited below did not exercise a compiling build of the Gate 13 code path
 - Member status enforcement: Auth middleware fail-closed validation + event-driven session/case access revocation
 - Authentication/offboarding enforcement: Both synchronous (auth layer) and asynchronous (event listener) paths implemented
 - Commits: `af983b3c4` (Gate 13), `CURRENT_HEAD` (member status enforcement)
@@ -147,10 +147,15 @@
 
 ### 6. Background Jobs & Provider Artifact Lifecycle
 
-**Status**: `CLOSED_AND_PROVEN`
-**Disposition**: `CLOSED_AND_PROVEN`
-**Implementation Complete**:
-- Gate 13 (background job cancellation governance) implemented in Phase 2
+**Status**: `REOPENED_FOR_REGRESSION_CORRECTION` (was `CLOSED_AND_PROVEN`)
+**Disposition**: `REOPENED_FOR_REGRESSION_CORRECTION` — see [Regression Correction Addendum](#regression-correction-addendum-2026-08-30) and [#713](https://github.com/anungis437/nzila-os/issues/713)
+**Regression found post-merge (2026-08-30)**:
+- `JobCancellationService` imports `jobExecutionState`, `jobCancellationRequest`, `jobCancellationAuditEvent` from `../db/schema` — **none of these tables exist in schema or migrations**
+- `isJobCancelled` / `completeJob` / `failJob` are declared with positional-arg signatures; all call sites pass object literals — API contract mismatch across 4 workflow files
+- `payment-collection-workflow.ts` has a variable-scoping bug (vars declared in `try`, referenced in `catch`)
+- `stipend-processing-workflow.ts` has additional type errors (`Error` vs `Record<string, unknown>`, wrong arg counts, `JobExecutionState` typing)
+- Net effect: `financial-service#typecheck` fails with 24 errors on current `main`; the "16,077 tests PASS" evidence below did not catch this because typecheck and test execution diverged for this package
+- Previously claimed (now invalidated) implementation notes:
 - Idempotent cancellation with per-run jobRunId isolation, safe-point guards, terminal handlers
 - Observable residuals documented as `ACCEPTED_OPERATING_LIMITATION` (provider-side effects cannot be guaranteed)
 - Commits: `af983b3c4` (Gate 13 background job implementation + validation)
@@ -535,3 +540,23 @@ Phase 2 is **COMPLETE** when:
 
 **Report Generated**: 2026-08-29 13:30 UTC
 **Status**: 🟡 IN PROGRESS (1 of 16 areas complete, Gate 13 decision pending)
+
+---
+
+## Regression Correction Addendum (2026-08-30)
+
+**Trigger**: [#713](https://github.com/anungis437/nzila-os/issues/713) — filed after merging an unrelated fix ([#712](https://github.com/anungis437/nzila-os/pull/712)) surfaced that `financial-service` does not typecheck on `main` (24 errors), invalidating the `CLOSED_AND_PROVEN` claim for Domain 5 and Domain 6 (Gate 13).
+
+**Program state**:
+- `PHASE_2 = REOPENED_FOR_REGRESSION_CORRECTION` (Domains 5 & 6 only; Domains 1–4, 7–16 remain `CLOSED_AND_PROVEN` and are unaffected)
+- `PHASE_3 = HOLD` — do not resume Phase 3 planning/execution until this addendum is closed
+
+**Merged-main SHA at time of correction start**: `ca6fe3645941359fa22cf06ff0638b15ea33d5f8` (includes #712)
+
+**Closure requirement** (all must hold before Domains 5/6 revert to `CLOSED_AND_PROVEN` and `PHASE_3` reopens):
+- `FINANCIAL_SERVICE_TYPECHECK = PASS`
+- `GATE_13_PERSISTENCE = PROVEN` (schema + migration for job execution/cancellation/audit tracking, reviewed via Security Design Review)
+- `GATE_13_WORKFLOW_INTEGRATION = PROVEN` (analytics-processor, arrears-management-workflow, payment-collection-workflow, stipend-processing-workflow all correct against the canonical `JobCancellationService` API)
+- `MAIN_CI = GREEN`
+
+This is an evidence correction to the existing audit, not a rollback of the other 14 domains.
