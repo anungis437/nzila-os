@@ -7,6 +7,14 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
+/** Canonical organization types (see types/organization.ts) */
+const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const;
+type OrganizationType = typeof ORGANIZATION_TYPES[number];
+
+function isOrganizationType(value: unknown): value is OrganizationType {
+  return typeof value === 'string' && (ORGANIZATION_TYPES as readonly string[]).includes(value);
+}
+
 /** Active grievance statuses (not closed/settled/withdrawn/denied) */
 const _ACTIVE_CLAIM_STATUSES = [
   'draft', 'filed', 'acknowledged', 'investigating',
@@ -115,15 +123,49 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
+  // Known callers post the organization type under three different field names
+  // (type, organization_type, organizationType) — normalize rather than pick one
+  // and silently drop the others (see #713-class DTO mismatch: this previously
+  // always fell through to 'union' because the New Organization page posts `type`
+  // while this handler only read `organization_type`).
+  const requestedType = body.type ?? body.organization_type ?? body.organizationType;
+  if (!isOrganizationType(requestedType)) {
+    return NextResponse.json(
+      { error: `Invalid organization type: ${String(requestedType)}. Must be one of: ${ORGANIZATION_TYPES.join(', ')}` },
+      { status: 400 },
+    );
+  }
+
+  const parentId: string | null = body.parent_id ?? body.parentId ?? body.parentOrganizationId ?? null;
+
+  // Derive hierarchyPath/hierarchyLevel from the parent instead of trusting a
+  // client-supplied value (which no known caller sends, so it always defaulted
+  // to [] / 0 regardless of the selected parent).
+  let hierarchyPath: string[] = [];
+  let hierarchyLevel = 0;
+  if (parentId) {
+    const parentRows = await withRLSContext(async () =>
+      db.select({ hierarchyPath: organizations.hierarchyPath, hierarchyLevel: organizations.hierarchyLevel })
+        .from(organizations)
+        .where(eq(organizations.id, parentId))
+    );
+    const [parent] = parentRows as Array<{ hierarchyPath: string[] | null; hierarchyLevel: number | null }>;
+    if (!parent) {
+      return NextResponse.json({ error: `Parent organization not found: ${parentId}` }, { status: 400 });
+    }
+    hierarchyPath = [...(parent.hierarchyPath ?? []), parentId];
+    hierarchyLevel = (parent.hierarchyLevel ?? 0) + 1;
+  }
+
   const [created] = await withRLSContext(async () =>
     db.insert(organizations).values({
       name: body.name,
       slug: body.slug,
       displayName: body.display_name,
-      organizationType: body.organization_type ?? 'union',
-      parentId: body.parent_id,
-      hierarchyPath: body.hierarchy_path ?? [],
-      hierarchyLevel: body.hierarchy_level ?? 0,
+      organizationType: requestedType,
+      parentId,
+      hierarchyPath,
+      hierarchyLevel,
       sectors: body.sectors ?? [],
       email: body.email,
       phone: body.phone,

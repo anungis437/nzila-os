@@ -25,7 +25,7 @@ const mockDb: any = {
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
-vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status' } }));
+vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -97,5 +97,61 @@ describe('organizations route', () => {
     expect(response.status).toBe(201);
     const json = await response.json();
     expect(json.data.id).toBe('org_1');
+  });
+
+  it('POST returns 400 for an invalid organization type', async () => {
+    const { POST } = await loadRoute();
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Org', slug: 'org', organization_type: 'not-a-real-type' }),
+    }));
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST returns 400 when the requested parent organization does not exist', async () => {
+    const { POST } = await loadRoute();
+    m.rowsQueue.push([]); // parent lookup finds nothing
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Org', slug: 'org', type: 'local', parent_id: 'missing-parent' }),
+    }));
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST derives hierarchyPath/hierarchyLevel from the parent and persists the requested type', async () => {
+    const { POST } = await loadRoute();
+    m.rowsQueue.push([{ hierarchyPath: ['root-id'], hierarchyLevel: 1 }]); // parent lookup
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      // Mirrors the actual New Organization page payload shape (type + parent_id).
+      body: JSON.stringify({ name: 'Local 456', slug: 'local-456', type: 'local', parent_id: 'parent-id' }),
+    }));
+
+    expect(response.status).toBe(201);
+    const insertedValues = mockDb.insert.mock.results[0].value.values.mock.calls[0][0];
+    expect(insertedValues.organizationType).toBe('local');
+    expect(insertedValues.parentId).toBe('parent-id');
+    expect(insertedValues.hierarchyPath).toEqual(['root-id', 'parent-id']);
+    expect(insertedValues.hierarchyLevel).toBe(2);
+  });
+
+  it('POST accepts the organizationType/parentOrganizationId field-name convention used by OrganizationHierarchyAdmin', async () => {
+    const { POST } = await loadRoute();
+    m.rowsQueue.push([{ hierarchyPath: [], hierarchyLevel: 0 }]); // parent lookup
+
+    const response = await POST(new NextRequest('http://localhost/api/organizations', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Region A', organizationType: 'region', parentOrganizationId: 'parent-id' }),
+    }));
+
+    expect(response.status).toBe(201);
+    const insertedValues = mockDb.insert.mock.results[0].value.values.mock.calls[0][0];
+    expect(insertedValues.organizationType).toBe('region');
+    expect(insertedValues.hierarchyLevel).toBe(1);
   });
 });
