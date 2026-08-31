@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from "next/navigation";
 import { useOrganization } from "@/lib/hooks/use-organization";
+import { buildMembersFetchUrl } from "@/lib/members/build-members-fetch-url";
 import {
   Users,
   Search,
@@ -128,166 +129,27 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
     "on-leave": { label: t('members.statusOnLeave'), color: "text-yellow-700 bg-yellow-100 border-yellow-200", dotColor: "bg-yellow-500" }
   };
   
-  // Fetch members from API with organization-aware cache key
+  // Fetch members from the single authoritative endpoint. `/api/members`
+  // resolves the caller's own organization from the authenticated session
+  // when no `organizationId` query param is supplied (see
+  // app/api/members/route.ts) — there is no need to guess across candidate
+  // organizations client-side, and a failed request must surface as a real
+  // error rather than silently falling back to a different endpoint or an
+  // empty "no members" result.
   const { data, error, isLoading } = useSWR(
     (orgIdProp || !orgLoading) ? ['members', effectiveOrganizationId ?? 'auto'] as const : null,
     async ([, orgId]) => {
-      const extractMemberCount = (payload: unknown): number => {
-        const anyPayload = payload as Record<string, unknown>;
-        const totals = [
-          anyPayload?.total,
-          (anyPayload?.data as Record<string, unknown> | undefined)?.total,
-          ((anyPayload?.data as Record<string, unknown> | undefined)?.stats as Record<string, unknown> | undefined)?.total,
-          (((anyPayload?.data as Record<string, unknown> | undefined)?.data as Record<string, unknown> | undefined)?.total),
-        ];
-        for (const total of totals) {
-          if (typeof total === 'number' && Number.isFinite(total)) return total;
-        }
-        const discovered = findMemberArrayInPayload(payload);
-        return Array.isArray(discovered) ? discovered.length : 0;
-      };
-
-      const fetchByOrgId = async (candidateOrgId: string | null | undefined) => {
-        const query = candidateOrgId ? `?organizationId=${encodeURIComponent(candidateOrgId)}` : '';
-        const response = await fetch(`/api/members${query}`);
-        if (!response.ok) return null;
-        const payload = await response.json();
-        return {
-          payload,
-          count: extractMemberCount(payload),
-        };
-      };
-
-      let bestPayload: unknown = null;
-      let bestCount = -1;
-      const triedOrgIds = new Set<string>();
-
-      const tryCandidate = async (candidateOrgId: string | null | undefined) => {
-        const normalized = typeof candidateOrgId === 'string' ? candidateOrgId.trim() : '';
-        if (!normalized || triedOrgIds.has(normalized)) return false;
-        triedOrgIds.add(normalized);
-
-        const result = await fetchByOrgId(normalized);
-        if (!result) return false;
-
-        if (result.count > bestCount) {
-          bestCount = result.count;
-          bestPayload = result.payload;
-        }
-
-        return result.count > 0;
-      };
-
-      if (orgId !== 'auto') {
-        const found = await tryCandidate(orgId);
-        if (found && bestPayload) return bestPayload;
+      const response = await fetch(buildMembersFetchUrl(orgId));
+      if (!response.ok) {
+        throw new Error(`Failed to load members (HTTP ${response.status})`);
       }
-
-      // If org context is stale or points to a parent org, try explicit memberships.
-      const orgsRes = await fetch('/api/users/me/organizations');
-      if (orgsRes.ok) {
-        const orgsJson = await orgsRes.json();
-        const orgPayload = typeof orgsJson?.data === 'object' && orgsJson?.data !== null
-          ? orgsJson.data
-          : orgsJson;
-        const memberships = Array.isArray(orgPayload?.memberships) ? orgPayload.memberships : [];
-        const organizations = Array.isArray(orgPayload?.organizations) ? orgPayload.organizations : [];
-
-        const primaryMembership = memberships.find((m: { isPrimary?: boolean }) => m?.isPrimary);
-        if (await tryCandidate(primaryMembership?.organizationId)) {
-          return bestPayload;
-        }
-
-        for (const membership of memberships) {
-          if (await tryCandidate(membership?.organizationId)) {
-            return bestPayload;
-          }
-        }
-
-        for (const organization of organizations) {
-          if (await tryCandidate(organization?.id)) {
-            return bestPayload;
-          }
-        }
-      }
-
-      // Last canonical source from profile organization.
-      const profileRes = await fetch('/api/users/me/profile');
-      if (profileRes.ok) {
-        const profile = await profileRes.json();
-        const profileOrgId = profile?.organization?.id || profile?.organizationId || profile?.organization_id;
-        if (await tryCandidate(profileOrgId)) {
-          return bestPayload;
-        }
-      }
-
-      // Fallback to implicit org from server auth context.
-      const implicit = await fetchByOrgId(null);
-      if (implicit && implicit.count > bestCount) {
-        bestPayload = implicit.payload;
-        bestCount = implicit.count;
-      }
-
-      if (bestPayload) {
-        return bestPayload;
-      }
-
-      if (orgId !== 'auto') {
-        // Fallback 1: legacy org members endpoint
-        const legacyRes = await fetch(`/api/organization/members?organization=${encodeURIComponent(orgId)}`);
-        if (legacyRes.ok) {
-          const legacy = await legacyRes.json();
-          const legacyMembers = Array.isArray(legacy?.data?.members) ? legacy.data.members : [];
-          if (legacyMembers.length > 0) {
-            return {
-              success: true,
-              data: {
-                members: legacyMembers,
-                stats: legacy?.data?.stats,
-                total: legacyMembers.length,
-              },
-            };
-          }
-        }
-
-        // Fallback 2: org-scoped members endpoint
-        const scopedRes = await fetch(`/api/organizations/${encodeURIComponent(orgId)}/members`);
-        if (scopedRes.ok) {
-          const scoped = await scopedRes.json();
-          const scopedMembers = Array.isArray(scoped?.data) ? scoped.data : [];
-          if (scopedMembers.length > 0) {
-            return {
-              success: true,
-              data: {
-                members: scopedMembers,
-                total: scopedMembers.length,
-                stats: {
-                  total: scopedMembers.length,
-                  active: scopedMembers.filter((m: { status?: string }) => m.status === 'active').length,
-                },
-              },
-            };
-          }
-        }
-      }
-
-      return {
-        success: true,
-        data: {
-          members: [],
-          total: 0,
-          stats: {
-            total: 0,
-            active: 0,
-          },
-        },
-      };
+      return response.json();
     },
-    { 
+    {
       refreshInterval: 30000,
       revalidateOnFocus: true,
       revalidateOnMount: true,
-      dedupingInterval: 2000
+      dedupingInterval: 2000,
     }
   );
 
