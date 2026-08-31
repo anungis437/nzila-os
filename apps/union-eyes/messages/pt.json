@@ -182,7 +182,7 @@
       },
       "lastPayment": "Último pagamento: {amount} em {date}",
       "noLastPayment": "Nenhum pagamento registrado ainda",
-      "sourceNative": "Fonte: registro de contribuições Union Eyes · Última sincronização {date}",
+      "sourceNative": "Fonte: registro de contribuições Union Eyes · Saldo calculado em {date}",
       "unavailableTitle": "Informações de contribuições indisponíveis",
       "unavailableBody": "Não foi possível carregar seu saldo de contribuições. Tente novamente mais tarde ou entre em contato com o administrador do sindicato.",
       "noDataTitle": "Nenhum dado de contribuições registrado",

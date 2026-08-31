@@ -182,7 +182,7 @@
       },
       "lastPayment": "Dernier paiement : {amount} le {date}",
       "noLastPayment": "Aucun paiement enregistré pour le moment",
-      "sourceNative": "Source : registre des cotisations Union Eyes · Dernière synchronisation {date}",
+      "sourceNative": "Source : registre des cotisations Union Eyes · Solde calculé le {date}",
       "unavailableTitle": "Informations sur les cotisations indisponibles",
       "unavailableBody": "Nous n'avons pas pu charger votre solde de cotisations. Veuillez réessayer plus tard ou contacter votre administrateur syndical.",
       "noDataTitle": "Aucune donnée de cotisation au dossier",

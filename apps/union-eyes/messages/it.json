@@ -182,7 +182,7 @@
       },
       "lastPayment": "Ultimo pagamento: {amount} il {date}",
       "noLastPayment": "Nessun pagamento registrato finora",
-      "sourceNative": "Fonte: registro delle quote Union Eyes · Ultima sincronizzazione {date}",
+      "sourceNative": "Fonte: registro delle quote Union Eyes · Saldo calcolato il {date}",
       "unavailableTitle": "Informazioni sulle quote non disponibili",
       "unavailableBody": "Non è stato possibile caricare il tuo saldo delle quote. Riprova più tardi o contatta il tuo amministratore sindacale.",
       "noDataTitle": "Nessun dato sulle quote disponibile",

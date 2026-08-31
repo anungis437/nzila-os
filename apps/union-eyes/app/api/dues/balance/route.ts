@@ -4,12 +4,15 @@
  * Backed exclusively by the native member_dues_ledger table. Never
  * fabricates a balance, membership status, or payment date.
  *
- * NO DATA != ZERO BALANCE: a member with zero member_dues_ledger rows has
- * not necessarily paid nothing — Union Eyes may simply never have received
- * dues data for them (a specialist external dues/membership system may be
- * authoritative). That case returns `available: false`, the same as a
- * missing auth context, and is distinguishable from a genuine posted $0
- * balance (which requires at least one real, posted ledger transaction).
+ * NO DATA != ZERO BALANCE: a member with zero AUTHORITATIVE (posted)
+ * member_dues_ledger rows has not necessarily paid nothing — Union Eyes
+ * may simply never have received dues data for them (a specialist
+ * external dues/membership system may be authoritative), or the only
+ * activity on file may be pending/reversed/voided (never posted). Any of
+ * those cases returns `available: false`, the same as a missing auth
+ * context. A genuine `available: true` / `paid_up` requires at least one
+ * real, posted ledger transaction — financial standing is never inferred
+ * from non-posted activity.
  *
  * Balance sign convention (charges add, everything else subtracts as a
  * positive magnitude) is not invented here — it is the same convention
@@ -22,6 +25,12 @@
  * pending, reversed, and voided rows from the balance — no separate
  * reversal handling is required here because reversed/voided rows never
  * carry status='posted'.
+ *
+ * `asOf` is the time this balance was CALCULATED (query time), not a
+ * source-synchronization timestamp — there is no external system to sync
+ * from for the native ledger today. If an integration source later
+ * provides a genuine synchronization timestamp, expose it as a distinct
+ * field (e.g. `sourceUpdatedAt`) rather than overloading `asOf`.
  */
 
 import { withApi } from '@/lib/api/framework';
@@ -81,21 +90,12 @@ export const GET = withApi(
       return UNAVAILABLE;
     }
 
-    // Existence check FIRST, independent of status: if Union Eyes has never
-    // received any ledger activity for this member (any status), there is
-    // no financial conclusion to report — not even "zero".
-    const [existsRow] = await db
-      .select({ id: memberDuesLedger.id })
-      .from(memberDuesLedger)
-      .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, organizationId)))
-      .limit(1);
-
-    if (!existsRow) {
-      return UNAVAILABLE;
-    }
-
+    // A single query establishes BOTH whether authoritative data exists
+    // (postedCount) AND the balance components — scoped to status='posted'
+    // only, so pending/reversed/voided rows can never satisfy either check.
     const [row] = await db
       .select({
+        postedCount: sql<string>`COUNT(*)`,
         totalCharges: sql<string>`COALESCE(SUM(CASE WHEN ${memberDuesLedger.transactionType} = 'charge' THEN ${memberDuesLedger.amount} ELSE 0 END), 0)`,
         totalPayments: sql<string>`COALESCE(SUM(CASE WHEN ${memberDuesLedger.transactionType} = 'payment' THEN ${memberDuesLedger.amount} ELSE 0 END), 0)`,
         totalCredits: sql<string>`COALESCE(SUM(CASE WHEN ${memberDuesLedger.transactionType} = 'credit' THEN ${memberDuesLedger.amount} ELSE 0 END), 0)`,
@@ -110,6 +110,14 @@ export const GET = withApi(
           eq(memberDuesLedger.status, 'posted'),
         ),
       );
+
+    const postedCount = Number(row?.postedCount ?? 0);
+    if (postedCount === 0) {
+      // No authoritative (posted) activity on file — whether because
+      // Union Eyes has zero rows at all, or only pending/reversed/voided
+      // ones. Neither case supports a financial conclusion.
+      return UNAVAILABLE;
+    }
 
     const chargesCents = toCents(row?.totalCharges ?? '0');
     const paymentsCents = toCents(row?.totalPayments ?? '0');

@@ -182,7 +182,7 @@
       },
       "lastPayment": "Last payment: {amount} on {date}",
       "noLastPayment": "No payments recorded yet",
-      "sourceNative": "Source: Union Eyes dues ledger · Last synchronized {date}",
+      "sourceNative": "Source: Union Eyes dues ledger · Balance calculated {date}",
       "unavailableTitle": "Dues information unavailable",
       "unavailableBody": "We could not load your dues balance right now. Please try again later or contact your union administrator.",
       "noDataTitle": "No dues data on file",
