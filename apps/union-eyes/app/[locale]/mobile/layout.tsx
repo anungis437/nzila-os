@@ -3,6 +3,7 @@ import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import { BottomNav } from '@/components/mobile/BottomNav';
 import { OfflineBanner } from '@/components/mobile/OfflineBanner';
+import { PilotModeProvider } from '@/contexts/pilot-mode-context';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { getUserRole } from '@/lib/auth/rbac-server';
 import { logger } from '@/lib/logger';
@@ -42,12 +43,14 @@ export default async function MobileLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <OfflineBanner />
-      <main className="min-h-screen">
-        {children}
-      </main>
-      <BottomNav userRole={userRole} />
-    </div>
+    <PilotModeProvider>
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <OfflineBanner />
+        <main className="min-h-screen">
+          {children}
+        </main>
+        <BottomNav userRole={userRole} />
+      </div>
+    </PilotModeProvider>
   );
 }

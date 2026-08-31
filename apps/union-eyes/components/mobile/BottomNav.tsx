@@ -23,9 +23,10 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePilotMode } from '@/contexts/pilot-mode-context';
 import {
   getDashboardExperience,
-  getNavigationForExperience,
+  getVisibleNavigationForExperience,
   type NavigationItem,
 } from '@/lib/dashboard/role-experience';
 
@@ -99,14 +100,15 @@ function iconFor(label: string): LucideIcon {
 export function BottomNav({ className, userRole }: BottomNavProps) {
   const pathname = usePathname();
   const locale = useLocale();
+  const { isPilotMode } = usePilotMode();
 
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
   const items = useMemo<NavigationItem[]>(() => {
-    const nav = getNavigationForExperience(experience);
+    const nav = getVisibleNavigationForExperience(experience, isPilotMode);
     const primary = nav.slice(0, 4);
     return [...primary, { label: 'More', href: '/dashboard/settings' }];
-  }, [experience]);
+  }, [experience, isPilotMode]);
 
   const withLocale = (href: string) => `/${locale}${href}`;
 

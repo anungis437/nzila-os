@@ -3,6 +3,7 @@ import {
   getDashboardExperience,
   getNavigationForExperience,
   getRoleLandingPath,
+  getVisibleNavigationForExperience,
   type DashboardExperience,
 } from '../../lib/dashboard/role-experience';
 
@@ -186,6 +187,7 @@ export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
     'Workflow Builder',
     'System Status',
     'Pilot Configuration',
+    'Operations Continuity',
   ],
   governance: [
     'Raw FSM',
@@ -197,6 +199,7 @@ export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
     'Open Representation Case',
     'Raw FSM',
     'Workflow Builder',
+    'Exports',
   ],
 };
 
@@ -221,7 +224,11 @@ export function getExpectedLanding(role: StakeholderRole): string {
 export function getExpectedSidebar(role: StakeholderRole): string[] {
   const fixture = STAKEHOLDER_FIXTURES[role];
   const experience = getDashboardExperience(fixture.userRole);
-  return getNavigationForExperience(experience).map((item) => item.label);
+  // playwright.config.ts's webServer always sets NODE_ENV=test / QA_TEST_ENV=true,
+  // which makes GET /api/feature-flags?flag=pilot-mode deterministically resolve
+  // isPilotMode=true for every E2E run -- so the expected sidebar must be filtered
+  // through the same policy the app itself applies in pilot mode.
+  return getVisibleNavigationForExperience(experience, true).map((item) => item.label);
 }
 
 /**
