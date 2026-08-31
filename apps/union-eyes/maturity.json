@@ -10,10 +10,10 @@
   "gtm_posture": "sell-now",
   "proof_level": "pilot-proof",
   "revenue_status": "pilot-contracting",
-  "last_validated": "2026-08-27",
+  "last_validated": "2026-08-31",
   "runbooks": "complete",
   "backup_restore": "complete",
-  "analytics_readiness": "partial",
+  "analytics_readiness": "closed",
   "access_reviews": "partial",
   "orchestrator_integration": true,
   "orchestrator_playbooks": [
@@ -60,7 +60,7 @@
     "access_reviews": {
       "status": "partial",
       "owner": "security-team",
-      "blocker": "Quarterly role/access attestations are defined but not yet enforced as a fail-closed CI artifact check.",
+      "blocker": "Quarterly role/access attestations ARE enforced as a fail-closed CI artifact check (.github/workflows/access-review-gate.yml). What remains open: the underlying quarterly attestation (reports/compliance/access-review/2026-Q3.json) records account-level findings (activeAdminCount, privilegedRoleCount, dormantElevatedAccounts) as unmeasured pending Azure Entra read access, and dormantAccountsAudited is false. CI enforcement exists; substantive Azure Entra-backed measurement does not yet.",
       "target": "2026-06-15",
       "severity": "high"
     }

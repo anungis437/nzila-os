@@ -60,3 +60,16 @@ gstack moves from optional to required only if maintainers confirm:
 - Required checks remain stable or improve.
 - Post-merge rollback or hotfix frequency does not increase.
 - Documentation and governance drift do not increase.
+
+## Union Eyes — before you touch it
+
+- Before changing anything under `apps/union-eyes`, read (in order):
+  `docs/union-eyes/README.md`,
+  `docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`,
+  and `apps/union-eyes/lib/reality/capability-registry.ts`.
+- Do not advertise a navigation link to a route that resolves to `notFound()` or a 404.
+- Do not return HTTP 200 for a capability whose real state is `NOT_IMPLEMENTED` — return 501.
+- Do not start Phase 3B (recording environment, LIUNA fixtures, recording certification) while
+  `UE_SAAS_OPERATIONAL_READINESS` reads `NO_GO`.
+- Never write `PROVEN_IN_STAGING`, `complete`, `green`, `ready`, or `delivered` for a Union Eyes
+  capability unless every proof the programme requires for that claim is on file.
