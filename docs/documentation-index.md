@@ -1,9 +1,9 @@
 # Documentation Index
 
-Generated: 2026-08-27T20:40:33.534Z
+Generated: 2026-08-31T19:16:01.637Z
 
-Total documents indexed: 1726
-Stale documents (>90 days since repo validation): 927
+Total documents indexed: 1739
+Stale documents (>90 days since repo validation): 925
 
 ## Category Summary
 
@@ -13,10 +13,11 @@ Stale documents (>90 days since repo validation): 927
 | GOLDEN_PATH_DEVELOPER_GUIDE.md | 1 | 1 |
 | INDEX.md | 1 | 0 |
 | README.md | 1 | 1 |
+| _alignment | 2 | 0 |
 | architecture | 3 | 3 |
 | backlog | 1 | 1 |
 | business-plan | 43 | 0 |
-| categories | 953 | 725 |
+| categories | 958 | 725 |
 | compliance | 6 | 1 |
 | courtlens | 14 | 0 |
 | disaster-recovery.md | 1 | 0 |
@@ -41,25 +42,27 @@ Stale documents (>90 days since repo validation): 927
 | nzila-tier2-hardening | 9 | 9 |
 | nzila-tier3-operating-infrastructure | 2 | 0 |
 | oci | 160 | 86 |
-| ops | 8 | 2 |
+| ops | 9 | 2 |
 | platform | 5 | 4 |
 | procurement-pack.md | 1 | 0 |
 | proof-center | 1 | 0 |
 | public | 1 | 1 |
 | public-service | 108 | 0 |
 | readiness | 19 | 0 |
-| root | 4 | 3 |
+| root | 4 | 2 |
 | runbooks | 2 | 0 |
 | sred | 87 | 0 |
-| union-eyes | 57 | 20 |
+| union-eyes | 62 | 19 |
 | zonga | 2 | 1 |
 
 ## Documents
 
 | Path | Category | Last Validated | Status |
 | --- | --- | --- | --- |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-05-20 | stale |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | root | 2026-08-31 | current |
 | [CHANGELOG.md](CHANGELOG.md) | root | 2026-05-11 | stale |
+| [docs/_alignment/DIFF_NOTES.md](docs/_alignment/DIFF_NOTES.md) | _alignment | 2026-08-31 | current |
+| [docs/_alignment/INVENTORY.md](docs/_alignment/INVENTORY.md) | _alignment | 2026-08-31 | current |
 | [docs/architecture/AUDIT_ENFORCEMENT.md](docs/architecture/AUDIT_ENFORCEMENT.md) | architecture | 2026-05-20 | stale |
 | [docs/architecture/authority-policy-registry-and-decision-events.md](docs/architecture/authority-policy-registry-and-decision-events.md) | architecture | 2026-05-20 | stale |
 | [docs/architecture/ORG_SCOPED_TABLES.md](docs/architecture/ORG_SCOPED_TABLES.md) | architecture | 2026-05-20 | stale |
@@ -850,26 +853,31 @@ Stale documents (>90 days since repo validation): 927
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/05-findings-and-remediation-backlog.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/05-findings-and-remediation-backlog.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/06-video-claim-proof-matrix.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/06-video-claim-proof-matrix.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/07-oci-workshop-opportunity.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/07-oci-workshop-opportunity.md) | categories | 2026-08-27 | current |
-| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md) | categories | 2026-08-30 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/09-pre-video-synthetic-scenario.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/09-pre-video-synthetic-scenario.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/10-recording-script-and-shot-list.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/10-recording-script-and-shot-list.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/11-pre-video-claim-lock.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/11-pre-video-claim-lock.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/12-gate-2-continuity-authorization-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/12-gate-2-continuity-authorization-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/13-gate-3a-confidential-document-boundary-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/13-gate-3a-confidential-document-boundary-proof.md) | categories | 2026-08-27 | current |
-| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md) | categories | 2026-08-30 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/15-gate-4-leadership-transition-fixture.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/15-gate-4-leadership-transition-fixture.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/16-gate-5-federated-visibility-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/16-gate-5-federated-visibility-proof.md) | categories | 2026-08-27 | current |
-| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md) | categories | 2026-08-28 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/18-gate-7-evidence-export-boundary-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/18-gate-7-evidence-export-boundary-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/19-gate-8-legal-hold-retention-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/19-gate-8-legal-hold-retention-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/20-gate-9-ai-advisory-boundary-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/20-gate-9-ai-advisory-boundary-proof.md) | categories | 2026-08-27 | current |
-| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md) | categories | 2026-08-30 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/22-gate-10-notification-offboarding-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/22-gate-10-notification-offboarding-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/23-gate-10b-session-direct-link-offboarding-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/23-gate-10b-session-direct-link-offboarding-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/24-gate-10c-pending-ai-action-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/24-gate-10c-pending-ai-action-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/25-gate-11-case-evidence-legal-hold-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/25-gate-11-case-evidence-legal-hold-proof.md) | categories | 2026-08-27 | current |
 | [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/26-gate-12-central-aggregate-reporting-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/26-gate-12-central-aggregate-reporting-proof.md) | categories | 2026-08-27 | current |
-| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md) | categories | 2026-08-27 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md) | categories | 2026-08-30 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/28-oci-workshop-pack.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/28-oci-workshop-pack.md) | categories | 2026-08-30 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/29-recording-package-v1-handoff-baseline.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/29-recording-package-v1-handoff-baseline.md) | categories | 2026-08-30 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/30-synthetic-fixtures-manifest.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/30-synthetic-fixtures-manifest.md) | categories | 2026-08-30 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/32-opdc-cecof-provisional-vocabulary.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/32-opdc-cecof-provisional-vocabulary.md) | categories | 2026-08-30 | current |
+| [docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md) | categories | 2026-08-30 | current |
 | [docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md](docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/core-principle-navigation-is-monetization.md) | categories | 2026-05-11 | stale |
 | [docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md](docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-gating-philosophy.md) | categories | 2026-05-11 | stale |
 | [docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md](docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/final-navigation-monetization-review.md) | categories | 2026-07-18 | current |
@@ -1490,6 +1498,7 @@ Stale documents (>90 days since repo validation): 927
 | [docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md](docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md) | oci | 2026-07-18 | current |
 | [docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md](docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md) | oci | 2026-07-18 | current |
 | [docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md](docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md) | oci | 2026-07-18 | current |
+| [docs/ops/ci-critical-path-analysis.md](docs/ops/ci-critical-path-analysis.md) | ops | 2026-08-30 | current |
 | [docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md](docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md) | ops | 2026-07-18 | current |
 | [docs/ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md](docs/ops/FINANCIAL_SERVICE_GOVERNANCE_RECOVERY.md) | ops | 2026-05-22 | stale |
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-07-18 | current |
@@ -1735,26 +1744,27 @@ Stale documents (>90 days since repo validation): 927
 | [docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md](docs/union-eyes/pilot-evidence-pack/PILOT_SCOPE_LOCK.md) | union-eyes | 2026-05-21 | stale |
 | [docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md](docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md) | union-eyes | 2026-05-21 | stale |
 | [docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md](docs/union-eyes/pilot-evidence-pack/READINESS_COMMANDS.md) | union-eyes | 2026-07-18 | current |
-| [docs/union-eyes/pilot-evidence-pack/README.md](docs/union-eyes/pilot-evidence-pack/README.md) | union-eyes | 2026-05-21 | stale |
+| [docs/union-eyes/pilot-evidence-pack/README.md](docs/union-eyes/pilot-evidence-pack/README.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md](docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md) | union-eyes | 2026-07-18 | current |
 | [docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md](docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md) | union-eyes | 2026-07-18 | current |
 | [docs/union-eyes/qa/rbac-reality-map.md](docs/union-eyes/qa/rbac-reality-map.md) | union-eyes | 2026-05-11 | stale |
 | [docs/union-eyes/qa/user-story-coverage-matrix.md](docs/union-eyes/qa/user-story-coverage-matrix.md) | union-eyes | 2026-05-11 | stale |
-| [docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md](docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/README.md](docs/union-eyes/README.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md](docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/01_BASELINE_AND_SCOPE.md](docs/union-eyes/reality-remediation/01_BASELINE_AND_SCOPE.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/02_CAPABILITY_REALITY_REGISTER.md](docs/union-eyes/reality-remediation/02_CAPABILITY_REALITY_REGISTER.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/03_THREAT_AND_IMPACT_MODEL.md](docs/union-eyes/reality-remediation/03_THREAT_AND_IMPACT_MODEL.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md](docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md](docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md](docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/06_ANTI_THEATRE_CI_CHECKS.md](docs/union-eyes/reality-remediation/06_ANTI_THEATRE_CI_CHECKS.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/07_DEPLOYMENT_GUARDS.md](docs/union-eyes/reality-remediation/07_DEPLOYMENT_GUARDS.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md](docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md](docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md](docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md](docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md](docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md](docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md](docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md](docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md](docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md](docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md](docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md](docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md](docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md](docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/15_REMEDIATION_BASELINE.md](docs/union-eyes/reality-remediation/15_REMEDIATION_BASELINE.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md](docs/union-eyes/reality-remediation/16_ANTI_THEATRE_BASELINE.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/17_VALIDATION_MATRIX.md) | union-eyes | 2026-08-26 | current |
@@ -1763,9 +1773,13 @@ Stale documents (>90 days since repo validation): 927
 | [docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md](docs/union-eyes/reality-remediation/19_ROUTE_RECONCILIATION.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md](docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md](docs/union-eyes/reality-remediation/20_SEMANTIC_ISOLATION.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md](docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md](docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md](docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/reality-remediation/archive/README.md](docs/union-eyes/reality-remediation/archive/README.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/deadline-engine/00-charter.md](docs/union-eyes/reality-remediation/deadline-engine/00-charter.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md](docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md](docs/union-eyes/runtime-convergence/final-runtime-convergence-review.md) | union-eyes | 2026-05-11 | stale |
@@ -1782,6 +1796,6 @@ Stale documents (>90 days since repo validation): 927
 | [docs/union-eyes/runtime-convergence/README.md](docs/union-eyes/runtime-convergence/README.md) | union-eyes | 2026-07-18 | current |
 | [docs/zonga/dr/restore-drill-runbook.md](docs/zonga/dr/restore-drill-runbook.md) | zonga | 2026-07-18 | current |
 | [docs/zonga/pilot-commercial-model.md](docs/zonga/pilot-commercial-model.md) | zonga | 2026-05-11 | stale |
-| [README.md](README.md) | root | 2026-08-27 | current |
+| [README.md](README.md) | root | 2026-08-31 | current |
 | [SECURITY.md](SECURITY.md) | root | 2026-02-20 | stale |
 

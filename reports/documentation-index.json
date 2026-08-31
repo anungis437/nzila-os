@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-27T20:40:33.534Z",
-  "totalDocuments": 1726,
-  "staleDocuments": 927,
+  "generatedAt": "2026-08-31T19:16:01.637Z",
+  "totalDocuments": 1739,
+  "staleDocuments": 925,
   "categories": [
     {
       "category": "CIVIC_OCI_ALIGNMENT.md",
@@ -24,6 +24,11 @@
       "staleCount": 1
     },
     {
+      "category": "_alignment",
+      "count": 2,
+      "staleCount": 0
+    },
+    {
       "category": "architecture",
       "count": 3,
       "staleCount": 3
@@ -40,7 +45,7 @@
     },
     {
       "category": "categories",
-      "count": 953,
+      "count": 958,
       "staleCount": 725
     },
     {
@@ -165,7 +170,7 @@
     },
     {
       "category": "ops",
-      "count": 8,
+      "count": 9,
       "staleCount": 2
     },
     {
@@ -201,7 +206,7 @@
     {
       "category": "root",
       "count": 4,
-      "staleCount": 3
+      "staleCount": 2
     },
     {
       "category": "runbooks",
@@ -215,8 +220,8 @@
     },
     {
       "category": "union-eyes",
-      "count": 57,
-      "staleCount": 20
+      "count": 62,
+      "staleCount": 19
     },
     {
       "category": "zonga",
@@ -228,14 +233,26 @@
     {
       "path": "ARCHITECTURE.md",
       "category": "root",
-      "lastValidated": "2026-05-20",
-      "stale": true
+      "lastValidated": "2026-08-31",
+      "stale": false
     },
     {
       "path": "CHANGELOG.md",
       "category": "root",
       "lastValidated": "2026-05-11",
       "stale": true
+    },
+    {
+      "path": "docs/_alignment/DIFF_NOTES.md",
+      "category": "_alignment",
+      "lastValidated": "2026-08-31",
+      "stale": false
+    },
+    {
+      "path": "docs/_alignment/INVENTORY.md",
+      "category": "_alignment",
+      "lastValidated": "2026-08-31",
+      "stale": false
     },
     {
       "path": "docs/architecture/AUDIT_ENFORCEMENT.md",
@@ -4980,7 +4997,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/08-executive-readiness-report.md",
       "category": "categories",
-      "lastValidated": "2026-08-27",
+      "lastValidated": "2026-08-30",
       "stale": false
     },
     {
@@ -5016,7 +5033,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/14-gate-3b-case-access-revocation-proof.md",
       "category": "categories",
-      "lastValidated": "2026-08-27",
+      "lastValidated": "2026-08-30",
       "stale": false
     },
     {
@@ -5034,7 +5051,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/17-gate-6-bilingual-mobile-recording-readiness.md",
       "category": "categories",
-      "lastValidated": "2026-08-27",
+      "lastValidated": "2026-08-28",
       "stale": false
     },
     {
@@ -5058,7 +5075,7 @@
     {
       "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/21-current-readiness-ledger.md",
       "category": "categories",
-      "lastValidated": "2026-08-27",
+      "lastValidated": "2026-08-30",
       "stale": false
     },
     {
@@ -5092,9 +5109,39 @@
       "stale": false
     },
     {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md",
+      "category": "categories",
+      "lastValidated": "2026-08-30",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/28-oci-workshop-pack.md",
+      "category": "categories",
+      "lastValidated": "2026-08-30",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/29-recording-package-v1-handoff-baseline.md",
+      "category": "categories",
+      "lastValidated": "2026-08-30",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/30-synthetic-fixtures-manifest.md",
+      "category": "categories",
+      "lastValidated": "2026-08-30",
+      "stale": false
+    },
+    {
+      "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/32-opdc-cecof-provisional-vocabulary.md",
+      "category": "categories",
+      "lastValidated": "2026-08-30",
+      "stale": false
+    },
+    {
       "path": "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/README.md",
       "category": "categories",
-      "lastValidated": "2026-08-27",
+      "lastValidated": "2026-08-30",
       "stale": false
     },
     {
@@ -8818,6 +8865,12 @@
       "stale": false
     },
     {
+      "path": "docs/ops/ci-critical-path-analysis.md",
+      "category": "ops",
+      "lastValidated": "2026-08-30",
+      "stale": false
+    },
+    {
       "path": "docs/ops/FINANCIAL_RUNTIME_RELEASE_POLICY.md",
       "category": "ops",
       "lastValidated": "2026-07-18",
@@ -10290,8 +10343,8 @@
     {
       "path": "docs/union-eyes/pilot-evidence-pack/README.md",
       "category": "union-eyes",
-      "lastValidated": "2026-05-21",
-      "stale": true
+      "lastValidated": "2026-08-31",
+      "stale": false
     },
     {
       "path": "docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md",
@@ -10318,9 +10371,15 @@
       "stale": true
     },
     {
+      "path": "docs/union-eyes/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-08-31",
+      "stale": false
+    },
+    {
       "path": "docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
@@ -10350,7 +10409,7 @@
     {
       "path": "docs/union-eyes/reality-remediation/05_REMEDIATION_PLAN.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
@@ -10368,43 +10427,43 @@
     {
       "path": "docs/union-eyes/reality-remediation/08_OBSERVABILITY_AND_REALITY_ALERTS.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/09_DATA_QUALITY_GATE.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/10_AUTH_AND_AUDIT_CONSOLIDATION.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/11_REALITY_E2E_TESTS.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/12_VALIDATION_REPORT.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/13_POST_REMEDIATION_RETROSPECTIVE.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/14_GLOSSARY_AND_REFERENCES.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
@@ -10458,19 +10517,43 @@
     {
       "path": "docs/union-eyes/reality-remediation/21_WAVE_0_VALIDATION_MATRIX.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md",
       "category": "union-eyes",
-      "lastValidated": "2026-08-26",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
       "path": "docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md",
       "category": "union-eyes",
+      "lastValidated": "2026-08-31",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-08-31",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
+      "category": "union-eyes",
       "lastValidated": "2026-08-26",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-08-26",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/archive/README.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
@@ -10572,7 +10655,7 @@
     {
       "path": "README.md",
       "category": "root",
-      "lastValidated": "2026-08-27",
+      "lastValidated": "2026-08-31",
       "stale": false
     },
     {
