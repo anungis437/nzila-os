@@ -261,6 +261,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'communications/sms/page.tsx',                 minRole: 'steward',              description: 'SMS communications' },
   { path: 'cross-union-analytics/page.tsx',              minRole: 'steward',              description: 'Cross-union analytics' },
   { path: 'grievances/[id]/page.tsx',                    minRole: 'steward',              description: 'Grievance detail' },
+  { path: 'members/page.tsx',                            minRole: 'steward',              description: 'Staff member directory' },
   { path: 'members/new/page.tsx',                        minRole: 'steward',              description: 'Create new member' },
   { path: 'members/[id]/page.tsx',                       minRole: 'steward',              description: 'Member detail' },
   { path: 'pension/admin/page.tsx',                      minRole: 'steward',              description: 'Pension admin console' },
