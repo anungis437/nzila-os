@@ -14,15 +14,13 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Dues'],
-      summary: 'List payroll deductions for a member',
+      summary: 'List payroll deductions for the authenticated member',
     },
   },
-  async ({ organizationId, request }) => {
-    const userId = request.nextUrl.searchParams.get('userId');
-
+  async ({ organizationId, userId }) => {
     if (!organizationId || !userId) {
       return { data: [] };
     }

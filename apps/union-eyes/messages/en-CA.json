@@ -175,6 +175,18 @@
       "membershipStatus": "Membership Status",
       "goodStanding": "Good Standing",
       "arrears": "Arrears",
+      "balanceStatus": {
+        "paid_up": "Paid Up",
+        "owing": "Arrears",
+        "credit": "Credit Balance"
+      },
+      "lastPayment": "Last payment: {amount} on {date}",
+      "noLastPayment": "No payments recorded yet",
+      "sourceNative": "Source: Union Eyes dues ledger · Balance calculated {date}",
+      "unavailableTitle": "Dues information unavailable",
+      "unavailableBody": "We could not load your dues balance right now. Please try again later or contact your union administrator.",
+      "noDataTitle": "No dues data on file",
+      "noDataBody": "Union Eyes has no dues records for you yet. Your union may track dues through a separate membership/dues system — contact your union administrator for your current standing.",
       "autopayEnabled": "AutoPay enabled (****{last4})",
       "overdueShort": "{amount} overdue",
       "overdueBalance": "Overdue Balance",

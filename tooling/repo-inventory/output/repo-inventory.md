@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 257 |
 | GitHub Workflows | 53 |
 | Contract Test Files | 277 |
-| TS/JS Test Files | 2511 |
+| TS/JS Test Files | 2516 |
 | Python Test Files | 33 |
 
 ## Apps
@@ -37,7 +37,7 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4927 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 4932 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 71 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |

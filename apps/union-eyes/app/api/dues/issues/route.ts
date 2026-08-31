@@ -3,39 +3,36 @@
  *
  * Allows members to report problems with their payroll deductions such as
  * missing deductions, incorrect amounts, duplicates, or unrecognized charges.
- * Issues are queued for review by union administrators.
+ * Persisted to member_dues_issues for review by union administrators.
  */
 
 import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db';
+import { memberDuesIssues } from '@/db/schema/dues-finance-schema';
 
 export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Dues'],
       summary: 'Report a deduction issue',
     },
   },
-  async ({ organizationId, body }) => {
-    if (!organizationId) {
-      return NextResponse.json(
-        { error: 'Organization context required' },
-        { status: 400 },
-      );
+  async ({ organizationId, userId, body }) => {
+    if (!organizationId || !userId) {
+      throw ApiError.badRequest('Organization/user context required');
     }
 
     const {
-      userId,
       issueType,
       subject,
       description,
       payrollDeductionId,
       expectedAmount,
     } = body as {
-      userId: string;
       issueType: string;
       subject: string;
       description: string;
@@ -43,11 +40,8 @@ export const POST = withApi(
       expectedAmount?: number;
     };
 
-    if (!userId || !issueType || !subject || !description) {
-      return NextResponse.json(
-        { error: 'Missing required fields: userId, issueType, subject, description' },
-        { status: 400 },
-      );
+    if (!issueType || !subject || !description) {
+      throw ApiError.badRequest('Missing required fields: issueType, subject, description');
     }
 
     const validIssueTypes = [
@@ -59,29 +53,26 @@ export const POST = withApi(
     ];
 
     if (!validIssueTypes.includes(issueType)) {
-      return NextResponse.json(
-        { error: `Invalid issue type. Must be one of: ${validIssueTypes.join(', ')}` },
-        { status: 400 },
-      );
+      throw ApiError.badRequest(`Invalid issue type. Must be one of: ${validIssueTypes.join(', ')}`);
     }
 
-    // Issue is accepted and will be persisted once the payroll_deductions
-    // and member_dues_issues tables are created via migration.
-    // For now, return a success acknowledgement.
-    return NextResponse.json({
-      success: true,
-      issue: {
-        id: crypto.randomUUID(),
+    const [issue] = await db
+      .insert(memberDuesIssues)
+      .values({
         organizationId,
         userId,
         issueType,
         subject,
         description,
         payrollDeductionId: payrollDeductionId ?? null,
-        expectedAmount: expectedAmount ?? null,
+        expectedAmount: expectedAmount != null ? expectedAmount.toFixed(2) : null,
         status: 'open',
-        createdAt: new Date().toISOString(),
-      },
+      })
+      .returning();
+
+    return NextResponse.json({
+      success: true,
+      issue,
     });
   },
 );

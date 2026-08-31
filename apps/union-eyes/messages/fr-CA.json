@@ -175,6 +175,18 @@
       "membershipStatus": "Statut d'adhésion",
       "goodStanding": "En règle",
       "arrears": "Arriérés",
+      "balanceStatus": {
+        "paid_up": "À jour",
+        "owing": "Arriérés",
+        "credit": "Solde créditeur"
+      },
+      "lastPayment": "Dernier paiement : {amount} le {date}",
+      "noLastPayment": "Aucun paiement enregistré pour le moment",
+      "sourceNative": "Source : registre des cotisations Union Eyes · Solde calculé le {date}",
+      "unavailableTitle": "Informations sur les cotisations indisponibles",
+      "unavailableBody": "Nous n'avons pas pu charger votre solde de cotisations. Veuillez réessayer plus tard ou contacter votre administrateur syndical.",
+      "noDataTitle": "Aucune donnée de cotisation au dossier",
+      "noDataBody": "Union Eyes ne possède aucun dossier de cotisations pour vous pour le moment. Votre syndicat pourrait suivre les cotisations dans un système distinct — contactez votre administrateur syndical pour connaître votre statut actuel.",
       "autopayEnabled": "Paiement automatique activé (****{last4})",
       "overdueShort": "{amount} en retard",
       "overdueBalance": "Solde en retard",

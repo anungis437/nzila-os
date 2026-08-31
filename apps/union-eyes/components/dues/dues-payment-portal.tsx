@@ -7,31 +7,41 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DollarSign,
-  Calendar,
   AlertTriangle,
   CheckCircle2,
-  Clock,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import DeductionHistory from './deduction-history';
 import ReportDeductionIssue from './report-deduction-issue';
 import PaymentHistory from './payment-history';
-import DuesPaymentForm from './dues-payment-form';
-import PaymentMethodManager from './payment-method-manager';
 
-interface DuesBalance {
-  currentBalance: number;
-  nextDueDate: string;
-  nextDueAmount: number;
-  overdueAmount: number;
-  lastPaymentDate: string;
-  lastPaymentAmount: number;
-  isInArrears: boolean;
-  arrearsAmount: number;
-  membershipStatus: string;
-  autoPayEnabled: boolean;
-  paymentMethodLast4: string | null;
+type BalanceStatus = 'paid_up' | 'owing' | 'credit';
+
+interface LastPayment {
+  amount: number;
+  date: string;
 }
+
+type DuesBalanceContext =
+  | {
+      source: 'native' | 'integration';
+      available: true;
+      currentBalance: number;
+      balanceStatus: BalanceStatus;
+      isInArrears: boolean;
+      arrearsAmount: number;
+      lastPayment: LastPayment | null;
+      asOf: string;
+    }
+  | {
+      source: 'unavailable';
+      available: false;
+      currentBalance: null;
+      balanceStatus: null;
+      isInArrears: null;
+      arrearsAmount: null;
+      lastPayment: null;
+    };
 
 interface DuesPaymentPortalProps {
   userId: string;
@@ -39,36 +49,29 @@ interface DuesPaymentPortalProps {
 
 export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
   const t = useTranslations('dashboard.dues');
-  const [balance, setBalance] = useState<DuesBalance | null>(null);
+  const [balance, setBalance] = useState<DuesBalanceContext | null>(null);
   const [loading, setLoading] = useState(true);
+  // A genuine fetch/network failure — distinct from the API honestly
+  // reporting `available: false` because no dues data exists for this
+  // member (e.g. dues are administered by a separate system).
+  const [loadError, setLoadError] = useState(false);
   const [selectedDeductionId, setSelectedDeductionId] = useState<string | undefined>();
 
   const loadDuesBalance = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const response = await fetch(`/api/dues/balance?userId=${userId}`);
       if (!response.ok) throw new Error('Failed to load dues balance');
       const json = await response.json();
       setBalance(json?.data ?? json);
     } catch (_error) {
-      // Fall back to zero-value balance so the UI renders instead of
-      // showing the opaque "No dues information available" message.
-      setBalance({
-        currentBalance: 0,
-        nextDueDate: new Date(Date.now() + 30 * 86_400_000).toISOString(),
-        nextDueAmount: 0,
-        overdueAmount: 0,
-        lastPaymentDate: new Date().toISOString(),
-        lastPaymentAmount: 0,
-        isInArrears: false,
-        arrearsAmount: 0,
-        membershipStatus: 'active',
-        autoPayEnabled: false,
-        paymentMethodLast4: null,
-      });
+      // Honest failure state — never fabricate a balance to make the UI render.
+      setBalance(null);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
-   
   }, [userId]);
 
   useEffect(() => {
@@ -79,14 +82,35 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
     return <div className="flex items-center justify-center p-12">{t('loading')}</div>;
   }
 
-  if (!balance) {
-    return <div className="text-center p-12">{t('noInfo')}</div>;
+  if (loadError || !balance) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-center py-12">
+          <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">{t('unavailableTitle')}</h3>
+          <p className="text-muted-foreground">{t('unavailableBody')}</p>
+        </CardContent>
+      </Card>
+    );
   }
+
+  if (!balance.available) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-center py-12">
+          <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">{t('noDataTitle')}</h3>
+          <p className="text-muted-foreground">{t('noDataBody')}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
 
   return (
     <div className="space-y-6">
       {/* Status Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('currentBalance')}</CardTitle>
@@ -102,20 +126,8 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
                 {t('overdueShort', { amount: formatCurrency(balance.arrearsAmount) })}
               </p>
             )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('nextDeductionExpected')}</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(balance.nextDueAmount)}
-            </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {t('expected', { date: new Date(balance.nextDueDate).toLocaleDateString() })}
+              {t('sourceNative', { date: new Date(balance.asOf).toLocaleString() })}
             </p>
           </CardContent>
         </Card>
@@ -126,24 +138,26 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <Badge 
-              variant={balance.membershipStatus === 'good_standing' ? 'default' : 'destructive'}
+            <Badge
+              variant={balance.balanceStatus === 'owing' ? 'destructive' : 'default'}
               className="text-sm"
             >
-              {balance.membershipStatus === 'good_standing' ? t('goodStanding') : t('arrears')}
+              {t(`balanceStatus.${balance.balanceStatus}`)}
             </Badge>
-            {balance.autoPayEnabled && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
-                <Clock className="h-3 w-3" />
-                {t('autopayEnabled', { last4: balance.paymentMethodLast4 ?? '' })}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-2">
+              {balance.lastPayment
+                ? t('lastPayment', {
+                    amount: formatCurrency(balance.lastPayment.amount),
+                    date: new Date(balance.lastPayment.date).toLocaleDateString(),
+                  })
+                : t('noLastPayment')}
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Alert for Overdue Amounts */}
-      {balance.overdueAmount > 0 && (
+      {balance.isInArrears && (
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -151,19 +165,23 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
               {t('overdueBalance')}
             </CardTitle>
             <CardDescription>
-              {t('overdueBalanceDescription', { amount: formatCurrency(balance.overdueAmount) })}
+              {t('overdueBalanceDescription', { amount: formatCurrency(balance.arrearsAmount) })}
             </CardDescription>
           </CardHeader>
         </Card>
       )}
 
-      {/* Main Tabs — Deduction visibility is primary */}
+      {/* Main Tabs — direct payment/autopay are not part of the supported
+          surface (see MEMBER_DUES_CONTEXT capability disposition): the
+          Stripe payment flow has no reconciliation back into the member's
+          dues ledger, and autopay/saved-payment-method management is
+          largely unimplemented. Deduction visibility, issue reporting, and
+          payment history remain fully supported. */}
       <Tabs defaultValue="deductions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="deductions">{t('tabs.deductions')}</TabsTrigger>
           <TabsTrigger value="report-issue">{t('tabs.reportIssue')}</TabsTrigger>
           <TabsTrigger value="history">{t('tabs.history')}</TabsTrigger>
-          <TabsTrigger value="manual-payment">{t('tabs.manualPayment')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deductions" className="space-y-4">
@@ -184,28 +202,6 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
 
         <TabsContent value="history" className="space-y-4">
           <PaymentHistory userId={userId} />
-        </TabsContent>
-
-        <TabsContent value="manual-payment" className="space-y-4">
-          <Card className="mb-4">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">
-                <strong>{t('manualPaymentNote')}</strong>{' '}
-                {t('manualPaymentNoteBody')}
-              </p>
-            </CardContent>
-          </Card>
-          <DuesPaymentForm 
-            userId={userId}
-            currentBalance={balance.currentBalance}
-            overdueAmount={balance.overdueAmount}
-            onPaymentComplete={loadDuesBalance}
-          />
-          <PaymentMethodManager 
-            userId={userId}
-            autoPayEnabled={balance.autoPayEnabled}
-            onUpdate={loadDuesBalance}
-          />
         </TabsContent>
       </Tabs>
     </div>

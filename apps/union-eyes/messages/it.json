@@ -175,6 +175,18 @@
       "membershipStatus": "Stato dell'iscrizione",
       "goodStanding": "In regola",
       "arrears": "Arretrati",
+      "balanceStatus": {
+        "paid_up": "In regola",
+        "owing": "Arretrati",
+        "credit": "Saldo a credito"
+      },
+      "lastPayment": "Ultimo pagamento: {amount} il {date}",
+      "noLastPayment": "Nessun pagamento registrato finora",
+      "sourceNative": "Fonte: registro delle quote Union Eyes · Saldo calcolato il {date}",
+      "unavailableTitle": "Informazioni sulle quote non disponibili",
+      "unavailableBody": "Non è stato possibile caricare il tuo saldo delle quote. Riprova più tardi o contatta il tuo amministratore sindacale.",
+      "noDataTitle": "Nessun dato sulle quote disponibile",
+      "noDataBody": "Union Eyes non ha ancora registrazioni delle quote per te. Il tuo sindacato potrebbe tracciare le quote tramite un sistema separato — contatta il tuo amministratore sindacale per conoscere la tua posizione attuale.",
       "autopayEnabled": "AutoPay abilitato (****{last4})",
       "overdueShort": "{amount} in ritardo",
       "overdueBalance": "Saldo in ritardo",
