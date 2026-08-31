@@ -24,6 +24,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+// POST /api/organization/members has no handler (GET only) — this form
+// cannot currently create a member. Disabled until a real, governed
+// member-creation endpoint exists rather than leaving a reachable form
+// that always receives a 405. See MEMBER_DIRECT_CREATE in the capability
+// registry audit.
+const MEMBER_DIRECT_CREATE_ENABLED = false;
+
 type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 type MemberStatus = "active" | "inactive" | "on-leave";
 
@@ -57,6 +64,38 @@ export default function CreateMemberPage() {
     membershipNumber: "",
     unionJoinDate: new Date().toISOString().split('T')[0]
   });
+
+  if (!MEMBER_DIRECT_CREATE_ENABLED) {
+    return (
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
+          <Button
+            onClick={() => router.back()}
+            variant="ghost"
+            className="mb-4 hover:bg-white/50"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            {t('backToMembers')}
+          </Button>
+          <Card className="border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                {t('pageTitle')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">
+                Direct member creation is not available yet. Use the Invite User flow from the
+                Member Management console, or the Bulk Import template once member creation is
+                supported end-to-end.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
