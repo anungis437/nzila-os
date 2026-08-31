@@ -443,6 +443,95 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     notes:
       'LIMITED: proves the direct permanent-failure branch when max_attempts=1. Retry classification, exponential backoff, exhaustion-after-retries, manual replay, and lease-based recovery are all UNPROVEN in staging.',
   },
+
+  // ------------------------------------------------------------------------
+  // Member Dues Portal — truth reconciliation
+  //
+  // CORRECTION: the member-facing dues portal previously (a) queried
+  // platform-level billing tables (platformCostLedgerEntries /
+  // platformPayments — Nzila's own SaaS billing ledger, unrelated to union
+  // member dues) instead of the native per-member dues ledger, (b) ignored
+  // the authenticated userId and scoped some reads by organization only,
+  // leaking cross-member payment/deduction data, (c) fabricated a fake
+  // "healthy" balance ($0, active, next-due-in-30-days) on any load error
+  // instead of surfacing failure, and (d) never persisted submitted
+  // deduction-issue reports despite returning a fabricated success ack.
+  // Native dues calculation, scheduling, and automated reminders remain
+  // explicitly out of scope (non-blocking, optional) — the requirement
+  // enforced here is that whatever balance/history/issue data IS shown to
+  // a member is real, correctly scoped, and honestly absent when it can't
+  // be loaded.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-DUES-PORTAL-BALANCE',
+    title: "Member dues portal — balance summary (member's own view)",
+    state: 'REAL',
+    ownedBy: [
+      'app/api/dues/balance/route.ts',
+      'components/dues/dues-payment-portal.tsx',
+      'db/schema/dues-finance-schema.ts',
+    ],
+    evidence: [
+      'app/api/dues/balance/route.ts — computes balance from member_dues_ledger (charges − payments − credits − adjustments − write_offs) scoped by authenticated userId + organizationId; returns { source: "unavailable" } rather than a fabricated balance when context is missing',
+      'components/dues/dues-payment-portal.tsx — removed the catch-block that fabricated a $0/"active" balance on fetch failure; renders an explicit unavailable state instead',
+    ],
+    targetWave: 0,
+    notes:
+      'Replaces the prior implementation, which read organization-level platform billing ledger data (platformCostLedgerEntries) and hardcoded membershipStatus/lastPaymentDate/nextDueDate. Dues scheduling ("next deduction expected") is intentionally not shown — no real per-member dues-rate/schedule table exists; this is a non-blocking, optional capability, not a truth defect.',
+  },
+  {
+    id: 'UE-DUES-PORTAL-PAYMENT-HISTORY',
+    title: 'Member dues portal — payment history',
+    state: 'REAL',
+    ownedBy: ['app/api/dues/payment-history/route.ts', 'app/api/dues/receipt/[id]/route.ts'],
+    evidence: [
+      'app/api/dues/payment-history/route.ts — queries member_dues_ledger filtered by transactionType=payment, userId, and organizationId (previously queried platformPayments with no userId scoping — a cross-member data leak)',
+      'app/api/dues/receipt/[id]/route.ts — receipt lookup now scoped by id + organizationId + userId against member_dues_ledger (previously platformPayments, org-scoped only)',
+    ],
+    targetWave: 0,
+    notes:
+      'Receipt route returns the ledger entry as JSON, not a rendered PDF — a known, accepted, lower-priority gap distinct from the truth-fabrication issue this entry addresses.',
+  },
+  {
+    id: 'UE-DUES-PORTAL-ISSUE-REPORTING',
+    title: 'Member dues portal — deduction issue reporting',
+    state: 'REAL',
+    ownedBy: ['app/api/dues/issues/route.ts'],
+    evidence: [
+      'app/api/dues/issues/route.ts — persists to member_dues_issues via db.insert(); previously returned a fabricated success acknowledgement (crypto.randomUUID() id) with no database write at all',
+    ],
+    targetWave: 0,
+  },
+  {
+    id: 'UE-DUES-PORTAL-DEDUCTIONS',
+    title: 'Member dues portal — payroll deduction history',
+    state: 'REAL',
+    ownedBy: ['app/api/dues/deductions/route.ts'],
+    evidence: [
+      'app/api/dues/deductions/route.ts — userId now sourced from the authenticated withApi context; previously read from a client-supplied ?userId= query parameter, allowing any authenticated member to view another member\'s deduction records (IDOR)',
+    ],
+    targetWave: 0,
+  },
+  {
+    id: 'UE-DUES-DIRECT-PAYMENT',
+    title: 'Member dues portal — direct Stripe payment / autopay / saved payment methods',
+    state: 'DISABLED',
+    ownedBy: [
+      'components/dues/dues-payment-form.tsx',
+      'components/dues/payment-method-manager.tsx',
+      'app/api/dues/create-payment-intent/route.ts',
+      'app/api/dues/payment-methods/route.ts',
+    ],
+    evidence: [
+      'components/dues/dues-payment-portal.tsx — "Manual Payment" tab removed; DuesPaymentForm and PaymentMethodManager are no longer imported or rendered',
+      'app/api/dues/autopay/route.ts — confirmed does not exist (404)',
+      'app/api/dues/payment-methods/[id]/route.ts (DELETE) and .../set-default/route.ts (POST) — confirmed do not exist (404)',
+      'git grep -rln "union-eyes-dues" — no webhook handler anywhere reconciles a completed create-payment-intent charge back into member_dues_ledger',
+    ],
+    targetWave: 0,
+    notes:
+      'DISABLED rather than removed: create-payment-intent and the GET payment-methods list are genuinely wired to Stripe and were left in place, but hidden from the portal because a real charge can succeed while the member\'s own ledger balance never reflects it (missing webhook reconciliation), and 3 of the 4 payment-method management endpoints do not exist. Re-enabling requires: a Stripe webhook that inserts a member_dues_ledger payment row on payment_intent.succeeded, plus the missing autopay/delete/set-default routes.',
+  },
 ] as const;
 
 /**

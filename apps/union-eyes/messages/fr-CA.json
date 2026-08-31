@@ -175,6 +175,16 @@
       "membershipStatus": "Statut d'adhésion",
       "goodStanding": "En règle",
       "arrears": "Arriérés",
+      "balanceStatus": {
+        "paid_up": "À jour",
+        "owing": "Arriérés",
+        "credit": "Solde créditeur"
+      },
+      "lastPayment": "Dernier paiement : {amount} le {date}",
+      "noLastPayment": "Aucun paiement enregistré pour le moment",
+      "sourceNative": "Source : registre natif des cotisations",
+      "unavailableTitle": "Informations sur les cotisations indisponibles",
+      "unavailableBody": "Nous n'avons pas pu charger votre solde de cotisations. Veuillez réessayer plus tard ou contacter votre administrateur syndical.",
       "autopayEnabled": "Paiement automatique activé (****{last4})",
       "overdueShort": "{amount} en retard",
       "overdueBalance": "Solde en retard",

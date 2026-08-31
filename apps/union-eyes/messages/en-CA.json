@@ -175,6 +175,16 @@
       "membershipStatus": "Membership Status",
       "goodStanding": "Good Standing",
       "arrears": "Arrears",
+      "balanceStatus": {
+        "paid_up": "Paid Up",
+        "owing": "Arrears",
+        "credit": "Credit Balance"
+      },
+      "lastPayment": "Last payment: {amount} on {date}",
+      "noLastPayment": "No payments recorded yet",
+      "sourceNative": "Source: native dues ledger",
+      "unavailableTitle": "Dues information unavailable",
+      "unavailableBody": "We could not load your dues balance right now. Please try again later or contact your union administrator.",
       "autopayEnabled": "AutoPay enabled (****{last4})",
       "overdueShort": "{amount} overdue",
       "overdueBalance": "Overdue Balance",

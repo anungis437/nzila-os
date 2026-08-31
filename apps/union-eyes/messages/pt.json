@@ -175,6 +175,16 @@
       "membershipStatus": "Status da Associação",
       "goodStanding": "Em Dia",
       "arrears": "Atrasos",
+      "balanceStatus": {
+        "paid_up": "Em Dia",
+        "owing": "Atrasos",
+        "credit": "Saldo Credor"
+      },
+      "lastPayment": "Último pagamento: {amount} em {date}",
+      "noLastPayment": "Nenhum pagamento registrado ainda",
+      "sourceNative": "Fonte: registro nativo de contribuições",
+      "unavailableTitle": "Informações de contribuições indisponíveis",
+      "unavailableBody": "Não foi possível carregar seu saldo de contribuições. Tente novamente mais tarde ou entre em contato com o administrador do sindicato.",
       "autopayEnabled": "AutoPay ativado (****{last4})",
       "overdueShort": "{amount} em atraso",
       "overdueBalance": "Saldo em Atraso",

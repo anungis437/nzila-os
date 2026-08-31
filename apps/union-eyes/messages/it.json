@@ -175,6 +175,16 @@
       "membershipStatus": "Stato dell'iscrizione",
       "goodStanding": "In regola",
       "arrears": "Arretrati",
+      "balanceStatus": {
+        "paid_up": "In regola",
+        "owing": "Arretrati",
+        "credit": "Saldo a credito"
+      },
+      "lastPayment": "Ultimo pagamento: {amount} il {date}",
+      "noLastPayment": "Nessun pagamento registrato finora",
+      "sourceNative": "Fonte: registro nativo delle quote",
+      "unavailableTitle": "Informazioni sulle quote non disponibili",
+      "unavailableBody": "Non è stato possibile caricare il tuo saldo delle quote. Riprova più tardi o contatta il tuo amministratore sindacale.",
       "autopayEnabled": "AutoPay abilitato (****{last4})",
       "overdueShort": "{amount} in ritardo",
       "overdueBalance": "Saldo in ritardo",
