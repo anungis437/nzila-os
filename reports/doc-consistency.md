@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-31T19:17:12.886Z
+> Generated: 2026-08-31T21:17:54.993Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 2410 |
-| Total Findings | 2828 |
+| Total Findings | 2813 |
 | Errors | 0 |
-| Warnings | 1238 |
+| Warnings | 1223 |
 | Info | 1590 |
 
 ## Findings by Rule
@@ -17,12 +17,12 @@
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1562 |
-| stale-reference | 1046 |
+| stale-reference | 1031 |
 | missing-package-readme | 112 |
 | stale-package-ref | 80 |
 | stale-date | 28 |
 
-## stale-reference (1046)
+## stale-reference (1031)
 
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:124` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -824,21 +824,6 @@
 - 🟡 `docs/README.md:32` — Possible broken link: [Status Authority Model](platform/STATUS_AUTHORITY_MODEL.md)
 - 🟡 `docs/README.md:33` — Possible broken link: [CUPE Pilot Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
 - 🟡 `docs/README.md:38` — Possible broken link: [Golden Path Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:3` — Possible broken link: [`23_WAVE_0_CORRECTION.md`](23_WAVE_0_CORRECTION.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:3` — Possible broken link: [`../../../reports/wave-0-artifact-proof.md`](../../../reports/wave-0-artifact-proof.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:97` — Possible broken link: [`reports/wave-0-validation-matrix.json`](../../../reports/wave-0-validation-matrix.json)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:101` — Possible broken link: [`tooling/reality/anti-theatre-scan.ts`](../../../tooling/reality/anti-theatre-scan.ts)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:101` — Possible broken link: [`16_ANTI_THEATRE_BASELINE.md`](16_ANTI_THEATRE_BASELINE.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:101` — Possible broken link: [`reports/anti-theatre.json`](../../../reports/anti-theatre.json)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:102` — Possible broken link: [`19_ROUTE_RECONCILIATION.md`](19_ROUTE_RECONCILIATION.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:102` — Possible broken link: [`apps/union-eyes/lib/reality/__tests__/route-reconciliation.test.ts`](../../../apps/union-eyes/lib/reality/__tests__/route-reconciliation.test.ts)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:103` — Possible broken link: [`20_OPERATIONAL_BUILD_DEMO_SCAN.md`](20_OPERATIONAL_BUILD_DEMO_SCAN.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:103` — Possible broken link: [`tooling/reality/operational-build-scan.ts`](../../../tooling/reality/operational-build-scan.ts)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:104` — Possible broken link: [`reports/wave-0-build-isolation-proof.md`](../../../reports/wave-0-build-isolation-proof.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:104` — Possible broken link: [`reports/wave-0-build-isolation.operational.md`](../../../reports/wave-0-build-isolation.operational.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:104` — Possible broken link: [`reports/wave-0-build-isolation.demo.md`](../../../reports/wave-0-build-isolation.demo.md)
-- 🟡 `docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md:105` — Possible broken link: [`apps/union-eyes/lib/reality/capability-registry.ts`](../../../apps/union-eyes/lib/reality/capability-registry.ts)
-- 🟡 `docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md:3` — Possible broken link: [`23_WAVE_0_CORRECTION.md`](23_WAVE_0_CORRECTION.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:279` — Possible broken link: [portfolio-5yr-projections.md](portfolio-5yr-projections.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:280` — Possible broken link: [flagship-unit-economics.md](flagship-unit-economics.md)
 - 🟡 `governance/business/investor-materials/financial-models/README.md:281` — Possible broken link: [platform-revenue-models.md](platform-revenue-models.md)

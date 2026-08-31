@@ -1,6 +1,6 @@
 # Union Eyes — you are here
 
-This page describes the repository as of **SHA `6bbbb735`** (`main`, 2026-08-31).
+This page describes the repository as of **SHA `026e10ba1`** (`main`, 2026-08-31, post-Cluster-D).
 If you are about to change Union Eyes, read this page, then
 [`reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`](reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md),
 then [`../../apps/union-eyes/lib/reality/capability-registry.ts`](../../apps/union-eyes/lib/reality/capability-registry.ts).
@@ -26,16 +26,19 @@ That stamp is from
 audited against `origin/main` SHA `cebe1d520aeb6d95e7a3e4cd70ddf071eff93428`
 on 2026-08-31. It is **stale relative to `HEAD`**, not upgraded to `PASS`:
 
-- Cluster A (#742, staff members directory) — merged after the stamp.
-- Cluster B (#743, `/api/deadlines/upcoming` empty-success fabrication) — merged after the stamp.
-- Cluster D (#744, nav vs. pilot-exclude mismatch) — open at time of writing.
+- Cluster A (#742, staff members directory) — merged.
+- Cluster B (#743, `/api/deadlines/upcoming` empty-success fabrication) — merged.
+- Cluster D (#744, nav vs. pilot-exclude mismatch) — merged.
 - Cluster C (`maturity.json` blocker-text corrections) — not done as a numbered cluster; the
-  specific corrections file 24 §8 identified are applied directly in this same alignment pass
-  (see `DIFF_NOTES.md` on the branch that introduced this README).
-- The ledger itself has not been re-run against a post-A/B/C/D `main` SHA.
+  specific corrections file 24 §8 identified are applied directly in this alignment pass
+  (see `DIFF_NOTES.md`) plus `last_validated` bumped to the reconciliation date.
+- The ledger itself has not yet been re-run against the post-A/B/C/D `main` SHA.
 
-Do not read "A and B merged" as "gate is PASS." The gate is **stale**, and stays `NO_GO`
-until file 24 is re-authored against a `HEAD` that includes all four clusters.
+Do not read "A, B, C, and D merged" as "gate is PASS." The gate is **stale**, and stays `NO_GO`
+until file 24 is re-authored against a `HEAD` that includes all four clusters — that rerun is
+the next required step, and it may legitimately conclude `NO_GO — RUNTIME_PROOF_REQUIRED` even
+with zero remaining source-code/document blockers, since several `REQUIRED_BEFORE_SAAS_PASS`
+runtime proofs in file 24 do not close merely because source blockers close.
 
 ## 3. Capability registry
 
@@ -56,14 +59,17 @@ anywhere in this programme unless every listed proof is on file.
 
 ## 4. Open increment (in order)
 
-1. Cluster D (#744) — nav vs. pilot-exclude mismatch (`executive-operating-intelligence`
-   nav-advertised but pilot-mode-excluded at runtime).
-2. Cluster C — `maturity.json` blocker-text corrections (see file 24 §8; applied in this pass).
-3. Re-author `24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md` against `HEAD` once A+B+C+D have landed.
-4. Staging Sean continuity path (assign → successor → deadline → reminder + audit + RLS) — see
+1. Cluster C — `maturity.json` blocker-text corrections (see file 24 §8) — applied in this pass.
+2. Re-author `24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md` against `HEAD` now that A+B+C+D have landed.
+   Recompute: canonical route matrix; anti-theatre scan; persona matrix; Sean continuity matrix;
+   maturity state; runtime-proof queue; code blockers. Expected valid outcome even with zero
+   remaining source blockers: `NO_GO — RUNTIME_PROOF_REQUIRED` if any file-24 runtime proof is
+   still unproven — proceed into a focused Phase 3A Runtime Acceptance workstream in that case,
+   not back into miscellaneous source remediation.
+3. Staging Sean continuity path (assign → successor → deadline → reminder + audit + RLS) — see
    file 24 §6/§9 runtime-proof queue. This is code-proven in places, **not** proven against
    deployed staging infrastructure.
-5. Only after the gate reads `PASS`: Phase 3B (recording environment, LIUNA fixtures, recording
+4. Only after the gate reads `PASS`: Phase 3B (recording environment, LIUNA fixtures, recording
    identities, recording certification artifacts).
 
 ## 5. Explicitly parked (not this increment)

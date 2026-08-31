@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-08-31T19:16:01.637Z
+Generated: 2026-08-31T21:17:44.413Z
 
 Total documents indexed: 1739
 Stale documents (>90 days since repo validation): 925
@@ -1163,7 +1163,7 @@ Stale documents (>90 days since repo validation): 925
 | [docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/INTRODUCING_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/README.md](docs/doctrine/whitepapers/README.md) | doctrine | 2026-07-18 | current |
 | [docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md](docs/doctrine/whitepapers/WHAT_IS_INSTITUTIONAL_INTELLIGENCE.md) | doctrine | 2026-07-18 | current |
-| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-08-27 | current |
+| [docs/documentation-index.md](docs/documentation-index.md) | documentation-index.md | 2026-08-31 | current |
 | [docs/GOLDEN_PATH_DEVELOPER_GUIDE.md](docs/GOLDEN_PATH_DEVELOPER_GUIDE.md) | GOLDEN_PATH_DEVELOPER_GUIDE.md | 2026-05-11 | stale |
 | [docs/governance/gates/gate-taxonomy.md](docs/governance/gates/gate-taxonomy.md) | governance | 2026-07-18 | current |
 | [docs/governance/owner-operated-review-model.md](docs/governance/owner-operated-review-model.md) | governance | 2026-08-26 | current |
@@ -1777,8 +1777,8 @@ Stale documents (>90 days since repo validation): 925
 | [docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md](docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md](docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md) | union-eyes | 2026-08-31 | current |
-| [docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-08-26 | current |
-| [docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-26 | current |
+| [docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/archive/README.md](docs/union-eyes/reality-remediation/archive/README.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/deadline-engine/00-charter.md](docs/union-eyes/reality-remediation/deadline-engine/00-charter.md) | union-eyes | 2026-08-26 | current |
 | [docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md](docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md) | union-eyes | 2026-08-26 | current |

@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-31T19:17:12.886Z",
+  "generatedAt": "2026-08-31T21:17:54.993Z",
   "filesScanned": 2410,
-  "totalFindings": 2828,
+  "totalFindings": 2813,
   "findingsByRule": {
-    "stale-reference": 1046,
+    "stale-reference": 1031,
     "stale-package-ref": 80,
     "naming-inconsistency": 1562,
     "stale-date": 28,
@@ -11,7 +11,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1238,
+    "warning": 1223,
     "info": 1590
   },
   "findings": [
@@ -6148,116 +6148,11 @@
       "message": "References @nzila/union-eyes-demo but package does not exist"
     },
     {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 3,
-      "message": "Possible broken link: [`23_WAVE_0_CORRECTION.md`](23_WAVE_0_CORRECTION.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 3,
-      "message": "Possible broken link: [`../../../reports/wave-0-artifact-proof.md`](../../../reports/wave-0-artifact-proof.md)"
-    },
-    {
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
       "line": 3,
       "message": "References @nzila/union-eyes but package does not exist"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 97,
-      "message": "Possible broken link: [`reports/wave-0-validation-matrix.json`](../../../reports/wave-0-validation-matrix.json)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 101,
-      "message": "Possible broken link: [`tooling/reality/anti-theatre-scan.ts`](../../../tooling/reality/anti-theatre-scan.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 101,
-      "message": "Possible broken link: [`16_ANTI_THEATRE_BASELINE.md`](16_ANTI_THEATRE_BASELINE.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 101,
-      "message": "Possible broken link: [`reports/anti-theatre.json`](../../../reports/anti-theatre.json)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 102,
-      "message": "Possible broken link: [`19_ROUTE_RECONCILIATION.md`](19_ROUTE_RECONCILIATION.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 102,
-      "message": "Possible broken link: [`apps/union-eyes/lib/reality/__tests__/route-reconciliation.test.ts`](../../../apps/union-eyes/lib/reality/__tests__/route-reconciliation.test.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 103,
-      "message": "Possible broken link: [`20_OPERATIONAL_BUILD_DEMO_SCAN.md`](20_OPERATIONAL_BUILD_DEMO_SCAN.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 103,
-      "message": "Possible broken link: [`tooling/reality/operational-build-scan.ts`](../../../tooling/reality/operational-build-scan.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 104,
-      "message": "Possible broken link: [`reports/wave-0-build-isolation-proof.md`](../../../reports/wave-0-build-isolation-proof.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 104,
-      "message": "Possible broken link: [`reports/wave-0-build-isolation.operational.md`](../../../reports/wave-0-build-isolation.operational.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 104,
-      "message": "Possible broken link: [`reports/wave-0-build-isolation.demo.md`](../../../reports/wave-0-build-isolation.demo.md)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md",
-      "line": 105,
-      "message": "Possible broken link: [`apps/union-eyes/lib/reality/capability-registry.ts`](../../../apps/union-eyes/lib/reality/capability-registry.ts)"
-    },
-    {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md",
-      "line": 3,
-      "message": "Possible broken link: [`23_WAVE_0_CORRECTION.md`](23_WAVE_0_CORRECTION.md)"
     },
     {
       "rule": "stale-package-ref",

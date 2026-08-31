@@ -102,3 +102,22 @@ Nothing else was moved. `reports/**` was left untouched (evidence stays under `r
 - Confirmed no script under `scripts/**` or `tooling/**` reads the literal `generated_from` or
   `analytics_readiness` values from `maturity.json` in a way this pass's edits would break.
 - This is a docs/JSON-metadata-only pass; no runtime source files were modified.
+
+## Addendum (Cluster C reconciliation, rebased onto post-Cluster-D `main`)
+
+This branch was originally cut from `main` @ `6bbbb7350` (post-Cluster-B, pre-Cluster-D). Both
+commits were cherry-picked forward, unchanged, onto `main` @ `026e10ba1` (post-Cluster-D, PR #744
+merged) to close out Cluster C as the last of the B → D → C remediation sequence. On top of the
+cherry-picked commits:
+
+- `apps/union-eyes/maturity.json`'s `last_validated` bumped from `2026-08-27` to `2026-08-31` to
+  reflect this reconciliation pass. No other maturity fields were touched beyond what the
+  original commit already applied — `contracts_complete`, `data_integrity`, and `observability`
+  remain `false`/`partial`/`partial`, not optimistically closed.
+- `docs/union-eyes/README.md` updated in place to reflect that Cluster D (#744) has since merged
+  (was "open at time of writing" when this branch was first authored) and that this Cluster C
+  pass is the last piece of source/document remediation before file 24 is re-authored against
+  `HEAD`. This is an in-place correction of a still-open working document, not a rewrite of the
+  audit ledger itself (file 24 remains untouched and will be re-authored as a separate, later
+  pass per its own instruction).
+- No other files from the original two commits were altered.
