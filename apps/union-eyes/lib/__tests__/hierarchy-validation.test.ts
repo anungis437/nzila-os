@@ -85,8 +85,9 @@ describe('hierarchy-validation', () => {
       expect(HIERARCHY_TYPES.congress).toBe(0);
       expect(HIERARCHY_TYPES.federation).toBe(1);
       expect(HIERARCHY_TYPES.union).toBe(2);
-      expect(HIERARCHY_TYPES.local).toBe(3);
-      expect(HIERARCHY_TYPES.branch).toBe(4);
+      expect(HIERARCHY_TYPES.region).toBe(3);
+      expect(HIERARCHY_TYPES.district).toBe(3);
+      expect(HIERARCHY_TYPES.local).toBe(4);
     });
   });
 
@@ -202,42 +203,42 @@ describe('hierarchy-validation', () => {
   // ── validatePathConsistency ──────────────────────────────────────────────
 
   describe('validatePathConsistency', () => {
-    it('validates root organization with correct path', async () => {
-      const result = await validatePathConsistency('org-1', null, ['org-1']);
+    it('validates root organization with empty (ancestors-only) path', async () => {
+      const result = await validatePathConsistency('org-1', null, []);
       expect(result.valid).toBe(true);
     });
 
-    it('rejects root with wrong path', async () => {
-      const result = await validatePathConsistency('org-1', null, ['org-1', 'org-2']);
+    it('rejects root with a non-empty path', async () => {
+      const result = await validatePathConsistency('org-1', null, ['org-1']);
       expect(result.valid).toBe(false);
       expect(result.errors[0]).toContain('Root organization');
     });
 
     it('errors when parent not found', async () => {
       mocks.mockFindFirst.mockResolvedValue(null);
-      const result = await validatePathConsistency('org-2', 'org-999', ['org-999', 'org-2']);
+      const result = await validatePathConsistency('org-2', 'org-999', ['org-999']);
       expect(result.valid).toBe(false);
       expect(result.errors[0]).toContain('Parent organization not found');
     });
 
-    it('validates correct path with parent', async () => {
+    it('validates correct path with parent (ancestors-only: parent id appended, not self)', async () => {
       mocks.mockFindFirst.mockResolvedValue({
-        hierarchyPath: ['root', 'org-1'],
+        hierarchyPath: ['root'],
         name: 'Parent',
       });
       const result = await validatePathConsistency(
-        'org-2', 'org-1', ['root', 'org-1', 'org-2']
+        'org-2', 'org-1', ['root', 'org-1']
       );
       expect(result.valid).toBe(true);
     });
 
     it('detects path mismatch', async () => {
       mocks.mockFindFirst.mockResolvedValue({
-        hierarchyPath: ['root', 'org-1'],
+        hierarchyPath: ['root'],
         name: 'Parent',
       });
       const result = await validatePathConsistency(
-        'org-2', 'org-1', ['root', 'org-3', 'org-2']
+        'org-2', 'org-1', ['root', 'org-3']
       );
       expect(result.valid).toBe(false);
       expect(result.errors[0]).toContain('path mismatch');
@@ -288,11 +289,11 @@ describe('hierarchy-validation', () => {
       expect(result.errors[0]).toContain('not found');
     });
 
-    it('validates root org with correct path', async () => {
+    it('validates root org with correct (empty, ancestors-only) path', async () => {
       mocks.mockFindFirst.mockResolvedValue({
         id: 'org-1',
         parentId: null,
-        hierarchyPath: ['org-1'],
+        hierarchyPath: [],
         organizationType: 'congress',
       });
       const result = await validateOrganizationHierarchy('org-1');
@@ -304,18 +305,18 @@ describe('hierarchy-validation', () => {
       mocks.mockFindFirst.mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
-          // The org being validated
+          // The org being validated: ancestors-only path holds the parent's id.
           return {
             id: 'org-2',
             parentId: 'org-1',
-            hierarchyPath: ['org-1', 'org-2'],
+            hierarchyPath: ['org-1'],
             organizationType: 'local',
           };
         }
-        // Parent org lookups
+        // Parent org lookups (root, so its own hierarchyPath is empty)
         return {
           id: 'org-1',
-          hierarchyPath: ['org-1'],
+          hierarchyPath: [],
           name: 'Parent',
           organizationType: 'federation',
         };
@@ -325,7 +326,7 @@ describe('hierarchy-validation', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('validates org with null hierarchyPath (|| [] fallback)', async () => {
+    it('validates org with null hierarchyPath (|| [] fallback) as a valid root', async () => {
       mocks.mockFindFirst.mockResolvedValue({
         id: 'org-1',
         parentId: null,
@@ -333,8 +334,8 @@ describe('hierarchy-validation', () => {
         organizationType: 'congress',
       });
       const result = await validateOrganizationHierarchy('org-1');
-      // null path is replaced with [], which gives invalid root path
-      expect(result.valid).toBe(false);
+      // null path is replaced with [], which is the valid ancestors-only root path
+      expect(result.valid).toBe(true);
     });
   });
 
@@ -345,8 +346,8 @@ describe('hierarchy-validation', () => {
         hierarchyPath: null,
         name: 'Parent',
       });
-      const result = await validatePathConsistency('org-2', 'org-1', ['org-2']);
-      // null path → [] so expected = [...[], 'org-2'] = ['org-2'] which matches
+      const result = await validatePathConsistency('org-2', 'org-1', ['org-1']);
+      // null path → [] so expected = [...[], 'org-1'] = ['org-1'] which matches
       expect(result.valid).toBe(true);
     });
 
@@ -365,7 +366,7 @@ describe('hierarchy-validation', () => {
       mocks.mockFindFirst.mockResolvedValue({
         id: 'org-1',
         parentId: null,
-        hierarchyPath: ['org-1'],
+        hierarchyPath: [],
         organizationType: 'congress',
       });
       // findOrphanedOrganizations → execute
