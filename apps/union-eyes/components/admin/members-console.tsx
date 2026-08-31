@@ -4,8 +4,8 @@
  */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Users, Upload, Download, Plus, Search, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Download, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { BulkImportMembers } from "@/components/admin/bulk-import-members";
+import { useToast } from "@/components/ui/use-toast";
 import JobClassificationManagement from "@/components/admin/JobClassificationManagement";
+import { generateCSV, type CSVColumn } from "@/lib/csv-export";
+import { useMembersConsoleData } from "@/lib/hooks/use-members-console-data";
 import {
   Select,
   SelectContent,
@@ -36,18 +38,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
 
 interface Organization {
   id: string;
   name: string;
-}
-
-interface MemberStats {
-  total: number;
-  active: number;
-  stewards: number;
-  officers: number;
 }
 
 interface Member {
@@ -64,35 +58,65 @@ interface Member {
   created_at: string | null;
 }
 
+/** Filters members by role (exact match, 'all' = no filter) and a free-text search query. */
+export function filterMembers(
+  members: Member[],
+  { searchQuery, roleFilter }: { searchQuery: string; roleFilter: string },
+): Member[] {
+  return members.filter((member) => {
+    const matchesRole = roleFilter === "all" || member.role === roleFilter;
+    if (!matchesRole) return false;
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      member.name?.toLowerCase().includes(q) ||
+      member.email?.toLowerCase().includes(q) ||
+      member.role?.toLowerCase().includes(q) ||
+      member.membership_number?.toLowerCase().includes(q)
+    );
+  });
+}
+
+/** Builds a CSV string for the given members list (header row + one row per member). Uses the repo's canonical CSV escaping/formula-injection guard (lib/csv-export.ts) — never hand-rolled string joining. */
+export function buildMembersExportCsv(members: Member[]): string {
+  const columns: CSVColumn<Member>[] = [
+    { header: "Name", accessor: (m) => m.name },
+    { header: "Email", accessor: (m) => m.email },
+    { header: "Role", accessor: (m) => m.role },
+    { header: "Status", accessor: (m) => m.status },
+    { header: "Department", accessor: (m) => m.department },
+    { header: "Membership Number", accessor: (m) => m.membership_number },
+  ];
+  return generateCSV(members, columns);
+}
+
 export default function MembersConsole() {
   const { toast } = useToast();
-  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
   const [inviteSending, setInviteSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
   const [selectedOrg, setSelectedOrg] = useState<string>("all");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
-  const [stats, setStats] = useState<MemberStats>({ total: 0, active: 0, stewards: 0, officers: 0 });
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
-  const [_refreshKey, setRefreshKey] = useState(0);
+  const [orgsError, setOrgsError] = useState<string | null>(null);
 
   // Load organizations on mount
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
         setIsLoadingOrgs(true);
+        setOrgsError(null);
         const response = await fetch('/api/organizations');
-        if (response.ok) {
-          const data = await response.json();
-          setOrganizations(data.data || data.organizations || []);
+        if (!response.ok) {
+          throw new Error(`Failed to load organizations (${response.status})`);
         }
+        const data = await response.json();
+        setOrganizations(data.data || data.organizations || []);
       } catch (error) {
-        void error;
+        setOrgsError(error instanceof Error ? error.message : 'Failed to load organizations');
       } finally {
         setIsLoadingOrgs(false);
       }
@@ -101,77 +125,8 @@ export default function MembersConsole() {
     fetchOrganizations();
   }, []);
 
-  // Fetch stats (all or filtered by org)
-  const fetchStats = useCallback(async () => {
-    try {
-      setIsLoadingStats(true);
-      const url = selectedOrg === "all"
-        ? '/api/admin/members/stats'
-        : `/api/admin/members/stats?organizationId=${selectedOrg}`;
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      void error;
-    } finally {
-      setIsLoadingStats(false);
-    }
-  }, [selectedOrg]);
-
-  // Fetch members list
-  const fetchMembers = useCallback(async () => {
-    if (selectedOrg === "all") {
-      // Fetch from all orgs
-      try {
-        setIsLoadingMembers(true);
-        const allMembers: Member[] = [];
-        for (const org of organizations) {
-          const response = await fetch(`/api/organizations/${org.id}/members`);
-          if (response.ok) {
-            const data = await response.json();
-            allMembers.push(...(data.data || []));
-          }
-        }
-        setMembers(allMembers);
-      } catch (error) {
-        void error;
-      } finally {
-        setIsLoadingMembers(false);
-      }
-    } else {
-      try {
-        setIsLoadingMembers(true);
-        const response = await fetch(`/api/organizations/${selectedOrg}/members`);
-        if (response.ok) {
-          const data = await response.json();
-          setMembers(data.data || []);
-        }
-      } catch (error) {
-        void error;
-      } finally {
-        setIsLoadingMembers(false);
-      }
-    }
-  }, [selectedOrg, organizations]);
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
-
-  useEffect(() => {
-    if (!isLoadingOrgs) {
-      fetchMembers();
-    }
-  }, [fetchMembers, isLoadingOrgs]);
-
-  // Function to trigger member list refresh
-  const refreshMemberList = () => {
-    setRefreshKey(prev => prev + 1);
-    fetchStats();
-    fetchMembers();
-  };
+  const { stats, isLoadingStats, statsError, members, isLoadingMembers, membersError } =
+    useMembersConsoleData(selectedOrg, organizations, isLoadingOrgs);
 
   const currentOrganization = organizations.find((org) => org.id === selectedOrg);
 
@@ -224,17 +179,45 @@ export default function MembersConsole() {
     }
   };
 
-  // Filter members by search query
-  const filteredMembers = members.filter((member) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      member.name?.toLowerCase().includes(q) ||
-      member.email?.toLowerCase().includes(q) ||
-      member.role?.toLowerCase().includes(q) ||
-      member.membership_number?.toLowerCase().includes(q)
-    );
-  });
+  // Filter members by search query and role
+  const filteredMembers = filterMembers(members, { searchQuery, roleFilter });
+
+  // Client-side CSV export of the currently filtered member list — no
+  // backend endpoint required (mirrors the proven pattern already used by
+  // components/organization/organization-members.tsx's handleExport).
+  const handleExportMembers = () => {
+    // A partial/failed load (e.g. "All Organizations" with some orgs
+    // failing) can still leave a non-empty `members` array — exporting it
+    // would produce an incomplete CSV that LOOKS complete. Block export
+    // entirely rather than silently ship a partial dataset; the visible
+    // error banner above already explains which scope is unavailable.
+    if (membersError) {
+      toast({
+        title: "Export unavailable",
+        description: "Member data failed to load for one or more organizations. Export is blocked until the complete dataset loads successfully.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (filteredMembers.length === 0) {
+      toast({
+        title: "Nothing to export",
+        description: "No members match the current filters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const csv = buildMembersExportCsv(filteredMembers);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `members-export-${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -256,30 +239,35 @@ export default function MembersConsole() {
               <Users className="w-4 h-4" />
               Invite User
             </Button>
-            <Button 
+            <Button
               variant="outline"
-              onClick={() => setBulkImportOpen(true)}
+              onClick={handleExportMembers}
+              disabled={!!membersError || isLoadingMembers}
+              title={membersError ? "Export unavailable — member data failed to load for one or more organizations." : undefined}
               className="gap-2"
             >
-              <Upload className="w-4 h-4" />
-              Bulk Import Members
-            </Button>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Add Member
+              <Download className="w-4 h-4" />
+              Export Members
             </Button>
           </div>
         </div>
       </div>
 
+      {orgsError && (
+        <p className="text-sm text-destructive" role="alert">{orgsError}</p>
+      )}
+
       {/* Stats Cards */}
+      {statsError && (
+        <p className="text-sm text-destructive" role="alert">{statsError}</p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Members</p>
-                <p className="text-2xl font-bold">{isLoadingStats ? '…' : stats.total}</p>
+                <p className="text-2xl font-bold">{isLoadingStats || stats === null ? '…' : stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-muted-foreground" />
             </div>
@@ -291,7 +279,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Members</p>
-                <p className="text-2xl font-bold text-green-600">{isLoadingStats ? '…' : stats.active}</p>
+                <p className="text-2xl font-bold text-green-600">{isLoadingStats || stats === null ? '…' : stats.active}</p>
               </div>
               <Users className="w-8 h-8 text-green-600" />
             </div>
@@ -303,7 +291,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Stewards</p>
-                <p className="text-2xl font-bold text-purple-600">{isLoadingStats ? '…' : stats.stewards}</p>
+                <p className="text-2xl font-bold text-purple-600">{isLoadingStats || stats === null ? '…' : stats.stewards}</p>
               </div>
               <Users className="w-8 h-8 text-purple-600" />
             </div>
@@ -315,7 +303,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Officers</p>
-                <p className="text-2xl font-bold text-orange-600">{isLoadingStats ? '…' : stats.officers}</p>
+                <p className="text-2xl font-bold text-orange-600">{isLoadingStats || stats === null ? '…' : stats.officers}</p>
               </div>
               <Users className="w-8 h-8 text-orange-600" />
             </div>
@@ -369,7 +357,7 @@ export default function MembersConsole() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Role</label>
-              <Select defaultValue="all">
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -386,73 +374,20 @@ export default function MembersConsole() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button 
-              variant="outline" 
-              className="justify-start gap-2 h-auto py-4"
-              onClick={() => setBulkImportOpen(true)}
-            >
-              <div className="flex flex-col items-start gap-1">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  <span className="font-semibold">Bulk Import</span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  Import members from CSV/Excel file
-                </span>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="justify-start gap-2 h-auto py-4"
-            >
-              <div className="flex flex-col items-start gap-1">
-                <div className="flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  <span className="font-semibold">Export Members</span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  Download member list as CSV
-                </span>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="justify-start gap-2 h-auto py-4"
-            >
-              <div className="flex flex-col items-start gap-1">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span className="font-semibold">Member Reports</span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  View membership analytics
-                </span>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Member List */}
       <Card>
         <CardHeader>
           <CardTitle>All Members</CardTitle>
         </CardHeader>
         <CardContent>
+          {membersError && (
+            <p className="text-sm text-destructive mb-4" role="alert">{membersError}</p>
+          )}
           {isLoadingMembers ? (
             <p className="text-sm text-muted-foreground">Loading members…</p>
           ) : filteredMembers.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No members found.
+              {membersError ? 'Unable to display members due to the error above.' : 'No members found.'}
             </p>
           ) : (
             <Table>
@@ -503,16 +438,6 @@ export default function MembersConsole() {
           )}
         </CardContent>
       </Card>
-
-      {/* Bulk Import Dialog */}
-      <BulkImportMembers
-        open={bulkImportOpen}
-        onOpenChange={setBulkImportOpen}
-        onSuccess={() => {
-          setBulkImportOpen(false);
-          refreshMemberList();
-        }}
-      />
 
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent>
