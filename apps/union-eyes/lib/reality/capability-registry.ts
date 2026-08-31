@@ -536,6 +536,59 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     notes:
       'DISABLED rather than removed: create-payment-intent and the GET payment-methods list are genuinely wired to Stripe and were left in place, but hidden from the portal because a real charge can succeed while the member\'s own ledger balance never reflects it (missing webhook reconciliation), and 3 of the 4 payment-method management endpoints do not exist. Re-enabling requires: a Stripe webhook that inserts a member_dues_ledger payment row on payment_intent.succeeded, plus the missing autopay/delete/set-default routes.',
   },
+
+  // ------------------------------------------------------------------------
+  // Deadline continuity remediation (UE_DEADLINE_CONTINUITY) —
+  // fix/deadline-continuity. Closes the representative-transition gap the
+  // Wave 1 Phase A inventory explicitly flagged: reminder recipients are
+  // snapshotted at schedule time and never re-resolved, so a grievance
+  // reassignment left the outgoing representative as the reminder
+  // recipient and the successor received nothing.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-DEADLINE-ASSIGNMENT-CONTINUITY',
+    title: 'Deadline engine — recipient continuity across representative reassignment',
+    state: 'LIMITED',
+    ownedBy: [
+      'apps/union-eyes/lib/deadline-engine/assignment-sync.ts',
+      'apps/union-eyes/lib/deadline-engine/reminder-worker.ts',
+      'apps/union-eyes/lib/deadline-tracking-system.ts',
+      'apps/union-eyes/app/api/grievances/[id]/assign/route.ts',
+    ],
+    evidence: [
+      'app/api/grievances/[id]/assign/route.ts — PATCH updates grievances.unionRepId and inserts a durable deadline_reassignment_convergence task in the SAME transaction (via the tx handle from withRLSContext), then attempts convergence immediately; previously the route never touched the deadline engine at all',
+      'lib/deadline-engine/assignment-sync.ts — requestAssignmentConvergence()/processAssignmentConvergence()/sweepPendingAssignmentConvergence() close the partial-handoff risk: an assignment change can never commit without a corresponding durable, retryable task existing (deadline_reassignment_convergence, migrations/0049). The task stays "pending" (never a terminal failure) across attempts; refreshDeadlineRemindersForGrievance() itself reschedules every non-completed grievance_deadlines row and is idempotent (cancel-then-insert), so retrying a partially-converged task is safe and completes the remaining deadlines without duplicating already-converged ones',
+      'lib/deadline-engine/reminder-worker.ts — runDeadlineReminderWorker() sweeps pending convergence tasks on every periodic run (sweepPendingAssignmentConvergence), so a handoff that failed to fully converge in-request (deadline N of M failed to reschedule) is retried automatically without requiring a human to re-hit the assign endpoint',
+      'lib/deadline-engine/reminder-worker.ts — a dispatch-time revalidation query runs immediately before every delivery attempt: a reminder whose source deadline is now completed, or whose assigned_officer recipient no longer matches grievances.unionRepId, is fail-closed suppressed (status=cancelled, execution outcome=skipped_cancelled, audit event reminder.superseded_at_dispatch) instead of being sent — closing the race where a rep change or completion happens between claim and dispatch, up to leaseMs=60s later',
+      'lib/deadline-engine/reminder-worker.ts — the reminder deep link is now built from the deadline\'s actual grievance_id (resolved via the same revalidation query), not the deadline row\'s own id; the prior default builder used source_deadline_id as if it were the grievance id',
+      'lib/deadline-tracking-system.ts — completeDeadline() now verifies grievance-organization ownership before mutating (tenant-scoped via an inner join through grievances, since grievance_deadlines has no organizationId column of its own), records the completing actor in the notes, and calls cancelGrievanceDeadlineReminders() so a completed deadline cancels any pending durable-outbox reminder, not just legacy notifications-table rows',
+      'lib/deadline-tracking-system.ts — getUpcomingDeadlines()/getOverdueDeadlines()/getGrievanceDeadlines()/escalateMissedDeadlines() now join through grievances, filter by organizationId, and return a discriminated { status: "ok" | "unavailable" } result instead of a bare array/count — a query failure (DB unreachable, timeout) is no longer indistinguishable from a genuine zero-deadline result; previously both a real "[]" and a caught exception silently returned the same empty array (or 0 for escalation count)',
+      'migrations/0048_union_eyes_deadline_continuity_audit_events.sql — extends the deadline_audit_events.event_type CHECK constraint with reminder.recipients_refreshed and reminder.superseded_at_dispatch',
+      'migrations/0049_union_eyes_deadline_convergence_tasks.sql — creates deadline_reassignment_convergence (durable task table, RLS tenant-isolated), registered in migrations/migration-manifest.json',
+      'lib/deadline-engine/__tests__/assignment-sync.test.ts, reminder-worker.test.ts, grievance-continuity.integration.test.ts, lib/__tests__/deadline-tracking-system.test.ts, app/api/__tests__/grievances-assign.route.test.ts — full test coverage for the reassignment-refresh path, the durable convergence task lifecycle (request/process/sweep, idempotent retry, never-strands-the-handoff), the dispatch-time suppression matrix (deadline completed / stale officer / missing source), the deep-link fix, org-isolation of the legacy tenant-safety functions, and the ok/unavailable discriminated result for the deadline-list helpers',
+    ],
+    targetWave: 1,
+    notes:
+      'LIMITED, not REAL: the fix closes the recipient-continuity gap at the module level with unit + mock-level integration test coverage, matching the same evidentiary standard as the sibling UE-DEADLINE-* entries above. It has NOT been proven against a live staging database (no equivalent of the 2026-07-21 D1-D3 staging runs exists yet for the reassignment scenario, nor for the convergence-task retry path under real concurrent load) — true concurrent-worker races, real RLS tenant isolation at the SQL layer, and an actual successor inbox receiving the email are unproven. Claim deadlines (claim_deadlines table) are explicitly OUT OF SCOPE for this fix — see UE-CLAIM-DEADLINES-SURFACE below.',
+  },
+  {
+    id: 'UE-CLAIM-DEADLINES-SURFACE',
+    title: 'Claim deadlines (claim_deadlines table) — latent, unexposed surface',
+    state: 'NOT_IMPLEMENTED',
+    ownedBy: [
+      'apps/union-eyes/db/schema/deadlines-schema.ts',
+      'apps/union-eyes/db/schema/domains/claims/deadlines.ts',
+    ],
+    evidence: [
+      'db/schema/domains/claims/deadlines.ts — defines a fully-formed claim_deadlines table (deadlineRules, deadlineExtensions sidecar tables, its own organizationId FK) distinct from grievance_deadlines',
+      'lib/deadline-engine/recipient-resolver.ts — resolveGrievanceDeadlineRecipients() explicitly throws "not yet supported (Phase A grievance-only)" when sourceTable === "claim_deadlines"',
+      'Repo-wide search found zero API routes referencing claim_deadlines, claimDeadlines, or the deadlines/deadlineRules/deadlineExtensions table bindings under app/api/',
+      'Repo-wide search found no confirmed UI navigation entry wiring any dashboard page to the claim_deadlines table (components/deadlines/* and components/jurisdiction/deadline-calculator.tsx consume grievance deadlines via deadline-tracking-system.ts, not this table, based on naming/import inspection)',
+    ],
+    targetWave: 99,
+    notes:
+      'Classification (per this remediation\'s scope check): LATENT/UNEXPOSED. The table, its rules, and its extensions sidecar are fully modeled in the schema but have no API surface and no confirmed navigable UI entry point — a real user cannot reach this surface today. It is therefore kept OUT of the grievance-continuity fix in this PR. If a future audit finds it IS reachable through a route or page not caught by this search, it must be reclassified to SEPARATE_SUPPORTED_SURFACE_REQUIRES_REMEDIATION and given equivalent operational treatment (recipient resolution, reminder scheduling, continuity-on-reassignment) before overall SaaS readiness can pass.',
+  },
 ] as const;
 
 /**

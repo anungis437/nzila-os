@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   txExecute: vi.fn(),
   deliver: vi.fn(),
   audit: vi.fn(),
+  sweepPendingAssignmentConvergence: vi.fn(async () => ({ examined: 0, converged: 0, stillPending: 0 })),
 }));
 
 vi.mock('@/db', () => ({
@@ -35,6 +36,10 @@ vi.mock('../email-adapter', () => ({
 
 vi.mock('../audit', () => ({
   writeDeadlineAuditEvent: mocks.audit,
+}));
+
+vi.mock('../assignment-sync', () => ({
+  sweepPendingAssignmentConvergence: mocks.sweepPendingAssignmentConvergence,
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -55,6 +60,8 @@ function makeRow(overrides: Partial<Record<string, unknown>> = {}) {
     id: 'r-1',
     source_deadline_id: 'd-1',
     organization_id: ORG,
+    recipient_user_id: 'officer-A',
+    recipient_role: 'assigned_officer',
     recipient_email: 'a@example.com',
     recipient_locale: 'en',
     message_subject: 'Union Eyes deadline reminder',
@@ -67,11 +74,36 @@ function makeRow(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
+const GRIEVANCE_ID = 'g-1';
+
+/** The dispatch-time revalidation query result for a still-eligible reminder. */
+function makeEligibleRevalidation(overrides: Partial<Record<string, unknown>> = {}) {
+  return [
+    {
+      reminder_status: 'claimed',
+      deadline_status: 'pending',
+      grievance_id: GRIEVANCE_ID,
+      current_union_rep_id: 'officer-A',
+      ...overrides,
+    },
+  ];
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe('reminder-worker', () => {
+  it('sweeps pending assignment-convergence tasks before claiming reminders', async () => {
+    mocks.execute
+      .mockResolvedValueOnce([]) // lease recovery
+      .mockResolvedValueOnce([]); // claim
+
+    await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+    expect(mocks.sweepPendingAssignmentConvergence).toHaveBeenCalledTimes(1);
+  });
+
   it('returns a structured result (never a boolean) even when nothing to do', async () => {
     mocks.execute
       .mockResolvedValueOnce([]) // lease recovery
@@ -119,7 +151,8 @@ describe('reminder-worker', () => {
   it('on successful delivery: writes execution + transitions to sent + emits reminder.sent', async () => {
     mocks.execute
       .mockResolvedValueOnce([]) // recovery
-      .mockResolvedValueOnce([makeRow()]); // claim
+      .mockResolvedValueOnce([makeRow()]) // claim
+      .mockResolvedValueOnce(makeEligibleRevalidation()); // dispatch-time revalidation for r-1
     mocks.deliver.mockResolvedValueOnce({
       kind: 'sent',
       provider: 'resend',
@@ -146,7 +179,8 @@ describe('reminder-worker', () => {
   it('on transient failure with attempts remaining: returns row to pending + emits reminder.failed_transient', async () => {
     mocks.execute
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([makeRow({ attempt_count: 2, max_attempts: 5 })]);
+      .mockResolvedValueOnce([makeRow({ attempt_count: 2, max_attempts: 5 })])
+      .mockResolvedValueOnce(makeEligibleRevalidation());
     mocks.deliver.mockResolvedValueOnce({
       kind: 'transient_failure',
       provider: 'resend',
@@ -171,7 +205,8 @@ describe('reminder-worker', () => {
   it('on transient failure at max attempts: transitions to dead_letter (never lost)', async () => {
     mocks.execute
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([makeRow({ attempt_count: 5, max_attempts: 5 })]);
+      .mockResolvedValueOnce([makeRow({ attempt_count: 5, max_attempts: 5 })])
+      .mockResolvedValueOnce(makeEligibleRevalidation());
     mocks.deliver.mockResolvedValueOnce({
       kind: 'transient_failure',
       provider: 'resend',
@@ -195,7 +230,8 @@ describe('reminder-worker', () => {
   it('on permanent failure: transitions to dead_letter immediately (no retry)', async () => {
     mocks.execute
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([makeRow({ attempt_count: 1, max_attempts: 5 })]);
+      .mockResolvedValueOnce([makeRow({ attempt_count: 1, max_attempts: 5 })])
+      .mockResolvedValueOnce(makeEligibleRevalidation());
     mocks.deliver.mockResolvedValueOnce({
       kind: 'permanent_failure',
       provider: 'resend',
@@ -220,7 +256,8 @@ describe('reminder-worker', () => {
   it('when email adapter is disabled: reminder is dead-lettered (fails visibly, never silent)', async () => {
     mocks.execute
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([makeRow({ attempt_count: 1, max_attempts: 5 })]);
+      .mockResolvedValueOnce([makeRow({ attempt_count: 1, max_attempts: 5 })])
+      .mockResolvedValueOnce(makeEligibleRevalidation());
     mocks.deliver.mockResolvedValueOnce({
       kind: 'disabled',
       message: 'RESEND_API_KEY not set',
@@ -242,7 +279,10 @@ describe('reminder-worker', () => {
         makeRow({ id: 'r-1' }),
         makeRow({ id: 'r-2' }),
         makeRow({ id: 'r-3' }),
-      ]);
+      ])
+      .mockResolvedValueOnce(makeEligibleRevalidation())
+      .mockResolvedValueOnce(makeEligibleRevalidation())
+      .mockResolvedValueOnce(makeEligibleRevalidation());
     mocks.deliver
       .mockResolvedValueOnce({ kind: 'sent', provider: 'resend', providerMessageId: 'm1' })
       .mockResolvedValueOnce({ kind: 'transient_failure', provider: 'resend', statusCode: 500, code: 'err', message: 'oops' })
@@ -267,5 +307,102 @@ describe('reminder-worker', () => {
     });
     expect(result.startedAt).toBe(frozen.toISOString());
     expect(result.finishedAt).toBe(frozen.toISOString());
+  });
+
+  // ── Dispatch-time revalidation (fail-closed race suppression) ──────
+  describe('dispatch-time revalidation', () => {
+    it('suppresses delivery when the deadline was completed between claim and dispatch', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([]) // recovery
+        .mockResolvedValueOnce([makeRow()]) // claim
+        .mockResolvedValueOnce(makeEligibleRevalidation({ deadline_status: 'completed' }));
+
+      const result = await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+      expect(result.sent).toBe(0);
+      expect(result.claimed).toBe(1);
+      expect(result.cancelledSkipped).toBe(1);
+      expect(mocks.deliver).not.toHaveBeenCalled();
+      // Insert into deadline_reminder_executions with outcome='skipped_cancelled', then
+      // cancel the reminder row — both via the transactional tx.execute.
+      expect(mocks.txExecute).toHaveBeenCalledTimes(2);
+      const insertSql = mocks.txExecute.mock.calls[0]?.[0]?.strings.join(' ');
+      expect(insertSql).toContain('skipped_cancelled');
+      const auditTypes = mocks.audit.mock.calls.map(([arg]) => arg.eventType);
+      expect(auditTypes).toContain('reminder.superseded_at_dispatch');
+      expect(auditTypes).not.toContain('reminder.sent');
+    });
+
+    it('suppresses delivery when the assigned-officer recipient no longer matches the current assignment', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([makeRow({ recipient_role: 'assigned_officer', recipient_user_id: 'officer-A' })])
+        .mockResolvedValueOnce(makeEligibleRevalidation({ current_union_rep_id: 'officer-B' }));
+
+      const result = await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+      expect(result.sent).toBe(0);
+      expect(result.cancelledSkipped).toBe(1);
+      expect(mocks.deliver).not.toHaveBeenCalled();
+      const auditTypes = mocks.audit.mock.calls.map(([arg]) => arg.eventType);
+      expect(auditTypes).toContain('reminder.superseded_at_dispatch');
+    });
+
+    it('does NOT suppress a grievor reminder even if the grievance has been reassigned to a new officer', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([makeRow({ recipient_role: 'grievor', recipient_user_id: 'member-1' })])
+        .mockResolvedValueOnce(makeEligibleRevalidation({ current_union_rep_id: 'officer-B' }));
+      mocks.deliver.mockResolvedValueOnce({ kind: 'sent', provider: 'resend', providerMessageId: 'm-grievor' });
+
+      const result = await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+      expect(result.sent).toBe(1);
+      expect(result.cancelledSkipped).toBe(0);
+    });
+
+    it('suppresses delivery when the source deadline no longer resolves (missing join)', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([makeRow()])
+        .mockResolvedValueOnce([{ reminder_status: 'claimed', deadline_status: null, grievance_id: null, current_union_rep_id: null }]);
+
+      const result = await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+      expect(result.sent).toBe(0);
+      expect(result.cancelledSkipped).toBe(1);
+      expect(mocks.deliver).not.toHaveBeenCalled();
+    });
+
+    it('builds the reminder deep link from the resolved grievance id, not the deadline id', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([makeRow({ source_deadline_id: 'deadline-XYZ' })])
+        .mockResolvedValueOnce(makeEligibleRevalidation({ grievance_id: 'grievance-ABC' }));
+      mocks.deliver.mockResolvedValueOnce({ kind: 'sent', provider: 'resend', providerMessageId: 'm-url' });
+
+      await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+      const deliverArgs = mocks.deliver.mock.calls[0][0];
+      expect(deliverArgs.claimUrl).toContain('/dashboard/grievances/grievance-ABC');
+      expect(deliverArgs.claimUrl).not.toContain('deadline-XYZ');
+    });
+
+    it('honours a custom claimUrlBuilder that receives the resolved grievanceId', async () => {
+      mocks.execute
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([makeRow()])
+        .mockResolvedValueOnce(makeEligibleRevalidation({ grievance_id: 'grievance-custom' }));
+      mocks.deliver.mockResolvedValueOnce({ kind: 'sent', provider: 'resend', providerMessageId: 'm-custom' });
+
+      await runDeadlineReminderWorker({
+        workerInstance: 'worker-test',
+        now: () => NOW,
+        claimUrlBuilder: (_row, grievanceId) => `https://custom.test/g/${grievanceId}`,
+      });
+
+      const deliverArgs = mocks.deliver.mock.calls[0][0];
+      expect(deliverArgs.claimUrl).toBe('https://custom.test/g/grievance-custom');
+    });
   });
 });

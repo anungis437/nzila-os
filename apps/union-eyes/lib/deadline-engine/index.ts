@@ -22,6 +22,23 @@ export type {
 export { writeDeadlineAuditEvent } from './audit';
 export type { WriteAuditEventInput } from './audit';
 
+export { refreshDeadlineRemindersForGrievance } from './assignment-sync';
+export type {
+  RefreshDeadlineRemindersInput,
+  RefreshDeadlineRemindersResult,
+} from './assignment-sync';
+
+export {
+  requestAssignmentConvergence,
+  processAssignmentConvergence,
+  sweepPendingAssignmentConvergence,
+} from './assignment-sync';
+export type {
+  RequestAssignmentConvergenceInput,
+  ProcessAssignmentConvergenceResult,
+  SweepPendingConvergenceResult,
+} from './assignment-sync';
+
 export type {
   RecipientSnapshot,
   WorkerRunResult,

@@ -23,13 +23,14 @@ import { db } from '@/db';
 import { logger } from '@/lib/logger';
 import { writeDeadlineAuditEvent } from './audit';
 import { deliverDeadlineReminderEmail } from './email-adapter';
+import { sweepPendingAssignmentConvergence } from './assignment-sync';
 import type { WorkerRunResult } from './types';
 
 export interface RunReminderWorkerConfig {
   workerInstance?: string;
   maxBatch?: number;
   leaseMs?: number;
-  claimUrlBuilder?: (row: ClaimedReminderRow) => string;
+  claimUrlBuilder?: (row: ClaimedReminderRow, grievanceId: string | null) => string;
   now?: () => Date;
 }
 
@@ -37,6 +38,8 @@ interface ClaimedReminderRow {
   id: string;
   source_deadline_id: string;
   organization_id: string;
+  recipient_user_id: string | null;
+  recipient_role: string;
   recipient_email: string;
   recipient_locale: string;
   message_subject: string;
@@ -45,6 +48,13 @@ interface ClaimedReminderRow {
   scheduled_for: string;
   attempt_count: number;
   max_attempts: number;
+}
+
+interface DispatchRevalidation {
+  reminder_status: string;
+  deadline_status: string | null;
+  grievance_id: string | null;
+  current_union_rep_id: string | null;
 }
 
 const DEFAULTS = {
@@ -70,8 +80,8 @@ export async function runDeadlineReminderWorker(
   const leaseMs = config.leaseMs ?? DEFAULTS.leaseMs;
   const claimUrlBuilder =
     config.claimUrlBuilder ??
-    ((row: ClaimedReminderRow) =>
-      `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/grievances/${row.source_deadline_id}`);
+    ((row: ClaimedReminderRow, grievanceId: string | null) =>
+      `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/grievances/${grievanceId ?? row.source_deadline_id}`);
 
   logger.info('deadline-engine.worker: run starting', {
     runId,
@@ -81,6 +91,21 @@ export async function runDeadlineReminderWorker(
     nowIso,
   });
 
+  // Retry any assignment-reassignment handoffs that failed to fully
+  // converge in-request (see assignment-sync.ts). Never throws — a task
+  // that still fails here simply remains pending for the next run.
+  const convergenceSweep = await sweepPendingAssignmentConvergence({
+    type: 'worker',
+    id: workerInstance,
+  });
+  if (convergenceSweep.examined > 0) {
+    logger.info('deadline-engine.worker: convergence sweep complete', {
+      runId,
+      workerInstance,
+      ...convergenceSweep,
+    });
+  }
+
   let examined = 0;
   let claimed = 0;
   let sent = 0;
@@ -88,7 +113,7 @@ export async function runDeadlineReminderWorker(
   let permanentFailures = 0;
   let deadLettered = 0;
   let leasesRecovered = 0;
-  const cancelledSkipped = 0;
+  let cancelledSkipped = 0;
 
   // 1. Recover expired leases first so they can be re-claimed by this run.
   const recoveryResult = await db.execute(sql`
@@ -142,6 +167,8 @@ export async function runDeadlineReminderWorker(
        deadline_reminders.id,
        deadline_reminders.source_deadline_id,
        deadline_reminders.organization_id,
+       deadline_reminders.recipient_user_id,
+       deadline_reminders.recipient_role,
        deadline_reminders.recipient_email,
        deadline_reminders.recipient_locale,
        deadline_reminders.message_subject,
@@ -175,6 +202,83 @@ export async function runDeadlineReminderWorker(
   // 3. Dispatch each claimed reminder.
   for (const row of claimedRows) {
     const attemptNumber = row.attempt_count; // already incremented at claim
+
+    // Revalidate IMMEDIATELY before dispatch. A reminder can sit in
+    // 'claimed' for up to leaseMs while the source deadline is completed,
+    // cancelled, or the grievance is reassigned to someone else — none of
+    // which touch an already-claimed row (reschedule/cancel only ever
+    // touch status='pending'). Fail-closed: any ineligible condition
+    // suppresses delivery and records a durable, auditable outcome instead
+    // of silently returning.
+    const [revalidation] = (await db.execute(sql`
+      select
+        dr.status          as reminder_status,
+        gd.status          as deadline_status,
+        gd.grievance_id    as grievance_id,
+        g.union_rep_id     as current_union_rep_id
+        from deadline_reminders dr
+        left join grievance_deadlines gd on gd.id = dr.source_deadline_id
+        left join grievances g on g.id = gd.grievance_id
+       where dr.id = ${row.id}::uuid
+    `)) as unknown as DispatchRevalidation[];
+
+    const grievanceId = revalidation?.grievance_id ?? null;
+    const isStaleOfficer =
+      row.recipient_role === 'assigned_officer' &&
+      row.recipient_user_id !== null &&
+      row.recipient_user_id !== revalidation?.current_union_rep_id;
+    const isEligible =
+      !!revalidation &&
+      revalidation.reminder_status === 'claimed' &&
+      revalidation.deadline_status !== null &&
+      revalidation.deadline_status !== 'completed' &&
+      !isStaleOfficer;
+
+    if (!isEligible) {
+      const supersededReason = !revalidation || revalidation.deadline_status === null
+        ? 'source_deadline_missing'
+        : revalidation.reminder_status !== 'claimed'
+          ? 'reminder_no_longer_claimed'
+          : revalidation.deadline_status === 'completed'
+            ? 'deadline_completed'
+            : 'recipient_reassigned';
+
+      await db.transaction(async (tx) => {
+        await tx.execute(sql`
+          insert into deadline_reminder_executions (
+            reminder_id, attempt_number, outcome, error_code, error_message,
+            duration_ms, worker_instance, correlation_id
+          ) values (
+            ${row.id}::uuid, ${attemptNumber}, 'skipped_cancelled',
+            ${supersededReason}, ${'Suppressed at dispatch: ' + supersededReason},
+            0, ${workerInstance}, ${runId}
+          )
+        `);
+        await tx.execute(sql`
+          update deadline_reminders
+             set status = 'cancelled',
+                 cancelled_reason = ${supersededReason},
+                 lease_owner = null,
+                 lease_expires_at = null
+           where id = ${row.id}::uuid
+        `);
+      });
+
+      cancelledSkipped++;
+      await writeDeadlineAuditEvent({
+        organizationId: row.organization_id,
+        sourceTable: 'grievance_deadlines',
+        sourceDeadlineId: row.source_deadline_id,
+        reminderId: row.id,
+        eventType: 'reminder.superseded_at_dispatch',
+        actorType: 'worker',
+        actorId: workerInstance,
+        correlationId: runId,
+        metadata: { attempt_number: attemptNumber, reason: supersededReason },
+      });
+      continue;
+    }
+
     const attemptStart = Date.now();
     const dueDate = new Date(row.scheduled_for);
     // scheduled_for = dueDate - offset_days days → deadline occurs at
@@ -191,9 +295,10 @@ export async function runDeadlineReminderWorker(
       correlationId: runId,
       daysToDeadline,
       deadlineKind: row.reminder_kind === 'overdue' ? 'past-due deadline' : 'deadline',
-      claimUrl: claimUrlBuilder(row),
+      claimUrl: claimUrlBuilder(row, grievanceId),
       organizationId: row.organization_id,
     });
+
     const durationMs = Date.now() - attemptStart;
 
     if (outcome.kind === 'sent') {
