@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-31T16:43:59.488Z",
-  "scannedFiles": 4859,
+  "generatedAt": "2026-08-31T22:11:16.240Z",
+  "scannedFiles": 4862,
   "rulesRun": [
     "R-1",
     "R-2",
@@ -1507,7 +1507,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/sidebar.tsx",
-      "line": 186,
+      "line": 184,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1515,7 +1515,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/components/sidebar.tsx",
-      "line": 198,
+      "line": 196,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"

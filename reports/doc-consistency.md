@@ -1,12 +1,12 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-31T21:17:54.993Z
+> Generated: 2026-08-31T22:15:52.186Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2410 |
+| Files Scanned | 2411 |
 | Total Findings | 2813 |
 | Errors | 0 |
 | Warnings | 1223 |
@@ -2628,7 +2628,7 @@
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:37` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:1` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/qa/rbac-reality-map.md:29` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/README.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md:90` — "evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md:146` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/reality-remediation/18_STAGING_ATTESTATION.md:38` — "nzila-os" should be "NzilaOS" (platform name)
