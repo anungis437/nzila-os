@@ -2,7 +2,13 @@
 
 **Programme status:** `PARTIALLY_IMPLEMENTED` — Wave 0 containment landed, verification incomplete.
 **Wave 0 status:** `PARTIALLY_IMPLEMENTED` (see §Wave 0 open items below).
-**Wave 1+ status:** `NOT_STARTED`.
+**Wave 1+ status:** `NOT_STARTED` as a formally-scoped wave, but its subject matter has
+substantially progressed outside the wave sequence: Phase 2 (dues/deadline continuity, #721/#722),
+Phase 3A (SaaS operational readiness audit, `24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`), and its
+remediation clusters A/B (merged) and D (see PR #744) all landed after this charter's wave table
+was written. **The wave table below is analytic history, not the current sprint board.** The
+current sprint board is `24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md` §10 (clusters A–D) and §9
+(runtime-proof queue). See [`../README.md`](../README.md) for the current one-page status.
 **Branch:** `fix/union-eyes-reality-remediation`
 **Owner:** Platform Reliability & Reality.
 
@@ -64,6 +70,8 @@ The single machine-readable source of truth is
 Waves are analytic groupings — they are NOT commit or PR boundaries.
 An item labelled "Wave N" may land in the same branch as Wave 0 work.
 The programme continues until every P0 finding is `CLOSED` or `BLOCKED`.
+As of 2026-08-31, the wave table below is kept as analytic history only;
+it is not being used as the current sprint board (see status block above).
 
 | Wave | Focus                                                                                     |
 |------|-------------------------------------------------------------------------------------------|

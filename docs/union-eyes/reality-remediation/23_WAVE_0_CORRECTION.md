@@ -1,8 +1,8 @@
 # 23 — Wave 0 correction & superseding findings
 
 **Supersedes previous verdicts in:**
-- [`21_WAVE_0_VALIDATION_MATRIX.md`](21_WAVE_0_VALIDATION_MATRIX.md)
-- [`22_WAVE_0_SUMMARY.md`](22_WAVE_0_SUMMARY.md)
+- [`archive/21_WAVE_0_VALIDATION_MATRIX.md`](archive/21_WAVE_0_VALIDATION_MATRIX.md)
+- [`archive/22_WAVE_0_SUMMARY.md`](archive/22_WAVE_0_SUMMARY.md)
 - [`../../../reports/wave-0-build-isolation-proof.md`](../../../reports/wave-0-build-isolation-proof.md)
 
 **Does not rewrite history.** The prior documents remain in the tree with their original claims. This document records the corrections and the reversed verdict.
