@@ -1,5 +1,5 @@
 {
-  "generated_from": "hand-maintained (cross-references governance/portfolio/product-catalog.json; no automated generator exists — see docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md §8)",
+  "generated_from": "governance/portfolio/product-catalog.json",
   "generated_at": "2026-08-27",
   "status": "pilot",
   "exposure": "internal",
