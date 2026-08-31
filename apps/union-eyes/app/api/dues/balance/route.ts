@@ -2,9 +2,26 @@
  * GET /api/dues/balance — Get the authenticated member's dues balance
  *
  * Backed exclusively by the native member_dues_ledger table. Never
- * fabricates a balance, membership status, or payment date — if no
- * organization/user context is available, returns an explicit
- * `source: 'unavailable'` state instead.
+ * fabricates a balance, membership status, or payment date.
+ *
+ * NO DATA != ZERO BALANCE: a member with zero member_dues_ledger rows has
+ * not necessarily paid nothing — Union Eyes may simply never have received
+ * dues data for them (a specialist external dues/membership system may be
+ * authoritative). That case returns `available: false`, the same as a
+ * missing auth context, and is distinguishable from a genuine posted $0
+ * balance (which requires at least one real, posted ledger transaction).
+ *
+ * Balance sign convention (charges add, everything else subtracts as a
+ * positive magnitude) is not invented here — it is the same convention
+ * used by both production writers of member_dues_ledger:
+ *   - app/api/portal/dues/pay/route.ts (balance = SUM(charge) −
+ *     SUM(payment, credit, adjustment, write_off), status='posted' only)
+ *   - app/api/dues/arrears/[id]/payment/route.ts (payment amount is a
+ *     positive z.number().positive() that reduces balanceAfter)
+ * Filtering by status='posted' (as both writers do) already excludes
+ * pending, reversed, and voided rows from the balance — no separate
+ * reversal handling is required here because reversed/voided rows never
+ * carry status='posted'.
  */
 
 import { withApi } from '@/lib/api/framework';
@@ -15,12 +32,39 @@ import { toCents } from '@/lib/decimal-safe';
 
 export const dynamic = 'force-dynamic';
 
-const UNAVAILABLE_BALANCE = {
-  source: 'unavailable' as const,
-  currentBalance: 0,
-  balanceStatus: 'paid_up' as const,
-  isInArrears: false,
-  arrearsAmount: 0,
+interface LastPayment {
+  amount: number;
+  date: string;
+}
+
+type DuesBalanceContext =
+  | {
+      source: 'native' | 'integration';
+      available: true;
+      currentBalance: number;
+      balanceStatus: 'paid_up' | 'owing' | 'credit';
+      isInArrears: boolean;
+      arrearsAmount: number;
+      lastPayment: LastPayment | null;
+      asOf: string;
+    }
+  | {
+      source: 'unavailable';
+      available: false;
+      currentBalance: null;
+      balanceStatus: null;
+      isInArrears: null;
+      arrearsAmount: null;
+      lastPayment: null;
+    };
+
+const UNAVAILABLE: DuesBalanceContext = {
+  source: 'unavailable',
+  available: false,
+  currentBalance: null,
+  balanceStatus: null,
+  isInArrears: null,
+  arrearsAmount: null,
   lastPayment: null,
 };
 
@@ -32,9 +76,22 @@ export const GET = withApi(
       summary: "Get the authenticated member's native dues balance",
     },
   },
-  async ({ userId, organizationId }) => {
+  async ({ userId, organizationId }): Promise<DuesBalanceContext> => {
     if (!userId || !organizationId) {
-      return UNAVAILABLE_BALANCE;
+      return UNAVAILABLE;
+    }
+
+    // Existence check FIRST, independent of status: if Union Eyes has never
+    // received any ledger activity for this member (any status), there is
+    // no financial conclusion to report — not even "zero".
+    const [existsRow] = await db
+      .select({ id: memberDuesLedger.id })
+      .from(memberDuesLedger)
+      .where(and(eq(memberDuesLedger.userId, userId), eq(memberDuesLedger.organizationId, organizationId)))
+      .limit(1);
+
+    if (!existsRow) {
+      return UNAVAILABLE;
     }
 
     const [row] = await db
@@ -78,7 +135,8 @@ export const GET = withApi(
       .limit(1);
 
     return {
-      source: 'native' as const,
+      source: 'native',
+      available: true,
       currentBalance,
       balanceStatus,
       isInArrears: balanceStatus === 'owing',
@@ -86,6 +144,7 @@ export const GET = withApi(
       lastPayment: lastPaymentRow
         ? { amount: Number(lastPaymentRow.amount), date: new Date(lastPaymentRow.date).toISOString() }
         : null,
+      asOf: new Date().toISOString(),
     };
   },
 );

@@ -472,12 +472,15 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'db/schema/dues-finance-schema.ts',
     ],
     evidence: [
-      'app/api/dues/balance/route.ts — computes balance from member_dues_ledger (charges − payments − credits − adjustments − write_offs) scoped by authenticated userId + organizationId; returns { source: "unavailable" } rather than a fabricated balance when context is missing',
-      'components/dues/dues-payment-portal.tsx — removed the catch-block that fabricated a $0/"active" balance on fetch failure; renders an explicit unavailable state instead',
+      'app/api/dues/balance/route.ts — computes balance from member_dues_ledger (charges − payments − credits − adjustments − write_offs, status=posted only) scoped by authenticated userId + organizationId',
+      'app/api/dues/balance/route.ts — an existence check (any status, any row) runs BEFORE the aggregate query; zero rows returns { available: false } rather than a fabricated $0/paid_up balance — "NO DATA != ZERO BALANCE"',
+      'app/api/__tests__/dues-balance.route.test.ts — proves: missing auth context → available:false; zero ledger rows of any status → available:false (not $0/paid_up); posted rows summing to zero → genuine available:true/paid_up/$0, distinguishable from the no-data case',
+      'components/dues/dues-payment-portal.tsx — removed the catch-block that fabricated a $0/"active" balance on fetch failure; renders a distinct "no dues data on file" state (balance.available === false) versus a genuine fetch-error state (loadError)',
+      'Balance sign convention is not invented in the read endpoint — it matches the two production writers of member_dues_ledger: app/api/portal/dues/pay/route.ts and app/api/dues/arrears/[id]/payment/route.ts, both of which store payment/credit/adjustment/write_off as positive magnitudes that reduce balance, and both of which scope balance calculation to status=posted (which already excludes pending/reversed/voided rows — no separate reversal-handling branch is required)',
     ],
     targetWave: 0,
     notes:
-      'Replaces the prior implementation, which read organization-level platform billing ledger data (platformCostLedgerEntries) and hardcoded membershipStatus/lastPaymentDate/nextDueDate. Dues scheduling ("next deduction expected") is intentionally not shown — no real per-member dues-rate/schedule table exists; this is a non-blocking, optional capability, not a truth defect.',
+      'Replaces the prior implementation, which read organization-level platform billing ledger data (platformCostLedgerEntries) and hardcoded membershipStatus/lastPaymentDate/nextDueDate. Dues scheduling ("next deduction expected") is intentionally not shown — no real per-member dues-rate/schedule table exists; this is a non-blocking, optional capability, not a truth defect. The response contract is a discriminated union (`available: true | false`) so a future `source: "integration"` provenance (an external, authoritative dues/membership system) can be added without re-introducing ambiguity between "no data" and "zero balance" — no such integration is implemented or fabricated today.',
   },
   {
     id: 'UE-DUES-PORTAL-PAYMENT-HISTORY',

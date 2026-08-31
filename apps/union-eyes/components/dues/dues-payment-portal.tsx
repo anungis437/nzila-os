@@ -22,14 +22,26 @@ interface LastPayment {
   date: string;
 }
 
-interface DuesBalance {
-  source: 'native' | 'unavailable';
-  currentBalance: number;
-  balanceStatus: BalanceStatus;
-  isInArrears: boolean;
-  arrearsAmount: number;
-  lastPayment: LastPayment | null;
-}
+type DuesBalanceContext =
+  | {
+      source: 'native' | 'integration';
+      available: true;
+      currentBalance: number;
+      balanceStatus: BalanceStatus;
+      isInArrears: boolean;
+      arrearsAmount: number;
+      lastPayment: LastPayment | null;
+      asOf: string;
+    }
+  | {
+      source: 'unavailable';
+      available: false;
+      currentBalance: null;
+      balanceStatus: null;
+      isInArrears: null;
+      arrearsAmount: null;
+      lastPayment: null;
+    };
 
 interface DuesPaymentPortalProps {
   userId: string;
@@ -37,8 +49,11 @@ interface DuesPaymentPortalProps {
 
 export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
   const t = useTranslations('dashboard.dues');
-  const [balance, setBalance] = useState<DuesBalance | null>(null);
+  const [balance, setBalance] = useState<DuesBalanceContext | null>(null);
   const [loading, setLoading] = useState(true);
+  // A genuine fetch/network failure — distinct from the API honestly
+  // reporting `available: false` because no dues data exists for this
+  // member (e.g. dues are administered by a separate system).
   const [loadError, setLoadError] = useState(false);
   const [selectedDeductionId, setSelectedDeductionId] = useState<string | undefined>();
 
@@ -67,7 +82,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
     return <div className="flex items-center justify-center p-12">{t('loading')}</div>;
   }
 
-  if (!balance || balance.source === 'unavailable' || loadError) {
+  if (loadError || !balance) {
     return (
       <Card>
         <CardContent className="pt-6 text-center py-12">
@@ -78,6 +93,19 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
       </Card>
     );
   }
+
+  if (!balance.available) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-center py-12">
+          <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">{t('noDataTitle')}</h3>
+          <p className="text-muted-foreground">{t('noDataBody')}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
 
   return (
     <div className="space-y-6">
@@ -98,7 +126,9 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
                 {t('overdueShort', { amount: formatCurrency(balance.arrearsAmount) })}
               </p>
             )}
-            <p className="text-xs text-muted-foreground mt-2">{t('sourceNative')}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {t('sourceNative', { date: new Date(balance.asOf).toLocaleString() })}
+            </p>
           </CardContent>
         </Card>
 
