@@ -33,7 +33,7 @@ import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import {
   getDashboardExperience,
-  getNavigationForExperience,
+  getVisibleNavigationForExperience,
   type NavigationGroup,
   type NavigationItem,
 } from "@/lib/dashboard/role-experience";
@@ -126,12 +126,10 @@ export default function Sidebar({
 
   const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
 
-  const items = useMemo<NavigationItem[]>(() => {
-    const nav = getNavigationForExperience(experience);
-    if (!isPilotMode) return nav;
-    const pilotAllowed = new Set(nav.map((entry) => entry.href));
-    return nav.filter((entry) => pilotAllowed.has(entry.href));
-  }, [experience, isPilotMode]);
+  const items = useMemo<NavigationItem[]>(
+    () => getVisibleNavigationForExperience(experience, isPilotMode),
+    [experience, isPilotMode],
+  );
 
   // Build ordered groups from the nav. Use demo-defined order when available;
   // otherwise derive groups from the items themselves in encounter order.

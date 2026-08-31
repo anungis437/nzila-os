@@ -271,3 +271,22 @@ export function canAccessDashboardPath(pathname: string, experience: DashboardEx
   const isExcluded = PILOT_EXCLUDED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   return !isExcluded;
 }
+
+/**
+ * Single source of truth for which navigation entries are actually visible.
+ * Navigation availability and route authorization must be derived from the
+ * same policy — this filters `getNavigationForExperience()` through
+ * `canAccessDashboardPath()` so a nav item is never shown for a route the
+ * user could not actually open. Consumed by both the desktop sidebar and the
+ * mobile bottom nav so they cannot diverge.
+ */
+export function getVisibleNavigationForExperience(
+  experience: DashboardExperience,
+  isPilotMode: boolean,
+): NavigationItem[] {
+  return getNavigationForExperience(experience).filter((item) => {
+    const pathname = item.href.split('?')[0];
+    return canAccessDashboardPath(pathname, experience, isPilotMode);
+  });
+}
+
