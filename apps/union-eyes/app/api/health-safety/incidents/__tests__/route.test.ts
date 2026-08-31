@@ -9,8 +9,10 @@ import {
 
 describe('health-safety/incidents route helpers', () => {
   describe('generateIncidentNumber', () => {
-    it('produces an INC-<year>-<suffix> formatted number', () => {
-      expect(generateIncidentNumber()).toMatch(/^INC-\d{4}-[0-9A-F]{6}$/);
+    it('produces an INC-<year>-<uuid> formatted number with full UUID entropy', () => {
+      const num = generateIncidentNumber();
+      expect(num).toMatch(/^INC-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+      expect(num.length).toBeLessThanOrEqual(50);
     });
   });
 
@@ -45,7 +47,7 @@ describe('health-safety/incidents route helpers', () => {
     });
 
     it('falls back to other/minor for unrecognized values', () => {
-      const result = buildIncidentCreateValues({ incidentType: 'unknown', severity: 'unknown' });
+      const result = buildIncidentCreateValues({ incidentType: 'unknown', severity: 'unknown', location: 'Site A', description: 'desc' });
       expect(result.incidentType).toBe('other');
       expect(result.severity).toBe('minor');
     });
@@ -64,12 +66,12 @@ describe('health-safety/incidents route helpers', () => {
     });
 
     it('generates an incidentNumber when the client does not supply one', () => {
-      const result = buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor' });
-      expect(result.incidentNumber).toMatch(/^INC-\d{4}-[0-9A-F]{6}$/);
+      const result = buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc' });
+      expect(result.incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f-]{36}$/);
     });
 
     it('preserves a client-supplied incidentNumber', () => {
-      const result = buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', incidentNumber: 'INC-2020-000001' });
+      const result = buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc', incidentNumber: 'INC-2020-000001' });
       expect(result.incidentNumber).toBe('INC-2020-000001');
     });
 
@@ -77,6 +79,8 @@ describe('health-safety/incidents route helpers', () => {
       const result = buildIncidentCreateValues({
         incidentType: 'injury',
         severity: 'minor',
+        location: 'Site A',
+        description: 'desc',
         isAnonymous: true,
         reportedBy: 'Jane Doe',
         reporterContact: 'jane@example.com',
@@ -90,11 +94,25 @@ describe('health-safety/incidents route helpers', () => {
       const result = buildIncidentCreateValues({
         incidentType: 'injury',
         severity: 'minor',
+        location: 'Site A',
+        description: 'desc',
         organizationId: 'org-123',
         createdBy: 'user-456',
       });
       expect(result.organizationId).toBe('org-123');
       expect(result.createdBy).toBe('user-456');
+    });
+
+    it('rejects a submission with no location and no description at all', () => {
+      expect(() => buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor' })).toThrow();
+    });
+
+    it('rejects a submission with a whitespace-only location', () => {
+      expect(() => buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: '   ', description: 'A real description' })).toThrow();
+    });
+
+    it('rejects a submission with a whitespace-only description', () => {
+      expect(() => buildIncidentCreateValues({ incidentType: 'injury', severity: 'minor', location: 'Site A', description: '   ' })).toThrow();
     });
   });
 });

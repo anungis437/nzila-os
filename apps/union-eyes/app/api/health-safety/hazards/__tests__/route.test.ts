@@ -8,9 +8,10 @@ import {
 
 describe('health-safety/hazards route helpers', () => {
   describe('generateReportNumber', () => {
-    it('produces a HAZ-<year>-<suffix> formatted number', () => {
+    it('produces a HAZ-<year>-<uuid> formatted number with full UUID entropy', () => {
       const num = generateReportNumber();
-      expect(num).toMatch(/^HAZ-\d{4}-[0-9A-F]{6}$/);
+      expect(num).toMatch(/^HAZ-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+      expect(num.length).toBeLessThanOrEqual(50);
     });
 
     it('produces distinct values across calls', () => {
@@ -36,7 +37,7 @@ describe('health-safety/hazards route helpers', () => {
     });
 
     it('falls back to other/moderate for unrecognized values', () => {
-      const result = buildHazardCreateValues({ hazardType: 'unknown_type', priority: 'unknown_priority' });
+      const result = buildHazardCreateValues({ hazardType: 'unknown_type', priority: 'unknown_priority', location: 'Site A', description: 'desc' });
       expect(result.hazardCategory).toBe('other');
       expect(result.hazardLevel).toBe('moderate');
     });
@@ -57,13 +58,13 @@ describe('health-safety/hazards route helpers', () => {
     });
 
     it('generates a reportNumber when the client does not supply one', () => {
-      const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low' });
+      const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc' });
       expect(typeof result.reportNumber).toBe('string');
-      expect(result.reportNumber).toMatch(/^HAZ-\d{4}-[0-9A-F]{6}$/);
+      expect(result.reportNumber).toMatch(/^HAZ-\d{4}-[0-9a-f-]{36}$/);
     });
 
     it('preserves a client-supplied reportNumber', () => {
-      const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low', reportNumber: 'HAZ-2020-000001' });
+      const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc', reportNumber: 'HAZ-2020-000001' });
       expect(result.reportNumber).toBe('HAZ-2020-000001');
     });
 
@@ -71,6 +72,8 @@ describe('health-safety/hazards route helpers', () => {
       const result = buildHazardCreateValues({
         hazardType: 'other',
         priority: 'low',
+        location: 'Site A',
+        description: 'desc',
         isAnonymous: true,
         reporterName: 'Jane Doe',
         reporterContact: 'jane@example.com',
@@ -83,6 +86,8 @@ describe('health-safety/hazards route helpers', () => {
       const result = buildHazardCreateValues({
         hazardType: 'other',
         priority: 'low',
+        location: 'Site A',
+        description: 'desc',
         isAnonymous: false,
         reporterName: 'Jane Doe',
         reporterContact: 'jane@example.com',
@@ -95,11 +100,25 @@ describe('health-safety/hazards route helpers', () => {
       const result = buildHazardCreateValues({
         hazardType: 'other',
         priority: 'low',
+        location: 'Site A',
+        description: 'desc',
         organizationId: 'org-123',
         createdBy: 'user-456',
       });
       expect(result.organizationId).toBe('org-123');
       expect(result.createdBy).toBe('user-456');
+    });
+
+    it('rejects a submission with no location and no description at all', () => {
+      expect(() => buildHazardCreateValues({ hazardType: 'other', priority: 'low' })).toThrow();
+    });
+
+    it('rejects a submission with a whitespace-only location', () => {
+      expect(() => buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: '   ', description: 'A real description' })).toThrow();
+    });
+
+    it('rejects a submission with a whitespace-only description', () => {
+      expect(() => buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: '   ' })).toThrow();
     });
   });
 });

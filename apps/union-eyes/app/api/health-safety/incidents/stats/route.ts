@@ -29,9 +29,8 @@ export const GET = withApi(
       summary: 'Workplace incident summary statistics',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const url = new URL(request.url);
-    const organizationId = url.searchParams.get('organizationId');
     const period = url.searchParams.get('period') || '30d';
     const startISO = getStartDateISO(period);
     const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;

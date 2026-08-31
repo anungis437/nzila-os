@@ -18,9 +18,7 @@ export const GET = withApi(
       summary: 'Hazard report summary statistics',
     },
   },
-  async ({ request }) => {
-    const url = new URL(request.url);
-    const organizationId = url.searchParams.get('organizationId');
+  async ({ organizationId }) => {
     const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
 
     const rows = Array.from(

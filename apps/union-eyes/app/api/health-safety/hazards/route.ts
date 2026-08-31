@@ -3,6 +3,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { hazardReports } from '@/db/schema';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,8 +28,7 @@ export const PRIORITY_TO_HAZARD_LEVEL: Record<string, string> = {
 
 export function generateReportNumber(): string {
   const year = new Date().getFullYear();
-  const suffix = Math.random().toString(16).slice(2, 8).toUpperCase();
-  return `HAZ-${year}-${suffix}`;
+  return `HAZ-${year}-${crypto.randomUUID()}`;
 }
 
 export function buildHazardCreateValues(values: Record<string, unknown>): Record<string, unknown> {
@@ -36,12 +36,23 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
   const hazardType = typeof raw.hazardType === 'string' ? raw.hazardType : undefined;
   const priority = typeof raw.priority === 'string' ? raw.priority : undefined;
 
+  const specificLocation = String(raw.specificLocation ?? raw.location ?? '').trim();
+  const hazardDescription = String(raw.hazardDescription ?? raw.description ?? '').trim();
+
+  // Required, safety-relevant narrative fields must not be silently
+  // normalized into a blank-but-"valid" record — reject instead.
+  if (!specificLocation || !hazardDescription) {
+    throw ApiError.badRequest(
+      'specificLocation (location) and hazardDescription (description) are required to submit a hazard report',
+    );
+  }
+
   return {
     reportNumber: raw.reportNumber ?? generateReportNumber(),
     hazardCategory: raw.hazardCategory ?? (hazardType && HAZARD_TYPE_TO_CATEGORY[hazardType]) ?? 'other',
     hazardLevel: raw.hazardLevel ?? (priority && PRIORITY_TO_HAZARD_LEVEL[priority]) ?? 'moderate',
-    specificLocation: raw.specificLocation ?? raw.location ?? '',
-    hazardDescription: raw.hazardDescription ?? raw.description ?? '',
+    specificLocation,
+    hazardDescription,
     potentialConsequences: raw.potentialConsequences,
     suggestedCorrections: raw.suggestedCorrections ?? raw.recommendedAction,
     isAnonymous: raw.isAnonymous ?? false,
@@ -57,8 +68,11 @@ const { GET, POST } = crudRoutes({
   table: hazardReports,
   tags: ["Health-safety"],
   orgScoped: true,
-  readRole: 'member',
-  writeRole: 'admin',
+  // Matches the documented H&S API contract (README.md): hazard list/create
+  // require at minimum the health_safety_rep role (level 30), not the
+  // broader 'member' (20) or the stricter 'admin' (140).
+  readRole: 'health_safety_rep',
+  writeRole: 'health_safety_rep',
   beforeCreate: (values) => buildHazardCreateValues(values),
 });
 export { GET, POST };
