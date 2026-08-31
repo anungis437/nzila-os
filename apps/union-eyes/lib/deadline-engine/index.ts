@@ -28,6 +28,17 @@ export type {
   RefreshDeadlineRemindersResult,
 } from './assignment-sync';
 
+export {
+  requestAssignmentConvergence,
+  processAssignmentConvergence,
+  sweepPendingAssignmentConvergence,
+} from './assignment-sync';
+export type {
+  RequestAssignmentConvergenceInput,
+  ProcessAssignmentConvergenceResult,
+  SweepPendingConvergenceResult,
+} from './assignment-sync';
+
 export type {
   RecipientSnapshot,
   WorkerRunResult,

@@ -353,21 +353,23 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getUpcomingDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
-      expect(alerts[0].deadlineId).toBe("dl-1");
-      expect(alerts[0].status).toBe("upcoming");
+      const result = await getUpcomingDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
+      expect(result.deadlines[0].deadlineId).toBe("dl-1");
+      expect(result.deadlines[0].status).toBe("upcoming");
     });
 
     it("never returns another organization's deadlines (org B empty when scoped to org A)", async () => {
       // The join's WHERE clause is what scopes by organization; simulate the
       // DB honestly returning nothing for an org with no matching rows.
       mocks.mockSelect.mockReturnValueOnce(makeSelectChain([]));
-      const alerts = await getUpcomingDeadlines("org-B");
-      expect(alerts).toEqual([]);
+      const result = await getUpcomingDeadlines("org-B");
+      expect(result).toEqual({ status: "ok", deadlines: [] });
     });
 
-    it("returns empty on error", async () => {
+    it("reports unavailable (not a false empty) on query failure", async () => {
       mocks.mockSelect.mockReturnValueOnce({
         from: vi.fn(() => ({
           innerJoin: vi.fn(() => ({
@@ -375,7 +377,10 @@ describe("deadline-tracking-system", () => {
           })),
         })),
       });
-      expect(await getUpcomingDeadlines("org-1")).toEqual([]);
+      const result = await getUpcomingDeadlines("org-1");
+      expect(result.status).toBe("unavailable");
+      if (result.status !== "unavailable") throw new Error("expected unavailable");
+      expect(result.error).toBe("fail");
     });
   });
 
@@ -395,17 +400,19 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getOverdueDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
+      const result = await getOverdueDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
     });
 
     it("never returns another organization's deadlines", async () => {
       mocks.mockSelect.mockReturnValueOnce(makeSelectChain([]));
-      const alerts = await getOverdueDeadlines("org-B");
-      expect(alerts).toEqual([]);
+      const result = await getOverdueDeadlines("org-B");
+      expect(result).toEqual({ status: "ok", deadlines: [] });
     });
 
-    it("returns empty on error", async () => {
+    it("reports unavailable (not a false empty) on query failure", async () => {
       mocks.mockSelect.mockReturnValueOnce({
         from: vi.fn(() => ({
           innerJoin: vi.fn(() => ({
@@ -413,7 +420,10 @@ describe("deadline-tracking-system", () => {
           })),
         })),
       });
-      expect(await getOverdueDeadlines("org-1")).toEqual([]);
+      const result = await getOverdueDeadlines("org-1");
+      expect(result.status).toBe("unavailable");
+      if (result.status !== "unavailable") throw new Error("expected unavailable");
+      expect(result.error).toBe("fail");
     });
   });
 
@@ -421,13 +431,16 @@ describe("deadline-tracking-system", () => {
   describe("getGrievanceDeadlines", () => {
     it("returns deadlines for grievance", async () => {
       mocks.mockFindManyDeadlines.mockResolvedValueOnce([{ id: "dl-1", grievanceId: "g-1" }]);
-      const deadlines = await getGrievanceDeadlines("g-1");
-      expect(deadlines).toHaveLength(1);
+      const result = await getGrievanceDeadlines("g-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
     });
 
-    it("returns empty on error", async () => {
+    it("reports unavailable (not a false empty) on query failure", async () => {
       mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("fail"));
-      expect(await getGrievanceDeadlines("g-1")).toEqual([]);
+      const result = await getGrievanceDeadlines("g-1");
+      expect(result).toEqual({ status: "unavailable", error: "fail" });
     });
   });
 
@@ -448,11 +461,11 @@ describe("deadline-tracking-system", () => {
         ]),
       );
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-1" }); // sendEscalationNotification
-      const count = await escalateMissedDeadlines("org-1");
-      expect(count).toBe(1);
+      const result = await escalateMissedDeadlines("org-1");
+      expect(result).toEqual({ status: "ok", escalatedCount: 1 });
     });
 
-    it("returns 0 on error", async () => {
+    it("reports unavailable (not a false zero) when the overdue query fails", async () => {
       mocks.mockSelect.mockReturnValueOnce({
         from: vi.fn(() => ({
           innerJoin: vi.fn(() => ({
@@ -460,7 +473,8 @@ describe("deadline-tracking-system", () => {
           })),
         })),
       });
-      expect(await escalateMissedDeadlines("org-1")).toBe(0);
+      const result = await escalateMissedDeadlines("org-1");
+      expect(result).toEqual({ status: "unavailable", error: "fail" });
     });
   });
 
@@ -563,10 +577,11 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getUpcomingDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
+      const result = await getUpcomingDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
       // The mock returns 5, so status will be "upcoming"
-      expect(alerts[0].daysRemaining).toBeGreaterThanOrEqual(0);
+      expect(result.deadlines[0].daysRemaining).toBeGreaterThanOrEqual(0);
     });
 
     it("calculates overdue status for negative days remaining", async () => {
@@ -583,8 +598,10 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getOverdueDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
+      const result = await getOverdueDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
     });
   });
 
@@ -605,9 +622,11 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getUpcomingDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
-      expect(alerts[0].status).toBe("overdue");
+      const result = await getUpcomingDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
+      expect(result.deadlines[0].status).toBe("overdue");
     });
 
     it("maps warning status when 0 <= daysRemaining <= 3", async () => {
@@ -625,9 +644,11 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getUpcomingDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
-      expect(alerts[0].status).toBe("warning");
+      const result = await getUpcomingDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
+      expect(result.deadlines[0].status).toBe("warning");
     });
 
     it("uses new Date() fallback when dueDate is null", async () => {
@@ -645,10 +666,12 @@ describe("deadline-tracking-system", () => {
           },
         ]),
       );
-      const alerts = await getUpcomingDeadlines("org-1");
-      expect(alerts).toHaveLength(1);
-      expect(alerts[0].dueDate).toBeInstanceOf(Date);
-      expect(alerts[0].description).toBe("");
+      const result = await getUpcomingDeadlines("org-1");
+      expect(result.status).toBe("ok");
+      if (result.status !== "ok") throw new Error("expected ok");
+      expect(result.deadlines).toHaveLength(1);
+      expect(result.deadlines[0].dueDate).toBeInstanceOf(Date);
+      expect(result.deadlines[0].description).toBe("");
     });
   });
 
@@ -728,8 +751,8 @@ describe("deadline-tracking-system", () => {
       );
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-esc" });
 
-      const count = await escalateMissedDeadlines("org-1");
-      expect(count).toBe(1);
+      const result = await escalateMissedDeadlines("org-1");
+      expect(result).toEqual({ status: "ok", escalatedCount: 1 });
       expect(mocks.mockUpdateWhere).toHaveBeenCalled();
     });
   });
@@ -903,7 +926,7 @@ describe("deadline-tracking-system", () => {
 
   // ── Branch Coverage: escalateMissedDeadlines error ────────────────
   describe("escalateMissedDeadlines — error path", () => {
-    it("returns 0 on error", async () => {
+    it("reports unavailable (not a false zero) when the overdue query fails", async () => {
       mocks.mockSelect.mockReturnValueOnce({
         from: vi.fn(() => ({
           innerJoin: vi.fn(() => ({
@@ -911,8 +934,8 @@ describe("deadline-tracking-system", () => {
           })),
         })),
       });
-      const count = await escalateMissedDeadlines("org-1");
-      expect(count).toBe(0);
+      const result = await escalateMissedDeadlines("org-1");
+      expect(result).toEqual({ status: "unavailable", error: "db down" });
     });
 
     it("handles sendEscalationNotification when deadline not found", async () => {
@@ -933,8 +956,8 @@ describe("deadline-tracking-system", () => {
       // sendEscalationNotification does findFirst — return null
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce(null);
 
-      const count = await escalateMissedDeadlines("org-1");
-      expect(count).toBe(1);
+      const result = await escalateMissedDeadlines("org-1");
+      expect(result).toEqual({ status: "ok", escalatedCount: 1 });
     });
   });
 });

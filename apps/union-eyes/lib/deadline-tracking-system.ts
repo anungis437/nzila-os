@@ -70,6 +70,24 @@ export type DeadlineExtensionRequest = {
   requiresApproval: boolean;
 };
 
+/**
+ * A query failure (DB unreachable, timeout, etc.) MUST NOT be reported the
+ * same way as a genuinely empty result set — an `unavailable` caller has to
+ * surface "deadline data could not be loaded", not silently render "no
+ * deadlines". See getUpcomingDeadlines / getOverdueDeadlines / getGrievanceDeadlines.
+ */
+export type DeadlineAlertListResult =
+  | { status: "ok"; deadlines: DeadlineAlert[] }
+  | { status: "unavailable"; error: string };
+
+export type GrievanceDeadlineListResult =
+  | { status: "ok"; deadlines: GrievanceDeadline[] }
+  | { status: "unavailable"; error: string };
+
+export type EscalationResult =
+  | { status: "ok"; escalatedCount: number }
+  | { status: "unavailable"; error: string };
+
 // ============================================================================
 // PREDEFINED DEADLINE RULES (Based on common CBA timelines)
 // ============================================================================
@@ -431,11 +449,15 @@ return {
  * Tenant-scoped through an inner join on grievances — grievance_deadlines
  * has no organizationId column of its own, so ownership must be proven via
  * the grievanceId FK rather than a direct column filter.
+ *
+ * Returns a discriminated result rather than a bare array: a query failure
+ * must be distinguishable from a genuine zero-deadline result — an
+ * `unavailable` status is not the same fact as "no deadlines".
  */
 export async function getUpcomingDeadlines(
   organizationId: string,
   daysAhead: number = 30
-): Promise<DeadlineAlert[]> {
+): Promise<DeadlineAlertListResult> {
   try {
     const today = new Date();
     const futureDate = addDays(today, daysAhead);
@@ -453,9 +475,16 @@ export async function getUpcomingDeadlines(
       )
       .orderBy(asc(grievanceDeadlines.dueDate));
 
-    return rows.map((r) => createDeadlineAlert(r.deadline));
-  } catch (_error) {
-return [];
+    return { status: "ok", deadlines: rows.map((r) => createDeadlineAlert(r.deadline)) };
+  } catch (error) {
+    logger.error("deadline-tracking: getUpcomingDeadlines query failed", {
+      organizationId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      status: "unavailable",
+      error: error instanceof Error ? error.message : "Failed to load upcoming deadlines",
+    };
   }
 }
 
@@ -463,8 +492,9 @@ return [];
  * Get overdue deadlines for an organization
  *
  * Tenant-scoped through an inner join on grievances (see getUpcomingDeadlines).
+ * See getUpcomingDeadlines for why this returns a discriminated result.
  */
-export async function getOverdueDeadlines(organizationId: string): Promise<DeadlineAlert[]> {
+export async function getOverdueDeadlines(organizationId: string): Promise<DeadlineAlertListResult> {
   try {
     const today = new Date();
 
@@ -481,39 +511,63 @@ export async function getOverdueDeadlines(organizationId: string): Promise<Deadl
       )
       .orderBy(asc(grievanceDeadlines.dueDate));
 
-    return rows.map((r) => createDeadlineAlert(r.deadline));
-  } catch (_error) {
-return [];
+    return { status: "ok", deadlines: rows.map((r) => createDeadlineAlert(r.deadline)) };
+  } catch (error) {
+    logger.error("deadline-tracking: getOverdueDeadlines query failed", {
+      organizationId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      status: "unavailable",
+      error: error instanceof Error ? error.message : "Failed to load overdue deadlines",
+    };
   }
 }
 
 /**
  * Get all deadlines for a specific grievance
+ *
+ * See getUpcomingDeadlines for why this returns a discriminated result.
  */
 export async function getGrievanceDeadlines(
   grievanceId: string
-): Promise<GrievanceDeadline[]> {
+): Promise<GrievanceDeadlineListResult> {
   try {
     const deadlines = await db.query.grievanceDeadlines.findMany({
       where: eq(grievanceDeadlines.grievanceId, grievanceId),
       orderBy: [asc(grievanceDeadlines.dueDate)],
     });
 
-    return deadlines;
-  } catch (_error) {
-return [];
+    return { status: "ok", deadlines };
+  } catch (error) {
+    logger.error("deadline-tracking: getGrievanceDeadlines query failed", {
+      grievanceId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      status: "unavailable",
+      error: error instanceof Error ? error.message : "Failed to load grievance deadlines",
+    };
   }
 }
 
 /**
  * Check and escalate missed deadlines
+ *
+ * Propagates unavailability from getOverdueDeadlines rather than reporting
+ * `escalatedCount: 0` — a query failure is not the same fact as "nothing
+ * needed escalating".
  */
-export async function escalateMissedDeadlines(organizationId: string): Promise<number> {
+export async function escalateMissedDeadlines(organizationId: string): Promise<EscalationResult> {
+  const overdueResult = await getOverdueDeadlines(organizationId);
+  if (overdueResult.status === "unavailable") {
+    return overdueResult;
+  }
+
   try {
-    const overdueDeadlines = await getOverdueDeadlines(organizationId);
     let escalatedCount = 0;
 
-    for (const alert of overdueDeadlines) {
+    for (const alert of overdueResult.deadlines) {
       // Mark as overdue and add escalation note
       await db
         .update(grievanceDeadlines)
@@ -528,9 +582,16 @@ export async function escalateMissedDeadlines(organizationId: string): Promise<n
       escalatedCount++;
     }
 
-    return escalatedCount;
-  } catch (_error) {
-return 0;
+    return { status: "ok", escalatedCount };
+  } catch (error) {
+    logger.error("deadline-tracking: escalateMissedDeadlines failed", {
+      organizationId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      status: "unavailable",
+      error: error instanceof Error ? error.message : "Failed to escalate missed deadlines",
+    };
   }
 }
 

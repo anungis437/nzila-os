@@ -23,6 +23,7 @@ import { db } from '@/db';
 import { logger } from '@/lib/logger';
 import { writeDeadlineAuditEvent } from './audit';
 import { deliverDeadlineReminderEmail } from './email-adapter';
+import { sweepPendingAssignmentConvergence } from './assignment-sync';
 import type { WorkerRunResult } from './types';
 
 export interface RunReminderWorkerConfig {
@@ -89,6 +90,21 @@ export async function runDeadlineReminderWorker(
     leaseMs,
     nowIso,
   });
+
+  // Retry any assignment-reassignment handoffs that failed to fully
+  // converge in-request (see assignment-sync.ts). Never throws — a task
+  // that still fails here simply remains pending for the next run.
+  const convergenceSweep = await sweepPendingAssignmentConvergence({
+    type: 'worker',
+    id: workerInstance,
+  });
+  if (convergenceSweep.examined > 0) {
+    logger.info('deadline-engine.worker: convergence sweep complete', {
+      runId,
+      workerInstance,
+      ...convergenceSweep,
+    });
+  }
 
   let examined = 0;
   let claimed = 0;

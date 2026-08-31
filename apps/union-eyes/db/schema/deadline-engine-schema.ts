@@ -135,6 +135,43 @@ export const deadlineAuditEvents = pgTable(
 );
 
 // ============================================================================
+// deadline_reassignment_convergence
+// ============================================================================
+// Durable work item for the assignment → reminder-recipient handoff. A row
+// is inserted in the SAME transaction as the grievance's union_rep_id
+// update, so an assignment change can never commit without a durable
+// convergence task existing. status stays 'pending' (never a terminal
+// failure state) across attempts so retries keep converging it — see
+// assignment-sync.ts's processAssignmentConvergence()/sweepPending...().
+export const deadlineReassignmentConvergence = pgTable(
+  'deadline_reassignment_convergence',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id').notNull(),
+    grievanceId: uuid('grievance_id').notNull(),
+    previousAssigneeId: varchar('previous_assignee_id', { length: 255 }),
+    newAssigneeId: varchar('new_assignee_id', { length: 255 }).notNull(),
+    status: text('status').notNull().default('pending'), // 'pending' | 'converged'
+    attemptCount: integer('attempt_count').notNull().default(0),
+    lastError: text('last_error'),
+    correlationId: text('correlation_id').notNull(),
+    requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
+    lastAttemptedAt: timestamp('last_attempted_at', { withTimezone: true }),
+    convergedAt: timestamp('converged_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('deadline_reassignment_convergence_pending_idx').on(t.grievanceId),
+    index('deadline_reassignment_convergence_org_idx').on(t.organizationId, t.status),
+  ],
+);
+
+export type DeadlineReassignmentConvergence = typeof deadlineReassignmentConvergence.$inferSelect;
+export type DeadlineReassignmentConvergenceInsert =
+  typeof deadlineReassignmentConvergence.$inferInsert;
+export type DeadlineReassignmentConvergenceStatus = 'pending' | 'converged';
+
+// ============================================================================
 // Relations
 // ============================================================================
 export const deadlineRemindersRelations = relations(deadlineReminders, ({ many }) => ({

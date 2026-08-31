@@ -5,13 +5,15 @@ const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
   hasMinRole: vi.fn(),
   db: { select: vi.fn(), update: vi.fn(), insert: vi.fn() },
+  tx: { update: vi.fn(), insert: vi.fn() },
   withRLSContext: vi.fn(),
   assignSteward: vi.fn(),
   auditDataMutation: vi.fn(),
   auditLog: vi.fn(),
   buildUnionEvidencePack: vi.fn(),
   logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() },
-  refreshDeadlineRemindersForGrievance: vi.fn(),
+  requestAssignmentConvergence: vi.fn(),
+  processAssignmentConvergence: vi.fn(),
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -29,7 +31,8 @@ vi.mock('@/lib/audit-logger', () => ({
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/deadline-engine', () => ({
-  refreshDeadlineRemindersForGrievance: m.refreshDeadlineRemindersForGrievance,
+  requestAssignmentConvergence: m.requestAssignmentConvergence,
+  processAssignmentConvergence: m.processAssignmentConvergence,
 }));
 
 async function loadRoute() {
@@ -52,16 +55,22 @@ describe('grievances/[id]/assign route', () => {
     m.auditDataMutation.mockResolvedValue(undefined);
     m.auditLog.mockResolvedValue(undefined);
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
-    m.withRLSContext.mockImplementation(async (fn: any) => fn());
-    m.refreshDeadlineRemindersForGrievance.mockResolvedValue({
-      correlationId: 'c-1', refreshedDeadlineIds: ['dl-1'], failedDeadlineIds: [],
+    // withRLSContext passes a tx handle to the callback — the route inserts
+    // the convergence task through it so the task's existence is atomic
+    // with the assignment update.
+    m.withRLSContext.mockImplementation(async (fn: any) => fn(m.tx));
+    m.requestAssignmentConvergence.mockResolvedValue({ taskId: 'task-1' });
+    m.processAssignmentConvergence.mockResolvedValue({
+      taskId: 'task-1',
+      converged: true,
+      refreshedDeadlineIds: ['dl-1'],
     });
 
     m.db.select = vi.fn(() => ({
       from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 'g1', unionRepId: 'officer-A' }]) })),
     }));
-    m.db.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => null) })) }));
-    m.db.insert = vi.fn(() => ({ values: vi.fn(async () => null) }));
+    m.tx.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => null) })) }));
+    m.tx.insert = vi.fn(() => ({ values: vi.fn(async () => null) }));
   });
 
   function assignRequest(body: Record<string, unknown> = { stewardId: NEW_STEWARD }) {
@@ -90,27 +99,34 @@ describe('grievances/[id]/assign route', () => {
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
     expect(response.status).toBe(404);
-    expect(m.refreshDeadlineRemindersForGrievance).not.toHaveBeenCalled();
-    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.requestAssignmentConvergence).not.toHaveBeenCalled();
+    expect(m.processAssignmentConvergence).not.toHaveBeenCalled();
+    expect(m.tx.update).not.toHaveBeenCalled();
   });
 
-  it('assigns the steward, updates unionRepId, and refreshes deadline reminders for the grievance', async () => {
+  it('assigns the steward, updates unionRepId via the transaction, and records + processes a convergence task', async () => {
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
     expect(response.status).toBe(200);
 
-    expect(m.db.update).toHaveBeenCalled();
-    expect(m.refreshDeadlineRemindersForGrievance).toHaveBeenCalledTimes(1);
-    expect(m.refreshDeadlineRemindersForGrievance).toHaveBeenCalledWith(
+    expect(m.tx.update).toHaveBeenCalled();
+    expect(m.requestAssignmentConvergence).toHaveBeenCalledTimes(1);
+    expect(m.requestAssignmentConvergence).toHaveBeenCalledWith(
+      m.tx,
       expect.objectContaining({
         grievanceId: 'g1',
         organizationId: 'org_1',
-        reason: 'assignment_changed',
         previousAssigneeId: 'officer-A',
         newAssigneeId: NEW_STEWARD,
-        actor: { type: 'user', id: 'u1' },
       }),
     );
+    // The convergence task is inserted INSIDE the same transaction as the
+    // assignment update — an assignment can never commit without a durable
+    // retryable task existing.
+    expect(m.requestAssignmentConvergence.mock.invocationCallOrder[0]).toBeLessThan(
+      m.processAssignmentConvergence.mock.invocationCallOrder[0],
+    );
+    expect(m.processAssignmentConvergence).toHaveBeenCalledWith('task-1', { type: 'user', id: 'u1' });
   });
 
   it('reads the OUTGOING representative from the pre-update grievance row (proves continuity, not a stale snapshot)', async () => {
@@ -120,18 +136,30 @@ describe('grievances/[id]/assign route', () => {
     const { PATCH } = await loadRoute();
     await PATCH(assignRequest());
 
-    expect(m.refreshDeadlineRemindersForGrievance).toHaveBeenCalledWith(
+    expect(m.requestAssignmentConvergence).toHaveBeenCalledWith(
+      m.tx,
       expect.objectContaining({ previousAssigneeId: 'officer-OLD', newAssigneeId: NEW_STEWARD }),
     );
   });
 
-  it('does not claim success when reminder continuity cannot be guaranteed (refresh throws)', async () => {
-    m.refreshDeadlineRemindersForGrievance.mockRejectedValueOnce(
+  it('does not claim success when reminder continuity cannot be guaranteed (convergence fails)', async () => {
+    m.processAssignmentConvergence.mockRejectedValueOnce(
       new Error('deadline-engine.assignment-sync: failed to refresh reminders for 1 of 1 deadline(s)'),
     );
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
     expect(response.status).toBe(500);
+  });
+
+  it('does not strand the handoff: the durable task is recorded even when the immediate convergence attempt fails', async () => {
+    m.processAssignmentConvergence.mockRejectedValueOnce(new Error('scheduler unavailable'));
+    const { PATCH } = await loadRoute();
+    await PATCH(assignRequest());
+
+    // The task was recorded (atomically with the assignment) BEFORE the
+    // failing convergence attempt — it remains pending in the DB for the
+    // reminder worker's sweep to retry, rather than being lost with the 500.
+    expect(m.requestAssignmentConvergence).toHaveBeenCalledTimes(1);
   });
 
   it('handles a grievance with no prior representative (previousAssigneeId is null)', async () => {
@@ -141,7 +169,8 @@ describe('grievances/[id]/assign route', () => {
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
     expect(response.status).toBe(200);
-    expect(m.refreshDeadlineRemindersForGrievance).toHaveBeenCalledWith(
+    expect(m.requestAssignmentConvergence).toHaveBeenCalledWith(
+      m.tx,
       expect.objectContaining({ previousAssigneeId: null, newAssigneeId: NEW_STEWARD }),
     );
   });

@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   txExecute: vi.fn(),
   deliver: vi.fn(),
   audit: vi.fn(),
+  sweepPendingAssignmentConvergence: vi.fn(async () => ({ examined: 0, converged: 0, stillPending: 0 })),
 }));
 
 vi.mock('@/db', () => ({
@@ -35,6 +36,10 @@ vi.mock('../email-adapter', () => ({
 
 vi.mock('../audit', () => ({
   writeDeadlineAuditEvent: mocks.audit,
+}));
+
+vi.mock('../assignment-sync', () => ({
+  sweepPendingAssignmentConvergence: mocks.sweepPendingAssignmentConvergence,
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -89,6 +94,16 @@ beforeEach(() => {
 });
 
 describe('reminder-worker', () => {
+  it('sweeps pending assignment-convergence tasks before claiming reminders', async () => {
+    mocks.execute
+      .mockResolvedValueOnce([]) // lease recovery
+      .mockResolvedValueOnce([]); // claim
+
+    await runDeadlineReminderWorker({ workerInstance: 'worker-test', now: () => NOW });
+
+    expect(mocks.sweepPendingAssignmentConvergence).toHaveBeenCalledTimes(1);
+  });
+
   it('returns a structured result (never a boolean) even when nothing to do', async () => {
     mocks.execute
       .mockResolvedValueOnce([]) // lease recovery

@@ -16,7 +16,7 @@ import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/li
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
-import { refreshDeadlineRemindersForGrievance } from "@/lib/deadline-engine";
+import { requestAssignmentConvergence, processAssignmentConvergence } from "@/lib/deadline-engine";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -63,37 +63,40 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
 
     const assignment = await assignSteward(params.id, parsed.data.stewardId);
     const previousUnionRepId = grievance.unionRepId ?? null;
+    const continuityCorrelationId = randomUUID();
 
-    // Update grievance assigned rep
-    await withRLSContext(async () => {
-      await db
+    // Update grievance assigned rep AND record a durable convergence task in
+    // the SAME transaction, so the assignment can never commit without a
+    // retryable record that reminders still need to converge to it.
+    const { taskId: convergenceTaskId } = await withRLSContext(async (tx) => {
+      await tx
         .update(grievances)
         .set({ unionRepId: parsed.data.stewardId, updatedAt: new Date() })
         .where(eq(grievances.id, params.id));
 
       // Emit event
-      await db.insert(grievanceEvents).values({
+      await tx.insert(grievanceEvents).values({
         grievanceId: params.id,
         eventType: "assigned",
         actorUserId: userId,
         notes: `Steward ${parsed.data.stewardId} assigned`,
       });
+
+      return requestAssignmentConvergence(tx, {
+        organizationId,
+        grievanceId: params.id,
+        correlationId: continuityCorrelationId,
+        previousAssigneeId: previousUnionRepId,
+        newAssigneeId: parsed.data.stewardId,
+      });
     });
 
-    // Refresh any active deadline reminders so the outgoing representative's
-    // snapshotted recipient is superseded and the successor is scheduled.
-    // Recipient resolution reads grievances.unionRepId, which was just
-    // updated above, so this call resolves the NEW assignment.
-    const continuityCorrelationId = randomUUID();
-    await refreshDeadlineRemindersForGrievance({
-      grievanceId: params.id,
-      organizationId,
-      correlationId: continuityCorrelationId,
-      actor: { type: 'user', id: userId },
-      reason: 'assignment_changed',
-      previousAssigneeId: previousUnionRepId,
-      newAssigneeId: parsed.data.stewardId,
-    });
+    // Attempt convergence immediately so the common case (no failures)
+    // resolves within the same request. If this fails, the durable task
+    // recorded above stays pending — the reminder worker's periodic sweep
+    // will retry it, so the handoff is never permanently stranded even
+    // though this request reports failure.
+    await processAssignmentConvergence(convergenceTaskId, { type: 'user', id: userId });
 
     // Audit
     await auditDataMutation({
