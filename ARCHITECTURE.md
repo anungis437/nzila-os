@@ -2,7 +2,14 @@
 
 ## Overview
 
-Nzila OS is the internal control backbone for the Nzila platform. It provides:
+Nzila OS is the internal control backbone for the Nzila platform. NzilaOS itself is internal
+acceleration IP, not a directly sold product — the current commercial spine is Union Eyes
+(near-term revenue) and CIVIC (cautious public-institution path); see the root
+[README.md](./README.md) "Commercial spine" section. For Union Eyes' own living engineering
+status and gate state, read [docs/union-eyes/README.md](./docs/union-eyes/README.md) before
+changing anything under `apps/union-eyes`.
+
+It provides:
 
 - **Evidence generation** — Tamper-evident audit trails stored in Azure Blob with hash chaining
 - **RBAC / Authorization** — Centralized policy engine consumed by all apps

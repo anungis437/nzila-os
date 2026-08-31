@@ -1,6 +1,6 @@
 # Nzila OS
 
-NzilaOS is decision infrastructure: a shared system for capturing, evaluating, proving, replaying, and governing organizational decisions across multiple domains.
+NzilaOS is decision infrastructure: a shared system for capturing, evaluating, proving, replaying, and governing organizational decisions across multiple domains. NzilaOS itself is internal acceleration IP — it is not sold directly.
 
 Every product surface is a thin interface over a shared decision core:
 
@@ -8,13 +8,27 @@ Every product surface is a thin interface over a shared decision core:
 Decision = Input + Policy + Actor Authority + Outcome + Proof
 ```
 
+## Commercial spine (two lanes only)
+
+As of the Aug 2026 condensed plan, only two lanes are the active commercial motion:
+
+1. **Union Eyes** — near-term revenue. Living engineering status:
+   [docs/union-eyes/README.md](docs/union-eyes/README.md). Current gate:
+   `UE_SAAS_OPERATIONAL_READINESS = NO_GO` (stale relative to `HEAD` — see that page).
+2. **CIVIC** — cautious public-institution path, currently in discovery/market-engagement.
+   See [docs/CIVIC_OCI_ALIGNMENT.md](docs/CIVIC_OCI_ALIGNMENT.md).
+
+Everything else below is portfolio inventory or an internal hold, not part of the
+current commercial spine — see [governance/portfolio/README.md](governance/portfolio/README.md)
+before quoting a tier/GTM-posture/revenue figure from the catalog as an active sales motion.
+
 ## Domain Interfaces
 
 | Product | Domain | Status | Tier |
 |---------|--------|--------|------|
-| **Union Eyes** | Labour representation & case management | Pilot — sell-now | 1 |
-| **CourtLens** | Access-to-justice & legal matter intelligence (on ABR substrate; retains FAIRCASE tribunal-intelligence lineage) | Pilot — sell-now | 1 |
-| **Flow** | SMB operations & commerce automation | Pilot — sell-now | 1 |
+| **Union Eyes** | Labour representation & case management | Pilot — commercial spine, lane 1 | 1 |
+| **CourtLens** | Access-to-justice & legal matter intelligence (on ABR substrate; retains FAIRCASE tribunal-intelligence lineage) | Pilot — portfolio inventory, not current spine | 1 |
+| **Flow** | SMB operations & commerce automation | Pilot — portfolio inventory, not current spine | 1 |
 | **CFO** | Finance workflows | Pilot | 2 |
 | **Partners** | Partner enablement portal | Pilot | 2 |
 | **Console** | Internal ops & governance control surface | Internal | 3 |
@@ -27,7 +41,10 @@ Decision = Input + Policy + Actor Authority + Outcome + Proof
 | **Mobility** | Immigration & mobility | Incubating | 4 |
 | **NACP Exams** | DRC national education & examination infrastructure | Incubating | 4 |
 
-Portfolio truth source: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
+Portfolio truth source (inventory, not GTM plan): [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
+Read [governance/portfolio/README.md](governance/portfolio/README.md) first — a `tier: 1` /
+`sell-now` label in that file does not mean active sales motion this quarter (see "Commercial
+spine" above).
 
 ## Decision Core
 

@@ -1,5 +1,14 @@
 # Union Eyes — Pilot Evidence Pack
 
+> **Status note (2026-08-31):** the `✅ CONTROLLED PILOT — GO` verdict below is dated
+> 2026-05-14/2026-05-21 and predates the current operational-readiness gate. The current
+> gate, `UE_SAAS_OPERATIONAL_READINESS`, reads **`NO_GO`** as of the 2026-08-31 audit — see
+> [`../reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`](../reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md)
+> and [`../README.md`](../README.md). The evidence artifacts below (CI captures, Azure
+> live-capture runbooks, restore-drill records) are retained as historical evidence; the
+> summary "GO" verdict at the top of this page is superseded and should not be quoted as the
+> current pilot posture.
+
 **Version:** 2.0  
 **Date:** 2026-05-14  
 **Sprint:** 10/10 Pilot Readiness  
