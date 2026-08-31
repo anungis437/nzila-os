@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-26T17:39:41.500Z",
-  "scannedFiles": 4825,
+  "generatedAt": "2026-08-31T14:14:55.799Z",
+  "scannedFiles": 4856,
   "rulesRun": [
     "R-1",
     "R-2",
@@ -412,14 +412,6 @@
       "rule": "R-6",
       "file": "apps/union-eyes/components/admin/FeatureFlagsAdmin.tsx",
       "line": 57,
-      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
-      "evidence": "catch { }",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-6",
-      "file": "apps/union-eyes/components/admin/organization-form.tsx",
-      "line": 356,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1819,7 +1811,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/lib/api-auth-guard.ts",
-      "line": 411,
+      "line": 413,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1827,7 +1819,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/lib/api-auth-guard.ts",
-      "line": 429,
+      "line": 431,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1835,7 +1827,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/lib/api-auth-guard.ts",
-      "line": 528,
+      "line": 532,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -1843,7 +1835,7 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/lib/api-auth-guard.ts",
-      "line": 540,
+      "line": 544,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -2002,8 +1994,8 @@
     },
     {
       "rule": "R-6",
-      "file": "apps/union-eyes/lib/deadline-tracking-system.ts",
-      "line": 583,
+      "file": "apps/union-eyes/lib/deadline-engine/assignment-sync.ts",
+      "line": 290,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -2011,7 +2003,15 @@
     {
       "rule": "R-6",
       "file": "apps/union-eyes/lib/deadline-tracking-system.ts",
-      "line": 604,
+      "line": 693,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/deadline-tracking-system.ts",
+      "line": 714,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -2356,6 +2356,14 @@
       "rule": "R-6",
       "file": "apps/union-eyes/lib/observability/telemetry.ts",
       "line": 63,
+      "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
+      "evidence": "catch { }",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-6",
+      "file": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "line": 717,
       "message": "Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored.",
       "evidence": "catch { }",
       "severity": "warning"
@@ -5802,14 +5810,6 @@
     },
     {
       "rule": "R-7",
-      "file": "apps/union-eyes/app/api/dues/balance/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/dues/balance/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/dues/balance/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
       "file": "apps/union-eyes/app/api/dues/billing-cycle/route.ts",
       "line": 1,
       "message": "Production API route `app/api/dues/billing-cycle/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
@@ -5826,14 +5826,6 @@
     },
     {
       "rule": "R-7",
-      "file": "apps/union-eyes/app/api/dues/create-payment-intent/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/dues/create-payment-intent/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/dues/create-payment-intent/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
       "file": "apps/union-eyes/app/api/dues/dashboard/route.ts",
       "line": 1,
       "message": "Production API route `app/api/dues/dashboard/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
@@ -5842,26 +5834,10 @@
     },
     {
       "rule": "R-7",
-      "file": "apps/union-eyes/app/api/dues/deductions/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/dues/deductions/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/dues/deductions/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
       "file": "apps/union-eyes/app/api/dues/exceptions/route.ts",
       "line": 1,
       "message": "Production API route `app/api/dues/exceptions/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/dues/exceptions/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
-      "file": "apps/union-eyes/app/api/dues/issues/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/dues/issues/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/dues/issues/route.ts",
       "severity": "warning"
     },
     {
@@ -5878,22 +5854,6 @@
       "line": 1,
       "message": "Production API route `app/api/dues/ledger/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/dues/ledger/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
-      "file": "apps/union-eyes/app/api/dues/payment-history/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/dues/payment-history/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/dues/payment-history/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-7",
-      "file": "apps/union-eyes/app/api/dues/payment-methods/route.ts",
-      "line": 1,
-      "message": "Production API route `app/api/dues/payment-methods/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
-      "evidence": "app/api/dues/payment-methods/route.ts",
       "severity": "warning"
     },
     {
@@ -7538,6 +7498,14 @@
     },
     {
       "rule": "R-7",
+      "file": "apps/union-eyes/app/api/health-safety/hazards/stats/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/health-safety/hazards/stats/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/health-safety/hazards/stats/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
       "file": "apps/union-eyes/app/api/health-safety/incidents/[id]/route.ts",
       "line": 1,
       "message": "Production API route `app/api/health-safety/incidents/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
@@ -7550,6 +7518,14 @@
       "line": 1,
       "message": "Production API route `app/api/health-safety/incidents/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/health-safety/incidents/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
+      "file": "apps/union-eyes/app/api/health-safety/incidents/stats/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/health-safety/incidents/stats/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/health-safety/incidents/stats/route.ts",
       "severity": "warning"
     },
     {
@@ -7570,6 +7546,14 @@
     },
     {
       "rule": "R-7",
+      "file": "apps/union-eyes/app/api/health-safety/inspections/findings/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/health-safety/inspections/findings/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/health-safety/inspections/findings/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
       "file": "apps/union-eyes/app/api/health-safety/inspections/route.ts",
       "line": 1,
       "message": "Production API route `app/api/health-safety/inspections/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
@@ -7578,10 +7562,26 @@
     },
     {
       "rule": "R-7",
+      "file": "apps/union-eyes/app/api/health-safety/inspections/stats/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/health-safety/inspections/stats/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/health-safety/inspections/stats/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
       "file": "apps/union-eyes/app/api/health-safety/ppe/route.ts",
       "line": 1,
       "message": "Production API route `app/api/health-safety/ppe/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/health-safety/ppe/route.ts",
+      "severity": "warning"
+    },
+    {
+      "rule": "R-7",
+      "file": "apps/union-eyes/app/api/health-safety/stats/route.ts",
+      "line": 1,
+      "message": "Production API route `app/api/health-safety/stats/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
+      "evidence": "app/api/health-safety/stats/route.ts",
       "severity": "warning"
     },
     {
