@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-31T14:14:55.799Z",
-  "scannedFiles": 4856,
+  "generatedAt": "2026-08-31T16:43:59.488Z",
+  "scannedFiles": 4859,
   "rulesRun": [
     "R-1",
     "R-2",
@@ -13,7 +13,7 @@
   ],
   "totals": {
     "errors": 0,
-    "warnings": 1266
+    "warnings": 1265
   },
   "findings": [
     {
@@ -10102,14 +10102,6 @@
       "line": 1,
       "message": "Production API route `app/api/workspace/telemetry/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`.",
       "evidence": "app/api/workspace/telemetry/route.ts",
-      "severity": "warning"
-    },
-    {
-      "rule": "R-8",
-      "file": "apps/union-eyes/app/api/deadlines/upcoming/route.ts",
-      "line": 23,
-      "message": "Handler returns an empty authoritative payload as success. Either compute real data or return HTTP 501 with ApiError.notImplemented().",
-      "evidence": "NextResponse.json({ data: []",
       "severity": "warning"
     },
     {

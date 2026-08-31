@@ -1,10 +1,10 @@
 # Anti-Theatre Scan Report
 
-- Generated: 2026-08-31T14:14:55.808Z
-- Files scanned: 4856
+- Generated: 2026-08-31T16:43:59.493Z
+- Files scanned: 4859
 - Rules: R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8
 - **Errors: 0**
-- Warnings: 1266
+- Warnings: 1265
 
 ## Findings
 
