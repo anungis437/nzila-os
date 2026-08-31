@@ -1,6 +1,7 @@
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users';
 import {
   getDashboardExperience,
+  getNavigationForExperience,
   getRoleLandingPath,
   getVisibleNavigationForExperience,
   type DashboardExperience,
