@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-31T21:17:54.993Z",
-  "filesScanned": 2410,
+  "generatedAt": "2026-08-31T22:15:52.186Z",
+  "filesScanned": 2411,
   "totalFindings": 2813,
   "findingsByRule": {
     "stale-reference": 1031,
@@ -18205,7 +18205,7 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/union-eyes/README.md",
-      "line": 14,
+      "line": 16,
       "message": "\"Nzila OS\" should be \"NzilaOS\" (platform name)"
     },
     {

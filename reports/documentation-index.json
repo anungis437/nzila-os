@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-31T21:17:44.413Z",
-  "totalDocuments": 1739,
+  "generatedAt": "2026-08-31T22:15:48.070Z",
+  "totalDocuments": 1740,
   "staleDocuments": 925,
   "categories": [
     {
@@ -220,7 +220,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 62,
+      "count": 63,
       "staleCount": 19
     },
     {
@@ -10534,6 +10534,12 @@
     },
     {
       "path": "docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-08-31",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md",
       "category": "union-eyes",
       "lastValidated": "2026-08-31",
       "stale": false

@@ -65,7 +65,8 @@ gstack moves from optional to required only if maintainers confirm:
 
 - Before changing anything under `apps/union-eyes`, read (in order):
   `docs/union-eyes/README.md`,
-  `docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`,
+  `docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md` (current gate
+  ruling — supersedes file 24's ruling but does not replace it as historical record),
   and `apps/union-eyes/lib/reality/capability-registry.ts`.
 - Do not advertise a navigation link to a route that resolves to `notFound()` or a 404.
 - Do not return HTTP 200 for a capability whose real state is `NOT_IMPLEMENTED` — return 501.

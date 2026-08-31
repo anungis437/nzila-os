@@ -1,8 +1,8 @@
 # Documentation Index
 
-Generated: 2026-08-31T21:17:44.413Z
+Generated: 2026-08-31T22:15:48.070Z
 
-Total documents indexed: 1739
+Total documents indexed: 1740
 Stale documents (>90 days since repo validation): 925
 
 ## Category Summary
@@ -52,7 +52,7 @@ Stale documents (>90 days since repo validation): 925
 | root | 4 | 2 |
 | runbooks | 2 | 0 |
 | sred | 87 | 0 |
-| union-eyes | 62 | 19 |
+| union-eyes | 63 | 19 |
 | zonga | 2 | 1 |
 
 ## Documents
@@ -1777,6 +1777,7 @@ Stale documents (>90 days since repo validation): 925
 | [docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md](docs/union-eyes/reality-remediation/23_WAVE_0_CORRECTION.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md](docs/union-eyes/reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md) | union-eyes | 2026-08-31 | current |
+| [docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md](docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md](docs/union-eyes/reality-remediation/archive/21_WAVE_0_VALIDATION_MATRIX.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md](docs/union-eyes/reality-remediation/archive/22_WAVE_0_SUMMARY.md) | union-eyes | 2026-08-31 | current |
 | [docs/union-eyes/reality-remediation/archive/README.md](docs/union-eyes/reality-remediation/archive/README.md) | union-eyes | 2026-08-31 | current |
