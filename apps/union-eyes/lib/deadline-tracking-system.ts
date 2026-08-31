@@ -16,7 +16,7 @@ import {
 } from "@/db/schema";
 import { addDays, addBusinessDays, differenceInDays } from "date-fns";
 import { createLogger } from "@nzila/os-core/telemetry";
-import { scheduleGrievanceDeadlineReminders } from "@/lib/deadline-engine";
+import { scheduleGrievanceDeadlineReminders, cancelGrievanceDeadlineReminders } from "@/lib/deadline-engine";
 
 const logger = createLogger("union-eyes.deadline-tracking-system");
 
@@ -259,27 +259,60 @@ export async function createGrievanceStepDeadlines(
 
 /**
  * Mark deadline as completed
+ *
+ * Tenant-scoped: ownership is proven through the parent grievance's
+ * organizationId (grievance_deadlines has no organizationId column of its
+ * own). Cancels reminders in BOTH the legacy notifications queue and the
+ * durable deadline-engine outbox so a completed deadline can never fire a
+ * queued reminder afterward.
  */
 export async function completeDeadline(
   deadlineId: string,
-  _organizationId: string,
-  _completedBy: string,
+  organizationId: string,
+  completedBy: string,
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const [owned] = await db
+      .select({ id: grievanceDeadlines.id })
+      .from(grievanceDeadlines)
+      .innerJoin(grievances, eq(grievanceDeadlines.grievanceId, grievances.id))
+      .where(
+        and(
+          eq(grievanceDeadlines.id, deadlineId),
+          eq(grievances.organizationId, organizationId)
+        )
+      );
+
+    if (!owned) {
+      return { success: false, error: "Deadline not found" };
+    }
+
+    const completionNote = notes ? `Completed by ${completedBy}: ${notes}` : `Completed by ${completedBy}`;
+
     await db
       .update(grievanceDeadlines)
       .set({
         status: "completed",
         completedAt: new Date(),
-        notes,
+        notes: completionNote,
       })
       .where(
         eq(grievanceDeadlines.id, deadlineId)
       );
 
-    // Cancel any pending reminder notifications
+    // Cancel any pending reminder notifications (legacy queue)
     await cancelDeadlineReminders(deadlineId);
+
+    // Cancel any pending reminders in the durable deadline-engine outbox —
+    // without this, a completed deadline can still fire an already-scheduled
+    // reminder from the new outbox.
+    await cancelGrievanceDeadlineReminders({
+      sourceDeadlineId: deadlineId,
+      organizationId,
+      reason: "completed",
+      actor: { type: "user", id: completedBy },
+    });
 
     return { success: true };
   } catch (error) {
@@ -394,6 +427,10 @@ return {
 
 /**
  * Get upcoming deadlines for an organization
+ *
+ * Tenant-scoped through an inner join on grievances — grievance_deadlines
+ * has no organizationId column of its own, so ownership must be proven via
+ * the grievanceId FK rather than a direct column filter.
  */
 export async function getUpcomingDeadlines(
   organizationId: string,
@@ -403,15 +440,20 @@ export async function getUpcomingDeadlines(
     const today = new Date();
     const futureDate = addDays(today, daysAhead);
 
-    const deadlines = await db.query.grievanceDeadlines.findMany({
-      where: and(
-        eq(grievanceDeadlines.status, "pending"),
-        lte(grievanceDeadlines.dueDate, futureDate)
-      ),
-      orderBy: [asc(grievanceDeadlines.dueDate)],
-    });
+    const rows = await db
+      .select({ deadline: grievanceDeadlines })
+      .from(grievanceDeadlines)
+      .innerJoin(grievances, eq(grievanceDeadlines.grievanceId, grievances.id))
+      .where(
+        and(
+          eq(grievances.organizationId, organizationId),
+          eq(grievanceDeadlines.status, "pending"),
+          lte(grievanceDeadlines.dueDate, futureDate)
+        )
+      )
+      .orderBy(asc(grievanceDeadlines.dueDate));
 
-    return deadlines.map((d) => createDeadlineAlert(d));
+    return rows.map((r) => createDeadlineAlert(r.deadline));
   } catch (_error) {
 return [];
   }
@@ -419,20 +461,27 @@ return [];
 
 /**
  * Get overdue deadlines for an organization
+ *
+ * Tenant-scoped through an inner join on grievances (see getUpcomingDeadlines).
  */
-export async function getOverdueDeadlines(_organizationId: string): Promise<DeadlineAlert[]> {
+export async function getOverdueDeadlines(organizationId: string): Promise<DeadlineAlert[]> {
   try {
     const today = new Date();
 
-    const deadlines = await db.query.grievanceDeadlines.findMany({
-      where: and(
-        eq(grievanceDeadlines.status, "pending"),
-        lte(grievanceDeadlines.dueDate, today)
-      ),
-      orderBy: [asc(grievanceDeadlines.dueDate)],
-    });
+    const rows = await db
+      .select({ deadline: grievanceDeadlines })
+      .from(grievanceDeadlines)
+      .innerJoin(grievances, eq(grievanceDeadlines.grievanceId, grievances.id))
+      .where(
+        and(
+          eq(grievances.organizationId, organizationId),
+          eq(grievanceDeadlines.status, "pending"),
+          lte(grievanceDeadlines.dueDate, today)
+        )
+      )
+      .orderBy(asc(grievanceDeadlines.dueDate));
 
-    return deadlines.map((d) => createDeadlineAlert(d));
+    return rows.map((r) => createDeadlineAlert(r.deadline));
   } catch (_error) {
 return [];
   }

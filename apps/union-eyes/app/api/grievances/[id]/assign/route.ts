@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { randomUUID } from "node:crypto";
 import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
@@ -15,6 +16,7 @@ import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/li
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
+import { refreshDeadlineRemindersForGrievance } from "@/lib/deadline-engine";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -60,6 +62,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     }
 
     const assignment = await assignSteward(params.id, parsed.data.stewardId);
+    const previousUnionRepId = grievance.unionRepId ?? null;
 
     // Update grievance assigned rep
     await withRLSContext(async () => {
@@ -75,6 +78,21 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
         actorUserId: userId,
         notes: `Steward ${parsed.data.stewardId} assigned`,
       });
+    });
+
+    // Refresh any active deadline reminders so the outgoing representative's
+    // snapshotted recipient is superseded and the successor is scheduled.
+    // Recipient resolution reads grievances.unionRepId, which was just
+    // updated above, so this call resolves the NEW assignment.
+    const continuityCorrelationId = randomUUID();
+    await refreshDeadlineRemindersForGrievance({
+      grievanceId: params.id,
+      organizationId,
+      correlationId: continuityCorrelationId,
+      actor: { type: 'user', id: userId },
+      reason: 'assignment_changed',
+      previousAssigneeId: previousUnionRepId,
+      newAssigneeId: parsed.data.stewardId,
     });
 
     // Audit

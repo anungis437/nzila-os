@@ -194,5 +194,7 @@ export type DeadlineAuditEventType =
   | 'reminder.dead_lettered'
   | 'reminder.replayed'
   | 'reminder.lease_recovered'
+  | 'reminder.recipients_refreshed'
+  | 'reminder.superseded_at_dispatch'
   | 'overdue.detected'
   | 'overdue.processed';

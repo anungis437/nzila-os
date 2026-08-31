@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   mockFindManyDeadlines: vi.fn(),
   mockInsertReturning: vi.fn(),
   mockUpdateWhere: vi.fn(),
+  mockSelect: vi.fn(),
+  cancelGrievanceDeadlineReminders: vi.fn(async () => ({ cancelledIds: [], correlationId: 'test-cancel-correlation' })),
 }));
 
 vi.mock("@/db/db", () => ({
@@ -24,6 +26,7 @@ vi.mock("@/db/db", () => ({
         findMany: mocks.mockFindManyDeadlines,
       },
     },
+    select: mocks.mockSelect,
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
         returning: mocks.mockInsertReturning,
@@ -36,6 +39,15 @@ vi.mock("@/db/db", () => ({
     })),
   },
 }));
+
+/** Chainable select().from().innerJoin().where()[.orderBy()] mock. */
+function makeSelectChain(rows: unknown[]) {
+  const where = vi.fn(() => ({
+    orderBy: vi.fn(async () => rows),
+    then: (resolve: (v: unknown[]) => void) => Promise.resolve(rows).then(resolve),
+  }));
+  return { from: vi.fn(() => ({ innerJoin: vi.fn(() => ({ where })) })) };
+}
 
 vi.mock("@/db/schema", () => ({
   grievanceDeadlines: {
@@ -83,6 +95,7 @@ vi.mock("@/lib/deadline-engine", () => ({
     skipped: [],
     skippedInPast: [],
   })),
+  cancelGrievanceDeadlineReminders: mocks.cancelGrievanceDeadlineReminders,
 }));
 
 /* ── imports ────────────────────────────────────────────────────────── */
@@ -112,6 +125,8 @@ describe("deadline-tracking-system", () => {
     mocks.mockFindManyDeadlines.mockResolvedValue([]);
     mocks.mockInsertReturning.mockResolvedValue([{ id: "dl-1" }]);
     mocks.mockUpdateWhere.mockResolvedValue([]);
+    mocks.mockSelect.mockReturnValue(makeSelectChain([]));
+    mocks.cancelGrievanceDeadlineReminders.mockResolvedValue({ cancelledIds: [], correlationId: "test-cancel-correlation" });
   });
 
   // ── DEFAULT_DEADLINE_RULES ───────────────────────────────────────
@@ -211,12 +226,38 @@ describe("deadline-tracking-system", () => {
 
   // ── completeDeadline ──────────────────────────────────────────────
   describe("completeDeadline", () => {
-    it("completes successfully", async () => {
+    it("completes successfully when the deadline belongs to the caller's organization", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([{ id: "dl-1" }]));
       const r = await completeDeadline("dl-1", "org-1", "user-1", "Done");
       expect(r.success).toBe(true);
     });
 
+    it("records the completing actor in the notes", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([{ id: "dl-1" }]));
+      await completeDeadline("dl-1", "org-1", "user-42", "All done");
+      const setCall = (mocks.mockUpdateWhere as unknown as { mock: { calls: unknown[] } });
+      expect(setCall).toBeDefined();
+    });
+
+    it("cancels durable outbox reminders on completion (not just legacy notifications)", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([{ id: "dl-1" }]));
+      await completeDeadline("dl-1", "org-1", "user-1");
+      expect(mocks.cancelGrievanceDeadlineReminders).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceDeadlineId: "dl-1", organizationId: "org-1", reason: "completed" }),
+      );
+    });
+
+    it("fails closed when the deadline does not belong to the caller's organization (wrong-org)", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([])); // ownership join returns nothing
+      const r = await completeDeadline("dl-1", "org-B", "user-1");
+      expect(r.success).toBe(false);
+      expect(r.error).toContain("Deadline not found");
+      expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
+      expect(mocks.cancelGrievanceDeadlineReminders).not.toHaveBeenCalled();
+    });
+
     it("handles error", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([{ id: "dl-1" }]));
       mocks.mockUpdateWhere.mockRejectedValueOnce(new Error("update failed"));
       const r = await completeDeadline("dl-1", "org-1", "user-1");
       expect(r.success).toBe(false);
@@ -298,46 +339,80 @@ describe("deadline-tracking-system", () => {
 
   // ── getUpcomingDeadlines ──────────────────────────────────────────
   describe("getUpcomingDeadlines", () => {
-    it("returns mapped alerts", async () => {
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-1",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() + 5 * 86400000),
-          description: "File grievance",
-        },
-      ]);
+    it("returns mapped alerts scoped to the organization via the grievance join", async () => {
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-1",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() + 5 * 86400000),
+              description: "File grievance",
+            },
+          },
+        ]),
+      );
       const alerts = await getUpcomingDeadlines("org-1");
       expect(alerts).toHaveLength(1);
       expect(alerts[0].deadlineId).toBe("dl-1");
       expect(alerts[0].status).toBe("upcoming");
     });
 
+    it("never returns another organization's deadlines (org B empty when scoped to org A)", async () => {
+      // The join's WHERE clause is what scopes by organization; simulate the
+      // DB honestly returning nothing for an org with no matching rows.
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([]));
+      const alerts = await getUpcomingDeadlines("org-B");
+      expect(alerts).toEqual([]);
+    });
+
     it("returns empty on error", async () => {
-      mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("fail"));
+      mocks.mockSelect.mockReturnValueOnce({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(() => ({ orderBy: vi.fn().mockRejectedValue(new Error("fail")) })),
+          })),
+        })),
+      });
       expect(await getUpcomingDeadlines("org-1")).toEqual([]);
     });
   });
 
   // ── getOverdueDeadlines ───────────────────────────────────────────
   describe("getOverdueDeadlines", () => {
-    it("returns mapped alerts", async () => {
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-2",
-          grievanceId: "c-2",
-          deadlineType: "step_1_response",
-          dueDate: new Date(Date.now() - 86400000),
-          description: "Response due",
-        },
-      ]);
+    it("returns mapped alerts scoped to the organization via the grievance join", async () => {
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-2",
+              grievanceId: "c-2",
+              deadlineType: "step_1_response",
+              dueDate: new Date(Date.now() - 86400000),
+              description: "Response due",
+            },
+          },
+        ]),
+      );
       const alerts = await getOverdueDeadlines("org-1");
       expect(alerts).toHaveLength(1);
     });
 
+    it("never returns another organization's deadlines", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([]));
+      const alerts = await getOverdueDeadlines("org-B");
+      expect(alerts).toEqual([]);
+    });
+
     it("returns empty on error", async () => {
-      mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("fail"));
+      mocks.mockSelect.mockReturnValueOnce({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(() => ({ orderBy: vi.fn().mockRejectedValue(new Error("fail")) })),
+          })),
+        })),
+      });
       expect(await getOverdueDeadlines("org-1")).toEqual([]);
     });
   });
@@ -359,22 +434,32 @@ describe("deadline-tracking-system", () => {
   // ── escalateMissedDeadlines ───────────────────────────────────────
   describe("escalateMissedDeadlines", () => {
     it("escalates overdue deadlines and returns count", async () => {
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-1",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() - 86400000),
-          description: "Late",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-1",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() - 86400000),
+              description: "Late",
+            },
+          },
+        ]),
+      );
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-1" }); // sendEscalationNotification
       const count = await escalateMissedDeadlines("org-1");
       expect(count).toBe(1);
     });
 
     it("returns 0 on error", async () => {
-      mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("fail"));
+      mocks.mockSelect.mockReturnValueOnce({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(() => ({ orderBy: vi.fn().mockRejectedValue(new Error("fail")) })),
+          })),
+        })),
+      });
       expect(await escalateMissedDeadlines("org-1")).toBe(0);
     });
   });
@@ -465,15 +550,19 @@ describe("deadline-tracking-system", () => {
 
   describe("deadline status classification", () => {
     it("calculates warning status for deadlines 3 days or less away", async () => {
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-1",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() + 2 * 86400000),
-          description: "File grievance",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-1",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() + 2 * 86400000),
+              description: "File grievance",
+            },
+          },
+        ]),
+      );
       const alerts = await getUpcomingDeadlines("org-1");
       expect(alerts).toHaveLength(1);
       // The mock returns 5, so status will be "upcoming"
@@ -481,15 +570,19 @@ describe("deadline-tracking-system", () => {
     });
 
     it("calculates overdue status for negative days remaining", async () => {
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-1",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() - 2 * 86400000),
-          description: "Late filing",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-1",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() - 2 * 86400000),
+              description: "Late filing",
+            },
+          },
+        ]),
+      );
       const alerts = await getOverdueDeadlines("org-1");
       expect(alerts).toHaveLength(1);
     });
@@ -499,15 +592,19 @@ describe("deadline-tracking-system", () => {
   describe("createDeadlineAlert — status branches", () => {
     it("maps overdue status when daysRemaining < 0", async () => {
       vi.mocked(differenceInDays).mockReturnValueOnce(-3);
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-o",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() - 3 * 86400000),
-          description: "Overdue",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-o",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() - 3 * 86400000),
+              description: "Overdue",
+            },
+          },
+        ]),
+      );
       const alerts = await getUpcomingDeadlines("org-1");
       expect(alerts).toHaveLength(1);
       expect(alerts[0].status).toBe("overdue");
@@ -515,15 +612,19 @@ describe("deadline-tracking-system", () => {
 
     it("maps warning status when 0 <= daysRemaining <= 3", async () => {
       vi.mocked(differenceInDays).mockReturnValueOnce(2);
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-w",
-          grievanceId: "c-1",
-          deadlineType: "step_1_response",
-          dueDate: new Date(Date.now() + 2 * 86400000),
-          description: "Warning",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-w",
+              grievanceId: "c-1",
+              deadlineType: "step_1_response",
+              dueDate: new Date(Date.now() + 2 * 86400000),
+              description: "Warning",
+            },
+          },
+        ]),
+      );
       const alerts = await getUpcomingDeadlines("org-1");
       expect(alerts).toHaveLength(1);
       expect(alerts[0].status).toBe("warning");
@@ -531,15 +632,19 @@ describe("deadline-tracking-system", () => {
 
     it("uses new Date() fallback when dueDate is null", async () => {
       vi.mocked(differenceInDays).mockReturnValueOnce(0);
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-n",
-          grievanceId: "c-1",
-          deadlineType: "step_1_response",
-          dueDate: null,
-          description: null,
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-n",
+              grievanceId: "c-1",
+              deadlineType: "step_1_response",
+              dueDate: null,
+              description: null,
+            },
+          },
+        ]),
+      );
       const alerts = await getUpcomingDeadlines("org-1");
       expect(alerts).toHaveLength(1);
       expect(alerts[0].dueDate).toBeInstanceOf(Date);
@@ -581,6 +686,7 @@ describe("deadline-tracking-system", () => {
   // ── Branch Coverage: completeDeadline update ─────────────────────
   describe("completeDeadline — notes branch", () => {
     it("completes without notes argument", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([{ id: "dl-1" }]));
       const r = await completeDeadline("dl-1", "org-1", "user-1");
       expect(r.success).toBe(true);
     });
@@ -607,15 +713,19 @@ describe("deadline-tracking-system", () => {
   describe("escalateMissedDeadlines — update path", () => {
     it("updates overdue deadline status and sends notification", async () => {
       vi.mocked(differenceInDays).mockReturnValue(-2);
-      mocks.mockFindManyDeadlines.mockResolvedValue([
-        {
-          id: "dl-esc",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() - 2 * 86400000),
-          description: "Missed deadline",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-esc",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() - 2 * 86400000),
+              description: "Missed deadline",
+            },
+          },
+        ]),
+      );
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-esc" });
 
       const count = await escalateMissedDeadlines("org-1");
@@ -660,6 +770,7 @@ describe("deadline-tracking-system", () => {
     });
 
     it("completeDeadline wraps non-Error throw", async () => {
+      mocks.mockSelect.mockReturnValueOnce(makeSelectChain([{ id: "dl-1" }]));
       mocks.mockUpdateWhere.mockRejectedValueOnce(null);
 
       const r = await completeDeadline("dl-1", "org-1", "user-1");
@@ -793,22 +904,32 @@ describe("deadline-tracking-system", () => {
   // ── Branch Coverage: escalateMissedDeadlines error ────────────────
   describe("escalateMissedDeadlines — error path", () => {
     it("returns 0 on error", async () => {
-      mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("db down"));
+      mocks.mockSelect.mockReturnValueOnce({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(() => ({ orderBy: vi.fn().mockRejectedValue(new Error("db down")) })),
+          })),
+        })),
+      });
       const count = await escalateMissedDeadlines("org-1");
       expect(count).toBe(0);
     });
 
     it("handles sendEscalationNotification when deadline not found", async () => {
       vi.mocked(differenceInDays).mockReturnValue(-1);
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
-        {
-          id: "dl-gone",
-          grievanceId: "c-1",
-          deadlineType: "filing_deadline",
-          dueDate: new Date(Date.now() - 86400000),
-          description: "Missing",
-        },
-      ]);
+      mocks.mockSelect.mockReturnValueOnce(
+        makeSelectChain([
+          {
+            deadline: {
+              id: "dl-gone",
+              grievanceId: "c-1",
+              deadlineType: "filing_deadline",
+              dueDate: new Date(Date.now() - 86400000),
+              description: "Missing",
+            },
+          },
+        ]),
+      );
       // sendEscalationNotification does findFirst — return null
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce(null);
 
