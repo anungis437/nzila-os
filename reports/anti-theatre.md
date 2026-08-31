@@ -1,7 +1,7 @@
 # Anti-Theatre Scan Report
 
-- Generated: 2026-08-26T17:39:41.506Z
-- Files scanned: 4825
+- Generated: 2026-08-31T14:14:55.808Z
+- Files scanned: 4856
 - Rules: R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8
 - **Errors: 0**
 - Warnings: 1266
@@ -60,7 +60,6 @@
 | warning | R-6 | `apps/union-eyes/components/admin/clc-remittances-dashboard.tsx` | 190 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/admin/FeatureFlagsAdmin.tsx` | 34 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/admin/FeatureFlagsAdmin.tsx` | 57 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/components/admin/organization-form.tsx` | 356 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/admin/OrganizationHierarchyAdmin.tsx` | 85 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/admin/OrganizationHierarchyAdmin.tsx` | 144 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/components/admin/OrganizationHierarchyAdmin.tsx` | 169 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -235,10 +234,10 @@
 | warning | R-6 | `apps/union-eyes/lib/address/address-service.ts` | 367 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/analytics-aggregation.ts` | 265 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/analytics-middleware.ts` | 108 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 411 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 429 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 528 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 540 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 413 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 431 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 532 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/api-auth-guard.ts` | 544 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/api/standardized-responses.ts` | 24 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/api/with-api.ts` | 335 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/api/with-api.ts` | 350 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -258,8 +257,9 @@
 | warning | R-6 | `apps/union-eyes/lib/client-logger.ts` | 29 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/cognition/ue-adapter.ts` | 127 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/db/with-rls-context.ts` | 152 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 583 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
-| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 604 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/deadline-engine/assignment-sync.ts` | 290 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 693 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/deadline-tracking-system.ts` | 714 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/document-management-system.ts` | 797 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/document-management-system.ts` | 862 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/documents/batch-operations-service.ts` | 97 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -303,6 +303,7 @@
 | warning | R-6 | `apps/union-eyes/lib/migrations/tenant-to-org-mapper.ts` | 461 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/mobile/biometric-auth.ts` | 144 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/observability/telemetry.ts` | 63 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
+| warning | R-6 | `apps/union-eyes/lib/reality/capability-registry.ts` | 717 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/recurring-events-service.ts` | 262 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/rollout-governance.ts` | 52 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
 | warning | R-6 | `apps/union-eyes/lib/rollout-governance.ts` | 76 | Silent-swallow catch block. Log and re-throw, or explicitly document why the error is ignored. |
@@ -509,4 +510,3 @@
 | warning | R-7 | `apps/union-eyes/app/api/bargaining-notes/route.ts` | 1 | Production API route `app/api/bargaining-notes/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/bargaining/negotiations/[id]/route.ts` | 1 | Production API route `app/api/bargaining/negotiations/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
 | warning | R-7 | `apps/union-eyes/app/api/bargaining/negotiations/route.ts` | 1 | Production API route `app/api/bargaining/negotiations/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
-| warning | R-7 | `apps/union-eyes/app/api/bargaining/proposals/[id]/route.ts` | 1 | Production API route `app/api/bargaining/proposals/[id]/route.ts` has no capability-registry entry. Add it to `apps/union-eyes/lib/reality/capability-registry.ts`. |
