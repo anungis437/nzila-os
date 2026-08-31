@@ -38,6 +38,30 @@ export type CapabilityState =
   | 'DEPRECATED'
   | 'REMOVED';
 
+/**
+ * Whether a non-`REAL` capability is required before Union Eyes can be
+ * considered SaaS-operational. Omitted means `blocking` (the historical
+ * default — every non-REAL capability was assumed to need a fix before
+ * GA). Set to `non_blocking` only per an explicit, documented
+ * product-boundary decision — never inferred from state alone.
+ */
+export type CapabilityReadinessImpact = 'blocking' | 'non_blocking';
+
+/**
+ * Why a `non_blocking` capability is not required. Not a defect
+ * classification — `state` already records what's wrong with the
+ * implementation; this records why fixing it is optional.
+ */
+export type CapabilityDisposition =
+  // A real, intentional feature Union Eyes could offer, but is not
+  // required because a specialist external system (e.g. a dedicated
+  // dues/membership platform) may already be authoritative for this
+  // domain. Union Eyes does not need to become that system of record.
+  | 'OPTIONAL_NATIVE_CAPABILITY'
+  // Code that exists but is not wired to any live, user-reachable
+  // surface today — orphaned, not a defect a real user can hit.
+  | 'LATENT_INTERNAL_CAPABILITY';
+
 export interface Capability {
   /** Stable identifier (e.g. `UE-CRON-MONTHLY-DUES`). Never renamed once assigned. */
   id: string;
@@ -58,7 +82,12 @@ export interface Capability {
   targetWave: number;
   /** Free-form notes (limitations, gotchas, follow-ups). */
   notes?: string;
+  /** See {@link CapabilityReadinessImpact}. Omitted = blocking. */
+  readinessImpact?: CapabilityReadinessImpact;
+  /** Required when `readinessImpact` is `non_blocking`. See {@link CapabilityDisposition}. */
+  disposition?: CapabilityDisposition;
 }
+
 
 /**
  * Wave 0 baseline. Additions are appended over successive waves; existing
@@ -605,6 +634,19 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   // discovered while classifying the 5 NOT_IMPLEMENTED cron entries above.
   // Not implemented/repaired here — flagged with evidence for a dedicated,
   // reviewed follow-up given the financial/notification blast radius.
+  //
+  // PRODUCT-BOUNDARY CORRECTION (2026-08-31, post-audit): Union Eyes does
+  // not need to become a replacement dues-management system. Native
+  // multi-tenant dues calculation and automated dues reminders (the two
+  // entries immediately below) are OPTIONAL, NON-BLOCKING capabilities —
+  // see `readinessImpact`/`disposition` on each. The member-facing dues
+  // portal remains REQUIRED to be truthful regardless: it must never
+  // display fabricated balances/dates, and must honestly distinguish "no
+  // dues data on file" from "$0 owed" when a specialist external
+  // dues/membership system is authoritative instead of Union Eyes' native
+  // ledger. That truth-contract work is tracked separately (PR #721,
+  // UE-DUES-PORTAL-* capability entries) and does not depend on either
+  // capability below becoming REAL.
   // ------------------------------------------------------------------------
   {
     id: 'UE-FIN-DUES-CALCULATION-WORKFLOW',
@@ -619,15 +661,23 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'services/financial-service/src/tests/unit/dues-calculation-workflow.test.ts — unit-tests processMonthlyDuesCalculation() and job cancellation integration for a single supplied tenantId; does not test the scheduled job\'s multi-tenant behavior because there is none to test.',
     ],
     targetWave: 7,
+    readinessImpact: 'non_blocking',
+    disposition: 'OPTIONAL_NATIVE_CAPABILITY',
     notes:
       'LIMITED, not REAL: the job is genuinely scheduled and does create real dues_transactions rows for the ' +
       'one hardcoded test tenant, but every real customer organization silently receives ZERO monthly dues ' +
       'transactions from this scheduled run — the "iterate through all tenants" step described in the code\'s ' +
       'own comment was never implemented. This is materially different from UE-CRON-MONTHLY-DUES (the main-app ' +
       'stub, which is honestly 501) because this one runs, appears successful in logs, and produces no ' +
-      'observable failure for real tenants — it just never processes them. Repair requires querying active ' +
-      'organizations and iterating processMonthlyDuesCalculation per tenant; flagged for a dedicated, reviewed ' +
-      'PR given the direct financial/billing blast radius rather than folded into this audit pass.',
+      'observable failure for real tenants — it just never processes them. ' +
+      'PRODUCT-BOUNDARY DECISION (2026-08-31): native multi-tenant dues calculation is an OPTIONAL, ' +
+      'NON-BLOCKING capability, not a requirement for Union Eyes to be SaaS-operational. Union Eyes does not ' +
+      'need to become a replacement dues-management system — a specialist external dues/membership system may ' +
+      'already be authoritative for a given tenant. This finding therefore must NOT be represented as an ' +
+      '"implement to make SaaS operational" blocker. The recommended follow-up is: only productize this ' +
+      '(fix the hardcoded tenant, add COPE/PAC/surcharge support) if/when native dues administration becomes ' +
+      'an intentional Union Eyes module — it is not required for GA. It remains LIMITED (not REAL) so its ' +
+      'current implementation is never mistaken for operational.',
   },
   {
     id: 'UE-FIN-DUES-REMINDER-SCHEDULER',
@@ -640,13 +690,20 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'app/api/cron/overdue-notifications/route.ts — the main-app cron that would be the natural trigger for this class is registered NOT_IMPLEMENTED (see UE-CRON-OVERDUE-NOTIFICATIONS) and does not delegate to it.',
     ],
     targetWave: 3,
+    readinessImpact: 'non_blocking',
+    disposition: 'OPTIONAL_NATIVE_CAPABILITY',
     notes:
       'LIMITED: the reminder logic and notification dispatch are real, tested-in-isolation code, but nothing ' +
       'ever schedules or triggers a run, so no member has ever received a 7-day, 1-day, or overdue dues ' +
-      'reminder in a deployed environment. Repair is comparatively low-risk (wire ' +
+      'reminder in a deployed environment. ' +
+      'PRODUCT-BOUNDARY DECISION (2026-08-31): automated native dues reminders are an OPTIONAL, NON-BLOCKING ' +
+      'capability — not required for Union Eyes to be SaaS-operational, for the same reason as ' +
+      'UE-FIN-DUES-CALCULATION-WORKFLOW above (a specialist external dues/membership system may already send ' +
+      'these reminders). The recommended follow-up is: only productize this (wire ' +
       'app/api/cron/overdue-notifications/route.ts to call DuesReminderScheduler.runReminderJob() behind the ' +
-      'existing cron-secret auth) but flagged for a dedicated PR with its own test/rollout review given it ' +
-      'sends real member-facing emails once wired.',
+      'existing cron-secret auth) if/when native dues administration becomes an intentional Union Eyes module ' +
+      '— it is not required for GA. It remains LIMITED (not REAL) so its current implementation is never ' +
+      'mistaken for operational.',
   },
   {
     id: 'UE-ANALYTICS-SCHEDULED-REPORTS-UI',
@@ -662,6 +719,8 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'Repo-wide search found no page.tsx that imports/renders ScheduledReportsManager from components/analytics/scheduled-reports-manager.tsx — it is currently unreferenced (orphaned), so the stale-endpoint bug has no live user-facing impact today.',
     ],
     targetWave: 8,
+    readinessImpact: 'non_blocking',
+    disposition: 'LATENT_INTERNAL_CAPABILITY',
     notes:
       'DEGRADED, not a live defect: the orphaned scheduled-reports-manager.tsx also ships ~180 lines of ' +
       'hardcoded sample data as its declared fallback ("SAMPLE DATA (module-level defaults, replaced by API ' +
