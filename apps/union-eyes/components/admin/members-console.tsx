@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Users, Download, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import JobClassificationManagement from "@/components/admin/JobClassificationManagement";
+import { generateCSV, type CSVColumn } from "@/lib/csv-export";
+import { useMembersConsoleData } from "@/lib/hooks/use-members-console-data";
 import {
   Select,
   SelectContent,
@@ -40,13 +42,6 @@ import { Badge } from "@/components/ui/badge";
 interface Organization {
   id: string;
   name: string;
-}
-
-interface MemberStats {
-  total: number;
-  active: number;
-  stewards: number;
-  officers: number;
 }
 
 interface Member {
@@ -82,18 +77,17 @@ export function filterMembers(
   });
 }
 
-/** Builds a CSV string for the given members list (header row + one row per member). */
+/** Builds a CSV string for the given members list (header row + one row per member). Uses the repo's canonical CSV escaping/formula-injection guard (lib/csv-export.ts) — never hand-rolled string joining. */
 export function buildMembersExportCsv(members: Member[]): string {
-  const headers = ["Name", "Email", "Role", "Status", "Department", "Membership Number"];
-  const rows = members.map((m) => [
-    m.name ?? "",
-    m.email ?? "",
-    m.role ?? "",
-    m.status ?? "",
-    m.department ?? "",
-    m.membership_number ?? "",
-  ]);
-  return [headers, ...rows].map((row) => row.join(",")).join("\n");
+  const columns: CSVColumn<Member>[] = [
+    { header: "Name", accessor: (m) => m.name },
+    { header: "Email", accessor: (m) => m.email },
+    { header: "Role", accessor: (m) => m.role },
+    { header: "Status", accessor: (m) => m.status },
+    { header: "Department", accessor: (m) => m.department },
+    { header: "Membership Number", accessor: (m) => m.membership_number },
+  ];
+  return generateCSV(members, columns);
 }
 
 export default function MembersConsole() {
@@ -108,12 +102,6 @@ export default function MembersConsole() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
   const [orgsError, setOrgsError] = useState<string | null>(null);
-  const [stats, setStats] = useState<MemberStats>({ total: 0, active: 0, stewards: 0, officers: 0 });
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [statsError, setStatsError] = useState<string | null>(null);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
-  const [membersError, setMembersError] = useState<string | null>(null);
 
   // Load organizations on mount
   useEffect(() => {
@@ -137,80 +125,8 @@ export default function MembersConsole() {
     fetchOrganizations();
   }, []);
 
-  // Fetch stats (all or filtered by org)
-  const fetchStats = useCallback(async () => {
-    try {
-      setIsLoadingStats(true);
-      setStatsError(null);
-      const url = selectedOrg === "all"
-        ? '/api/admin/members/stats'
-        : `/api/admin/members/stats?organizationId=${selectedOrg}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to load member statistics (${response.status})`);
-      }
-      const data = await response.json();
-      setStats(data);
-    } catch (error) {
-      setStatsError(error instanceof Error ? error.message : 'Failed to load member statistics');
-    } finally {
-      setIsLoadingStats(false);
-    }
-  }, [selectedOrg]);
-
-  // Fetch members list
-  const fetchMembers = useCallback(async () => {
-    setMembersError(null);
-    if (selectedOrg === "all") {
-      // Fetch from all orgs
-      try {
-        setIsLoadingMembers(true);
-        const allMembers: Member[] = [];
-        const failedOrgs: string[] = [];
-        for (const org of organizations) {
-          const response = await fetch(`/api/organizations/${org.id}/members`);
-          if (response.ok) {
-            const data = await response.json();
-            allMembers.push(...(data.data || []));
-          } else {
-            failedOrgs.push(org.name);
-          }
-        }
-        setMembers(allMembers);
-        if (failedOrgs.length > 0) {
-          setMembersError(`Failed to load members for: ${failedOrgs.join(', ')}`);
-        }
-      } catch (error) {
-        setMembersError(error instanceof Error ? error.message : 'Failed to load members');
-      } finally {
-        setIsLoadingMembers(false);
-      }
-    } else {
-      try {
-        setIsLoadingMembers(true);
-        const response = await fetch(`/api/organizations/${selectedOrg}/members`);
-        if (!response.ok) {
-          throw new Error(`Failed to load members (${response.status})`);
-        }
-        const data = await response.json();
-        setMembers(data.data || []);
-      } catch (error) {
-        setMembersError(error instanceof Error ? error.message : 'Failed to load members');
-      } finally {
-        setIsLoadingMembers(false);
-      }
-    }
-  }, [selectedOrg, organizations]);
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
-
-  useEffect(() => {
-    if (!isLoadingOrgs) {
-      fetchMembers();
-    }
-  }, [fetchMembers, isLoadingOrgs]);
+  const { stats, isLoadingStats, statsError, members, isLoadingMembers, membersError } =
+    useMembersConsoleData(selectedOrg, organizations, isLoadingOrgs);
 
   const currentOrganization = organizations.find((org) => org.id === selectedOrg);
 
@@ -270,6 +186,20 @@ export default function MembersConsole() {
   // backend endpoint required (mirrors the proven pattern already used by
   // components/organization/organization-members.tsx's handleExport).
   const handleExportMembers = () => {
+    // A partial/failed load (e.g. "All Organizations" with some orgs
+    // failing) can still leave a non-empty `members` array — exporting it
+    // would produce an incomplete CSV that LOOKS complete. Block export
+    // entirely rather than silently ship a partial dataset; the visible
+    // error banner above already explains which scope is unavailable.
+    if (membersError) {
+      toast({
+        title: "Export unavailable",
+        description: "Member data failed to load for one or more organizations. Export is blocked until the complete dataset loads successfully.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (filteredMembers.length === 0) {
       toast({
         title: "Nothing to export",
@@ -312,6 +242,8 @@ export default function MembersConsole() {
             <Button
               variant="outline"
               onClick={handleExportMembers}
+              disabled={!!membersError || isLoadingMembers}
+              title={membersError ? "Export unavailable — member data failed to load for one or more organizations." : undefined}
               className="gap-2"
             >
               <Download className="w-4 h-4" />
@@ -335,7 +267,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Members</p>
-                <p className="text-2xl font-bold">{isLoadingStats ? '…' : stats.total}</p>
+                <p className="text-2xl font-bold">{isLoadingStats || stats === null ? '…' : stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-muted-foreground" />
             </div>
@@ -347,7 +279,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Members</p>
-                <p className="text-2xl font-bold text-green-600">{isLoadingStats ? '…' : stats.active}</p>
+                <p className="text-2xl font-bold text-green-600">{isLoadingStats || stats === null ? '…' : stats.active}</p>
               </div>
               <Users className="w-8 h-8 text-green-600" />
             </div>
@@ -359,7 +291,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Stewards</p>
-                <p className="text-2xl font-bold text-purple-600">{isLoadingStats ? '…' : stats.stewards}</p>
+                <p className="text-2xl font-bold text-purple-600">{isLoadingStats || stats === null ? '…' : stats.stewards}</p>
               </div>
               <Users className="w-8 h-8 text-purple-600" />
             </div>
@@ -371,7 +303,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Officers</p>
-                <p className="text-2xl font-bold text-orange-600">{isLoadingStats ? '…' : stats.officers}</p>
+                <p className="text-2xl font-bold text-orange-600">{isLoadingStats || stats === null ? '…' : stats.officers}</p>
               </div>
               <Users className="w-8 h-8 text-orange-600" />
             </div>

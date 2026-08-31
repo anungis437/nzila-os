@@ -61,4 +61,52 @@ describe('members-console buildMembersExportCsv', () => {
     const csv = buildMembersExportCsv([]);
     expect(csv).toBe('Name,Email,Role,Status,Department,Membership Number');
   });
+
+  // Uses the repo's canonical escaper (lib/csv-export.ts) rather than a
+  // hand-rolled row.join(",") — these prove the export is safe for
+  // real member-controlled data (names/departments containing commas,
+  // quotes, newlines) and neutralised against spreadsheet formula injection.
+  it('quotes a name containing a comma', () => {
+    const csv = buildMembersExportCsv([
+      { id: '1', user_id: 'u1', organization_id: 'org1', role: 'member', status: 'active', name: 'Smith, Jane', email: 'j@example.com', phone: null, department: null, membership_number: null, created_at: null },
+    ]);
+    expect(csv.split('\n')[1]).toBe('"Smith, Jane",j@example.com,member,active,,');
+  });
+
+  it('doubles an embedded quote and wraps the field', () => {
+    const csv = buildMembersExportCsv([
+      { id: '1', user_id: 'u1', organization_id: 'org1', role: 'member', status: 'active', name: 'Jane "JJ" Smith', email: null, phone: null, department: null, membership_number: null, created_at: null },
+    ]);
+    expect(csv.split('\n')[1]).toContain('"Jane ""JJ"" Smith"');
+  });
+
+  it('wraps a department containing a newline in quotes', () => {
+    const csv = buildMembersExportCsv([
+      { id: '1', user_id: 'u1', organization_id: 'org1', role: 'member', status: 'active', name: 'Alice', email: null, phone: null, department: 'Line1\nLine2', membership_number: null, created_at: null },
+    ]);
+    const csvRow = csv.split('\n').slice(1).join('\n');
+    expect(csvRow).toContain('"Line1\nLine2"');
+  });
+
+  it('preserves Unicode values unchanged', () => {
+    const csv = buildMembersExportCsv([
+      { id: '1', user_id: 'u1', organization_id: 'org1', role: 'member', status: 'active', name: 'José Núñez 李明', email: null, phone: null, department: null, membership_number: null, created_at: null },
+    ]);
+    expect(csv.split('\n')[1]).toContain('José Núñez 李明');
+  });
+
+  it('neutralises a spreadsheet-formula-leading department with a leading apostrophe', () => {
+    const csv = buildMembersExportCsv([
+      { id: '1', user_id: 'u1', organization_id: 'org1', role: 'member', status: 'active', name: 'Alice', email: null, phone: null, department: '=SUM(A1:A9)', membership_number: null, created_at: null },
+    ]);
+    const dataLine = csv.split('\n')[1];
+    expect(dataLine).toContain("'=SUM(A1:A9)");
+  });
+
+  it('leaves normal values semantically unchanged', () => {
+    const csv = buildMembersExportCsv([
+      { id: '1', user_id: 'u1', organization_id: 'org1', role: 'member', status: 'active', name: 'Alice Smith', email: 'alice@example.com', phone: null, department: 'Assembly', membership_number: 'M-001', created_at: null },
+    ]);
+    expect(csv.split('\n')[1]).toBe('Alice Smith,alice@example.com,member,active,Assembly,M-001');
+  });
 });
