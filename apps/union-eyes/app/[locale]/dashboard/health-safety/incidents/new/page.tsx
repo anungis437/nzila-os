@@ -30,7 +30,7 @@ export default function NewIncidentPage() {
 
   const handleSubmit = async (data: Record<string, unknown>) => {
     try {
-      const res = await fetch('/api/v2/health-safety/incidents', {
+      const res = await fetch('/api/health-safety/incidents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, organizationId }),

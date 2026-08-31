@@ -76,7 +76,7 @@ export default function IncidentsPage() {
 
   const loadStats = useCallback(async () => {
     try {
-      const res = await fetch(`/api/v2/health-safety/incidents/stats?organizationId=${organizationId}&period=${dateRange}`);
+      const res = await fetch(`/api/health-safety/incidents/stats?organizationId=${organizationId}&period=${dateRange}`);
       if (res.ok) {
         const json = await res.json();
         setStats({

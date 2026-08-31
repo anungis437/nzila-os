@@ -34,8 +34,13 @@ import { db } from '@/db/db';
 import { eq, and, desc, count, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
+import type { UserRole } from '@/lib/api-auth-guard';
 
-type MinRole = 'member' | 'steward' | 'officer' | 'admin';
+// crud-factory's readRole/writeRole accept the full canonical role hierarchy
+// (same set withApi's auth.minRole already enforces via ROLE_HIERARCHY), not
+// just the 4 legacy shorthand values — so specialized roles like
+// 'health_safety_rep' can be expressed without bypassing the type system.
+type MinRole = UserRole;
 type RouteHandler = (request: NextRequest, nextContext?: { params?: Record<string, string> | Promise<Record<string, string>> }) => Promise<Response>;
 
 interface CollectionHandlers { GET: RouteHandler; POST: RouteHandler; }
@@ -73,6 +78,22 @@ export interface CrudOptions {
    * Use for FSM-governed fields like `status` that must only change via explicit workflow APIs.
    */
   blockedPatchFields?: string[];
+  /**
+   * Optional transform applied to the insert payload before create, after
+   * organizationId/createdBy are auto-set. Use this to normalize client field
+   * names to schema column names, derive required unique identifiers (e.g.
+   * report numbers), or fill in server-computed defaults.
+   *
+   * Security note: the factory re-asserts organizationId/createdBy from the
+   * pre-transform values AFTER this hook runs, so this hook cannot remove or
+   * override tenant/audit scoping even if it tries to (whether by accident or
+   * by a bug in a future hook) — those two fields are always taken from the
+   * authenticated request context, never from this hook's return value.
+   */
+  beforeCreate?: (
+    values: Record<string, unknown>,
+    ctx: { organizationId?: string | null; userId?: string | null },
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
 }
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
@@ -97,6 +118,32 @@ function getTableName(table: PgTable): string {
   const sym = Object.getOwnPropertySymbols(table).find(s => s.toString().includes('Name'));
   if (sym) return String((table as unknown as Record<symbol, unknown>)[sym]);
   return 'resource';
+}
+
+/**
+ * Re-asserts factory-owned tenant/audit scoping on a `beforeCreate` result.
+ * A hostile or buggy `beforeCreate` hook must never be able to remove or
+ * replace `organizationId`/`createdBy` — those two fields always come from
+ * the authenticated request context, never from a hook's return value.
+ * Exported for direct unit testing of this invariant in isolation.
+ */
+export function enforceCreateSecurityInvariants(
+  transformed: Record<string, unknown>,
+  guard: {
+    organizationId?: string | null;
+    userId?: string | null;
+    hasOrgColumn: boolean;
+    hasCreatedByColumn: boolean;
+  },
+): Record<string, unknown> {
+  const finalValues: Record<string, unknown> = { ...transformed };
+  if (guard.hasOrgColumn && guard.organizationId) {
+    finalValues.organizationId = guard.organizationId;
+  }
+  if (guard.hasCreatedByColumn && guard.userId) {
+    finalValues.createdBy = guard.userId;
+  }
+  return finalValues;
 }
 
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
@@ -226,7 +273,23 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           values.createdBy = userId;
         }
 
-        const [row] = await db.insert(table).values(values).returning();
+        const transformed = opts.beforeCreate
+          ? await opts.beforeCreate(values, { organizationId, userId })
+          : values;
+
+        // Security invariant: beforeCreate may normalize/derive business
+        // fields, but it must never be able to remove or override the
+        // factory-established tenant/audit scoping. Re-assert both values
+        // from the pre-transform object after the hook runs, no matter what
+        // the hook returned.
+        const finalValues = enforceCreateSecurityInvariants(transformed, {
+          organizationId,
+          userId,
+          hasOrgColumn: Boolean(orgScoped && orgCol),
+          hasCreatedByColumn: Boolean(createdByCol),
+        });
+
+        const [row] = await db.insert(table).values(finalValues).returning();
         return { data: row };
       },
     );
