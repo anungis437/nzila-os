@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Routed Submission Validator
  * MODULE: OCRA Dynamic Questionnaire Adaptation
- * DOCTRINE: docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §7
+ * DOCTRINE: docs/oci/superseded/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §7
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure helper used by both the live submit flow and the API ingest route to

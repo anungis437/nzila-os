@@ -21,7 +21,7 @@ The live adaptive routing surface is correct, deterministic, privacy-respecting,
 
 | Part | Deliverable | Status |
 |------|-------------|--------|
-| 1 | Manual QA script: [docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](../../../docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md) | ✅ |
+| 1 | Manual QA script: [docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](../../../docs/oci/superseded/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md) | ✅ |
 | 2 | Playwright E2E scaffold: [apps/union-eyes/e2e/ocra-adaptive-flow.spec.ts](../../../apps/union-eyes/e2e/ocra-adaptive-flow.spec.ts) | ✅ (smoke + privacy active; full traversal skipped pending question-bank testids) |
 | 3 | Component test for `AdaptiveExplanationCard`: [apps/union-eyes/components/icra/__tests__/AdaptiveExplanationCard.test.tsx](../../../apps/union-eyes/components/icra/__tests__/AdaptiveExplanationCard.test.tsx) | ✅ (7 tests, jsdom + @testing-library/react) |
 | 4 | Accessibility checks (focus order, keyboard navigation, aria roles, autoFocus heading) inside the same component test | ✅ |
@@ -95,4 +95,4 @@ The smoke + telemetry-privacy specs are active. The full multi-section traversal
 - **Author:** GitHub Copilot (Claude Opus 4.7)
 - **Reviewer (engineering):** _pending_
 - **Reviewer (security):** _pending_
-- **Manual QA (per [QA script](../../../docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md)):** _pending_
+- **Manual QA (per [QA script](../../../docs/oci/superseded/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md)):** _pending_

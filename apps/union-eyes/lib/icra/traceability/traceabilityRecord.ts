@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Traceability Record
  * MODULE: OCI/OCRA TraceabilityRecord (persistable, audit-safe, PII-free)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Aggregates derived findings and computes chain integrity. Mirrors the

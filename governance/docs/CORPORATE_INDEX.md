@@ -201,7 +201,7 @@
 - [Executive Reports](../business/reports/)
 
 ### Platform & Technology
-- [Platform Architecture](../platform/architecture/)
+- [Platform Architecture](../../platform/architecture)
 - [Technical Blueprints](../platform/blueprints/)
 - [Migration Plans](../platform/migrations/)
 

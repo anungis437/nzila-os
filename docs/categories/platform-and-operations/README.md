@@ -21,7 +21,7 @@ Technical and operational documentation grouped by platform lifecycle.
 ## Governance and Assurance
 
 - [Governance](../../governance/)
-- [Security](../../security/)
+- [Security](../../../security)
 - [Risk](../../risk/)
 - [Hardening](../../hardening/)
 - [Stress Test](../../stress-test/)

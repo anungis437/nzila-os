@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Source Instrument Taxonomy
  * MODULE: OCI/OCRA Source Instrument + Citation reference data (Phase G)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Phase G extends the traceability chain from an abstract obligation CLASS

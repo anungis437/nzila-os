@@ -1,8 +1,8 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Assessor Certification & Governance
  * MODULE: OCI/OCRA "who may conduct an assessment" standard (Gap 2)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md
- *           docs/oci/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md (§3.2 thresholds)
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md
+ *           docs/oci/superseded/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md (§3.2 thresholds)
  *
  * The IRR harness measures whether two reviewers AGREE. This module answers the
  * prior regulator question: **who is allowed to conduct OCI/OCRA in the first

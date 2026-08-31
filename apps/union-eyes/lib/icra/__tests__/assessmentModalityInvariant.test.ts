@@ -1,6 +1,6 @@
 /**
  * Assessment Modality Invariant — verifies the bank distribution and
- * modality role discipline mandated by docs/oci/assessment/OCI_MODALITY_DOCTRINE.md.
+ * modality role discipline mandated by docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md.
  */
 import { describe, it, expect } from 'vitest';
 import { ALL_QUESTIONS, QUESTION_BANK_VERSION } from '../questions';

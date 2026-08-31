@@ -1,8 +1,8 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Finding Artifact
  * MODULE: OCI/OCRA Finding (the addressable unit of explanation)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
- *           docs/oci/government-readiness/OCI_OCRA_EXPLAINABILITY_MODEL.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
+ *           docs/oci/superseded/government-readiness/OCI_OCRA_EXPLAINABILITY_MODEL.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * A Finding is a deterministic, PII-free assertion derived from the scoring

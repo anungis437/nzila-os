@@ -5,7 +5,7 @@
  * Pure. Append-only. No DB writes.
  *
  * Doctrine:
- *   docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md §10
+ *   docs/oci/superseded/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md §10
  *   docs/oci/OCI_INTERVENTION_ETHICS.md §2.5 (consent revocability)
  */
 

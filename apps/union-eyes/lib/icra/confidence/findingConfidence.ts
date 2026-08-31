@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Per-Finding Confidence
  * MODULE: OCI/OCRA finding-level confidence envelope
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_CONFIDENCE_ARCHITECTURE.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_CONFIDENCE_ARCHITECTURE.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Builds a Universal Confidence Envelope at FINDING granularity, fed by the

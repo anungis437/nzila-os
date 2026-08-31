@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (T3)
  * MODULE: Every surfaced finding has all seven answers
- * SPEC: docs/oci/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T3
+ * SPEC: docs/oci/superseded/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T3
  *
  * No finding is surfaced unless evidence, statement, obligation, dimension
  * contribution, confidence, consequence, and ≥1 recommendation are all present.

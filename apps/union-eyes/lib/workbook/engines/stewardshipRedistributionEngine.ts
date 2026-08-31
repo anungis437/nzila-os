@@ -12,8 +12,8 @@
  * Pure, deterministic. Tone: institutional, recognition-first,
  * governance-receivable, blame-free. No transformation theatre.
  *
- * Doctrine: docs/oci/stabilization/STEWARDSHIP_REDISTRIBUTION.md and
- * docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md.
+ * Doctrine: docs/oci/superseded/stabilization/STEWARDSHIP_REDISTRIBUTION.md and
+ * docs/oci/superseded/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md.
  */
 
 import {

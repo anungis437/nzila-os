@@ -19,7 +19,7 @@
  *      boundary breach.
  *
  * Doctrine sources:
- *  - docs/oci/OCI_METHOD.md (Sections 3.6, 3.7, 6)
+ *  - docs/oci/OCI_METHOD.md (Sections 3.6, 3.7, 6.5)
  *  - docs/oci/OCI_AI_BOUNDARY.md
  *  - docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md
  *  - docs/oci/OCI_DATA_HANDLING.md

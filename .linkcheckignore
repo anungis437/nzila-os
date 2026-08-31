@@ -54,6 +54,7 @@ docs/documentation-index.md
 
 # Archived docs — historical, links to removed/relocated content
 docs/archive/
+reports/archive/
 
 # Historical auth-migration artifacts — reference pre-migration file paths
 packages/automation/data/AUTH_IMPLEMENTATION_SUMMARY.md

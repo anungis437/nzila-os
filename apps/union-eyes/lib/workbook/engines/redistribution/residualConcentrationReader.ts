@@ -6,7 +6,7 @@
  * Pure. Reads, does not score. Categorical outputs only.
  *
  * Doctrine:
- *   docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md §9
+ *   docs/oci/superseded/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md §9
  *   docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md (no numeric scoring)
  */
 

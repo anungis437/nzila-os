@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (Phase C / IRR)
  * MODULE: Inter-Rater Reliability harness
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md
  *
  * Proves the IRR statistics are correct against textbook values, that the study
  * is honest under-data (INSUFFICIENT, never fabricated), that measurement never

@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Routing Explainability Snapshot
  * MODULE: OCRA Dynamic Questionnaire Adaptation
- * DOCTRINE: docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §6
+ * DOCTRINE: docs/oci/superseded/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md §6
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure, audit-safe summary of how a routed question bank was selected for a

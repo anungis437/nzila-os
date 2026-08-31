@@ -74,7 +74,7 @@ The smoke + telemetry-privacy specs are active. The full multi-section traversal
 - A static doctrine guard locks the selector contract so future drift fails fast.
 - The skipped scenarios are now mechanical to enable; they require dev-server orchestration but no further code changes inside the flow.
 
-This is a coverage limitation, not a correctness gap. The manual QA script ([docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](../../../docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md)) remains the authoritative end-to-end gate.
+This is a coverage limitation, not a correctness gap. The manual QA script ([docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md](../../../docs/oci/superseded/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md)) remains the authoritative end-to-end gate.
 
 ---
 
@@ -103,4 +103,4 @@ This is a coverage limitation, not a correctness gap. The manual QA script ([doc
 - **Author:** GitHub Copilot (Claude Opus 4.7)
 - **Reviewer (engineering):** _pending_
 - **Reviewer (security):** _pending_
-- **Manual QA (per [QA script](../../../docs/oci/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md)):** _pending_
+- **Manual QA (per [QA script](../../../docs/oci/superseded/assessment/OCRA_ADAPTIVE_LIVE_FLOW_QA_SCRIPT.md)):** _pending_

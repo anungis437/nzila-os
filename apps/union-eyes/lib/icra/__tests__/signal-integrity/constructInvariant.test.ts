@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Construct Invariant (measurement-theory guard)
  * MODULE: OCI/OCRA single-construct, evidence-gradient invariant
- * DOCTRINE: docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md §7.6 "Construct basis"
+ * DOCTRINE: docs/oci/superseded/methodology/OCI_METHOD_WHITEPAPER_v1.md §7.6 "Construct basis"
  *
  * THE CONSTRUCT INVARIANT (whitepaper §7.6):
  *   OCI/OCRA measures a SINGLE construct — institutional continuity CAPABILITY —

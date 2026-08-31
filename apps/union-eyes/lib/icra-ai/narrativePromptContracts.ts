@@ -6,7 +6,7 @@
  * boundary fails TypeScript compilation; the runtime builder in
  * `buildNarrativeContext.ts` additionally strips unexpected keys defensively.
  *
- * Boundary doctrine: docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md
+ * Boundary doctrine: docs/oci/superseded/ai/AI_DATA_BOUNDARY_MODEL.md
  */
 
 export const SYNTHESIS_ENGINE_VERSION = '1.0.0' as const;

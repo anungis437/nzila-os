@@ -5,7 +5,7 @@
  * NarrativeContext passed to the AI synthesis layer. Strips any unexpected
  * keys defensively and refuses to embed forbidden fields.
  *
- * Doctrine: docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md
+ * Doctrine: docs/oci/superseded/ai/AI_DATA_BOUNDARY_MODEL.md
  */
 
 import {
@@ -51,7 +51,7 @@ function assertNoForbiddenKeys(input: Record<string, unknown>, path: string): vo
     if (FORBIDDEN_KEY_SET.has(k)) {
       throw new Error(
         `[ai/buildNarrativeContext] forbidden key "${k}" at ${path}; ` +
-          'see docs/oci/ai/AI_DATA_BOUNDARY_MODEL.md',
+          'see docs/oci/superseded/ai/AI_DATA_BOUNDARY_MODEL.md',
       );
     }
   }

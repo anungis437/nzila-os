@@ -5,7 +5,7 @@
  * institutional continuity topologies. They are not scores; they surface
  * the pattern an institution operates under for archetype detection.
  *
- * Doctrine source: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §5
+ * Doctrine source: docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md §5
  */
 
 import type { Answer, ContinuityArchetypeId, Question } from './types';

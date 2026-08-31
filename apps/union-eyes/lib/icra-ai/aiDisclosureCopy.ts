@@ -2,7 +2,7 @@
  * aiDisclosureCopy
  * ────────────────
  * Canonical bilingual disclosure copy + UX language helpers. Mirrors
- * docs/oci/ai/AI_DISCLOSURE_NOTICE.md.
+ * docs/oci/superseded/ai/AI_DISCLOSURE_NOTICE.md.
  */
 
 export const AI_DISCLOSURE_VERSION = '1.0.0' as const;

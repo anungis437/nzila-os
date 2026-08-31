@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Inter-Rater Reliability (stats)
  * MODULE: OCI/OCRA IRR statistics engine (Phase C)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure, deterministic statistics for measuring agreement between independent

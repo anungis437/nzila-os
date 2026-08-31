@@ -1,6 +1,6 @@
 /**
  * GES Level 5 Probe Registry — direct extraction support for the eighth
- * signals listed in docs/oci/audit/GES_LEVEL_5_SIGNAL_MODEL.md.
+ * signals listed in docs/oci/superseded/audit/GES_LEVEL_5_SIGNAL_MODEL.md.
  *
  * Closes audit Finding E-1: GES Level 5 previously had no direct probe.
  * Each probe references a v2 modality question (or a documented composite

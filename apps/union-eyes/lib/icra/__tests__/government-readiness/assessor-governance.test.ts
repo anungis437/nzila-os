@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (Gap 2)
  * MODULE: Assessor Certification & Governance
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_ASSESSOR_CERTIFICATION_STANDARD.md
  *
  * Proves "who may conduct OCI/OCRA" is GOVERNED:
  *   - five levels with strictly monotonic privileges;

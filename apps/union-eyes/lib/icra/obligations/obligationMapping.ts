@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Obligation Mapping
  * MODULE: OCI/OCRA Finding → Obligation mapping (deterministic, table-driven)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_OBLIGATION_TAXONOMY.md §6
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_OBLIGATION_TAXONOMY.md §6
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure, deterministic mapping from a finding theme + evidence level to the

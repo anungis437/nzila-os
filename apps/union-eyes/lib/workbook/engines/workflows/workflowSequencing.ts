@@ -5,7 +5,7 @@
  *
  * Workflow Sequencing — deterministic ordering of eligible workflows
  * per the five sequencing rules in
- * docs/oci/stabilization/workflows/README.md §4.
+ * docs/oci/superseded/stabilization/workflows/README.md §4.
  *
  * 1. Recognition precedes intervention (recognition gate).
  * 2. Reduction precedes addition (capture + redistribution before

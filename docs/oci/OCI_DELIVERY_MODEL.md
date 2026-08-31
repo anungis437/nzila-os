@@ -69,9 +69,12 @@ Their role is to:
 ### Facilitator
 
 The OCI-trained fieldworker who carries the methodology. The
-facilitator is not a consultant. They do not produce findings. They
-help the institution articulate what is already true and choose what
-to stabilise.
+facilitator is not a consultant. **The facilitator drafts; the
+institution adopts or declines. A draft is not a finding until the
+institution adopts it.** The facilitator helps the institution
+articulate what is already true and choose what to stabilise — see
+[`OCI_METHOD.md` §4](./OCI_METHOD.md#4-method-artefacts) for the full
+artefact-by-artefact drafted-by / adopted-by table.
 
 A facilitator may be internal to the institution (after training) or
 external. The methodology is the same.
@@ -141,6 +144,18 @@ institution's property thereafter.
 - **Governance continuity plan** — the institution's own document,
   drafted under facilitation, ratified by the governance body.
 
+### Phase 3 close
+
+- **Deferred items list** — every item the engagement could not
+  stabilise, with reason, owner, and review date. Honest deferral is
+  a successful outcome, not a failure — see [`OCI_METHOD.md` §3.8](./OCI_METHOD.md#38-honest-deferral).
+- **Closure minute** — one page, drafted by the facilitator and
+  signed by the sponsor, recording that the institution declares
+  closure, what was stabilised, and what was deferred. This is the
+  artefact that answers "what do I hold if I fire you in week 6?" —
+  whatever has been drafted and adopted up to that point, plus a
+  closure minute recording the state at exit.
+
 ### Phase 4 artifacts
 
 - **Embedding decision memo** — a short document recording the
@@ -199,6 +214,22 @@ author. The institution is the author of its own continuity.
   certifying additional facilitators, not by stacking pilots.
 
 ---
+
+## SKU vs. labour — what each tier actually delivers
+
+The self-serve tiers in the [Product Ladder](./oci-product-ladder.md) are
+documents, not engagements. This engagement — twelve weeks, nine sessions —
+is labour. Neither may borrow the other's claim.
+
+| Tier | Hours / sessions | Artefacts out | Who reviews | If AI is off |
+|---|---|---|---|---|
+| Leadership Briefing Report ($1,200) | 0 sessions, self-serve | One PDF | No facilitator review | Report generation pauses; no manual fallback offered at this tier |
+| Full Diagnostic & Action Plan ($6,500) | 1 workshop (~2–3 hrs) | Gap map, recommended actions | Facilitator | Facilitator drafts manually; engagement continues |
+| OCI Assessment (this document, $18k–$45k) | ~12 weeks, 9 sessions (table above) | Continuity map, stewardship density register, governance continuity plan, deferred items list, closure minute | Facilitator drafts, institution adopts | Engines compute deterministically without AI assistance; facilitator drafts manually; the engagement is not paused |
+| Platform Activation (annual) | Ongoing, no fixed session count | Runtime continuity records | Institution, on its own cadence | Runtime is deterministic; AI assistance is optional at this tier |
+
+Self-serve SKUs cannot claim Phase 3–5 outcomes (stabilization, ratified continuity plan,
+embedded infrastructure). Only a facilitated engagement produces those.
 
 ## Cross-references
 

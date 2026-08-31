@@ -1,6 +1,6 @@
 /**
  * Question Metadata Integrity — verifies intelligence metadata completeness
- * and modality-role consistency per docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md.
+ * and modality-role consistency per docs/oci/superseded/assessment/OCI_QUESTION_ARCHITECTURE.md.
  */
 import { describe, it, expect } from 'vitest';
 import { ALL_QUESTIONS } from '../questions';

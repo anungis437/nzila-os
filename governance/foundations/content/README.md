@@ -10,17 +10,17 @@ ECM at Nzila is the discipline of managing the **lifecycle of content**
 (documents, evidence, exports, recordings, tenant uploads) across our
 storage tiers. It complements (and intentionally does **not** duplicate):
 
-- [`governance/privacy/`](../privacy/) — what personal data we hold, how we lawfully process it
-- [`governance/security/`](../security/) — how content is protected at rest / in transit
+- [`governance/privacy/`](../../privacy) — what personal data we hold, how we lawfully process it
+- [`governance/security/`](../../security) — how content is protected at rest / in transit
 - [`governance/foundations/knowledge/`](../knowledge/) — how curated knowledge is published internally
-- [`governance/ai/`](../ai/) — what content is allowed into AI prompts and indexes
+- [`governance/ai/`](../../ai) — what content is allowed into AI prompts and indexes
 
 ECM provides the **classification, retention, disposition, taxonomy, and
 audit** envelope that the other domains rely on.
 
 ## 2. Storage surfaces in scope
 
-(Cross-reference: [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json))
+(Cross-reference: [`governance/privacy/data-inventory.json`](../../privacy/data-inventory.json))
 
 | Store | Kind | Tier | ECM concern |
 |-------|------|:----:|------------|
@@ -58,19 +58,19 @@ classification standard) before adoption.
 Until each policy is ratified, the following minimums apply:
 
 1. **Classification first.** Every content store has a documented
-   highest data tier in [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json).
+   highest data tier in [`governance/privacy/data-inventory.json`](../../privacy/data-inventory.json).
 2. **Retention defaults.** Default retention follows
-   [`governance/privacy/policies/data-retention-schedule.md`](../privacy/policies/data-retention-schedule.md) unless a
+   [`governance/privacy/policies/data-retention-schedule.md`](../../privacy/policies/data-retention-schedule.md) unless a
    container-specific overlay is added.
 3. **Access by RBAC + RLS.** No direct blob URLs to Confidential or
    Restricted content; access is mediated by app routes that enforce
    tenant + role.
 4. **Audit.** Content access and disposition events are auditable per
-   [`governance/security/`](../security/) logging standards.
+   [`governance/security/`](../../security) logging standards.
 5. **No prod content in non-prod.** Non-prod environments use synthetic
-   content per [`tooling/staging-seed/SYNTHETIC.md`](../../tooling/staging-seed/SYNTHETIC.md).
+   content per [`tooling/staging-seed/SYNTHETIC.md`](../../../tooling/staging-seed/SYNTHETIC.md).
 6. **No Restricted content in AI prompts** unless the surface's PIA
-   (under [`governance/privacy/ai-pia/surfaces/`](../privacy/ai-pia/surfaces/))
+   (under [`governance/privacy/ai-pia/surfaces/`](../../privacy/ai-pia/surfaces))
    explicitly authorizes it with a documented lawful basis.
 
 ## 5. Open work

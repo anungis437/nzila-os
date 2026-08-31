@@ -3,7 +3,7 @@
  *
  * Pure. Append-only event model. No DB writes.
  *
- * Doctrine: docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md
+ * Doctrine: docs/oci/superseded/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md
  */
 
 export const ENGINE_VERSION = '2.0.0';

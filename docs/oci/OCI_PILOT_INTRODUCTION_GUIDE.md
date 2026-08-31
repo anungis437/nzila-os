@@ -132,7 +132,7 @@ welcome a written thread.
 
 ### What the introducer says
 
-- The name of the work: "Operational Continuity Intelligence,
+- The name of the work: "Organizational Continuity Intelligence,
   or OCI."
 - The institutional question: "It takes seriously the
   continuity load that institutions carry in a small number of

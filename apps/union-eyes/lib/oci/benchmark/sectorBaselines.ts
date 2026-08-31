@@ -9,7 +9,7 @@
  * deficient; it is differently shaped. The facilitator names the
  * difference institutionally rather than evaluating it numerically.
  *
- * See: docs/oci/OCI_METHOD.md (Sections 3.6, 6), docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md.
+ * See: docs/oci/OCI_METHOD.md (Sections 3.6, 6.5), docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md.
  */
 
 import type { SectorBaseline } from './types';

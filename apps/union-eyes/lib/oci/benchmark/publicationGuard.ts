@@ -2,7 +2,7 @@
  * OCI / OCRA Benchmark Publication Guard.
  *
  * Codifies the benchmark publication discipline defined in
- * docs/oci/government-readiness/OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md
+ * docs/oci/superseded/government-readiness/OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md
  * (§3 minimum cohorts, §4 safe/unsafe claim catalogue, §7 honesty clause).
  *
  * Pure, deterministic, no I/O, no scoring import. This guard NEVER produces a

@@ -1,8 +1,8 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Canonical Scoring Payload
  * MODULE: OCI/OCRA canonical, timestamp-free scoring payload for byte-identical hashing.
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
- *           docs/oci/government-readiness/IMPLEMENTATION_STATUS.md (determinism claim)
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
+ *           docs/oci/superseded/government-readiness/IMPLEMENTATION_STATUS.md (determinism claim)
  * DOCTRINE_VERSION: 1.0.0
  *
  * The unqualified "byte-identical" determinism claim is false for the *full*

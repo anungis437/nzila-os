@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Obligation Taxonomy
  * MODULE: OCI/OCRA Obligation Taxonomy (reference data)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_OBLIGATION_TAXONOMY.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_OBLIGATION_TAXONOMY.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Canonical, deterministic reference data for the seven obligation classes.

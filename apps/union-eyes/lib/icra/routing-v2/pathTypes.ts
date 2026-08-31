@@ -8,7 +8,7 @@
  *
  * Doctrine (verbatim from sprint brief): "Adaptive routing should now
  * deepen extraction where fragility is detected." See
- * docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md.
+ * docs/oci/superseded/audit/QUESTION_POOL_v2_0_ROADMAP.md.
  */
 
 import type { V2Question } from '../modalities-v2/types';

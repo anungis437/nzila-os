@@ -10,6 +10,12 @@
 > facilitators and reviewers under explicit human oversight. This
 > document names the boundary, plainly, so institutions can decide
 > whether the boundary matches their own AI governance posture.
+>
+> **This is the only canonical AI boundary document.** `ai/OCRA_AI_SYSTEM_ARCHITECTURE.md`
+> and its siblings under `docs/oci/ai/` are internal engineering references — they describe
+> implementation, not doctrine, and are demoted to `internal/engineering` (see
+> [`SUPERSEDED.md`](./SUPERSEDED.md)). Anything the public method cites about AI, it cites
+> from this document only. Where an engineering doc and this document diverge, this document governs.
 
 ---
 

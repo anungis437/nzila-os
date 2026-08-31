@@ -1,10 +1,11 @@
 # The OCI Pilot Framework™
 
 **ARTIFACT TYPE:** Institutional Doctrine
-**DOCTRINE_VERSION:** 1.0.0
-**STATUS:** Canonical
+**DOCTRINE_VERSION:** 1.1.0
+**STATUS:** Derived — a delivery view of [`OCI_METHOD.md`](./OCI_METHOD.md). Where this document
+and `OCI_METHOD.md` diverge, `OCI_METHOD.md` governs. This is not a second method or a second clock.
 **PARENT DOCTRINE:** [docs/doctrine/DOCTRINE.md](../doctrine/DOCTRINE.md)
-**METHODOLOGICAL SPINE:** [docs/oci/oci-method.md](./oci-method.md)
+**METHODOLOGICAL SPINE:** [docs/oci/OCI_METHOD.md](./OCI_METHOD.md)
 
 > This document defines the institutional pilot. It is not a marketing
 > framework. It is the canonical methodology under which an institution
@@ -18,7 +19,7 @@ The Pilot Framework names the four phases of an OCI institutional pilot
 and binds each phase to its instruments, its institutional posture, and
 its exit criteria.
 
-Where the [OCI Method™](./oci-method.md) names the long arc of an
+Where the [OCI Method™](./OCI_METHOD.md) names the long arc of an
 institution's continuity maturity (five phases, including the steady-state
 phases of Infrastructure and Intelligence), the Pilot Framework names the
 delivery arc — the bounded engagement during which an institution and
@@ -28,7 +29,9 @@ during which the conditions for embedding are prepared.
 > The Pilot Framework is a slice of the OCI Method™.
 > Pilot Phase 4 (Embedding) opens the door to Method Phases 4 and 5
 > (Infrastructure and Intelligence), which the institution operates from
-> then on.
+> then on. Kill criteria and the labour information boundary are defined once,
+> in [`OCI_METHOD.md` §6.3–6.4](./OCI_METHOD.md#63-information-boundary-labour-engagements),
+> and apply to every phase below without restatement.
 
 ---
 
@@ -144,7 +147,7 @@ overlapping with Phase 2.
 **What happens.** Continuity becomes embedded in the institution's
 operational systems. The work done in Phases 1–3 is no longer a project;
 it is the platform. This phase opens onto the long-arc steady state
-defined in [OCI Method™](./oci-method.md) as Infrastructure (Method
+defined in [OCI Method™](./OCI_METHOD.md) as Infrastructure (Method
 Phase 4) and Intelligence (Method Phase 5).
 
 **Instruments.**
@@ -223,11 +226,11 @@ These are not stylistic preferences. They are conditions of the work.
 
 ## Cross-references
 
-- [OCI Method™](./oci-method.md) — the methodological spine
+- [OCI Method™](./OCI_METHOD.md) — the methodological spine (canonical; this document is derived)
 - [OCI Product Ladder](./oci-product-ladder.md) — instruments by phase
 - [OCI Delivery Model](./OCI_DELIVERY_MODEL.md) — roles, cadence,
   artifact handover
 - [OCI Institutional Activation](./OCI_INSTITUTIONAL_ACTIVATION.md) —
   the go-live playbook
-- [Anti-Surveillance Doctrine](../doctrine/ANTI_SURVEILLANCE_DOCTRINE.md) —
+- [Anti-Surveillance Position](./OCI_ANTI_SURVEILLANCE_POSITION.md) —
   red lines that bind every phase
