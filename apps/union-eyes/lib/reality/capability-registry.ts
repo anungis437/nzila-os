@@ -70,7 +70,7 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   // ------------------------------------------------------------------------
   {
     id: 'UE-CRON-MONTHLY-DUES',
-    title: 'Monthly dues cron',
+    title: 'Monthly dues cron (main app)',
     state: 'NOT_IMPLEMENTED',
     ownedBy: ['app/api/cron/monthly-dues/route.ts'],
     evidence: [
@@ -79,15 +79,25 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'lib/api/standardized-responses.ts:110 — NOT_IMPLEMENTED → 501 mapping',
     ],
     targetWave: 5,
-    notes: 'Pending real dues-calculation implementation in Wave 5 and Wave 7.',
+    notes:
+      'Pending real dues-calculation implementation in Wave 5 and Wave 7. NOTE (Phase 3A capability audit, ' +
+      '2026-08-31): a SEPARATE, more mature implementation already exists and is scheduled in the ' +
+      'financial-service microservice — see UE-FIN-DUES-CALCULATION-WORKFLOW below. That implementation is ' +
+      'real and running but has its own defect (hardcoded single test tenant). This entry describes only the ' +
+      'main-app stub route, which genuinely returns 501 and is not itself wired to the financial-service job.',
   },
   {
     id: 'UE-CRON-OVERDUE-NOTIFICATIONS',
-    title: 'Overdue-notifications cron',
+    title: 'Overdue-notifications cron (main app)',
     state: 'NOT_IMPLEMENTED',
     ownedBy: ['app/api/cron/overdue-notifications/route.ts'],
     evidence: ['app/api/cron/overdue-notifications/route.ts — throws ApiError.notImplemented → HTTP 501'],
     targetWave: 3,
+    notes:
+      'NOTE (Phase 3A capability audit, 2026-08-31): real dues-reminder-sending code already exists at ' +
+      'lib/jobs/dues-reminder-scheduler.ts (DuesReminderScheduler.runReminderJob — 7-day/1-day/overdue ' +
+      'notices via lib/services/notification-service.ts) but no cron, queue, or route invokes it anywhere ' +
+      'in the codebase. See UE-FIN-DUES-REMINDER-SCHEDULER below.',
   },
   {
     id: 'UE-CRON-PROCESS-MESSAGES',
@@ -588,6 +598,79 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     targetWave: 99,
     notes:
       'Classification (per this remediation\'s scope check): LATENT/UNEXPOSED. The table, its rules, and its extensions sidecar are fully modeled in the schema but have no API surface and no confirmed navigable UI entry point — a real user cannot reach this surface today. It is therefore kept OUT of the grievance-continuity fix in this PR. If a future audit finds it IS reachable through a route or page not caught by this search, it must be reclassified to SEPARATE_SUPPORTED_SURFACE_REQUIRES_REMEDIATION and given equivalent operational treatment (recipient resolution, reminder scheduling, continuity-on-reassignment) before overall SaaS readiness can pass.',
+  },
+
+  // ------------------------------------------------------------------------
+  // Phase 3A capability registry reality audit (2026-08-31) — findings
+  // discovered while classifying the 5 NOT_IMPLEMENTED cron entries above.
+  // Not implemented/repaired here — flagged with evidence for a dedicated,
+  // reviewed follow-up given the financial/notification blast radius.
+  // ------------------------------------------------------------------------
+  {
+    id: 'UE-FIN-DUES-CALCULATION-WORKFLOW',
+    title: 'Monthly dues calculation (financial-service microservice)',
+    state: 'LIMITED',
+    ownedBy: ['services/financial-service/src/jobs/dues-calculation-workflow.ts'],
+    evidence: [
+      'services/financial-service/src/jobs/dues-calculation-workflow.ts:243-246 — monthlyDuesCalculationJob is a real node-cron schedule (0 2 1 * *, America/Toronto), genuinely registered and started.',
+      'services/financial-service/src/index.ts — imports and calls startDuesCalculationWorkflow() at service startup.',
+      'services/financial-service/src/jobs/dues-calculation-workflow.ts:249 — `const tenantId = \'11111111-1111-1111-1111-111111111111\'; // Test tenant` is HARDCODED inside the scheduled job callback; the code comment above it says "In production, iterate through all tenants" but does not do so.',
+      'services/financial-service/src/jobs/dues-calculation-workflow.ts:135-137 — explicit code comment: COPE/PAC/surcharge add-ons are not implemented, only the flat base dues rate is applied.',
+      'services/financial-service/src/tests/unit/dues-calculation-workflow.test.ts — unit-tests processMonthlyDuesCalculation() and job cancellation integration for a single supplied tenantId; does not test the scheduled job\'s multi-tenant behavior because there is none to test.',
+    ],
+    targetWave: 7,
+    notes:
+      'LIMITED, not REAL: the job is genuinely scheduled and does create real dues_transactions rows for the ' +
+      'one hardcoded test tenant, but every real customer organization silently receives ZERO monthly dues ' +
+      'transactions from this scheduled run — the "iterate through all tenants" step described in the code\'s ' +
+      'own comment was never implemented. This is materially different from UE-CRON-MONTHLY-DUES (the main-app ' +
+      'stub, which is honestly 501) because this one runs, appears successful in logs, and produces no ' +
+      'observable failure for real tenants — it just never processes them. Repair requires querying active ' +
+      'organizations and iterating processMonthlyDuesCalculation per tenant; flagged for a dedicated, reviewed ' +
+      'PR given the direct financial/billing blast radius rather than folded into this audit pass.',
+  },
+  {
+    id: 'UE-FIN-DUES-REMINDER-SCHEDULER',
+    title: 'Dues payment reminders (7-day / 1-day / overdue)',
+    state: 'LIMITED',
+    ownedBy: ['lib/jobs/dues-reminder-scheduler.ts'],
+    evidence: [
+      'lib/jobs/dues-reminder-scheduler.ts — DuesReminderScheduler.runReminderJob() queries duesTransactions for 7-day, 1-day, and overdue reminder windows and sends real notifications via lib/services/notification-service.ts.',
+      'Repo-wide search found zero call sites for DuesReminderScheduler.runReminderJob or DuesReminderScheduler anywhere outside its own file — no cron route, queue consumer, or scheduled task invokes it.',
+      'app/api/cron/overdue-notifications/route.ts — the main-app cron that would be the natural trigger for this class is registered NOT_IMPLEMENTED (see UE-CRON-OVERDUE-NOTIFICATIONS) and does not delegate to it.',
+    ],
+    targetWave: 3,
+    notes:
+      'LIMITED: the reminder logic and notification dispatch are real, tested-in-isolation code, but nothing ' +
+      'ever schedules or triggers a run, so no member has ever received a 7-day, 1-day, or overdue dues ' +
+      'reminder in a deployed environment. Repair is comparatively low-risk (wire ' +
+      'app/api/cron/overdue-notifications/route.ts to call DuesReminderScheduler.runReminderJob() behind the ' +
+      'existing cron-secret auth) but flagged for a dedicated PR with its own test/rollout review given it ' +
+      'sends real member-facing emails once wired.',
+  },
+  {
+    id: 'UE-ANALYTICS-SCHEDULED-REPORTS-UI',
+    title: 'Scheduled reports admin UI (duplicate surfaces)',
+    state: 'DEGRADED',
+    ownedBy: [
+      'components/analytics/scheduled-reports-manager.tsx',
+      'app/[locale]/dashboard/admin/scheduled-reports/page.tsx',
+    ],
+    evidence: [
+      'components/analytics/scheduled-reports-manager.tsx — fetches GET /api/v2/analytics/scheduled-reports, a v2-prefixed path; the /api/v2/[...path] deprecation catch-all intercepts all remaining v2 traffic, so this component silently falls to its catch{} empty-state branch rather than showing real data.',
+      'app/[locale]/dashboard/admin/scheduled-reports/page.tsx — fetches GET /api/reports/scheduled (no v2 prefix) and renders ScheduledReportForm; this is the route reachable from admin navigation.',
+      'Repo-wide search found no page.tsx that imports/renders ScheduledReportsManager from components/analytics/scheduled-reports-manager.tsx — it is currently unreferenced (orphaned), so the stale-endpoint bug has no live user-facing impact today.',
+    ],
+    targetWave: 8,
+    notes:
+      'DEGRADED, not a live defect: the orphaned scheduled-reports-manager.tsx also ships ~180 lines of ' +
+      'hardcoded sample data as its declared fallback ("SAMPLE DATA (module-level defaults, replaced by API ' +
+      'fetch at runtime)"), which is exactly the anti-pattern this programme exists to eliminate, but since ' +
+      'the component is not currently rendered by any route it cannot mislead a real user today. Flagged so ' +
+      'it is not silently re-wired to a live page without first fixing the v2 endpoint and removing the ' +
+      'sample-data fallback, per the same class of defect closed for Health & Safety in #717. Whether ' +
+      'app/api/reports/scheduled/route.ts (the non-v2 path the OTHER, live page calls) is itself backed by ' +
+      'real cron delivery depends on UE-CRON-SCHEDULED-REPORTS above, which remains NOT_IMPLEMENTED.',
   },
 ] as const;
 
