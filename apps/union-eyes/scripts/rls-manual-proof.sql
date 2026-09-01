@@ -10,17 +10,24 @@
 -- script is what to run instead if that happens.
 --
 -- Usage against a disposable database only:
---   psql -U <admin> -h <host> -p <port> -d <db> -f scripts/rls-manual-proof.sql
+--   Set PGPASSWORD (or a matching .pgpass entry) to the admin role's real
+--   password, then run:
+--     psql -U <admin> -h <host> -p <port> -d <db> -f scripts/rls-manual-proof.sql
 --
 -- Requires: union_eyes_runtime and union_eyes_system already provisioned
 -- with LOGIN passwords (see scripts/provision-runtime-db-roles.ts), and a
--- `grievances` table with an `organization_id` column. Edit the two
--- \c connection-string lines below to match your target roles/passwords
--- before running — they are intentionally left as placeholders, never as
--- real credentials, in this committed copy.
+-- `grievances` table with an `organization_id` column. The script switches
+-- roles mid-session via psql's `\c - <username>` form (keeps the current
+-- dbname/host/port, changes only the connecting role) — this file
+-- deliberately never contains a connection string with any credential in
+-- it, placeholder or real. Before running, either export PGPASSWORD as
+-- each role's real password immediately before its `\c` line below, or
+-- add matching entries to your local .pgpass.
 
 -- 1. Bootstrap fixtures as union_eyes_system (unconditional access).
-\c postgresql://union_eyes_system:REPLACE_WITH_SYSTEM_ROLE_PASSWORD@localhost:5432/REPLACE_WITH_DB_NAME
+-- Reconnect as union_eyes_system before this point (export PGPASSWORD to
+-- its real password, or rely on .pgpass) — same dbname/host/port.
+\c - union_eyes_system
 BEGIN;
 INSERT INTO organizations (id, name, slug) VALUES
   ('aaaaaaaa-0000-0000-0000-000000000001', 'Manual Proof Org A', 'manual-proof-org-a'),
@@ -31,7 +38,9 @@ INSERT INTO grievances (id, organization_id) VALUES
 COMMIT;
 
 -- 2. Prove isolation as union_eyes_runtime, Org A context.
-\c postgresql://union_eyes_runtime:REPLACE_WITH_RUNTIME_ROLE_PASSWORD@localhost:5432/REPLACE_WITH_DB_NAME
+-- Reconnect as union_eyes_runtime (export PGPASSWORD to its real password,
+-- or rely on .pgpass) before this line.
+\c - union_eyes_runtime
 BEGIN;
 SELECT set_config('app.current_user_id', 'manual_proof_user_a', true);
 SELECT set_config('app.current_org_id', 'aaaaaaaa-0000-0000-0000-000000000001', true);
@@ -75,7 +84,9 @@ SELECT id FROM grievances;
 ROLLBACK;
 
 -- 5. Cleanup, as union_eyes_system.
-\c postgresql://union_eyes_system:REPLACE_WITH_SYSTEM_ROLE_PASSWORD@localhost:5432/REPLACE_WITH_DB_NAME
+-- Reconnect as union_eyes_system again (see note at top of file) before
+-- this line.
+\c - union_eyes_system
 BEGIN;
 DELETE FROM grievances WHERE organization_id IN ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002');
 DELETE FROM organizations WHERE id IN ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002');

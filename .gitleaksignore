@@ -32,18 +32,38 @@ apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:3
 .gitleaksignore:nzila-database-url-with-password:11
 
 # ─────────────────────────────────────────────────────────────────────────────
-# apps/union-eyes/scripts/rls-manual-proof.sql:23,34,78
+# .gitleaksignore:37 (historical, commit bd0c744b0)
 # Rule: nzila-database-url-with-password
-# Match: `\c postgresql://union_eyes_<role>:<placeholder-token>@localhost:5432/<placeholder-token>`
-# Justification: Every value in the flagged connection strings is a literal
-#   documentation placeholder — the "password" and "database name" positions
-#   contain tokens the file's own header comment instructs the operator to
-#   replace before running (e.g. a token meaning "put the system role's real
-#   password here", never a real credential). No secret was ever committed —
-#   the rule matches on connection-string SHAPE (scheme://user:token@host/db),
-#   which a descriptive placeholder still satisfies syntactically even though
-#   it carries zero real entropy/secret material. Verified by direct file
-#   inspection: PR #752 exact-head CI run 33506900682, job 99852986676.
+# Justification: Same recurring failure mode as the entry above, this time
+#   introduced in commit bd0c744b0 by a justification comment that quoted
+#   the exact connection-string-shaped text it was allowlisting (for
+#   apps/union-eyes/scripts/rls-manual-proof.sql). Redacted in the very next
+#   commit, but PR #752's scanned range still includes bd0c744b0's diff.
+#   This fingerprint allowlists that specific historical path+rule+line. No
+#   secret is exposed — see the rls-manual-proof.sql entry above for the
+#   underlying documentation-placeholder finding this comment was allowlisting.
+# Reviewed: PR #752 RLS tenant-isolation foundation review (2026-09-01).
+.gitleaksignore:nzila-database-url-with-password:37
+# Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
+.gitleaksignore:nzila-database-url-with-password:11
+
+# ─────────────────────────────────────────────────────────────────────────────
+# apps/union-eyes/scripts/rls-manual-proof.sql:23,34,78 (historical — see below)
+# Rule: nzila-database-url-with-password
+# Match: <REDACTED — see justification below; do not quote the matched text
+#   here, it will cause Gitleaks to re-flag this file itself>
+# Justification: Every value in the originally-flagged connection strings was
+#   a literal documentation placeholder (a token instructing the operator to
+#   substitute a real password/database name), never a real credential. No
+#   secret was ever committed — the rule matches on connection-string SHAPE
+#   (scheme://user:token@host/db), which a descriptive placeholder still
+#   satisfies syntactically despite carrying zero real entropy/secret
+#   material. The file has since been rewritten to avoid this shape entirely
+#   (uses psql's `\c - <username>` role-switch syntax instead of embedding
+#   any connection string), so this allowlist only covers the historical
+#   introducing commit still inside the PR's scanned range. Verified by
+#   direct file inspection: PR #752 exact-head CI run 33506900682, job
+#   99852986676.
 # Reviewed: PR #752 RLS tenant-isolation foundation review (2026-09-01).
 apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:23
 apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:34

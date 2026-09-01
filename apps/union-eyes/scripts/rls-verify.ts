@@ -263,7 +263,7 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
       pass: isClosed,
       detail: isClosed
         ? `${entry.classification} — ${entry.reason}`
-        : `${entry.classification} (FAILING classification) — ${entry.reason}`,
+        : `${entry.classification} [reviewPriority=${entry.reviewPriority}] (FAILING classification) — ${entry.reason}`,
     })
     if (isClosed && rlsRequiredClassifications.has(entry.classification)) {
       tablesNeedingRlsCheck.push(table)
