@@ -1,4 +1,17 @@
 // Nzila Vertical App - Azure Infrastructure
+//
+// STALE — NOT the live deployment authority for Union Eyes staging/production.
+// Confirmed 2026-09-01 (docs/union-eyes/reality-remediation/26, PR #751 /
+// fix/ue-runtime-rls-foundation): the deployed nzila-os-union-eyes-* apps run
+// on Azure Container Apps, provisioned/updated by
+// .github/workflows/deploy-union-eyes.yml (dispatched by
+// .github/workflows/auto-promote-union-eyes.yml). This file defines an App
+// Service topology with a `postgresAdminPassword` parameter that recreates
+// the exact admin-as-runtime anti-pattern the RLS foundation fix removes —
+// do not deploy this file as-is, and do not use it as a reference for how
+// the current Container Apps environment is configured. Left in place only
+// so its history isn't lost; a follow-up should either delete it or rewrite
+// it to describe the actual Container Apps topology.
 
 targetScope = 'resourceGroup'
 

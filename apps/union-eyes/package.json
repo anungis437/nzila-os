@@ -59,7 +59,10 @@
     "governance:sovereignty": "tsx scripts/validate-governance-sovereignty.ts",
     "trust:center": "tsx scripts/generate-trust-center-manifest.ts && tsx scripts/generate-trust-center-summary.ts",
     "trust:center:check": "tsx scripts/generate-trust-center-manifest.ts",
-    "workbook:pilot-readiness": "tsx scripts/check-workbook-pilot-readiness.ts"
+    "workbook:pilot-readiness": "tsx scripts/check-workbook-pilot-readiness.ts",
+    "rls:verify": "tsx scripts/rls-verify.ts --mode=preflight",
+    "rls:verify:full": "tsx scripts/rls-verify.ts --mode=full",
+    "rls:provision-roles": "tsx scripts/provision-runtime-db-roles.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",

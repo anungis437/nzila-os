@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   mockCurrentUser: vi.fn(),
   mockTxExecute: vi.fn(),
   mockDbExecute: vi.fn(),
+  mockSystemTxExecute: vi.fn(),
 }));
 
 vi.mock("@/lib/api-auth-guard", () => ({
@@ -27,6 +28,14 @@ vi.mock("@/db/db", () => ({
       return fn({ execute: mocks.mockTxExecute });
     }),
     execute: mocks.mockDbExecute,
+  },
+}));
+
+vi.mock("@/db/system-db", () => ({
+  systemDb: {
+    transaction: vi.fn(async (fn: (tx: any) => Promise<any>) => {
+      return fn({ execute: mocks.mockSystemTxExecute });
+    }),
   },
 }));
 
@@ -271,10 +280,11 @@ describe("with-rls-context", () => {
 
   // ── withSystemContext ─────────────────────────────────────────────
   describe("withSystemContext", () => {
-    it("clears user and org context", async () => {
+    it("clears user and org context on the separate system connection", async () => {
       const result = await withSystemContext(async () => "sys");
       expect(result).toBe("sys");
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockTxExecute).not.toHaveBeenCalled();
     });
   });
 
@@ -350,11 +360,11 @@ describe("with-rls-context", () => {
 
   // ── withSystemRLSContext ──────────────────────────────────────────
   describe("withSystemRLSContext", () => {
-    it("executes and clears user + org context", async () => {
+    it("executes and clears user + org context on the system connection", async () => {
       const result = await withSystemRLSContext("test: seed user creation", async () => "done");
       expect(result).toBe("done");
       // withSystemContext sets '' for both user_id and org_id → 2 execute calls
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2);
     });
 
     it("requires a reason string", async () => {
@@ -373,15 +383,16 @@ describe("with-rls-context", () => {
       ).rejects.toThrow("Platform admin ID is required");
     });
 
-    it("executes with explicit user context for a valid admin", async () => {
+    it("executes on the system connection for a valid admin", async () => {
       const result = await withPlatformAdminRLSContext(
         "admin-123",
         "compliance-export",
         async () => "exported",
       );
       expect(result).toBe("exported");
-      // withExplicitUserContext sets user_id → at least 1 execute call
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1);
+      // sets app.current_user_id (audit) + clears app.current_org_id → 2 execute calls
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockTxExecute).not.toHaveBeenCalled();
     });
   });
 });

@@ -666,6 +666,32 @@ jobs:
             "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}"
           )
 
+          # RLS foundation remediation (docs/union-eyes/reality-remediation/26,
+          # PR #751): the tenant-scoped DATABASE_URL must point at the
+          # dedicated non-bypass `union_eyes_runtime` role, and system/admin
+          # paths get a SEPARATE SYSTEM_DATABASE_URL for `union_eyes_system`.
+          # Conditional on the target secret already existing so merging this
+          # workflow change is a no-op until apps/union-eyes/scripts/
+          # provision-runtime-db-roles.ts has actually provisioned it in this
+          # environment (see the rollout sequence in the fix PR description) —
+          # never fail a deploy because a secret hasn't been provisioned yet,
+          # and never silently keep shipping against the admin credential once
+          # the dedicated secret exists.
+          PRE_UPDATE_SECRETS=$(az containerapp secret list \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --query "[].name" -o tsv 2>/dev/null || true)
+          if echo "$PRE_UPDATE_SECRETS" | grep -qx "union-eyes-runtime-database-url"; then
+            FRONTEND_ENV_VARS+=("DATABASE_URL=secretref:union-eyes-runtime-database-url")
+          else
+            echo "::warning::union-eyes-runtime-database-url secret not present on $TARGET_APP yet — DATABASE_URL still points at whatever secretref was set previously. Run the runtime-role provisioning script for this environment."
+          fi
+          if echo "$PRE_UPDATE_SECRETS" | grep -qx "union-eyes-system-database-url"; then
+            FRONTEND_ENV_VARS+=("SYSTEM_DATABASE_URL=secretref:union-eyes-system-database-url")
+          else
+            echo "::warning::union-eyes-system-database-url secret not present on $TARGET_APP yet — withSystemContext()/withPlatformAdminRLSContext() will fail at runtime until it is provisioned."
+          fi
+
           if [ "${{ needs.plan.outputs.environment }}" = "pilot" ]; then
             FRONTEND_ENV_VARS+=(
               "DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot"

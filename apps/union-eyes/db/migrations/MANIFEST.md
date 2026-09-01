@@ -8,9 +8,9 @@
 - **Branch:** main
 - **Commit:** local
 - **Short Commit:** local
-- **Generated:** 2026-05-18T13:09:35.000Z
+- **Generated:** 2026-09-01T07:29:28.076Z
 - **Migrations Directory:** `db/migrations`
-- **Total Migrations:** 93
+- **Total Migrations:** 96
 
 ## Migration Files
 
@@ -83,11 +83,13 @@
 | 0099 | 0099_audit_remediation.sql | `471da694...fed0e0bc` | 1.04 KB | Migration 0080: Audit Remediation |
 | 0100 | 0100_clerk_to_entra_user_ids.sql | `41481bae...a0ad2de5` | 2.17 KB | ============================================================================= |
 | 0101 | 0101_auth_password_reset_tokens.sql | `ddf61c8d...d24a3ce4` | 2.92 KB | Migration: 20260711_auth_password_reset_tokens |
-| 0102 | 0102_align_organization_members_columns.sql | `efd01948...37ff3785` | 1.83 KB | Re-add columns to organization_members that were dropped in 0002_true_selene |
+| 0102 | 0102_align_organization_members_columns.sql | `1eb1a0a1...e9c4e137` | 2.48 KB | Re-add columns to organization_members that were dropped in 0002_true_selene |
 | 0103 | 0103_org_users_unique_constraint.sql | `284e1ba6...ae3b623a` | 0.35 KB | Add unique constraint on (user_id, organization_id) to prevent duplicate |
 | 0104 | 0104_dedup_and_quality_warnings.sql | `e9002f65...771a9667` | 4.10 KB | Migration: Dedup Groups & Data Quality Warnings |
 | 0105 | 0105_correspondence_pipeline.sql | `7855d408...10ef63cf` | 6.68 KB | =========================================================================== |
 | 0106 | 0106_integration_fabric.sql | `8d983c5e...2edf8f42` | 10.40 KB | =========================================================================== |
+| 0107 | 0107_ue_policy_bindings.sql | `647a14f0...fc78c704` | 1.42 KB | ============================================================================= |
+| 0108 | 0108_rls_tenant_isolation_foundation.sql | `1c275ff9...406bea22` | 16.03 KB | ============================================================================= |
 | 1770880372830 | 1770880372830_consolidate_chart_of_accounts_fixed.sql | `1f4b3853...106ce17e` | 10.59 KB | ============================================================================ |
 | 20260212 | 20260212_add_hris_tables_fixed.sql | `fba48701...41ece925` | 8.66 KB | Migration: HRIS Integration Tables (FIXED) |
 | 20260212 | 20260212_add_integration_framework_fixed.sql | `7235867e...fe0c086e` | 7.28 KB | Integration Framework Database Schema |
@@ -109,6 +111,7 @@
 | 20260507 | 20260507_fixup_pre_0008_missing_tables.sql | `92c820f1...77174c69` | 31.60 KB | ============================================================================ |
 | 20260508 | 20260508_fixup_post_0019_align_modern_schema.sql | `163e9a5f...88048bcf` | 5.59 KB | Fixup: align modern schema after 0019 drops + missing newer migrations. |
 | 20260509 | 20260509_fixup_auth_mfa_magic_invites.sql | `aac9d2ab...ef5411fe` | 3.01 KB | 20260509_fixup_auth_mfa_magic_invites.sql |
+| 20260521 | 20260521_fixup_icra_assessments_claim_columns.sql | `56960b63...e8457fba` | 0.85 KB | Fixup: add icra_assessments claim/payment columns that exist in Drizzle schema |
 
 ## Verification
 
