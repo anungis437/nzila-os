@@ -7,7 +7,7 @@
 expansions below, which [`docs/oci/CANON.md`](../oci/CANON.md) owns (see note in place of those
 two entries in Part 1).
 
-Every definition in this document is canonical. When two documents disagree on terminology, this document governs. Deprecated terms must not appear in future commercial, lender-facing, or investor-facing materials.
+Every definition in this document is canonical. When two documents disagree on terminology, this document governs — except OCI/OCRA, owned by `docs/oci/CANON.md` (see Part 1). Deprecated terms must not appear in future commercial, lender-facing, or investor-facing materials.
 
 ---
 
@@ -276,4 +276,4 @@ The following terms and usages are deprecated. They must not appear in new comme
 
 ---
 
-*This document is canonical. In the event of terminology conflict between any other document and this vocabulary, this document governs.*
+*This document is canonical. In the event of terminology conflict between any other document and this vocabulary, this document governs — except OCI/OCRA, owned by `docs/oci/CANON.md` (see Part 1).*
