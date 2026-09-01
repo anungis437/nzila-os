@@ -1,9 +1,9 @@
 # GA Gate v2 — Check Report
 
 **Overall**: ✅ PASS
-**Commit**: `0a48256bc`
-**Timestamp**: 2026-08-04T12:55:27.271Z
-**Duration**: 9199ms
+**Commit**: `2422761a8`
+**Timestamp**: 2026-09-01T04:28:31.960Z
+**Duration**: 14611ms
 **CI**: No
 
 ## Summary
@@ -18,29 +18,29 @@
 
 | Status | Gate | Details | Duration |
 |--------|------|---------|----------|
-| ✅ | Org boundary: No raw DB imports in app code | All 4 apps clean — no raw DB imports | 3603ms |
+| ✅ | Org boundary: No raw DB imports in app code | All 4 apps clean — no raw DB imports | 6997ms |
 | ✅ | Org boundary: Org-scoped registry exists and consistent | Org-scoped registry present with both ORG_SCOPED_TABLES and NON_ORG_SCOPED_TABLES | 1ms |
-| ✅ | Hash chain: Module + append-only tables tracked | Hash module exists, 3 append-only tables tracked | 1ms |
-| ✅ | Governance profiles: Registry exists + validation | Profile registry with immutable controls + validation | 0ms |
-| ✅ | Auth edge guard: All apps have auth proxy or middleware | All 4 apps have auth edge guards (proxy.ts/middleware.ts) | 2ms |
-| ✅ | Audited writes: withAudit used in API guards | All apps use withAudit in API guards | 2ms |
-| ✅ | Audited writes: Audit module blocks on failure | Audit emission is mandatory (blocks on failure) | 1ms |
+| ✅ | Hash chain: Module + append-only tables tracked | Hash module exists, 3 append-only tables tracked | 0ms |
+| ✅ | Governance profiles: Registry exists + validation | Profile registry with immutable controls + validation | 1ms |
+| ✅ | Auth edge guard: All apps have auth proxy or middleware | All 4 apps have auth edge guards (proxy.ts/middleware.ts) | 4ms |
+| ✅ | Audited writes: withAudit used in API guards | All apps use withAudit in API guards | 3ms |
+| ✅ | Audited writes: Audit module blocks on failure | Audit emission is mandatory (blocks on failure) | 0ms |
 | ✅ | Evidence: verifySeal exported from seal module | generateSeal + verifySeal both exported | 1ms |
-| ✅ | Evidence: governance workflow includes verifySeal step | Governance workflow includes evidence seal verification | 0ms |
+| ✅ | Evidence: governance workflow includes verifySeal step | Governance workflow includes evidence seal verification | 3ms |
 | ✅ | Evidence: pack.json + seal.json both uploaded as CI artifacts | pack.json + seal.json + sbom all uploaded as CI artifacts | 1ms |
-| ✅ | Evidence: UE and ABR evidence jobs wired into governance-gate | UE and ABR evidence jobs both present, wired into governance-gate, and have blocking verify steps | 0ms |
-| ✅ | CI gates: Required security checks present in workflows | All 5 required CI checks present in workflows | 3ms |
+| ✅ | Evidence: UE and ABR evidence jobs wired into governance-gate | UE and ABR evidence jobs both present, wired into governance-gate, and have blocking verify steps | 2ms |
+| ✅ | CI gates: Required security checks present in workflows | All 5 required CI checks present in workflows | 6ms |
 | ✅ | CI gates: Governance workflow exists | nzila-governance.yml + ci.yml both present | 0ms |
-| ✅ | CI gates: Trivy FS scan is PR-blocking on CRITICAL | Trivy FS blocking scan present (exit-code: 1) in CI workflows | 2ms |
-| ✅ | CI gates: No || true on security-gating commands | No \|\| true on security-gating commands in CI workflows | 23ms |
-| ✅ | ESLint: All apps enforce boundary rules | All 4 apps enforce 3 boundary rules | 3ms |
-| ✅ | Contract tests: ≥20 test files exist | 272 contract test files (require ≥20) | 4ms |
-| ✅ | CODEOWNERS: Governance files have ownership | All governance paths have code ownership | 1ms |
-| ✅ | Red-team: Nightly red-team workflow exists | Red-team nightly workflow with schedule trigger present | 0ms |
+| ✅ | CI gates: Trivy FS scan is PR-blocking on CRITICAL | Trivy FS blocking scan present (exit-code: 1) in CI workflows | 3ms |
+| ✅ | CI gates: No || true on security-gating commands | No \|\| true on security-gating commands in CI workflows | 67ms |
+| ✅ | ESLint: All apps enforce boundary rules | All 4 apps enforce 3 boundary rules | 5ms |
+| ✅ | Contract tests: ≥20 test files exist | 277 contract test files (require ≥20) | 6ms |
+| ✅ | CODEOWNERS: Governance files have ownership | All governance paths have code ownership | 2ms |
+| ✅ | Red-team: Nightly red-team workflow exists | Red-team nightly workflow with schedule trigger present | 1ms |
 | ✅ | Red-team: Outputs included as evidence artifacts | Red-team outputs uploaded as artifacts, test files present | 2ms |
-| ✅ | Studio maturity: Every app scores ≥ 7/10 on platform integration | All 27 apps score ≥ 7/10 on platform integration | 785ms |
-| ✅ | Studio maturity: No AI marketing claims without ai-sdk wiring | All apps with AI claims have runtime ai-sdk wiring | 19ms |
-| ✅ | Studio maturity: No in-memory Maps used as primary persistence | No in-memory Map stores used as primary persistence in app code | 4669ms |
+| ✅ | Studio maturity: Every app scores ≥ 7/10 on platform integration | All 28 apps score ≥ 7/10 on platform integration | 14ms |
+| ✅ | Studio maturity: No AI marketing claims without ai-sdk wiring | All apps with AI claims have runtime ai-sdk wiring | 9ms |
+| ✅ | Studio maturity: No in-memory Maps used as primary persistence | No in-memory Map stores used as primary persistence in app code | 7362ms |
 
 ## Environment
 
