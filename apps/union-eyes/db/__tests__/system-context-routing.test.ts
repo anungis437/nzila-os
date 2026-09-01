@@ -21,6 +21,21 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { systemContextStorage } from '../system-context-storage'
 import { db } from '../db'
 
+// Outside a system-context scope, db.<prop> falls through to the real
+// (lazy-initialized) tenant client getter. Whether that getter throws
+// (DATABASE_URL unset) or returns a real value (DATABASE_URL set — e.g. the
+// CUPE CI job's postgres service, which always sets DATABASE_URL for this
+// step) is environment-dependent and NOT what these tests assert; either
+// outcome proves no system override leaked, since a lingering override
+// would make this equal the fake marker with no error at all.
+function readOutsideScope(): { threw: boolean; value: unknown } {
+  try {
+    return { threw: false, value: db.execute }
+  } catch (err) {
+    return { threw: true, value: err }
+  }
+}
+
 describe('db.ts system-context routing (AsyncLocalStorage)', () => {
   afterEach(() => {
     // Nothing to reset — AsyncLocalStorage scoping is automatically bounded
@@ -48,14 +63,12 @@ describe('db.ts system-context routing (AsyncLocalStorage)', () => {
       expect(db.execute).toBe(fakeSystemDb.execute)
     })
 
-    // Outside the run() callback, accessing db.execute must NOT throw due
-    // to a lingering system override, and must not equal the fake marker —
-    // it falls through to the real (lazy-initialized) tenant client getter,
-    // which throws in this test environment because DATABASE_URL is unset.
-    // That failure mode itself proves no system override survived: if the
-    // system override had leaked, db.execute would still equal the fake
-    // marker with no error at all.
-    expect(() => db.execute).toThrow(/DATABASE_URL/)
+    // No lingering override: either the real tenant getter threw (no
+    // DATABASE_URL), or it returned a real value that isn't the fake marker.
+    const { threw, value } = readOutsideScope()
+    if (!threw) {
+      expect(value).not.toBe(fakeSystemDb.execute)
+    }
   })
 
   it('supports nested/sequential system contexts without cross-contamination', () => {
@@ -105,7 +118,12 @@ describe('db.ts system-context routing (AsyncLocalStorage)', () => {
     expect(resultA).toBe('A')
     expect(resultB).toBe('B')
 
-    // Both scopes have exited — neither context should linger.
-    expect(() => db.execute).toThrow(/DATABASE_URL/)
+    // Both scopes have exited — neither context should linger (see
+    // readOutsideScope() comment above for why this doesn't assert a throw).
+    const { threw, value } = readOutsideScope()
+    if (!threw) {
+      expect(value).not.toBe(dbA.execute)
+      expect(value).not.toBe(dbB.execute)
+    }
   })
 })
