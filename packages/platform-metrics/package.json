@@ -24,8 +24,8 @@
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@typescript-eslint/parser": "^8.68.0",
     "eslint": "^10",
     "typescript": "^6",
     "vitest": "^4.1.2"
