@@ -1,16 +1,17 @@
 # Portfolio Status
 
-Generated: 2026-08-27
+Generated: 2026-09-01
 Authority: governance/portfolio/product-catalog.json
 
 ## Executive Matrix
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
-| CourtLens | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
-| Flow | 1 | pilot | sell-now | pilot-contracting | internal-proof | high |
 | Union Eyes | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | CFO | 2 | pilot | maintain | pre-revenue | internal-proof | medium |
+| CIVIC | 2 | incubating | hold | pre-revenue | none | medium |
+| CourtLens | 2 | pilot | hold | pilot-contracting | pilot-proof | critical |
+| Flow | 2 | pilot | hold | pilot-contracting | internal-proof | high |
 | Partners | 2 | pilot | maintain | pre-revenue | none | medium |
 | Console | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
@@ -37,8 +38,8 @@ Authority: governance/portfolio/product-catalog.json
 
 ## Allocation Summary
 
-- Sell now: abr, flow, union-eyes
-- Strategic growth: cfo, partners
+- Sell now: union-eyes
+- Strategic growth: cfo, civic, abr, flow, partners
 - Internal only: console, control-plane, nzila-hq, orchestrator-api, maestria, union-eyes-demo, weekone
 - Frozen / sunset: mobility-client-portal, platform-admin, test-scaffold-gp
 
@@ -57,10 +58,11 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 
 | Product | Weighted Score | Recommendation | Operational Tier | Readiness |
 | --- | ---: | --- | --- | --- |
-| CourtLens | 8.0 | KEEP | EXPERIMENTAL | pilot-safe |
-| Flow | 7.0 | KEEP | PILOT | pilot-safe |
 | Union Eyes | 8.0 | KEEP | PRODUCTION | pilot-safe |
 | CFO | 5.6 | HOLD | PILOT | pilot-safe |
+| CIVIC | 4.6 | HOLD | UNREGISTERED | internal-only |
+| CourtLens | 7.4 | KEEP | EXPERIMENTAL | pilot-safe |
+| Flow | 6.4 | KEEP | PILOT | pilot-safe |
 | Partners | 4.8 | HOLD | PILOT | pilot-safe |
 | Console | 5.0 | HOLD | PRODUCTION | internal-only |
 | Control Plane | 5.0 | HOLD | PILOT | internal-only |

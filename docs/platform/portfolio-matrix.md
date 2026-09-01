@@ -2,14 +2,15 @@
 
 > GENERATED FILE. Do not edit directly.
 > Authority: governance/portfolio/product-catalog.json
-> Generated: 2026-08-27
+> Generated: 2026-09-01
 
 | Product | Tier | Status | GTM | Revenue | Proof | Priority |
 | --- | --- | --- | --- | --- | --- | --- |
-| CourtLens | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
-| Flow | 1 | pilot | sell-now | pilot-contracting | internal-proof | high |
 | Union Eyes | 1 | pilot | sell-now | pilot-contracting | pilot-proof | critical |
 | CFO | 2 | pilot | maintain | pre-revenue | internal-proof | medium |
+| CIVIC | 2 | incubating | hold | pre-revenue | none | medium |
+| CourtLens | 2 | pilot | hold | pilot-contracting | pilot-proof | critical |
+| Flow | 2 | pilot | hold | pilot-contracting | internal-proof | high |
 | Partners | 2 | pilot | maintain | pre-revenue | none | medium |
 | Console | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
 | Control Plane | 3 | internal | internal-only | internal-cost-center | internal-proof | high |
@@ -38,10 +39,11 @@
 
 | Product | Registry Tier | Readiness | Deployment | Recommendation |
 | --- | --- | --- | --- | --- |
-| CourtLens | EXPERIMENTAL | pilot-safe | internal | KEEP |
-| Flow | PILOT | pilot-safe | internal | KEEP |
 | Union Eyes | PRODUCTION | pilot-safe | internal | KEEP |
 | CFO | PILOT | pilot-safe | internal | HOLD |
+| CIVIC | UNREGISTERED | internal-only | internal | HOLD |
+| CourtLens | EXPERIMENTAL | pilot-safe | internal | KEEP |
+| Flow | PILOT | pilot-safe | internal | KEEP |
 | Partners | PILOT | pilot-safe | internal | HOLD |
 | Console | PRODUCTION | internal-only | internal | HOLD |
 | Control Plane | PILOT | internal-only | internal | HOLD |
