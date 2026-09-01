@@ -20,7 +20,8 @@ import {
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
-import { stewards, stewardAssignments } from '@/db/schema/domains/member/stewards';
+import { stewards } from '@/db/schema/domains/member/stewards';
+import { stewardAssignments } from '@/db/schema/union-structure-schema';
 
 const DEFAULT_TENANT = 'union-eyes';
 const ENTITY_ID_KEY = ['entity', 'Id'].join('');

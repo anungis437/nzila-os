@@ -42,9 +42,9 @@
 import { describe, it, expect } from 'vitest'
 import { scanSchemaDeclarations, classifyGroup } from '../schema-duplicate-table-scan'
 
-// Recorded 2026-09-01 (round 2, after fixing the scanner's column-name-only
-// comparison and resolving grievance_documents/grievances/member_documents —
-// see docs/union-eyes/reality-remediation/27_RLS_STORAGE_SCHEMA_CANONICALIZATION.md).
+// Recorded 2026-09-01 (round 3, after resolving grievance_transitions,
+// steward_assignments' real consumers + user_sessions + employers — see
+// docs/union-eyes/reality-remediation/27_RLS_STORAGE_SCHEMA_CANONICALIZATION.md).
 // Only remove keys as conflicts are resolved; never add a key to accommodate
 // a newly-introduced conflict.
 const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
@@ -57,18 +57,15 @@ const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
   'public.chart_of_accounts',
   'public.communication_preferences',
   'public.consent_records',
-  'public.grievance_transitions',
   'public.campaigns',
   'public.message_log',
   'public.newsletter_list_subscribers',
   'public.steward_assignments',
-  'public.employers',
   'public.gl_account_mappings',
   'public.dues_transactions',
   'public.payments',
   'public.payment_methods',
   'public.webhook_deliveries',
-  'user_management.user_sessions',
 ])
 
 describe('duplicate physical-table declarations (ratchet, PR #752 review)', () => {

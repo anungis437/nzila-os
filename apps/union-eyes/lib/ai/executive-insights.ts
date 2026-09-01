@@ -22,7 +22,7 @@ import { eq, and, desc, gte, count, sql } from 'drizzle-orm';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiInsightReports, type AiInsightReportInsert } from '@/db/schema/domains/ml/ai-insight-reports';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { employers } from '@/db/schema/domains/compliance/employer-compliance';
+import { employers } from '@/db/schema/union-structure-schema';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
 import { logger } from '@/lib/logger';
@@ -265,7 +265,7 @@ async function gatherOrgContext(
   const [empCount] = await db
     .select({ value: count() })
     .from(employers)
-    .where(eq(employers.orgId, organizationId));
+    .where(eq(employers.organizationId, organizationId));
 
   const [alertC] = await db
     .select({ value: count() })

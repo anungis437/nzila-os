@@ -144,8 +144,11 @@ export { accountTypeEnum, chartOfAccounts, chartOfAccountsRelations, glAccountMa
 // syncStatusEnum - infrastructure is the canonical source
 export { syncStatusEnum } from "./domains/infrastructure";
 
-// Employer / employers - compliance is the canonical source
-export { employers, type Employer } from "./domains/compliance";
+// Employer / employers — union-structure-schema is the canonical source
+// (live-DB-verified 2026-09-01: 33 columns; domains/compliance's 8-column
+// declaration used org_id/industry/contactEmail field names that don't
+// physically exist at all — PR #752 review round 3).
+export { employers, type Employer } from "./union-structure-schema";
 
 // Steward assignments - union-structure-schema is the canonical source
 export { stewardAssignments, stewardAssignmentsRelations, type StewardAssignment } from "./union-structure-schema";

@@ -26,6 +26,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(() => 'eq'),
   gte: vi.fn(() => 'gte'),
   sql: vi.fn(() => 'sql'),
+  relations: vi.fn(() => ({})),
 }));
 
 vi.mock('@nzila/platform-cognition-core', () => ({

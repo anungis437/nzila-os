@@ -76,6 +76,7 @@
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
+import { CANONICAL_SCHEMA_DECLARATIONS } from './canonical-schema-map'
 
 const APP_ROOT = join(__dirname, '..')
 const SCHEMA_ROOT = join(APP_ROOT, 'db/schema')
@@ -119,6 +120,23 @@ export type ConflictClassification =
   | 'IDENTICAL_OR_PROVEN_COMPATIBLE'
   | 'SAME_COLUMN_SET_UNVERIFIED'
   | 'CONFLICTING_SCHEMA'
+
+export type DeclarationSourceStatus =
+  | 'CANONICAL_DECLARATION'
+  | 'STALE_DUPLICATE'
+  | 'UNRESOLVED'
+
+/**
+ * Classifies a single declaration against CANONICAL_SCHEMA_DECLARATIONS.
+ * A single-declaration group (no conflict at all) is always UNRESOLVED —
+ * the map only matters once there is more than one declaration to choose
+ * between.
+ */
+export function getDeclarationStatus(key: string, modulePath: string): DeclarationSourceStatus {
+  const canonical = CANONICAL_SCHEMA_DECLARATIONS[key]
+  if (!canonical) return 'UNRESOLVED'
+  return canonical === modulePath ? 'CANONICAL_DECLARATION' : 'STALE_DUPLICATE'
+}
 
 const pgSchemaVarRe = /export const ([a-zA-Z0-9_]+) = pgSchema\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/g
 const tableRe = /export const ([a-zA-Z0-9_]+) = pgTable\(\s*["'`]([a-z0-9_]+)["'`]\s*,\s*\{/g
@@ -360,9 +378,14 @@ function main() {
   for (const { key, decls } of conflicts) {
     lines.push(`${displayName(key)}: ${decls.map((d) => `db/schema/${d.modulePath}.ts(${d.exportName})[${d.columns.length}cols]`).join(' | ')}`)
     for (const d of decls) {
+      const status = getDeclarationStatus(key, d.modulePath)
+      if (status !== 'UNRESOLVED') {
+        lines.push(`  ${status}: db/schema/${d.modulePath}(${d.exportName})`)
+      }
       const bypassers = findDirectBypassImports(d.modulePath, d.exportName)
       if (bypassers.length > 0) {
-        lines.push(`  DIRECT IMPORT BYPASSING BARREL: db/schema/${d.modulePath}(${d.exportName}) imported directly by: ${bypassers.join(', ')}`)
+        const bypassTag = status === 'STALE_DUPLICATE' ? ' [STALE_DUPLICATE — should be redirected]' : ''
+        lines.push(`  DIRECT IMPORT BYPASSING BARREL: db/schema/${d.modulePath}(${d.exportName}) imported directly by: ${bypassers.join(', ')}${bypassTag}`)
       }
     }
     const migrations = findMigrationEvidence(bareTableName(key))

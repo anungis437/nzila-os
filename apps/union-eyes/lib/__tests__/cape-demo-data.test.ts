@@ -22,10 +22,10 @@ describe("generateDemoEmployers", () => {
     expect(employers).toHaveLength(4);
   });
 
-  it("assigns orgId to every employer", () => {
+  it("assigns organizationId to every employer", () => {
     const employers = generateDemoEmployers(ORG_ID);
     for (const e of employers) {
-      expect(e.orgId).toBe(ORG_ID);
+      expect(e.organizationId).toBe(ORG_ID);
     }
   });
 
@@ -35,10 +35,10 @@ describe("generateDemoEmployers", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("uses Federal Government as industry for all", () => {
+  it("uses federal as employerType for all", () => {
     const employers = generateDemoEmployers(ORG_ID);
     for (const e of employers) {
-      expect(e.industry).toBe("Federal Government");
+      expect(e.employerType).toBe("federal");
     }
   });
 });

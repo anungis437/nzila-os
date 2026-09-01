@@ -1,6 +1,6 @@
 Total distinct physical (schema, table) keys: 703
-Keys with >1 declaration: 347
-  - CONFLICTING_SCHEMA (proven incompatible): 21
+Keys with >1 declaration: 344
+  - CONFLICTING_SCHEMA (proven incompatible): 18
   - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 3
   - IDENTICAL_OR_PROVEN_COMPATIBLE: 323
 
@@ -29,20 +29,17 @@ communication_preferences: db/schema/communication-analytics-schema.ts(communica
   DIRECT IMPORT BYPASSING BARREL: db/schema/communication-analytics-schema(communicationPreferences) imported directly by: lib/services/messaging/campaign-service.ts
   MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 consent_records: db/schema/data-governance-schema.ts(consentRecords)[22cols] | db/schema/domains/communications/campaigns.ts(consentRecords)[13cols]
-grievance_transitions: db/schema/domains/claims/workflows.ts(grievanceTransitions)[18cols] | db/schema/grievance-workflow-schema.ts(grievanceTransitions)[19cols]
-  MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 campaigns: db/schema/domains/communications/campaigns.ts(campaigns)[27cols] | db/schema/phase-4-messaging-schema.ts(campaigns)[17cols]
   DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema(campaigns) imported directly by: lib/workers/message-queue-processor.ts
 message_log: db/schema/domains/communications/campaigns.ts(messageLog)[23cols] | db/schema/phase-4-messaging-schema.ts(message_log)[18cols]
   DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema(message_log) imported directly by: lib/workers/message-queue-processor.ts
 newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers)[8cols] | db/schema/newsletter-schema.ts(newsletterListSubscribers)[8cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
-steward_assignments: db/schema/domains/communications/organizer-workflows.ts(stewardAssignments)[16cols] | db/schema/domains/member/stewards.ts(stewardAssignments)[6cols] | db/schema/union-structure-schema.ts(stewardAssignments)[33cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/member/stewards(stewardAssignments) imported directly by: lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts
+steward_assignments: db/schema/domains/communications/organizer-workflows.ts(stewardAssignments)[16cols] | db/schema/union-structure-schema.ts(stewardAssignments)[33cols]
+  STALE_DUPLICATE: db/schema/domains/communications/organizer-workflows(stewardAssignments)
+  CANONICAL_DECLARATION: db/schema/union-structure-schema(stewardAssignments)
+  DIRECT IMPORT BYPASSING BARREL: db/schema/union-structure-schema(stewardAssignments) imported directly by: lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts
   MIGRATION EVIDENCE: 0019_lonely_stephen_strange.sql, 0041_steady_reavers.sql
-employers: db/schema/domains/compliance/employer-compliance.ts(employers)[8cols] | db/schema/union-structure-schema.ts(employers)[33cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/compliance/employer-compliance(employers) imported directly by: app/api/compliance/alerts/route.ts, app/api/compliance/reports/route.ts, app/api/pilot/demo-data/route.ts, lib/ai/employer-risk.ts, lib/ai/executive-insights.ts
-  MIGRATION EVIDENCE: 0019_lonely_stephen_strange.sql, 0020_keen_roulette.sql
 gl_account_mappings: db/schema/domains/finance/accounting.ts(glAccountMappings)[18cols] | db/schema/domains/infrastructure/erp.ts(glAccountMappings)[12cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 dues_transactions: db/schema/domains/finance/dues.ts(duesTransactions)[30cols] | db/schema/dues-transactions-schema.ts(duesTransactions)[27cols]
@@ -53,8 +50,6 @@ payments: db/schema/domains/finance/payments.ts(payments)[27cols] | db/schema/fi
 payment_methods: db/schema/domains/finance/payments.ts(paymentMethods)[15cols] | db/schema/financial-payments-schema.ts(paymentMethods)[13cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 webhook_deliveries: db/schema/domains/infrastructure/integrations.ts(webhookDeliveries)[10cols] | db/schema/integration-schema.ts(webhookDeliveries)[19cols]
-user_sessions (schema: user_management): db/schema/domains/member/user-management.ts(userSessions)[13cols] | db/schema/user-management-schema.ts(userSessions)[12cols]
-  MIGRATION EVIDENCE: 20260507_fixup_create_break_glass_activations.sql, 20260507_fixup_pre_0008_missing_tables.sql
 
 === SAME_COLUMN_SET_UNVERIFIED (column names match; type/nullability/default/FK not fully provable statically — verify against live schema before treating as safe) ===
 claim_precedent_analysis: db/schema/cba-intelligence-schema.ts(claimPrecedentAnalysis) | db/schema/domains/agreements/intelligence.ts(claimPrecedentAnalysis)

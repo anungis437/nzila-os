@@ -122,30 +122,174 @@ was converted to a re-export shim (matching the existing `claims-schema.ts`
 deprecation-shim pattern already used elsewhere in this codebase).
 `member_documents` no longer appears in the conflict report.
 
-## Remaining backlog (21 tables, fingerprint-ratcheted)
+## Remaining backlog (18 tables, fingerprint-ratcheted)
 
 `ml_predictions`, `insight_recommendations`, `automation_rules`,
 `reward_wallet_ledger`, `clc_sync_log`, `clc_webhook_log`,
 `chart_of_accounts`, `communication_preferences`, `consent_records`,
-`grievance_transitions`, `campaigns`, `message_log`,
-`newsletter_list_subscribers`, `steward_assignments`, `employers`,
-`gl_account_mappings`, `dues_transactions`, `payments`, `payment_methods`,
-`webhook_deliveries`, `user_management.user_sessions`.
+`campaigns`, `message_log`, `newsletter_list_subscribers`,
+`steward_assignments`, `gl_account_mappings`, `dues_transactions`,
+`payments`, `payment_methods`, `webhook_deliveries`.
 
-These are **not yet individually verified/fixed**. Several have real
-direct-import bypasses (see `apps/union-eyes/schema-duplicate-table-report.txt`
-for the current, regenerable list per table). None of these 21 are
-currently known to intersect the RLS-protected/tenant-HTTP-reachable
-surface the way `grievances`/`member_documents` did — that has not been
-proven for all 21, only not yet disproven; each still needs the same
-live-schema-first verification before being ruled in or out of #752's
-scope.
+## Round 3 (2026-09-01): Phase-3A-relevant conflicts
+
+Per follow-up review, resolved the tables that plausibly intersect the
+grievance-continuity/auth-offboarding/security-critical surface before
+returning to the broader backlog.
+
+### `grievance_transitions` — fully resolved
+
+Canonical: `db/schema/domains/claims/workflows.ts` (18 columns,
+live-verified exact match). The other declaration
+(`db/schema/grievance-workflow-schema.ts`, 19 cols) had a phantom `version`
+column that does not physically exist. Its one real consumer
+(`lib/workers/report-worker.ts`, filtered only by `organizationId`) was
+redirected; the stale declaration converted to a re-export. No longer
+appears in the conflict report.
+
+### `steward_assignments` — three genuinely different concepts, one table name
+
+Live DB has 33 columns (`organization_id`, `steward_id` as TEXT,
+`steward_type`, `status`, `grievance_id`, etc.), matching
+`db/schema/union-structure-schema.ts` by name (nullability was separately
+relaxed by a historical fixup migration, same pattern as other tables in
+this doc). Two OTHER declarations exist for the same table name but
+represent genuinely different, never-reconciled data models:
+
+- `db/schema/domains/communications/organizer-workflows.ts` (16 cols):
+  a "steward assigned to a member" model (`steward_id` + `member_id` +
+  `assignment_type` + `effective_date`) for an "Organizer Workflows"
+  feature — **zero real consumers found anywhere in the repo**, and its
+  columns don't exist on the live table at all. Left untouched (dead,
+  no live risk) rather than guessing which of two unbuilt models to keep.
+- `db/schema/domains/member/stewards.ts` (6 cols): a "grievance-case
+  steward assignment" model (`grievanceId` + `stewardId` as **uuid**,
+  referencing a separate `stewards` table) — missing `organization_id`
+  entirely. Its real consumer, `lib/services/steward-assignment.ts`'s
+  `assignSteward()`, inserted rows with **no organization_id at all**
+  (a genuine tenant-isolation gap for every row it created). Fixed:
+  redirected to the canonical declaration, added an `organizationId`
+  parameter (the one real caller, `PATCH /api/grievances/[id]/assign`,
+  already had it in scope) and supplied required `stewardType`/`startDate`
+  values. `lib/cognition/ue-adapter.ts`'s read-only usage was also
+  redirected. The stale declaration converted to a re-export.
+
+The `organizer-workflows.ts` declaration remains a disclosed,
+unreconciled conflict (dead code, zero risk) — resolving it would require
+guessing which of two unimplemented product concepts to keep, which this
+round declined to do blind.
+
+### `user_sessions` — schema-qualification bug + a broken cleanup worker
+
+Both existing declarations declared this as `pgSchema('user_management').table('user_sessions', ...)`.
+Migration `0019_lonely_stephen_strange.sql` **dropped that exact
+schema-qualified table** (`DROP TABLE "user_management"."user_sessions" CASCADE`),
+and migrations `0055`/`0058`/`0081` recreated it in the **public** schema —
+`0058_world_class_rls_policies.sql` already enables RLS with four
+per-user policies (`sessions_select_own`/`_insert_own`/`_update_own`/`_delete_own`).
+This means `lib/workers/cleanup-worker.ts`'s scheduled session-cleanup
+DELETE queries had been failing on every invocation (querying a table that
+hadn't existed since migration 0019). Fixed: corrected
+`db/schema/user-management-schema.ts` to a plain `pgTable('user_sessions', ...)`
+matching live schema/nullability exactly (cleanup-worker.ts already
+imported from this file, so it is fixed automatically); converted
+`db/schema/domains/member/user-management.ts`'s copy (which also had a
+phantom `session_token_hash` column) to a re-export. Separately flagged,
+NOT investigated in this pass: several other tables in these same two
+files (`users`, `oauth_providers`, `password_reset_tokens`,
+`auth_audit_log`) are also declared `user_management`-schema-qualified,
+but only `organization_users` actually exists under that schema live —
+broader scope, deferred.
+
+### `employers` — column-name mismatch, not just type/nullability
+
+Live DB has 33 columns matching `db/schema/union-structure-schema.ts`
+exactly by name. The other declaration
+(`db/schema/domains/compliance/employer-compliance.ts`, 8 cols) used
+**`org_id`** (not `organization_id`), **`industry`**/**`contactEmail`**/**`contactPhone`**
+(none of which exist live at all — live has `industry_code`, `email`,
+`phone`). All 5 real consumers (`app/api/compliance/alerts/route.ts`,
+`app/api/compliance/reports/route.ts`, `app/api/pilot/demo-data/route.ts`,
+`lib/ai/employer-risk.ts`, `lib/ai/executive-insights.ts`) were filtering
+by the phantom `employers.orgId` — every one of these compliance/AI
+routes was throwing "column org_id does not exist" on every call. Also
+found: the top-level barrel (`db/schema/index.ts`) had an **explicit,
+incorrect** override — `export { employers } from "./domains/compliance"`
+— actively pointing `db.query.employers` (the Drizzle relational query
+API) at the wrong, non-matching declaration. Fixed: corrected the barrel
+override, redirected all 5 consumers (renaming `orgId`→`organizationId`,
+`contactEmail`→`email`, fixed the pilot demo-data seed generator's
+`employerType` enum value), converted the stale declaration to a
+re-export. No longer appears in the conflict report.
+
+### `webhook_deliveries` — disposed as LATENT_UNREACHABLE, not canonicalized
+
+Live DB has 26 columns, no `organization_id` — tenancy (if any) flows
+through `webhook_id` (NOT NULL) or the nullable `subscription_id`. Two
+conflicting declarations exist
+(`db/schema/domains/infrastructure/integrations.ts`, 10 cols, keyed by
+`webhook_id`; `db/schema/integration-schema.ts`, 19 cols, keyed by
+`subscription_id`) — **both are individually column-accurate against
+live** (not stale/wrong, just different partial views), suggesting two
+historically-separate integration-delivery flows share one physical
+table. `git grep` found **zero real production consumers** of
+`webhookDeliveries` from either declaration — the earlier bypass flag on
+`app/api/extensions/[id]/route.ts` was a false positive from the pre-fix
+scanner (that route only imports the unrelated `apiIntegrations` export).
+Given zero reachability, not canonicalized — doing so would require
+product-level judgment about which delivery flow, if either, is current.
+
+### `campaigns` / `message_log` / `communication_preferences` — investigated, deliberately NOT mechanically fixed
+
+`campaigns` and `message_log` are heavily reachable (40+ and several real
+references respectively across the communications dashboard, API routes,
+and webhooks) and live-verified against
+`db/schema/domains/communications/campaigns.ts` — the vast majority of
+consumers already use this canonical declaration correctly. One
+consumer, `lib/workers/message-queue-processor.ts`, still imports the
+stale `db/schema/phase-4-messaging-schema.ts` declarations, which have
+`sentCount`/`failedCount`/`skippedCount`/`totalRecipients` columns on
+`campaigns` and `channel`/`body`/`variables`/`scheduledAt`/`externalId`/`nextRetryAt`
+columns on `message_log` that do **not physically exist** — every
+campaign-stat-increment and message-queue operation in this worker
+throws. This was investigated in depth but **deliberately not fixed
+blind**: the canonical schema replaced per-campaign counters with a
+`stats` jsonb column, and — more importantly — canonical `messageLog`
+only stores a `bodySnippet` (explicitly "first 500 chars for reference"),
+not a full sendable body; the canonical `campaigns` table stores the
+template `body`/`variables` instead. Properly fixing this worker requires
+redesigning how it resolves and renders message content at send time
+(campaign template + variables → per-recipient content → snippet for
+audit), which is real feature work, not a mechanical import redirect —
+exactly the risk this round's own methodology (section on messaging
+tables) warned against rushing for code that sends real email/SMS to
+real members. Disclosed and deferred; see the `campaigns`/`message_log`
+manifest entries for the full citation. `communication_preferences` (a
+separate, still-conflicting table — not to be confused with
+`phase-4-messaging-schema.ts`'s differently-named
+`communication_preferences_phase4`, which the same worker also queries
+and does not conflict) was classified `TENANT_RLS_REQUIRED` based on its
+real consumers but not individually live-verified in this pass.
+
+## Scanner improvement: canonical-source map (round 3)
+
+`scripts/canonical-schema-map.ts` is a small, source-controlled
+`Record<(schema.table), modulePath>` recording which module owns the
+canonical declaration for every physical table resolved so far. The
+scanner (`getDeclarationStatus`) and report now tag each declaration in a
+conflict group as `CANONICAL_DECLARATION`, `STALE_DUPLICATE`, or
+(if not yet in the map) unlabeled. A new test,
+`scripts/__tests__/canonical-schema-map.test.ts`, fails if any real
+(non-test) code directly imports a declaration the map marks
+`STALE_DUPLICATE` — re-export shims are fine (they resolve to the same
+canonical object); a fresh, independently-declared stale `pgTable()` call
+is not.
 
 ## Ratchet: fingerprint set, not a raw count
 
 `apps/union-eyes/scripts/__tests__/schema-duplicate-table-ratchet.test.ts`
 now asserts the **current set** of `CONFLICTING_SCHEMA` table keys is a
-subset of an explicitly recorded baseline set (21 keys, listed above,
+subset of an explicitly recorded baseline set (18 keys, listed above,
 keyed as `${schema}.${table}`) — not merely that the total count doesn't
 exceed a number. A raw count can't distinguish "fixed table A, introduced
 table B" from "no change" if the totals happen to match; the fingerprint
@@ -166,7 +310,7 @@ connect to a schema conflict.
 ## Disposition
 
 - **Not a merge blocker for #752's core RLS scope by itself** — the
-  remaining 21 tables are tracked, ratcheted by fingerprint (not raw
+  remaining 18 tables are tracked, ratcheted by fingerprint (not raw
   count), and none are yet proven to intersect the tenant-RLS-required
   surface. Each will go through the same live-schema-first process used
   for `grievances`/`member_documents` before #752 is considered complete.

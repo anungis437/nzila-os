@@ -15,7 +15,7 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, desc } from "drizzle-orm";
-import { employers } from "@/db/schema/domains/compliance/employer-compliance";
+import { employers } from "@/db/schema/union-structure-schema";
 
 const logger = createLogger("compliance-alerts");
 

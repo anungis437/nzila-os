@@ -15,7 +15,13 @@ import {
   integer,
   index,
 } from "drizzle-orm/pg-core";
-import { grievances } from "../claims/grievances";
+
+// Canonical `stewardAssignments` declaration lives in ../../union-structure-schema
+// (live-DB-verified 2026-09-01: 33 columns, including organization_id). This
+// file's own 6-column declaration lacked organization_id entirely, which
+// meant any insert built against it silently created tenant-orphaned rows
+// (PR #752 review round 3) — re-exported here instead of re-declared.
+import { stewardAssignments } from "../../union-structure-schema";
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
@@ -57,31 +63,7 @@ export const stewards = pgTable(
   ],
 );
 
-/**
- * Tracks which steward is assigned to which grievance.
- */
-export const stewardAssignments = pgTable(
-  "steward_assignments",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    grievanceId: uuid("grievance_id")
-      .notNull()
-      .references(() => grievances.id, { onDelete: "cascade" }),
-    stewardId: uuid("steward_id")
-      .notNull()
-      .references(() => stewards.id, { onDelete: "cascade" }),
-    assignedAt: timestamp("assigned_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    status: stewardAssignmentStatusEnum("status").notNull().default("pending"),
-    completedAt: timestamp("completed_at", { withTimezone: true }),
-  },
-  (table) => [
-    index("idx_steward_assignments_grievance").on(table.grievanceId),
-    index("idx_steward_assignments_steward").on(table.stewardId),
-    index("idx_steward_assignments_status").on(table.status),
-  ],
-);
+export { stewardAssignments };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
