@@ -8,6 +8,7 @@
  */
 
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import {
   analyticsMetrics,
   kpiConfigurations,
@@ -29,27 +30,22 @@ import { logger } from '@/lib/logger';
 
 /**
  * Get current user's organization ID
+ *
+ * IMPORTANT: does NOT trust auth()'s `orgId` — for Entra-backed sessions
+ * that value is the Azure AD security-group GUID (activeOrgId), not the
+ * app-level organizations.id UUID. Using it directly here previously meant
+ * analytics queries could be scoped to a value that never matches the
+ * user's real organization membership (queries silently returning nothing),
+ * or — if an AD group GUID happens to collide with an unrelated org's UUID —
+ * scoping the RLS context to an organization the user never verified
+ * membership in. getOrganizationIdForUser() always resolves via a verified
+ * organization_members row.
  */
 async function getCurrentUserOrgId(): Promise<string> {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
   if (!userId) throw new Error('Unauthorized');
-  
-  // Prefer Clerk's active org context (avoids raw DB lookup)
-  if (orgId) return orgId;
 
-  // Fallback: resolve via org membership with system RLS context
-  const result = await withRLSContext({ organizationId: 'system' }, async (rlsDb) =>
-    rlsDb.query.organizationMembers.findFirst({
-      where: (members, { eq }) => eq(members.userId, userId),
-      with: {
-        organization: true
-      }
-    })
-  );
-  
-  if (!result) throw new Error('User not associated with any organization');
-  
-  return result.organizationId;
+  return getOrganizationIdForUser(userId);
 }
 
 /**

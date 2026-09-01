@@ -25,6 +25,7 @@
 import { auth, currentUser } from '@/lib/api-auth-guard'
 import { db } from '@/db/db'
 import { systemDb } from '@/db/system-db'
+import { systemContextStorage } from '@/db/system-context-storage'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 
@@ -283,8 +284,14 @@ export async function withSystemContext<T>(
     // policy on this connection depends on them being empty.
     await tx.execute(sql`SELECT set_config('app.current_user_id', '', true)`)
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
-    const result = await (operation as (tx: RLSTx) => Promise<T>)(
-      tx as any as RLSTx,
+    // Scope the module-level `db` import (from @/db/db) to this transaction
+    // for the duration of the callback. Dozens of existing callers use the
+    // no-argument form and query through `db` directly rather than the
+    // supplied `tx` — without this, those queries would silently run on the
+    // tenant connection (union_eyes_runtime) despite appearing
+    // system-authorized. See db/system-context-storage.ts.
+    const result = await systemContextStorage.run(tx as any, () =>
+      (operation as (tx: RLSTx) => Promise<T>)(tx as any as RLSTx),
     )
     return result
   })
@@ -509,6 +516,8 @@ export async function withPlatformAdminRLSContext<T>(
   return await systemDb.transaction(async (tx) => {
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${adminId}, true)`)
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
-    return await fn()
+    // Same ALS scoping as withSystemContext — fn() may query through the
+    // module-level `db` import rather than an explicit tx.
+    return await systemContextStorage.run(tx as any, fn)
   })
 }

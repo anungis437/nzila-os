@@ -4,6 +4,19 @@
 // Description: Automated assignment system with workload balancing, expertise
 //              matching, and multi-officer collaboration support
 // Created: 2025-12-06
+//
+// TRUST BOUNDARY: every exported function here takes `organizationId` as a
+// plain parameter and passes it straight into withRLSContext({ organizationId }),
+// which sets it as the live Postgres RLS tenant context. Callers MUST supply a
+// value that was independently verified against the caller's own session
+// (e.g. via getOrganizationIdForUser()), never a client-suppliable value
+// (query/body param, or a raw auth()-provided orgId — see
+// apps/union-eyes/actions/analytics-actions.ts's getCurrentUserOrgId() for
+// why the latter is unsafe for Entra-backed sessions). Currently this module
+// has no production caller (only imported dynamically by
+// lib/workflow-automation-engine.ts, which itself has no production caller
+// either) — verify this trust boundary before wiring either module into a
+// live route.
 // ============================================================================
 
 import { db } from "@/db/db";

@@ -62,7 +62,8 @@
     "workbook:pilot-readiness": "tsx scripts/check-workbook-pilot-readiness.ts",
     "rls:verify": "tsx scripts/rls-verify.ts --mode=preflight",
     "rls:verify:full": "tsx scripts/rls-verify.ts --mode=full",
-    "rls:provision-roles": "tsx scripts/provision-runtime-db-roles.ts"
+    "rls:provision-roles": "tsx scripts/provision-runtime-db-roles.ts",
+    "rls:apply-foundation-migration": "tsx scripts/apply-rls-foundation-migration.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",

@@ -189,6 +189,71 @@ async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
   }
 }
 
+/**
+ * Discovers tables that carry an org/tenant-shaped column
+ * (organization_id / org_id / tenant_id) but are granted DML to
+ * union_eyes_runtime without RLS enabled — i.e. tables the blanket
+ * `GRANT ... ON ALL TABLES IN SCHEMA public` in 0108 makes reachable, but
+ * that have no row-level enforcement at all (relying solely on
+ * application-layer filtering).
+ *
+ * This does NOT block on every such table today: 0108 protects a
+ * deliberately scoped subset (the Phase 3A capability surface), and this
+ * repository's schema has 200+ tables — most not yet audited for whether
+ * they are actually reachable by tenant-facing runtime code. Blocking
+ * deployment on the full, un-triaged gap would be an unreviewed, blind
+ * mass change, not a considered one.
+ *
+ * Known/accepted gaps are tracked in scripts/rls-known-unprotected-tables.json
+ * (a plain array of table names) so this check can still fail closed on
+ * *new* additions once that file has been populated against the real
+ * database schema (it currently ships empty/unpopulated — see the file's
+ * own header comment). Until populated, this check is REPORT-ONLY and does
+ * not affect the pass/fail exit code.
+ */
+async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult[]) {
+  const rows = await sql<{ table_name: string; column_name: string }[]>`
+    SELECT DISTINCT c.table_name, c.column_name
+    FROM information_schema.columns c
+    JOIN information_schema.tables t
+      ON t.table_schema = c.table_schema AND t.table_name = c.table_name AND t.table_type = 'BASE TABLE'
+    WHERE c.table_schema = 'public'
+      AND c.column_name IN ('organization_id', 'org_id', 'tenant_id')
+      AND c.table_name != ALL(${ALL_PROTECTED_TABLES})`
+
+  let allowlist: string[] = []
+  try {
+    const mod = await import('./rls-known-unprotected-tables')
+    allowlist = mod.default ?? []
+  } catch {
+    allowlist = []
+  }
+  const allowlistPopulated = allowlist.length > 0
+
+  const byTable = new Map<string, string[]>()
+  for (const row of rows) {
+    const cols = byTable.get(row.table_name) ?? []
+    cols.push(row.column_name)
+    byTable.set(row.table_name, cols)
+  }
+
+  for (const [table, columns] of byTable) {
+    const isAllowlisted = allowlist.includes(table)
+    results.push({
+      name: `orphaned-tenant-table scan: ${table} (${columns.join(', ')})`,
+      // Only actually gates the exit code once the allowlist has real
+      // content — see the file header for why an empty allowlist means
+      // "not yet populated against a real schema", not "no gaps exist".
+      pass: !allowlistPopulated || isAllowlisted,
+      detail: isAllowlisted
+        ? 'known gap, tracked in scripts/rls-known-unprotected-tables.ts'
+        : allowlistPopulated
+          ? 'NEW unprotected tenant-shaped table — add RLS coverage or add to the allowlist with justification'
+          : 'reported only — scripts/rls-known-unprotected-tables.ts is not yet populated against a real schema, see its header comment',
+    })
+  }
+}
+
 async function checkNoContextFailsClosed(sql: postgres.Sql, results: CheckResult[]) {
   await sql.begin(async (tx) => {
     await tx.unsafe(`SELECT set_config('app.current_user_id', '', true)`)
@@ -324,6 +389,7 @@ async function main() {
     await checkRuntimeRole(sql, results)
     await checkTableRlsState(sql, results)
     await checkNoContextFailsClosed(sql, results)
+    await checkOrphanedTenantTables(sql, results)
     if (mode === 'full') {
       const systemDbUrl = process.env.RLS_VERIFY_SYSTEM_DATABASE_URL || process.env.SYSTEM_DATABASE_URL
       if (!systemDbUrl) {
