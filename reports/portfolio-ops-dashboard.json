@@ -189,7 +189,7 @@
       "recommendation": "HOLD",
       "weighted_score": 4.6,
       "readiness_tier": "internal-only",
-      "registry_tier": "UNREGISTERED",
+      "registry_tier": "EXPERIMENTAL",
       "dev_port": null
     },
     {

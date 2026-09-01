@@ -1,0 +1,25 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "civic",
+  "version": "1.0.0",
+  "riskLevel": "none",
+  "policyProfile": null,
+  "controls": {
+    "enforcement": false,
+    "governance": false,
+    "audit": false,
+    "observability": false,
+    "security": false,
+    "aiControl": false,
+    "contracts": false,
+    "events": false
+  },
+  "exceptions": [
+    {
+      "control": "enforcement",
+      "reason": "Catalog/registry placeholder only — no runtime code, no routes, no data.",
+      "expiresOn": "2026-12-31",
+      "owner": "platform-core"
+    }
+  ]
+}

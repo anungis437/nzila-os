@@ -41,7 +41,7 @@
 | --- | --- | --- | --- | --- |
 | Union Eyes | PRODUCTION | pilot-safe | internal | KEEP |
 | CFO | PILOT | pilot-safe | internal | HOLD |
-| CIVIC | UNREGISTERED | internal-only | internal | HOLD |
+| CIVIC | EXPERIMENTAL | internal-only | internal | HOLD |
 | CourtLens | EXPERIMENTAL | pilot-safe | internal | KEEP |
 | Flow | PILOT | pilot-safe | internal | KEEP |
 | Partners | PILOT | pilot-safe | internal | HOLD |

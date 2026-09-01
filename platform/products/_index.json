@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-26T00:00:00.000Z",
-  "count": 27,
+  "generatedAt": "2026-09-01T00:00:00.000Z",
+  "count": 28,
   "products": [
     {
       "slug": "abr",
-      "tier": 1,
-      "tierLabel": "flagship",
+      "tier": 2,
+      "tierLabel": "growth",
       "publicVisible": true
     },
     {
@@ -16,6 +16,12 @@
     },
     {
       "slug": "cfo",
+      "tier": 2,
+      "tierLabel": "growth",
+      "publicVisible": false
+    },
+    {
+      "slug": "civic",
       "tier": 2,
       "tierLabel": "growth",
       "publicVisible": false
@@ -40,8 +46,8 @@
     },
     {
       "slug": "flow",
-      "tier": 1,
-      "tierLabel": "flagship",
+      "tier": 2,
+      "tierLabel": "growth",
       "publicVisible": true
     },
     {

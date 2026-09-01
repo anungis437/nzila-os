@@ -42,6 +42,14 @@
       "launchStage": "pilot",
       "publicVisible": true
     },
+    "civic": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
+    },
     "cfo": {
       "pricingTier": "growth",
       "telemetryRequired": true,

@@ -1,8 +1,8 @@
 {
   "slug": "flow",
   "name": "Flow",
-  "tier": 1,
-  "tierLabel": "flagship",
+  "tier": 2,
+  "tierLabel": "growth",
   "status": "pilot",
   "owner": "Nzila Ventures",
   "pricingTier": "growth",
@@ -11,10 +11,10 @@
   "trustProfile": "tier-1-public",
   "launchStage": "pilot",
   "publicVisible": true,
-  "gtmPosture": "sell-now",
+  "gtmPosture": "hold",
   "proofLevel": "internal-proof",
   "strategicRole": "Second flagship revenue wedge for SMB operations and commerce.",
-  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "generatedAt": "2026-09-01T00:00:00.000Z",
   "generatedFrom": [
     "governance/portfolio/product-catalog.json",
     "platform/products/envelope.config.json"

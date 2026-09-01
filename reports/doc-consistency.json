@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T03:20:08.189Z",
+  "generatedAt": "2026-09-01T04:06:38.297Z",
   "filesScanned": 2416,
   "totalFindings": 2793,
   "findingsByRule": {
@@ -18759,7 +18759,7 @@
       "severity": "info",
       "file": "docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md",
       "line": 475,
-      "message": "Document date \"April 23, 2026\" is 130 days old — may be stale"
+      "message": "Document date \"April 23, 2026\" is 131 days old — may be stale"
     },
     {
       "rule": "stale-date",

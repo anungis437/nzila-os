@@ -60,7 +60,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | --- | ---: | --- | --- | --- |
 | Union Eyes | 8.0 | KEEP | PRODUCTION | pilot-safe |
 | CFO | 5.6 | HOLD | PILOT | pilot-safe |
-| CIVIC | 4.6 | HOLD | UNREGISTERED | internal-only |
+| CIVIC | 4.6 | HOLD | EXPERIMENTAL | internal-only |
 | CourtLens | 7.4 | KEEP | EXPERIMENTAL | pilot-safe |
 | Flow | 6.4 | KEEP | PILOT | pilot-safe |
 | Partners | 4.8 | HOLD | PILOT | pilot-safe |

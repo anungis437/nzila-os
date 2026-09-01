@@ -1,6 +1,6 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-09-01T03:20:08.189Z
+> Generated: 2026-09-01T04:06:38.297Z
 
 ## Summary
 
@@ -2710,7 +2710,7 @@
 - ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 137 days old — may be stale
 - ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 137 days old — may be stale
 - ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 137 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 130 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 131 days old — may be stale
 - ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 134 days old — may be stale
 - ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 99 days old — may be stale
 - ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 99 days old — may be stale
