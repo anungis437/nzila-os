@@ -34,7 +34,7 @@ its stabilisation plan independently. Same five rows, one name for the exit deci
 | # | Phase | Product |
 |---|---|---|
 | 1 | Recognition | P1 — OCRA |
-| 2 | Mapping | P2 — Governance Entropy Workbook™ |
+| 2 | Mapping | P2 — Governance Entropy Workbook |
 | 3 | Stabilization | P3 — OCI Diagnostic & Stabilization |
 | 4 | Infrastructure ("Embedding" decision) | P4 — OCI Runtime |
 | 5 | Intelligence (not sold — see below) | P5 — OCI Intelligence Network |

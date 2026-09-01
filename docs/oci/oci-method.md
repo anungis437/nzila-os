@@ -1,4 +1,4 @@
-# The OCI Method™ — superseded, redirect only
+# The OCI Method — superseded, redirect only
 
 **STATUS:** Superseded. This file is a stub. Do not add content here.
 

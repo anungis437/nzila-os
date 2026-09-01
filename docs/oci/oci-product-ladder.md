@@ -25,7 +25,7 @@ drift apart again, this document governs and the plan is stale until updated.
 | Layer | Product | Method phase (see [OCI Method](./OCI_METHOD.md)) |
 |---|---|---|
 | **P1** | OCRA — the Recognition-phase assessment | Recognition |
-| **P2** | Governance Entropy Workbook™ | Mapping |
+| **P2** | Governance Entropy Workbook | Mapping |
 | **P3** | OCI Diagnostic & Stabilization | Stabilization |
 | **P4** | OCI Runtime (Platform Activation) | Infrastructure |
 | **P5** | OCI Intelligence Network | Intelligence — not sold (see below) |
@@ -53,9 +53,9 @@ facilitated OCI Assessment or later tier may claim Stabilization-phase or Infras
 results.
 
 **Named conflict, closed.** The BDC business plan describes the $1,200 Leadership Briefing Report
-as covering "governance entropy, continuity debt, dependency review" — Continuity Debt™ is a P3,
+as covering "governance entropy, continuity debt, dependency review" — Continuity Debt is a P3,
 Stabilization-phase, facilitated-only instrument (see `docs/oci/superseded/stabilization/OCI_CONTINUITY_DEBT.md`).
-The $1,200 tier does not compute Continuity Debt™. That phrase in the plan is a labelling error
+The $1,200 tier does not compute Continuity Debt. That phrase in the plan is a labelling error
 inherited from an earlier draft, not a claim this doctrine backs — the deliverable at that price
 point is a Recognition/Mapping-phase reading only.
 
@@ -97,7 +97,7 @@ leaves the database — holder names and notes never sync to CRM or PDF aggregat
 
 ## Cross-references
 
-- [OCI Method™](./OCI_METHOD.md) — the methodology spine
+- [OCI Method](./OCI_METHOD.md) — the methodology spine
 - [OCI Delivery Model](./OCI_DELIVERY_MODEL.md) — the one clock
 - [Anti-Surveillance Position](./OCI_ANTI_SURVEILLANCE_POSITION.md) — instrument disposition and the P5 gate
 - [`apps/union-eyes/lib/oci/frameworks/`](../../apps/union-eyes/lib/oci/frameworks/) — framework implementations
