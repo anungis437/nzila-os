@@ -20,7 +20,7 @@ export type WhitepaperLocalizedContent = {
  * `/whitepaper` (preserved for SEO and theme parity). All other entries
  * are rendered through the shared markdown-driven renderer at
  * `/whitepapers/[slug]` and source their locale-specific content from
- * `docs/oci/whitepapers/`.
+ * `docs/oci/superseded/whitepapers/`.
  */
 export type WhitepaperEntry = {
   readonly slug: string;

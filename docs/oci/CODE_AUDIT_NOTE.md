@@ -20,7 +20,7 @@ Patches applied (rename/constant alignment only):
    points at was a duplicate; now there is one file).
 2. `productFamily: 'ICRA'` → `'OCRA'` for the Recognition/P1 phase. This was simply stale — the
    product was already renamed OCRA in the doctrine and in the pricing surfaces; the migration
-   convergence plan (`docs/oci/migration/OCI_OCRA_CONVERGENCE_PLAN.md`) already documents this
+   convergence plan (`docs/oci/superseded/migration/OCI_OCRA_CONVERGENCE_PLAN.md`) already documents this
    rename as executed everywhere except a long tail of technical identifiers. This is that tail.
 3. `productFamily: 'OCI Diagnostic'` → `'OCI Diagnostic & Stabilization'` (P3) and
    `'OCI Runtime Infrastructure'` → `'OCI Runtime'` (P4) — matches the renamed ladder tier names in
