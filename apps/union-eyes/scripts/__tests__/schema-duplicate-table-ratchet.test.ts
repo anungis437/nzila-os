@@ -54,6 +54,17 @@ import { scanSchemaDeclarations, classifyGroup } from '../schema-duplicate-table
 // per Wave 0 finding F-01 and never called this worker). Both the worker,
 // its test, and the stale schema file were deleted rather than
 // canonicalized — there was no real behavior to preserve.
+// Also round 4: removed 'public.steward_assignments' — the stale
+// declaration in db/schema/domains/communications/organizer-workflows.ts
+// (a different, narrower steward-to-member concept than the canonical
+// steward-to-coverage-area model in union-structure-schema.ts) had zero
+// production consumers of its own (confirmed via git grep for the module
+// path, stewardAssignmentTypeEnum, and every real caller of the
+// 'stewardAssignments' symbol — all resolve to the canonical declaration
+// via db/schema/index.ts's explicit override). Deleted the table, its
+// enum, relations, and type exports rather than re-exporting the
+// canonical one, since the stale file never actually persisted a
+// steward-to-member relationship in production.
 // Only remove keys as conflicts are resolved; never add a key to
 // accommodate a newly-introduced conflict.
 const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
@@ -67,7 +78,6 @@ const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
   'public.communication_preferences',
   'public.consent_records',
   'public.newsletter_list_subscribers',
-  'public.steward_assignments',
   'public.gl_account_mappings',
   'public.dues_transactions',
   'public.payments',

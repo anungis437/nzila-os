@@ -1,6 +1,6 @@
 Total distinct physical (schema, table) keys: 702
-Keys with >1 declaration: 342
-  - CONFLICTING_SCHEMA (proven incompatible): 16
+Keys with >1 declaration: 341
+  - CONFLICTING_SCHEMA (proven incompatible): 15
   - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 3
   - IDENTICAL_OR_PROVEN_COMPATIBLE: 323
 
@@ -31,11 +31,6 @@ communication_preferences: db/schema/communication-analytics-schema.ts(communica
 consent_records: db/schema/data-governance-schema.ts(consentRecords)[22cols] | db/schema/domains/communications/campaigns.ts(consentRecords)[13cols]
 newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers)[8cols] | db/schema/newsletter-schema.ts(newsletterListSubscribers)[8cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
-steward_assignments: db/schema/domains/communications/organizer-workflows.ts(stewardAssignments)[16cols] | db/schema/union-structure-schema.ts(stewardAssignments)[33cols]
-  STALE_DUPLICATE: db/schema/domains/communications/organizer-workflows(stewardAssignments)
-  CANONICAL_DECLARATION: db/schema/union-structure-schema(stewardAssignments)
-  DIRECT IMPORT BYPASSING BARREL: db/schema/union-structure-schema(stewardAssignments) imported directly by: lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts
-  MIGRATION EVIDENCE: 0019_lonely_stephen_strange.sql, 0041_steady_reavers.sql
 gl_account_mappings: db/schema/domains/finance/accounting.ts(glAccountMappings)[18cols] | db/schema/domains/infrastructure/erp.ts(glAccountMappings)[12cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 dues_transactions: db/schema/domains/finance/dues.ts(duesTransactions)[30cols] | db/schema/dues-transactions-schema.ts(duesTransactions)[27cols]

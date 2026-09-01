@@ -289,7 +289,7 @@ is not.
 
 `apps/union-eyes/scripts/__tests__/schema-duplicate-table-ratchet.test.ts`
 now asserts the **current set** of `CONFLICTING_SCHEMA` table keys is a
-subset of an explicitly recorded baseline set (16 keys after round 4,
+subset of an explicitly recorded baseline set (15 keys after round 4,
 listed above,
 keyed as `${schema}.${table}`) — not merely that the total count doesn't
 exceed a number. A raw count can't distinguish "fixed table A, introduced
@@ -362,6 +362,50 @@ per-import re-verification (it was a raw symbol-name grep that likely
 picked up an unrelated, identically-named export from a different
 physical table) — tracked as a follow-up alongside `communication_preferences`
 canonicalization.
+
+## Round 4 (2026-09-01, continued): `steward_assignments` canonicalization completed
+
+Round 3 dispositioned `steward_assignments` as a genuine two-concept
+collision — `db/schema/union-structure-schema.ts`'s steward-to-coverage-
+area assignment (tenure/training/certification tracking, optional
+grievance link) vs `db/schema/domains/communications/organizer-workflows.ts`'s
+narrower steward-to-individual-member assignment — and left the latter's
+zero-consumer declaration disclosed but untouched, reasoning that
+force-merging two genuinely different concepts would misrepresent real
+code. On review, "zero consumers" was itself sufficient grounds to
+finish the canonicalization: a declaration nothing imports isn't
+preserving a real, distinct concept in production — it's inert.
+
+**Re-verification**: `git grep` for the `stewardAssignments` symbol
+across the repo confirmed every real (non-test) caller — 
+`app/api/stewards/[id]/route.ts`, `app/api/stewards/route.ts` (via the
+`@/db/schema` barrel), `db/queries/union-structure-queries.ts`,
+`lib/cognition/ue-adapter.ts`, `lib/services/steward-assignment.ts` (via
+direct `@/db/schema/union-structure-schema` import), and
+`db/schema/domains/member/stewards.ts` (an explicit re-export shim with
+its own "Canonical `stewardAssignments` declaration lives in
+../../union-structure-schema" comment) — already resolved to the
+canonical declaration. `db/schema/index.ts` already carried an explicit
+override (`export { stewardAssignments, ... } from "./union-structure-schema"`)
+resolving the wildcard-export ambiguity in the canonical declaration's
+favor, so no real consumer was ever at risk of receiving the stale one.
+The stale file's own `stewardAssignmentTypeEnum` had no consumers outside
+its own (now-removed) table either.
+
+**Action taken**: deleted the stale `stewardAssignments` `pgTable(...)`
+declaration, its `stewardAssignmentTypeEnum`, `stewardAssignmentsRelations`,
+and `StewardAssignment`/`InsertStewardAssignment` type exports from
+`organizer-workflows.ts` — leaving a comment explaining the removal in
+place of a re-export (a re-export would misrepresent the file as still
+owning a steward-to-member assignment concept it never actually
+persisted). All other organizer-workflow declarations in that file
+(outreach sequences/enrollments/steps, field notes, tasks, member
+relationship scores) are untouched. Confirmed the round-3
+tenant-isolation fix (`lib/services/steward-assignment.ts`'s
+`assignSteward()` persisting `organization_id` on insert) is still in
+place. Removed `public.steward_assignments` from the ratchet baseline
+(16 → 15 conflicting keys) and corrected its manifest entry from
+`NEEDS_REVIEW` to `TENANT_RLS_REQUIRED` with the full evidence trail.
 
 ## Disposition
 

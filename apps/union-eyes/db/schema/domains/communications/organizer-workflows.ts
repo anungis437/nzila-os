@@ -36,13 +36,6 @@ import { organizations } from '../../../schema-organizations';
 // ENUMS
 // ============================================================================
 
-export const stewardAssignmentTypeEnum = pgEnum('steward_assignment_type', [
-  'primary',      // Primary steward for member
-  'backup',       // Backup steward
-  'temporary',    // Temporary assignment (e.g., during leave)
-  'training',     // Training assignment for new stewards
-]);
-
 export const outreachSequenceStatusEnum = pgEnum('outreach_sequence_status', [
   'active',
   'paused',
@@ -97,50 +90,23 @@ export const taskStatusEnum = pgEnum('task_status', [
 // ============================================================================
 // STEWARD ASSIGNMENTS
 // ============================================================================
-
-/**
- * Steward Assignments
- * Maps stewards to members they support
- */
-export const stewardAssignments = pgTable('steward_assignments', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  // Assignment details
-  stewardId: varchar('steward_id', { length: 255 }).notNull(), // User ID of steward
-  memberId: varchar('member_id', { length: 255 }).notNull(), // User ID of member
-  assignmentType: stewardAssignmentTypeEnum('assignment_type').notNull().default('primary'),
-  
-  // Duration
-  effectiveDate: date('effective_date').notNull(),
-  endDate: date('end_date'), // null = ongoing assignment
-  
-  // Context
-  worksiteId: uuid('worksite_id'), // Optional worksite reference
-  departmentId: uuid('department_id'), // Optional department reference
-  notes: text('notes'),
-  
-  // Status
-  isActive: boolean('is_active').default(true),
-  
-  // Metadata
-  metadata: jsonb('metadata').default({}),
-  
-  // Audit
-  createdBy: varchar('created_by', { length: 255 }).notNull(),
-  updatedBy: varchar('updated_by', { length: 255 }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  orgIdx: index('idx_steward_assignments_org').on(table.organizationId),
-  stewardIdx: index('idx_steward_assignments_steward').on(table.stewardId),
-  memberIdx: index('idx_steward_assignments_member').on(table.memberId),
-  typeIdx: index('idx_steward_assignments_type').on(table.assignmentType),
-  effectiveDateIdx: index('idx_steward_assignments_effective').on(table.effectiveDate),
-  isActiveIdx: index('idx_steward_assignments_active').on(table.isActive),
-}));
+//
+// The physical `steward_assignments` table is canonically declared in
+// ../../union-structure-schema.ts (steward-to-coverage-area assignment,
+// with tenure/training/certification tracking and an optional grievance
+// link). This module previously declared a second, conflicting
+// `pgTable('steward_assignments', ...)` for a different, narrower concept
+// (steward-to-individual-member assignment). PR #752 review confirmed
+// zero production consumers ever imported that declaration (or its
+// stewardAssignmentTypeEnum/stewardAssignmentsRelations) directly from
+// this module or from the domains/communications barrel - every real
+// caller already used the canonical declaration via @/db/schema or
+// @/db/schema/union-structure-schema. Removed rather than re-exported: a
+// re-export would misrepresent this file as still owning a
+// steward-to-member assignment concept it never actually persisted.
+// See scripts/__tests__/schema-duplicate-table-ratchet.test.ts and
+// docs/union-eyes/reality-remediation/27_RLS_STORAGE_SCHEMA_CANONICALIZATION.md
+// (Round 4) for the full investigation.
 
 // ============================================================================
 // OUTREACH SEQUENCES
@@ -487,13 +453,6 @@ export const memberRelationshipScores = pgTable('member_relationship_scores', {
 // RELATIONS
 // ============================================================================
 
-export const stewardAssignmentsRelations = relations(stewardAssignments, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [stewardAssignments.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
 export const outreachSequencesRelations = relations(outreachSequences, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [outreachSequences.organizationId],
@@ -561,9 +520,6 @@ export const memberRelationshipScoresRelations = relations(memberRelationshipSco
 // ============================================================================
 // INFERRED TYPES
 // ============================================================================
-
-export type StewardAssignment = typeof stewardAssignments.$inferSelect;
-export type InsertStewardAssignment = typeof stewardAssignments.$inferInsert;
 
 export type OutreachSequence = typeof outreachSequences.$inferSelect;
 export type InsertOutreachSequence = typeof outreachSequences.$inferInsert;

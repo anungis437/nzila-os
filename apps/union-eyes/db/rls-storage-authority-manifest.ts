@@ -3193,10 +3193,10 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   },
   {
     table: 'steward_assignments',
-    classification: 'NEEDS_REVIEW',
-    reason: "4 non-test reference(s) to 'stewardAssignments' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
-    supportingCapability: ["app/api/stewards/[id]/route.ts","app/api/stewards/route.ts","lib/cognition/ue-adapter.ts","lib/services/steward-assignment.ts"],
-    requiredRuntimePrivilege: 'TBD',
+    classification: 'TENANT_RLS_REQUIRED',
+    reason: "organization_id present and NOT NULL in the canonical declaration (db/schema/union-structure-schema.ts): steward-to-coverage-area assignment with tenure/training/certification tracking and an optional grievance link. Round 4 (2026-09-01): resolved the CONFLICTING_SCHEMA finding \u2014 db/schema/domains/communications/organizer-workflows.ts previously declared a second, conflicting 'steward_assignments' pgTable for a narrower steward-to-individual-member concept. Confirmed via git grep for the module path, its stewardAssignmentTypeEnum, and every real caller of the 'stewardAssignments' symbol that the stale declaration had ZERO production consumers of its own \u2014 every real caller (app/api/stewards/[id]/route.ts, app/api/stewards/route.ts, db/queries/union-structure-queries.ts, lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts, db/schema/domains/member/stewards.ts) already resolved to the canonical declaration, either directly or via db/schema/index.ts's explicit override. Deleted the stale table/enum/relations/types rather than re-exporting them. Tenant-isolation fix from round 3 (lib/services/steward-assignment.ts's assignSteward() persisting organization_id on insert) confirmed still present.",
+    supportingCapability: ["app/api/stewards/[id]/route.ts","app/api/stewards/route.ts","db/queries/union-structure-queries.ts","lib/cognition/ue-adapter.ts","lib/services/steward-assignment.ts","db/schema/union-structure-schema.ts"],
+    requiredRuntimePrivilege: 'FULL_DML',
     reviewPriority: 'HIGH',
   },
   {
