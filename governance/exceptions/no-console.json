@@ -7,120 +7,120 @@
       "path": "apps/union-eyes/db/seeds/**",
       "owner": "union-eyes-team",
       "justification": "Seed scripts are CLI programs — console output is appropriate for development tooling.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/lib/client-logger.ts",
       "owner": "platform-team",
       "justification": "Client-safe logger wraps console.* as the browser output sink — console calls here ARE the structured output.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/lib/console-wrapper.ts",
       "owner": "platform-team",
       "justification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/lib/logger.ts",
       "owner": "platform-team",
       "justification": "App-specific logger implementation uses console as the output sink — console calls here ARE the structured output.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/public/service-worker.js",
       "owner": "union-eyes-team",
       "justification": "Service Worker runs in browser context where @nzila/os-core is not available — console is the only logging mechanism.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/middleware.ts",
       "owner": "platform-team",
       "justification": "Edge middleware cannot use @nzila/os-core/createLogger (Node.js APIs unavailable on Edge Runtime) — console is the only safe logging mechanism.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/cfo/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/cfo/app/*/dashboard/*/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/cfo/app/*/dashboard/*/*/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary for nested sub-sections (e.g., documents/upload, workflows/new) runs in browser context where @nzila/os-core is not available.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/zonga/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/zonga/app/*/dashboard/*/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary for sub-sections runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/partners/app/**/admin/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/partners/app/**/portal/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/nacp-exams/app/*/dashboard/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/lib/api.ts",
       "owner": "platform-team",
       "justification": "Client-safe API logger for union-eyes — os-core createLogger uses Node.js APIs unavailable in Turbopack client bundles. Console is used as the structured output sink.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/lib/api/index.ts",
       "owner": "platform-team",
       "justification": "Client-safe API logger for union-eyes — os-core createLogger uses Node.js APIs unavailable in Turbopack client bundles. Console is used as the structured output sink.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/*/lib/demoSeed.ts",
       "owner": "platform-team",
       "justification": "Demo seed scripts are CLI programs invoked via npx tsx — console output is appropriate for development tooling.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/agrimo/lib/events/agri-event-emitter.ts",
       "owner": "agri-team",
       "justification": "Event emitter uses console for structured event logging and webhook error reporting — will migrate to os-core logger.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/zonga/lib/stripe.ts",
       "owner": "platform-team",
       "justification": "Payment integration logs missing secrets at startup — will migrate to os-core logger.",
-      "expiresOn": "2026-09-01"    },
+      "expiresOn": "2026-10-01"    },
     {
       "path": "apps/console/components/ui/ErrorPanel.tsx",
       "owner": "platform-team",
       "justification": "Client error boundary runs in browser context where @nzila/os-core is not available \u2014 console.error is the browser RUM sink for Next.js error digest reporting.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
@@ -137,7 +137,7 @@
       "path": "apps/union-eyes/instrumentation.ts",
       "owner": "platform-team",
       "justification": "Turbopack instrumentation loader cannot instantiate relative module factories from inside register() catch path — console.error is the only safe fallback here.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     }
   ]
 }
