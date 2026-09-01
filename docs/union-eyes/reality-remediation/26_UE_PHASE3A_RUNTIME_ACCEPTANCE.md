@@ -9,9 +9,13 @@
 **Status of this document:** IN PROGRESS. This is a live evidence ledger, not a final ruling. Do not
 treat any row below as `PASS` unless it cites durable evidence. Do not begin Phase 3B while any
 `REQUIRED_BEFORE_SAAS_PASS` row reads anything other than `PASS`.
-**Headline result so far:** `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL — APPLICATION_DATABASE_ROLE_BYPASSES_RLS`
-(§4). `UE_SAAS_OPERATIONAL_READINESS remains NO_GO` — this is a genuine, disclosed SaaS blocker
-discovered during runtime acceptance, not a source-remediation task performed in this branch.
+**Headline result so far:** `UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL — DATABASE_RLS_FOUNDATION_NOT_ENFORCED`
+(§4). `UE_SAAS_OPERATIONAL_READINESS = NO_GO — RLS_FOUNDATION_REMEDIATION_REQUIRED` — a genuine,
+disclosed SaaS blocker discovered during runtime acceptance. Root-cause remediation is tracked
+separately in [PR #752](https://github.com/anungis437/nzila-os/pull/752)
+(`fix/ue-runtime-rls-foundation`) — this branch stays evidence-only. Do not attempt further
+RLS-dependent acceptance gates against the current staging database configuration until #752
+merges and staging is redeployed.
 
 ## 0. Scope discipline
 
@@ -203,14 +207,59 @@ created for this gate, consistent with "do not work around it to obtain a passin
 
 ### Verdict
 
-`UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL — APPLICATION_DATABASE_ROLE_BYPASSES_RLS` (compounded by
-`RLS_NOT_ENABLED` on every tested table). This is a genuine SaaS blocker and is the dominant
-finding of this Phase 3A run. It also invalidates any assumption of DB-level enforcement behind
-`UE_RUNTIME_AUDIT_PERSISTENCE` (the `cross_org_access_log` audit table tested above has the same
-gap) and `UE_RUNTIME_ASSIGNMENT_CONVERGENCE`/`UE_RUNTIME_EVIDENCE_REVOCATION`, both of which rely
-on the same session-context RLS contract (`withRLSContext` → `app.current_org_id` →
-Postgres policy). Per §11 of the operator's brief, remediation of this finding belongs in a
-separate, focused fix branch off current `main` — not in this evidence branch.
+`UE_RUNTIME_RLS_TENANT_ISOLATION = FAIL — DATABASE_RLS_FOUNDATION_NOT_ENFORCED`. This is a genuine
+SaaS blocker and is the dominant finding of this Phase 3A run. It also invalidates any assumption
+of DB-level enforcement behind `UE_RUNTIME_AUDIT_PERSISTENCE` (the `cross_org_access_log` audit
+table tested above has the same gap) and `UE_RUNTIME_ASSIGNMENT_CONVERGENCE`/
+`UE_RUNTIME_EVIDENCE_REVOCATION`, both of which rely on the same session-context RLS contract
+(`withRLSContext` → `app.current_org_id` → Postgres policy).
+
+Correction to precision: what this ledger proves is that **database-enforced tenant isolation is
+absent/bypassed in staging**. It does **not** prove a cross-tenant exploit has been demonstrated
+through the application — some API/query paths may still scope correctly at the application
+layer even though the DB-level backstop is missing. That distinction matters and is not
+collapsed here.
+
+### Root-cause decomposition (three independent layers)
+
+Independent source review (2026-09-01) confirms this is not one accidental staging setting —
+it is a structural defect across three layers:
+
+**A. Runtime principal defect.** The deployed application connects with `nzilaadmin`, which has
+`rolbypassrls = true`. A SaaS runtime must not use the PostgreSQL administrative principal.
+
+**B. Live schema-policy defect.** Representative production-domain tables tested in staging have
+RLS disabled and no effective RLS policies. The live database is not enforcing the tenant
+boundary `withRLSContext()` assumes.
+
+**C. Migration/deployment-governance defect.** The repository contains RLS SQL
+(`db/migrations/manual/053_enable_rls_policies.sql` and later files), but the deployment
+mechanism never made the desired RLS state authoritative in staging. The manual-migrations
+README (`apps/union-eyes/db/migrations/README.md`) explicitly states manual migrations are
+**not tracked by Drizzle's journal** and must be applied by hand via
+`node scripts/apply-manual-migrations.js` — a script that **does not exist** in the repository.
+"RLS migration exists in git" therefore never guaranteed "RLS exists in the deployed database."
+This is a deployment-governance defect, not merely an ops mistake.
+
+Two additional, disclosed constraints on remediation, established during root-cause review:
+
+- `053_enable_rls_policies.sql` cannot simply be run against the current staging database: it is
+  keyed to `app.current_tenant_id`, while the current `withRLSContext()` contract sets
+  `app.current_org_id`; the schema has also evolved materially since that migration. It is
+  superseded, not reused.
+- `0097_nzilaos_rls_org_isolation.sql`'s `create_org_rls_policy()` helper includes a generic
+  `system_bypass` policy (`current_setting('app.current_org_id', true) = '' OR ... IS NULL` →
+  unrestricted access). That pattern is explicitly **not** propagated to the remediation — missing
+  tenant context must fail closed; system/background access must come from a separately
+  provisioned, separately credentialed database role instead.
+
+Remediation for all three layers is tracked in a dedicated branch,
+[`fix/ue-runtime-rls-foundation`](https://github.com/anungis437/nzila-os/pull/752) (PR #752), kept
+separate from this evidence-only branch per the operator's instruction. It does not touch this
+branch or its files — see PR #752 for the full remediation (dedicated `union_eyes_runtime`/
+`union_eyes_system` roles, `db/migrations/0108_rls_tenant_isolation_foundation.sql`, and
+`scripts/rls-verify.ts` as a deployment-time preflight so this class of drift cannot silently
+return) and its own local/ephemeral proof before touching any shared environment.
 
 ## 5. Worker topology (`UE_RUNTIME_WORKER_CONCURRENCY` — partial finding, gate `NOT_RUN`)
 
