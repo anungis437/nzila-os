@@ -289,7 +289,8 @@ is not.
 
 `apps/union-eyes/scripts/__tests__/schema-duplicate-table-ratchet.test.ts`
 now asserts the **current set** of `CONFLICTING_SCHEMA` table keys is a
-subset of an explicitly recorded baseline set (18 keys, listed above,
+subset of an explicitly recorded baseline set (16 keys after round 4,
+listed above,
 keyed as `${schema}.${table}`) — not merely that the total count doesn't
 exceed a number. A raw count can't distinguish "fixed table A, introduced
 table B" from "no change" if the totals happen to match; the fingerprint
@@ -306,6 +307,61 @@ another tenant's rows. The real risk is **data-correctness / type-safety**
 completely broken write/read paths behind a schema-shaped correctness bug
 that a shallow "endpoint returns 500 sometimes" report would not obviously
 connect to a schema conflict.
+
+## Disposition
+
+## Round 4 (2026-09-01): `campaigns` / `message_log` reachability re-investigation
+
+Round 3 dispositioned `campaigns` and `message_log` as `TENANT_RLS_REQUIRED`
+with a "disclosed and deferred" note: `lib/workers/message-queue-processor.ts`
+imported the stale `db/schema/phase-4-messaging-schema.ts` declaration
+(columns like `sentCount`/`failedCount`/`channel`/`body`/`variables`/
+`scheduledAt` that do not physically exist), and was treated as "ONE real
+consumer" requiring a genuine messaging redesign to fix. On review, that
+framing conflated "imports the stale schema" with "is itself invoked by
+anything" — it never checked whether `message-queue-processor.ts` had any
+caller of its own.
+
+**Re-investigation**: `git grep` across `app/`, `actions/`, `lib/`,
+`services/` for the module path (`@/lib/workers/message-queue-processor`)
+and every exported symbol name (`processMessageQueue`,
+`processCampaignMessages`, `getQueueStatus`) found exactly one importer:
+the worker's own test file. The send-side capability is officially
+registered `NOT_IMPLEMENTED`: `app/api/cron/process-messages/route.ts`
+throws `ApiError.notImplemented()` per Wave 0 finding F-01
+(`docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md`)
+and never calls this worker or `campaign-service.ts`'s equivalent methods
+(which also, independently, have zero callers beyond their own test file).
+No cron config, route, or scheduler registration references either module.
+
+**Conclusion**: the worker was genuinely dead/unwired code, not a live
+production defect. `campaigns`/`message_log` themselves are heavily
+reachable (40+ real references) and every actual production consumer
+(dashboard, CRUD routes, webhook delivery tracking, open/click pixel
+tracking, unsubscribe flow) already used the canonical
+`db/schema/domains/communications/campaigns.ts` declaration correctly.
+
+**Action taken** (deletion, not canonicalization — there was no real
+behavior to preserve):
+- Deleted `apps/union-eyes/lib/workers/message-queue-processor.ts` and its
+  test.
+- Deleted `apps/union-eyes/db/schema/phase-4-messaging-schema.ts` (verified
+  zero other importers of any of its 3 exports — `message_log`,
+  `campaigns`, and `communicationPreferences` → physical table
+  `communication_preferences_phase4`, which is Django-owned and unaffected
+  by this deletion; see `communication_preferences_phase4` manifest entry).
+- Updated the `campaigns`/`message_log` manifest entries to drop the
+  "redesign required" framing and correct `supportingCapability` to the
+  real production consumers.
+- Removed `public.campaigns` and `public.message_log` from the ratchet
+  baseline (18 → 16 conflicting keys).
+
+**Not addressed in this round**: the `communication_preferences_phase4`
+manifest entry's `supportingCapability` list still needs precise
+per-import re-verification (it was a raw symbol-name grep that likely
+picked up an unrelated, identically-named export from a different
+physical table) — tracked as a follow-up alongside `communication_preferences`
+canonicalization.
 
 ## Disposition
 

@@ -45,8 +45,17 @@ import { scanSchemaDeclarations, classifyGroup } from '../schema-duplicate-table
 // Recorded 2026-09-01 (round 3, after resolving grievance_transitions,
 // steward_assignments' real consumers + user_sessions + employers — see
 // docs/union-eyes/reality-remediation/27_RLS_STORAGE_SCHEMA_CANONICALIZATION.md).
-// Only remove keys as conflicts are resolved; never add a key to accommodate
-// a newly-introduced conflict.
+// Round 4: removed 'public.campaigns' and 'public.message_log' — the only
+// conflicting declaration was db/schema/phase-4-messaging-schema.ts, whose
+// sole consumer (lib/workers/message-queue-processor.ts) had ZERO
+// production callers (confirmed via git grep across app/, actions/, lib/,
+// services/ for the module path and every exported symbol name; the
+// process-messages cron route already throws ApiError.notImplemented()
+// per Wave 0 finding F-01 and never called this worker). Both the worker,
+// its test, and the stale schema file were deleted rather than
+// canonicalized — there was no real behavior to preserve.
+// Only remove keys as conflicts are resolved; never add a key to
+// accommodate a newly-introduced conflict.
 const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
   'public.ml_predictions',
   'public.insight_recommendations',
@@ -57,8 +66,6 @@ const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
   'public.chart_of_accounts',
   'public.communication_preferences',
   'public.consent_records',
-  'public.campaigns',
-  'public.message_log',
   'public.newsletter_list_subscribers',
   'public.steward_assignments',
   'public.gl_account_mappings',

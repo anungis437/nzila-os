@@ -1,6 +1,6 @@
-Total distinct physical (schema, table) keys: 703
-Keys with >1 declaration: 344
-  - CONFLICTING_SCHEMA (proven incompatible): 18
+Total distinct physical (schema, table) keys: 702
+Keys with >1 declaration: 342
+  - CONFLICTING_SCHEMA (proven incompatible): 16
   - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 3
   - IDENTICAL_OR_PROVEN_COMPATIBLE: 323
 
@@ -29,10 +29,6 @@ communication_preferences: db/schema/communication-analytics-schema.ts(communica
   DIRECT IMPORT BYPASSING BARREL: db/schema/communication-analytics-schema(communicationPreferences) imported directly by: lib/services/messaging/campaign-service.ts
   MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 consent_records: db/schema/data-governance-schema.ts(consentRecords)[22cols] | db/schema/domains/communications/campaigns.ts(consentRecords)[13cols]
-campaigns: db/schema/domains/communications/campaigns.ts(campaigns)[27cols] | db/schema/phase-4-messaging-schema.ts(campaigns)[17cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema(campaigns) imported directly by: lib/workers/message-queue-processor.ts
-message_log: db/schema/domains/communications/campaigns.ts(messageLog)[23cols] | db/schema/phase-4-messaging-schema.ts(message_log)[18cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema(message_log) imported directly by: lib/workers/message-queue-processor.ts
 newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers)[8cols] | db/schema/newsletter-schema.ts(newsletterListSubscribers)[8cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 steward_assignments: db/schema/domains/communications/organizer-workflows.ts(stewardAssignments)[16cols] | db/schema/union-structure-schema.ts(stewardAssignments)[33cols]
