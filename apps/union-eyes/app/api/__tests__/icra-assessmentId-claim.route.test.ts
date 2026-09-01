@@ -19,7 +19,7 @@ function makeSelectChain(rows: unknown[]) {
   return chain;
 }
 
-const mockDb: any = {
+const mockTx: any = {
   select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])),
   update: vi.fn(() => ({
     set: vi.fn(() => ({
@@ -31,7 +31,7 @@ const mockDb: any = {
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
 vi.mock('@/lib/icra/claim-tokens', () => ({ isClaimExpired: m.isClaimExpired }));
-vi.mock('@/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockTx) }));
 vi.mock('@/db/schema/icra-schema', () => ({ icraAssessments: {} }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -145,7 +145,7 @@ describe('icra/[assessmentId]/claim route', () => {
   it('returns 500 on database error during claim', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push([{ id: 'a1', claimToken: 'valid_token_xxxx', claimedAt: null, claimTokenExpiresAt: new Date(Date.now() + 3600000) }]);
-    mockDb.update.mockImplementationOnce(() => {
+    mockTx.update.mockImplementationOnce(() => {
       throw new Error('db error');
     });
 

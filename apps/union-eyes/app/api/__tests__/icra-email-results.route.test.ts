@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
   fireAndForgetEvent: vi.fn(),
   hashIp: vi.fn(),
   logger: { warn: vi.fn(), error: vi.fn() },
-  db: { select: vi.fn() },
+  db: { select: vi.fn(), update: vi.fn() },
   eq: vi.fn(),
 }));
 
@@ -16,7 +16,7 @@ vi.mock('@/lib/rate-limit', () => ({ rateLimit: m.rateLimit }));
 vi.mock('@/lib/email-service', () => ({ sendEmail: m.sendEmail, isValidEmail: m.isValidEmail }));
 vi.mock('@/lib/icra/observability', () => ({ fireAndForgetEvent: m.fireAndForgetEvent, hashIp: m.hashIp }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
-vi.mock('@/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(m.db) }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: m.eq };
@@ -40,6 +40,7 @@ describe('icra/email-results route', () => {
     const where = vi.fn(() => ({ limit }));
     const from = vi.fn(() => ({ where }));
     m.db.select.mockReturnValue({ from });
+    m.db.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
   });
 
   it('returns 429 when rate-limited', async () => {
@@ -105,7 +106,7 @@ describe('icra/email-results route', () => {
     expect(response.status).toBe(502);
   });
 
-  it('returns ok=true when email is sent', async () => {
+  it('returns ok=true when email is sent, embedding a rotated capability in the URL fragment', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/icra/email-results', {
       method: 'POST',
@@ -117,5 +118,10 @@ describe('icra/email-results route', () => {
     expect(response.status).toBe(200);
     expect(payload).toEqual({ ok: true });
     expect(m.fireAndForgetEvent).toHaveBeenCalled();
+    expect(m.db.update).toHaveBeenCalled();
+    // The emailed link must never carry the capability as a query parameter.
+    const emailArgs = m.sendEmail.mock.calls[0][0];
+    expect(emailArgs.html).toContain('#cap=');
+    expect(emailArgs.html).not.toContain('?cap=');
   });
 });

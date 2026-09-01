@@ -13,8 +13,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db';
 import { icraAssessments } from '@/db/schema/icra-schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { isClaimExpired } from '@/lib/icra/claim-tokens';
 import { logger } from '@/lib/logger';
@@ -63,7 +63,8 @@ export async function POST(
   }
 
   try {
-    const [row] = await db
+    return await withSystemContext(async (tx) => {
+    const [row] = await tx
       .select({
         id: icraAssessments.id,
         claimToken: icraAssessments.claimToken,
@@ -88,7 +89,7 @@ export async function POST(
       return NextResponse.json({ error: 'Claim token expired' }, { status: 410 });
     }
 
-    await db
+    await tx
       .update(icraAssessments)
       .set({
         claimedByUserId: userId,
@@ -102,6 +103,7 @@ export async function POST(
     logger.info('[icra-claim] Assessment claimed', { assessmentId, userId, orgId });
 
     return NextResponse.json({ ok: true, assessmentId, organizationId: orgId });
+    });
   } catch (err) {
     logger.error('[icra-claim] Claim failed', { assessmentId, err });
     return NextResponse.json({ error: 'Failed to claim assessment' }, { status: 500 });

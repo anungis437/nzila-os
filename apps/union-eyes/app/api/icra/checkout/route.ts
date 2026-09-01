@@ -16,8 +16,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
 import { icraAssessments } from '@/db/schema/icra-schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import {
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+  type CapabilityDenialReason,
+} from '@/lib/icra/assessment-capability';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 
@@ -95,19 +101,38 @@ export async function POST(request: NextRequest) {
 
   const { assessmentId, tierId } = parse.data;
 
-  // Verify the assessment exists (prevent arbitrary UUID injection)
+  // Verify the assessment exists AND the caller holds its capability
+  // (prevent arbitrary UUID injection / unlocking someone else's report).
   let existingTierId: string | null = null;
   try {
-    const [row] = await db
-      .select({ reportTierId: icraAssessments.reportTierId })
-      .from(icraAssessments)
-      .where(eq(icraAssessments.id, assessmentId))
-      .limit(1);
+    const capResult = await withSystemContext(async (tx): Promise<
+      { denied: CapabilityDenialReason; tierId: null } | { denied: null; tierId: string }
+    > => {
+      const [row] = await tx
+        .select({
+          reportTierId: icraAssessments.reportTierId,
+          capabilityTokenHash: icraAssessments.capabilityTokenHash,
+          capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        })
+        .from(icraAssessments)
+        .where(eq(icraAssessments.id, assessmentId))
+        .limit(1);
 
-    if (!row) {
-      return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
+      const presented = extractCapabilityToken(request, assessmentId);
+      const capCheck = checkCapability(presented, row);
+      if (!capCheck.ok) {
+        return { denied: capCheck.reason, tierId: null };
+      }
+      return { denied: null, tierId: row!.reportTierId ?? 'continuity_reflection' };
+    });
+
+    if (capResult.denied) {
+      return NextResponse.json(
+        { error: 'Not authorized to upgrade this assessment' },
+        { status: capabilityDenialStatus(capResult.denied) },
+      );
     }
-    existingTierId = row.reportTierId ?? 'continuity_reflection';
+    existingTierId = capResult.tierId;
   } catch (err) {
     logger.error('[icra-checkout] DB lookup failed', { assessmentId, err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });

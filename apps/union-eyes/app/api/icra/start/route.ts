@@ -1,12 +1,20 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { db } from '@/db/db'
 import { icraAssessments, icraOrganizations } from '@/db/schema/icra-schema'
 import { logger } from '@/lib/logger'
 import { DOCTRINE_VERSION } from '@/lib/icra/copy'
 import { QUESTION_BANK_VERSION } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import {
+  generateCapabilityToken,
+  hashCapabilityToken,
+  computeCapabilityExpiry,
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+  setCapabilityCookie,
+} from '@/lib/icra/assessment-capability'
 
 const startSchema = z.object({
   locale: z.string().min(2).max(16).optional(),
@@ -65,6 +73,9 @@ export async function POST(request: Request) {
         organizationId = inserted[0]?.id ?? null
       }
 
+      const capabilityToken = generateCapabilityToken()
+      const capabilityTokenExpiresAt = computeCapabilityExpiry()
+
       const [assessment] = await tx
         .insert(icraAssessments)
         .values({
@@ -81,6 +92,8 @@ export async function POST(request: Request) {
             : null,
           organizationContext: ctx ?? null,
           locale: payload.locale ?? 'en-CA',
+          capabilityTokenHash: hashCapabilityToken(capabilityToken),
+          capabilityTokenExpiresAt,
         })
         .returning({ id: icraAssessments.id })
 
@@ -90,7 +103,12 @@ export async function POST(request: Request) {
         questionBankVersion: QUESTION_BANK_VERSION,
       })
 
-      return NextResponse.json({ assessmentId: assessment.id }, { status: 201 })
+      const response = NextResponse.json(
+        { assessmentId: assessment.id, capabilityToken },
+        { status: 201 },
+      )
+      setCapabilityCookie(response, assessment.id, capabilityToken)
+      return response
     })
   } catch (err) {
     logger.error('icra.assessment.start_failed', { error: (err as Error).message })
@@ -104,9 +122,48 @@ export async function GET(request: Request) {
   if (!id) {
     return NextResponse.json({ error: 'assessmentId required' }, { status: 400 })
   }
-  const rows = await db.select().from(icraAssessments).where(eq(icraAssessments.id, id)).limit(1)
-  if (rows.length === 0) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  }
-  return NextResponse.json({ assessment: rows[0] })
+
+  return withSystemContext(async (tx) => {
+    const rows = await tx
+      .select({
+        id: icraAssessments.id,
+        status: icraAssessments.status,
+        locale: icraAssessments.locale,
+        organizationContext: icraAssessments.organizationContext,
+        questionBankVersion: icraAssessments.questionBankVersion,
+        doctrineVersion: icraAssessments.doctrineVersion,
+        reportTierId: icraAssessments.reportTierId,
+        createdAt: icraAssessments.createdAt,
+        submittedAt: icraAssessments.submittedAt,
+        capabilityTokenHash: icraAssessments.capabilityTokenHash,
+        capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+      })
+      .from(icraAssessments)
+      .where(eq(icraAssessments.id, id))
+      .limit(1)
+    const row = rows[0]
+
+    const presented = extractCapabilityToken(request, id)
+    const check = checkCapability(presented, row)
+    if (!check.ok) {
+      return NextResponse.json({ error: 'Not authorized to resume this assessment' }, { status: capabilityDenialStatus(check.reason) })
+    }
+
+    // Deliberately constructed resume DTO — never the raw row. Excludes
+    // stripePaymentRef/claimEmail/claimToken*/claimedByUserId/claimedOrgId/
+    // capabilityTokenHash/capabilityTokenExpiresAt.
+    return NextResponse.json({
+      assessment: {
+        id: row!.id,
+        status: row!.status,
+        locale: row!.locale,
+        organizationContext: row!.organizationContext,
+        questionBankVersion: row!.questionBankVersion,
+        doctrineVersion: row!.doctrineVersion,
+        reportTierId: row!.reportTierId,
+        createdAt: row!.createdAt,
+        submittedAt: row!.submittedAt,
+      },
+    })
+  })
 }

@@ -155,6 +155,21 @@ describe('icra/submit route', () => {
     expect(m.scoreAssessment).toHaveBeenCalled();
   });
 
+  it('issues a capability token and sets the issuance cookie on creation', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/icra/submit', {
+      method: 'POST',
+      body: JSON.stringify(baseBody()),
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': '127.0.0.1' },
+    }));
+    const payload = await response.json();
+
+    expect(typeof payload.capabilityToken).toBe('string');
+    expect(payload.capabilityToken.length).toBeGreaterThan(20);
+    expect(response.headers.get('set-cookie')).toContain('icra_cap_assessment_1=');
+    expect(response.headers.get('set-cookie')).toContain('HttpOnly');
+  });
+
   it('returns 500 when persistence layer throws', async () => {
     const { POST } = await loadRoute();
     m.withSystemContext.mockRejectedValueOnce(new Error('db failure'));

@@ -17,8 +17,8 @@ export const dynamic = 'force-dynamic';
 import { timingSafeEqual } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { ALL_QUESTIONS } from '@/lib/icra/questions';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
@@ -80,9 +80,12 @@ export async function POST(request: Request, { params }: RouteContext) {
   if (typeof parsed.summary !== 'string' || !parsed.summary.trim()) {
     return NextResponse.json({ error: 'Review summary is required.' }, { status: 400 });
   }
+  const summary = parsed.summary.trim();
+  const action = parsed.action;
 
   try {
-    const [assessment] = await db
+    return await withSystemContext(async (tx) => {
+    const [assessment] = await tx
       .select({
         id: icraAssessments.id,
         organizationContext: icraAssessments.organizationContext,
@@ -96,7 +99,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Assessment not found.' }, { status: 404 });
     }
 
-    const [profileRow] = await db
+    const [profileRow] = await tx
       .select({ profilePayload: icraMaturityProfiles.profilePayload })
       .from(icraMaturityProfiles)
       .where(eq(icraMaturityProfiles.assessmentId, assessmentId))
@@ -125,8 +128,8 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     const updated = applyAdaptiveReportReviewDecision(slot, {
       reviewerRole: normalizeReviewerRole(parsed.reviewerRole),
-      status: parsed.action === 'approve' ? 'approved' : 'rejected',
-      summary: parsed.summary.trim(),
+      status: action === 'approve' ? 'approved' : 'rejected',
+      summary,
       reviewedAt: new Date().toISOString(),
     });
 
@@ -135,25 +138,26 @@ export async function POST(request: Request, { params }: RouteContext) {
       updated,
     );
 
-    await db
+    await tx
       .update(icraAssessments)
       .set({ organizationContext: updatedOrganizationContext })
       .where(eq(icraAssessments.id, assessmentId));
 
     logger.info('icra.report.review_recorded', {
       assessmentId,
-      action: parsed.action,
+      action,
     });
 
     return NextResponse.json(
       {
         success: true,
         assessmentId,
-        action: parsed.action,
+        action,
         reviewStatus: updated.reviewWorkflow.status,
       },
       { status: 200 },
     );
+    });
   } catch (error) {
     logger.error('icra.report.review_failed', {
       assessmentId,
