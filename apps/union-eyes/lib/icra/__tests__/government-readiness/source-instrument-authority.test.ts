@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (Gap 1 extension)
  * MODULE: Source Instrument — AuthorityLevel + EffectiveDate reference fields
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
  *
  * Proves the reference-only authority/effective-date fields:
  *   - every seed instrument carries an AuthorityLevel consistent with its kind;

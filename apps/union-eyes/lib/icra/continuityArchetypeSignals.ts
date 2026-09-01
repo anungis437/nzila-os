@@ -7,7 +7,7 @@
  *
  * Archetypes are descriptive, not normative. They are not rankings.
  *
- * Doctrine source: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §5,
+ * Doctrine source: docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md §5,
  * OCI_QUESTION_ARCHITECTURE.md §9.
  */
 

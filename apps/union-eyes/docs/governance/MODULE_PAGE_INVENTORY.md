@@ -831,4 +831,4 @@ All pages must handle server or API errors gracefully according to this standard
 
 ---
 
-*Generated from source code analysis of `apps/union-eyes/app/[locale]/`, `lib/auth/roles.ts`, `lib/dashboard/role-experience.ts`, and supporting documentation in `apps/union-eyes/docs/`. For questions, contact the UnionEyes platform team or reference [INDEX.md](./INDEX.md).*
+*Generated from source code analysis of `apps/union-eyes/app/[locale]/`, `lib/auth/roles.ts`, `lib/dashboard/role-experience.ts`, and supporting documentation in `apps/union-eyes/docs/`. For questions, contact the UnionEyes platform team or reference [INDEX.md](../INDEX.md).*

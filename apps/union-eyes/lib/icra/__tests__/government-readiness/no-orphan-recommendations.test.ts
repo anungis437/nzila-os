@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (T4)
  * MODULE: No orphan recommendations
- * SPEC: docs/oci/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T4
+ * SPEC: docs/oci/superseded/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T4
  *
  * Every recommendation surfaced through the traceability record must resolve to
  * at least one finding. The chain must be intact before a report renders.

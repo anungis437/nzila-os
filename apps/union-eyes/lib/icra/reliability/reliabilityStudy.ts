@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Reliability Study (Phase C)
  * MODULE: OCI/OCRA IRR study orchestration
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_INTER_RATER_RELIABILITY_MODEL.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Aggregates paired/multi-rater observations into a version-pinned reliability

@@ -16,7 +16,7 @@
  * Tone: institutional, recognition-first, governance-receivable,
  * blame-free. Deferral is a method outcome.
  *
- * Doctrine: docs/oci/stabilization/workflows/README.md and the six
+ * Doctrine: docs/oci/superseded/stabilization/workflows/README.md and the six
  * workflow documents it indexes.
  */
 

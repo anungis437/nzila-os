@@ -675,7 +675,7 @@ const SOVEREIGNTY_GOVERNANCE: MaturitySelectQuestion[] = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Continuity Confidence Signals — likert_5 modality (v3)
-// Doctrine: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §4
+// Doctrine: docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md §4
 // These questions sense perceived continuity confidence and ambiguity.
 // They are statements; respondents indicate the degree to which each is true.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -871,7 +871,7 @@ const CONTINUITY_CONFIDENCE: LikertQuestion[] = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Structural Continuity Signals — multiple_choice modality (v3)
-// Doctrine: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §5
+// Doctrine: docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md §5
 // Each option represents a recognizable structural continuity pattern.
 // No "correct" answer — selection surfaces the topology, not a rank.
 // Option values are aligned with QUESTION_OPTION_PATTERNS in

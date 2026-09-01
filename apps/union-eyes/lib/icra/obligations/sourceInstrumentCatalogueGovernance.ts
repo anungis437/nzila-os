@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Source-Instrument Catalogue Governance
  * MODULE: OCI/OCRA Catalogue lifecycle, versioning, jurisdiction selection, conflict handling (Gap 4)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
  *
  * Once OCI/OCRA names a *specific* instrument ("which Act? which policy?"), the
  * unavoidable governance question is: **who decides which legislation counts, and

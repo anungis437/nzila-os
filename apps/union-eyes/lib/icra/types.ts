@@ -55,7 +55,7 @@ export interface QuestionOption {
 
 /**
  * Modality role — the *reason* a question uses its modality.
- * Governed by docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md §3.
+ * Governed by docs/oci/superseded/assessment/OCI_QUESTION_ARCHITECTURE.md §3.
  */
 export type ModalityRole =
   | 'maturity_ladder'

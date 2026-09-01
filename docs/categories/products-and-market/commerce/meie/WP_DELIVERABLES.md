@@ -82,7 +82,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 - Documentation des 30+ migrations Supabase
 - Évaluation des risques : injection SQL, pas de RLS, types dupliqués
 
-**Livrable :** [`docs/commerce/LEGACY_REVIEW.md`](LEGACY_REVIEW.md)
+**Livrable :** [`docs/commerce/LEGACY_REVIEW.md`](../LEGACY_REVIEW.md)
 
 ### 3.2 Phase 2 — Modèle de domaine (Terminée)
 
@@ -97,7 +97,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 
 **Livrables :**
 
-- [`docs/commerce/DOMAIN_MODEL_DRAFT.md`](DOMAIN_MODEL_DRAFT.md)
+- [`docs/commerce/DOMAIN_MODEL_DRAFT.md`](../DOMAIN_MODEL_DRAFT.md)
 - [`packages/commerce-core/src/types/index.ts`](../../packages/commerce-core/src/types/index.ts)
 - [`packages/commerce-core/src/enums.ts`](../../packages/commerce-core/src/enums.ts)
 - [`packages/commerce-core/src/schemas/index.ts`](../../packages/commerce-core/src/schemas/index.ts)
@@ -148,7 +148,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 **Livrables :**
 
 - [`apps/flow/`](../../apps/flow/) — adaptateur complet (supersède `@nzila/shop-quoter`)
-- [`docs/commerce/IRAP_TECHNICAL_DESIGN.md`](IRAP_TECHNICAL_DESIGN.md) — conception technique IRAP
+- [`docs/commerce/IRAP_TECHNICAL_DESIGN.md`](../IRAP_TECHNICAL_DESIGN.md) — conception technique IRAP
 
 ---
 

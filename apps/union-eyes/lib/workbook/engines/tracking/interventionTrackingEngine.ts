@@ -5,7 +5,7 @@
  *
  * Pure. No DB writes. No analytics. No scoring.
  *
- * Doctrine: docs/oci/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md
+ * Doctrine: docs/oci/superseded/stabilization/OCI_CONTINUITY_INTERVENTION_TRACKING.md
  */
 
 import {

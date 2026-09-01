@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Source Instrument Mapping
  * MODULE: OCI/OCRA Obligation class → Source Instrument citations (Phase G)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure, deterministic mapping from a finding's admissible obligation classes +

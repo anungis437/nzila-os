@@ -253,7 +253,7 @@ Key documents:
 - Healthtech strategy: 3,359 docs
 - Legacy Memora platform: 298 files
 
-### [Templates](../templates/)
+### [Templates](../../templates)
 - Operating agreement templates
 - Board governance templates
 - Strategic review templates

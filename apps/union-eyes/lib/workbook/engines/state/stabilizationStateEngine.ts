@@ -10,7 +10,7 @@
  *
  * No DB writes. No side effects. Composition only.
  *
- * Doctrine: docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md
+ * Doctrine: docs/oci/superseded/stabilization/OCI_STABILIZATION_STATE_ENGINE.md
  */
 
 import {

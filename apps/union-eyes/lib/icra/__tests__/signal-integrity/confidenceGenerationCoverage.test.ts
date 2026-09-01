@@ -1,7 +1,7 @@
 /**
  * Question Architecture Audit™ — Confidence Generation Coverage test
  *
- * Audit reference: docs/oci/audit/CONFIDENCE_GENERATION_AUDIT.md
+ * Audit reference: docs/oci/superseded/audit/CONFIDENCE_GENERATION_AUDIT.md
  *
  * Enforces:
  *  - Every dimension has >= 5 questions feeding `score`.

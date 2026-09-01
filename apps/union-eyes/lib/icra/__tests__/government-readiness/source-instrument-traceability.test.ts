@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (Phase G / T6)
  * MODULE: Source Instrument Traceability
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_SOURCE_INSTRUMENT_TRACEABILITY.md
  *
  * Extends the chain Finding → Obligation → Source Instrument → Citation. Proves:
  *   - the seed catalogue is wholly UNVERIFIED and asserts no clause numbers;

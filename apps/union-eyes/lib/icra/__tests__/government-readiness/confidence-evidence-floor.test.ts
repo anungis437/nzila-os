@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (T5)
  * MODULE: Confidence never exceeds the evidence floor
- * SPEC: docs/oci/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T5
+ * SPEC: docs/oci/superseded/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T5
  *
  * The evidence band is the governing cap. No amount of corroboration, sample
  * size, or low variance can lift a finding's confidence above what its evidence

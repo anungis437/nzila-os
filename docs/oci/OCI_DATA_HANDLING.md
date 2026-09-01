@@ -13,6 +13,15 @@
 
 ---
 
+## Tenancy and keys
+
+Each institution runs in its own database instance (not a shared, row-level-isolated multi-tenant
+table). The institution's data is encrypted at rest under Azure-managed keys scoped to that
+instance; Nzila does not hold a separate copy of the encryption key outside the Azure resource
+the institution's contract names. This is the short answer to "whose tenant, whose keys" — see
+Subprocessors below for who else touches the data, and Deletion on contract close for what
+happens to the evidence pack when the relationship ends.
+
 ## Categories of data
 
 OCI handles four categories of institutional data, each with its own

@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Test
  * MODULE: Public-sector kill switch for `Answer.note` (free-text field)
- * DOCTRINE: docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md §2.1
+ * DOCTRINE: docs/oci/superseded/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md §2.1
  * STATUS: INTERNALLY_TESTED
  *
  * Proves the deployment-time enforcement of the documented "callers must

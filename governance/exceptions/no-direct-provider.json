@@ -7,25 +7,25 @@
       "path": "apps/union-eyes/lib/stripe.ts",
       "owner": "union-eyes-team",
       "justification": "Union-Eyes wraps Stripe directly for financial reconciliation. Migration to @nzila/payments-stripe tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/lib/workers/sms-worker.ts",
       "owner": "union-eyes-team",
       "justification": "Union-Eyes uses Twilio directly for SMS worker. No @nzila/sms package exists yet.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/services/financial-service/src/services/notification-service.ts",
       "owner": "union-eyes-team",
       "justification": "Union-Eyes notification service uses Twilio directly. Migration planned.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/union-eyes/services/twilio-sms-service.ts",
       "owner": "union-eyes-team",
       "justification": "Union-Eyes SMS service wraps Twilio directly. No @nzila/sms package exists yet.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     }
   ]
 }

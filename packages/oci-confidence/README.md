@@ -11,4 +11,4 @@ Runtime confidence infrastructure for the OCI Method™.
 
 All modules are pure, deterministic, side-effect-free, and contain no AI. Confidence states never imply probability and never imply ranking.
 
-See [docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md](../../docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md) §7 (Confidence model) and the methodology extensions added under the operationalization sprint.
+See [docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md](../../docs/oci/superseded/methodology/OCI_METHOD_WHITEPAPER_v1.md) §7 (Confidence model) and the methodology extensions added under the operationalization sprint.

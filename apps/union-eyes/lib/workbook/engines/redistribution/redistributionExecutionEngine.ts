@@ -11,8 +11,8 @@
  * Pure. No DB writes. No actions.
  *
  * Doctrine:
- *   docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md
- *   docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md
+ *   docs/oci/superseded/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md
+ *   docs/oci/superseded/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md
  */
 
 import {

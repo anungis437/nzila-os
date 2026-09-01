@@ -4,7 +4,7 @@ import Image from 'next/image';
 /**
  * Lightweight markdown renderer used by the shared whitepaper route.
  *
- * The source whitepapers in `docs/oci/whitepapers/` are clean, hand-written
+ * The source whitepapers in `docs/oci/superseded/whitepapers/` are clean, hand-written
  * markdown (unlike the PDF-extracted continuity-gap source, which requires
  * a much larger bespoke parser). This renderer is intentionally minimal and
  * focused on the doctrinal feature set the whitepaper theme actually uses:

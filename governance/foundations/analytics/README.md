@@ -11,7 +11,7 @@ Nzila already has analytics surfaces (Console KPIs, CFO dashboards,
 Union-Eyes case analytics, Flow operational metrics). This document
 captures the **operating model** — how analytics work is organized,
 prioritized, governed, and delivered — distinct from the AI/ML
-operating model in [`governance/ai/`](../ai/).
+operating model in [`governance/ai/`](../../ai).
 
 ## 2. Operating model summary
 
@@ -67,9 +67,9 @@ between humans; "I'll just join the prod DB."
 
 ## 7. Governance hooks
 
-- All analytic surfaces using AI inference must be in [`governance/ai/inventory.json`](../ai/inventory.json).
-- All data stores feeding analytics must be in [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json).
-- Cross-border analytic data flows require a documented transfer mechanism (enforced by [`tooling/contract-tests/data-inventory-integrity.test.ts`](../../tooling/contract-tests/data-inventory-integrity.test.ts)).
+- All analytic surfaces using AI inference must be in [`governance/ai/inventory.json`](../../ai/inventory.json).
+- All data stores feeding analytics must be in [`governance/privacy/data-inventory.json`](../../privacy/data-inventory.json).
+- Cross-border analytic data flows require a documented transfer mechanism (enforced by [`tooling/contract-tests/data-inventory-integrity.test.ts`](../../../tooling/contract-tests/data-inventory-integrity.test.ts)).
 - Analytic surfaces displaying member-level data must have an access-control test in `tooling/contract-tests/`.
 
 ## 8. Open work

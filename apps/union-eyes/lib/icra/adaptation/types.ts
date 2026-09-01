@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Adaptive Assessment Types
  * MODULE: OCRA Dynamic Questionnaire Adaptation
- * DOCTRINE: docs/oci/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md
+ * DOCTRINE: docs/oci/superseded/assessment/OCI_ADAPTIVE_ASSESSMENT_DOCTRINE.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Type-only module. No I/O, no logic. Defines the deterministic shapes used

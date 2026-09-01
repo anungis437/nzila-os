@@ -9,9 +9,9 @@
  *
  * This module is pure data. It introduces no analytics. It is the
  * machine-readable expression of the workflow docs under
- * docs/oci/stabilization/workflows/.
+ * docs/oci/superseded/stabilization/workflows/.
  *
- * Doctrine: docs/oci/stabilization/workflows/README.md and the six
+ * Doctrine: docs/oci/superseded/stabilization/workflows/README.md and the six
  * workflow documents it indexes.
  */
 
@@ -54,8 +54,8 @@ export const CONTINUITY_WORKFLOW_REGISTRY: Readonly<Record<WorkflowKey, Workflow
   continuity_capture: {
     key: 'continuity_capture',
     title: 'Continuity Capture',
-    docPath: 'docs/oci/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md',
-    playbookPaths: ['docs/oci/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md'],
+    docPath: 'docs/oci/superseded/stabilization/workflows/CONTINUITY_CAPTURE_WORKFLOW.md',
+    playbookPaths: ['docs/oci/superseded/stabilization/playbooks/CONTINUITY_CAPTURE_SPRINT.md'],
     composedEngines: [
       'stabilizationPriorityEngine',
       'continuityRedistributionPlanner',
@@ -75,8 +75,8 @@ export const CONTINUITY_WORKFLOW_REGISTRY: Readonly<Record<WorkflowKey, Workflow
   governance_clarification: {
     key: 'governance_clarification',
     title: 'Governance Clarification',
-    docPath: 'docs/oci/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md',
-    playbookPaths: ['docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md'],
+    docPath: 'docs/oci/superseded/stabilization/workflows/GOVERNANCE_CLARIFICATION_WORKFLOW.md',
+    playbookPaths: ['docs/oci/superseded/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md'],
     composedEngines: [
       'continuityLineageEngine',
       'governanceRecoveryEngine',
@@ -96,10 +96,10 @@ export const CONTINUITY_WORKFLOW_REGISTRY: Readonly<Record<WorkflowKey, Workflow
   stewardship_redistribution: {
     key: 'stewardship_redistribution',
     title: 'Stewardship Redistribution',
-    docPath: 'docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md',
+    docPath: 'docs/oci/superseded/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md',
     playbookPaths: [
-      'docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md',
-      'docs/oci/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md',
+      'docs/oci/superseded/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md',
+      'docs/oci/superseded/stabilization/playbooks/LEADERSHIP_TRANSITION_STABILIZATION.md',
     ],
     composedEngines: [
       'stewardshipRedistributionEngine',
@@ -122,8 +122,8 @@ export const CONTINUITY_WORKFLOW_REGISTRY: Readonly<Record<WorkflowKey, Workflow
   onboarding_stabilization: {
     key: 'onboarding_stabilization',
     title: 'Onboarding Stabilization',
-    docPath: 'docs/oci/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md',
-    playbookPaths: ['docs/oci/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md'],
+    docPath: 'docs/oci/superseded/stabilization/workflows/ONBOARDING_STABILIZATION_WORKFLOW.md',
+    playbookPaths: ['docs/oci/superseded/stabilization/playbooks/ONBOARDING_SURVIVABILITY_RECOVERY.md'],
     composedEngines: [
       'onboardingFragilityAnalysis',
       'stabilizationPriorityEngine',
@@ -143,8 +143,8 @@ export const CONTINUITY_WORKFLOW_REGISTRY: Readonly<Record<WorkflowKey, Workflow
   modernization_remediation: {
     key: 'modernization_remediation',
     title: 'Modernization Remediation',
-    docPath: 'docs/oci/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md',
-    playbookPaths: ['docs/oci/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md'],
+    docPath: 'docs/oci/superseded/stabilization/workflows/MODERNIZATION_REMEDIATION_WORKFLOW.md',
+    playbookPaths: ['docs/oci/superseded/stabilization/playbooks/MODERNIZATION_CONTINUITY_REMEDIATION.md'],
     composedEngines: [
       'modernizationAlignmentEngine',
       'governanceModernizationReview',
@@ -165,8 +165,8 @@ export const CONTINUITY_WORKFLOW_REGISTRY: Readonly<Record<WorkflowKey, Workflow
   operational_reconstruction: {
     key: 'operational_reconstruction',
     title: 'Operational Reconstruction',
-    docPath: 'docs/oci/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md',
-    playbookPaths: ['docs/oci/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md'],
+    docPath: 'docs/oci/superseded/stabilization/workflows/OPERATIONAL_RECONSTRUCTION_WORKFLOW.md',
+    playbookPaths: ['docs/oci/superseded/stabilization/playbooks/OPERATIONAL_RECONSTRUCTION_RECOVERY.md'],
     composedEngines: [
       'reconstructionBurdenAnalyzer',
       'continuityLineageEngine',

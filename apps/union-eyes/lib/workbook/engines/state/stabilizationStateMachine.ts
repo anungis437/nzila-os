@@ -7,7 +7,7 @@
  * governance ratification as an external precondition expressed via
  * gates.
  *
- * Doctrine: docs/oci/stabilization/OCI_STABILIZATION_STATE_ENGINE.md
+ * Doctrine: docs/oci/superseded/stabilization/OCI_STABILIZATION_STATE_ENGINE.md
  */
 
 export const ENGINE_VERSION = '2.0.0';

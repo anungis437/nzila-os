@@ -1,7 +1,7 @@
 /**
  * Question Architecture Audit™ — Statistical Interpretability test
  *
- * Audit reference: docs/oci/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md
+ * Audit reference: docs/oci/superseded/audit/STATISTICAL_INTERPRETABILITY_AUDIT.md
  *
  * Enforces:
  *  - Every `maturity_select` question's options carry monotonically

@@ -4,7 +4,7 @@
  * Reusable system-prompt fragments that every OCRA AI synthesis prompt MUST
  * include. The fragments encode the OCI AI Augmentation Doctrine:
  *
- *   docs/oci/ai/OCI_AI_AUGMENTATION_DOCTRINE.md
+ *   docs/oci/superseded/ai/OCI_AI_AUGMENTATION_DOCTRINE.md
  *
  * Any prompt that does not include the doctrine guardrail fragment is
  * rejected by `systemPromptRegistry.ts` (and by `aiPromptBoundary.test.ts`).

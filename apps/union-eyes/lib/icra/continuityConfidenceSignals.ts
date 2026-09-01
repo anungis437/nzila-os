@@ -5,7 +5,7 @@
  * confidence indicators. They are not scores; they are interpretable signals
  * used by Product 5 longitudinal analysis and executive reporting.
  *
- * Doctrine source: docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §4
+ * Doctrine source: docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md §4
  */
 
 import type { Answer, Question } from './types';

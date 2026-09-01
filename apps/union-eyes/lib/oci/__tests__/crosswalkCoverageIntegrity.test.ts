@@ -15,7 +15,7 @@ import { join, resolve } from "node:path";
  */
 
 const REPO_ROOT = resolve(__dirname, "..", "..", "..", "..", "..");
-const COMPLIANCE_DIR = join(REPO_ROOT, "docs", "oci", "compliance");
+const COMPLIANCE_DIR = join(REPO_ROOT, "docs", "oci", "superseded", "compliance");
 
 const CROSSWALK_FILES = [
   "OCI_ISO22301_CROSSWALK.md",

@@ -1,7 +1,7 @@
 /**
  * Question Architecture Audit™ — Adaptive Routing Depth test
  *
- * Audit reference: docs/oci/audit/ADAPTIVE_ROUTING_AUDIT.md
+ * Audit reference: docs/oci/superseded/audit/ADAPTIVE_ROUTING_AUDIT.md
  *
  * Enforces:
  *  - Safe-default floor (>= 18 routed questions).

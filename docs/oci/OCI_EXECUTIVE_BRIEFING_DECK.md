@@ -93,7 +93,7 @@ Infrastructure → Intelligence.
 
 **Body (verbal):** A short pass through each phase. No slide per
 phase. The detail belongs to
-[OCI Method™](./oci-method.md).
+[OCI Method™](./OCI_METHOD.md).
 
 ---
 
@@ -249,7 +249,7 @@ The deck itself is not handed out.
 ## Cross-references
 
 - [OCI Pilot Framework™](./OCI_PILOT_FRAMEWORK.md)
-- [OCI Method™](./oci-method.md)
+- [OCI Method™](./OCI_METHOD.md)
 - [OCI Delivery Model](./OCI_DELIVERY_MODEL.md)
 - [OCI Board Overview](./OCI_BOARD_OVERVIEW.md) — the four-page
   written companion the institution may circulate to its

@@ -20,8 +20,8 @@ work.
 
 | Name | Layer | Audience | Where it lives |
 | --- | --- | --- | --- |
-| **OCI** (Operational / Organizational Continuity Intelligence) | Methodology + product ladder + scoring architecture | Internal stewards, sponsoring institutions, procurement evaluators, certified facilitators | [`docs/oci/`](./oci/) |
-| **OCRA** | Assessment product built on OCI | Government / procurement evaluators | [`docs/oci/government-readiness/`](./oci/government-readiness/) |
+| **OCI** — Organizational Continuity Intelligence (the one expansion; see [`OCI_METHOD.md`](./oci/OCI_METHOD.md)) | Methodology + product ladder + scoring architecture | Internal stewards, sponsoring institutions, procurement evaluators, certified facilitators | [`docs/oci/`](./oci/) |
+| **OCRA** — Organizational Continuity Recognition Assessment | Product 1 of OCI, the Recognition-phase instrument | Government / procurement evaluators, all institutional buyers | [`docs/oci/OCI_METHOD.md`](./oci/OCI_METHOD.md) (canonical); [`docs/oci/government-readiness/`](./oci/superseded/government-readiness/) is `premature`/internal detail — see [`docs/oci/SUPERSEDED.md`](./oci/SUPERSEDED.md) |
 | **CIVIC by Nzila** | Public-service front door — the positioning, brand, and forwardable framing | Federal / provincial / municipal public-service leaders receiving a first introduction | [`docs/public-service/`](./public-service/) |
 | **CLEAR** | The public-service articulation of the OCI evidence discipline | Public-service leaders reading the CIVIC brief; anyone explaining "the method behind the framing" | [`docs/public-service/clear-method-canonical.md`](./public-service/clear-method-canonical.md) |
 
@@ -46,7 +46,7 @@ enforced by the government-readiness non-regression suite:
 - Observatory rules: opt-in, k-anonymity K=5, no rankings, refusal-first.
 - Human review is authoritative; the method supports decisions, it does not make them.
 
-See [OCI/OCRA Government Readiness — non-negotiable freeze](./oci/government-readiness/README.md#the-non-negotiable-freeze).
+See [OCI/OCRA Government Readiness — non-negotiable freeze](oci/superseded/government-readiness/README.md#the-non-negotiable-freeze).
 
 Any CIVIC or CLEAR document that appears to soften, contradict, or reinterpret these
 must be corrected against the OCI/OCRA sources, not the other way around.
@@ -90,7 +90,7 @@ When editing any file under `docs/oci/`, `docs/public-service/`, or a Richard
 packet:
 
 1. **Never restate the frozen list from §2 in a way that softens or contradicts it.**
-   Link to [`docs/oci/government-readiness/README.md`](./oci/government-readiness/README.md)
+   Link to [`docs/oci/government-readiness/README.md`](oci/superseded/government-readiness/README.md)
    or [`docs/oci/OCI_AI_BOUNDARY.md`](./oci/OCI_AI_BOUNDARY.md) instead.
 2. **Never introduce a new pillar name, new dimension, or new maturity band** in
    CIVIC/CLEAR without a matching change to OCI/OCRA doctrine and its non-regression
@@ -114,7 +114,7 @@ purposes and are both correct — but must not be conflated.
 
 | Package | Purpose | Audience | Track |
 | --- | --- | --- | --- |
-| [`docs/oci/government-readiness/richard-packet/`](./oci/government-readiness/richard-packet/) — **Richard Sharpe Validation Packet** | Adversarial senior-public-sector review of the OCI/OCRA government-readiness architecture (protocol, workbook, verdicts) | Simulated deputy-minister-grade validator | **OCI / OCRA** technical validation |
+| [`docs/oci/government-readiness/richard-packet/`](./oci/superseded/government-readiness/richard-packet/) — **Richard Sharpe Validation Packet** | Adversarial senior-public-sector review of the OCI/OCRA government-readiness architecture (protocol, workbook, verdicts) | Simulated deputy-minister-grade validator | **OCI / OCRA** technical validation |
 | [`docs/public-service/forwardable/`](./public-service/forwardable/) — **Richard First-Send Package** | External forwardable outreach: what Richard sends to a public-service leader as a first, feedback-only introduction to CIVIC | Public-service leaders reachable through Richard's network | **CIVIC** public-service front door |
 
 If in doubt: the government-readiness Richard packet is *inbound* validation
@@ -130,10 +130,11 @@ If in doubt: the government-readiness Richard packet is *inbound* validation
   [`docs/public-service/forwardable/civic-one-page-brief-executive.md`](./public-service/forwardable/civic-one-page-brief-executive.md)
 - CLEAR method: [`docs/public-service/clear-method-canonical.md`](./public-service/clear-method-canonical.md),
   [`docs/public-service/clear-method-note.md`](./public-service/clear-method-note.md)
-- OCI method (canonical): [`docs/oci/OCI_METHOD.md`](./oci/OCI_METHOD.md),
-  [`docs/oci/oci-method.md`](./oci/oci-method.md)
-- Government-readiness program: [`docs/oci/government-readiness/README.md`](./oci/government-readiness/README.md)
-- Frozen scoring core reference: [`docs/oci/government-readiness/README.md#the-non-negotiable-freeze`](./oci/government-readiness/README.md#the-non-negotiable-freeze)
+- OCI method (canonical, single file): [`docs/oci/OCI_METHOD.md`](./oci/OCI_METHOD.md) —
+  `docs/oci/oci-method.md` is a redirect stub, see [`docs/oci/SUPERSEDED.md`](./oci/SUPERSEDED.md)
+- Canon (2-page summary): [`docs/oci/CANON.md`](./oci/CANON.md)
+- Government-readiness program (`premature`, not part of the public method surface): [`docs/oci/government-readiness/README.md`](oci/superseded/government-readiness/README.md)
+- Frozen scoring core reference: [`docs/oci/government-readiness/README.md#the-non-negotiable-freeze`](oci/superseded/government-readiness/README.md#the-non-negotiable-freeze)
 - AI boundary: [`docs/oci/OCI_AI_BOUNDARY.md`](./oci/OCI_AI_BOUNDARY.md)
 - Anti-surveillance position: [`docs/oci/OCI_ANTI_SURVEILLANCE_POSITION.md`](./oci/OCI_ANTI_SURVEILLANCE_POSITION.md)
 - Human-review principles: [`docs/public-service/human-review-and-evidence-principles.md`](./public-service/human-review-and-evidence-principles.md)

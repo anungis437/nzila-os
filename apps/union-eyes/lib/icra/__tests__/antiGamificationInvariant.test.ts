@@ -1,6 +1,6 @@
 /**
  * Anti-Gimmick Invariant — enforces the calm, institutionally-serious tone
- * mandated by docs/oci/assessment/OCI_MODALITY_DOCTRINE.md §7.
+ * mandated by docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md §7.
  *
  * Forbidden vocabulary across all question prompts, help text, options,
  * and option labels.

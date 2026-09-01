@@ -22,17 +22,17 @@ export * as ReconstructionBurdenIndex from './reconstruction-burden-index';
 
 /**
  * The OCI Method™ — five-phase methodology spine.
- * See docs/oci/oci-method.md.
+ * See docs/oci/OCI_METHOD.md (single canonical method file).
  */
 export const OCI_METHOD = {
-  doctrineVersion: '1.0.0',
+  doctrineVersion: '1.1.0',
   phases: [
     {
       id: 'recognition',
       ordinal: 1,
       name: 'Recognition',
       productLayer: 'P1',
-      productFamily: 'ICRA',
+      productFamily: 'OCRA',
       posture:
         'Calm, awakening, non-coercive. Begin to see what your institution is carrying.',
     },
@@ -50,7 +50,7 @@ export const OCI_METHOD = {
       ordinal: 3,
       name: 'Stabilization',
       productLayer: 'P3',
-      productFamily: 'OCI Diagnostic',
+      productFamily: 'OCI Diagnostic & Stabilization',
       posture:
         'Facilitative, collegial, reductive. Reduce continuity burden where it is most fragile.',
     },
@@ -59,7 +59,7 @@ export const OCI_METHOD = {
       ordinal: 4,
       name: 'Infrastructure',
       productLayer: 'P4',
-      productFamily: 'OCI Runtime Infrastructure',
+      productFamily: 'OCI Runtime',
       posture:
         'Embedded, structural, durable. Continuity becomes how the institution operates.',
     },

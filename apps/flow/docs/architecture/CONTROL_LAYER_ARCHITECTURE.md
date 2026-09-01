@@ -153,4 +153,4 @@ Flow implements all four platform contracts:
 - [GUARD_REFERENCE.md](./GUARD_REFERENCE.md) — Guard details
 - [WORKFLOW_ENFORCEMENT_AUDIT.md](./WORKFLOW_ENFORCEMENT_AUDIT.md) — Enforcement audit
 - [ORDER_CENTRIC_ENFORCEMENT.md](./ORDER_CENTRIC_ENFORCEMENT.md) — Order boundary audit
-- [PLATFORM_CONTRACTS.md](./PLATFORM_CONTRACTS.md) — Platform contract implementation
+- [PLATFORM_CONTRACTS.md](../PLATFORM_CONTRACTS.md) — Platform contract implementation

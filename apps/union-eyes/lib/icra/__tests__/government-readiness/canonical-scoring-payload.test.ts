@@ -1,6 +1,6 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Canonical Scoring Payload (byte-identical claim)
- * SPEC: docs/oci/government-readiness/IMPLEMENTATION_STATUS.md (determinism claim)
+ * SPEC: docs/oci/superseded/government-readiness/IMPLEMENTATION_STATUS.md (determinism claim)
  *
  * Proves the honest determinism claim we make externally:
  *   For identical substantive inputs, the canonical scoring payload

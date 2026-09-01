@@ -7,7 +7,7 @@ do not forward this file.*
 > introduction to public-service leaders under the CIVIC by Nzila framing. It sits in the
 > public-service tree because it must not be confused with, sequenced through, or share
 > attachments with the OCI/OCRA technical validation packet at
-> [`docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md`](../../oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md).
+> [`docs/oci/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md`](../../oci/superseded/government-readiness/richard-packet/RICHARD_VALIDATION_PACKET.md).
 > Nothing from that packet (validation protocol, workbook, dimension architecture, procurement
 > language) is ever forwarded through this front door. See
 > [CIVIC ↔ OCI Alignment §6](../../CIVIC_OCI_ALIGNMENT.md#6-the-two-richard-tracks-resolved).

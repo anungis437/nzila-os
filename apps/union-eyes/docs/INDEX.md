@@ -5,7 +5,7 @@
 
 ## Audience Guides
 
-> **Non-technical?** Start at the [UnionEyes Hub](../../docs/union-eyes/README.md).
+> **Non-technical?** Start at the [UnionEyes Hub](../../../docs/union-eyes/README.md).
 
 ## Quick Start
 
@@ -149,10 +149,10 @@ Historical snapshots retained for traceability.
 
 ## Cross-References
 
-- Audience-friendly docs: [UnionEyes Hub](../../docs/union-eyes/README.md)
+- Audience-friendly docs: [UnionEyes Hub](../../../docs/union-eyes/README.md)
 - Full glossary: [Glossary](../../docs/index/glossary.md)
 - Documentation map: [Doc Map](../../docs/index/doc-map.md)
-- Main repo README: [../../README.md](../../README.md)
-- Platform architecture: [../../ARCHITECTURE.md](../../ARCHITECTURE.md)
-- Contributing guide: [../../CONTRIBUTING.md](../../CONTRIBUTING.md)
-- Security policy: [../../SECURITY.md](../../SECURITY.md)
+- Main repo README: [../../README.md](../../../README.md)
+- Platform architecture: [../../ARCHITECTURE.md](../../../ARCHITECTURE.md)
+- Contributing guide: [../../CONTRIBUTING.md](../../../CONTRIBUTING.md)
+- Security policy: [../../SECURITY.md](../../../SECURITY.md)

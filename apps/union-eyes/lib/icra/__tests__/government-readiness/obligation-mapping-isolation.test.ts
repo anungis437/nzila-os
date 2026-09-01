@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (T2)
  * MODULE: Obligation mapping never changes scores
- * SPEC: docs/oci/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T2
+ * SPEC: docs/oci/superseded/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T2
  *
  * Mapping a finding to obligations is reporting context only. It cannot
  * influence any score, and the obligations modules must not import the scoring

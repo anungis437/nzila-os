@@ -41,7 +41,7 @@ const RISK_DIMENSIONS: Set<DimensionId> = new Set(['governance_fragility', 'trus
  * When `OCI_PUBLIC_SECTOR_MODE=1` (or `=true`, case-insensitive) is set in the
  * process environment, `buildAnswer` throws if a non-empty `note` is supplied.
  * This turns the documented "callers must disable free text" posture in
- * `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1
+ * `docs/oci/superseded/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1
  * into an enforced runtime control at the single source-of-entry for answers.
  */
 export function isPublicSectorModeEnabled(): boolean {
@@ -65,7 +65,7 @@ export interface ComputeProfileInput {
  *
  *   `note` is not covered by the *"PII-free by construction"* property of the
  *   derived scoring/finding/traceability artifacts (see
- *   `docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1).
+ *   `docs/oci/superseded/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md` §2.1).
  *   Callers **must** treat any string passed here as potentially personal,
  *   confidential, or otherwise sensitive material and are responsible for:
  *
@@ -94,7 +94,7 @@ export function buildAnswer(question: Question, rawValue: string | number, note?
     throw new Error(
       'buildAnswer: free-text `note` is not permitted when OCI_PUBLIC_SECTOR_MODE is enabled. ' +
         'Disable note capture, ephemeralize the field, or route it to a separately-secured evidence repository. ' +
-        'See docs/oci/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md §2.1.',
+        'See docs/oci/superseded/government-readiness/SECURITY_AND_DATA_HANDLING_BRIEF.md §2.1.',
     )
   }
   return {

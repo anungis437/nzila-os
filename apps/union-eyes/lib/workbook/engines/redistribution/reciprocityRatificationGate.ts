@@ -7,8 +7,8 @@
  * Pure. No DB writes.
  *
  * Doctrine:
- *   docs/oci/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md §11
- *   docs/oci/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md
+ *   docs/oci/superseded/stabilization/playbooks/STEWARDSHIP_REDISTRIBUTION.md §11
+ *   docs/oci/superseded/stabilization/workflows/STEWARDSHIP_REDISTRIBUTION_WORKFLOW.md
  */
 
 export const ENGINE_VERSION = '2.0.0';

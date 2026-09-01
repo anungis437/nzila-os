@@ -5,7 +5,7 @@
  * NarrativeArtifactKind. The registry refuses to surface any entry that has
  * not been stamped by `promptGuardrails.stampGuardrail`.
  *
- * Doctrine: docs/oci/ai/OCRA_AI_BOUNDARY_MODEL.md
+ * Doctrine: docs/oci/superseded/ai/OCRA_AI_BOUNDARY_MODEL.md
  */
 
 import type {

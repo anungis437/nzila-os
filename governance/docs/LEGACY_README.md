@@ -203,12 +203,12 @@ nzila-automation/
 
 ### Business Strategy
 - [MULTI_VERTICAL_STRATEGY.md](MULTI_VERTICAL_STRATEGY.md) — Cross-domain framework
-- [business/financial-models/5-year-projections.md](business/financial-models/5-year-projections.md) — Financial roadmap
-- [business/investor-materials/pitch-deck-2026.md](business/investor-materials/pitch-deck-2026.md) — Fundraising deck
+- [business/financial-models/5-year-projections.md](../business/financial-models/5-year-projections.md) — Financial roadmap
+- [business/investor-materials/pitch-deck-2026.md](../business/investor-materials/pitch-deck-2026.md) — Fundraising deck
 
 ### Technical
 - [BACKBONE_ARCHITECTURE.md](BACKBONE_ARCHITECTURE.md) — Technical foundation
-- [ai/README.md](ai/README.md) — AI infrastructure
+- [ai/README.md](../ai/README.md) — AI infrastructure
 - [PORTFOLIO_DEEP_DIVE.md](PORTFOLIO_DEEP_DIVE.md) — Migration priorities
 
 ---

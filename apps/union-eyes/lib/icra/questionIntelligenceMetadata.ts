@@ -5,7 +5,7 @@
  * questions that pre-date the metadata field, plus helpers to retrieve
  * effective metadata for any question.
  *
- * Doctrine source: docs/oci/assessment/OCI_QUESTION_ARCHITECTURE.md
+ * Doctrine source: docs/oci/superseded/assessment/OCI_QUESTION_ARCHITECTURE.md
  */
 
 import type {

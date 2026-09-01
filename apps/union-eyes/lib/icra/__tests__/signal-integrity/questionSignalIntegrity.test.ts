@@ -1,10 +1,10 @@
 /**
  * Question Architecture Audit™ — Signal Integrity test
  *
- * Audit reference: docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md
- *                  docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md
- *                  docs/oci/audit/EVIDENCE_EXTRACTION_AUDIT.md
- *                  docs/oci/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md
+ * Audit reference: docs/oci/superseded/audit/QUESTION_ARCHITECTURE_INVENTORY.md
+ *                  docs/oci/superseded/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md
+ *                  docs/oci/superseded/audit/EVIDENCE_EXTRACTION_AUDIT.md
+ *                  docs/oci/superseded/audit/HUMAN_CONTINUITY_THEORY_ALIGNMENT.md
  *
  * Enforces:
  *  - Anti-redundancy (no two prompts share identical text).
@@ -17,7 +17,7 @@ import { ALL_QUESTIONS } from '../../questions';
 import type { Question } from '../../types';
 
 // ── Signal-Depth™ classification, grounded in
-//    docs/oci/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md §2.
+//    docs/oci/superseded/audit/SIGNAL_DEPTH_AND_DIVERSITY_AUDIT.md §2.
 const D1_IDS = new Set<string>([]); // surface — must remain empty
 const D2_IDS = new Set([
   'od_02', 'od_03', 'icb_02',

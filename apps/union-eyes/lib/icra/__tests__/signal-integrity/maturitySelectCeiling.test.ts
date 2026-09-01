@@ -1,9 +1,9 @@
 /**
  * Question Architecture Audit™ — Maturity-Select Ceiling test
  *
- * Audit reference: docs/oci/audit/QUESTION_ARCHITECTURE_INVENTORY.md (Finding M-1)
- *                  docs/oci/assessment/OCI_MODALITY_DOCTRINE.md
- *                  docs/oci/audit/QUESTION_REDESIGN_ROADMAP.md (Roadmap R-H1)
+ * Audit reference: docs/oci/superseded/audit/QUESTION_ARCHITECTURE_INVENTORY.md (Finding M-1)
+ *                  docs/oci/superseded/assessment/OCI_MODALITY_DOCTRINE.md
+ *                  docs/oci/superseded/audit/QUESTION_REDESIGN_ROADMAP.md (Roadmap R-H1)
  *
  * Doctrine target band: maturity_select share is 65–75 % of the scored bank.
  * Current state: 42 / 54 = 77.8 % — breach above the 75 % ceiling.

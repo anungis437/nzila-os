@@ -592,7 +592,7 @@ tenant_key_mapping = {
 - **[PORTFOLIO_DEEP_DIVE.md](../PORTFOLIO_DEEP_DIVE.md)** — Platform analysis, entity counts, complexity assessments
 - **[automation/generators/manifest_generator.py](../automation/generators/manifest_generator.py)** — Automated manifest generation logic
 - **[automation/orchestrator.py](../automation/orchestrator.py)** — Migration orchestration entry point
-- **[business/README.md](../business/README.md)** — Portfolio overview, strategic positioning
+- **[business/README.md](../../business/README.md)** — Portfolio overview, strategic positioning
 - **[nzila-scripts-book-template/](../nzila-scripts-book-template/)** — Template structure for standardized modules
 
 ---

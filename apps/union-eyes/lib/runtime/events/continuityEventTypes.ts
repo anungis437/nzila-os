@@ -7,7 +7,7 @@
  * severity. Severity may be elevated by an engine but never downgraded.
  *
  * The catalogue is closed: new event kinds require a doctrinal change to
- * `runtimeContracts.ts`, this file, and `docs/oci/runtime/OCI_EVENT_RUNTIME.md`.
+ * `runtimeContracts.ts`, this file, and `docs/oci/superseded/runtime/OCI_EVENT_RUNTIME.md`.
  */
 
 import type { ContinuityEventKind, ContinuityEventSeverity } from '../contracts/runtimeContracts';

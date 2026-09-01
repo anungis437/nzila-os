@@ -3,9 +3,11 @@
 **Prepared:** 2026-08-01  
 **Branch:** `copilot/generate-evidence-and-dossier`  
 **Commit SHA:** `cb3440b04a1bd7d1f71ae1b7df60dc386678dcc3`  
-**Status:** CANONICAL — AUTHORITATIVE FOR ALL FUTURE DOCUMENTS
+**Status:** CANONICAL — AUTHORITATIVE FOR ALL FUTURE DOCUMENTS, **except** the OCI/OCRA
+expansions below, which [`docs/oci/CANON.md`](../oci/CANON.md) owns (see note in place of those
+two entries in Part 1).
 
-Every definition in this document is canonical. When two documents disagree on terminology, this document governs. Deprecated terms must not appear in future commercial, lender-facing, or investor-facing materials.
+Every definition in this document is canonical. When two documents disagree on terminology, this document governs — except OCI/OCRA, owned by `docs/oci/CANON.md` (see Part 1). Deprecated terms must not appear in future commercial, lender-facing, or investor-facing materials.
 
 ---
 
@@ -64,20 +66,20 @@ Every definition in this document is canonical. When two documents disagree on t
 
 ---
 
-### OCI (Operational Continuity Intelligence)
+### OCI / OCRA — owned by `docs/oci/CANON.md`
 
-**Canonical definition:** The doctrine and framework that formalizes how institutions achieve and maintain operational continuity through intelligent governance systems. OCI is the methodological foundation of the CIVIC product.
+**This document does not define OCI or OCRA.** The canonical expansions and definitions live in
+[`docs/oci/CANON.md`](../oci/CANON.md) ("What is OCI? What is OCRA? Which comes first?"):
 
-**Expansion on first use:** Always expand as "Operational Continuity Intelligence (OCI)" on first use in any document.  
-**Do not use:** "OCI" without expansion in any document that will be read by a first-time audience.
+- **OCI** = **Organizational Continuity Intelligence**.
+- **OCRA** = **Organizational Continuity Recognition Assessment** — Product 1 (Recognition phase)
+  inside OCI, not a separate product and not "first" in a temporal sense.
 
----
-
-### OCRA (Operational Continuity and Resilience Assessment)
-
-**Canonical definition:** The structured assessment methodology used by the Nzila platform to evaluate an institution's current operational continuity posture and identify governance gaps.
-
-**Expansion on first use:** Always expand as "Operational Continuity and Resilience Assessment (OCRA)."
+An earlier version of this document expanded OCI as "Operational Continuity Intelligence" and
+OCRA as "Operational Continuity and Resilience Assessment." Those expansions are **superseded**
+by the OCI canon collapse and must not be used. If this section and `docs/oci/CANON.md` ever
+disagree again, `docs/oci/CANON.md` governs for these two terms specifically — this document
+remains authoritative for every other definition below.
 
 ---
 
@@ -270,8 +272,8 @@ The following terms and usages are deprecated. They must not appear in new comme
 3. **Confidence labels (Verified / Demonstrated / Documented / Planned / Not Yet Evidenced) are authoritative and must not be changed without evidence-book methodology compliance.**
 4. **Product maturity boundaries must not be elevated without documented stage-gate evidence.** Union Eyes may not be described as having paying customers without actual customer records. CIVIC may not be described as a deployed government product. CourtLens may not be described as commercially available.
 5. **No term appearing in the "Deprecated Language" section may be used in any new document without the mandatory historical-lineage framing.**
-6. **OCI and OCRA must always be expanded on first use in any document.**
+6. **OCI and OCRA must always be expanded on first use in any document, using the expansions owned by [`docs/oci/CANON.md`](../oci/CANON.md)** — Organizational Continuity Intelligence (OCI) and Organizational Continuity Recognition Assessment (OCRA). Not this document's former "Operational" expansions, which are superseded.
 
 ---
 
-*This document is canonical. In the event of terminology conflict between any other document and this vocabulary, this document governs.*
+*This document is canonical. In the event of terminology conflict between any other document and this vocabulary, this document governs — except OCI/OCRA, owned by `docs/oci/CANON.md` (see Part 1).*

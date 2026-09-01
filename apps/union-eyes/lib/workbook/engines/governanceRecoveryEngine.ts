@@ -16,8 +16,8 @@
  * Pure, deterministic. Tone: institutional, recognition-first,
  * governance-receivable, blame-free.
  *
- * Doctrine: docs/oci/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md
- * and docs/oci/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md.
+ * Doctrine: docs/oci/superseded/stabilization/GOVERNANCE_SURVIVABILITY_RECOVERY.md
+ * and docs/oci/superseded/stabilization/playbooks/GOVERNANCE_LINEAGE_RECOVERY.md.
  */
 
 import {

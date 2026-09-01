@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Finding Derivation
  * MODULE: OCI/OCRA deterministic finding derivation
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_POLICY_TRACEABILITY_ARCHITECTURE.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Derives Findings from a ScoringTrace + reviewer-supplied evidence. Pure and

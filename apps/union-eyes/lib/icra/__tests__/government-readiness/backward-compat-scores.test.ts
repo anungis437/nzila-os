@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Vitest Suite — Government-Readiness Non-Regression (T1)
  * MODULE: Backward compatibility — scores unchanged
- * SPEC: docs/oci/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T1
+ * SPEC: docs/oci/superseded/government-readiness/implementation/NON_REGRESSION_TEST_SPECIFICATION.md §T1
  *
  * The additive layer must not change any assessment's composite, dimension
  * scores, or maturity band — and must never mutate the ScoringTrace it reads.

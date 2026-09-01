@@ -1,7 +1,7 @@
 /**
  * Question Architecture Audit™ — Longitudinal Signal Stability test
  *
- * Audit reference: docs/oci/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md
+ * Audit reference: docs/oci/superseded/audit/LONGITUDINAL_SURVIVABILITY_AUDIT.md
  *
  * Enforces:
  *  - Zero L-Transient prompts (no event-anchored or tooling-anchored text).

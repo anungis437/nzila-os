@@ -45,7 +45,7 @@ initiates.
 > a short written reference so you have something on the page
 > when you have a quiet ten minutes.
 >
-> The work I described is called Operational Continuity
+> The work I described is called Organizational Continuity
 > Intelligence — OCI for short. The institutional question it
 > takes seriously is the one most institutions notice late:
 > how much of the organisation lives in a small number of

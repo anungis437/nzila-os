@@ -2,7 +2,7 @@
  * OCI / OCRA Benchmark Publication Guard — tests.
  *
  * Proves the publication discipline from
- * docs/oci/government-readiness/OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md:
+ * docs/oci/superseded/government-readiness/OCI_OCRA_BENCHMARK_GOVERNANCE_REVIEW.md:
  *  - cohort floors (§3) suppress thin slices,
  *  - forbidden claim forms (§4.2) are rejected outright,
  *  - the honesty clause (§4.3) is mandatory,

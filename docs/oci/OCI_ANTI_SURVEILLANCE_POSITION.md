@@ -126,6 +126,26 @@ The anti-surveillance position binds every layer of OCI delivery:
 
 ---
 
+## Instrument disposition
+
+The method carries a small set of analytical instruments (named in
+[`OCI_METHOD.md`](./OCI_METHOD.md) and [`oci-product-ladder.md`](./oci-product-ladder.md)). Each is
+reviewed here against the anti-surveillance position. None report a number that stands alone;
+every reading is paired with the institutional context that justifies it, and none name individuals.
+
+| Instrument | Disposition | Why |
+| --- | --- | --- |
+| Stewardship Density Index | **Keep** | Institutional concentration reading; reports a band, not a person |
+| Governance Entropy Scale (1–5) | **Keep, renamed as ordinal, not a score** | An ordinal drift reading paired with the precedent register that produced it — never presented as a grade |
+| Continuity Burden Map | **Keep** | Institutional topology; rendered as bands and zones, never a heat map of named people |
+| Continuity Survivability Matrix | **Keep** | Reconstruction-burden reading under breakpoint scenarios; institutional, not personal |
+| Reconstruction Burden Index | **Keep** | Institutional reconstruction-cost estimate; speaks to the institution's load, not any individual's |
+| OCI Operational Profile | **Keep, facilitated-engagements only** | Cross-instrument synthesis; requires the breadth of input only a facilitated session produces |
+| P5 Intelligence Network / sector baselines | **Keep, opt-in, non-ranked, not sold** | Permitted only with k≥5 contributing institutions per published band, and only once two completed paid engagements exist and a second certified facilitator is active (see [`OCI_METHOD.md` §6.5](./OCI_METHOD.md#65-p5-intelligence-network-gate)) |
+
+No instrument in this list produces a ranked institutional comparison. If a future instrument
+would, it is rejected at design review under this position, not shipped and relabelled later.
+
 ## What happens at the edge
 
 A pilot occasionally encounters a moment where an institutional

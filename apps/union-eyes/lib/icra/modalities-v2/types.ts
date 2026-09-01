@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: v2 Modality Type System
  * DOCTRINE_VERSION: 1.2.0-foundation
- * CANONICAL DOCTRINE: docs/oci/audit/QUESTION_POOL_v2_0_ROADMAP.md
+ * CANONICAL DOCTRINE: docs/oci/superseded/audit/QUESTION_POOL_v2_0_ROADMAP.md
  *
  * Strict typed definitions for the eight new OCRA/OCI response modalities
  * introduced by the Signal Sophistication Recovery Sprint.

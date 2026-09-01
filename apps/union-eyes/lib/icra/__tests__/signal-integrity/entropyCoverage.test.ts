@@ -1,7 +1,7 @@
 /**
  * Question Architecture Audit™ — Entropy Coverage test
  *
- * Audit reference: docs/oci/audit/ENTROPY_SIGNAL_GAP_REPORT.md
+ * Audit reference: docs/oci/superseded/audit/ENTROPY_SIGNAL_GAP_REPORT.md
  *
  * Enforces:
  *  - Every Governance-Entropy-Scale (GES) ordinal 1..4 has >= 3 declared inputs

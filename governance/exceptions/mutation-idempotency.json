@@ -7,7 +7,7 @@
       "path": "apps/platform-admin/app/api/admin/set-active-org/route.ts",
       "owner": "platform-team",
       "justification": "Session-bootstrap endpoint: sets the active-org cookie based on (userId, orgId). The effect is deterministic and naturally idempotent \u2014 replays produce identical cookie state with no DB writes. Idempotency-Key would add friction to a UI selection flow without changing dedup semantics.",
-      "expiresOn": "2026-09-01"
+      "expiresOn": "2026-10-01"
     },
     {
       "path": "apps/weekone/app/api/cash/route.ts",

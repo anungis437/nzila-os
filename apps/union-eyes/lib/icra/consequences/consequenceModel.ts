@@ -1,7 +1,7 @@
 /**
  * ARTIFACT TYPE: Government-Readiness Additive Layer — Consequence Model
  * MODULE: OCI/OCRA Finding → Consequence mapping (deterministic, confidence-gated)
- * DOCTRINE: docs/oci/government-readiness/OCI_OCRA_CONSEQUENCE_MODEL.md
+ * DOCTRINE: docs/oci/superseded/government-readiness/OCI_OCRA_CONSEQUENCE_MODEL.md
  * DOCTRINE_VERSION: 1.0.0
  *
  * Pure, deterministic mapping from a finding theme + confidence band to the
