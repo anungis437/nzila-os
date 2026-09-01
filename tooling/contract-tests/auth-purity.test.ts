@@ -262,6 +262,7 @@ describe('AUTH-004: Apps use canonical auth (platform-auth import)', () => {
   /** Apps that use non-session auth (API-key auth, machine-to-machine) */
   const AUTH_EXEMPT_APPS = new Set<string>([
     'orchestrator-api', // Fastify API service — uses API key auth, not session-based platform-auth
+    'civic', // Catalog/registry placeholder only — no runtime code, no auth surface yet
   ])
 
   const apps = readdirSync(APPS_DIR, { withFileTypes: true })

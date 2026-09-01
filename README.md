@@ -27,8 +27,9 @@ before quoting a tier/GTM-posture/revenue figure from the catalog as an active s
 | Product | Domain | Status | Tier |
 |---------|--------|--------|------|
 | **Union Eyes** | Labour representation & case management | Pilot — commercial spine, lane 1 | 1 |
-| **CourtLens** | Access-to-justice & legal matter intelligence (on ABR substrate; retains FAIRCASE tribunal-intelligence lineage) | Pilot — portfolio inventory, not current spine | 1 |
-| **Flow** | SMB operations & commerce automation | Pilot — portfolio inventory, not current spine | 1 |
+| **CIVIC** | Public-institution continuity (cautious, discovery/market-engagement phase) | Hold — commercial spine, lane 2, pre-revenue | 2 |
+| **CourtLens** | Access-to-justice & legal matter intelligence (on ABR substrate; retains FAIRCASE tribunal-intelligence lineage) | Pilot — portfolio inventory, not current spine | 2 |
+| **Flow** | SMB operations & commerce automation | Pilot — portfolio inventory, not current spine | 2 |
 | **CFO** | Finance workflows | Pilot | 2 |
 | **Partners** | Partner enablement portal | Pilot | 2 |
 | **Console** | Internal ops & governance control surface | Internal | 3 |
@@ -69,7 +70,7 @@ Bootstrap and seed workflows are idempotent and safe to re-run multiple times.
 ## Repo Structure
 
 ```
-apps/              27 applications
+apps/              28 applications
 packages/          canonical inventory (platform, domain, infra)
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools

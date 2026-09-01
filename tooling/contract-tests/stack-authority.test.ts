@@ -46,6 +46,7 @@ const DJANGO_AUTHORITATIVE_APPS = ['abr']
 const TS_AUTHORITATIVE_APPS = [
   'console',
   'cfo',
+  'civic',
   'control-plane',
   'cora',
   'flow',

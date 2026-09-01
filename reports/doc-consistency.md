@@ -1,28 +1,28 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-08-31T22:15:52.186Z
+> Generated: 2026-09-01T04:06:38.297Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2411 |
-| Total Findings | 2813 |
+| Files Scanned | 2416 |
+| Total Findings | 2793 |
 | Errors | 0 |
-| Warnings | 1223 |
-| Info | 1590 |
+| Warnings | 1204 |
+| Info | 1589 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1562 |
-| stale-reference | 1031 |
+| naming-inconsistency | 1561 |
+| stale-reference | 1012 |
 | missing-package-readme | 112 |
 | stale-package-ref | 80 |
 | stale-date | 28 |
 
-## stale-reference (1031)
+## stale-reference (1012)
 
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:124` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -36,11 +36,11 @@
 - 🟡 `CONTRIBUTING.md:87` — Possible broken link: [Command Catalog](docs/platform/COMMAND_CATALOG.md)
 - 🟡 `CONTRIBUTING.md:88` — Possible broken link: [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
 - 🟡 `CONTRIBUTING.md:89` — Possible broken link: [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
-- 🟡 `README.md:169` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
-- 🟡 `README.md:169` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
-- 🟡 `README.md:189` — Possible broken link: [docs/builders/](docs/builders/)
-- 🟡 `README.md:191` — Possible broken link: [docs/buyers/](docs/buyers/)
-- 🟡 `README.md:193` — Possible broken link: [docs/investor/](docs/investor/)
+- 🟡 `README.md:170` — Possible broken link: [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md)
+- 🟡 `README.md:170` — Possible broken link: [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md)
+- 🟡 `README.md:190` — Possible broken link: [docs/builders/](docs/builders/)
+- 🟡 `README.md:192` — Possible broken link: [docs/buyers/](docs/buyers/)
+- 🟡 `README.md:194` — Possible broken link: [docs/investor/](docs/investor/)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:64` — Possible broken link: [convert/route.ts](apps/union-eyes/app/api/grievances/%5Bid%5D/convert/route.ts)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:117` — Possible broken link: [portal/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/page.tsx)
 - 🟡 `docs/categories/historical-archive/archive/audit-reports/INTAKE_VS_CASE_AUTHORITY_AUDIT.md:118` — Possible broken link: [claims/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/page.tsx)
@@ -409,7 +409,6 @@
 - 🟡 `docs/categories/platform-and-operations/README.md:11` — Possible broken link: [Intelligence](../../intelligence/)
 - 🟡 `docs/categories/platform-and-operations/README.md:15` — Possible broken link: [Deployment](../../deploy/)
 - 🟡 `docs/categories/platform-and-operations/README.md:17` — Possible broken link: [Release Docs](../../releases/)
-- 🟡 `docs/categories/platform-and-operations/README.md:24` — Possible broken link: [Security](../../security/)
 - 🟡 `docs/categories/platform-and-operations/README.md:25` — Possible broken link: [Risk](../../risk/)
 - 🟡 `docs/categories/platform-and-operations/README.md:27` — Possible broken link: [Stress Test](../../stress-test/)
 - 🟡 `docs/categories/platform-and-operations/README.md:28` — Possible broken link: [Procurement](../../procurement/)
@@ -459,8 +458,6 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:82` — Possible broken link: [`packages/commerce-evidence/src/evidence.ts`](../../packages/commerce-evidence/src/evidence.ts)
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:112` — Possible broken link: [`apps/flow/`](../../apps/flow/)
 - 🟡 `docs/categories/products-and-market/commerce/meie/TECHNICAL_UNCERTAINTIES.md:139` — Possible broken link: [`packages/commerce-governance/src/gates.ts`](../../packages/commerce-governance/src/gates.ts)
-- 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:85` — Possible broken link: [`docs/commerce/LEGACY_REVIEW.md`](LEGACY_REVIEW.md)
-- 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:100` — Possible broken link: [`docs/commerce/DOMAIN_MODEL_DRAFT.md`](DOMAIN_MODEL_DRAFT.md)
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:101` — Possible broken link: [`packages/commerce-core/src/types/index.ts`](../../packages/commerce-core/src/types/index.ts)
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:102` — Possible broken link: [`packages/commerce-core/src/enums.ts`](../../packages/commerce-core/src/enums.ts)
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:103` — Possible broken link: [`packages/commerce-core/src/schemas/index.ts`](../../packages/commerce-core/src/schemas/index.ts)
@@ -472,7 +469,6 @@
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:135` — Possible broken link: [`packages/commerce-evidence/`](../../packages/commerce-evidence/)
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:136` — Possible broken link: [`packages/commerce-observability/`](../../packages/commerce-observability/)
 - 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:150` — Possible broken link: [`apps/flow/`](../../apps/flow/)
-- 🟡 `docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md:151` — Possible broken link: [`docs/commerce/IRAP_TECHNICAL_DESIGN.md`](IRAP_TECHNICAL_DESIGN.md)
 - 🟡 `docs/categories/products-and-market/demos/union-eyes-demo-seed.md:5` — Possible broken link: [docs/procurement/demo-personas.md](../procurement/demo-personas.md)
 - 🟡 `docs/categories/products-and-market/nzila-assurance/assurance-readiness-review.md:7` — Possible broken link: [governance readiness review](../nzila-governance/doctrine-operationalization-readiness-review.md)
 - 🟡 `docs/categories/products-and-market/nzila-assurance/assurance-readiness-review.md:7` — Possible broken link: [IP formalization readiness review](../nzila-ip/ip-formalization-readiness-review.md)
@@ -1030,9 +1026,6 @@
 - 🟡 `governance/docs/CORPORATE_INDEX.md:181` — Possible broken link: [🛠️ Nzila CTO Technical Strategy Summary](../platform/architecture/tools-nzila-cto-technical-strategy-summary.md)
 - 🟡 `governance/docs/CORPORATE_INDEX.md:205` — Possible broken link: [Technical Blueprints](../platform/blueprints/)
 - 🟡 `governance/docs/CORPORATE_INDEX.md:206` — Possible broken link: [Migration Plans](../platform/migrations/)
-- 🟡 `governance/docs/LEGACY_README.md:206` — Possible broken link: [business/financial-models/5-year-projections.md](business/financial-models/5-year-projections.md)
-- 🟡 `governance/docs/LEGACY_README.md:207` — Possible broken link: [business/investor-materials/pitch-deck-2026.md](business/investor-materials/pitch-deck-2026.md)
-- 🟡 `governance/docs/LEGACY_README.md:211` — Possible broken link: [ai/README.md](ai/README.md)
 - 🟡 `governance/docs/README.md:18` — Possible broken link: [PORTFOLIO_DEEP_DIVE.md](../../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/docs/README.md:19` — Possible broken link: [BACKBONE_ARCHITECTURE.md](../../BACKBONE_ARCHITECTURE.md)
 - 🟡 `governance/docs/README.md:20` — Possible broken link: [BACKBONE_BUILD_PLAN.md](../../BACKBONE_BUILD_PLAN.md)
@@ -1041,19 +1034,7 @@
 - 🟡 `governance/docs/README.md:126` — Possible broken link: [BACKBONE_ARCHITECTURE.md](../../BACKBONE_ARCHITECTURE.md)
 - 🟡 `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:593` — Possible broken link: [automation/generators/manifest_generator.py](../automation/generators/manifest_generator.py)
 - 🟡 `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:594` — Possible broken link: [automation/orchestrator.py](../automation/orchestrator.py)
-- 🟡 `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:595` — Possible broken link: [business/README.md](../business/README.md)
 - 🟡 `governance/docs/technical-specs/STANDARDIZATION_ARCHITECTURE.md:596` — Possible broken link: [nzila-scripts-book-template/](../nzila-scripts-book-template/)
-- 🟡 `governance/foundations/analytics/README.md:14` — Possible broken link: [`governance/ai/`](../ai/)
-- 🟡 `governance/foundations/analytics/README.md:70` — Possible broken link: [`governance/ai/inventory.json`](../ai/inventory.json)
-- 🟡 `governance/foundations/analytics/README.md:71` — Possible broken link: [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json)
-- 🟡 `governance/foundations/analytics/README.md:72` — Possible broken link: [`tooling/contract-tests/data-inventory-integrity.test.ts`](../../tooling/contract-tests/data-inventory-integrity.test.ts)
-- 🟡 `governance/foundations/content/README.md:13` — Possible broken link: [`governance/privacy/`](../privacy/)
-- 🟡 `governance/foundations/content/README.md:16` — Possible broken link: [`governance/ai/`](../ai/)
-- 🟡 `governance/foundations/content/README.md:23` — Possible broken link: [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json)
-- 🟡 `governance/foundations/content/README.md:61` — Possible broken link: [`governance/privacy/data-inventory.json`](../privacy/data-inventory.json)
-- 🟡 `governance/foundations/content/README.md:63` — Possible broken link: [`governance/privacy/policies/data-retention-schedule.md`](../privacy/policies/data-retention-schedule.md)
-- 🟡 `governance/foundations/content/README.md:71` — Possible broken link: [`tooling/staging-seed/SYNTHETIC.md`](../../tooling/staging-seed/SYNTHETIC.md)
-- 🟡 `governance/foundations/content/README.md:73` — Possible broken link: [`governance/privacy/ai-pia/surfaces/`](../privacy/ai-pia/surfaces/)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 
 ## stale-package-ref (80)
@@ -1125,10 +1106,10 @@
 - 🟡 `docs/courtlens/README.md:3` — References @nzila/abr but package does not exist
 - 🟡 `docs/courtlens/README.md:22` — References @nzila/abr but package does not exist
 - 🟡 `docs/courtlens/target-architecture.md:1` — References @nzila/abr but package does not exist
-- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:24` — References @nzila/platform-audit but package does not exist
-- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:25` — References @nzila/platform-consent but package does not exist
-- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
-- 🟡 `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
+- 🟡 `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:24` — References @nzila/platform-audit but package does not exist
+- 🟡 `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:25` — References @nzila/platform-consent but package does not exist
+- 🟡 `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:26` — References @nzila/platform-cognition but package does not exist
+- 🟡 `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:28` — References @nzila/platform-doctrine but package does not exist
 - 🟡 `docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md:5` — References @nzila/union-eyes but package does not exist
 - 🟡 `docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md:38` — References @nzila/union-eyes-demo but package does not exist
 - 🟡 `docs/union-eyes/reality-remediation/20_OPERATIONAL_BUILD_DEMO_SCAN.md:39` — References @nzila/union-eyes but package does not exist
@@ -1139,7 +1120,7 @@
 - 🟡 `docs/union-eyes/reality-remediation/deadline-engine/00-charter.md:38` — References @nzila/union-eyes-demo but package does not exist
 - 🟡 `governance/business/investor-materials/one-pager-abr.md:7` — References @nzila/abr but package does not exist
 
-## naming-inconsistency (1562)
+## naming-inconsistency (1561)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1169,9 +1150,9 @@
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:159` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:161` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/business-plan/AI-AUTHORING-POLICY.md:72` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/business-plan/CONTROLLED-VOCABULARY.md:166` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/business-plan/CONTROLLED-VOCABULARY.md:228` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/business-plan/CONTROLLED-VOCABULARY.md:231` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/business-plan/CONTROLLED-VOCABULARY.md:168` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/business-plan/CONTROLLED-VOCABULARY.md:230` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/business-plan/CONTROLLED-VOCABULARY.md:233` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md:238` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/business-plan/CORPORATE-KNOWLEDGE-MAP.md:423` — "buyer pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/business-plan/evidence-book/01-Company.md:81` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2469,34 +2450,33 @@
 - ℹ️ `docs/nzila-tier2-hardening/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier3-operating-infrastructure/full-tier3-operating-infrastructure-review.md:62` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-tier3-operating-infrastructure/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md:4` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/government-readiness/EVIDENCE_MANIFEST.md:20` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/methodology/OCI_METHOD_WHITEPAPER_v1.md:118` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/OCI_METHOD.md:327` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.fr-CA.md:312` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md:438` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md:197` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1.md:213` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md:169` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/OCI_OCRA_WHITEPAPER_ARCHITECTURE_v2.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:353` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:496` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/oci/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md:193` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/government-readiness/CLOSURE_RUN_PROOF_2026-07-20.md:4` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/government-readiness/EVIDENCE_MANIFEST.md:20` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/intelligence/OCI_INTELLIGENCE_PLATFORM_ALIGNMENT.md:10` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/methodology/OCI_METHOD_WHITEPAPER_v1.md:118` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md:21` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.fr-CA.md:312` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER.md:438` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_COMPANION_WHITEPAPER_fr-CA.md:197` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_WHITEPAPER_v1.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_WHITEPAPER_v1.md:213` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_METHOD_WHITEPAPER_v1_fr-CA.md:169` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/OCI_OCRA_WHITEPAPER_ARCHITECTURE_v2.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.fr-CA.md:353` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION.md:496` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md:4` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/oci/superseded/whitepapers/THE_CONTINUITY_GAP_OPERATIONAL_REALITY_EDITION_fr-CA.md:193` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/AUDIT_ENFORCEMENT.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/EVIDENCE_LIFECYCLE_POLICY.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/platform/ORG_SCOPED_TABLES.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2706,34 +2686,34 @@
 
 ## stale-date (28)
 
-- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 134 days old — may be stale
-- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 145 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 133 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 133 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 133 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-04" is 119 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md:3` — Document date "2026-05-04" is 119 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 133 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 140 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 116 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 139 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 129 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 130 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 129 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 122 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 122 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 122 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 122 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 136 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 136 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 136 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 136 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 136 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 136 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 130 days old — may be stale
-- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 133 days old — may be stale
-- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 98 days old — may be stale
-- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 98 days old — may be stale
+- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 135 days old — may be stale
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 146 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 134 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 134 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 134 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-04" is 120 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md:3` — Document date "2026-05-04" is 120 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 134 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 141 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 117 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 140 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 130 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 131 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 130 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 123 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 123 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 123 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 123 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 137 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 137 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 137 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 137 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 137 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 137 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 131 days old — may be stale
+- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 134 days old — may be stale
+- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 99 days old — may be stale
+- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 99 days old — may be stale
 
 ## missing-package-readme (112)
 

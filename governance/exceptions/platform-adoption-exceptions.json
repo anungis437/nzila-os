@@ -31,6 +31,20 @@
       "expiresOn": "2027-01-01"
     },
     {
+      "path": "apps/civic",
+      "package": "platform-shell",
+      "owner": "platform-core",
+      "justification": "Catalog/registry placeholder only — no runtime code, no UI, nothing to adopt platform-shell into yet.",
+      "expiresOn": "2027-01-01"
+    },
+    {
+      "path": "apps/civic",
+      "package": "platform-auth",
+      "owner": "platform-core",
+      "justification": "Catalog/registry placeholder only — no runtime code, no auth surface to adopt platform-auth into yet.",
+      "expiresOn": "2027-01-01"
+    },
+    {
       "path": "apps/test-scaffold-gp",
       "package": "platform-shell",
       "owner": "platform-team",

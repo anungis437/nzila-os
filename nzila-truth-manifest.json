@@ -1,7 +1,7 @@
 {
   "status_model_version": "2026-04-18.0",
   "platform_status": "operator-safe",
-  "last_audit": "2026-08-27",
+  "last_audit": "2026-09-01",
   "authority": {
     "editable_source": "governance/portfolio/product-catalog.json",
     "generated_by": "scripts/generate-portfolio-artifacts.ts",
@@ -105,10 +105,11 @@
     }
   ],
   "apps": {
-    "abr": "pilot",
-    "flow": "pilot",
     "union-eyes": "pilot",
     "cfo": "pilot",
+    "civic": "incubating",
+    "abr": "pilot",
+    "flow": "pilot",
     "partners": "pilot",
     "console": "internal",
     "control-plane": "internal",
@@ -134,28 +135,6 @@
     "test-scaffold-gp": "frozen"
   },
   "app_status": {
-    "abr": {
-      "registry_tier": "EXPERIMENTAL",
-      "deployment_status": "pilot",
-      "readiness_tier": "pilot-safe",
-      "exposure": "internal",
-      "portfolio_tier": 1,
-      "gtm_posture": "sell-now",
-      "proof_level": "pilot-proof",
-      "revenue_status": "pilot-contracting",
-      "priority": "critical"
-    },
-    "flow": {
-      "registry_tier": "PILOT",
-      "deployment_status": "pilot",
-      "readiness_tier": "pilot-safe",
-      "exposure": "internal",
-      "portfolio_tier": 1,
-      "gtm_posture": "sell-now",
-      "proof_level": "internal-proof",
-      "revenue_status": "pilot-contracting",
-      "priority": "high"
-    },
     "union-eyes": {
       "registry_tier": "PRODUCTION",
       "deployment_status": "pilot",
@@ -177,6 +156,39 @@
       "proof_level": "internal-proof",
       "revenue_status": "pre-revenue",
       "priority": "medium"
+    },
+    "civic": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 2,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
+    },
+    "abr": {
+      "registry_tier": "EXPERIMENTAL",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal",
+      "portfolio_tier": 2,
+      "gtm_posture": "hold",
+      "proof_level": "pilot-proof",
+      "revenue_status": "pilot-contracting",
+      "priority": "critical"
+    },
+    "flow": {
+      "registry_tier": "PILOT",
+      "deployment_status": "pilot",
+      "readiness_tier": "pilot-safe",
+      "exposure": "internal",
+      "portfolio_tier": 2,
+      "gtm_posture": "hold",
+      "proof_level": "internal-proof",
+      "revenue_status": "pilot-contracting",
+      "priority": "high"
     },
     "partners": {
       "registry_tier": "PILOT",
@@ -441,12 +453,13 @@
     "authority": "governance/portfolio/product-catalog.json",
     "tier_assignments": {
       "TIER 1 — Sell Now": [
-        "abr",
-        "flow",
         "union-eyes"
       ],
       "TIER 2 — Strategic Growth": [
         "cfo",
+        "civic",
+        "abr",
+        "flow",
         "partners"
       ],
       "TIER 3 — Maintain": [
@@ -483,12 +496,13 @@
     "version": "2026-04-18.0",
     "classifications": {
       "sell_now": [
-        "abr",
-        "flow",
         "union-eyes"
       ],
       "strategic_growth": [
         "cfo",
+        "civic",
+        "abr",
+        "flow",
         "partners"
       ],
       "maintain": [

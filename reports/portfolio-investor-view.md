@@ -1,14 +1,12 @@
 # Portfolio Investor View
 
-Generated: 2026-08-27
+Generated: 2026-09-01
 Authority: governance/portfolio/product-catalog.json
 
 ## Active Revenue Wedges
 
 | Product | Status | Strategic Role | Proof | Recommendation |
 | --- | --- | --- | --- | --- |
-| CourtLens | pilot | Governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs. Evolved and productized on the ABR technical substrate; retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage. | pilot-proof | KEEP |
-| Flow | pilot | Second flagship revenue wedge for SMB operations and commerce. | internal-proof | KEEP |
 | Union Eyes | pilot | Flagship labourtech wedge with the clearest near-term commercial path. Production infrastructure approved; product go-live restricted to pilot only — unrestricted production not yet approved. | pilot-proof | KEEP |
 
 ## Future Options
@@ -16,6 +14,9 @@ Authority: governance/portfolio/product-catalog.json
 | Product | Status | Strategic Role | Proof | Recommendation |
 | --- | --- | --- | --- | --- |
 | CFO | pilot | Finance workflow option that can graduate if customer demand hardens. | internal-proof | HOLD |
+| CIVIC | incubating | Cautious public-institution continuity lane — the second lane of the two-lane commercial spine alongside Union Eyes. Currently in discovery / market-engagement phase; see docs/CIVIC_OCI_ALIGNMENT.md and docs/public-service/civic-thesis.md. No pilot or paying customer exists yet; this entry exists so the catalog does not silently omit the second lane while Union Eyes carries the sell-now posture. | none | HOLD |
+| CourtLens | pilot | Governed access-to-justice and legal matter-intelligence platform that converts intake into triaged, evidence-backed, human-reviewed matters and referral-ready outputs. Evolved and productized on the ABR technical substrate; retains FAIRCASE tribunal-intelligence and Anti-Black-racism accountability capabilities as lineage. | pilot-proof | KEEP |
+| Flow | pilot | Second flagship revenue wedge for SMB operations and commerce. | internal-proof | KEEP |
 | Partners | pilot | Partner workflow option with selective growth value if external demand appears. | none | HOLD |
 | Agrimo | incubating | Agtech option retained for future demand, not current capital concentration. Staging/internal-validation only — not pilot-ready; tier-2 in deployment-inventory reflects promotion-track only, not portfolio strategic tier. | none | HOLD |
 | Cora | incubating | Early-stage concept kept as an option rather than a current operating priority. | none | HOLD |

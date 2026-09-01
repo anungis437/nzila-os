@@ -10,10 +10,10 @@ metadata:
     nzila.app/stack: nextjs
     nzila.app/org-scoped: "true"
     nzila.app/generated-from: governance/portfolio/product-catalog.json
-    nzila.app/portfolio-tier: "1"
+    nzila.app/portfolio-tier: "2"
     nzila.app/portfolio-status: pilot
     nzila.app/deployment: internal
-    nzila.app/gtm-posture: sell-now
+    nzila.app/gtm-posture: hold
     nzila.app/proof-level: internal-proof
     nzila.app/revenue-status: pilot-contracting
   tags:

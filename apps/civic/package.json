@@ -1,0 +1,6 @@
+{
+  "name": "@nzila/civic",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CIVIC — cautious public-institution continuity lane. Stub placeholder; no runtime code yet. See docs/CIVIC_OCI_ALIGNMENT.md and governance/portfolio/product-catalog.json (id: \"civic\")."
+}

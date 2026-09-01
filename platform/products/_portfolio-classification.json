@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "generatedAt": "2026-09-01T00:00:00.000Z",
   "flagship": [
-    "abr",
-    "flow",
     "union-eyes"
   ],
   "growth": [
+    "abr",
     "cfo",
+    "civic",
+    "flow",
     "partners"
   ],
   "component": [

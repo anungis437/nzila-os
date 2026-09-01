@@ -1,0 +1,22 @@
+{
+  "slug": "civic",
+  "name": "CIVIC",
+  "tier": 2,
+  "tierLabel": "growth",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": false,
+  "finopsEnabled": false,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "incubating",
+  "publicVisible": false,
+  "gtmPosture": "hold",
+  "proofLevel": "none",
+  "strategicRole": "Cautious public-institution continuity lane — the second lane of the two-lane commercial spine alongside Union Eyes. Currently in discovery / market-engagement phase; see docs/CIVIC_OCI_ALIGNMENT.md and docs/public-service/civic-thesis.md. No pilot or paying customer exists yet; this entry exists so the catalog does not silently omit the second lane while Union Eyes carries the sell-now posture.",
+  "generatedAt": "2026-09-01T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

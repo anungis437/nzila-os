@@ -13,8 +13,8 @@ NzilaOS itself is internal acceleration IP, not sold directly. The offer for
 the active lane is fixed-fee continuity (briefing → diagnostic → OCI/OCRA →
 platform → implementation → retainer), not per-seat intake software.
 
-Every other catalog entry — including other `tier: 1` / `sell-now`-labelled
-products such as CourtLens and Flow — is portfolio inventory or a hold, not
+Every other catalog entry — including CourtLens and Flow, now labelled `tier: 2` /
+`gtm_posture: "hold"` in the catalog itself — is portfolio inventory or a hold, not
 part of the current commercial spine. If a document elsewhere in this repo
 implies otherwise, this file is the tie-breaker.
 
@@ -23,6 +23,10 @@ figures, not audited actuals; customers-under-contract for most entries is
 zero. Treat every commercial figure in this catalog as an estimate unless a
 specific evidence artifact under `reports/` says otherwise for that product.
 
-This pass did not regenerate or edit any commercial field in
-`product-catalog.json` — see `docs/_alignment/DIFF_NOTES.md` on the
-`docs/ue-alignment-20260831` branch.
+This pass did not regenerate or edit any commercial (dollar/revenue) field in
+`product-catalog.json`. A follow-up hygiene pass (2026-08-31/09-01) added a
+`civic` catalog entry (`tier: 2`, `gtm_posture: "hold"`, `revenue_status:
+"pre-revenue"`, all dollar fields `0` — no revenue invented) so the catalog no
+longer silently omits the second commercial lane, and demoted Flow and
+CourtLens (`abr`) from `tier: 1` / `sell-now` to `tier: 2` / `hold` so the
+catalog itself agrees with this file's tie-breaker instead of contradicting it.

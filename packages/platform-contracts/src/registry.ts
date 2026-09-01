@@ -985,6 +985,30 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     policyBindings: [],
     supportedOrgScopes: ['*'],
   },
+
+  {
+    id: 'civic',
+    name: 'CIVIC',
+    description: 'Public-institution continuity lane — catalog/registry placeholder, no runtime code yet',
+    basePath: '/civic',
+    tier: 'EXPERIMENTAL',
+    lifecycleNote: 'EXPERIMENTAL — catalog/registry placeholder only. No runtime code exists yet. See docs/CIVIC_OCI_ALIGNMENT.md and governance/portfolio/product-catalog.json (id: "civic").',
+    appType: 'web-app',
+    iconToken: 'landmark',
+    enabledByDefault: false,
+    requiresOrgScope: false,
+    showInNav: false,
+    navOrder: 200,
+    owner: 'platform-core',
+    packageName: '@nzila/civic',
+    domains: ['public-sector', 'governance'],
+    enabledCapabilities: [],
+    governanceRequirements: [],
+    integrationDependencies: [],
+    deployment: { environments: ['local'] },
+    policyBindings: [],
+    supportedOrgScopes: ['*'],
+  },
 ]
 
 /** Parsed registry with Zod defaults filled in. */

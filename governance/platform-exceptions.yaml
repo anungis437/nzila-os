@@ -37,6 +37,22 @@ exceptions:
     owner: mobility-team
     reviewDate: "2027-01-01"
 
+  - app: civic
+    missing: platform-shell
+    reason: >-
+      Catalog/registry placeholder only — no runtime code, no UI, nothing to
+      adopt platform-shell into yet.
+    owner: platform-core
+    reviewDate: "2027-01-01"
+
+  - app: civic
+    missing: platform-auth
+    reason: >-
+      Catalog/registry placeholder only — no runtime code, no auth surface to
+      adopt platform-auth into yet.
+    owner: platform-core
+    reviewDate: "2027-01-01"
+
   - app: test-scaffold-gp
     missing: platform-shell
     reason: >-

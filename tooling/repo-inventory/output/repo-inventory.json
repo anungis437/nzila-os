@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-31T00:00:00.000Z",
-  "appCount": 27,
+  "generatedAt": "2026-09-01T00:00:00.000Z",
+  "appCount": 28,
   "packageCount": 224,
-  "workspacePackageCount": 257,
+  "workspacePackageCount": 258,
   "workflowCount": 53,
   "contractTestCount": 277,
   "tsTestFileCount": 2524,
@@ -110,6 +110,19 @@
       ],
       "purpose": "CFO finance dashboard — ledger management, tax tools, AI advisory, document intelligence, and integrations with Plaid, Dext, Xero, and QuickBooks.",
       "codeFileCount": 238
+    },
+    {
+      "name": "civic",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": null,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": false,
+      "nzilaDeps": [],
+      "purpose": "",
+      "codeFileCount": 0
     },
     {
       "name": "console",

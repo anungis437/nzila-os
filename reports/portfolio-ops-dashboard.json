@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-27",
+  "generated_at": "2026-09-01",
   "authority": "governance/portfolio/product-catalog.json",
   "kpis": {
-    "total_products": 27,
+    "total_products": 28,
     "total_engines": 4,
-    "sell_now_count": 3,
+    "sell_now_count": 1,
     "internal_only_count": 7,
     "frozen_count": 3
   },
@@ -99,11 +99,11 @@
     "by_tier": [
       {
         "tier": 1,
-        "count": 3
+        "count": 1
       },
       {
         "tier": 2,
-        "count": 2
+        "count": 5
       },
       {
         "tier": 3,
@@ -129,7 +129,7 @@
       },
       {
         "status": "incubating",
-        "count": 13
+        "count": 14
       },
       {
         "status": "internal",
@@ -157,30 +157,6 @@
   },
   "products": [
     {
-      "id": "abr",
-      "name": "CourtLens",
-      "tier": 1,
-      "status": "pilot",
-      "gtm_posture": "sell-now",
-      "recommendation": "KEEP",
-      "weighted_score": 8,
-      "readiness_tier": "pilot-safe",
-      "registry_tier": "EXPERIMENTAL",
-      "dev_port": 3014
-    },
-    {
-      "id": "flow",
-      "name": "Flow",
-      "tier": 1,
-      "status": "pilot",
-      "gtm_posture": "sell-now",
-      "recommendation": "KEEP",
-      "weighted_score": 7,
-      "readiness_tier": "pilot-safe",
-      "registry_tier": "PILOT",
-      "dev_port": 3003
-    },
-    {
       "id": "union-eyes",
       "name": "Union Eyes",
       "tier": 1,
@@ -203,6 +179,42 @@
       "readiness_tier": "pilot-safe",
       "registry_tier": "PILOT",
       "dev_port": 3005
+    },
+    {
+      "id": "civic",
+      "name": "CIVIC",
+      "tier": 2,
+      "status": "incubating",
+      "gtm_posture": "hold",
+      "recommendation": "HOLD",
+      "weighted_score": 4.6,
+      "readiness_tier": "internal-only",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": null
+    },
+    {
+      "id": "abr",
+      "name": "CourtLens",
+      "tier": 2,
+      "status": "pilot",
+      "gtm_posture": "hold",
+      "recommendation": "KEEP",
+      "weighted_score": 7.4,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3014
+    },
+    {
+      "id": "flow",
+      "name": "Flow",
+      "tier": 2,
+      "status": "pilot",
+      "gtm_posture": "hold",
+      "recommendation": "KEEP",
+      "weighted_score": 6.4,
+      "readiness_tier": "pilot-safe",
+      "registry_tier": "PILOT",
+      "dev_port": 3003
     },
     {
       "id": "partners",
