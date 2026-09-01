@@ -30,3 +30,21 @@ apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:3
 #   exposed — see the entry above for the underlying dev-only fallback.
 # Reviewed: Phase 0 CourtLens refactor gate (2026-07-19).
 .gitleaksignore:nzila-database-url-with-password:11
+
+# ─────────────────────────────────────────────────────────────────────────────
+# apps/union-eyes/scripts/rls-manual-proof.sql:23,34,78
+# Rule: nzila-database-url-with-password
+# Match: `\c postgresql://union_eyes_<role>:<placeholder-token>@localhost:5432/<placeholder-token>`
+# Justification: Every value in the flagged connection strings is a literal
+#   documentation placeholder — the "password" and "database name" positions
+#   contain tokens the file's own header comment instructs the operator to
+#   replace before running (e.g. a token meaning "put the system role's real
+#   password here", never a real credential). No secret was ever committed —
+#   the rule matches on connection-string SHAPE (scheme://user:token@host/db),
+#   which a descriptive placeholder still satisfies syntactically even though
+#   it carries zero real entropy/secret material. Verified by direct file
+#   inspection: PR #752 exact-head CI run 33506900682, job 99852986676.
+# Reviewed: PR #752 RLS tenant-isolation foundation review (2026-09-01).
+apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:23
+apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:34
+apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:78

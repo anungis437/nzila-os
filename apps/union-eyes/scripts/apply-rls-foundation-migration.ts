@@ -23,9 +23,17 @@
  *      / CREATE OR REPLACE FUNCTION / guarded role creation) — safe to
  *      re-run.
  *   4. Verifies the two roles it creates exist with the expected
- *      pre-provisioning attributes (NOLOGIN, NOSUPERUSER, NOBYPASSRLS) —
- *      this is what scripts/provision-runtime-db-roles.ts requires before
- *      it will proceed.
+ *      IMMUTABLE privilege attributes (NOSUPERUSER, NOBYPASSRLS,
+ *      NOCREATEDB, NOCREATEROLE, NOREPLICATION) — these never change
+ *      across the role's lifecycle. LOGIN capability is intentionally NOT
+ *      checked against a fixed expected value here: 0108 creates the roles
+ *      NOLOGIN, and scripts/provision-runtime-db-roles.ts later flips them
+ *      to LOGIN — both states are valid depending on where an environment
+ *      is in its rollout, and this script must remain safe to re-run
+ *      AFTER provisioning (idempotent) without falsely failing on a role
+ *      that has since been provisioned. Pass --expect-pre-provisioning to
+ *      additionally assert NOLOGIN specifically (useful for a first-time
+ *      rollout, to prove no login capability existed before this step ran).
  *
  * It does NOT provision LOGIN credentials or touch Key Vault — that is
  * scripts/provision-runtime-db-roles.ts, run as the next step in the
@@ -43,6 +51,7 @@ const MIGRATION_PATH = resolve(__dirname, '../db/migrations/0108_rls_tenant_isol
 const EXPECTED_ROLES = ['union_eyes_runtime', 'union_eyes_system'] as const
 
 async function main() {
+  const expectPreProvisioning = process.argv.includes('--expect-pre-provisioning')
   const adminUrl = process.env.RLS_MIGRATION_ADMIN_DATABASE_URL || process.env.ADMIN_DATABASE_URL
   if (!adminUrl) {
     console.error('[apply-rls-foundation-migration] Missing RLS_MIGRATION_ADMIN_DATABASE_URL / ADMIN_DATABASE_URL.')
@@ -60,8 +69,16 @@ async function main() {
     await sql.unsafe(migrationSql)
     console.log('[apply-rls-foundation-migration] Migration applied without error.')
 
-    const roles = await sql<{ rolname: string; rolcanlogin: boolean; rolsuper: boolean; rolbypassrls: boolean }[]>`
-      SELECT rolname, rolcanlogin, rolsuper, rolbypassrls
+    const roles = await sql<{
+      rolname: string
+      rolcanlogin: boolean
+      rolsuper: boolean
+      rolbypassrls: boolean
+      rolcreatedb: boolean
+      rolcreaterole: boolean
+      rolreplication: boolean
+    }[]>`
+      SELECT rolname, rolcanlogin, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolreplication
       FROM pg_roles WHERE rolname = ANY(${EXPECTED_ROLES as unknown as string[]})`
 
     const found = new Map(roles.map((r) => [r.rolname, r]))
@@ -73,15 +90,25 @@ async function main() {
         allGood = false
         continue
       }
+      // Immutable across the role's lifecycle — always enforced, regardless
+      // of whether provisioning has run yet.
       const bad: string[] = []
-      if (role.rolcanlogin) bad.push('rolcanlogin=true (expected NOLOGIN until provision-runtime-db-roles.ts runs)')
       if (role.rolsuper) bad.push('rolsuper=true')
       if (role.rolbypassrls) bad.push('rolbypassrls=true')
+      if (role.rolcreatedb) bad.push('rolcreatedb=true')
+      if (role.rolcreaterole) bad.push('rolcreaterole=true')
+      if (role.rolreplication) bad.push('rolreplication=true')
+      // LOGIN capability is lifecycle-dependent (0108 creates NOLOGIN;
+      // provision-runtime-db-roles.ts later grants LOGIN) — only checked
+      // when the caller explicitly asserts the pre-provisioning stage.
+      if (expectPreProvisioning && role.rolcanlogin) {
+        bad.push('rolcanlogin=true (--expect-pre-provisioning asserts NOLOGIN at this stage)')
+      }
       if (bad.length > 0) {
         console.error(`[apply-rls-foundation-migration] FAIL: role ${roleName} has unexpected attributes: ${bad.join(', ')}`)
         allGood = false
       } else {
-        console.log(`[apply-rls-foundation-migration] OK: role ${roleName} exists with expected pre-provisioning attributes (NOLOGIN, NOSUPERUSER, NOBYPASSRLS).`)
+        console.log(`[apply-rls-foundation-migration] OK: role ${roleName} exists with expected immutable attributes (NOSUPERUSER, NOBYPASSRLS, NOCREATEDB, NOCREATEROLE, NOREPLICATION); rolcanlogin=${role.rolcanlogin} (lifecycle-dependent, not gated unless --expect-pre-provisioning).`)
       }
     }
 
@@ -90,7 +117,7 @@ async function main() {
       process.exit(1)
     }
 
-    console.log('[apply-rls-foundation-migration] Migration + role verification complete. Next: scripts/provision-runtime-db-roles.ts.')
+    console.log('[apply-rls-foundation-migration] Migration + role verification complete. Next: scripts/provision-runtime-db-roles.ts (if not already run for this environment).')
   } finally {
     await sql.end({ timeout: 2 })
   }

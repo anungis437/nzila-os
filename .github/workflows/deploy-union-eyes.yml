@@ -320,7 +320,7 @@ jobs:
           set +x  # never trace this — the export line contains a secret
           export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
 
-          pnpm --filter @nzila/union-eyes run rls:apply-foundation-migration
+          pnpm --filter @nzila/union-eyes run rls:apply-foundation-migration -- --expect-pre-provisioning
           MIGRATION_STATUS=$?
 
           unset RLS_MIGRATION_ADMIN_DATABASE_URL ADMIN_URL

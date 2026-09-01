@@ -43,6 +43,88 @@
 -- =============================================================================
 
 -- =============================================================================
+-- PART 0 — Retract historical permissive policies on tables this migration
+-- protects (PR #752 review finding).
+--
+-- PostgreSQL permissive policies are OR-combined: if an OLD, unscoped
+-- `TO public` policy from a prior migration (0051, 0071, 0073, 0075, 0076,
+-- manual/053) still exists on a table this migration also creates a policy
+-- for, that old policy can independently grant access regardless of what
+-- this migration's own policies say — "0108 makes cross_org_access_log
+-- system-only" is only true if no old PUBLIC policy survives alongside it.
+-- Do NOT assume "staging had zero policies when this was tested" means
+-- every environment (demo/pilot/production) has an identical migration
+-- history — drop these explicitly, unconditionally, on every apply.
+--
+-- This is deliberately idempotent (DROP POLICY IF EXISTS) and lists every
+-- named policy found in db/migrations/**/*.sql for the tables PART 5/6/7
+-- below protect, as of 2026-09-01.
+-- =============================================================================
+
+DROP POLICY IF EXISTS organizations_select_policy ON organizations;
+DROP POLICY IF EXISTS organizations_insert_policy ON organizations;
+DROP POLICY IF EXISTS organizations_update_policy ON organizations;
+DROP POLICY IF EXISTS organizations_delete_policy ON organizations;
+DROP POLICY IF EXISTS "organizations_member_access" ON organizations;
+
+DROP POLICY IF EXISTS claims_select_policy ON claims;
+DROP POLICY IF EXISTS claims_insert_policy ON claims;
+DROP POLICY IF EXISTS claims_update_policy ON claims;
+DROP POLICY IF EXISTS claims_delete_policy ON claims;
+
+DROP POLICY IF EXISTS "documents_read_own" ON documents;
+DROP POLICY IF EXISTS "documents_read_org_admin" ON documents;
+DROP POLICY IF EXISTS "documents_create_own" ON documents;
+DROP POLICY IF EXISTS "documents_update_own" ON documents;
+DROP POLICY IF EXISTS "documents_delete_own" ON documents;
+
+DROP POLICY IF EXISTS "messages_read_participant_access" ON messages;
+DROP POLICY IF EXISTS "messages_create_participant_only" ON messages;
+DROP POLICY IF EXISTS "messages_update_own_recent" ON messages;
+DROP POLICY IF EXISTS "messages_delete_own_recent" ON messages;
+
+DROP POLICY IF EXISTS "threads_read_participant_access" ON message_threads;
+DROP POLICY IF EXISTS "threads_create_org_members" ON message_threads;
+DROP POLICY IF EXISTS "threads_update_participant" ON message_threads;
+DROP POLICY IF EXISTS "threads_delete_creator_or_admin" ON message_threads;
+DROP POLICY IF EXISTS "threads_delete_participant" ON message_threads;
+
+DROP POLICY IF EXISTS "participants_read_own_or_admin" ON message_participants;
+DROP POLICY IF EXISTS "participants_create_org_admin" ON message_participants;
+DROP POLICY IF EXISTS "participants_delete_self" ON message_participants;
+DROP POLICY IF EXISTS "participants_read_own" ON message_participants;
+DROP POLICY IF EXISTS "participants_create_same_org" ON message_participants;
+DROP POLICY IF EXISTS "participants_update_own" ON message_participants;
+
+DROP POLICY IF EXISTS "read_receipts_own_only" ON message_read_receipts;
+DROP POLICY IF EXISTS "read_receipts_create_own" ON message_read_receipts;
+DROP POLICY IF EXISTS "read_receipts_read_own" ON message_read_receipts;
+DROP POLICY IF EXISTS "read_receipts_update_own" ON message_read_receipts;
+
+DROP POLICY IF EXISTS "msg_notifications_own_only" ON message_notifications;
+DROP POLICY IF EXISTS "msg_notifications_create_own" ON message_notifications;
+DROP POLICY IF EXISTS "msg_notifications_update_own" ON message_notifications;
+DROP POLICY IF EXISTS "message_notifications_read_own" ON message_notifications;
+DROP POLICY IF EXISTS "message_notifications_create_system" ON message_notifications;
+DROP POLICY IF EXISTS "message_notifications_update_own" ON message_notifications;
+DROP POLICY IF EXISTS "message_notifications_delete_own" ON message_notifications;
+
+-- cross_org_access_log is made system-only below (PART 7) — this old
+-- tenant-participant policy from manual/053 must not survive alongside
+-- that claim.
+DROP POLICY IF EXISTS "cross_org_access_log_participant" ON cross_org_access_log;
+
+-- claim_deadlines is not yet in this migration's protected set (tracked as
+-- a NEEDS_REVIEW-turned-TENANT_RLS_REQUIRED gap in
+-- db/rls-storage-authority-manifest.ts pending a follow-up migration), but
+-- its historical policy is retracted now regardless so it cannot combine
+-- unexpectedly with whatever protects it next.
+DROP POLICY IF EXISTS claim_deadlines_select_policy ON claim_deadlines;
+DROP POLICY IF EXISTS claim_deadlines_insert_policy ON claim_deadlines;
+DROP POLICY IF EXISTS claim_deadlines_update_policy ON claim_deadlines;
+DROP POLICY IF EXISTS claim_deadlines_delete_policy ON claim_deadlines;
+
+-- =============================================================================
 -- PART 1 — Runtime principal (`union_eyes_runtime`)
 --
 -- This is the role the deployed application's ordinary tenant-scoped
@@ -121,15 +203,34 @@ $$;
 -- for the tables enumerated in PART 5; every other table is unaffected by
 -- this migration and continues to be scoped at the application/query-builder
 -- layer exactly as it is today.
+--
+-- NOTE (PR #752 review): the blanket grant below covers EXISTING tables at
+-- the time this migration runs — tightening it to a least-privilege,
+-- per-table grant model for existing tables is tracked as a disclosed
+-- follow-up pending completion of db/rls-storage-authority-manifest.ts
+-- (most of its ~400 entries are still NEEDS_REVIEW). What this migration
+-- does NOT do (as of this revision, per that same review) is grant DML on
+-- FUTURE tables automatically: the `ALTER DEFAULT PRIVILEGES` blanket that
+-- used to appear here has been removed. Every migration created after this
+-- one that adds a new table must explicitly GRANT the privileges
+-- union_eyes_runtime/union_eyes_system actually need on it — silent,
+-- unreviewed automatic access is no longer the default for new tables.
 -- =============================================================================
 
 GRANT USAGE ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO union_eyes_runtime, union_eyes_system;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO union_eyes_runtime, union_eyes_system;
+
+-- Retract any default-privilege grant a prior revision of this migration
+-- may have already applied to a given database — ALTER DEFAULT PRIVILEGES
+-- is sticky and outlives the statement that created it, so simply removing
+-- the ALTER DEFAULT PRIVILEGES lines from this file does not by itself
+-- undo one that already ran. Safe/idempotent to run even if none was ever
+-- applied (REVOKE on a privilege that was never granted is a no-op).
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO union_eyes_runtime, union_eyes_system;
+  REVOKE SELECT, INSERT, UPDATE, DELETE ON TABLES FROM union_eyes_runtime, union_eyes_system;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO union_eyes_runtime, union_eyes_system;
+  REVOKE USAGE, SELECT ON SEQUENCES FROM union_eyes_runtime, union_eyes_system;
 
 DO $$
 BEGIN

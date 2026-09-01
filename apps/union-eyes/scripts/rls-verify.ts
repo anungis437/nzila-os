@@ -185,6 +185,17 @@ async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
         pass: !isProhibitedBypass,
         detail: isProhibitedBypass ? `PROHIBITED PATTERN FOUND: ${qual}` : 'ok',
       })
+      const isApprovedPolicyName =
+        policy.policyname === 'ue_system_full_access' ||
+        policy.policyname === 'ue_parent_org_isolation' ||
+        policy.policyname.startsWith('ue_org_isolation_')
+      results.push({
+        name: `table ${table}: policy "${policy.policyname}" is an approved 0108 policy (not a surviving historical policy)`,
+        pass: isApprovedPolicyName,
+        detail: isApprovedPolicyName
+          ? 'ok'
+          : `UNEXPECTED POLICY — not one of 0108's own named policies (ue_system_full_access / ue_parent_org_isolation / ue_org_isolation_*). A historical policy from an earlier migration may have survived on this table and can widen access via PostgreSQL's OR-combined permissive-policy semantics. Drop it explicitly (see PART 0 of 0108) or add it to this check's approved list with justification if it is genuinely still required.`,
+      })
     }
   }
 }
@@ -193,23 +204,26 @@ async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
  * Discovers tables that carry an org/tenant-shaped column
  * (organization_id / org_id / tenant_id) but are granted DML to
  * union_eyes_runtime without RLS enabled — i.e. tables the blanket
- * `GRANT ... ON ALL TABLES IN SCHEMA public` in 0108 makes reachable, but
- * that have no row-level enforcement at all (relying solely on
- * application-layer filtering).
+ * `GRANT ... ON ALL TABLES IN SCHEMA public` in 0108 makes reachable.
  *
- * This does NOT block on every such table today: 0108 protects a
- * deliberately scoped subset (the Phase 3A capability surface), and this
- * repository's schema has 200+ tables — most not yet audited for whether
- * they are actually reachable by tenant-facing runtime code. Blocking
- * deployment on the full, un-triaged gap would be an unreviewed, blind
- * mass change, not a considered one.
- *
- * Known/accepted gaps are tracked in scripts/rls-known-unprotected-tables.json
- * (a plain array of table names) so this check can still fail closed on
- * *new* additions once that file has been populated against the real
- * database schema (it currently ships empty/unpopulated — see the file's
- * own header comment). Until populated, this check is REPORT-ONLY and does
- * not affect the pass/fail exit code.
+ * FAIL-CLOSED (not report-only): every such table MUST have an entry in
+ * db/rls-storage-authority-manifest.ts. This check fails if:
+ *   - a discovered table has NO manifest entry at all (undocumented gap —
+ *     including any NEW table a future migration adds without a
+ *     disposition);
+ *   - the manifest entry's classification is NEEDS_REVIEW (an honest,
+ *     evidence-backed placeholder for real code that has not yet had its
+ *     exact HTTP reachability / RLS disposition traced — see the
+ *     manifest's own header for why this exists and is not silently
+ *     passed);
+ *   - the manifest entry requires RLS (TENANT_RLS_REQUIRED /
+ *     USER_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED) but the live catalog
+ *     shows RLS is not actually enabled+forced with at least one policy on
+ *     that table yet.
+ * "rls:verify passes" therefore means every tenant-bearing table reachable
+ * by union_eyes_runtime is either RLS-protected or has a reviewed,
+ * evidence-backed, non-NEEDS_REVIEW disposition — not merely "the 24-table
+ * 0108 subset checks out".
  */
 async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult[]) {
   const rows = await sql<{ table_name: string; column_name: string }[]>`
@@ -221,14 +235,9 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
       AND c.column_name IN ('organization_id', 'org_id', 'tenant_id')
       AND c.table_name != ALL(${ALL_PROTECTED_TABLES})`
 
-  let allowlist: string[] = []
-  try {
-    const mod = await import('./rls-known-unprotected-tables')
-    allowlist = mod.default ?? []
-  } catch {
-    allowlist = []
-  }
-  const allowlistPopulated = allowlist.length > 0
+  const { storageAuthorityManifest, CLOSED_CLASSIFICATIONS } = await import('../db/rls-storage-authority-manifest')
+  const manifestByTable = new Map(storageAuthorityManifest.map((e) => [e.table, e]))
+  const rlsRequiredClassifications = new Set(['TENANT_RLS_REQUIRED', 'USER_RLS_REQUIRED', 'PARENT_OWNED_RLS_REQUIRED'])
 
   const byTable = new Map<string, string[]>()
   for (const row of rows) {
@@ -237,22 +246,56 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
     byTable.set(row.table_name, cols)
   }
 
+  const tablesNeedingRlsCheck: string[] = []
   for (const [table, columns] of byTable) {
-    const isAllowlisted = allowlist.includes(table)
+    const entry = manifestByTable.get(table)
+    if (!entry) {
+      results.push({
+        name: `storage-authority: ${table} (${columns.join(', ')})`,
+        pass: false,
+        detail: 'UNDOCUMENTED — no entry in db/rls-storage-authority-manifest.ts. Add one (or add real RLS coverage) before this can ship.',
+      })
+      continue
+    }
+    const isClosed = (CLOSED_CLASSIFICATIONS as readonly string[]).includes(entry.classification)
     results.push({
-      name: `orphaned-tenant-table scan: ${table} (${columns.join(', ')})`,
-      // Only actually gates the exit code once the allowlist has real
-      // content — see the file header for why an empty allowlist means
-      // "not yet populated against a real schema", not "no gaps exist".
-      pass: !allowlistPopulated || isAllowlisted,
-      detail: isAllowlisted
-        ? 'known gap, tracked in scripts/rls-known-unprotected-tables.ts'
-        : allowlistPopulated
-          ? 'NEW unprotected tenant-shaped table — add RLS coverage or add to the allowlist with justification'
-          : 'reported only — scripts/rls-known-unprotected-tables.ts is not yet populated against a real schema, see its header comment',
+      name: `storage-authority: ${table} classification`,
+      pass: isClosed,
+      detail: isClosed
+        ? `${entry.classification} — ${entry.reason}`
+        : `${entry.classification} (FAILING classification) — ${entry.reason}`,
     })
+    if (isClosed && rlsRequiredClassifications.has(entry.classification)) {
+      tablesNeedingRlsCheck.push(table)
+    }
+  }
+
+  if (tablesNeedingRlsCheck.length > 0) {
+    const rlsRows = await sql<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }[]>`
+      SELECT relname, relrowsecurity, relforcerowsecurity
+      FROM pg_class
+      WHERE relname = ANY(${tablesNeedingRlsCheck}) AND relkind = 'r'`
+    const rlsByTable = new Map(rlsRows.map((r) => [r.relname, r]))
+    const policyRows = await sql<{ tablename: string }[]>`
+      SELECT DISTINCT tablename FROM pg_policies WHERE tablename = ANY(${tablesNeedingRlsCheck})`
+    const tablesWithPolicies = new Set(policyRows.map((r) => r.tablename))
+
+    for (const table of tablesNeedingRlsCheck) {
+      const rls = rlsByTable.get(table)
+      const hasRls = Boolean(rls?.relrowsecurity && rls?.relforcerowsecurity)
+      const hasPolicy = tablesWithPolicies.has(table)
+      results.push({
+        name: `storage-authority: ${table} has RLS+FORCE RLS+a policy (required by its manifest classification)`,
+        pass: hasRls && hasPolicy,
+        detail:
+          hasRls && hasPolicy
+            ? 'ok'
+            : `MISSING — relrowsecurity=${rls?.relrowsecurity ?? 'table not found'}, relforcerowsecurity=${rls?.relforcerowsecurity ?? 'n/a'}, has policy=${hasPolicy}. This table is classified as requiring RLS in the manifest but does not have it yet — extend 0108 (or a follow-up migration) to cover it.`,
+      })
+    }
   }
 }
+
 
 async function checkNoContextFailsClosed(sql: postgres.Sql, results: CheckResult[]) {
   await sql.begin(async (tx) => {
