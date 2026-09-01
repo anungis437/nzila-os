@@ -7,6 +7,16 @@
 
 import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index, pgEnum } from "drizzle-orm/pg-core";
 
+// Canonical `grievances` declaration lives in ./domains/claims/grievances
+// (live-DB-verified 2026-09-01: 42 columns). This file previously re-declared
+// it locally with a different (53-column) shape; that declaration had zero
+// remaining real production consumers after the PR #752 review redirected
+// them, so it is re-exported here instead of re-declared, keeping this
+// file's other tables' `.references(() => grievances.id)` pointed at the
+// one real physical relation.
+import { grievances } from "./domains/claims/grievances";
+export { grievances };
+
 export const grievanceTypeEnum = pgEnum("grievance_type", [
   "individual",
   "group",
@@ -71,116 +81,6 @@ export const settlementTypeEnum = pgEnum("settlement_type", [
   "apology",
   "training",
   "other",
-]);
-
-// Main Grievance Table
-export const grievances = pgTable("grievances", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  grievanceNumber: varchar("grievance_number", { length: 50 }).unique().notNull(),
-  
-  // Classification
-  type: grievanceTypeEnum("type").notNull(),
-  status: grievanceStatusEnum("status").notNull().default("draft"),
-  priority: grievancePriorityEnum("priority").default("medium"),
-  step: grievanceStepEnum("step"),
-  
-  // Parties
-  grievantId: uuid("grievant_id"),
-  grievantName: varchar("grievant_name", { length: 255 }),
-  grievantEmail: varchar("grievant_email", { length: 255 }),
-  unionRepId: uuid("union_rep_id"),
-  employerRepId: varchar("employer_rep_id", { length: 255 }),
-  
-  // Employer/Organization
-  employerId: uuid("employer_id"),
-  employerName: varchar("employer_name", { length: 255 }),
-  workplaceId: uuid("workplace_id"),
-  workplaceName: varchar("workplace_name", { length: 255 }),
-  
-  // Member details (from intake form)
-  memberPhone: varchar("member_phone", { length: 50 }),
-  memberNumber: varchar("member_number", { length: 100 }),
-  localChapter: varchar("local_chapter", { length: 255 }),
-
-  // Workplace details (from intake form)
-  department: varchar("department", { length: 255 }),
-  branch: varchar("branch", { length: 255 }),
-  supervisorName: varchar("supervisor_name", { length: 255 }),
-  incidentLocation: varchar("incident_location", { length: 500 }),
-
-  // CBA Reference
-  cbaId: uuid("cba_id"),
-  cbaArticle: varchar("cba_article", { length: 100 }),
-  cbaSection: varchar("cba_section", { length: 100 }),
-  
-  // Details
-  title: varchar("title", { length: 500 }).notNull(),
-  description: text("description").notNull(),
-  background: text("background"),
-  desiredOutcome: text("desired_outcome"),
-
-  // Sensitivity flags (from intake form)
-  workplaceSafetyFlag: boolean("workplace_safety_flag").default(false),
-  harassmentFlag: boolean("harassment_flag").default(false),
-  discriminationFlag: boolean("discrimination_flag").default(false),
-  accommodationFlag: boolean("accommodation_flag").default(false),
-  
-  // Dates
-  incidentDate: timestamp("incident_date", { withTimezone: true }),
-  filedDate: timestamp("filed_date", { withTimezone: true }),
-  responseDeadline: timestamp("response_deadline", { withTimezone: true }),
-  meetingDate: timestamp("meeting_date", { withTimezone: true }),
-  escalatedAt: timestamp("escalated_at", { withTimezone: true }),
-  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-  closedAt: timestamp("closed_at", { withTimezone: true }),
-  
-  // Timeline
-  timeline: jsonb("timeline").$type<Array<{
-    date: string;
-    action: string;
-    actor: string;
-    notes?: string;
-  }>>(),
-  
-  // Related records
-  groupGrievanceId: uuid("group_grievance_id"),
-  relatedGrievanceIds: uuid("related_grievance_ids").array(),
-  
-  // Attachments
-  attachments: jsonb("attachments").$type<Array<{
-    id: string;
-    name: string;
-    url: string;
-    type: string;
-    uploadedAt: string;
-  }>>(),
-  
-  // Flags
-  isGroupGrievance: boolean("is_group_grievance").default(false),
-  isArbitrationEligible: boolean("is_arbitration_eligible").default(false),
-  hasLegalImplications: boolean("has_legal_implications").default(false),
-  isConfidential: boolean("is_confidential").default(false),
-  
-  // Organization
-  organizationId: uuid("organization_id").notNull(),
-  
-  // Metadata
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  createdBy: uuid("created_by"),
-  lastUpdatedBy: uuid("last_updated_by"),
-}, (table) => [
-  index("idx_grievances_number").on(table.grievanceNumber),
-  index("idx_grievances_status").on(table.status),
-  index("idx_grievances_type").on(table.type),
-  index("idx_grievances_priority").on(table.priority),
-  index("idx_grievances_step").on(table.step),
-  index("idx_grievances_grievant").on(table.grievantId),
-  index("idx_grievances_union_rep").on(table.unionRepId),
-  index("idx_grievances_employer").on(table.employerId),
-  index("idx_grievances_cba").on(table.cbaId),
-  index("idx_grievances_org").on(table.organizationId),
-  index("idx_grievances_deadline").on(table.responseDeadline),
 ]);
 
 // Grievance Responses

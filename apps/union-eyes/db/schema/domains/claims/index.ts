@@ -29,6 +29,6 @@ export * from './satisfaction';
 // Both now match the actual DB schema (grievance_id FK to grievances, 14 columns)
 export { grievanceDeadlines, type GrievanceDeadline } from './workflows';
 
-// grievanceDocuments and GrievanceDocument exist in both workflows.ts and grievance-lifecycle.ts
-// Use the full definitions from workflows.ts (has organizationId, documentName, versioning, OCR etc.)
-export { grievanceDocuments, type GrievanceDocument } from './workflows';
+// grievanceDocuments/GrievanceDocument previously also existed in grievance-lifecycle.ts as a
+// stale, non-matching 6-column declaration; that declaration has been removed (PR #752 review),
+// so './workflows' is now the sole source and no explicit override is required here.

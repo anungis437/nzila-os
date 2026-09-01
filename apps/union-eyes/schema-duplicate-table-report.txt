@@ -1,58 +1,67 @@
-Total distinct physical table names: 693
-Tables with >1 pgTable declaration: 341
-  - COMPATIBLE_DUPLICATE (same columns): 319
-  - CONFLICTING_SCHEMA (different columns): 22
+Total distinct physical (schema, table) keys: 703
+Keys with >1 declaration: 347
+  - CONFLICTING_SCHEMA (proven incompatible): 21
+  - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 3
+  - IDENTICAL_OR_PROVEN_COMPATIBLE: 323
 
 === CONFLICTING_SCHEMA ===
 ml_predictions: db/schema/analytics.ts(mlPredictions)[15cols] | db/schema/domains/analytics/analytics.ts(mlPredictions)[15cols] | db/schema/domains/ml/predictions.ts(mlPredictions)[11cols] | db/schema/ml-predictions-schema.ts(mlPredictions)[11cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/analytics imported directly by: lib/services/lro-metrics.ts
+  MIGRATION EVIDENCE: 20260507_fixup_create_break_glass_activations.sql
 insight_recommendations: db/schema/analytics.ts(insightRecommendations)[28cols] | db/schema/domains/analytics/analytics.ts(insightRecommendations)[27cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/analytics imported directly by: lib/services/lro-metrics.ts
+  MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 20260507_fixup_create_break_glass_activations.sql
 automation_rules: db/schema/automation-rules-schema.ts(automationRules)[21cols] | db/schema/domains/infrastructure/automation.ts(automationRules)[21cols] | db/schema/domains/infrastructure/rewards.ts(automationRules)[15cols] | db/schema/recognition-rewards-schema.ts(automationRules)[15cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/rewards imported directly by: lib/services/rewards/wallet-service.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/recognition-rewards-schema imported directly by: app/[locale]/dashboard/admin/rewards/analytics/page.tsx, lib/services/rewards/automation-service.ts, lib/services/rewards/export-service.ts, lib/services/rewards/shopify-service.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/recognition-rewards-schema(automationRules) imported directly by: lib/services/rewards/automation-service.ts
+  MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql
 reward_wallet_ledger: db/schema/award-templates-schema.ts(rewardWalletLedger)[11cols] | db/schema/domains/infrastructure/awards.ts(rewardWalletLedger)[11cols] | db/schema/domains/infrastructure/rewards.ts(rewardWalletLedger)[10cols] | db/schema/recognition-rewards-schema.ts(rewardWalletLedger)[10cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/rewards imported directly by: lib/services/rewards/wallet-service.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/recognition-rewards-schema imported directly by: app/[locale]/dashboard/admin/rewards/analytics/page.tsx, lib/services/rewards/automation-service.ts, lib/services/rewards/export-service.ts, lib/services/rewards/shopify-service.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/rewards(rewardWalletLedger) imported directly by: lib/services/rewards/wallet-service.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/recognition-rewards-schema(rewardWalletLedger) imported directly by: app/[locale]/dashboard/admin/rewards/analytics/page.tsx, lib/services/rewards/export-service.ts
+  MIGRATION EVIDENCE: 0005_lazy_kate_bishop.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 clc_sync_log: db/schema/clc-partnership-schema.ts(clcSyncLog)[16cols] | db/schema/clc-per-capita-schema.ts(clcSyncLog)[9cols] | db/schema/clc-sync-schema.ts(clcSyncLog)[23cols] | db/schema/domains/infrastructure/clc-partnership.ts(clcSyncLog)[16cols] | db/schema/domains/infrastructure/clc-per-capita.ts(clcSyncLog)[9cols] | db/schema/domains/infrastructure/clc-sync.ts(clcSyncLog)[23cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-partnership-schema imported directly by: lib/services/external-data/clc-partnership-service.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-per-capita-schema imported directly by: app/[locale]/dashboard/clc/staff/page.tsx
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/clc-per-capita imported directly by: app/[locale]/dashboard/clc/page.tsx
+  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-partnership-schema(clcSyncLog) imported directly by: lib/services/external-data/clc-partnership-service.ts
+  MIGRATION EVIDENCE: 0002_true_selene.sql, 0008_lean_mother_askani.sql
 clc_webhook_log: db/schema/clc-per-capita-schema.ts(clcWebhookLog)[8cols] | db/schema/clc-sync-audit-schema.ts(clcWebhookLog)[10cols] | db/schema/clc-sync-schema.ts(clcWebhookLog)[23cols] | db/schema/domains/infrastructure/clc-audit.ts(clcWebhookLog)[10cols] | db/schema/domains/infrastructure/clc-per-capita.ts(clcWebhookLog)[8cols] | db/schema/domains/infrastructure/clc-sync.ts(clcWebhookLog)[23cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-per-capita-schema imported directly by: app/[locale]/dashboard/clc/staff/page.tsx
-  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-sync-audit-schema imported directly by: app/[locale]/dashboard/clc/staff/page.tsx, services/clc/clc-api-integration.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/clc-per-capita imported directly by: app/[locale]/dashboard/clc/page.tsx
+  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-sync-audit-schema(clcWebhookLog) imported directly by: services/clc/clc-api-integration.ts
+  MIGRATION EVIDENCE: 0002_true_selene.sql, 0008_lean_mother_askani.sql
 chart_of_accounts: db/schema/clc-sync-audit-schema.ts(chartOfAccounts)[16cols] | db/schema/domains/finance/accounting.ts(chartOfAccounts)[28cols] | db/schema/domains/financial/chart-of-accounts.ts(chartOfAccounts)[22cols] | db/schema/domains/infrastructure/clc-audit.ts(chartOfAccounts)[16cols] | db/schema/domains/infrastructure/erp.ts(chartOfAccounts)[19cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-sync-audit-schema imported directly by: app/[locale]/dashboard/clc/staff/page.tsx, services/clc/clc-api-integration.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/financial/chart-of-accounts imported directly by: services/clc/chart-of-accounts.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/financial/chart-of-accounts(chartOfAccounts) imported directly by: services/clc/chart-of-accounts.ts
+  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 communication_preferences: db/schema/communication-analytics-schema.ts(communicationPreferences)[18cols] | db/schema/domains/communications/analytics.ts(communicationPreferences)[18cols] | db/schema/domains/communications/campaigns.ts(communicationPreferences)[17cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/communication-analytics-schema imported directly by: lib/services/messaging/campaign-service.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/communication-analytics-schema(communicationPreferences) imported directly by: lib/services/messaging/campaign-service.ts
+  MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 consent_records: db/schema/data-governance-schema.ts(consentRecords)[22cols] | db/schema/domains/communications/campaigns.ts(consentRecords)[13cols]
-grievance_documents: db/schema/domains/claims/grievance-lifecycle.ts(grievanceDocuments)[6cols] | db/schema/domains/claims/workflows.ts(grievanceDocuments)[31cols] | db/schema/grievance-workflow-schema.ts(grievanceDocuments)[31cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/claims/grievance-lifecycle imported directly by: app/api/cases/[caseId]/escalate/route.ts, app/api/grievances/[id]/access/route.ts, app/api/grievances/[id]/assign/route.ts, app/api/grievances/[id]/convert/route.ts, app/api/grievances/[id]/documents/route.ts, app/api/grievances/[id]/priority-override/route.ts, app/api/grievances/[id]/route.ts, app/api/grievances/[id]/status/route.ts, app/api/grievances/import/route.ts, app/api/grievances/route.ts, app/api/search/universal/route.ts, lib/cognition/ue-adapter.ts, lib/events/pilot-event-listeners.ts, lib/services/case-access-service.ts, lib/services/case-related-documents-service.ts, services/case-intelligence/related-documents-service.ts
-grievances: db/schema/domains/claims/grievances.ts(grievances)[42cols] | db/schema/grievance-schema.ts(grievances)[53cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/claims/grievances imported directly by: app/api/admin/seed-cupe-pilot/route.ts, app/api/cases/[caseId]/escalate/route.ts, app/api/cognition/kpis/route.ts, app/api/cognition/precedents/route.ts, app/api/dashboard/leadership/route.ts, app/api/grievances/[id]/access/route.ts, app/api/grievances/[id]/assign/route.ts, app/api/grievances/[id]/convert/route.ts, app/api/grievances/[id]/documents/route.ts, app/api/grievances/[id]/intelligence/route.ts, app/api/grievances/[id]/priority-override/route.ts, app/api/grievances/[id]/related-documents/route.ts, app/api/grievances/[id]/route.ts, app/api/grievances/[id]/status/route.ts, app/api/grievances/[id]/suggest-clauses/route.ts, app/api/grievances/import/route.ts, app/api/grievances/route.ts, app/api/grievances/workload/route.ts, app/api/pilot/bootstrap/cupe/route.ts, app/api/pilot/demo-data/route.ts, app/api/search/universal/route.ts, lib/ai/clause-reasoning.ts, lib/ai/employer-risk.ts, lib/ai/executive-insights.ts, lib/ai/grievance-triage.ts, lib/ai/steward-copilot.ts, lib/cognition/ue-adapter.ts, lib/services/case-access-service.ts, lib/services/case-knowledge-graph-service.ts, lib/services/case-related-documents-service.ts, lib/services/clause-intelligence.ts, lib/services/steward-assignment.ts, lib/stagingSeed.ts, lib/wil/adapters.ts, lib/workflow-automation-engine.ts, services/case-intelligence/case-knowledge-graph-service.ts, services/case-intelligence/case-pattern-detection-service.ts, services/case-intelligence/precedent-matching-service.ts, services/case-intelligence/related-documents-service.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/grievance-schema imported directly by: app/api/staging-proof/deadline-engine/scenario/route.ts, lib/deadline-engine/recipient-resolver.ts, lib/ingestion/fuzzy-dedup.ts, lib/integrations/timeline-integration.ts
 grievance_transitions: db/schema/domains/claims/workflows.ts(grievanceTransitions)[18cols] | db/schema/grievance-workflow-schema.ts(grievanceTransitions)[19cols]
+  MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 campaigns: db/schema/domains/communications/campaigns.ts(campaigns)[27cols] | db/schema/phase-4-messaging-schema.ts(campaigns)[17cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema imported directly by: lib/workers/message-queue-processor.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema(campaigns) imported directly by: lib/workers/message-queue-processor.ts
 message_log: db/schema/domains/communications/campaigns.ts(messageLog)[23cols] | db/schema/phase-4-messaging-schema.ts(message_log)[18cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema imported directly by: lib/workers/message-queue-processor.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/phase-4-messaging-schema(message_log) imported directly by: lib/workers/message-queue-processor.ts
+newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers)[8cols] | db/schema/newsletter-schema.ts(newsletterListSubscribers)[8cols]
+  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 steward_assignments: db/schema/domains/communications/organizer-workflows.ts(stewardAssignments)[16cols] | db/schema/domains/member/stewards.ts(stewardAssignments)[6cols] | db/schema/union-structure-schema.ts(stewardAssignments)[33cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/member/stewards imported directly by: app/api/cognition/kpis/route.ts, lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/member/stewards(stewardAssignments) imported directly by: lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts
+  MIGRATION EVIDENCE: 0019_lonely_stephen_strange.sql, 0041_steady_reavers.sql
 employers: db/schema/domains/compliance/employer-compliance.ts(employers)[8cols] | db/schema/union-structure-schema.ts(employers)[33cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/compliance/employer-compliance imported directly by: app/api/compliance/alerts/route.ts, app/api/compliance/reports/route.ts, app/api/pilot/demo-data/route.ts, lib/ai/employer-risk.ts, lib/ai/executive-insights.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/compliance/employer-compliance(employers) imported directly by: app/api/compliance/alerts/route.ts, app/api/compliance/reports/route.ts, app/api/pilot/demo-data/route.ts, lib/ai/employer-risk.ts, lib/ai/executive-insights.ts
+  MIGRATION EVIDENCE: 0019_lonely_stephen_strange.sql, 0020_keen_roulette.sql
 gl_account_mappings: db/schema/domains/finance/accounting.ts(glAccountMappings)[18cols] | db/schema/domains/infrastructure/erp.ts(glAccountMappings)[12cols]
+  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 dues_transactions: db/schema/domains/finance/dues.ts(duesTransactions)[30cols] | db/schema/dues-transactions-schema.ts(duesTransactions)[27cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/finance/dues imported directly by: lib/jobs/dues-reminder-scheduler.ts, lib/jobs/failed-payment-retry.ts, lib/services/billing-cycle-service.ts, lib/services/dues-notifications.ts, lib/services/payment-service.ts
+  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/finance/dues(duesTransactions) imported directly by: lib/jobs/dues-reminder-scheduler.ts, lib/jobs/failed-payment-retry.ts, lib/services/billing-cycle-service.ts, lib/services/dues-notifications.ts, lib/services/payment-service.ts
+  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 payments: db/schema/domains/finance/payments.ts(payments)[27cols] | db/schema/financial-payments-schema.ts(payments)[25cols]
+  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 payment_methods: db/schema/domains/finance/payments.ts(paymentMethods)[15cols] | db/schema/financial-payments-schema.ts(paymentMethods)[13cols]
+  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 webhook_deliveries: db/schema/domains/infrastructure/integrations.ts(webhookDeliveries)[10cols] | db/schema/integration-schema.ts(webhookDeliveries)[19cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/integration-schema imported directly by: app/api/extensions/[id]/route.ts
-member_documents: db/schema/member-documents-schema.ts(memberDocuments)[10cols] | db/schema/member-profile-v2-schema.ts(memberDocuments)[24cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/member-profile-v2-schema imported directly by: app/api/members/[id]/history/route.ts
+user_sessions (schema: user_management): db/schema/domains/member/user-management.ts(userSessions)[13cols] | db/schema/user-management-schema.ts(userSessions)[12cols]
+  MIGRATION EVIDENCE: 20260507_fixup_create_break_glass_activations.sql, 20260507_fixup_pre_0008_missing_tables.sql
 
-=== COMPATIBLE_DUPLICATE (should still be consolidated, lower priority) ===
+=== SAME_COLUMN_SET_UNVERIFIED (column names match; type/nullability/default/FK not fully provable statically — verify against live schema before treating as safe) ===
+claim_precedent_analysis: db/schema/cba-intelligence-schema.ts(claimPrecedentAnalysis) | db/schema/domains/agreements/intelligence.ts(claimPrecedentAnalysis)
+defensibility_packs: db/schema/defensibility-packs-schema.ts(defensibilityPacks) | db/schema/domains/infrastructure/defensibility.ts(defensibilityPacks)
+pack_download_log: db/schema/defensibility-packs-schema.ts(packDownloadLog) | db/schema/domains/infrastructure/defensibility.ts(packDownloadLog)
+
+=== IDENTICAL_OR_PROVEN_COMPATIBLE (column name, type, nullability, PK/unique/array/default-presence, and any resolvable FK target all agreed) ===
 accessibility_audits: db/schema/accessibility-schema.ts(accessibilityAudits) | db/schema/domains/infrastructure/accessibility.ts(accessibilityAudits)
 accessibility_issues: db/schema/accessibility-schema.ts(accessibilityIssues) | db/schema/domains/infrastructure/accessibility.ts(accessibilityIssues)
 wcag_success_criteria: db/schema/accessibility-schema.ts(wcagSuccessCriteria) | db/schema/domains/infrastructure/accessibility.ts(wcagSuccessCriteria)
@@ -87,6 +96,10 @@ comparative_analyses: db/schema/analytics.ts(comparativeAnalyses) | db/schema/do
 arbitration_precedents: db/schema/arbitration-precedents-schema.ts(arbitrationPrecedents) | db/schema/domains/data/precedents.ts(arbitrationPrecedents)
 precedent_tags: db/schema/arbitration-precedents-schema.ts(precedentTags) | db/schema/domains/data/precedents.ts(precedentTags)
 precedent_citations: db/schema/arbitration-precedents-schema.ts(precedentCitations) | db/schema/domains/data/precedents.ts(precedentCitations)
+audit_logs (schema: audit_security): db/schema/audit-security-schema.ts(auditLogs) | db/schema/domains/infrastructure/audit.ts(auditLogs)
+security_events (schema: audit_security): db/schema/audit-security-schema.ts(securityEvents) | db/schema/domains/infrastructure/audit.ts(securityEvents)
+failed_login_attempts (schema: audit_security): db/schema/audit-security-schema.ts(failedLoginAttempts) | db/schema/domains/infrastructure/audit.ts(failedLoginAttempts)
+rate_limit_events (schema: audit_security): db/schema/audit-security-schema.ts(rateLimitEvents) | db/schema/domains/infrastructure/audit.ts(rateLimitEvents)
 automation_execution_log: db/schema/automation-rules-schema.ts(automationExecutionLog) | db/schema/domains/infrastructure/automation.ts(automationExecutionLog)
 automation_schedules: db/schema/automation-rules-schema.ts(automationSchedules) | db/schema/domains/infrastructure/automation.ts(automationSchedules)
 autopay_settings: db/schema/autopay-settings-schema.ts(autoPaySettings) | db/schema/domains/finance/autopay.ts(autoPaySettings)
@@ -110,7 +123,6 @@ arbitration_decisions: db/schema/cba-intelligence-schema.ts(arbitrationDecisions
 arbitrator_profiles: db/schema/cba-intelligence-schema.ts(arbitratorProfiles) | db/schema/domains/agreements/intelligence.ts(arbitratorProfiles)
 bargaining_notes: db/schema/cba-intelligence-schema.ts(bargainingNotes) | db/schema/domains/agreements/intelligence.ts(bargainingNotes)
 cba_footnotes: db/schema/cba-intelligence-schema.ts(cbaFootnotes) | db/schema/domains/agreements/intelligence.ts(cbaFootnotes)
-claim_precedent_analysis: db/schema/cba-intelligence-schema.ts(claimPrecedentAnalysis) | db/schema/domains/agreements/intelligence.ts(claimPrecedentAnalysis)
 certification_types: db/schema/certification-management-schema.ts(certificationTypes) | db/schema/domains/compliance/certifications.ts(certificationTypes)
 staff_certifications: db/schema/certification-management-schema.ts(staffCertifications) | db/schema/domains/compliance/certifications.ts(staffCertifications)
 continuing_education: db/schema/certification-management-schema.ts(continuingEducation) | db/schema/domains/compliance/certifications.ts(continuingEducation)
@@ -157,8 +169,6 @@ claim_deadlines: db/schema/deadlines-schema.ts(deadlines) | db/schema/domains/cl
 deadline_extensions: db/schema/deadlines-schema.ts(deadlineExtensions) | db/schema/domains/claims/deadlines.ts(deadlineExtensions)
 deadline_alerts: db/schema/deadlines-schema.ts(deadlineAlerts) | db/schema/domains/claims/deadlines.ts(deadlineAlerts)
 holidays: db/schema/deadlines-schema.ts(holidays) | db/schema/domains/claims/deadlines.ts(holidays)
-defensibility_packs: db/schema/defensibility-packs-schema.ts(defensibilityPacks) | db/schema/domains/infrastructure/defensibility.ts(defensibilityPacks)
-pack_download_log: db/schema/defensibility-packs-schema.ts(packDownloadLog) | db/schema/domains/infrastructure/defensibility.ts(packDownloadLog)
 pack_verification_log: db/schema/defensibility-packs-schema.ts(packVerificationLog) | db/schema/domains/infrastructure/defensibility.ts(packVerificationLog)
 shared_clause_library: db/schema/domains/agreements/shared-library.ts(sharedClauseLibrary) | db/schema/shared-clause-library-schema.ts(sharedClauseLibrary)
 clause_library_tags: db/schema/domains/agreements/shared-library.ts(clauseLibraryTags) | db/schema/shared-clause-library-schema.ts(clauseLibraryTags)
@@ -176,6 +186,7 @@ grievance_deadlines: db/schema/domains/claims/grievances.ts(grievanceDeadlines) 
 grievance_workflows: db/schema/domains/claims/workflows.ts(grievanceWorkflows) | db/schema/grievance-workflow-schema.ts(grievanceWorkflows)
 grievance_stages: db/schema/domains/claims/workflows.ts(grievanceStages) | db/schema/grievance-workflow-schema.ts(grievanceStages)
 grievance_assignments: db/schema/domains/claims/workflows.ts(grievanceAssignments) | db/schema/grievance-workflow-schema.ts(grievanceAssignments)
+grievance_documents: db/schema/domains/claims/workflows.ts(grievanceDocuments) | db/schema/grievance-workflow-schema.ts(grievanceDocuments)
 grievance_settlements: db/schema/domains/claims/workflows.ts(grievanceSettlements) | db/schema/grievance-workflow-schema.ts(grievanceSettlements)
 grievance_communications: db/schema/domains/claims/workflows.ts(grievanceCommunications) | db/schema/grievance-workflow-schema.ts(grievanceCommunications)
 grievance_approvals: db/schema/domains/claims/workflows.ts(grievanceApprovals) | db/schema/grievance-workflow-schema.ts(grievanceApprovals)
@@ -186,7 +197,6 @@ message_participants: db/schema/domains/communications/messages.ts(messagePartic
 message_notifications: db/schema/domains/communications/messages.ts(messageNotifications) | db/schema/messages-schema.ts(messageNotifications)
 newsletter_templates: db/schema/domains/communications/newsletters.ts(newsletterTemplates) | db/schema/newsletter-schema.ts(newsletterTemplates)
 newsletter_distribution_lists: db/schema/domains/communications/newsletters.ts(newsletterDistributionLists) | db/schema/newsletter-schema.ts(newsletterDistributionLists)
-newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers) | db/schema/newsletter-schema.ts(newsletterListSubscribers)
 newsletter_campaigns: db/schema/domains/communications/newsletters.ts(newsletterCampaigns) | db/schema/newsletter-schema.ts(newsletterCampaigns)
 newsletter_recipients: db/schema/domains/communications/newsletters.ts(newsletterRecipients) | db/schema/newsletter-schema.ts(newsletterRecipients)
 newsletter_engagement: db/schema/domains/communications/newsletters.ts(newsletterEngagement) | db/schema/newsletter-schema.ts(newsletterEngagement)
@@ -365,6 +375,9 @@ fmv_audit_log: db/schema/domains/infrastructure/trust-fmv.ts(fmvAuditLog) | db/s
 user_uuid_mapping: db/schema/domains/infrastructure/uuid-mapping.ts(userUuidMapping) | db/schema/user-uuid-mapping-schema.ts(userUuidMapping)
 pending_profiles: db/schema/domains/member/pending-profiles.ts(pendingProfilesTable) | db/schema/pending-profiles-schema.ts(pendingProfilesTable)
 profiles: db/schema/domains/member/profiles.ts(profilesTable) | db/schema/profiles-schema.ts(profilesTable)
+users (schema: user_management): db/schema/domains/member/user-management.ts(users) | db/schema/user-management-schema.ts(users)
+organization_users (schema: user_management): db/schema/domains/member/user-management.ts(organizationUsers) | db/schema/user-management-schema.ts(organizationUsers)
+oauth_providers (schema: user_management): db/schema/domains/member/user-management.ts(oauthProviders) | db/schema/user-management-schema.ts(oauthProviders)
 model_metadata: db/schema/domains/ml/predictions.ts(modelMetadata) | db/schema/ml-predictions-schema.ts(modelMetadata)
 training_courses: db/schema/domains/scheduling/training.ts(trainingCourses) | db/schema/education-training-schema.ts(trainingCourses)
 course_sessions: db/schema/domains/scheduling/training.ts(courseSessions) | db/schema/education-training-schema.ts(courseSessions)
