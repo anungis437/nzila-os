@@ -74,7 +74,7 @@ the sponsor.
 **Phase 2 — Mapping.** The institution maps its memory holders,
 its governance lineage, and its continuity breakpoints. The
 Governance Entropy Workbook™ is the working instrument. The
-Stewardship Density Index™ — a single deterministic measure of
+Stewardship Density Index — a single deterministic measure of
 how concentrated the institution's continuity is in a small
 number of people — is reviewed in this phase.
 

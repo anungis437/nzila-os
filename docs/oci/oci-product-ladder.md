@@ -13,10 +13,12 @@ vendor" ban-list — OCRA is plainly an assessment, and OCI Runtime is plainly a
 
 This document is the canonical reference for the five-layer product ladder and its pricing. All
 marketing copy, all pricing surfaces, all tier definitions, and all engineering work converge to
-this doctrine. It reconciles the repository doctrine with the pricing table in the Nzila Ventures
-business plan submitted for financing (`infotech/Nzila Ventures Business Plan — Revised (August
-26, 2026).docx`) — that plan carries real, named revenue commitments, so this ladder matches it,
-not the other way around.
+this doctrine. **This document is the one owner of prices — not the other way around.** The
+numbers below were set to match the Nzila Ventures business plan submitted for financing
+(`infotech/Nzila Ventures Business Plan — Revised (August 26, 2026).docx`) as it stood on 26 Aug
+2026, so the two did not contradict each other at the moment of this collapse. That plan is a
+dated snapshot of this table, not a second source; its own cover page says so. If the two ever
+drift apart again, this document governs and the plan is stale until updated.
 
 ## The five layers
 
@@ -80,11 +82,11 @@ Disposition (keep / rename / cut) for each is the [Anti-Surveillance Position](.
 
 | Framework | Purpose |
 |---|---|
-| **Continuity Burden Map™** | Institutional topology of where continuity load sits. |
-| **Governance Entropy Scale™** | Ordinal (1–5) reading of drift between governance design and practice. |
-| **Stewardship Density Index™** | Institutional concentration reading — not an individual score. |
-| **Continuity Survivability Matrix™** | Reconstruction burden under defined breakpoint scenarios. |
-| **Reconstruction Burden Index™** | Institutional cost estimate of reconstructing knowledge after a break. |
+| **Continuity Burden Map** | Institutional topology of where continuity load sits. |
+| **Governance Entropy Scale** | Ordinal (1–5) reading of drift between governance design and practice. |
+| **Stewardship Density Index** | Institutional concentration reading — not an individual score. |
+| **Continuity Survivability Matrix** | Reconstruction burden under defined breakpoint scenarios. |
+| **Reconstruction Burden Index** | Institutional cost estimate of reconstructing knowledge after a break. |
 
 ## Voice and brand constraints
 

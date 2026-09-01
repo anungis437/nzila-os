@@ -82,7 +82,7 @@ would be most consequential.
 
 - [Governance Entropy Workbook™](../../apps/union-eyes/lib/workbook/) —
   the canonical mapping instrument.
-- Stewardship Density Index™ — the deterministic concentration measure.
+- Stewardship Density Index — the deterministic concentration measure.
 - Continuity lineage exploration — facilitated session with stewards.
 - Governance archaeology — review of decisions whose rationale has been
   partially lost.
