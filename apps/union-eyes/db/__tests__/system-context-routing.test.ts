@@ -70,4 +70,42 @@ describe('db.ts system-context routing (AsyncLocalStorage)', () => {
       expect(db.execute).toBe(dbB.execute)
     })
   })
+
+  it('isolates concurrent, interleaved async system contexts (the actual property AsyncLocalStorage exists to guarantee — two simultaneous requests must never observe each other\'s connection)', async () => {
+    const dbA = { execute: Symbol('concurrent-a'), tag: 'A' } as any
+    const dbB = { execute: Symbol('concurrent-b'), tag: 'B' } as any
+
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    const runA = systemContextStorage.run(dbA, async () => {
+      // Yield to the event loop BEFORE reading db.execute, so runB's own
+      // run() call interleaves with this one — a purely synchronous test
+      // (like the sequential test above) cannot catch ALS context leaking
+      // across concurrent async executions, only this interleaved-await
+      // shape can.
+      await delay(5)
+      expect(db.execute).toBe(dbA.execute)
+      await delay(5)
+      // Re-check after a second yield, in case runB's completion (which
+      // also runs during this window) incorrectly cleared or overwrote
+      // runA's context.
+      expect(db.execute).toBe(dbA.execute)
+      return dbA.tag
+    })
+
+    const runB = systemContextStorage.run(dbB, async () => {
+      await delay(1) // starts and interleaves slightly ahead of runA's first yield
+      expect(db.execute).toBe(dbB.execute)
+      await delay(10)
+      expect(db.execute).toBe(dbB.execute)
+      return dbB.tag
+    })
+
+    const [resultA, resultB] = await Promise.all([runA, runB])
+    expect(resultA).toBe('A')
+    expect(resultB).toBe('B')
+
+    // Both scopes have exited — neither context should linger.
+    expect(() => db.execute).toThrow(/DATABASE_URL/)
+  })
 })
