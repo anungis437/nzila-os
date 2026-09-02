@@ -48,6 +48,10 @@
  * CI/deployment — see the fix PR description for wiring into the pipeline.
  */
 import postgres from 'postgres'
+import {
+  ALL_0108_PROTECTED_TABLES as ALL_PROTECTED_TABLES,
+  PROTECTED_NO_TENANT_ACCESS_TABLES,
+} from '../db/rls-0108-protected-tables'
 
 interface CheckResult {
   name: string
@@ -55,6 +59,12 @@ interface CheckResult {
   detail: string
 }
 
+// Per-table org-column metadata for the live RLS-state checks below. Table
+// MEMBERSHIP in the 0108-protected set is sourced from
+// db/rls-0108-protected-tables.ts (see the import above) — this array adds
+// the extra orgColumn/orgColumnIsText detail that module doesn't carry,
+// and its .table values must stay a superset match of that module's
+// PROTECTED_DIRECT_TABLES names.
 const PROTECTED_DIRECT_TABLES = [
   { table: 'organization_members', orgColumn: 'organization_id', orgColumnIsText: true },
   { table: 'organizations', orgColumn: 'id', orgColumnIsText: false },
@@ -76,21 +86,6 @@ const PROTECTED_DIRECT_TABLES = [
   { table: 'safety_certifications', orgColumn: 'organization_id', orgColumnIsText: false },
   { table: 'message_threads', orgColumn: 'organization_id', orgColumnIsText: false },
 ] as const
-
-const PROTECTED_PARENT_OWNED_TABLES = [
-  'messages',
-  'message_participants',
-  'message_read_receipts',
-  'message_notifications',
-] as const
-
-const PROTECTED_NO_TENANT_ACCESS_TABLES = ['cross_org_access_log'] as const
-
-const ALL_PROTECTED_TABLES = [
-  ...PROTECTED_DIRECT_TABLES.map((t) => t.table),
-  ...PROTECTED_PARENT_OWNED_TABLES,
-  ...PROTECTED_NO_TENANT_ACCESS_TABLES,
-]
 
 function parseArgs() {
   const args = process.argv.slice(2)
@@ -265,8 +260,50 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
         ? `${entry.classification} — ${entry.reason}`
         : `${entry.classification} [reviewPriority=${entry.reviewPriority}] (FAILING classification) — ${entry.reason}`,
     })
-    if (isClosed && rlsRequiredClassifications.has(entry.classification)) {
-      tablesNeedingRlsCheck.push(table)
+    if (isClosed) {
+      // PERMANENT INVARIANT (PR #752 round 5): a CLOSED classification is a
+      // claim that this table's authority has been fully reasoned about —
+      // 'TBD' in any of the four authority/privilege fields contradicts
+      // that claim and must fail closed here too, not just in the Vitest
+      // contract test (db/__tests__/rls-storage-authority-manifest-invariants.test.ts),
+      // so a live deploy-gate run catches drift even if someone edits the
+      // manifest without running the unit tests.
+      const unresolvedFields: string[] = []
+      if (entry.invocationAuthority === 'TBD') unresolvedFields.push('invocationAuthority')
+      if (entry.dbExecutionPrincipal === 'TBD') unresolvedFields.push('dbExecutionPrincipal')
+      if (entry.requiredRuntimePrivileges === 'TBD') unresolvedFields.push('requiredRuntimePrivileges')
+      if (entry.requiredSystemPrivileges === 'TBD') unresolvedFields.push('requiredSystemPrivileges')
+      results.push({
+        name: `storage-authority: ${table} has fully resolved authority (no TBD on a CLOSED classification)`,
+        pass: unresolvedFields.length === 0,
+        detail: unresolvedFields.length === 0
+          ? 'ok'
+          : `UNRESOLVED — ${entry.classification} is a CLOSED classification but still has 'TBD' in: ${unresolvedFields.join(', ')}. 'TBD' is only valid for NEEDS_REVIEW entries.`,
+      })
+      if (
+        entry.classification === 'SYSTEM_ONLY' &&
+        (entry.dbExecutionPrincipal === 'TENANT_RUNTIME' || entry.dbExecutionPrincipal === 'MIXED')
+      ) {
+        results.push({
+          name: `storage-authority: ${table} SYSTEM_ONLY invariant (dbExecutionPrincipal must never be TENANT_RUNTIME/MIXED)`,
+          pass: false,
+          detail: `SYSTEM_ONLY table has dbExecutionPrincipal=${entry.dbExecutionPrincipal} — no invocationAuthority justifies union_eyes_runtime access to a SYSTEM_ONLY table.`,
+        })
+      }
+      if (
+        entry.classification === 'SYSTEM_ONLY' &&
+        entry.requiredRuntimePrivileges !== 'TBD' &&
+        entry.requiredRuntimePrivileges.length > 0
+      ) {
+        results.push({
+          name: `storage-authority: ${table} SYSTEM_ONLY invariant (zero union_eyes_runtime privileges)`,
+          pass: false,
+          detail: `SYSTEM_ONLY table has non-empty requiredRuntimePrivileges: ${entry.requiredRuntimePrivileges.join(', ')}.`,
+        })
+      }
+      if (rlsRequiredClassifications.has(entry.classification)) {
+        tablesNeedingRlsCheck.push(table)
+      }
     }
   }
 

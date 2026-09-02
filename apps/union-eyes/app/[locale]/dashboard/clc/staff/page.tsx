@@ -45,6 +45,13 @@ async function checkCLCStaffAccess(userId: string, orgId: string): Promise<boole
   }
 }
 
+// This is a Model A (national/cross-affiliate) dashboard, not Model B
+// (org-scoped): getCLCOperationalMetrics() below deliberately ignores
+// orgId and returns cross-org aggregates. That is only safe because
+// clc_staff/clc_executive/system_admin cannot be self-service granted by
+// an ordinary tenant to its own organizationMembers row — proven in
+// lib/auth/__tests__/clc-national-role-boundary.test.ts (PR #752 round 5),
+// not merely assumed from the role name.
 async function getCLCOperationalMetrics(_orgId: string) {
   try {
     // clc_organization_sync_log is SYSTEM_ONLY (nullable organization_id,

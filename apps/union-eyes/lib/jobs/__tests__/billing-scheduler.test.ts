@@ -5,6 +5,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // "inside" the (mocked) withSystemContext callback, so these tests prove
 // the entire scheduler operation — not just the initial enumeration —
 // runs through the system connection.
+//
+// SCOPE NOTE (PR #752 round 5): BillingCycleService.generateBillingCycle
+// and the notification service are MOCKED below, so this file proves the
+// scheduler INVOKES its dependencies while the (simulated) SYSTEM boundary
+// is active — it does not, by itself, prove those dependencies' internal
+// `db` access actually resolves to the system connection. That second half
+// of the chain is proven independently, against the REAL (non-mocked)
+// db/db.ts Proxy and the real source of each dependency, in
+// billing-scheduler-system-boundary-proof.test.ts.
 const m = vi.hoisted(() => {
   let depth = 0;
   const calls: string[] = [];
