@@ -56,8 +56,8 @@ export const PATCH = withApi(
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
     const parsed = updateBoardPacketSchema.parse(body);
-    const [packet] = await withRLSContext(async () =>
-      db
+    const [packet] = await withRLSContext(async (tx) =>
+      tx
         .update(boardPackets)
         .set({ ...parsed, updatedAt: new Date() })
         .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))
@@ -77,8 +77,8 @@ export const DELETE = withApi(
   async ({ request, organizationId }) => {
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await withRLSContext(async () =>
-      db
+    const [packet] = await withRLSContext(async (tx) =>
+      tx
         .update(boardPackets)
         .set({ status: 'archived', updatedAt: new Date() })
         .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))

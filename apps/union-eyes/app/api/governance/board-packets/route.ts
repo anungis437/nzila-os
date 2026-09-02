@@ -73,8 +73,8 @@ export const POST = withApi(
     // organizationId always comes from the resolved caller context, never
     // client input — a create request cannot mint a board packet for a
     // different organization.
-    const [packet] = await withRLSContext(async () =>
-      db.insert(boardPackets).values({ ...parsed, organizationId: organizationId! }).returning()
+    const [packet] = await withRLSContext(async (tx) =>
+      tx.insert(boardPackets).values({ ...parsed, organizationId: organizationId! }).returning()
     );
     await auditDataMutation({
       userId: userId!,

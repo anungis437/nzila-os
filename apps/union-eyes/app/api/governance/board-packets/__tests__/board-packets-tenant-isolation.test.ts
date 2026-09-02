@@ -45,7 +45,12 @@ vi.mock('@/lib/api/framework', async () => {
 });
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (op: () => Promise<unknown>) => op(),
+  // Routes now use the tx parameter explicitly (PR #752 round 16) — pass
+  // the same mocked db object as tx so tx.insert/tx.update resolve.
+  withRLSContext: async (op: (tx: unknown) => Promise<unknown>) => {
+    const { db } = await import('@/db/db');
+    return op(db);
+  },
 }));
 
 function chain(terminal: (...args: unknown[]) => unknown) {

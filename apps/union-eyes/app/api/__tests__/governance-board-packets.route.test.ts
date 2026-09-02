@@ -25,7 +25,9 @@ describe('governance/board-packets route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    // Routes now use the tx parameter explicitly (PR #752 round 16) — pass
+    // the mocked db object as tx so tx.insert/tx.update resolve.
+    m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db));
     m.auditDataMutation.mockResolvedValue(undefined);
     m.db.select
       .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ total: 1 }]) })) }))

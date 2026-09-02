@@ -26,6 +26,7 @@ import { auth, currentUser } from '@/lib/api-auth-guard'
 import { db } from '@/db/db'
 import { systemDb } from '@/db/system-db'
 import { systemContextStorage } from '@/db/system-context-storage'
+import { tenantContextStorage } from '@/db/tenant-context-storage'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 
@@ -186,8 +187,15 @@ export async function withRLSContext<T>(
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`)
     }
 
-    // Execute the operation with user + org context set
-    const result = await operation(tx as any as RLSTx)
+    // Execute the operation with user + org context set. Scope the
+    // module-level `db` import to this transaction for the duration of the
+    // callback (see db/tenant-context-storage.ts) — a no-argument callback
+    // that queries through `db` directly instead of the supplied `tx` would
+    // otherwise silently run on the ordinary pooled connection, never on
+    // the transaction set_config() was just applied to.
+    const result = await tenantContextStorage.run(tx as any, () =>
+      operation(tx as any as RLSTx),
+    )
 
     // Transaction commit automatically clears local config variables
     return result
@@ -236,7 +244,9 @@ export async function withExplicitUserContext<T>(
     if (orgId) {
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`)
     }
-    const result = await operation()
+    // Scope the module-level `db` import to this transaction — see
+    // db/tenant-context-storage.ts.
+    const result = await tenantContextStorage.run(tx as any, () => operation())
     return result
   })
 }
