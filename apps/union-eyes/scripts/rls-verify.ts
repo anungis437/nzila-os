@@ -196,6 +196,48 @@ async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
 }
 
 /**
+ * PERMANENT INVARIANT (PR #752 round 6): every table in the 0108 baseline
+ * protected set (db/rls-0108-protected-tables.ts) must have its OWN entry
+ * in db/rls-storage-authority-manifest.ts with fully resolved (non-TBD)
+ * authority — closing the "24 baseline tables without manifest
+ * disposition" gap the round-5 convergence report surfaced. This is a
+ * live, deployment-gate mirror of the equivalent Vitest contract test in
+ * db/__tests__/rls-storage-authority-manifest-invariants.test.ts, so drift
+ * is caught even if someone edits the manifest without running unit tests.
+ * checkTableRlsState() above already verifies these tables' actual live
+ * RLS state (exists/enabled/forced/policy) — this check only verifies the
+ * manifest-side authority bookkeeping is complete.
+ */
+async function checkBaselineTablesHaveManifestDisposition(results: CheckResult[]) {
+  const { storageAuthorityManifest } = await import('../db/rls-storage-authority-manifest')
+  const manifestByTable = new Map(storageAuthorityManifest.map((e) => [e.table, e]))
+
+  for (const table of ALL_PROTECTED_TABLES) {
+    const entry = manifestByTable.get(table)
+    if (!entry) {
+      results.push({
+        name: `storage-authority: 0108-baseline table ${table} has a manifest entry`,
+        pass: false,
+        detail: 'MISSING — every 0108-baseline table must have its own entry in db/rls-storage-authority-manifest.ts.',
+      })
+      continue
+    }
+    const unresolvedFields: string[] = []
+    if (entry.invocationAuthority === 'TBD') unresolvedFields.push('invocationAuthority')
+    if (entry.dbExecutionPrincipal === 'TBD') unresolvedFields.push('dbExecutionPrincipal')
+    if (entry.requiredRuntimePrivileges === 'TBD') unresolvedFields.push('requiredRuntimePrivileges')
+    if (entry.requiredSystemPrivileges === 'TBD') unresolvedFields.push('requiredSystemPrivileges')
+    results.push({
+      name: `storage-authority: 0108-baseline table ${table} has fully resolved authority`,
+      pass: unresolvedFields.length === 0,
+      detail: unresolvedFields.length === 0
+        ? `${entry.classification} — ok`
+        : `UNRESOLVED — still has 'TBD' in: ${unresolvedFields.join(', ')}.`,
+    })
+  }
+}
+
+/**
  * Discovers tables that carry an org/tenant-shaped column
  * (organization_id / org_id / tenant_id) but are granted DML to
  * union_eyes_runtime without RLS enabled — i.e. tables the blanket
@@ -469,6 +511,7 @@ async function main() {
     await checkRuntimeRole(sql, results)
     await checkTableRlsState(sql, results)
     await checkNoContextFailsClosed(sql, results)
+    await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)
     if (mode === 'full') {
       const systemDbUrl = process.env.RLS_VERIFY_SYSTEM_DATABASE_URL || process.env.SYSTEM_DATABASE_URL

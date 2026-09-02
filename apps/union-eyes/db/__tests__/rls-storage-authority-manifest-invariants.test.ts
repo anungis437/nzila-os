@@ -39,6 +39,7 @@ import {
   CLOSED_CLASSIFICATIONS,
   storageAuthorityManifest,
 } from '../rls-storage-authority-manifest';
+import { ALL_0108_PROTECTED_TABLES } from '../rls-0108-protected-tables';
 
 const RUNTIME_OPERATIONS = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] as const;
 const INVOCATION_AUTHORITIES = [
@@ -226,6 +227,34 @@ describe('rls-storage-authority-manifest privilege/authority invariants', () => 
     expect(entry!.dbExecutionPrincipal).toBe('NONE');
     expect(opsOf(entry!.requiredRuntimePrivileges)).toEqual([]);
     expect(opsOf(entry!.requiredSystemPrivileges)).toEqual([]);
+  });
+
+  it('PERMANENT INVARIANT (round 6): every table in the 0108 baseline protected set has exactly one manifest entry, with fully resolved (non-TBD) authority', () => {
+    // Closes the gap the round-5 convergence report surfaced
+    // ("24 baseline tables without manifest disposition") — this manifest
+    // is now the complete authority registry for both the original 0108
+    // baseline and the tables discovered outside it, not three parallel
+    // sources (0108 list + gap manifest + grant metadata).
+    const byTable = new Map(storageAuthorityManifest.map((e) => [e.table, e]));
+    const missing: string[] = [];
+    const unresolved: string[] = [];
+    for (const table of ALL_0108_PROTECTED_TABLES) {
+      const entry = byTable.get(table);
+      if (!entry) {
+        missing.push(table);
+        continue;
+      }
+      if (
+        entry.invocationAuthority === 'TBD' ||
+        entry.dbExecutionPrincipal === 'TBD' ||
+        entry.requiredRuntimePrivileges === 'TBD' ||
+        entry.requiredSystemPrivileges === 'TBD'
+      ) {
+        unresolved.push(table);
+      }
+    }
+    expect(missing, 'baseline tables missing a manifest entry entirely').toEqual([]);
+    expect(unresolved, 'baseline tables with unresolved (TBD) authority').toEqual([]);
   });
 });
 

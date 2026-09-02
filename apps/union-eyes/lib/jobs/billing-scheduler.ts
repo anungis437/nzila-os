@@ -94,6 +94,19 @@ export class BillingScheduler {
    * generateBillingCycle will throw "Unauthorized" regardless of this
    * SYSTEM wrapper. Fixing that requires BillingCycleService to offer a
    * system-aware entrypoint — out of scope for this correction.
+   *
+   * PERMANENT DEFENSE-IN-DEPTH CONTRACT (PR #752 round 6): SYSTEM_RUNTIME
+   * bypasses tenant RLS by design — union_eyes_system's own policies grant
+   * unconditional access, so the nested withRLSContext() session variables
+   * set inside this boundary are NOT a security boundary once execution is
+   * already on the system connection. Every per-org query
+   * BillingCycleService issues MUST therefore keep an explicit
+   * organizationId predicate (see its getActiveMembersForBilling query),
+   * proven in lib/jobs/__tests__/billing-scheduler-system-boundary-proof.test.ts.
+   * Do NOT ever remove that predicate on the theory that "we're in system
+   * context, so scoping is unnecessary" — doing so would turn this
+   * single-org iteration into a platform-wide cross-org mutation with no
+   * RLS policy left to catch it.
    */
   static async runScheduledBilling(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
     return withSystemContext((_tx) => this.runScheduledBillingInSystemContext(frequency));

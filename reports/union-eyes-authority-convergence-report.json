@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T13:15:40.344Z",
-  "totalTables": 432,
+  "generatedAt": "2026-09-02T14:03:34.062Z",
+  "totalTables": 456,
   "byClassification": {
-    "TENANT_RLS_REQUIRED": 57,
-    "LATENT_UNREACHABLE": 158,
+    "TENANT_RLS_REQUIRED": 68,
+    "LATENT_UNREACHABLE": 169,
+    "PARENT_OWNED_RLS_REQUIRED": 3,
     "NEEDS_REVIEW": 207,
-    "PARENT_OWNED_RLS_REQUIRED": 1,
     "SYSTEM_ONLY": 9
   },
   "needsReview": 207,
@@ -24,43 +24,10 @@
   "zeroOneZeroEightBaseline": {
     "note": "The ORIGINAL 0108 protected-table set, sourced from db/rls-0108-protected-tables.ts (shared with scripts/rls-verify.ts — single source of truth, not a parallel hand-maintained list). This section answers \"did 0108 keep its own original coverage\", which is a DIFFERENT question from rlsPolicyExpansionRequired below (\"what NEW tables does the manifest say need the same treatment\").",
     "originalProtectedTableCount": 24,
-    "baselineTablesMissingFromMigrationSql": 7,
-    "baselineTablesMissingFromMigrationSqlList": [
-      "organization_members",
-      "organizations",
-      "documents",
-      "messages",
-      "message_participants",
-      "message_read_receipts",
-      "message_notifications"
-    ],
-    "baselineTablesWithoutManifestDisposition": 24,
-    "baselineTablesWithoutManifestDispositionList": [
-      "organization_members",
-      "organizations",
-      "grievances",
-      "claims",
-      "grievance_deadlines",
-      "documents",
-      "member_documents",
-      "workplace_incidents",
-      "safety_inspections",
-      "hazard_reports",
-      "safety_committee_meetings",
-      "safety_training_records",
-      "ppe_equipment",
-      "safety_audits",
-      "injury_logs",
-      "safety_policies",
-      "corrective_actions",
-      "safety_certifications",
-      "message_threads",
-      "messages",
-      "message_participants",
-      "message_read_receipts",
-      "message_notifications",
-      "cross_org_access_log"
-    ]
+    "baselineTablesMissingFromMigrationSql": 0,
+    "baselineTablesMissingFromMigrationSqlList": [],
+    "baselineTablesWithoutManifestDisposition": 0,
+    "baselineTablesWithoutManifestDispositionList": []
   },
   "rlsPolicyExpansionRequired": {
     "note": "Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 \"policyGaps\" wording, which conflated this with 0108 losing its own coverage.",

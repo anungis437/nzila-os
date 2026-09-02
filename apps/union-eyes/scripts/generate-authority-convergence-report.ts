@@ -19,6 +19,7 @@ import {
   type StorageAuthorityClassification,
 } from '../db/rls-storage-authority-manifest'
 import { ALL_0108_PROTECTED_TABLES } from '../db/rls-0108-protected-tables'
+import { scanMigrationSqlForProtectedTables } from '../db/rls-0108-migration-sql-scan'
 
 const REPO_ROOT = resolve(__dirname, '..', '..', '..')
 const MIGRATION_0108 = resolve(__dirname, '..', 'db', 'migrations', '0108_rls_tenant_isolation_foundation.sql')
@@ -30,12 +31,12 @@ const OUT_DIR = resolve(REPO_ROOT, 'reports')
 // primary answer is db/rls-0108-protected-tables.ts's ALL_0108_PROTECTED_TABLES
 // (round 5: extracted as the single source of truth shared with
 // scripts/rls-verify.ts, replacing this file's own former regex-derived set).
+// Round 6: the scan itself moved to db/rls-0108-migration-sql-scan.ts after
+// its original regex here produced 7 false positives on multi-arg helper
+// calls — see that module's own doc comment and dedicated test.
 function get0108TablesMentionedInMigrationSql(): Set<string> {
   const sql = readFileSync(MIGRATION_0108, 'utf8')
-  const tables = new Set<string>()
-  for (const m of sql.matchAll(/ue_create_[a-z_]+_rls_policy\('([a-z_]+)'\)/g)) tables.add(m[1]!)
-  for (const m of sql.matchAll(/ALTER TABLE "?([a-z_]+)"? ENABLE ROW LEVEL SECURITY/g)) tables.add(m[1]!)
-  return tables
+  return scanMigrationSqlForProtectedTables(sql)
 }
 
 function isTbdOps(v: readonly string[] | 'TBD'): boolean {

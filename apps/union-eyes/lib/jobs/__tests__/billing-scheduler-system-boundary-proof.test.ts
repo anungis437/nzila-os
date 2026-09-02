@@ -113,4 +113,18 @@ describe('billing scheduler SYSTEM-boundary transitive DB proof (PR #752 round 5
     // output, not just in a comment a future editor could miss.
     expect(true).toBe(true);
   });
+
+  it('PERMANENT INVARIANT (PR #752 round 6): BillingCycleService retains an explicit organizationId predicate on its per-member query even though it executes under SYSTEM_RUNTIME', () => {
+    // SYSTEM_RUNTIME's whole point is unconditional access via
+    // union_eyes_system's own RLS policies — nested withRLSContext()
+    // session variables are NOT the security boundary once inside
+    // withSystemContext(). That means a future refactor could reason "we
+    // are in system context, therefore organization predicates are
+    // unnecessary" and delete this WHERE clause without any RLS policy
+    // catching the mistake — turning what is today a single-org iteration
+    // bug into a platform-wide cross-org mutation. This test pins the
+    // explicit predicate in source so that deletion fails CI immediately.
+    const source = readSource('lib/services/billing-cycle-service.ts');
+    expect(source).toMatch(/eq\(organizationMembers\.organizationId,\s*organizationId\)/);
+  });
 });
