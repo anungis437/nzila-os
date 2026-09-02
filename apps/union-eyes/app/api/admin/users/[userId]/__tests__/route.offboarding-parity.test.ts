@@ -16,9 +16,15 @@
  *      from the membership row id;
  *   3. a failing revocation (success: false) surfaces as a non-2xx
  *      response, not a false "success: true";
- *   4. reactivation (inactive -> active) does not invoke revocation at
- *      all;
+ *   4. reactivation (inactive -> active) does not invoke revocation;
  *   5. a missing membership row 404s before any revocation is attempted.
+ *
+ * PR #752 round 13: reactivation now calls reactivateMemberAccess()
+ * (round-12's reactivation branch only restored organization_members
+ * .status, leaving the durable authOrganizationUsers membership disabled
+ * — a "successfully reactivated" member could still fail the canonical
+ * role resolver). Added: reactivation resolves the real authUserId and
+ * fails closed (502) if reactivateMemberAccess reports failure.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -27,6 +33,7 @@ const m = vi.hoisted(() => ({
   selectWhere: vi.fn(),
   updateWhere: vi.fn(),
   revokeMemberAccess: vi.fn(),
+  reactivateMemberAccess: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
@@ -54,6 +61,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/services/member-access-revocation-service', () => ({
   revokeMemberAccess: m.revokeMemberAccess,
+  reactivateMemberAccess: m.reactivateMemberAccess,
 }));
 
 async function loadRoute() {
@@ -74,6 +82,12 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
       localStatusUpdated: true,
       errors: [],
     });
+    m.reactivateMemberAccess.mockResolvedValue({
+      success: true,
+      authMembershipReenabled: true,
+      localStatusUpdated: true,
+      errors: [],
+    });
   });
 
   it('rejects a non-platform-admin caller on both PUT and DELETE before any system execution', async () => {
@@ -88,6 +102,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     expect(delRes.status).toBe(403);
     expect(m.selectWhere).not.toHaveBeenCalled();
     expect(m.revokeMemberAccess).not.toHaveBeenCalled();
+    expect(m.reactivateMemberAccess).not.toHaveBeenCalled();
   });
 
   it('PUT (active -> inactive) resolves the real authUserId (organizationMembers.userId), NOT the membershipId route param', async () => {
@@ -131,7 +146,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     });
   });
 
-  it('PUT (inactive -> active reactivation) does NOT invoke revocation', async () => {
+  it('PUT (inactive -> active reactivation) calls reactivateMemberAccess with the real authUserId, not revokeMemberAccess', async () => {
     m.selectWhere.mockResolvedValue([
       { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
@@ -143,6 +158,30 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     expect(res.status).toBe(200);
     expect(body).toEqual({ success: true, status: 'active' });
     expect(m.revokeMemberAccess).not.toHaveBeenCalled();
+    expect(m.reactivateMemberAccess).toHaveBeenCalledWith({
+      membershipId: 'membership-row-1',
+      authUserId: 'real-auth-user-999',
+      organizationId: 'org-a',
+    });
+  });
+
+  it('PUT reactivation returns 502 (not 200) when reactivateMemberAccess reports failure', async () => {
+    m.selectWhere.mockResolvedValue([
+      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+    ]);
+    m.reactivateMemberAccess.mockResolvedValue({
+      success: false,
+      authMembershipReenabled: false,
+      localStatusUpdated: true,
+      errors: ['auth_membership_reenable_failed: connection reset'],
+    });
+    const { PUT } = await loadRoute();
+
+    const res = await PUT({} as never, { params: Promise.resolve({ userId: 'membership-row-1' }) });
+    const body = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(body.details).toEqual(['auth_membership_reenable_failed: connection reset']);
   });
 
   it('PUT returns 502 (not 200) when revokeMemberAccess reports failure — offboarding is never certified from a partial revocation', async () => {

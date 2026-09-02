@@ -34,7 +34,7 @@ import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core/telemetry';
-import { revokeMemberAccess } from '@/lib/services/member-access-revocation-service';
+import { revokeMemberAccess, reactivateMemberAccess } from '@/lib/services/member-access-revocation-service';
 
 const logger = createLogger('union-eyes.admin.users');
 
@@ -78,14 +78,25 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const newStatus = memberRecord.status === 'active' ? 'inactive' : 'active';
 
-    // Reactivation does not revoke anything — only deactivation does.
+    // Reactivation symmetrically re-enables the durable auth membership
+    // (round 13) — restoring only organization_members.status left a
+    // "reactivated" member with a disabled authOrganizationUsers row,
+    // failing the canonical role resolver despite a 200 response.
     if (newStatus === 'active') {
-      await withSystemContext(async (tx) => {
-        await tx
-          .update(organizationMembers)
-          .set({ status: newStatus, updatedAt: new Date() })
-          .where(eq(organizationMembers.id, membershipId));
+      const result = await reactivateMemberAccess({
+        membershipId,
+        authUserId: memberRecord.authUserId,
+        organizationId: memberRecord.organizationId,
       });
+
+      if (!result.success) {
+        logger.error('member_reactivation_incomplete', { membershipId, errors: result.errors });
+        return NextResponse.json(
+          { error: 'Failed to fully reactivate member access', details: result.errors },
+          { status: 502 },
+        );
+      }
+
       return NextResponse.json({ success: true, status: newStatus });
     }
 

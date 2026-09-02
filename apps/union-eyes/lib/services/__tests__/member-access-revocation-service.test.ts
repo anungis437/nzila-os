@@ -16,6 +16,14 @@
  *     failure);
  *   - every failure is captured in `errors` with a stable, greppable
  *     prefix identifying which step failed.
+ *
+ * PR #752 round 13: session revocation and the authOrganizationUsers
+ * mutation now execute via @nzila/db/system-client's systemDb, not the
+ * ordinary @nzila/db/client \u2014 covered here by mocking systemDb and
+ * asserting it (not the ordinary client) is what receives the mutation.
+ * Also covers reactivateMemberAccess(): symmetric re-enable of the durable
+ * auth membership, no automatic session/case-access restoration, and
+ * fail-closed behavior for both of its steps.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -33,8 +41,8 @@ vi.mock('@nzila/platform-auth/password', () => ({
   revokeAllUserSessions: m.revokeAllUserSessions,
 }));
 
-vi.mock('@nzila/db/client', () => ({
-  db: {
+vi.mock('@nzila/db/system-client', () => ({
+  systemDb: {
     update: () => ({ set: () => ({ where: m.authUpdateWhere }) }),
   },
 }));
@@ -112,7 +120,7 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     expect(result.authMembershipDisabled).toBe(true);
     expect(result.localStatusUpdated).toBe(true);
     expect(result.errors).toEqual([]);
-    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('auth-user-1');
+    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('auth-user-1', expect.anything());
   });
 
   it('fails closed when session revocation throws — success: false, other steps still attempted', async () => {
@@ -168,7 +176,7 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     expect(result.errors.some((e) => e.startsWith('local_status_update_failed:'))).toBe(true);
   });
 
-  it('passes authUserId (not membershipId) to session revocation and case-access filtering', async () => {
+  it('passes authUserId (not membershipId) to session revocation and case-access filtering, via the SYSTEM auth db client', async () => {
     const distinctInput = {
       membershipId: 'membership-row-uuid-AAAA',
       authUserId: 'real-auth-user-uuid-BBBB',
@@ -179,8 +187,14 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
 
     await revokeMemberAccess(distinctInput);
 
-    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('real-auth-user-uuid-BBBB');
-    expect(m.revokeAllUserSessions).not.toHaveBeenCalledWith('membership-row-uuid-AAAA');
+    expect(m.revokeAllUserSessions).toHaveBeenCalledWith('real-auth-user-uuid-BBBB', expect.anything());
+    expect(m.revokeAllUserSessions).not.toHaveBeenCalledWith('membership-row-uuid-AAAA', expect.anything());
+    // the systemDb passed is @nzila/db/system-client's mocked systemDb, not
+    // the ordinary @nzila/db/client — proven by the second call arg being
+    // an object exposing `update` (the mocked systemDb shape) rather than
+    // undefined (which is what an unmocked/missing import would yield).
+    const [, dbArg] = m.revokeAllUserSessions.mock.calls[0];
+    expect(dbArg).toHaveProperty('update');
   });
 
   it('revokes every active case-access assignment returned for the user/org and reports the count', async () => {
@@ -194,5 +208,73 @@ describe('revokeMemberAccess — fail-closed offboarding enforcement', () => {
     // 2 case-access revocation updates + 1 local status update = 3 total
     // db.update() calls, all routed through the same mocked `where`.
     expect(m.membersUpdateWhere).toHaveBeenCalledTimes(3);
+  });
+});
+
+const reactivateBaseInput = {
+  membershipId: 'membership-1',
+  authUserId: 'auth-user-1',
+  organizationId: 'org-a',
+};
+
+describe('reactivateMemberAccess — symmetric, fail-closed reactivation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.updateCallCount.n = 0;
+    m.failNthUpdate.n = 0;
+    m.authUpdateWhere.mockResolvedValue(undefined);
+    m.membersUpdateWhere.mockResolvedValue(undefined);
+  });
+
+  it('re-enables authOrganizationUsers and restores local status when both steps succeed', async () => {
+    const { reactivateMemberAccess } = await loadService();
+
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(result.success).toBe(true);
+    expect(result.authMembershipReenabled).toBe(true);
+    expect(result.localStatusUpdated).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(m.authUpdateWhere).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call revokeAllUserSessions on reactivation', async () => {
+    const { reactivateMemberAccess } = await loadService();
+
+    await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(m.revokeAllUserSessions).not.toHaveBeenCalled();
+  });
+
+  it('does not touch grievanceCaseAccessAssignments on reactivation — revoked access stays revoked', async () => {
+    const { reactivateMemberAccess } = await loadService();
+
+    await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(m.caseAccessSelectWhere).not.toHaveBeenCalled();
+    expect(m.caseAccessUpdateWhere).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the authOrganizationUsers re-enable throws — success: false, no false 200', async () => {
+    m.authUpdateWhere.mockRejectedValue(new Error('connection reset'));
+    const { reactivateMemberAccess } = await loadService();
+
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(result.success).toBe(false);
+    expect(result.authMembershipReenabled).toBe(false);
+    expect(result.errors.some((e) => e.startsWith('auth_membership_reenable_failed:'))).toBe(true);
+  });
+
+  it('fails closed when local status restore throws — success: false, no false 200', async () => {
+    m.failNthUpdate.n = 1;
+    const { reactivateMemberAccess } = await loadService();
+
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(result.success).toBe(false);
+    expect(result.localStatusUpdated).toBe(false);
+    expect(result.authMembershipReenabled).toBe(true);
+    expect(result.errors.some((e) => e.startsWith('local_status_update_failed:'))).toBe(true);
   });
 });

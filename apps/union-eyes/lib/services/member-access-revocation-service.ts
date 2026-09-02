@@ -27,6 +27,21 @@ export interface RevokeMemberAccessResult {
   errors: string[];
 }
 
+export interface ReactivateMemberAccessInput {
+  /** organizationMembers.id — the membership row's own identity. */
+  membershipId: string;
+  /** organizationMembers.userId — the REAL authenticated user principal. */
+  authUserId: string;
+  organizationId: string;
+}
+
+export interface ReactivateMemberAccessResult {
+  success: boolean;
+  authMembershipReenabled: boolean;
+  localStatusUpdated: boolean;
+  errors: string[];
+}
+
 /**
  * PR #752 round 12: the ONE idempotent security-enforcement primitive for
  * offboarding a member — replaces the previous "fire an event and hope a
@@ -46,6 +61,19 @@ export interface RevokeMemberAccessResult {
  * retry (idempotent): re-revoking an already-revoked session/assignment,
  * or re-disabling an already-disabled auth membership, is a no-op, not an
  * error.
+ *
+ * PR #752 round 13: session revocation and the authOrganizationUsers
+ * mutation now execute via @nzila/db/system-client's systemDb (a
+ * dedicated SYSTEM_DATABASE_URL connection), not @nzila/db/client's
+ * ordinary DATABASE_URL-bound db. A platform-admin offboarding an
+ * arbitrary user in an arbitrary organization is a cross-user, cross-org
+ * mutation against another user's durable auth membership/sessions — the
+ * ordinary per-request runtime credential has no legitimate reason to
+ * mutate another user's row, so this must run under the system
+ * credential. @nzila/platform-auth/password's revokeAllUserSessions now
+ * accepts an optional db-executor override for exactly this reason; do
+ * not call it with the default ordinary client from a cross-user
+ * platform-admin path.
  */
 export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promise<RevokeMemberAccessResult> {
   const errors: string[] = [];
@@ -54,10 +82,12 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   let caseAccessRevokedCount = 0;
   let localStatusUpdated = false;
 
-  // 1. Revoke all active sessions for the REAL auth user id.
+  // 1. Revoke all active sessions for the REAL auth user id, via the
+  // SYSTEM auth DB credential (cross-user operation).
   try {
     const { revokeAllUserSessions } = await import('@nzila/platform-auth/password');
-    await revokeAllUserSessions(input.authUserId);
+    const { systemDb } = await import('@nzila/db/system-client');
+    await revokeAllUserSessions(input.authUserId, systemDb);
     sessionsRevoked = true;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -68,11 +98,12 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   // 2. Disable the durable platform-auth organization membership — the
   // canonical role resolver checks authOrganizationUsers BEFORE falling
   // back to organizationMembers, so leaving it active would let the user
-  // re-establish authorized access even after sessions are revoked.
+  // re-establish authorized access even after sessions are revoked. Runs
+  // via the SYSTEM auth DB credential (cross-user operation).
   try {
-    const { db: authDb } = await import('@nzila/db/client');
+    const { systemDb } = await import('@nzila/db/system-client');
     const { authOrganizationUsers } = await import('@nzila/db/schema');
-    await authDb
+    await systemDb
       .update(authOrganizationUsers)
       .set({ isActive: false, updatedAt: new Date() })
       .where(
@@ -162,6 +193,90 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
     sessionsRevoked,
     authMembershipDisabled,
     caseAccessRevokedCount,
+    localStatusUpdated,
+    errors,
+  };
+}
+
+/**
+ * PR #752 round 13: reactivation counterpart to revokeMemberAccess().
+ * Deactivation disables authOrganizationUsers, revokes sessions, and
+ * revokes case access; reactivation must symmetrically re-enable the
+ * durable auth membership — restoring only organizationMembers.status
+ * left the platform-auth membership disabled, so a "successfully
+ * reactivated" member could still fail the canonical role resolver.
+ *
+ * Deliberately does NOT:
+ *   - mint or restore a session (the user authenticates normally after
+ *     reactivation; no automatic re-login);
+ *   - restore previously-revoked grievance case-access assignments
+ *     (revoked access stays revoked by default — a case-access grant is a
+ *     separate, explicit decision, not an automatic side effect of
+ *     reactivating membership).
+ *
+ * FAILS CLOSED the same way as revokeMemberAccess(): both steps are
+ * attempted independently; `success` is only true if both succeed.
+ */
+export async function reactivateMemberAccess(
+  input: ReactivateMemberAccessInput,
+): Promise<ReactivateMemberAccessResult> {
+  const errors: string[] = [];
+  let authMembershipReenabled = false;
+  let localStatusUpdated = false;
+
+  // 1. Re-enable the durable platform-auth organization membership, via
+  // the SYSTEM auth DB credential (cross-user operation).
+  try {
+    const { systemDb } = await import('@nzila/db/system-client');
+    const { authOrganizationUsers } = await import('@nzila/db/schema');
+    await systemDb
+      .update(authOrganizationUsers)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(
+        and(
+          eq(authOrganizationUsers.userId, input.authUserId),
+          eq(authOrganizationUsers.organizationId, input.organizationId),
+        ),
+      );
+    authMembershipReenabled = true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    errors.push(`auth_membership_reenable_failed: ${message}`);
+    logger.error('auth_membership_reenable_failed', {
+      authUserId: input.authUserId,
+      organizationId: input.organizationId,
+      error: err,
+    });
+  }
+
+  // 2. Restore local membership status.
+  try {
+    await withSystemContext(async (_tx) => {
+      await db
+        .update(organizationMembers)
+        .set({ status: 'active', updatedAt: new Date() })
+        .where(eq(organizationMembers.id, input.membershipId));
+    });
+    localStatusUpdated = true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    errors.push(`local_status_update_failed: ${message}`);
+    logger.error('local_status_update_failed', { membershipId: input.membershipId, error: err });
+  }
+
+  const success = errors.length === 0;
+  if (!success) {
+    logger.error('member_access_reactivation_incomplete', {
+      membershipId: input.membershipId,
+      authUserId: input.authUserId,
+      organizationId: input.organizationId,
+      errors,
+    });
+  }
+
+  return {
+    success,
+    authMembershipReenabled,
     localStatusUpdated,
     errors,
   };

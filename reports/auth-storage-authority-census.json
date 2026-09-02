@@ -1,0 +1,87 @@
+{
+  "generatedAt": "2026-09-02T20:36:27.852Z",
+  "schema": "user_management",
+  "total": 11,
+  "needsReview": 0,
+  "byClassification": {
+    "AUTH_RUNTIME_SELF_SERVICE": 6,
+    "AUTH_RUNTIME_MIXED": 4,
+    "LATENT_UNWIRED": 1
+  },
+  "byExecutionPrincipal": {
+    "AUTH_RUNTIME": 8,
+    "MIXED": 2,
+    "NONE": 1
+  },
+  "invariantViolations": {
+    "authSystemOnlyExposedToRuntime": 0
+  },
+  "tables": [
+    {
+      "table": "user_management.users",
+      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "invocationAuthority": "END_USER",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.organization_users",
+      "classification": "AUTH_RUNTIME_MIXED",
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "MIXED"
+    },
+    {
+      "table": "user_management.user_sessions",
+      "classification": "AUTH_RUNTIME_MIXED",
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "MIXED"
+    },
+    {
+      "table": "user_management.password_reset_tokens",
+      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "invocationAuthority": "END_USER",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.auth_audit_log",
+      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.oauth_providers",
+      "classification": "LATENT_UNWIRED",
+      "invocationAuthority": "NONE",
+      "dbExecutionPrincipal": "NONE"
+    },
+    {
+      "table": "user_management.magic_links",
+      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "invocationAuthority": "END_USER",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.invites",
+      "classification": "AUTH_RUNTIME_MIXED",
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.org_auth_policies",
+      "classification": "AUTH_RUNTIME_MIXED",
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.mfa_totp",
+      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "invocationAuthority": "END_USER",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    },
+    {
+      "table": "user_management.mfa_challenges",
+      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "invocationAuthority": "END_USER",
+      "dbExecutionPrincipal": "AUTH_RUNTIME"
+    }
+  ]
+}
