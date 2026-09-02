@@ -10,7 +10,10 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  // Platform-wide Class-B governance data (round 11): restricted to the
+  // same national/platform allow-list used elsewhere in this PR (round 5
+  // CLC dashboard, round 8 institutional topology).
+  { auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     const rows = await db.execute(sql`
@@ -27,7 +30,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] },
     entitlement: 'governance_suite',
     body: z.object({
       certificateNumber: z.string().min(1),

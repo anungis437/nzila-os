@@ -114,16 +114,53 @@ function main() {
   ready.sort((a, b) => a.table.localeCompare(b.table))
   pending.sort((a, b) => a.table.localeCompare(b.table))
 
+  // PR #752 round 11, item 10: convergence signals beyond ready/pending —
+  // these are REVIEW SIGNALS, not automatic failures (no invariant here
+  // forbids any of them outright; a mixed-principal table or a tenant
+  // DELETE grant can be entirely legitimate — see grievances/claims).
+  const tenantGrantedTableCount = ready.filter((r) => r.tenantPrivileges.length > 0).length
+  const systemGrantedTableCount = ready.filter((r) => r.systemPrivileges.length > 0).length
+
+  const countOps = (rows: GrantPlanRow[], key: 'tenantPrivileges' | 'systemPrivileges') => {
+    const totals: Record<RuntimeOperation, number> = { SELECT: 0, INSERT: 0, UPDATE: 0, DELETE: 0 }
+    for (const row of rows) {
+      for (const op of row[key]) totals[op]++
+    }
+    return totals
+  }
+  const tenantOperationTotals = countOps(ready, 'tenantPrivileges')
+  const systemOperationTotals = countOps(ready, 'systemPrivileges')
+
+  const riskSignals = {
+    tenantDeleteGrants: ready.filter((r) => r.tenantPrivileges.includes('DELETE')).map((r) => r.table).sort(),
+    mixedPrincipalTables: ready.filter((r) => r.tenantPrivileges.length > 0 && r.systemPrivileges.length > 0).map((r) => r.table).sort(),
+    systemOnlyBroadSystemDml: ready
+      .filter((r) => r.classification === 'SYSTEM_ONLY' && r.systemPrivileges.length >= 3)
+      .map((r) => r.table)
+      .sort(),
+    globalReferenceDataWithMutations: ready
+      .filter((r) => r.classification === 'GLOBAL_REFERENCE_DATA' && r.tenantPrivileges.some((op) => op !== 'SELECT'))
+      .map((r) => r.table)
+      .sort(),
+  }
+
   const summary = {
     generatedAt: new Date().toISOString(),
     note:
       'Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables ' +
       'whose CLOSED classification and privilege sets are fully resolved and internally consistent; ' +
       'pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT ' +
-      'migration must still refuse to run while pendingReview.length > 0.',
+      'migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW ' +
+      'flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be ' +
+      'entirely legitimate; no invariant here forbids them.',
     totalManifestEntries: storageAuthorityManifest.length,
     readyForExplicitGrantCount: ready.length,
     pendingReviewCount: pending.length,
+    tenantGrantedTableCount,
+    systemGrantedTableCount,
+    tenantOperationTotals,
+    systemOperationTotals,
+    riskSignals,
     readyForExplicitGrant: ready,
     pendingReview: pending,
   }
@@ -142,6 +179,22 @@ function main() {
     `- Total manifest entries: ${summary.totalManifestEntries}`,
     `- Ready for explicit GRANT (CLOSED, fully resolved): ${summary.readyForExplicitGrantCount}`,
     `- Pending review (NEEDS_REVIEW, excluded from plan): ${summary.pendingReviewCount}`,
+    `- Tenant-granted tables (union_eyes_runtime): ${summary.tenantGrantedTableCount}`,
+    `- System-granted tables (union_eyes_system): ${summary.systemGrantedTableCount}`,
+    '',
+    '## Operation totals (ready set)',
+    '',
+    '| principal | SELECT | INSERT | UPDATE | DELETE |',
+    '| --- | --- | --- | --- | --- |',
+    `| tenant (union_eyes_runtime) | ${summary.tenantOperationTotals.SELECT} | ${summary.tenantOperationTotals.INSERT} | ${summary.tenantOperationTotals.UPDATE} | ${summary.tenantOperationTotals.DELETE} |`,
+    `| system (union_eyes_system) | ${summary.systemOperationTotals.SELECT} | ${summary.systemOperationTotals.INSERT} | ${summary.systemOperationTotals.UPDATE} | ${summary.systemOperationTotals.DELETE} |`,
+    '',
+    '## Risk signals (review flags, not automatic failures)',
+    '',
+    `- Tenant DELETE grants (${summary.riskSignals.tenantDeleteGrants.length}): ${summary.riskSignals.tenantDeleteGrants.join(', ') || '(none)'}`,
+    `- Mixed-principal tables (${summary.riskSignals.mixedPrincipalTables.length}): ${summary.riskSignals.mixedPrincipalTables.join(', ') || '(none)'}`,
+    `- SYSTEM_ONLY tables with broad system DML (>=3 ops) (${summary.riskSignals.systemOnlyBroadSystemDml.length}): ${summary.riskSignals.systemOnlyBroadSystemDml.join(', ') || '(none)'}`,
+    `- GLOBAL_REFERENCE_DATA with tenant mutations (${summary.riskSignals.globalReferenceDataWithMutations.length}): ${summary.riskSignals.globalReferenceDataWithMutations.join(', ') || '(none)'}`,
     '',
     '## Ready for explicit GRANT',
     '',
@@ -155,6 +208,8 @@ function main() {
   console.log(`Total manifest entries: ${summary.totalManifestEntries}`)
   console.log(`Ready for explicit GRANT: ${summary.readyForExplicitGrantCount}`)
   console.log(`Pending review (excluded): ${summary.pendingReviewCount}`)
+  console.log(`Tenant-granted tables: ${summary.tenantGrantedTableCount}; system-granted tables: ${summary.systemGrantedTableCount}`)
+  console.log(`Risk signals — tenant DELETE: ${summary.riskSignals.tenantDeleteGrants.length}, mixed-principal: ${summary.riskSignals.mixedPrincipalTables.length}, SYSTEM_ONLY broad DML: ${summary.riskSignals.systemOnlyBroadSystemDml.length}, GLOBAL_REFERENCE_DATA w/ mutations: ${summary.riskSignals.globalReferenceDataWithMutations.length}`)
   console.log('Report written to reports/union-eyes-explicit-grant-dry-run.{json,md}')
 }
 

@@ -56,7 +56,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // This enables event-driven enforcement of member lifecycle (sessions, case access)
     try {
       // Dynamic import to avoid circular dependency
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { eventBus } = await import('@/lib/events/event-bus');
       
       await eventBus.emitAndWait('member.status_changed', {
@@ -87,11 +86,41 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const { userId } = await params;
 
   try {
+    // PR #752 round 11: fetch org/status BEFORE the soft-delete so the
+    // offboarding event below has the same shape as PUT's — soft-deleting
+    // a member without this previously left their session and case-access
+    // assignments active (only PUT's active/inactive toggle revoked them).
+    const [memberRecord] = await db
+      .select({ status: organizationMembers.status, organizationId: organizationMembers.organizationId })
+      .from(organizationMembers)
+      .where(eq(organizationMembers.id, userId))
+      .limit(1);
+
+    if (!memberRecord) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+
     // Soft delete
     await db
       .update(organizationMembers)
       .set({ deletedAt: new Date(), updatedAt: new Date() })
       .where(eq(organizationMembers.id, userId));
+
+    // Phase 2 Domain 5: same event-driven access revocation as PUT — a
+    // soft-deleted member must not keep an active session or case access.
+    try {
+      const { eventBus } = await import('@/lib/events/event-bus');
+
+      await eventBus.emitAndWait('member.status_changed', {
+        userId,
+        organizationId: memberRecord.organizationId,
+        oldStatus: memberRecord.status,
+        newStatus: 'deleted',
+        timestamp: new Date(),
+      });
+    } catch (_eventError) {
+      logger.error('Failed to emit member.status_changed event on delete', { userId });
+    }
 
     return NextResponse.json({ success: true });
   } catch {

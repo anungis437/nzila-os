@@ -21,6 +21,17 @@ describe('generate-explicit-grant-dry-run', () => {
     const report = JSON.parse(readFileSync(REPORT_JSON, 'utf8'))
     expect(report.readyForExplicitGrantCount).toBeGreaterThan(0)
     expect(report.readyForExplicitGrantCount + report.pendingReviewCount).toBe(report.totalManifestEntries)
+    // PR #752 round 11, item 10: convergence signals beyond ready/pending.
+    expect(report.tenantGrantedTableCount).toBeGreaterThan(0)
+    expect(report.systemGrantedTableCount).toBeGreaterThan(0)
+    for (const op of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) {
+      expect(typeof report.tenantOperationTotals[op]).toBe('number')
+      expect(typeof report.systemOperationTotals[op]).toBe('number')
+    }
+    expect(Array.isArray(report.riskSignals.tenantDeleteGrants)).toBe(true)
+    expect(Array.isArray(report.riskSignals.mixedPrincipalTables)).toBe(true)
+    expect(Array.isArray(report.riskSignals.systemOnlyBroadSystemDml)).toBe(true)
+    expect(Array.isArray(report.riskSignals.globalReferenceDataWithMutations)).toBe(true)
     // Every ready entry must have fully resolved (non-TBD, array) privileges —
     // the generator itself throws before writing the report if this is
     // violated, so a successful run already proves this, but assert it

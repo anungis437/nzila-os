@@ -1,12 +1,28 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-02T17:58:22.976Z
+Generated: 2026-09-02T18:52:32.109Z
 
-Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0.
+Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 283
-- Pending review (NEEDS_REVIEW, excluded from plan): 417
+- Ready for explicit GRANT (CLOSED, fully resolved): 298
+- Pending review (NEEDS_REVIEW, excluded from plan): 402
+- Tenant-granted tables (union_eyes_runtime): 88
+- System-granted tables (union_eyes_system): 16
+
+## Operation totals (ready set)
+
+| principal | SELECT | INSERT | UPDATE | DELETE |
+| --- | --- | --- | --- | --- |
+| tenant (union_eyes_runtime) | 88 | 79 | 56 | 54 |
+| system (union_eyes_system) | 14 | 8 | 5 | 0 |
+
+## Risk signals (review flags, not automatic failures)
+
+- Tenant DELETE grants (54): anti_scab_violations, arbitration_decisions, arbitration_precedents, arbitrations, bargaining_notes, bargaining_proposals, bargaining_units, campaigns, case_studies, cba_clauses, claim_deadlines, claims, cnesst_filings, collective_agreements, communication_preferences, correspondence, course_sessions, deadline_reminders, documents, employers, federations, grievance_case_access_assignments, grievance_deadlines, grievance_documents, grievance_transitions, grievances, hazard_reports, in_app_notifications, joint_hs_committees, kpi_configurations, member_arrears, member_breaks, member_employment, member_history_events, member_segments, message_log, message_templates, negotiations, notification_queue, notifications, org_configurations, organization_members, preventive_withdrawals, push_notifications, right_of_refusal_events, safety_inspections, sms_messages, steward_assignments, testimonials, voting_sessions, wcb_claims, wcb_employer_assessments, workplace_incidents, worksites
+- Mixed-principal tables (10): campaigns, collective_agreements, communication_preferences, consent_records, deadline_reminders, grievance_deadlines, message_log, notification_delivery_log, notification_queue, organizations
+- SYSTEM_ONLY tables with broad system DML (>=3 ops) (1): reserved_matter_votes
+- GLOBAL_REFERENCE_DATA with tenant mutations (2): case_studies, testimonials
 
 ## Ready for explicit GRANT
 
@@ -27,6 +43,8 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | anti_scab_violations | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | api_access_tokens | LATENT_UNREACHABLE | NONE | NONE |
 | applications | LATENT_UNREACHABLE | NONE | NONE |
+| arbitration_decisions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| arbitration_precedents | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | arbitrations | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | automation_execution_log | LATENT_UNREACHABLE | NONE | NONE |
 | automation_schedules | LATENT_UNREACHABLE | NONE | NONE |
@@ -34,6 +52,8 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | bank_reconciliation | LATENT_UNREACHABLE | NONE | NONE |
 | bank_reconciliations | LATENT_UNREACHABLE | NONE | NONE |
 | bank_transactions | LATENT_UNREACHABLE | NONE | NONE |
+| bargaining_notes | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| bargaining_proposals | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | bargaining_units | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | benchmark_categories | LATENT_UNREACHABLE | NONE | NONE |
 | benchmark_data | LATENT_UNREACHABLE | NONE | NONE |
@@ -47,10 +67,15 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | campaigns | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT, UPDATE |
 | card_signing_events | LATENT_UNREACHABLE | NONE | NONE |
 | case_documents | TENANT_RLS_REQUIRED | SELECT | NONE |
+| case_studies | GLOBAL_REFERENCE_DATA | SELECT, INSERT, UPDATE, DELETE | NONE |
+| cba_clauses | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| cba_rule_set_items | TENANT_RLS_REQUIRED | SELECT | NONE |
+| cba_rule_versions | TENANT_RLS_REQUIRED | SELECT | NONE |
 | chatbot_analytics | LATENT_UNREACHABLE | NONE | NONE |
 | chatbot_suggestions | LATENT_UNREACHABLE | NONE | NONE |
 | claim_deadlines | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | claim_precedent_analysis | LATENT_UNREACHABLE | NONE | NONE |
+| claim_updates | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | claims | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | clause_comparisons_history | LATENT_UNREACHABLE | NONE | NONE |
 | clc_api_config | LATENT_UNREACHABLE | NONE | NONE |
@@ -62,6 +87,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | cms_navigation_menus | LATENT_UNREACHABLE | NONE | NONE |
 | cms_templates | LATENT_UNREACHABLE | NONE | NONE |
 | cnesst_filings | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| collective_agreements | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT |
 | communication_analytics | LATENT_UNREACHABLE | NONE | NONE |
 | communication_channels | LATENT_UNREACHABLE | NONE | NONE |
 | communication_preferences | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT, INSERT, UPDATE |
@@ -143,8 +169,11 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | grievance_communications | LATENT_UNREACHABLE | NONE | NONE |
 | grievance_deadlines | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT |
 | grievance_documents | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| grievance_events | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | grievance_responses | LATENT_UNREACHABLE | NONE | NONE |
+| grievance_settlements | TENANT_RLS_REQUIRED | SELECT | NONE |
 | grievance_stages | LATENT_UNREACHABLE | NONE | NONE |
+| grievance_timeline | TENANT_RLS_REQUIRED | SELECT | NONE |
 | grievance_transitions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | grievance_workflows | LATENT_UNREACHABLE | NONE | NONE |
 | grievances | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
@@ -259,6 +288,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | scim_events_log | LATENT_UNREACHABLE | NONE | NONE |
 | segment_executions | LATENT_UNREACHABLE | NONE | NONE |
 | segment_exports | LATENT_UNREACHABLE | NONE | NONE |
+| settlements | TENANT_RLS_REQUIRED | SELECT | NONE |
 | signature_templates | LATENT_UNREACHABLE | NONE | NONE |
 | signature_webhooks_log | LATENT_UNREACHABLE | NONE | NONE |
 | sms_messages | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
@@ -270,6 +300,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | stripe_webhook_events | LATENT_UNREACHABLE | NONE | NONE |
 | subscription_events_log | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | task_comments | LATENT_UNREACHABLE | NONE | NONE |
+| testimonials | GLOBAL_REFERENCE_DATA | SELECT, INSERT, UPDATE, DELETE | NONE |
 | ue_governance_job_cancellation_audit_event | LATENT_UNREACHABLE | NONE | NONE |
 | ue_governance_job_cancellation_request | LATENT_UNREACHABLE | NONE | NONE |
 | ue_governance_job_execution_state | LATENT_UNREACHABLE | NONE | NONE |

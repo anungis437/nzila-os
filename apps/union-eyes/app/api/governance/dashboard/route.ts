@@ -11,7 +11,11 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  // Platform-wide Class-B governance data (round 11): restricted to the
+  // same national/platform allow-list used elsewhere in this PR (round 5
+  // CLC dashboard, round 8 institutional topology) — an ordinary tenant
+  // org-admin must never reach these platform-wide governance records.
+  { auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     // Golden share (latest)

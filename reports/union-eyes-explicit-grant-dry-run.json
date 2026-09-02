@@ -1,9 +1,100 @@
 {
-  "generatedAt": "2026-09-02T17:58:22.976Z",
-  "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0.",
+  "generatedAt": "2026-09-02T18:52:32.109Z",
+  "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 283,
-  "pendingReviewCount": 417,
+  "readyForExplicitGrantCount": 298,
+  "pendingReviewCount": 402,
+  "tenantGrantedTableCount": 88,
+  "systemGrantedTableCount": 16,
+  "tenantOperationTotals": {
+    "SELECT": 88,
+    "INSERT": 79,
+    "UPDATE": 56,
+    "DELETE": 54
+  },
+  "systemOperationTotals": {
+    "SELECT": 14,
+    "INSERT": 8,
+    "UPDATE": 5,
+    "DELETE": 0
+  },
+  "riskSignals": {
+    "tenantDeleteGrants": [
+      "anti_scab_violations",
+      "arbitration_decisions",
+      "arbitration_precedents",
+      "arbitrations",
+      "bargaining_notes",
+      "bargaining_proposals",
+      "bargaining_units",
+      "campaigns",
+      "case_studies",
+      "cba_clauses",
+      "claim_deadlines",
+      "claims",
+      "cnesst_filings",
+      "collective_agreements",
+      "communication_preferences",
+      "correspondence",
+      "course_sessions",
+      "deadline_reminders",
+      "documents",
+      "employers",
+      "federations",
+      "grievance_case_access_assignments",
+      "grievance_deadlines",
+      "grievance_documents",
+      "grievance_transitions",
+      "grievances",
+      "hazard_reports",
+      "in_app_notifications",
+      "joint_hs_committees",
+      "kpi_configurations",
+      "member_arrears",
+      "member_breaks",
+      "member_employment",
+      "member_history_events",
+      "member_segments",
+      "message_log",
+      "message_templates",
+      "negotiations",
+      "notification_queue",
+      "notifications",
+      "org_configurations",
+      "organization_members",
+      "preventive_withdrawals",
+      "push_notifications",
+      "right_of_refusal_events",
+      "safety_inspections",
+      "sms_messages",
+      "steward_assignments",
+      "testimonials",
+      "voting_sessions",
+      "wcb_claims",
+      "wcb_employer_assessments",
+      "workplace_incidents",
+      "worksites"
+    ],
+    "mixedPrincipalTables": [
+      "campaigns",
+      "collective_agreements",
+      "communication_preferences",
+      "consent_records",
+      "deadline_reminders",
+      "grievance_deadlines",
+      "message_log",
+      "notification_delivery_log",
+      "notification_queue",
+      "organizations"
+    ],
+    "systemOnlyBroadSystemDml": [
+      "reserved_matter_votes"
+    ],
+    "globalReferenceDataWithMutations": [
+      "case_studies",
+      "testimonials"
+    ]
+  },
   "readyForExplicitGrant": [
     {
       "table": "ab_test_assignments",
@@ -104,6 +195,28 @@
       "systemPrivileges": []
     },
     {
+      "table": "arbitration_decisions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "arbitration_precedents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "arbitrations",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -148,6 +261,28 @@
       "table": "bank_transactions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bargaining_notes",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bargaining_proposals",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -244,6 +379,44 @@
       "systemPrivileges": []
     },
     {
+      "table": "case_studies",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_clauses",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_rule_set_items",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_rule_versions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "chatbot_analytics",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -270,6 +443,15 @@
       "table": "claim_precedent_analysis",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "claim_updates",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -352,6 +534,19 @@
         "DELETE"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "collective_agreements",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "communication_analytics",
@@ -929,15 +1124,40 @@
       "systemPrivileges": []
     },
     {
+      "table": "grievance_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "grievance_responses",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
+      "table": "grievance_settlements",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "grievance_stages",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_timeline",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1800,6 +2020,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "settlements",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "signature_templates",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -1876,6 +2104,17 @@
       "table": "task_comments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "testimonials",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2148,14 +2387,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "arbitration_decisions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "arbitration_precedents",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "arbitrator_profiles",
       "classification": "NEEDS_REVIEW"
     },
@@ -2189,14 +2420,6 @@
     },
     {
       "table": "bank_of_canada_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "bargaining_notes",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "bargaining_proposals",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -2260,14 +2483,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "case_studies",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_clauses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "cba_contacts",
       "classification": "NEEDS_REVIEW"
     },
@@ -2320,14 +2535,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "cba_rule_set_items",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_rule_versions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "cba_version_history",
       "classification": "NEEDS_REVIEW"
     },
@@ -2361,10 +2568,6 @@
     },
     {
       "table": "chat_sessions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "claim_updates",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -2405,10 +2608,6 @@
     },
     {
       "table": "cms_pages",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "collective_agreements",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -2916,18 +3115,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "grievance_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "grievance_settlements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "grievance_timeline",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "grievance_timeline_events",
       "classification": "NEEDS_REVIEW"
     },
@@ -3424,10 +3611,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "settlements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "shared_clause_library",
       "classification": "NEEDS_REVIEW"
     },
@@ -3573,10 +3756,6 @@
     },
     {
       "table": "tentative_agreements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "testimonials",
       "classification": "NEEDS_REVIEW"
     },
     {

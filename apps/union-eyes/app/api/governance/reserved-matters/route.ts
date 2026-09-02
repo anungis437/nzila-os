@@ -11,7 +11,8 @@ import { auditDataMutation } from '@/lib/audit-logger';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  // Platform-wide governance data (round 11): see golden-share/route.ts.
+  { auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     const rows = await db.execute(sql`
@@ -27,7 +28,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] },
     entitlement: 'governance_suite',
     body: z.object({
       matterType: z.string().min(1),
