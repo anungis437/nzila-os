@@ -3,7 +3,7 @@ import { auth, requireSystemAdmin } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
 import { eq, and, sql, type SQL } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { MAX_HIERARCHY_DEPTH } from '@/lib/utils/hierarchy-validation';
 
 export const dynamic = 'force-dynamic';
@@ -118,6 +118,7 @@ export async function GET(req: NextRequest) {
 }
 
 /** POST /api/organizations — create organization in DB */
+/** POST /api/organizations — create a new organization (system-admin only) */
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -125,6 +126,18 @@ export async function POST(req: NextRequest) {
   // Organization/tenant creation fails closed to platform/system administration.
   // Delegated tenant-admin child-org provisioning is a separate, not-yet-proven
   // permission model and is intentionally not implemented here.
+  //
+  // AUTHORIZATION HAPPENS HERE, BEFORE any DB access — requireSystemAdmin() is
+  // the authorization decision, not withSystemContext() below. withSystemContext
+  // is only the execution mechanism (PR #752 round 7 correction): 0108's
+  // organizations RLS policy is `id = current_org_id` for SELECT/INSERT/UPDATE/
+  // DELETE on union_eyes_runtime, so a NEW organization row (whose id is freshly
+  // generated and therefore can never equal the caller's own current_org_id)
+  // can never satisfy that INSERT ... WITH CHECK under the ordinary tenant
+  // connection — this previously ran the parent lookup and INSERT through
+  // withRLSContext() (tenant runtime), which would fail (or, if no org context
+  // was set for a system-admin session, throw "Organization context required")
+  // for any genuinely new organization.
   try {
     await requireSystemAdmin();
   } catch {
@@ -154,7 +167,7 @@ export async function POST(req: NextRequest) {
   let hierarchyPath: string[] = [];
   let hierarchyLevel = 0;
   if (parentId) {
-    const parentRows = await withRLSContext(async () =>
+    const parentRows = await withSystemContext(async (_tx) =>
       db.select({ hierarchyPath: organizations.hierarchyPath, hierarchyLevel: organizations.hierarchyLevel })
         .from(organizations)
         .where(eq(organizations.id, parentId))
@@ -173,7 +186,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const [created] = await withRLSContext(async () =>
+  const [created] = await withSystemContext(async (_tx) =>
     db.insert(organizations).values({
       name: body.name,
       slug: body.slug,

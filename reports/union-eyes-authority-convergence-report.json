@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-02T14:03:34.062Z",
-  "totalTables": 456,
+  "generatedAt": "2026-09-02T14:58:57.693Z",
+  "totalTables": 696,
   "byClassification": {
     "TENANT_RLS_REQUIRED": 68,
-    "LATENT_UNREACHABLE": 169,
+    "LATENT_UNREACHABLE": 193,
+    "NEEDS_REVIEW": 423,
     "PARENT_OWNED_RLS_REQUIRED": 3,
-    "NEEDS_REVIEW": 207,
     "SYSTEM_ONLY": 9
   },
-  "needsReview": 207,
+  "needsReview": 423,
   "authorityModel": {
-    "invocationAuthorityTbd": 207,
-    "dbExecutionPrincipalTbd": 207,
-    "requiredRuntimePrivilegesTbd": 207,
-    "requiredSystemPrivilegesTbd": 207,
+    "invocationAuthorityTbd": 423,
+    "dbExecutionPrincipalTbd": 423,
+    "requiredRuntimePrivilegesTbd": 423,
+    "requiredSystemPrivilegesTbd": 423,
     "closedClassificationWithTbdAuthorityCount": 0,
     "closedClassificationWithTbdAuthorityTables": []
   },

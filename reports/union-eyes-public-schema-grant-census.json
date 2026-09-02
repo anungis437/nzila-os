@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-09-02T14:58:57.402Z",
+  "note": "Source of truth for \"every canonical PUBLIC-schema table\" is scripts/schema-duplicate-table-scan.ts's scanSchemaDeclarations() (db/schema/** only — does not include services/financial-service's own separate database boundary). This census answers scope-completeness for the eventual explicit-GRANT generator; it does NOT re-verify RLS policy correctness (see scripts/rls-verify.ts for that).",
+  "totalPhysicalTableKeys": 702,
+  "publicSchemaTableCount": 693,
+  "nonPublicSchemaTableCount": 9,
+  "nonPublicSchemas": [
+    "audit_security",
+    "user_management"
+  ],
+  "publicTablesWithAuthorityEntry": 693,
+  "publicTablesWithoutAuthorityEntry": 0,
+  "publicTablesWithoutAuthorityEntryList": []
+}

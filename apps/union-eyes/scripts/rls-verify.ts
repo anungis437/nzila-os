@@ -222,6 +222,16 @@ async function checkBaselineTablesHaveManifestDisposition(results: CheckResult[]
       })
       continue
     }
+    if (entry.classification === 'NEEDS_REVIEW') {
+      // A baseline table CAN legitimately be NEEDS_REVIEW (round 7: e.g.
+      // safety_training_records, reclassified once a raw-SQL reference was
+      // found that a Drizzle-symbol-only scan missed) — TBD is a
+      // legitimate value there, same rule as every other manifest entry.
+      // NEEDS_REVIEW itself is still a FAILING classification overall —
+      // that is reported by checkOrphanedTenantTables's classification
+      // check below, not duplicated here.
+      continue
+    }
     const unresolvedFields: string[] = []
     if (entry.invocationAuthority === 'TBD') unresolvedFields.push('invocationAuthority')
     if (entry.dbExecutionPrincipal === 'TBD') unresolvedFields.push('dbExecutionPrincipal')
