@@ -95,4 +95,22 @@ describe('icra/[assessmentId]/capability/exchange route', () => {
     expect(setCookie).toContain(`icra_cap_a1=${TOKEN}`);
     expect(setCookie).toContain('HttpOnly');
   });
+
+  it('returns 429 after exceeding the per (IP, assessmentId) rate limit', async () => {
+    mockTx({ capabilityTokenHash: createHash('sha256').update('wrong', 'utf8').digest('hex'), capabilityTokenExpiresAt: FUTURE });
+    const { POST } = await loadRoute();
+    const assessmentId = 'rate-limit-test-assessment';
+    const rateLimitedReq = () =>
+      new Request('http://localhost/api/icra/rate-limit-test-assessment/capability/exchange', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': 'rate-limit-test-ip' },
+        body: JSON.stringify({ capability: TOKEN }),
+      });
+
+    let lastResponse!: Response;
+    for (let i = 0; i < 21; i += 1) {
+      lastResponse = await POST(rateLimitedReq(), { params: Promise.resolve({ assessmentId }) });
+    }
+    expect(lastResponse.status).toBe(429);
+  });
 });

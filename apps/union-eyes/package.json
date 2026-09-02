@@ -63,7 +63,9 @@
     "rls:verify": "tsx scripts/rls-verify.ts --mode=preflight",
     "rls:verify:full": "tsx scripts/rls-verify.ts --mode=full",
     "rls:provision-roles": "tsx scripts/provision-runtime-db-roles.ts",
-    "rls:apply-foundation-migration": "tsx scripts/apply-rls-foundation-migration.ts"
+    "rls:apply-foundation-migration": "tsx scripts/apply-rls-foundation-migration.ts",
+    "icra:capability-rollout:check": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --check",
+    "icra:capability-rollout:apply": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --apply"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",

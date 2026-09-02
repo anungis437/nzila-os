@@ -12,12 +12,18 @@
  * This endpoint does NOT rotate the capability — it only verifies the
  * presented token and, if valid, re-sets the same value as the HttpOnly
  * cookie. assessmentId alone is never sufficient; the token must match.
+ *
+ * Rate limited per (IP, assessmentId): the bearer token is cryptographically
+ * strong so brute-force compromise is not realistic, but an unauthenticated
+ * caller could otherwise generate unbounded DB traffic against a single
+ * assessment. This is resource-abuse protection, not authorization.
  */
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { icraAssessments } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { rateLimit } from '@/lib/rate-limit';
 import {
   checkCapability,
   capabilityDenialStatus,
@@ -34,6 +40,19 @@ interface RouteContext {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params;
+
+  const rl = rateLimit(request, {
+    maxRequests: 20,
+    windowSeconds: 60 * 60,
+    keyGenerator: (req) => {
+      const forwarded = req.headers.get('x-forwarded-for');
+      const ip = forwarded ? forwarded.split(',')[0]?.trim() : 'unknown';
+      return `icra-capability-exchange:${ip}:${assessmentId}`;
+    },
+  });
+  if (!rl.success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
 
   let body: unknown;
   try {

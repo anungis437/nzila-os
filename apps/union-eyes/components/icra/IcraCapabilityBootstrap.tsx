@@ -30,15 +30,31 @@ interface IcraCapabilityBootstrapProps {
 const COPY = {
   'en-CA': {
     verifying: 'Verifying your access link…',
-    notFound: 'This link could not be verified. It may be incomplete, expired, or already used from a different device.',
+    notFound: 'This link appears to be incomplete. Please use the full link from your email.',
     invalid: 'This access link is invalid or has expired.',
   },
   'fr-CA': {
     verifying: 'Vérification de votre lien d\u2019accès…',
-    notFound: 'Ce lien n\u2019a pas pu être vérifié. Il peut être incomplet, expiré, ou déjà utilisé depuis un autre appareil.',
+    notFound: 'Ce lien semble incomplet. Veuillez utiliser le lien complet reçu par courriel.',
     invalid: 'Ce lien d\u2019accès est invalide ou a expiré.',
   },
 } as const;
+
+/**
+ * Extracts and decodes the `cap=` fragment value, never throwing on
+ * malformed percent-encoding (e.g. `#cap=%ZZ`). Distinguishes "no cap=
+ * key present at all" from "present but undecodable", since the two map
+ * to different denial states.
+ */
+export function extractFragmentCapability(hash: string): { present: boolean; value: string | null } {
+  const match = /(?:^#|&)cap=([^&]+)/.exec(hash);
+  if (!match) return { present: false, value: null };
+  try {
+    return { present: true, value: decodeURIComponent(match[1]) };
+  } catch {
+    return { present: true, value: null };
+  }
+}
 
 export function IcraCapabilityBootstrap({ assessmentId, locale = 'en-CA' }: IcraCapabilityBootstrapProps) {
   const router = useRouter();
@@ -46,12 +62,14 @@ export function IcraCapabilityBootstrap({ assessmentId, locale = 'en-CA' }: Icra
   const [state, setState] = useState<'checking' | 'no-fragment' | 'invalid'>('checking');
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const match = /(?:^#|&)cap=([^&]+)/.exec(hash);
-    const capability = match ? decodeURIComponent(match[1]) : null;
+    const { present, value: capability } = extractFragmentCapability(window.location.hash);
 
-    if (!capability) {
+    if (!present) {
       setState('no-fragment');
+      return;
+    }
+    if (!capability) {
+      setState('invalid'); // present but undecodable — never a client exception
       return;
     }
 

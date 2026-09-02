@@ -129,6 +129,19 @@ list above because neither called `withSystemContext` at all:
 | `actions/icra/get-profile.ts` (server action, not a route) | Called directly by the results page `app/[locale]/continuity-assessment/results/[id]/page.tsx` | Queried `icra_maturity_profiles` keyed **only** by `assessmentId` via plain `db`, no capability check, no `withSystemContext` — a full UUID-only-takeover of any completed assessment's results, and the results page called it with zero API-layer protection to bypass. | Replaced with `getAuthorizedIcraProfile(assessmentId, capabilityToken)`: executes via `withSystemContext`, requires `checkCapability()` against the assessment's stored capability hash before returning the profile. The results page (`page.tsx`) now reads the HttpOnly capability cookie server-side (`cookies()` + `decodeCapabilityCookieValue`/`capabilityCookieName`) and falls back to a client `IcraCapabilityBootstrap` component + `.../capability/exchange` route for the email-fragment recovery flow, which never rotates the capability. |
 | `actions/icra/get-adaptive-resolution.ts` (server action) | No confirmed production callers as of this audit (dead code) | Same anti-pattern: plain `db`, `assessmentId`-only lookup, no capability check. Fixed proactively before anything wires it up, since the pattern itself — not just its current reachability — is the risk. | Now requires `capabilityToken` and resolves via `withSystemContext` + `checkCapability()`, returning a discriminated result union instead of a bare nullable value. |
 
+**Runtime caller verification (round 8):** re-confirmed via a repo-wide search
+(`grep -rl "getIcraAdaptiveResolution"`, excluding `node_modules` and build
+artifacts under `.next/`) that `getIcraAdaptiveResolution` has **zero
+production callers** anywhere in this repository — only its own definition,
+its own dedicated test file (`actions/icra/__tests__/get-adaptive-resolution.test.ts`),
+and the capability contract ratchet (which references the function name in
+its recognized-authorization-call allowlist). This is recorded explicitly,
+not assumed from unit tests alone: if a future change wires this action into
+a live route/page, that caller must be verified to obtain the capability
+token correctly (matching the pattern in
+`app/[locale]/continuity-assessment/results/[id]/page.tsx`) before the UX
+is considered complete.
+
 A third file, `app/api/payments/webhooks/stripe/route.ts`, reads/mutates
 `icra_assessments`/`icra_maturity_profiles` by `assessmentId` via plain `db`
 in its `checkout.session.completed` handler — but this is a **reviewed
@@ -217,30 +230,103 @@ exactly the new entry and nothing else.
 This is additive-only (`ADD COLUMN` / `CREATE INDEX`, no destructive DDL),
 enforced by `db/__tests__/icra-capability-migration-governance.test.ts`.
 
-**Required rollout ordering** for any environment adopting this PR (per the
-existing `migration-execution-governance.md` sequencing, this capability
-migration slots in as an earlier, ordinary scoped-Drizzle step — it does
-**not** require a bespoke one-off apply script the way `0108` did, because
-`0108` was blocked by the frozen-lineage replay-refusal contract and this
-migration is not):
+## Round 8: making the deployment guarantee as strong as the source-code guarantee
 
-1. `pnpm --filter @nzila/union-eyes db:bootstrap` — applies the scoped
-   capability migration (and any other pending scoped entries) using
-   migration/admin authority.
-2. `pnpm rls:apply-foundation-migration` (0108 RLS tenant isolation
+Round 7 established that `db:bootstrap` *can* apply the scoped migration.
+An independent review correctly pointed out this only proves "the
+migration will apply **if** `db:bootstrap` is run" — it does not prove
+"capability-dependent code cannot deploy before the columns exist,"
+because no deployment workflow in this repository currently invokes
+`db:bootstrap`/`run-union-eyes-drizzle-bootstrap.mjs` automatically.
+
+**Staging introspection requested by the reviewer** (`SELECT id, hash,
+created_at FROM drizzle.__drizzle_migrations ORDER BY id` and an
+`information_schema.columns` check for the two capability columns) could
+not be performed from this environment — no staging database credentials
+are configured here (only a local `DATABASE_URL` pointed at
+`localhost:5433`), and per this PR's own constraints, staging remains
+off-limits for mutation and is not something this environment has
+read access to either. **An operator with real staging credentials must
+run the `--check` mode below before merge** to get a real go/no-go
+verdict; this is now a one-command, auditable action rather than two
+hand-written SQL queries a human has to remember to run.
+
+**What was built instead of relying on operator memory:**
+
+- `tooling/scripts/lib/union-eyes-scoped-migrations.mjs` — the scoped-
+  migration DDL-application logic (read journal → hash each file → apply
+  unapplied entries idempotently, tracked in
+  `drizzle.__drizzle_migrations`) was extracted out of
+  `run-union-eyes-drizzle-bootstrap.mjs` into this single shared module.
+  There is now exactly one implementation of "apply a scoped migration,"
+  not two.
+- `tooling/scripts/apply-icra-capability-rollout.mjs` — a new,
+  purpose-built existing-environment gate for tag
+  `0005_add_icra_assessment_capability_token`, built on top of the same
+  shared module (`pnpm --filter @nzila/union-eyes icra:capability-rollout:check`
+  / `...:apply`):
+  - `--check` is **read-only** — it runs the exact two checks the
+    reviewer specified (scoped-migration ledger status + capability
+    column presence via `information_schema.columns`) and prints a
+    `GO`/`NO_GO` verdict with a non-zero exit code on `NO_GO`. Safe to run
+    against staging/production at any time; never mutates.
+  - `--apply` applies **only** the target tag (never 0000-0004) via the
+    shared executor, and explicitly **refuses** if any journal entry
+    preceding the target tag is not already recorded as applied in
+    `drizzle.__drizzle_migrations` — this is what makes it safe against
+    the reviewer's concrete concern ("blindly executing full
+    `db:bootstrap` against an existing environment whose schema exists
+    but whose historical scoped hashes are absent could cause earlier
+    migrations to replay"): a targeted apply can never silently replay or
+    skip ahead of an environment whose ledger doesn't yet reflect
+    reality — it fails loudly instead, telling the operator to run the
+    full `db:bootstrap` (or reconcile the ledger) first.
+  - Idempotent: re-running `--apply` after success reports zero newly
+    applied tags and executes zero additional DDL statements.
+  - Evidence includes the migration tag AND its SHA-256 hash (not just a
+    boolean), printed on both `--check` and `--apply`.
+- `db/__tests__/icra-capability-rollout.test.ts` — executable proof
+  (fake pg-like client, no real Postgres needed) that: fresh bootstrap
+  (empty ledger, no tag filter) applies all entries including 0005 and
+  adds both real columns (parsed from the actual `ALTER TABLE` statements
+  in the real SQL file, not hardcoded); `--check` reports `NO_GO` when the
+  tag isn't applied, and also `NO_GO` if the tag is recorded but a column
+  is somehow still missing (evidence-absence still fails the gate, not
+  just ledger-presence); a targeted `--apply` refuses when a preceding
+  entry is unrecorded; a targeted `--apply` succeeds and reaches `GO` when
+  preceding entries are recorded; a second `--apply` run is idempotent
+  (zero new DDL statements); and the fresh-bootstrap orchestrator and the
+  existing-environment rollout both delegate to the *same* shared
+  executor (`lib/union-eyes-scoped-migrations.mjs`) with no duplicated
+  ledger-write logic in either caller.
+
+**Required rollout ordering** for any environment adopting this PR:
+
+1. `pnpm --filter @nzila/union-eyes icra:capability-rollout:check` — read-only.
+   An operator with real environment credentials confirms current state.
+2. `pnpm --filter @nzila/union-eyes icra:capability-rollout:apply` (or, for
+   a genuinely fresh environment, the ordinary `db:bootstrap`, which
+   applies 0005 as part of applying every pending scoped entry in order).
+3. `pnpm rls:apply-foundation-migration` (0108 RLS tenant isolation
    foundation) — unchanged, still its own bespoke apply path.
-3. `scripts/provision-runtime-db-roles.ts` — provision/flip runtime and
+4. `scripts/provision-runtime-db-roles.ts` — provision/flip runtime and
    system role LOGIN credentials.
-4. Key Vault credential creation/update for the provisioned roles.
-5. Enable RLS enforcement.
-6. Deploy application code (including this PR's capability-dependent
+5. Key Vault credential creation/update for the provisioned roles.
+6. Enable RLS enforcement.
+7. Deploy application code (including this PR's capability-dependent
    ICRA routes/actions).
-7. RLS preflight + effective-principal proof.
+8. RLS preflight + effective-principal proof.
 
-Step 1 must complete before step 6 for the same reason `0108` must precede
+Step 2 must complete before step 7 for the same reason `0108` must precede
 application code that assumes RLS is enforced: capability-dependent code
 reading/writing `capability_token_hash`/`capability_token_expires_at`
-cannot reach an environment whose DB lacks those columns.
+cannot reach an environment whose DB lacks those columns. **This is still
+not wired into an automated CI/CD deploy job** — no such job exists in
+this repository for this app to hook into (see AGENTS.md pilot-mode
+restrictions on `/ship`/`/land-and-deploy`). Whatever deploy mechanism is
+used per environment must invoke step 1 (or step 2, non-interactively,
+checking its exit code) as an explicit gate; that wiring is outside what
+this correction can implement without deployment-pipeline access.
 
 ---
 
