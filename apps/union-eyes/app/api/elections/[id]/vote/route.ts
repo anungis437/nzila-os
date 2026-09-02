@@ -15,6 +15,8 @@ import { councilElections } from '@/db/schema/governance-schema';
 import { eq } from 'drizzle-orm';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +29,7 @@ interface Candidate {
 
 export const POST = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     openapi: {
       tags: ['Governance'],
       summary: 'Submit votes for a council election',
@@ -43,10 +45,12 @@ export const POST = withApi(
     }
 
     // Fetch current election record
-    const [election] = await db
-      .select()
-      .from(councilElections)
-      .where(eq(councilElections.id, params.id));
+    const [election] = await withSystemContext(async (_tx) =>
+      db
+        .select()
+        .from(councilElections)
+        .where(eq(councilElections.id, params.id))
+    );
 
     if (!election) throw ApiError.notFound('Election not found');
 
@@ -62,15 +66,17 @@ export const POST = withApi(
 
     const newTotal = (election.totalVotes ?? 0) + additionalVotes;
 
-    const [updated] = await db
-      .update(councilElections)
-      .set({
-        candidates: updatedCandidates,
-        totalVotes: newTotal,
-        updatedAt: new Date(),
-      })
-      .where(eq(councilElections.id, params.id))
-      .returning();
+    const [updated] = await withSystemContext(async (_tx) =>
+      db
+        .update(councilElections)
+        .set({
+          candidates: updatedCandidates,
+          totalVotes: newTotal,
+          updatedAt: new Date(),
+        })
+        .where(eq(councilElections.id, params.id))
+        .returning()
+    );
 
     buildUnionEvidencePack({
       actionType: 'ELECTION_VOTE_CAST',

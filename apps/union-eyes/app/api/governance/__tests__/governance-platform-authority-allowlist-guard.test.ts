@@ -49,3 +49,40 @@ describe('golden_shares/mission_audits/reserved_matter_votes require platform-ti
     }
   });
 });
+
+// Public-authority tranche (governance.ts NEEDS_REVIEW batch): council_elections
+// is ALSO a platform-wide, no-organization_id table (Union Member
+// Representative Council elections — one national council, not per-org).
+// All three routes previously used ordinary per-org minRole tiers
+// ('member'/'steward'), meaning any tenant's own steward could forge
+// national election results (candidates/winners/totalVotes) and any
+// tenant's own member could cast an arbitrary vote-count increment.
+// Fixed to require the same platform allow-list as the Class-B tables.
+const ELECTION_GOVERNED_FILES = [
+  'app/api/elections/route.ts',
+  'app/api/elections/[id]/route.ts',
+  'app/api/elections/[id]/vote/route.ts',
+];
+
+describe('council_elections requires platform-tier authority (no per-org minRole)', () => {
+  it.each(ELECTION_GOVERNED_FILES)('%s never uses an ordinary per-org minRole', (relPath) => {
+    const src = readFileSync(resolve(APP_ROOT, relPath), 'utf8');
+    expect(src).not.toMatch(/minRole:\s*['"](member|steward|officer|admin)['"]/);
+  });
+
+  it.each(ELECTION_GOVERNED_FILES)('%s imports GOVERNANCE_SYSTEM_ROLES and spreads it into every auth.roles block', (relPath) => {
+    const src = readFileSync(resolve(APP_ROOT, relPath), 'utf8');
+    expect(src).toMatch(/import\s*\{[^}]*GOVERNANCE_SYSTEM_ROLES[^}]*\}\s*from\s*['"]@\/lib\/api-auth-guard['"]/);
+    const authBlocks = src.match(/auth:\s*\{[^}]*\}/g) ?? [];
+    expect(authBlocks.length).toBeGreaterThan(0);
+    for (const block of authBlocks) {
+      expect(block).toMatch(/roles:\s*\[\s*\.\.\.GOVERNANCE_SYSTEM_ROLES\s*\]/);
+    }
+  });
+
+  it.each(ELECTION_GOVERNED_FILES)('%s executes its DB access under withSystemContext, not the ordinary tenant runtime', (relPath) => {
+    const src = readFileSync(resolve(APP_ROOT, relPath), 'utf8');
+    expect(src).toMatch(/import\s*\{[^}]*withSystemContext[^}]*\}\s*from\s*['"]@\/lib\/db\/with-rls-context['"]/);
+    expect(src).toMatch(/withSystemContext\(/);
+  });
+});
