@@ -35,6 +35,8 @@ const m = vi.hoisted(() => ({
   membersUpdateWhere: vi.fn(),
   updateCallCount: { n: 0 },
   failNthUpdate: { n: 0 },
+  authReturning: vi.fn(),
+  localReturning: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/password', () => ({
@@ -44,11 +46,31 @@ vi.mock('@nzila/platform-auth/password', () => ({
 vi.mock('@nzila/db/system-client', () => ({
   systemDb: {
     update: () => ({ set: () => ({ where: m.authUpdateWhere }) }),
+    transaction: async (callback: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        update: (table: unknown) => {
+          // authOrganizationUsers (mocked below) has `organizationUserId`;
+          // organizationMembers (mocked below) does not — used to dispatch
+          // to the correct returning() mock per table without needing
+          // separate transaction-scoped chain builders.
+          const isAuthTable = (table as { organizationUserId?: unknown })?.organizationUserId !== undefined;
+          const returning = isAuthTable ? m.authReturning : m.localReturning;
+          return { set: () => ({ where: () => ({ returning }) }) };
+        },
+      };
+      return callback(tx);
+    },
   },
 }));
 
 vi.mock('@nzila/db/schema', () => ({
-  authOrganizationUsers: { userId: 'userId', organizationId: 'organizationId', isActive: 'isActive', updatedAt: 'updatedAt' },
+  authOrganizationUsers: {
+    organizationUserId: 'organizationUserId',
+    userId: 'userId',
+    organizationId: 'organizationId',
+    isActive: 'isActive',
+    updatedAt: 'updatedAt',
+  },
 }));
 
 vi.mock('@/db/schema/domains/claims/grievance-lifecycle', () => ({
@@ -217,16 +239,18 @@ const reactivateBaseInput = {
   organizationId: 'org-a',
 };
 
-describe('reactivateMemberAccess — symmetric, fail-closed reactivation', () => {
+describe('reactivateMemberAccess — atomic, fail-closed reactivation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.updateCallCount.n = 0;
     m.failNthUpdate.n = 0;
     m.authUpdateWhere.mockResolvedValue(undefined);
     m.membersUpdateWhere.mockResolvedValue(undefined);
+    m.authReturning.mockResolvedValue([{ organizationUserId: 'org-user-1' }]);
+    m.localReturning.mockResolvedValue([{ id: 'membership-1' }]);
   });
 
-  it('re-enables authOrganizationUsers and restores local status when both steps succeed', async () => {
+  it('re-enables authOrganizationUsers and restores local status when both writes succeed in the same transaction', async () => {
     const { reactivateMemberAccess } = await loadService();
 
     const result = await reactivateMemberAccess(reactivateBaseInput);
@@ -235,7 +259,6 @@ describe('reactivateMemberAccess — symmetric, fail-closed reactivation', () =>
     expect(result.authMembershipReenabled).toBe(true);
     expect(result.localStatusUpdated).toBe(true);
     expect(result.errors).toEqual([]);
-    expect(m.authUpdateWhere).toHaveBeenCalledTimes(1);
   });
 
   it('does not call revokeAllUserSessions on reactivation', async () => {
@@ -255,26 +278,59 @@ describe('reactivateMemberAccess — symmetric, fail-closed reactivation', () =>
     expect(m.caseAccessUpdateWhere).not.toHaveBeenCalled();
   });
 
-  it('fails closed when the authOrganizationUsers re-enable throws — success: false, no false 200', async () => {
-    m.authUpdateWhere.mockRejectedValue(new Error('connection reset'));
+  it('the auth-membership write succeeding does NOT grant partial authority when the local write then throws — both flags stay false', async () => {
+    m.localReturning.mockRejectedValue(new Error('deadlock'));
+    const { reactivateMemberAccess } = await loadService();
+
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    // Round-13's independent-try/catch shape would have reported
+    // authMembershipReenabled: true here even though the local write
+    // failed — proving the auth store was already re-enabled while the
+    // overall operation still 502s. The atomic transaction must report
+    // BOTH as false: nothing may be reported as active until the whole
+    // transaction commits.
+    expect(result.success).toBe(false);
+    expect(result.authMembershipReenabled).toBe(false);
+    expect(result.localStatusUpdated).toBe(false);
+    expect(result.errors.some((e) => e.startsWith('reactivation_transaction_failed:'))).toBe(true);
+  });
+
+  it('the local write succeeding does NOT grant partial authority when the auth-membership write throws first — both flags stay false', async () => {
+    m.authReturning.mockRejectedValue(new Error('connection reset'));
     const { reactivateMemberAccess } = await loadService();
 
     const result = await reactivateMemberAccess(reactivateBaseInput);
 
     expect(result.success).toBe(false);
     expect(result.authMembershipReenabled).toBe(false);
-    expect(result.errors.some((e) => e.startsWith('auth_membership_reenable_failed:'))).toBe(true);
+    expect(result.localStatusUpdated).toBe(false);
+    // the local write must never even run since the auth write throws first
+    expect(m.localReturning).not.toHaveBeenCalled();
   });
 
-  it('fails closed when local status restore throws — success: false, no false 200', async () => {
-    m.failNthUpdate.n = 1;
+  it('fails closed when the auth-membership update matches zero rows (RETURNING empty) — does not silently activate', async () => {
+    m.authReturning.mockResolvedValue([]);
     const { reactivateMemberAccess } = await loadService();
 
     const result = await reactivateMemberAccess(reactivateBaseInput);
 
     expect(result.success).toBe(false);
+    expect(result.authMembershipReenabled).toBe(false);
     expect(result.localStatusUpdated).toBe(false);
-    expect(result.authMembershipReenabled).toBe(true);
-    expect(result.errors.some((e) => e.startsWith('local_status_update_failed:'))).toBe(true);
+    expect(result.errors.some((e) => e.includes('auth_membership_row_not_found'))).toBe(true);
+    expect(m.localReturning).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the local membership update matches zero rows (RETURNING empty) — does not silently activate', async () => {
+    m.localReturning.mockResolvedValue([]);
+    const { reactivateMemberAccess } = await loadService();
+
+    const result = await reactivateMemberAccess(reactivateBaseInput);
+
+    expect(result.success).toBe(false);
+    expect(result.authMembershipReenabled).toBe(false);
+    expect(result.localStatusUpdated).toBe(false);
+    expect(result.errors.some((e) => e.includes('local_membership_row_not_found'))).toBe(true);
   });
 });

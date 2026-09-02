@@ -20,9 +20,11 @@ import { writeFileSync, mkdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { authStorageAuthorityEntries } from '../src/auth-storage-authority/entries'
-import type {
-  AuthStorageAuthorityClassification,
-  AuthDbExecutionPrincipal,
+import { authTableDuplicateDeclarations } from '../src/auth-storage-authority/duplicate-declarations'
+import {
+  AUTH_STORAGE_AUTHORITY_ENFORCEMENT_STATUS,
+  type AuthStorageAuthorityClassification,
+  type AuthDbExecutionPrincipal,
 } from '../src/auth-storage-authority/types'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -52,12 +54,18 @@ function main() {
   // packages/db/src/auth-storage-authority/__tests__/registry-invariants
   // .test.ts's exact-count check, not by this report.
   const needsReview = 0
+  const duplicateDeclarationDebt = authTableDuplicateDeclarations.reduce(
+    (sum, entry) => sum + entry.alternates.filter((a) => a.reachable).length,
+    0,
+  )
 
   const summary = {
     generatedAt: new Date().toISOString(),
     schema: 'user_management',
+    enforcementStatus: AUTH_STORAGE_AUTHORITY_ENFORCEMENT_STATUS,
     total,
     needsReview,
+    duplicateDeclarationDebt,
     byClassification,
     byExecutionPrincipal,
     invariantViolations: {
@@ -68,6 +76,13 @@ function main() {
       classification: e.classification,
       invocationAuthority: e.invocationAuthority,
       dbExecutionPrincipal: e.dbExecutionPrincipal,
+      requiredAuthRuntimePrivileges: e.requiredAuthRuntimePrivileges,
+      requiredAuthSystemPrivileges: e.requiredAuthSystemPrivileges,
+    })),
+    duplicateDeclarations: authTableDuplicateDeclarations.map((d) => ({
+      physicalTable: d.physicalTable,
+      canonical: d.canonical,
+      alternates: d.alternates,
     })),
   }
 
@@ -85,6 +100,8 @@ function main() {
     '',
     `- Total tables: ${total}`,
     `- Needs review: ${needsReview}`,
+    `- Enforcement status: ${summary.enforcementStatus}`,
+    `- Duplicate-declaration debt (reachable alternates): ${duplicateDeclarationDebt}`,
     `- AUTH_SYSTEM_ONLY exposed to AUTH_RUNTIME (invariant violation): ${authSystemOnlyExposedToRuntime}`,
     '',
     '## By classification',
@@ -97,10 +114,22 @@ function main() {
     '',
     '## Tables',
     '',
-    '| Table | Classification | Invocation Authority | DB Execution Principal |',
-    '|---|---|---|---|',
+    '| Table | Classification | Invocation Authority | DB Execution Principal | Runtime Ops | System Ops |',
+    '|---|---|---|---|---|---|',
     ...authStorageAuthorityEntries.map(
-      (e) => `| ${e.table} | ${e.classification} | ${e.invocationAuthority} | ${e.dbExecutionPrincipal} |`,
+      (e) =>
+        `| ${e.table} | ${e.classification} | ${e.invocationAuthority} | ${e.dbExecutionPrincipal} | ${e.requiredAuthRuntimePrivileges.join(',') || '—'} | ${e.requiredAuthSystemPrivileges.join(',') || '—'} |`,
+    ),
+    '',
+    '## Duplicate declarations',
+    '',
+    '| Physical table | Canonical | Alternate | Reachable | Production importers |',
+    '|---|---|---|---|---|',
+    ...authTableDuplicateDeclarations.flatMap((d) =>
+      d.alternates.map(
+        (a) =>
+          `| ${d.physicalTable} | ${d.canonical.exportName} (${d.canonical.file}) | ${a.exportName} (${a.file}) | ${a.reachable ? 'YES' : 'no'} | ${a.productionImporters.join('; ') || '—'} |`,
+      ),
     ),
     '',
   ].join('\n')
@@ -109,6 +138,8 @@ function main() {
 
   console.log(`Total tables: ${total}`)
   console.log(`Needs review: ${needsReview}`)
+  console.log(`Enforcement status: ${summary.enforcementStatus}`)
+  console.log(`Duplicate-declaration debt (reachable alternates): ${duplicateDeclarationDebt}`)
   console.log(`AUTH_SYSTEM_ONLY exposed to AUTH_RUNTIME: ${authSystemOnlyExposedToRuntime}`)
   console.log('Report written to reports/auth-storage-authority-census.{json,md}')
 }

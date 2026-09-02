@@ -52,6 +52,17 @@ export type AuthInvocationAuthority =
 export type AuthDbExecutionPrincipal =
   | 'AUTH_RUNTIME' // the ordinary @nzila/db/client connection (ordinary credential)
   | 'AUTH_SYSTEM' // @nzila/db/system-client's systemDb (dedicated system credential)
+  /**
+   * PR #752 round 14: a real, additional execution path discovered
+   * during duplicate-declaration tracing (see ./duplicate-declarations.ts)
+   * — apps/union-eyes independently re-declares several
+   * `user_management.*` tables as its OWN Drizzle table objects, executed
+   * via apps/union-eyes/db/db.ts's own DATABASE_URL connection, not
+   * @nzila/db/client. Always self-scoped (the caller's own row) in every
+   * currently-known instance — this value exists to make that THIRD
+   * connection path visible, not to imply a cross-user concern by itself.
+   */
+  | 'APP_OWN_DUPLICATE_RUNTIME'
   | 'MIXED'
   | 'NONE'
 
@@ -64,4 +75,28 @@ export interface AuthStorageAuthorityEntry {
   supportingCapability: string[];
   invocationAuthority: AuthInvocationAuthority;
   dbExecutionPrincipal: AuthDbExecutionPrincipal;
+  /**
+   * PR #752 round 14: operation-level privilege sets, mirroring
+   * apps/union-eyes's public registry's requiredRuntimePrivileges/
+   * requiredSystemPrivileges — deliberately a set of atomic operations,
+   * never mechanically inferred as FULL_DML. Every value here is traced
+   * to a real, named code path in `reason`/`supportingCapability`, not
+   * assumed from the table's column shape.
+   */
+  requiredAuthRuntimePrivileges: AuthDbOperation[];
+  requiredAuthSystemPrivileges: AuthDbOperation[];
 }
+
+/**
+ * PR #752 round 14: this registry records the INTENDED authority model
+ * (see the module doc comment above) — it is NOT yet checkable against a
+ * live database the way scripts/rls-verify.ts checks union-eyes's public
+ * schema. Every report generated from this registry must carry this
+ * status explicitly; do not describe AUTH_STORAGE_AUTHORITY as
+ * "operationally enforced" until a real RLS/FORCE RLS/grant-split
+ * migration exists and a live-catalog verifier proves it.
+ */
+export const AUTH_STORAGE_AUTHORITY_ENFORCEMENT_STATUS =
+  'INTENDED_AUTHORITY_NOT_LIVE_DB_ENFORCEMENT' as const;
+
+export type AuthDbOperation = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE';

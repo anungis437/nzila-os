@@ -214,8 +214,19 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
  *     separate, explicit decision, not an automatic side effect of
  *     reactivating membership).
  *
- * FAILS CLOSED the same way as revokeMemberAccess(): both steps are
- * attempted independently; `success` is only true if both succeed.
+ * PR #752 round 14: unlike revokeMemberAccess() (where partial success is
+ * safe — a step that fails to revoke access only leaves MORE access
+ * revoked, never less), reactivation's two writes each independently
+ * grant authority: the canonical role resolver checks authOrganizationUsers
+ * FIRST, then falls back to organizationMembers — so EITHER write
+ * succeeding alone can already authorize the user, regardless of the
+ * other. Two independent try/catch blocks (round 13's original shape)
+ * could report success:false (502) while one store was already active.
+ * Both writes now run inside a SINGLE systemDb transaction (one physical
+ * connection, spanning both the user_management and public schemas on
+ * the same database) with RETURNING-based affected-row assertions — a
+ * missing row or any error rolls back BOTH writes, so authority is never
+ * partially restored.
  */
 export async function reactivateMemberAccess(
   input: ReactivateMemberAccessInput,
@@ -224,44 +235,46 @@ export async function reactivateMemberAccess(
   let authMembershipReenabled = false;
   let localStatusUpdated = false;
 
-  // 1. Re-enable the durable platform-auth organization membership, via
-  // the SYSTEM auth DB credential (cross-user operation).
   try {
     const { systemDb } = await import('@nzila/db/system-client');
     const { authOrganizationUsers } = await import('@nzila/db/schema');
-    await systemDb
-      .update(authOrganizationUsers)
-      .set({ isActive: true, updatedAt: new Date() })
-      .where(
-        and(
-          eq(authOrganizationUsers.userId, input.authUserId),
-          eq(authOrganizationUsers.organizationId, input.organizationId),
-        ),
-      );
+
+    await systemDb.transaction(async (tx) => {
+      const [authRow] = await tx
+        .update(authOrganizationUsers)
+        .set({ isActive: true, updatedAt: new Date() })
+        .where(
+          and(
+            eq(authOrganizationUsers.userId, input.authUserId),
+            eq(authOrganizationUsers.organizationId, input.organizationId),
+          ),
+        )
+        .returning({ organizationUserId: authOrganizationUsers.organizationUserId });
+      if (!authRow) {
+        throw new Error('auth_membership_row_not_found');
+      }
+
+      const [localRow] = await tx
+        .update(organizationMembers)
+        .set({ status: 'active', updatedAt: new Date() })
+        .where(eq(organizationMembers.id, input.membershipId))
+        .returning({ id: organizationMembers.id });
+      if (!localRow) {
+        throw new Error('local_membership_row_not_found');
+      }
+    });
+
     authMembershipReenabled = true;
+    localStatusUpdated = true;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    errors.push(`auth_membership_reenable_failed: ${message}`);
-    logger.error('auth_membership_reenable_failed', {
+    errors.push(`reactivation_transaction_failed: ${message}`);
+    logger.error('reactivation_transaction_failed', {
+      membershipId: input.membershipId,
       authUserId: input.authUserId,
       organizationId: input.organizationId,
       error: err,
     });
-  }
-
-  // 2. Restore local membership status.
-  try {
-    await withSystemContext(async (_tx) => {
-      await db
-        .update(organizationMembers)
-        .set({ status: 'active', updatedAt: new Date() })
-        .where(eq(organizationMembers.id, input.membershipId));
-    });
-    localStatusUpdated = true;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    errors.push(`local_status_update_failed: ${message}`);
-    logger.error('local_status_update_failed', { membershipId: input.membershipId, error: err });
   }
 
   const success = errors.length === 0;

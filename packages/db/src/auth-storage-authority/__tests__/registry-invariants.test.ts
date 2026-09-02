@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { authStorageAuthorityEntries } from '../entries';
 import type { AuthStorageAuthorityEntry } from '../types';
+import { authTableDuplicateDeclarations } from '../duplicate-declarations';
 import * as authSchema from '../../schema/auth';
 
 describe('auth-storage-authority registry invariants', () => {
@@ -27,6 +28,31 @@ describe('auth-storage-authority registry invariants', () => {
   it('every entry has a non-empty reason', () => {
     for (const entry of authStorageAuthorityEntries) {
       expect(entry.reason.length).toBeGreaterThan(20);
+    }
+  });
+
+  it('requiredAuthRuntimePrivileges/requiredAuthSystemPrivileges are only recognized operations, never FULL_DML placeholders', () => {
+    const validOps = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+    for (const entry of authStorageAuthorityEntries) {
+      expect(Array.isArray(entry.requiredAuthRuntimePrivileges)).toBe(true);
+      expect(Array.isArray(entry.requiredAuthSystemPrivileges)).toBe(true);
+      for (const op of entry.requiredAuthRuntimePrivileges) {
+        expect(validOps).toContain(op);
+      }
+      for (const op of entry.requiredAuthSystemPrivileges) {
+        expect(validOps).toContain(op);
+      }
+    }
+  });
+
+  it('a table with dbExecutionPrincipal AUTH_SYSTEM/MIXED-with-system-path has non-empty requiredAuthSystemPrivileges', () => {
+    for (const entry of authStorageAuthorityEntries) {
+      const hasSystemPath =
+        entry.dbExecutionPrincipal === 'AUTH_SYSTEM' ||
+        (entry.dbExecutionPrincipal === 'MIXED' && /AUTH_SYSTEM|systemDb|system-client/.test(entry.reason));
+      if (hasSystemPath) {
+        expect(entry.requiredAuthSystemPrivileges.length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -56,10 +82,10 @@ describe('auth-storage-authority registry invariants', () => {
     }
   });
 
-  it('MIXED-execution entries actually document a cross-user/system-authorized code path in the reason', () => {
+  it('MIXED-execution entries actually document a cross-user/system-authorized or app-own-duplicate code path in the reason', () => {
     for (const entry of authStorageAuthorityEntries) {
       if (entry.dbExecutionPrincipal === 'MIXED') {
-        expect(entry.reason).toMatch(/AUTH_SYSTEM|systemDb|system-client/);
+        expect(entry.reason).toMatch(/AUTH_SYSTEM|systemDb|system-client|APP_OWN_DUPLICATE_RUNTIME/);
       }
     }
   });
@@ -107,6 +133,7 @@ describe('auth-storage-authority registry invariants', () => {
     const validExecution: AuthStorageAuthorityEntry['dbExecutionPrincipal'][] = [
       'AUTH_RUNTIME',
       'AUTH_SYSTEM',
+      'APP_OWN_DUPLICATE_RUNTIME',
       'MIXED',
       'NONE',
     ];
@@ -114,6 +141,21 @@ describe('auth-storage-authority registry invariants', () => {
       expect(validClassifications).toContain(entry.classification);
       expect(validInvocation).toContain(entry.invocationAuthority);
       expect(validExecution).toContain(entry.dbExecutionPrincipal);
+    }
+  });
+
+  it('every entry with an APP_OWN_DUPLICATE_RUNTIME-involving execution documents the alternate declaration in duplicate-declarations.ts', () => {
+    for (const entry of authStorageAuthorityEntries) {
+      if (
+        entry.dbExecutionPrincipal === 'APP_OWN_DUPLICATE_RUNTIME' ||
+        (entry.dbExecutionPrincipal === 'MIXED' && entry.reason.includes('APP_OWN_DUPLICATE_RUNTIME'))
+      ) {
+        const tableName = entry.table.replace('user_management.', '');
+        const dispositioned = authTableDuplicateDeclarations.some(
+          (d) => d.physicalTable === `user_management.${tableName}`,
+        );
+        expect(dispositioned).toBe(true);
+      }
     }
   });
 });

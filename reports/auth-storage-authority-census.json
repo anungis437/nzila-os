@@ -1,17 +1,18 @@
 {
-  "generatedAt": "2026-09-02T20:36:27.852Z",
+  "generatedAt": "2026-09-02T21:34:26.032Z",
   "schema": "user_management",
+  "enforcementStatus": "INTENDED_AUTHORITY_NOT_LIVE_DB_ENFORCEMENT",
   "total": 11,
   "needsReview": 0,
+  "duplicateDeclarationDebt": 4,
   "byClassification": {
-    "AUTH_RUNTIME_SELF_SERVICE": 6,
-    "AUTH_RUNTIME_MIXED": 4,
-    "LATENT_UNWIRED": 1
+    "AUTH_RUNTIME_MIXED": 6,
+    "AUTH_RUNTIME_SELF_SERVICE": 5
   },
   "byExecutionPrincipal": {
-    "AUTH_RUNTIME": 8,
-    "MIXED": 2,
-    "NONE": 1
+    "MIXED": 3,
+    "AUTH_RUNTIME": 7,
+    "APP_OWN_DUPLICATE_RUNTIME": 1
   },
   "invariantViolations": {
     "authSystemOnlyExposedToRuntime": 0
@@ -19,69 +20,244 @@
   "tables": [
     {
       "table": "user_management.users",
-      "classification": "AUTH_RUNTIME_SELF_SERVICE",
+      "classification": "AUTH_RUNTIME_MIXED",
       "invocationAuthority": "END_USER",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "MIXED",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.organization_users",
       "classification": "AUTH_RUNTIME_MIXED",
       "invocationAuthority": "MIXED",
-      "dbExecutionPrincipal": "MIXED"
+      "dbExecutionPrincipal": "MIXED",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": [
+        "UPDATE"
+      ]
     },
     {
       "table": "user_management.user_sessions",
       "classification": "AUTH_RUNTIME_MIXED",
       "invocationAuthority": "MIXED",
-      "dbExecutionPrincipal": "MIXED"
+      "dbExecutionPrincipal": "MIXED",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": [
+        "UPDATE"
+      ]
     },
     {
       "table": "user_management.password_reset_tokens",
       "classification": "AUTH_RUNTIME_SELF_SERVICE",
       "invocationAuthority": "END_USER",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.auth_audit_log",
       "classification": "AUTH_RUNTIME_SELF_SERVICE",
       "invocationAuthority": "MIXED",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.oauth_providers",
-      "classification": "LATENT_UNWIRED",
-      "invocationAuthority": "NONE",
-      "dbExecutionPrincipal": "NONE"
+      "classification": "AUTH_RUNTIME_MIXED",
+      "invocationAuthority": "END_USER",
+      "dbExecutionPrincipal": "APP_OWN_DUPLICATE_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.magic_links",
       "classification": "AUTH_RUNTIME_SELF_SERVICE",
       "invocationAuthority": "END_USER",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.invites",
       "classification": "AUTH_RUNTIME_MIXED",
       "invocationAuthority": "MIXED",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.org_auth_policies",
       "classification": "AUTH_RUNTIME_MIXED",
       "invocationAuthority": "MIXED",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.mfa_totp",
       "classification": "AUTH_RUNTIME_SELF_SERVICE",
       "invocationAuthority": "END_USER",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
     },
     {
       "table": "user_management.mfa_challenges",
       "classification": "AUTH_RUNTIME_SELF_SERVICE",
       "invocationAuthority": "END_USER",
-      "dbExecutionPrincipal": "AUTH_RUNTIME"
+      "dbExecutionPrincipal": "AUTH_RUNTIME",
+      "requiredAuthRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "requiredAuthSystemPrivileges": []
+    }
+  ],
+  "duplicateDeclarations": [
+    {
+      "physicalTable": "user_management.users",
+      "canonical": {
+        "exportName": "authUsers",
+        "file": "packages/db/src/schema/auth.ts"
+      },
+      "alternates": [
+        {
+          "exportName": "users",
+          "file": "apps/union-eyes/db/schema/domains/member/user-management.ts",
+          "productionImporters": [
+            "apps/union-eyes/lib/api-auth-guard.ts (reads users.isSystemAdmin for the CALLER's own userId)"
+          ],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": true
+        },
+        {
+          "exportName": "users",
+          "file": "apps/union-eyes/db/schema/user-management-schema.ts",
+          "productionImporters": [
+            "apps/union-eyes/lib/services/grievance-notifications.ts",
+            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
+            "apps/union-eyes/lib/deadline-engine/recipient-resolver.ts"
+          ],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": true
+        }
+      ]
+    },
+    {
+      "physicalTable": "user_management.organization_users",
+      "canonical": {
+        "exportName": "authOrganizationUsers",
+        "file": "packages/db/src/schema/auth.ts"
+      },
+      "alternates": [
+        {
+          "exportName": "organizationUsers",
+          "file": "apps/union-eyes/db/schema/domains/member/user-management.ts",
+          "productionImporters": [
+            "apps/union-eyes/actions/admin-actions.ts",
+            "apps/union-eyes/lib/middleware/api-security.ts"
+          ],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": true
+        },
+        {
+          "exportName": "organizationUsers",
+          "file": "apps/union-eyes/db/schema/user-management-schema.ts",
+          "productionImporters": [],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": false
+        }
+      ]
+    },
+    {
+      "physicalTable": "user_management.password_reset_tokens",
+      "canonical": {
+        "exportName": "authPasswordResetTokens",
+        "file": "packages/db/src/schema/auth.ts"
+      },
+      "alternates": [
+        {
+          "exportName": "passwordResetTokens",
+          "file": "apps/union-eyes/db/schema/domains/member/user-management.ts",
+          "productionImporters": [],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": false
+        }
+      ]
+    },
+    {
+      "physicalTable": "user_management.auth_audit_log",
+      "canonical": {
+        "exportName": "authAuditLog",
+        "file": "packages/db/src/schema/auth.ts"
+      },
+      "alternates": [
+        {
+          "exportName": "authAuditLog",
+          "file": "apps/union-eyes/db/schema/domains/member/user-management.ts",
+          "productionImporters": [],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": false
+        }
+      ]
+    },
+    {
+      "physicalTable": "user_management.oauth_providers",
+      "canonical": {
+        "exportName": "authOauthProviders",
+        "file": "packages/db/src/schema/auth.ts"
+      },
+      "alternates": [
+        {
+          "exportName": "oauthProviders",
+          "file": "apps/union-eyes/db/schema/domains/member/user-management.ts",
+          "productionImporters": [
+            "apps/union-eyes/app/api/enterprise/integrations/route.ts (live crudRoutes CRUD endpoint)"
+          ],
+          "dbClient": "apps/union-eyes/db/db.ts (DATABASE_URL)",
+          "reachable": true
+        }
+      ]
     }
   ]
 }
