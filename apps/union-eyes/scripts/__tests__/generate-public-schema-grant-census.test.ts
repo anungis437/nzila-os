@@ -19,14 +19,19 @@ describe('generate-public-schema-grant-census', () => {
     expect(existsSync(REPORT_MD)).toBe(true)
 
     const report = JSON.parse(readFileSync(REPORT_JSON, 'utf8'))
-    expect(report.publicSchemaTableCount).toBeGreaterThan(0)
-    expect(report.publicSchemaTableCount).toBe(report.publicTablesWithAuthorityEntry)
+    expect(report.canonicalDeclaredPublicTableCount).toBeGreaterThan(0)
+    expect(report.canonicalDeclaredPublicTableCount).toBe(report.publicTablesWithAuthorityEntry)
     // PERMANENT INVARIANT (PR #752 round 7): every canonical public-schema
     // table must have exactly one authority-manifest entry — "no entry at
     // all" is not a valid disposition for a table that could receive a
     // union_eyes_runtime/union_eyes_system grant.
     expect(report.publicTablesWithoutAuthorityEntry).toBe(0)
     expect(report.publicTablesWithoutAuthorityEntryList).toEqual([])
+    // PERMANENT (round 8): db/schema/**'s own SCHEMA_ROOT walk misses real
+    // sibling declaration files (e.g. db/schema-organizations.ts) — the
+    // census must keep merging them in, not silently narrow scope again.
+    expect(report.additionalDeclarationFilesMerged.length).toBeGreaterThan(0)
+    expect(report.rlsVerificationTier).toBe('DECLARED')
 
     const md = readFileSync(REPORT_MD, 'utf8')
     expect(md).toContain('Public-Schema Grant-Scope Census')

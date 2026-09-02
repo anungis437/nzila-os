@@ -267,3 +267,55 @@ describe('rls-storage-authority-manifest privilege/authority invariants', () => 
   });
 });
 
+describe('rls-storage-authority-manifest — registry/census boundary (PR #752 round 8)', () => {
+  it('PERMANENT INVARIANT: no duplicate (table) key across the manifest', () => {
+    const seen = new Map<string, number>();
+    for (const entry of storageAuthorityManifest) {
+      seen.set(entry.table, (seen.get(entry.table) ?? 0) + 1);
+    }
+    const duplicates = [...seen.entries()].filter(([, count]) => count > 1).map(([table]) => table);
+    expect(duplicates).toEqual([]);
+  });
+
+  it('PERMANENT INVARIANT: every entry outside the canonical DECLARED public-schema scope has an explicit scopeDisposition, and no entry claims a scopeDisposition it does not need', async () => {
+    // Mirrors scripts/generate-public-schema-grant-census.ts's own merged
+    // declaration universe (SCHEMA_ROOT + ADDITIONAL_PUBLIC_SCHEMA_FILES) —
+    // a registry entry that resolves to neither must be explicitly
+    // justified (see StorageAuthorityEntry.scopeDisposition), so the
+    // eventual explicit-GRANT generator never silently emits
+    // `GRANT ... ON TABLE public.<name>` for a name that isn't actually a
+    // live public-schema relation under that exact name.
+    const { scanSchemaDeclarations, scanAdditionalDeclarationFiles } = await import(
+      '../../scripts/schema-duplicate-table-scan'
+    );
+    const { resolve } = await import('node:path');
+    const APP_ROOT = resolve(__dirname, '..', '..');
+    const declarations = scanSchemaDeclarations();
+    const additional = scanAdditionalDeclarationFiles([
+      resolve(APP_ROOT, 'db/schema-organizations.ts'),
+      resolve(APP_ROOT, 'db/schema-applications.ts'),
+      resolve(APP_ROOT, 'db/data/communication.ts'),
+    ]);
+    for (const [key, decls] of additional) {
+      declarations.set(key, [...(declarations.get(key) ?? []), ...decls]);
+    }
+    const publicTables = new Set<string>();
+    for (const [key, decls] of declarations) {
+      const schema = decls[0]?.schema ?? 'public';
+      const tableName = key.startsWith(`${schema}.`) ? key.slice(schema.length + 1) : key;
+      if (schema === 'public') publicTables.add(tableName);
+    }
+
+    const missingDisposition: string[] = [];
+    const unnecessaryDisposition: string[] = [];
+    for (const entry of storageAuthorityManifest) {
+      const inScope = publicTables.has(entry.table);
+      if (!inScope && !entry.scopeDisposition) missingDisposition.push(entry.table);
+      if (inScope && entry.scopeDisposition) unnecessaryDisposition.push(entry.table);
+    }
+    expect(missingDisposition, 'entries outside canonical scope with no scopeDisposition').toEqual([]);
+    expect(unnecessaryDisposition, 'entries inside canonical scope with an unnecessary scopeDisposition').toEqual([]);
+  });
+});
+
+

@@ -24,14 +24,36 @@
  */
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { scanSchemaDeclarations } from './schema-duplicate-table-scan'
+import { scanSchemaDeclarations, scanAdditionalDeclarationFiles } from './schema-duplicate-table-scan'
 import { storageAuthorityManifest } from '../db/rls-storage-authority-manifest'
 
 const REPO_ROOT = resolve(__dirname, '..', '..', '..')
+const APP_ROOT = resolve(__dirname, '..')
 const OUT_DIR = resolve(REPO_ROOT, 'reports')
+
+// PR #752 round 8: db/schema/**'s own SCHEMA_ROOT walk (used by
+// scanSchemaDeclarations) never visits these sibling files even though
+// they declare real, live physical public tables (found via a repo-wide
+// `pgTable(` sweep outside db/schema/** and outside the pre-existing
+// services/financial-service database boundary). Widening SCHEMA_ROOT
+// itself would change scanSchemaDeclarations()'s own conflict-detection
+// output and its ratchet baseline (a different tool's concern), so these
+// are merged in here instead, explicitly, for grant-scope completeness
+// only. Add a file here the moment a NEW sibling schema file is found —
+// do not assume db/schema/** is the whole universe again.
+const ADDITIONAL_PUBLIC_SCHEMA_FILES = [
+  resolve(APP_ROOT, 'db/schema-organizations.ts'),
+  resolve(APP_ROOT, 'db/schema-applications.ts'),
+  resolve(APP_ROOT, 'db/data/communication.ts'),
+]
 
 function main() {
   const declarations = scanSchemaDeclarations()
+  const additional = scanAdditionalDeclarationFiles(ADDITIONAL_PUBLIC_SCHEMA_FILES)
+  for (const [key, decls] of additional) {
+    const existing = declarations.get(key) ?? []
+    declarations.set(key, [...existing, ...decls])
+  }
   const manifestTables = new Set(storageAuthorityManifest.map((e) => e.table))
 
   const publicTables: string[] = []
@@ -56,10 +78,25 @@ function main() {
   const summary = {
     generatedAt: new Date().toISOString(),
     note:
-      'Source of truth for "every canonical PUBLIC-schema table" is scripts/schema-duplicate-table-scan.ts\'s scanSchemaDeclarations() (db/schema/** only \u2014 does not include services/financial-service\'s own separate database boundary). This census answers scope-completeness for the eventual explicit-GRANT generator; it does NOT re-verify RLS policy correctness (see scripts/rls-verify.ts for that).',
-    totalPhysicalTableKeys: declarations.size,
-    publicSchemaTableCount: publicTables.length,
-    nonPublicSchemaTableCount: nonPublicTables.length,
+      'PR #752 round 8 terminology correction: scanSchemaDeclarations() (+ the ' +
+      'ADDITIONAL_PUBLIC_SCHEMA_FILES merge below, for sibling files outside ' +
+      'db/schema/** that SCHEMA_ROOT\'s walk never visits) proves a table is ' +
+      'DECLARED in TypeScript/Drizzle source \u2014 it does NOT independently ' +
+      'prove the table exists in the deployed PostgreSQL catalog, in migration ' +
+      'history, with the expected schema, or that the declaration is not itself ' +
+      'an orphaned/stale artifact. Do not read these counts as "live physical ' +
+      'tables" until cross-referenced against pg_catalog/information_schema ' +
+      'and migration history (tracked separately, see rlsVerificationTier ' +
+      'below \u2014 currently DECLARED only, no live-catalog evidence in this ' +
+      'run). Does not include services/financial-service\'s own separate ' +
+      'database boundary. This census answers scope-completeness for the ' +
+      'eventual explicit-GRANT generator; it does NOT re-verify RLS policy ' +
+      'correctness (see scripts/rls-verify.ts for that).',
+    rlsVerificationTier: 'DECLARED' as 'DECLARED' | 'MIGRATION_EVIDENCED' | 'LIVE_CATALOG_CONFIRMED',
+    additionalDeclarationFilesMerged: ADDITIONAL_PUBLIC_SCHEMA_FILES.map((f) => f.replace(APP_ROOT + '/', '')),
+    totalCanonicalDeclaredTableKeys: declarations.size,
+    canonicalDeclaredPublicTableCount: publicTables.length,
+    canonicalDeclaredNonPublicTableCount: nonPublicTables.length,
     nonPublicSchemas: [...new Set(nonPublicTables.map((t) => t.schema))].sort(),
     publicTablesWithAuthorityEntry: withEntry.length,
     publicTablesWithoutAuthorityEntry: withoutEntry.length,
@@ -76,9 +113,10 @@ function main() {
     '',
     summary.note,
     '',
-    `- Total canonical physical (schema, table) keys: ${summary.totalPhysicalTableKeys}`,
-    `- Public-schema tables: ${summary.publicSchemaTableCount}`,
-    `- Non-public-schema tables: ${summary.nonPublicSchemaTableCount} (schemas: ${summary.nonPublicSchemas.join(', ') || 'none'})`,
+    `- Additional declaration files merged (outside db/schema/**): ${summary.additionalDeclarationFilesMerged.join(', ')}`,
+    `- Total canonical DECLARED (schema, table) keys: ${summary.totalCanonicalDeclaredTableKeys}`,
+    `- Canonical DECLARED public-schema tables: ${summary.canonicalDeclaredPublicTableCount}`,
+    `- Canonical DECLARED non-public-schema tables: ${summary.canonicalDeclaredNonPublicTableCount} (schemas: ${summary.nonPublicSchemas.join(', ') || 'none'})`,
     `- Public tables WITH an authority-manifest entry: ${summary.publicTablesWithAuthorityEntry}`,
     `- Public tables WITHOUT an authority-manifest entry: ${summary.publicTablesWithoutAuthorityEntry}`,
     '',
@@ -89,9 +127,9 @@ function main() {
   ].join('\n')
   writeFileSync(resolve(OUT_DIR, 'union-eyes-public-schema-grant-census.md'), md)
 
-  console.log(`Total physical keys: ${summary.totalPhysicalTableKeys}`)
-  console.log(`Public schema tables: ${summary.publicSchemaTableCount}`)
-  console.log(`Non-public schema tables: ${summary.nonPublicSchemaTableCount}`)
+  console.log(`Total canonical DECLARED keys: ${summary.totalCanonicalDeclaredTableKeys}`)
+  console.log(`Canonical DECLARED public schema tables: ${summary.canonicalDeclaredPublicTableCount}`)
+  console.log(`Canonical DECLARED non-public schema tables: ${summary.canonicalDeclaredNonPublicTableCount}`)
   console.log(`Public tables WITH authority entry: ${summary.publicTablesWithAuthorityEntry}`)
   console.log(`Public tables WITHOUT authority entry: ${summary.publicTablesWithoutAuthorityEntry}`)
   console.log('Report written to reports/union-eyes-public-schema-grant-census.{json,md}')

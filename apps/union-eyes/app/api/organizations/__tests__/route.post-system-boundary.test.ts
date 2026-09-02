@@ -123,9 +123,10 @@ describe('POST /api/organizations — creation authority + execution boundary (P
 
     expect(res.status).toBe(201);
     expect(m.selectWhere).toHaveBeenCalled();
-    // Both the parent lookup and the insert run inside withSystemContext —
-    // called at least twice (lookup + insert), never via withRLSContext.
-    expect(m.withSystemContext.mock.calls.length).toBeGreaterThanOrEqual(2);
+    // PR #752 round 8: the parent lookup and the insert now run inside ONE
+    // withSystemContext transaction (closes a TOCTOU window between the
+    // lookup and the insert) — exactly one call, never via withRLSContext.
+    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
     expect(m.withRLSContext).not.toHaveBeenCalled();
   });
 });

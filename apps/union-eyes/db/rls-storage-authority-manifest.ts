@@ -201,6 +201,21 @@ export type InvocationAuthority =
  */
 export type DbExecutionPrincipal = 'TENANT_RUNTIME' | 'SYSTEM_RUNTIME' | 'MIXED' | 'NONE' | 'TBD'
 
+/**
+ * PR #752 round 8: classifies a manifest entry whose `table` name does NOT
+ * resolve to a canonical DECLARED public-schema table (per the merged
+ * scanSchemaDeclarations() + scanAdditionalDeclarationFiles() universe —
+ * see scripts/generate-public-schema-grant-census.ts). Required whenever
+ * such a mismatch exists, so the eventual explicit-GRANT generator never
+ * silently emits `GRANT ... ON TABLE public.<name>` for a table that isn't
+ * actually a live public-schema relation under that exact name.
+ */
+export type ScopeDisposition =
+  | 'NON_PUBLIC_SCHEMA'
+  | 'SEPARATE_DATABASE_BOUNDARY'
+  | 'DECLARATION_STALE_OR_NONCANONICAL'
+  | 'OTHER_EXPLICITLY_JUSTIFIED'
+
 export interface StorageAuthorityEntry {
   /** Exact public schema table name. */
   table: string
@@ -232,7 +247,14 @@ export interface StorageAuthorityEntry {
   dbExecutionPrincipal: DbExecutionPrincipal
   /** Which NEEDS_REVIEW entries to triage first — see file header. */
   reviewPriority: StorageAuthorityReviewPriority
+  /**
+   * Set ONLY when `table` does not resolve to a canonical DECLARED
+   * public-schema table — see ScopeDisposition. Absent/undefined means
+   * this entry is a normal in-scope public-schema table.
+   */
+  scopeDisposition?: ScopeDisposition
 }
+
 
 /**
  * Classifications that are considered CLOSED (verifier does not fail on
@@ -1488,13 +1510,14 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   {
     table: 'communication_preferences_phase4',
     classification: 'NEEDS_REVIEW',
-    reason: "Django-owned table (backend/notifications/models.py, db_table='communication_preferences_phase4') with no remaining Drizzle/TS declaration \u2014 its only TS-side mirror (db/schema/phase-4-messaging-schema.ts's 'communicationPreferences' export) was deleted in round 4 as dead code with zero consumers (see 'campaigns' entry). Original scanner supportingCapability list included false positives from an unrelated, identically-named 'communicationPreferences' export in db/schema/communication-analytics-schema.ts (a different physical table, see 'communication_preferences' entry) \u2014 removed below pending precise per-import re-verification. Out of this round's bounded scope; full disposition (confirm no TS-side access to this table is needed, or add a canonical Drizzle declaration if it is) tracked as follow-up.",
+    reason: "Django-owned table (backend/notifications/models.py, db_table='communication_preferences_phase4') with no remaining Drizzle/TS declaration \u2014 its only TS-side mirror (db/schema/phase-4-messaging-schema.ts's 'communicationPreferences' export) was deleted in round 4 as dead code with zero consumers (see 'campaigns' entry). Original scanner supportingCapability list included false positives from an unrelated, identically-named 'communicationPreferences' export in db/schema/communication-analytics-schema.ts (a different physical table, see 'communication_preferences' entry) \u2014 removed below pending precise per-import re-verification. Out of this round's bounded scope; full disposition (confirm no TS-side access to this table is needed, or add a canonical Drizzle declaration if it is) tracked as follow-up. PR #752 round 8: this is the ONLY manifest entry left outside the canonical DECLARED public-schema scope (verified via scripts/generate-public-schema-grant-census.ts's merged declaration universe) \u2014 classified DECLARATION_STALE_OR_NONCANONICAL below: the physical table is real (Django-owned, live in Postgres) but has zero current TypeScript/Drizzle declaration to resolve against.",
     supportingCapability: ["app/api/communications/unsubscribe/[recipientId]/route.ts","app/api/communications/webhooks/resend/route.ts","app/api/members/[id]/preferences/route.ts","lib/ml/predictive-scoring.ts"],
     requiredRuntimePrivileges: 'TBD',
     requiredSystemPrivileges: 'TBD',
     invocationAuthority: 'TBD',
     dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
+    scopeDisposition: 'DECLARATION_STALE_OR_NONCANONICAL',
   },
   {
     table: 'communication_templates',
@@ -2818,35 +2841,35 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   },
   {
     table: 'governance_bylaws',
-    classification: 'NEEDS_REVIEW',
-    reason: "10 non-test reference(s) to 'bylaws' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
-    supportingCapability: ["app/[locale]/(marketing)/governance/page.tsx","app/[locale]/(marketing)/solutions/governance-leadership/page.tsx","app/api/governance/bylaws/route.ts","app/layout.tsx","lib/ai/role-templates.ts","lib/icra/obligations/obligationTaxonomy.ts","lib/icra/obligations/sourceInstruments.ts","lib/icra/questions.ts","lib/services/board-packet-generator.ts","lib/ui-tooltips.ts"],
-    requiredRuntimePrivileges: 'TBD',
-    requiredSystemPrivileges: 'TBD',
-    invocationAuthority: 'TBD',
-    dbExecutionPrincipal: 'TBD',
-    reviewPriority: 'HIGH',
+    classification: 'LATENT_UNREACHABLE',
+    reason: "RESOLVED (round 8, governance family review): the original citation list was a FALSE POSITIVE \u2014 every listed file matches the plain-English word 'bylaws' (marketing copy, ICRA questionnaire text, tooltips, role templates), not the actual 'bylaws' Drizzle export (db/schema/domains/governance/bylaws.ts, physical table governance_bylaws) or a raw-SQL reference to it. app/api/governance/bylaws/route.ts's own doc comment says it is 'Sourced from the knowledge base using governance/bylaws document types' \u2014 it queries `knowledgeBase`, not this table. Verified zero '.from(bylaws)'/'.insert(bylaws)'/etc. call sites and zero raw-SQL 'FROM/INTO/UPDATE governance_bylaws' references anywhere outside __tests__/**.",
+    supportingCapability: [],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
+    reviewPriority: 'NONE',
   },
   {
     table: 'governance_policies',
-    classification: 'NEEDS_REVIEW',
-    reason: "2 non-test reference(s) to 'governancePolicies' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
+    classification: 'TENANT_RLS_REQUIRED',
+    reason: "RESOLVED (round 8, governance family review): both citing routes are real. app/api/governance/policies/rules/route.ts's GET (withApi minRole:'steward') reads `governancePolicies` filtered by `eq(governancePolicies.organizationId, organizationId!)` via plain `db`; its POST (minRole:'admin') inserts via withRLSContext, values include organizationId explicitly. app/api/governance/policy-templates/route.ts's GET (minRole:'officer') filters the same way; its POST (minRole:'admin') inserts via withRLSContext with organizationId + an audit-log entry. No UPDATE/DELETE call site found; not defaulted to FULL_DML.",
     supportingCapability: ["app/api/governance/policies/rules/route.ts","app/api/governance/policy-templates/route.ts"],
-    requiredRuntimePrivileges: 'TBD',
-    requiredSystemPrivileges: 'TBD',
-    invocationAuthority: 'TBD',
-    dbExecutionPrincipal: 'TBD',
-    reviewPriority: 'HIGH',
+    requiredRuntimePrivileges: ['SELECT', 'INSERT'],
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
+    reviewPriority: 'NONE',
   },
   {
     table: 'governance_signatories',
-    classification: 'NEEDS_REVIEW',
-    reason: "1 non-test reference(s) to 'signatories' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
-    supportingCapability: ["app/api/governance/signatories/route.ts"],
-    requiredRuntimePrivileges: 'TBD',
-    requiredSystemPrivileges: 'TBD',
-    invocationAuthority: 'TBD',
-    dbExecutionPrincipal: 'TBD',
+    classification: 'LATENT_UNREACHABLE',
+    reason: "RESOLVED (round 8, governance family review): another FALSE POSITIVE, same shape as 'governance_bylaws'. app/api/governance/signatories/route.ts's own doc comment says 'Canonical signatories feed for the governance dashboard' but it actually queries `organizationMembers` filtered to SIGNATORY_ROLES (president/vice_president/secretary_treasurer/officer/chief_steward) \u2014 it never references the 'governanceSignatories' Drizzle export or a raw-SQL 'governance_signatories' reference. Verified zero real reachability anywhere outside __tests__/**.",
+    supportingCapability: [],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'HIGH',
   },
   {
@@ -6665,14 +6688,14 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   },
   {
     table: 'golden_shares',
-    classification: 'NEEDS_REVIEW',
-    reason: "RECLASSIFIED 2026-09-02 (round 7, raw-SQL LATENT-detection correction): this table was previously classified LATENT_UNREACHABLE based on a Drizzle-EXPORT-NAME-only reachability scan, which cannot find raw SQL references. A raw-SQL detection pass (see db/__tests__/rls-storage-authority-manifest-raw-sql-latent.test.ts for the detector/fixture) found real, direct raw-SQL table references (db.execute(sql`... FROM/INTO/UPDATE golden_shares ...`) or an equivalent quoted-table-name repository reference) in the file(s) listed below. Full HTTP-reachability/auth-boundary trace not yet completed.",
+    classification: 'SYSTEM_ONLY',
+    reason: "RESOLVED (round 8, governance family review): app/api/governance/golden-share/route.ts's GET+POST both execute entirely under withSystemContext, querying/inserting a SINGLE platform-wide Class-B share certificate row with NO organization_id filter at all (a global cooperative-governance construct, not tenant-shaped data). FOLLOW-UP FLAGGED, not fixed this round: both handlers gate on `auth: { minRole: 'admin' }` \u2014 an ORDINARY per-organization role tier, not platform_lead/system_admin \u2014 meaning any tenant's own org-admin can read/mutate this platform-wide record. Whether 'admin' is the intended authority for platform-wide Class-B governance data is a product/security question outside pure RLS/manifest scope; tracked here for follow-up, same shape noted for mission_audits and reserved_matter_votes below.",
     supportingCapability: ["app/api/governance/golden-share/route.ts", "app/api/governance/dashboard/route.ts"],
-    requiredRuntimePrivileges: 'TBD',
-    requiredSystemPrivileges: 'TBD',
-    invocationAuthority: 'TBD',
-    dbExecutionPrincipal: 'TBD',
-    reviewPriority: 'HIGH',
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ['SELECT', 'INSERT'],
+    invocationAuthority: 'PLATFORM_ADMIN',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
+    reviewPriority: 'NONE',
   },
   {
     table: 'governance_events',
@@ -6984,14 +7007,14 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   },
   {
     table: 'mission_audits',
-    classification: 'NEEDS_REVIEW',
-    reason: "RECLASSIFIED 2026-09-02 (round 7, raw-SQL LATENT-detection correction): this table was previously classified LATENT_UNREACHABLE based on a Drizzle-EXPORT-NAME-only reachability scan, which cannot find raw SQL references. A raw-SQL detection pass (see db/__tests__/rls-storage-authority-manifest-raw-sql-latent.test.ts for the detector/fixture) found real, direct raw-SQL table references (db.execute(sql`... FROM/INTO/UPDATE mission_audits ...`) or an equivalent quoted-table-name repository reference) in the file(s) listed below. Full HTTP-reachability/auth-boundary trace not yet completed.",
+    classification: 'SYSTEM_ONLY',
+    reason: "RESOLVED (round 8, governance family review): same shape as 'golden_shares' \u2014 app/api/governance/mission-audits/route.ts's GET+POST execute entirely under withSystemContext against a platform-wide audit-results table (audit_year/auditor_firm/etc.), NO organization_id filter, gated only by `minRole: 'admin'` (an ordinary per-org role tier). Same follow-up flagged: whether ordinary org-admin should be able to write platform-wide mission-audit records is a product/security question, not fixed this round.",
     supportingCapability: ["app/api/governance/mission-audits/route.ts", "app/api/governance/dashboard/route.ts"],
-    requiredRuntimePrivileges: 'TBD',
-    requiredSystemPrivileges: 'TBD',
-    invocationAuthority: 'TBD',
-    dbExecutionPrincipal: 'TBD',
-    reviewPriority: 'HIGH',
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ['SELECT', 'INSERT'],
+    invocationAuthority: 'PLATFORM_ADMIN',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
+    reviewPriority: 'NONE',
   },
   {
     table: 'movement_trends',
@@ -7358,14 +7381,14 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   },
   {
     table: 'reserved_matter_votes',
-    classification: 'NEEDS_REVIEW',
-    reason: "RECLASSIFIED 2026-09-02 (round 7, raw-SQL LATENT-detection correction): this table was previously classified LATENT_UNREACHABLE based on a Drizzle-EXPORT-NAME-only reachability scan, which cannot find raw SQL references. A raw-SQL detection pass (see db/__tests__/rls-storage-authority-manifest-raw-sql-latent.test.ts for the detector/fixture) found real, direct raw-SQL table references (db.execute(sql`... FROM/INTO/UPDATE reserved_matter_votes ...`) or an equivalent quoted-table-name repository reference) in the file(s) listed below. Full HTTP-reachability/auth-boundary trace not yet completed.",
+    classification: 'SYSTEM_ONLY',
+    reason: "RESOLVED (round 8, governance family review): same shape as 'golden_shares'/'mission_audits'. app/api/governance/reserved-matters/route.ts (GET+POST), its [id]/route.ts PATCH (Class A vote tally), and its [id]/class-b-vote/route.ts POST (Class B council vote) all execute entirely under withSystemContext against a platform-wide reserved-matter-votes table, NO organization_id filter, all gated only by `minRole: 'admin'` (an ordinary per-org role tier). Same follow-up flagged as golden_shares/mission_audits: whether ordinary org-admin should be able to record platform-wide Class A/B governance votes is a product/security question, not fixed this round.",
     supportingCapability: ["app/api/governance/reserved-matters/[id]/class-b-vote/route.ts", "app/api/governance/reserved-matters/[id]/route.ts", "app/api/governance/reserved-matters/route.ts", "app/api/governance/dashboard/route.ts"],
-    requiredRuntimePrivileges: 'TBD',
-    requiredSystemPrivileges: 'TBD',
-    invocationAuthority: 'TBD',
-    dbExecutionPrincipal: 'TBD',
-    reviewPriority: 'HIGH',
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ['SELECT', 'INSERT', 'UPDATE'],
+    invocationAuthority: 'PLATFORM_ADMIN',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
+    reviewPriority: 'NONE',
   },
   {
     table: 'rl1_tax_slips',
@@ -7938,5 +7961,49 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     invocationAuthority: 'TBD',
     dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
+  },
+  {
+    table: 'applications',
+    classification: 'LATENT_UNREACHABLE',
+    reason: "PR #752 round 8: db/schema-applications.ts's Multi-App Discriminator registry — declared in a sibling file OUTSIDE db/schema/** (SCHEMA_ROOT's walk never visited it; see scripts/generate-public-schema-grant-census.ts's ADDITIONAL_PUBLIC_SCHEMA_FILES for the census-completeness fix). Only real reference is a FK column (organizations.appId references(() => applications.id) in db/schema-organizations.ts) and its barrel re-export in db/index.ts. Zero '.from(applications)'/'.insert(applications)'/'.update(applications)'/'.delete(applications)' call sites and zero raw-SQL 'FROM/INTO/UPDATE applications' references found across app/, actions/, lib/, services/ outside __tests__/**.",
+    supportingCapability: [],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
+    reviewPriority: 'NONE',
+  },
+  {
+    table: 'org_configurations',
+    classification: 'TENANT_RLS_REQUIRED',
+    reason: "PR #752 round 8: db/schema-organizations.ts, another sibling file outside SCHEMA_ROOT's walk (same census-completeness fix as 'applications'). Two independent write paths found: (1) lib/representation/protocol-service.ts's getRepresentationProtocol/saveRepresentationProtocol/resetRepresentationProtocol — REAL, reachable via app/api/admin/representation-protocol/route.ts (withAdminAuth, org-scoped, organizationId taken from the authenticated caller's own context) and consumed read-only by lib/case-assignment-engine.ts. Uses plain `db` with organizationId as an app-level WHERE/values filter, NOT wrapped in withRLSContext — no DB-level RLS session var is set on this path today, a latent gap tracked here (not fixed this round; org_configurations was never 0108-protected and has no RLS policy yet, hence TENANT_RLS_REQUIRED rather than an already-closed classification). (2) actions/admin-actions.ts's getSystemConfigs/updateSystemConfig — LATENT_UNWIRED: actions/admin-actions.ts has zero real importers anywhere in app/lib/actions/services/components (confirmed via grep), matching the round-5 lib/workers/** dead-code precedent; not counted toward required privileges.",
+    supportingCapability: ["app/api/admin/representation-protocol/route.ts", "lib/representation/protocol-service.ts", "lib/case-assignment-engine.ts"],
+    requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
+    reviewPriority: 'HIGH',
+  },
+  {
+    table: 'org_usage',
+    classification: 'LATENT_UNREACHABLE',
+    reason: "PR #752 round 8: db/schema-organizations.ts (sibling-file census fix, see 'applications'). Only reference is actions/admin-actions.ts's getSystemStats — that whole module (actions/admin-actions.ts) has zero real importers anywhere in app/lib/actions/services/components (confirmed via grep, no barrel/indirect import found either), matching the round-5 lib/workers/** dead-code precedent. Zero raw-SQL references found either.",
+    supportingCapability: [],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
+    reviewPriority: 'NONE',
+  },
+  {
+    table: 'organization_relationships',
+    classification: 'SYSTEM_ONLY',
+    reason: "PR #752 round 8: db/schema-organizations.ts (sibling-file census fix, see 'applications'). Two paths found: (1) db/queries/organization-queries.ts's createOrganizationRelationship/getOrganizationRelationships (withRLSContext-wrapped, tenant-scoped by parentOrgId/childOrgId) — LATENT_UNWIRED, zero real callers found anywhere outside that file itself. (2) lib/organizational-topology/source.ts's getInstitutionalGraph() — REAL, reads ALL organization_relationships with no per-org filter (a national/cross-affiliate topology view), consumed by 3 dashboard pages (organizational-topology, organizational-chronology, organizational-observability). Found and fixed a REAL cross-org exposure bug this round: those 3 pages were gated only by requireUser() (any authenticated user, any role) — restricted to clc_staff/clc_executive/system_admin via the new lib/organizational-topology/access.ts, mirroring the round-5 CLC-dashboard precedent (see lib/auth/__tests__/clc-national-role-boundary.test.ts). getInstitutionalGraph() itself was also moved from plain `db` to withSystemContext so the DB-level boundary matches that app-level authority rather than relying on ordinary tenant-RLS routing to happen to permit a cross-org read.",
+    supportingCapability: ["app/[locale]/dashboard/organizational-topology/page.tsx", "app/[locale]/dashboard/organizational-chronology/page.tsx", "app/[locale]/dashboard/organizational-observability/page.tsx", "lib/organizational-topology/source.ts"],
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ['SELECT'],
+    invocationAuthority: 'PLATFORM_ADMIN',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
+    reviewPriority: 'NONE',
   },
 ]

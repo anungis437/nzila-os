@@ -161,52 +161,70 @@ export async function POST(req: NextRequest) {
 
   const parentId: string | null = body.parent_id ?? body.parentId ?? body.parentOrganizationId ?? null;
 
-  // Derive hierarchyPath/hierarchyLevel from the parent instead of trusting a
-  // client-supplied value (which no known caller sends, so it always defaulted
-  // to [] / 0 regardless of the selected parent).
-  let hierarchyPath: string[] = [];
-  let hierarchyLevel = 0;
-  if (parentId) {
-    const parentRows = await withSystemContext(async (_tx) =>
-      db.select({ hierarchyPath: organizations.hierarchyPath, hierarchyLevel: organizations.hierarchyLevel })
-        .from(organizations)
-        .where(eq(organizations.id, parentId))
-    );
-    const [parent] = parentRows as Array<{ hierarchyPath: string[] | null; hierarchyLevel: number | null }>;
-    if (!parent) {
-      return NextResponse.json({ error: `Parent organization not found: ${parentId}` }, { status: 400 });
-    }
-    hierarchyPath = [...(parent.hierarchyPath ?? []), parentId];
-    hierarchyLevel = (parent.hierarchyLevel ?? 0) + 1;
-    if (hierarchyPath.length > MAX_HIERARCHY_DEPTH) {
-      return NextResponse.json(
-        { error: `Hierarchy depth ${hierarchyPath.length} would exceed maximum ${MAX_HIERARCHY_DEPTH}` },
-        { status: 400 },
-      );
+  // PR #752 round 8: parent lookup + hierarchy derivation + INSERT now run
+  // inside ONE withSystemContext transaction (previously two independent
+  // transactions) — closes a TOCTOU window where a concurrent write to the
+  // parent's hierarchyPath/hierarchyLevel between the lookup and the
+  // insert could produce an inconsistent child hierarchyPath.
+  class OrganizationCreateValidationError extends Error {
+    constructor(readonly status: number, readonly payload: Record<string, unknown>) {
+      super('organization creation validation failed');
     }
   }
 
-  const [created] = await withSystemContext(async (_tx) =>
-    db.insert(organizations).values({
-      name: body.name,
-      slug: body.slug,
-      displayName: body.display_name,
-      organizationType: requestedType,
-      parentId,
-      hierarchyPath,
-      hierarchyLevel,
-      sectors: body.sectors ?? [],
-      email: body.email,
-      phone: body.phone,
-      website: body.website,
-      status: body.status ?? 'active',
-      clcAffiliated: body.clc_affiliated ?? false,
-      memberCount: body.member_count ?? 0,
-      activeMemberCount: body.active_member_count ?? 0,
-      settings: body.settings ?? {},
-      featuresEnabled: body.features_enabled ?? [],
-    }).returning()
-  );
+  let created: Record<string, unknown>;
+  try {
+    created = await withSystemContext(async (_tx) => {
+      let hierarchyPath: string[] = [];
+      let hierarchyLevel = 0;
+      if (parentId) {
+        const parentRows = await db
+          .select({ hierarchyPath: organizations.hierarchyPath, hierarchyLevel: organizations.hierarchyLevel })
+          .from(organizations)
+          .where(eq(organizations.id, parentId));
+        const [parent] = parentRows as Array<{ hierarchyPath: string[] | null; hierarchyLevel: number | null }>;
+        if (!parent) {
+          throw new OrganizationCreateValidationError(400, { error: `Parent organization not found: ${parentId}` });
+        }
+        hierarchyPath = [...(parent.hierarchyPath ?? []), parentId];
+        hierarchyLevel = (parent.hierarchyLevel ?? 0) + 1;
+        if (hierarchyPath.length > MAX_HIERARCHY_DEPTH) {
+          throw new OrganizationCreateValidationError(400, {
+            error: `Hierarchy depth ${hierarchyPath.length} would exceed maximum ${MAX_HIERARCHY_DEPTH}`,
+          });
+        }
+      }
+
+      const [row] = await db
+        .insert(organizations)
+        .values({
+          name: body.name,
+          slug: body.slug,
+          displayName: body.display_name,
+          organizationType: requestedType,
+          parentId,
+          hierarchyPath,
+          hierarchyLevel,
+          sectors: body.sectors ?? [],
+          email: body.email,
+          phone: body.phone,
+          website: body.website,
+          status: body.status ?? 'active',
+          clcAffiliated: body.clc_affiliated ?? false,
+          memberCount: body.member_count ?? 0,
+          activeMemberCount: body.active_member_count ?? 0,
+          settings: body.settings ?? {},
+          featuresEnabled: body.features_enabled ?? [],
+        })
+        .returning();
+      return row;
+    });
+  } catch (err) {
+    if (err instanceof OrganizationCreateValidationError) {
+      return NextResponse.json(err.payload, { status: err.status });
+    }
+    throw err;
+  }
 
   return NextResponse.json({ data: created }, { status: 201 });
 }

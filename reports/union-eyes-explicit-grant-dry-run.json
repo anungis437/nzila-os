@@ -1,0 +1,3727 @@
+{
+  "generatedAt": "2026-09-02T15:37:51.944Z",
+  "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0.",
+  "totalManifestEntries": 700,
+  "readyForExplicitGrantCount": 283,
+  "pendingReviewCount": 417,
+  "readyForExplicitGrant": [
+    {
+      "table": "ab_test_assignments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ab_test_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "accessibility_audits",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "accessibility_issues",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "accessibility_test_suites",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "accessibility_user_testing",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_grievance_triages",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_rate_limits",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "alert_actions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "alert_conditions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "alert_escalations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "analytics_scheduled_reports",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "anti_scab_violations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "api_access_tokens",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "applications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "arbitrations",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "automation_execution_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "automation_schedules",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bank_accounts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bank_reconciliation",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bank_reconciliations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bank_transactions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bargaining_units",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "benchmark_categories",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "benchmark_data",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "billing_adjustments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "billing_invoices",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "billing_payments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "billing_terms",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "board_packet_sections",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "board_packet_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "calendar_sharing",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "campaigns",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ]
+    },
+    {
+      "table": "card_signing_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "case_documents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "chatbot_analytics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "chatbot_suggestions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "claim_deadlines",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "claim_precedent_analysis",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "claims",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "clause_comparisons_history",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "clc_api_config",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "clc_organization_sync_log",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "clc_remittance_mapping",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "clc_sync_log",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "clc_webhook_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cms_blocks",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cms_navigation_menus",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cms_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cnesst_filings",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "communication_analytics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "communication_channels",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "communication_preferences",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
+      "table": "communication_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "comparative_analyses",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "conflict_review_committee",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "conflict_training",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "congress_memberships",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "consent_records",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "INSERT"
+      ]
+    },
+    {
+      "table": "contract_amendments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "contract_covered_orgs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "contract_rate_cards",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "corrective_actions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "correspondence",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "course_sessions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cross_org_access_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_anonymization_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_processing_records",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_residency_configs",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_retention_policies",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "deadline_alerts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "deadline_extensions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "deadline_reassignment_convergence",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "deadline_reminder_executions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "deadline_reminders",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "deadline_rules",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "defensibility_packs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "document_access_grants",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "document_links",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "document_search_index",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "document_versions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "documents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "donation_receipts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dsr_activity_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dsr_requests",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dues_policies",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dues_rates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_execution_evidence_links",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_payroll_adjustments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_responses",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employers",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employment_history",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "erp_connectors",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "erp_invoices",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "event_check_ins",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "event_registrations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "event_reminders",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "exit_interview_documents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "exit_interview_sessions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_calendar_attendees",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_calendar_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_calendar_recurring_patterns",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_calendars",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_pension_beneficiaries",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_pension_contributions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_pension_estimates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_pension_members",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_pension_plans",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_pension_service_credits",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_campaigns",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_communications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_executives",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_meetings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_memberships",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_remittances",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federation_resources",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "federations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "field_notes",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "field_organizer_activities",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "financial_audit_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "gl_transaction_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "golden_shares",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
+    },
+    {
+      "table": "governance_bylaws",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "governance_policies",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "governance_signatories",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_approvals",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_assignments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_case_access_assignments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_communications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_deadlines",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "grievance_documents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_responses",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_stages",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_transitions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievance_workflows",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "grievances",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "hazard_reports",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_anonymized_metrics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_assessment_answers",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_assessments",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_benchmark_groups",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_continuity_scores",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_followup_recommendations",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_governance_flags",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_maturity_profiles",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_operational_indicators",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "icra_organizations",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "impact_metrics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "in_app_notifications",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "injury_logs",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "integration_sync_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "integration_sync_logs",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "job_applications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "job_classifications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "job_postings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "job_saved",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "joint_hs_committees",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "journal_entries",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "journal_entry_lines",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "kpi_configurations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "lrb_employers",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "lrb_unions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_arrears",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_breaks",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_certifications",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_consents",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_contact_preferences",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_documents",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_dues_issues",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_dues_ledger",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_employment",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_employment_details",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_history_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_jurisdiction_preferences",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_leaves",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_relationship_scores",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_segments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "message_log",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ]
+    },
+    {
+      "table": "message_notifications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "message_participants",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "message_read_receipts",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "message_templates",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "message_threads",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "messages",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "mfa_configurations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "mission_audits",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
+    },
+    {
+      "table": "mobile_app_config",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "mobile_notifications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "negotiations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "newsletter_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "nlrb_clrb_filings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "notification_bounces",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "notification_delivery_log",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "INSERT"
+      ]
+    },
+    {
+      "table": "notification_history",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "notification_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "notification_queue",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
+      "table": "notification_templates",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "notification_tracking",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "notifications",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "org_configurations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "org_usage",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organization_benchmark_snapshots",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organization_billing_config",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "organization_contacts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organization_members",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organization_relationships",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "organization_sharing_settings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organizations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
+    },
+    {
+      "table": "organizer_impacts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organizing_campaign_milestones",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organizing_contacts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "outreach_enrollments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "outreach_sequences",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "outreach_steps_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pack_download_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pack_verification_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "page_analytics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "payment_classification_policy",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "payment_cycles",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "payment_disputes",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pci_dss_cardholder_data_flow",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pension_benefit_claims",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pension_members",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ppe_equipment",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "preventive_withdrawals",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "program_enrollments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "public_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "push_notification_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "push_notifications",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "report_delivery_history",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "report_executions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "report_shares",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "report_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "reserved_matter_votes",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
+      "table": "right_of_refusal_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "role_tenure_history",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "room_bookings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "safety_audits",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "safety_certifications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "safety_committee_meetings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "safety_inspections",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "safety_policies",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "scheduled_reports",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "scim_configurations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "scim_events_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "segment_executions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "segment_exports",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "signature_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "signature_webhooks_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "sms_messages",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "sms_rate_limits",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "social_engagement",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "social_feeds",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "sso_sessions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "steward_assignments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "stripe_webhook_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "subscription_events_log",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "task_comments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ue_governance_job_cancellation_audit_event",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ue_governance_job_cancellation_request",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ue_governance_job_execution_state",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ue_governance_job_reconciliation_pass",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ue_policy_bindings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "union_dues_receipts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "union_dues_year_end",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "union_representation_votes",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "user_engagement_scores",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "user_sessions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_sessions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "wcag_success_criteria",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "wcb_claims",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "wcb_employer_assessments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "webhook_deliveries",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "webhook_subscriptions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "website_settings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workbook_continuity_breakpoints",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workbook_modernization_alignment",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workbook_stewardship_signals",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workbook_transformation_roadmap",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workflow_definitions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workflow_executions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workplace_incidents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "worksites",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    }
+  ],
+  "pendingReview": [
+    {
+      "table": "ab_test_variants",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ab_tests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "access_justification_requests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "account_balance_reconciliation",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "account_mappings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "address_change_history",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "address_validation_cache",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ai_budgets",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ai_clause_reasonings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ai_copilot_sessions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ai_insight_reports",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ai_safety_filters",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ai_usage_metrics",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "alert_executions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "alert_recipients",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "alert_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "allocation_basis_snapshots",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "allocation_rule_versions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "allocation_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "allocation_run_lines",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "allocation_runs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "analytics_metrics",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "api_integrations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "arbitration_decisions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "arbitration_precedents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "arbitrator_profiles",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "arms_length_verification",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "automation_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "autopay_settings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "award_history",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "award_templates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "band_council_consent",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "band_councils",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "bank_of_canada_rates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "bargaining_notes",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "bargaining_proposals",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "bargaining_team_members",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "benefit_comparisons",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "billing_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "billing_periods",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "billing_subscriptions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "blind_trust_registry",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "board_packet_distributions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "board_packets",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "break_glass_activations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "break_glass_system",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "break_policies",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "budget_pool",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "budget_reservations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "calendar_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "calendars",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "case_studies",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_clauses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_contacts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_footnotes",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_agreements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_benchmark_snapshots",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_clauses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_documents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_extraction_runs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_findings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_freshness_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_ingestion_jobs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_review_decisions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_sources",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_intel_wage_adjustments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_rule_set_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_rule_versions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cba_version_history",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "certification_alerts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "certification_audit_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "certification_compliance_reports",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "certification_types",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "chargeback_statements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "chart_of_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "chat_messages",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "chat_sessions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "claim_updates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clause_comparisons",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clause_embeddings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clause_library_tags",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clc_bargaining_trends",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clc_chart_of_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clc_oauth_tokens",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clc_per_capita_benchmarks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "clc_union_density",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cms_media_library",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cms_pages",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "collective_agreements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "commercial_contracts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committee_action_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committee_documents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committee_intelligence_snapshots",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committee_meeting_attendees",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committee_meetings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committee_memberships",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "committees",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "communication_preferences_phase4",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "compliance_alerts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "conflict_audit_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "conflict_disclosures",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "conflict_of_interest_policy",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "continuing_education",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "contract_line_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "contribution_rates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cookie_consents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "correspondence_audit_trail",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "correspondence_recipients",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cost_centers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cost_of_living_data",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "council_elections",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "country_address_formats",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "course_registrations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cpi_adjusted_pricing",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cpi_data",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "cross_border_transactions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "currency_enforcement_audit",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "currency_enforcement_policy",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "currency_enforcement_violations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "currency_exchange_rates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "customer_nps_surveys",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "customer_onboarding_milestones",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "data_aggregation_consent",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "data_classification_policy",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "data_classification_registry",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "data_quality_warnings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "data_subject_access_requests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "deadline_audit_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "disaster_recovery_drills",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dispatch_assignments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dispatch_requests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dispatch_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "document_folders",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "document_signers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "donation_campaigns",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "donations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dues_assignments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dues_transactions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dunning_cases",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dunning_policies",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "dunning_steps",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "duplicate_group_members",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "duplicate_groups",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "emergency_declarations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_access_attempts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_communications",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_contacts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_execution_artifacts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_execution_compliance_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_execution_profiles",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_execution_replays",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_payroll_run_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_payroll_runs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_remittance_run_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_remittance_runs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_remittances",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_reports",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_risk_scores",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_timesheet_batches",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "employer_timesheet_entries",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "entitlement_usage_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "event_attendees",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "exchange_rates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "exit_interview_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "exit_interviews",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_benefit_coverage",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_benefit_dependents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_benefit_enrollments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_benefit_plans",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_benefit_utilization",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_calendar_connections",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_communication_channels",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_communication_files",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_communication_messages",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_communication_users",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_customers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_data_sync_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_departments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_document_files",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_document_libraries",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_document_permissions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_document_sites",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_employees",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_insurance_beneficiaries",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_insurance_claims",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_insurance_policies",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_invoices",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_lms_completions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_lms_courses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_lms_enrollments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_lms_learners",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_lms_progress",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_payments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "external_positions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "feature_flags",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fee_adjustments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fee_settlement_batches",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fee_settlement_lines",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "financial_periods",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "firewall_access_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "firewall_compliance_audit",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "firewall_violations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fmv_audit_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fmv_benchmarks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fmv_policy",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fmv_violations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "foreign_workers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "fx_rate_audit_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "gdpr_data_requests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "geofence_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "geofences",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "gl_account_mappings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "gl_trial_balance",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "governance_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "grievance_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "grievance_settlements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "grievance_timeline",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "grievance_timeline_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "gss_applications",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "holidays",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "independent_appraisals",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "indigenous_data_access_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "indigenous_data_sharing_agreements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "indigenous_member_data",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ingestion_batches",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ingestion_records",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "insight_recommendations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "integration_api_keys",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "integration_configs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "integration_partners",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "integration_sync_schedules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "integration_webhooks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "international_addresses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "key_holder_registry",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "knowledge_base",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "knowledge_base_articles",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "legal_holds",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "license_renewals",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "lmbp_compliance_alerts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "lmbp_compliance_reports",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "lmbp_letters",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "location_deletion_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "location_tracking",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "location_tracking_audit",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "location_tracking_config",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "lrb_agreements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "lrb_sync_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "meeting_rooms",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "member_addresses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "member_location_consent",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "mentorships",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ml_predictions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "mobile_analytics",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "mobile_devices",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "mobile_sync_queue",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "model_metadata",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "movement_trends",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "negotiation_sessions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "newsletter_campaigns",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "newsletter_distribution_lists",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "newsletter_engagement",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "newsletter_list_subscribers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "newsletter_recipients",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "org_entitlements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "org_subscriptions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "organization_sharing_grants",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "organizer_tasks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "organizing_campaigns",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pay_equity_exercises",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payment_allocations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payment_methods",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payment_plans",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payment_routing_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payroll_deductions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pci_dss_encryption_keys",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pci_dss_quarterly_scans",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pci_dss_requirements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pci_dss_saq_assessments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pending_profiles",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pension_contributions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pension_plans",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pension_t4a_records",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pension_trustee_meetings",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pension_trustees",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "per_capita_remittances",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_applications",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_checklist_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_demo_seeds",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_enrollments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_feedback",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_metrics",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pilot_milestones",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "platform_cost_ledger_entries",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "platform_invoice_line_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "platform_invoices",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "platform_payments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "policy_evaluations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "policy_exceptions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "policy_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "poll_votes",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "polls",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "precedent_citations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "precedent_tags",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pricing_discount_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pricing_regional_deployments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pricing_template_modules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "pricing_templates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "privacy_breaches",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "procurement_bids",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "procurement_requests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "profiles",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "provincial_consent",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "provincial_data_handling",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "provincial_privacy_config",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "public_content",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "push_deliveries",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "push_devices",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "recognition_award_types",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "recognition_awards",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "recognition_programs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reconciliation_exceptions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reconciliation_matches",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reconciliation_runs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "recovery_time_objectives",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "recusal_tracking",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "remittance_approvals",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "remittance_exceptions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "remittance_line_items",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reports",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "retention_policies",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reward_budget_envelopes",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reward_redemptions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "reward_wallet_ledger",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "rl1_tax_slips",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "safety_training_records",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "satisfaction_surveys",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "security_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "security_posture_checks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "separated_payment_transactions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "settlements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "shared_clause_library",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "shopify_config",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "signature_audit_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "signature_audit_trail",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "signature_documents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "signature_verification",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "signature_workflows",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "signers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sla_policies",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sms_campaign_recipients",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sms_campaigns",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sms_conversations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sms_opt_outs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sms_templates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "social_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "social_analytics",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "social_campaigns",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "social_posts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sso_providers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "staff_certifications",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "stewards",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "strategic_goals",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "strike_fund_disbursements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "strike_fund_payment_audit",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "stripe_connect_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "subscription_plans",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "support_tickets",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "survey_answers",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "survey_questions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "survey_responses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "surveys",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "swiss_cold_storage",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "sync_jobs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "t106_filing_tracking",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "t4a_tax_slips",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "tax_year_end_processing",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "tentative_agreements",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "testimonials",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ticket_comments",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "ticket_history",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "traditional_knowledge_registry",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "training_courses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "training_programs",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "transaction_currency_conversions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "transaction_fee_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "transaction_fee_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "transfer_pricing_documentation",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "trend_analyses",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "union_density",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "union_only_data_tags",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "usage_aggregates",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "usage_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "usage_meters",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "user_consents",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "user_notification_preferences",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "user_signatures",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "user_uuid_mapping",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "voter_eligibility",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "votes",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "voting_audit_log",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "voting_notifications",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "voting_options",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "wage_benchmarks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "wage_progressions",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "webhook_events",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "webhook_receipts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "weekly_threshold_tracking",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "whiplash_prevention_audit",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "whiplash_violations",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "workbook_governance_lineage_entries",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "workbook_memory_holders",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "workbook_modules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "workbook_purchases",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "workbooks",
+      "classification": "NEEDS_REVIEW"
+    }
+  ]
+}

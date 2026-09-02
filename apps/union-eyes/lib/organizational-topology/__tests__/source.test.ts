@@ -25,6 +25,14 @@ function chain() {
 
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => chain()) } }))
 
+// PR #752 round 8: getInstitutionalGraph() now executes under
+// withSystemContext (see lib/organizational-topology/source.ts) — the
+// mock just runs the callback immediately against the mocked `db` above,
+// matching every other withSystemContext test mock in this codebase.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn((fn: (tx?: unknown) => unknown) => fn({})),
+}))
+
 vi.mock('@/db/schema-organizations', () => ({
   organizations: new Proxy({}, { get: (_t, p) => `organizations.${String(p)}` }),
   organizationRelationships: new Proxy({}, { get: (_t, p) => `organizationRelationships.${String(p)}` }),

@@ -185,52 +185,82 @@ function extractColumns(block: string): ColumnInfo[] {
 export function scanSchemaDeclarations(): Map<string, Declaration[]> {
   const byTable = new Map<string, Declaration[]>()
   for (const file of walk(SCHEMA_ROOT)) {
-    const src = readFileSync(file, 'utf8')
     const modulePath = file
       .replace(SCHEMA_ROOT, '')
       .replace(/\\/g, '/')
       .replace(/^\//, '')
       .replace(/\.ts$/, '')
-
-    const schemaVars = new Map<string, string>()
-    const schemaVarReLocal = new RegExp(pgSchemaVarRe.source, 'g')
-    let sm: RegExpExecArray | null
-    while ((sm = schemaVarReLocal.exec(src))) schemaVars.set(sm[1], sm[2])
-
-    // Plain, default-schema `pgTable("name", {...})` declarations.
-    const tableReLocal = new RegExp(tableRe.source, 'g')
-    let m: RegExpExecArray | null
-    while ((m = tableReLocal.exec(src))) {
-      const exportName = m[1]
-      const tableName = m[2]
-      const openBraceIdx = m.index + m[0].length - 1
-      const block = findBlock(src, openBraceIdx)
-      const key = `public.${tableName}`
-      const decls = byTable.get(key) ?? []
-      decls.push({ modulePath, exportName, schema: 'public', columns: extractColumns(block) })
-      byTable.set(key, decls)
-    }
-
-    // Schema-qualified `<pgSchema-var>.table("name", {...})` declarations.
-    for (const [varName, schemaName] of schemaVars) {
-      const qualifiedRe = new RegExp(
-        `export const ([a-zA-Z0-9_]+) = ${varName}\\.table\\(\\s*["'\`]([a-z0-9_]+)["'\`]\\s*,\\s*\\{`,
-        'g',
-      )
-      let qm: RegExpExecArray | null
-      while ((qm = qualifiedRe.exec(src))) {
-        const exportName = qm[1]
-        const tableName = qm[2]
-        const openBraceIdx = qm.index + qm[0].length - 1
-        const block = findBlock(src, openBraceIdx)
-        const key = `${schemaName}.${tableName}`
-        const decls = byTable.get(key) ?? []
-        decls.push({ modulePath, exportName, schema: schemaName, columns: extractColumns(block) })
-        byTable.set(key, decls)
-      }
-    }
+    scanFileIntoMap(file, modulePath, byTable)
   }
   return byTable
+}
+
+/**
+ * Scans specific files OUTSIDE db/schema/** for pgTable()/pgSchema-qualified
+ * declarations, merged into the same (schema, table) keying as
+ * scanSchemaDeclarations(). Exists because a handful of real, live physical
+ * tables (e.g. db/schema-organizations.ts's `organizations` /
+ * `organization_members`) are declared in sibling files that SCHEMA_ROOT's
+ * walk never visits — PR #752 round 8 found these were silently invisible
+ * to both this scanner's own conflict detection AND the public-schema grant
+ * census built on top of it. This does not widen SCHEMA_ROOT itself (that
+ * would change scanSchemaDeclarations()'s existing conflict-detection
+ * output and its ratchet baseline); callers that need the FULL known
+ * physical-table universe must explicitly merge both maps.
+ */
+export function scanAdditionalDeclarationFiles(absoluteFilePaths: string[]): Map<string, Declaration[]> {
+  const byTable = new Map<string, Declaration[]>()
+  for (const file of absoluteFilePaths) {
+    const modulePath = file
+      .replace(APP_ROOT, '')
+      .replace(/\\/g, '/')
+      .replace(/^\//, '')
+      .replace(/\.ts$/, '')
+    scanFileIntoMap(file, modulePath, byTable)
+  }
+  return byTable
+}
+
+function scanFileIntoMap(file: string, modulePath: string, byTable: Map<string, Declaration[]>): void {
+  const src = readFileSync(file, 'utf8')
+
+  const schemaVars = new Map<string, string>()
+  const schemaVarReLocal = new RegExp(pgSchemaVarRe.source, 'g')
+  let sm: RegExpExecArray | null
+  while ((sm = schemaVarReLocal.exec(src))) schemaVars.set(sm[1], sm[2])
+
+  // Plain, default-schema `pgTable("name", {...})` declarations.
+  const tableReLocal = new RegExp(tableRe.source, 'g')
+  let m: RegExpExecArray | null
+  while ((m = tableReLocal.exec(src))) {
+    const exportName = m[1]
+    const tableName = m[2]
+    const openBraceIdx = m.index + m[0].length - 1
+    const block = findBlock(src, openBraceIdx)
+    const key = `public.${tableName}`
+    const decls = byTable.get(key) ?? []
+    decls.push({ modulePath, exportName, schema: 'public', columns: extractColumns(block) })
+    byTable.set(key, decls)
+  }
+
+  // Schema-qualified `<pgSchema-var>.table("name", {...})` declarations.
+  for (const [varName, schemaName] of schemaVars) {
+    const qualifiedRe = new RegExp(
+      `export const ([a-zA-Z0-9_]+) = ${varName}\\.table\\(\\s*["'\`]([a-z0-9_]+)["'\`]\\s*,\\s*\\{`,
+      'g',
+    )
+    let qm: RegExpExecArray | null
+    while ((qm = qualifiedRe.exec(src))) {
+      const exportName = qm[1]
+      const tableName = qm[2]
+      const openBraceIdx = qm.index + qm[0].length - 1
+      const block = findBlock(src, openBraceIdx)
+      const key = `${schemaName}.${tableName}`
+      const decls = byTable.get(key) ?? []
+      decls.push({ modulePath, exportName, schema: schemaName, columns: extractColumns(block) })
+      byTable.set(key, decls)
+    }
+  }
 }
 
 /**
