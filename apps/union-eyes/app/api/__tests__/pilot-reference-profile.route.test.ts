@@ -35,6 +35,9 @@ const mockDb = {
 };
 
 vi.mock('@/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(),
+}));
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
   return {

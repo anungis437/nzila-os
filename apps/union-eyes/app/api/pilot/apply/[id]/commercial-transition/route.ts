@@ -90,10 +90,12 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'A valid targetState is required' }, { status: 400 });
     }
 
-    const [application] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+    const [application] = await withSystemContext((_tx) =>
+      db
+        .select()
+        .from(pilotApplications)
+        .where(and(eq(pilotApplications.id, id))),
+    );
 
     if (!application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });

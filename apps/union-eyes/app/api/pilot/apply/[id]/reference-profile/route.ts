@@ -9,24 +9,35 @@ import {
   normalizeCommercialState,
 } from '@/lib/pilot/commercialization-wave1';
 import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 async function buildReferencePayload(id: string) {
-  const [application] = await db
-    .select()
-    .from(pilotApplications)
-    .where(and(eq(pilotApplications.id, id)));
+  // Runs before the ownership decision (below, in each handler) can be made,
+  // so it must see the row regardless of the caller's own organization —
+  // must run under withSystemContext (PR #752 round 18), never the ordinary
+  // tenant runtime connection.
+  const [application, metric] = await withSystemContext(async (_tx) => {
+    const [app] = await db
+      .select()
+      .from(pilotApplications)
+      .where(and(eq(pilotApplications.id, id)));
+
+    if (!app) return [undefined, undefined] as const;
+
+    const [m] = await db
+      .select()
+      .from(pilotMetrics)
+      .where(eq(pilotMetrics.pilotId, app.id))
+      .orderBy(desc(pilotMetrics.lastCalculated))
+      .limit(1);
+
+    return [app, m] as const;
+  });
 
   if (!application) return { application: null };
-
-  const [metric] = await db
-    .select()
-    .from(pilotMetrics)
-    .where(eq(pilotMetrics.pilotId, application.id))
-    .orderBy(desc(pilotMetrics.lastCalculated))
-    .limit(1);
 
   const responses = (application.responses ?? {}) as Record<string, unknown>;
   const commercialState = normalizeCommercialState(responses.commercialState);

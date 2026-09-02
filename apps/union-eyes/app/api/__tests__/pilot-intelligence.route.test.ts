@@ -45,6 +45,9 @@ const mockDb = {
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(),
+}));
 vi.mock('@/lib/pilot/pilot-ownership', () => ({
   enforcePilotOwnership: vi.fn(async () => null),
   wrapPilotItemRoute: <T,>(handler: T) => handler,

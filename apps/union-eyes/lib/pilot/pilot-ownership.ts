@@ -28,6 +28,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { pilotApplications } from '@/db/schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getCurrentUser, normalizeRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
 
@@ -141,6 +142,32 @@ type FactoryRouteHandler = (
  * handler. It does not read the request body, so the factory's own body
  * parsing for PATCH is unaffected.
  */
+/**
+ * Loads a pilot application row by id for the purpose of an ownership
+ * decision (PR #752 round 18).
+ *
+ * The ownership decision itself requires seeing the row regardless of the
+ * caller's own organization — a same-org actor and a cross-org attacker look
+ * identical until the row's owning organization is known. That lookup must
+ * therefore run under `withSystemContext()`, never the ordinary tenant
+ * runtime connection: once a real RLS policy exists for this table (JSONB-
+ * owner policy for tenant reads, per the eventual policy-expansion design),
+ * a tenant-runtime connection would only be able to see rows that ALREADY
+ * match the caller's own org — making the ownership check itself unable to
+ * detect (and therefore reject) a cross-org id.
+ */
+export async function loadPilotApplicationForOwnershipCheck(
+  id: string,
+): Promise<{ responses: Record<string, unknown> | null } | undefined> {
+  return withSystemContext((_tx) =>
+    db
+      .select({ responses: pilotApplications.responses })
+      .from(pilotApplications)
+      .where(eq(pilotApplications.id, id))
+      .then(([application]) => application),
+  );
+}
+
 export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id'): FactoryRouteHandler {
   return async (request, nextContext) => {
     const params = nextContext?.params ? await nextContext.params : undefined;
@@ -153,10 +180,7 @@ export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id
 
     let application: { responses: Record<string, unknown> | null } | undefined;
     try {
-      [application] = await db
-        .select({ responses: pilotApplications.responses })
-        .from(pilotApplications)
-        .where(eq(pilotApplications.id, id));
+      application = await loadPilotApplicationForOwnershipCheck(id);
     } catch (error) {
       logger.error(
         'pilot ownership pre-check failed to load application',
@@ -170,11 +194,23 @@ export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
 
-    const denied = await enforcePilotOwnership(application);
-    if (denied) {
-      return denied;
+    const decision = await authorizePilotAccess(getPilotOwnerOrganizationId(application));
+    if (!decision.ok) {
+      return NextResponse.json(
+        { error: decision.status === 401 ? 'Unauthorized' : 'Forbidden' },
+        { status: decision.status },
+      );
     }
 
+    // Platform-tier actors act cross-org by design — the actual CRUD
+    // operation must run on the system connection (union_eyes_system), not
+    // the ordinary tenant runtime pool, so it is never gated by a future
+    // tenant-scoped RLS policy on this table. Same-org actors keep running
+    // on the ordinary runtime connection (app-layer-enforced today; the
+    // eventual JSONB-owner tenant RLS policy scopes this path).
+    if (decision.reason === 'platform') {
+      return withSystemContext(async (_tx) => handler(request, nextContext));
+    }
     return handler(request, nextContext);
   };
 }

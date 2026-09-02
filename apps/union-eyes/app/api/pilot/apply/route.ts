@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
@@ -20,7 +21,7 @@ export const dynamic = 'force-dynamic';
 // level. Previously gated only by an ordinary per-org steward-level role,
 // letting any steward at any org enumerate every other org's pilot
 // applications.
-const { GET } = crudRoutes({
+const { GET: listPilotApplications } = crudRoutes({
   table: pilotApplications,
   pk: 'id',
   tags: ["Marketing"],
@@ -28,7 +29,16 @@ const { GET } = crudRoutes({
   readRole: 'system_admin',
   writeRole: 'member',
 });
-export { GET };
+
+// Every caller reaching this handler is already system_admin+ (above), so
+// the underlying query always runs cross-org by design — execute it on the
+// system connection rather than the ordinary tenant runtime pool (PR #752
+// round 18), consistent with lib/pilot/pilot-ownership.ts's own platform-tier
+// execution model for the per-item routes.
+export const GET = (
+  request: NextRequest,
+  context?: { params?: Record<string, string> | Promise<Record<string, string>> },
+) => withSystemContext((_tx) => listPilotApplications(request, context));
 
 export async function POST(request: NextRequest) {
   try {

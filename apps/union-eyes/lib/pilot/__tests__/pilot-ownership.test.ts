@@ -34,6 +34,13 @@ vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
 vi.mock('@/db', () => ({ db: { select: mockDbSelect } }));
 vi.mock('@/db/db', () => ({ db: { select: mockDbSelect } }));
 
+// withSystemContext is ALS-routing plumbing (PR #752 rounds 16-18) — the
+// mocked `db` above already stands in for both the tenant and system
+// connections in these unit tests, so the mock just runs the callback.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(),
+}));
+
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));

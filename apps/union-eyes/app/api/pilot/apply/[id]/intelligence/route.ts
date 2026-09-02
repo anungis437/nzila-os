@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { pilotApplications } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -40,10 +41,12 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const [application] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+    const [application] = await withSystemContext((_tx) =>
+      db
+        .select()
+        .from(pilotApplications)
+        .where(and(eq(pilotApplications.id, id))),
+    );
 
     if (!application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
@@ -106,10 +109,12 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
     const payload = (await request.json().catch(() => ({}))) as IntelligencePayload;
 
-    const [application] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+    const [application] = await withSystemContext((_tx) =>
+      db
+        .select()
+        .from(pilotApplications)
+        .where(and(eq(pilotApplications.id, id))),
+    );
 
     if (!application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });

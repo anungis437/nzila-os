@@ -1,6 +1,6 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-02T23:07:56.173Z
+Generated: 2026-09-02T23:31:43.411Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
@@ -8,19 +8,19 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 - Ready for explicit GRANT (CLOSED, fully resolved): 320
 - Pending review (NEEDS_REVIEW, excluded from plan): 380
 - Tenant-granted tables (union_eyes_runtime): 103
-- System-granted tables (union_eyes_system): 19
+- System-granted tables (union_eyes_system): 20
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
 | tenant (union_eyes_runtime) | 103 | 91 | 65 | 56 |
-| system (union_eyes_system) | 17 | 9 | 7 | 0 |
+| system (union_eyes_system) | 18 | 9 | 8 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
 
 - Tenant DELETE grants (56): anti_scab_violations, arbitration_decisions, arbitration_precedents, arbitrations, bargaining_notes, bargaining_proposals, bargaining_units, campaigns, case_studies, cba_clauses, claim_deadlines, claims, cnesst_filings, collective_agreements, committee_documents, committees, communication_preferences, correspondence, course_sessions, deadline_reminders, documents, employers, federations, grievance_case_access_assignments, grievance_deadlines, grievance_documents, grievance_transitions, grievances, hazard_reports, in_app_notifications, joint_hs_committees, kpi_configurations, member_arrears, member_breaks, member_employment, member_history_events, member_segments, message_log, message_templates, negotiations, notification_queue, notifications, org_configurations, organization_members, preventive_withdrawals, push_notifications, right_of_refusal_events, safety_inspections, sms_messages, steward_assignments, testimonials, voting_sessions, wcb_claims, wcb_employer_assessments, workplace_incidents, worksites
-- Mixed-principal tables (11): campaigns, collective_agreements, communication_preferences, consent_records, deadline_reminders, grievance_deadlines, message_log, notification_delivery_log, notification_queue, organization_members, organizations
+- Mixed-principal tables (12): campaigns, collective_agreements, communication_preferences, consent_records, deadline_reminders, grievance_deadlines, message_log, notification_delivery_log, notification_queue, organization_members, organizations, pilot_applications
 - SYSTEM_ONLY tables with broad system DML (>=3 ops) (2): council_elections, reserved_matter_votes
 - GLOBAL_REFERENCE_DATA with tenant mutations (2): case_studies, testimonials
 
@@ -283,7 +283,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | pci_dss_cardholder_data_flow | LATENT_UNREACHABLE | NONE | NONE |
 | pension_benefit_claims | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | pension_members | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
-| pilot_applications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
+| pilot_applications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | SELECT, UPDATE |
 | ppe_equipment | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | preventive_withdrawals | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | program_enrollments | LATENT_UNREACHABLE | NONE | NONE |
