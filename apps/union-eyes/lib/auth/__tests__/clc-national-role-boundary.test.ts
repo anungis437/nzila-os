@@ -32,15 +32,33 @@
  * real importers" for the LATENT_UNWIRED ones via a real grep-based source
  * scan, not a string-presence assertion.
  *
+ * Round 12 correction (real defect found and fixed): the invite service's
+ * ALLOWED_ROLES allow-list included 'coo' — a Nzila platform-operations
+ * role (level 295, ABOVE platform_lead/system_admin/CLC roles), not a
+ * tenant-local one. Since the invite-create route only requires
+ * hasMinRole('admin') (level 140) and role-level checks compare hierarchy
+ * LEVEL rather than explicit assignability, an ordinary tenant admin could
+ * invite a member with role:'coo' into their OWN org and that member
+ * would then satisfy any minRole/hierarchy-level check requiring
+ * platform-operations authority — a real privilege escalation. FIXED:
+ * removed 'coo'; the allow-list is now exported as
+ * TENANT_SELF_SERVICE_ASSIGNABLE_ROLES (packages/platform-auth/src/invites/service.ts)
+ * and checked here against the canonical, EXPLICIT
+ * PLATFORM_ELEVATED_ROLES constant (lib/api-auth-guard.ts) — the full
+ * Nzila-platform-operations + CLC/federation/national role vocabulary,
+ * not a 4-role ad hoc list. Assignability is modeled explicitly; numeric
+ * hierarchy level alone is never trusted to imply "may be self-service
+ * assigned" or "may not be".
+ *
  * Writer enumeration (verified 2026-09-02 via git grep across app/, lib/,
  * actions/, services/ for `.update(organizationMembers)`/`.insert(organizationMembers)`
  * call sites, cross-checked against every `role:` write in the matched
  * files):
  *   1. packages/platform-auth/src/invites/service.ts's createInvite() —
  *      TENANT_SELF_SERVICE (app/api/auth/invite/create/route.ts, gated by
- *      hasMinRole('admin') only). SAFE: its ALLOWED_ROLES allow-list is
- *      {member, steward, chief_steward, admin, coo} — excludes every
- *      PLATFORM_ELEVATED_ROLES entry.
+ *      hasMinRole('admin') only). SAFE (round 12): its
+ *      TENANT_SELF_SERVICE_ASSIGNABLE_ROLES allow-list is {member, steward,
+ *      chief_steward, admin} — excludes every PLATFORM_ELEVATED_ROLES entry.
  *   2. lib/services/member-service.ts's bulkUpdateMemberRole() —
  *      LATENT_UNWIRED. Casts an arbitrary role string onto
  *      organizationMembers with NO allow-list. Zero real (non-test)
@@ -66,19 +84,10 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { TENANT_SELF_SERVICE_ASSIGNABLE_ROLES } from '@nzila/platform-auth/invites';
+import { ROLE_HIERARCHY, PLATFORM_ELEVATED_ROLES } from '@/lib/api-auth-guard';
 
-const REPO_ROOT = resolve(__dirname, '..', '..', '..', '..', '..');
-const PLATFORM_AUTH_INVITE_SERVICE = resolve(
-  REPO_ROOT,
-  'packages/platform-auth/src/invites/service.ts',
-);
 const APP_ROOT = resolve(__dirname, '..', '..', '..');
-
-// Canonical role vocabulary — lib/auth/roles.ts's UserRole enum values
-// (CLC_STAFF, CLC_EXECUTIVE, SYSTEM_ADMIN, PLATFORM_LEAD), not a
-// redeclared/independent list, to avoid drifting from the repo's actual
-// role definitions.
-const PLATFORM_ELEVATED_ROLES = ['clc_staff', 'clc_executive', 'system_admin', 'platform_lead'];
 
 /**
  * Real (non-test) importer count for a given module path, searched across
@@ -109,18 +118,28 @@ function realImporterFiles(moduleSpecifierFragment: string, definingFileRelative
     .filter((file) => file !== definingFileRelativePath);
 }
 
-describe('CLC national dashboard authority boundary (PR #752 round 5/6)', () => {
-  it("the live self-service invite path's ALLOWED_ROLES allow-list excludes every CLC/platform elevated role", () => {
-    const source = readFileSync(PLATFORM_AUTH_INVITE_SERVICE, 'utf8');
-    const match = source.match(/const ALLOWED_ROLES = new Set\(\[([\s\S]*?)\]\)/);
-    expect(match, 'expected to find ALLOWED_ROLES in invites/service.ts').toBeTruthy();
-    const allowListBody = match![1];
-    for (const role of PLATFORM_ELEVATED_ROLES) {
-      expect(
-        allowListBody.includes(`'${role}'`),
-        `ALLOWED_ROLES must NOT include '${role}' — self-service org invites must never be able to grant a CLC/platform-level role`,
-      ).toBe(false);
+describe('CLC national dashboard authority boundary (PR #752 round 5/6/12)', () => {
+  it('TENANT_SELF_SERVICE_ASSIGNABLE_ROLES (the actual invite-service allow-list) has ZERO overlap with the canonical PLATFORM_ELEVATED_ROLES set', () => {
+    const overlap = PLATFORM_ELEVATED_ROLES.filter((role) => TENANT_SELF_SERVICE_ASSIGNABLE_ROLES.has(role));
+    expect(overlap, 'a tenant self-service writer must never be able to assign a platform-elevated role').toEqual([]);
+  });
+
+  it("ordinary tenant admin CAN invite approved tenant-local roles (member/steward/chief_steward/admin)", () => {
+    for (const role of ['member', 'steward', 'chief_steward', 'admin']) {
+      expect(TENANT_SELF_SERVICE_ASSIGNABLE_ROLES.has(role), `${role} should be self-service assignable`).toBe(true);
     }
+  });
+
+  it("ordinary tenant admin CANNOT invite any Nzila platform-operations or CLC/federation/national role", () => {
+    for (const role of PLATFORM_ELEVATED_ROLES) {
+      expect(TENANT_SELF_SERVICE_ASSIGNABLE_ROLES.has(role), `${role} must NOT be self-service assignable`).toBe(false);
+    }
+  });
+
+  it("'coo' hierarchy level is above platform_lead/system_admin/admin — proof of why it must never be re-added to the tenant invite allow-list casually", () => {
+    expect(ROLE_HIERARCHY.coo).toBeGreaterThan(ROLE_HIERARCHY.platform_lead);
+    expect(ROLE_HIERARCHY.coo).toBeGreaterThan(ROLE_HIERARCHY.system_admin);
+    expect(ROLE_HIERARCHY.coo).toBeGreaterThan(ROLE_HIERARCHY.admin);
   });
 
   it('the invite-create route is gated only by an ordinary tenant-level role (admin), not a platform-level one — confirming the allow-list is the actual enforcement boundary, not the route gate', () => {

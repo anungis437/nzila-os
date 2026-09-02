@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T18:52:32.109Z",
+  "generatedAt": "2026-09-02T19:58:28.548Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
   "readyForExplicitGrantCount": 298,
   "pendingReviewCount": 402,
   "tenantGrantedTableCount": 88,
-  "systemGrantedTableCount": 16,
+  "systemGrantedTableCount": 17,
   "tenantOperationTotals": {
     "SELECT": 88,
     "INSERT": 79,
@@ -13,9 +13,9 @@
     "DELETE": 54
   },
   "systemOperationTotals": {
-    "SELECT": 14,
+    "SELECT": 15,
     "INSERT": 8,
-    "UPDATE": 5,
+    "UPDATE": 6,
     "DELETE": 0
   },
   "riskSignals": {
@@ -85,6 +85,7 @@
       "message_log",
       "notification_delivery_log",
       "notification_queue",
+      "organization_members",
       "organizations"
     ],
     "systemOnlyBroadSystemDml": [
@@ -667,7 +668,7 @@
     },
     {
       "table": "cross_org_access_log",
-      "classification": "LATENT_UNREACHABLE",
+      "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -1724,7 +1725,10 @@
         "UPDATE",
         "DELETE"
       ],
-      "systemPrivileges": []
+      "systemPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ]
     },
     {
       "table": "organization_relationships",

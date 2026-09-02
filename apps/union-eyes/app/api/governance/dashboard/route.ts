@@ -7,6 +7,7 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ export const GET = withApi(
   // same national/platform allow-list used elsewhere in this PR (round 5
   // CLC dashboard, round 8 institutional topology) — an ordinary tenant
   // org-admin must never reach these platform-wide governance records.
-  { auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] }, entitlement: 'governance_suite' },
+  { auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     // Golden share (latest)

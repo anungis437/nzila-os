@@ -6,6 +6,7 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export const GET = withApi(
   // Platform-wide Class-B governance data (round 11): restricted to the
   // same national/platform allow-list used elsewhere in this PR (round 5
   // CLC dashboard, round 8 institutional topology).
-  { auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] }, entitlement: 'governance_suite' },
+  { auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     const rows = await db.execute(sql`
@@ -30,7 +31,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     entitlement: 'governance_suite',
     body: z.object({
       certificateNumber: z.string().min(1),

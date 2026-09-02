@@ -180,6 +180,70 @@ export const ROLE_HIERARCHY = {
   member: 20,                        // Union Member
 } as const;
 
+/**
+ * PR #752 round 12: canonical set of roles that NO tenant self-service
+ * writer (invite acceptance, member-role update, bulk import, etc.) may
+ * ever assign — Nzila platform-operations roles and CLC/federation/
+ * national cross-org roles. Assignability is modeled EXPLICITLY here,
+ * not inferred from numeric ROLE_HIERARCHY level (a higher level does not
+ * by itself mean "a tenant admin must not grant it" — see
+ * TENANT_SELF_SERVICE_ASSIGNABLE_ROLES in
+ * packages/platform-auth/src/invites/service.ts for the converse,
+ * explicit allow-list). Every reachable role-writer must be audited
+ * against this constant — see
+ * lib/auth/__tests__/clc-national-role-boundary.test.ts.
+ */
+export const PLATFORM_ELEVATED_ROLES: readonly UserRole[] = [
+  // Nzila Ventures platform ownership/operations
+  'app_owner',
+  'coo',
+  'cto',
+  'platform_lead',
+  'customer_success_director',
+  'support_manager',
+  'data_analytics_manager',
+  'billing_manager',
+  'integration_manager',
+  'compliance_manager',
+  'security_manager',
+  'support_agent',
+  'data_analyst',
+  'billing_specialist',
+  'integration_specialist',
+  'content_manager',
+  'training_coordinator',
+  'system_admin',
+  // CLC/federation/national cross-org roles
+  'clc_executive',
+  'clc_staff',
+  'fed_executive',
+  'fed_staff',
+  'national_officer',
+];
+
+/**
+ * PR #752 round 11/12: the exact roles authorized to operate the
+ * platform-wide Class-B governance capability (golden_shares/
+ * mission_audits/reserved_matter_votes — a "Union Member Representative
+ * Council" construct per db/schema/domains/governance/governance.ts,
+ * executed under withSystemContext, no organization_id filter). Round 11
+ * removed ordinary tenant 'admin' (a real privilege-escalation fix); round
+ * 12 centralizes the resulting allow-list here instead of six copied
+ * array literals across the governance route files + their tests.
+ *
+ * Deliberately does NOT include platform_lead/app_owner/system roles
+ * beyond system_admin, or CLC/federation roles beyond clc_staff/
+ * clc_executive — not because they rank lower, but because there is no
+ * product-doctrine evidence they operate this specific governance
+ * capability; assignability/operability is modeled explicitly, never
+ * inferred from a higher ROLE_HIERARCHY number.
+ */
+export const GOVERNANCE_SYSTEM_ROLES: readonly UserRole[] = [
+  'clc_staff',
+  'clc_executive',
+  'system_admin',
+];
+
 export type UserRole = keyof typeof ROLE_HIERARCHY;
 
 /**

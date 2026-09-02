@@ -6,12 +6,13 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
 export const PATCH = withApi(
   {
-    auth: { required: true, roles: ['clc_staff', 'clc_executive', 'system_admin'] },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     entitlement: 'governance_suite',
     body: z.object({
       votesFor: z.number().int(),
