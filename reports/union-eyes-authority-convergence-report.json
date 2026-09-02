@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-09-02T12:04:54.692Z",
+  "totalTables": 432,
+  "byClassification": {
+    "TENANT_RLS_REQUIRED": 58,
+    "LATENT_UNREACHABLE": 156,
+    "NEEDS_REVIEW": 207,
+    "PARENT_OWNED_RLS_REQUIRED": 1,
+    "SYSTEM_ONLY": 9,
+    "USER_RLS_REQUIRED": 1
+  },
+  "needsReview": 207,
+  "authorityModel": {
+    "invocationAuthorityTbd": 243,
+    "dbExecutionPrincipalTbd": 243,
+    "requiredRuntimePrivilegesTbd": 207,
+    "requiredSystemPrivilegesTbd": 247,
+    "closedClassificationWithTbdAuthorityCount": 36
+  },
+  "invariantViolations": {
+    "systemOnlyExposedToTenantRuntime": 0,
+    "latentUnreachableExposedToAnyRole": 0
+  },
+  "policyGaps": {
+    "note": "0108-protected-table detection is a best-effort static scan of ue_create_*_rls_policy() calls and ENABLE ROW LEVEL SECURITY statements in the 0108 migration SQL, not a live database introspection.",
+    "tenantRlsRequiredMissing0108Coverage": 58,
+    "parentOwnedRlsRequiredMissingPolicy": 1,
+    "userRlsRequiredMissingPolicy": 1
+  },
+  "blanketGrantBlocker": "union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0 or any closed-classification entry has TBD authority/privileges."
+}

@@ -64,13 +64,42 @@ interface BillingSchedulerResult {
 export class BillingScheduler {
   /**
    * Run automated billing for all organizations with the given frequency
-   * 
+   *
    * This is called by cron jobs at scheduled intervals:
    * - Monthly: 1st of month
    * - Bi-weekly: Every other Monday
    * - Weekly: Every Monday
+   *
+   * The ENTIRE cross-org operation — organization enumeration, each org's
+   * billing-cycle generation, and completion/failure notifications — runs
+   * inside a single withSystemContext() so every nested call to the
+   * canonical `db` import (in this file, in BillingCycleService, in the
+   * notification service, in audit-service) resolves to the
+   * union_eyes_system connection via AsyncLocalStorage, not just the
+   * initial organization_billing_config enumeration (see db/db.ts's `db`
+   * Proxy and lib/db/with-rls-context.ts's systemContextStorage).
+   * Request-facing authorization (platform_lead) is still enforced
+   * entirely at the route level, before this is ever called —
+   * withSystemContext is only the execution mechanism.
+   *
+   * KNOWN LIMITATION (pre-existing, not introduced here):
+   * BillingCycleService.generateBillingCycle() internally calls
+   * withRLSContext()'s no-context overload, which calls auth()
+   * unconditionally and throws if there is no authenticated session — that
+   * check happens before any DB access and does not consult the active
+   * system context. This is fine for the only currently-wired caller (the
+   * platform_lead-authenticated admin route, which has a real session),
+   * but if runMonthlyBilling/runWeeklyBilling/runBiWeeklyBilling are ever
+   * invoked from a truly headless cron trigger with no HTTP session,
+   * generateBillingCycle will throw "Unauthorized" regardless of this
+   * SYSTEM wrapper. Fixing that requires BillingCycleService to offer a
+   * system-aware entrypoint — out of scope for this correction.
    */
   static async runScheduledBilling(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
+    return withSystemContext((_tx) => this.runScheduledBillingInSystemContext(frequency));
+  }
+
+  private static async runScheduledBillingInSystemContext(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
     const startTime = Date.now();
 
     logger.info(`Starting scheduled billing run for frequency: ${frequency}`);
@@ -191,71 +220,73 @@ export class BillingScheduler {
   }
 
   /**
-   * Get organizations configured for a specific billing frequency
+   * Get organizations configured for a specific billing frequency.
    *
    * Deliberately cross-organization (organization_billing_config is
-   * SYSTEM_ONLY — see db/rls-storage-authority-manifest.ts): only a
-   * platform_lead-authorized scheduler enumerates every org's billing
-   * config, so this runs through withSystemContext rather than the
-   * ordinary tenant runtime connection.
+   * SYSTEM_ONLY — see db/rls-storage-authority-manifest.ts). Uses the
+   * canonical `db` import directly rather than opening its own
+   * withSystemContext: this is always called from within
+   * runScheduledBilling's outer withSystemContext, so `db` already
+   * resolves to the union_eyes_system connection via AsyncLocalStorage.
+   * Opening a second, nested withSystemContext here would start an
+   * unrelated second transaction rather than participating in the same
+   * system execution boundary as the rest of the scheduled-billing run.
    */
   private static async getOrganizationsForBilling(
     frequency: BillingFrequency
   ): Promise<BillingScheduleConfig[]> {
     try {
-      return await withSystemContext(async (tx) => {
-        const configured = await tx
-          .select({
-            organizationId: organizationBillingConfig.organizationId,
-            organizationName: organizations.name,
-            frequency: organizationBillingConfig.billingFrequency,
-            enabled: organizationBillingConfig.enabled,
-          })
-          .from(organizationBillingConfig)
-          .innerJoin(
-            organizations,
-            eq(organizationBillingConfig.organizationId, organizations.id)
+      const configured = await db
+        .select({
+          organizationId: organizationBillingConfig.organizationId,
+          organizationName: organizations.name,
+          frequency: organizationBillingConfig.billingFrequency,
+          enabled: organizationBillingConfig.enabled,
+        })
+        .from(organizationBillingConfig)
+        .innerJoin(
+          organizations,
+          eq(organizationBillingConfig.organizationId, organizations.id)
+        )
+        .where(
+          and(
+            eq(organizationBillingConfig.enabled, true),
+            eq(organizationBillingConfig.billingFrequency, frequency)
           )
-          .where(
-            and(
-              eq(organizationBillingConfig.enabled, true),
-              eq(organizationBillingConfig.billingFrequency, frequency)
-            )
+        );
+
+      if (configured.length > 0) {
+        return configured as BillingScheduleConfig[];
+      }
+
+      // Fallback: get all active organizations and assume monthly billing
+      const orgs = await db
+        .select({
+          id: organizations.id,
+          name: organizations.name,
+          status: organizations.status,
+        })
+        .from(organizations)
+        .where(eq(organizations.status, 'active'));
+
+      return orgs
+        .filter((org) => org.status === 'active')
+        .map((org) => {
+          // Per-org billing frequency is not yet persisted on the organizations
+          // table. Hardcoding 'monthly' here means quarterly/annual contracts
+          // would be over-billed by this scheduler. Surface loudly until we
+          // either add a column or a billing_subscription table.
+          logger.warn(
+            'billing-scheduler: org billing frequency is hardcoded to monthly; per-org frequency is not persisted',
+            { organizationId: org.id }
           );
-
-        if (configured.length > 0) {
-          return configured as BillingScheduleConfig[];
-        }
-
-        // Fallback: get all active organizations and assume monthly billing
-        const orgs = await tx
-          .select({
-            id: organizations.id,
-            name: organizations.name,
-            status: organizations.status,
-          })
-          .from(organizations)
-          .where(eq(organizations.status, 'active'));
-
-        return orgs
-          .filter((org) => org.status === 'active')
-          .map((org) => {
-            // Per-org billing frequency is not yet persisted on the organizations
-            // table. Hardcoding 'monthly' here means quarterly/annual contracts
-            // would be over-billed by this scheduler. Surface loudly until we
-            // either add a column or a billing_subscription table.
-            logger.warn(
-              'billing-scheduler: org billing frequency is hardcoded to monthly; per-org frequency is not persisted',
-              { organizationId: org.id }
-            );
-            return {
-              organizationId: org.id,
-              organizationName: org.name,
-              frequency: 'monthly' as BillingFrequency,
-              enabled: true,
-            };
-          });
-      });
+          return {
+            organizationId: org.id,
+            organizationName: org.name,
+            frequency: 'monthly' as BillingFrequency,
+            enabled: true,
+          };
+        });
     } catch (error) {
       logger.error('Error fetching organizations for billing', { error });
       throw error;

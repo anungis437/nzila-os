@@ -24,7 +24,7 @@ import {
 import Link from 'next/link';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
 import { CLCApprovalWorkflow } from '@/components/admin/clc-approval-workflow';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { clcOrganizationSyncLog } from '@/db/schema/clc-sync-audit-schema';
 import { perCapitaRemittances, remittanceApprovals } from '@/db/schema/clc-per-capita-schema';
 import { eq, desc, count, and, sql, lte } from 'drizzle-orm';
@@ -47,9 +47,17 @@ async function checkCLCStaffAccess(userId: string, orgId: string): Promise<boole
 
 async function getCLCOperationalMetrics(_orgId: string) {
   try {
+    // clc_organization_sync_log is SYSTEM_ONLY (nullable organization_id,
+    // cross-affiliate sync audit log — see db/rls-storage-authority-manifest.ts).
+    // requireUser()+checkCLCStaffAccess() above is the request-facing
+    // authorization; the DB execution itself must still go through the
+    // system connection, not the ordinary tenant runtime — a SYSTEM_ONLY
+    // table may never be read via the ordinary db import regardless of
+    // how privileged the caller's role is.
+    return await withSystemContext(async (tx) => {
     // Query sync log for failed syncs in last 24 hours
     const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [failedSyncStats] = await db
+    const [failedSyncStats] = await tx
       .select({ count: count() })
       .from(clcOrganizationSyncLog)
       .where(
@@ -60,7 +68,7 @@ async function getCLCOperationalMetrics(_orgId: string) {
       );
 
     // Get most recent sync
-    const [mostRecentSync] = await db
+    const [mostRecentSync] = await tx
       .select({
         syncedAt: clcOrganizationSyncLog.syncedAt,
         action: clcOrganizationSyncLog.action,
@@ -70,14 +78,14 @@ async function getCLCOperationalMetrics(_orgId: string) {
       .limit(1);
 
     // Count pending approvals
-    const [pendingApprovalStats] = await db
+    const [pendingApprovalStats] = await tx
       .select({ count: count() })
       .from(remittanceApprovals)
       .where(eq(remittanceApprovals.status, 'pending'));
 
     // Count overdue remittances (past due date and not paid)
     const today = new Date().toISOString().split('T')[0];
-    const [overdueStats] = await db
+    const [overdueStats] = await tx
       .select({ count: count() })
       .from(perCapitaRemittances)
       .where(
@@ -88,7 +96,7 @@ async function getCLCOperationalMetrics(_orgId: string) {
       );
 
     // Get recent sync activity (last 10 syncs)
-    const recentSyncs = await db
+    const recentSyncs = await tx
       .select({
         id: clcOrganizationSyncLog.id,
         affiliateCode: clcOrganizationSyncLog.affiliateCode,
@@ -101,14 +109,15 @@ async function getCLCOperationalMetrics(_orgId: string) {
       .orderBy(desc(clcOrganizationSyncLog.syncedAt))
       .limit(10);
 
-    return {
-      pendingSyncs: 0, // This would need a separate queue table to track
-      failedSyncs: failedSyncStats?.count || 0,
-      lastSyncTime: mostRecentSync?.syncedAt || null,
-      pendingApprovals: pendingApprovalStats?.count || 0,
-      overdueRemittances: overdueStats?.count || 0,
-      recentActivity: recentSyncs || [],
-    };
+      return {
+        pendingSyncs: 0, // This would need a separate queue table to track
+        failedSyncs: failedSyncStats?.count || 0,
+        lastSyncTime: mostRecentSync?.syncedAt || null,
+        pendingApprovals: pendingApprovalStats?.count || 0,
+        overdueRemittances: overdueStats?.count || 0,
+        recentActivity: recentSyncs || [],
+      };
+    });
   } catch (error) {
     logger.error('Error fetching CLC operational metrics:', error);
     return {

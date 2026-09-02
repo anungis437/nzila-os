@@ -100,52 +100,64 @@ export type StorageAuthorityClassification =
 export type StorageAuthorityReviewPriority = 'HIGH' | 'NORMAL' | 'NONE'
 
 /**
- * A single PostgreSQL DML operation the union_eyes_runtime role needs on a
- * table. Deliberately a set of atomic operations, not a coarse enum
- * (SELECT_INSERT/FULL_DML etc.) — a coarse enum forces over-granting (e.g.
- * FULL_DML for a table that only ever needs SELECT+UPDATE) and cannot be
- * mechanically turned into an explicit `GRANT ... ON TABLE` statement.
+ * A single PostgreSQL DML operation. Deliberately a set of atomic
+ * operations, not a coarse enum (SELECT_INSERT/FULL_DML etc.) — a coarse
+ * enum forces over-granting (e.g. FULL_DML for a table that only ever
+ * needs SELECT+UPDATE) and cannot be mechanically turned into an explicit
+ * `GRANT ... ON TABLE` statement.
  */
 export type RuntimeOperation = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'
 
 /**
- * Who/what actually issues the DB operations against this table — distinct
- * from `classification`, which is about who the ROW belongs to. A
- * tenant-owned row (org_id NOT NULL) can still be written exclusively by a
- * platform-admin-gated system job (see organization_billing_config: the
- * enumeration query cross-org-scans every tenant's billing config on
- * behalf of a platform_lead-authorized scheduler — that is PLATFORM_ADMIN
- * authorizing a SYSTEM-executed operation, not ordinary tenant runtime
- * access, even though the rows themselves are tenant-owned).
+ * "Who authorized/invoked this operation" — a request-facing/human-facing
+ * question. This is INTENTIONALLY a different axis from
+ * `DbExecutionPrincipal` ("which Postgres role actually executes the
+ * operation"). Collapsing the two into one field (as an earlier revision
+ * of this manifest did with `executionAuthority`) hid real cases like
+ * organization_billing_config, where a PLATFORM_ADMIN invokes an operation
+ * that must still execute entirely as SYSTEM_RUNTIME — a single enum
+ * cannot express "PLATFORM_ADMIN authorizes -> SYSTEM_RUNTIME executes"
+ * without conflating the two questions.
  *
- *   TENANT         — an authenticated org member/steward/etc., acting
- *                     within their own organization, via the ordinary
- *                     tenant runtime connection.
- *   SYSTEM         — withSystemContext()/background job/cron, no human
- *                     request in the loop.
- *   PLATFORM_ADMIN — an authenticated platform-level staff/admin role
- *                     (platform_lead, clc_staff, etc.), whether or not the
- *                     actual DB execution happens via the system
- *                     connection.
- *   WEBHOOK        — an external system callback (e.g. Stripe), gated by
- *                     signature verification rather than a user session.
- *   WORKER         — an async queue/background worker process.
- *   MIXED          — more than one of the above genuinely executes
- *                     operations against this table (state the specific
- *                     paths in `reason`).
- *   NONE           — LATENT_UNREACHABLE; nothing executes against it today.
- *   TBD            — not yet determined (the default for entries not
- *                     individually re-reviewed for execution authority).
+ *   TENANT_USER     — an authenticated org member/steward/etc., acting
+ *                      within their own organization.
+ *   PLATFORM_ADMIN  — an authenticated platform-level staff/admin role
+ *                      (platform_lead, clc_staff, etc.).
+ *   SYSTEM_SCHEDULE — a cron/background job, no human request in the loop.
+ *   WEBHOOK         — an external system callback (e.g. Stripe), gated by
+ *                      signature verification rather than a user session.
+ *   WORKER          — an async queue/background worker process.
+ *   MIXED           — more than one of the above genuinely invokes
+ *                      operations against this table (state the specific
+ *                      paths in `reason`).
+ *   NONE            — LATENT_UNREACHABLE; nothing invokes it today.
+ *   TBD             — not yet determined.
  */
-export type StorageExecutionAuthority =
-  | 'TENANT'
-  | 'SYSTEM'
+export type InvocationAuthority =
+  | 'TENANT_USER'
   | 'PLATFORM_ADMIN'
+  | 'SYSTEM_SCHEDULE'
   | 'WEBHOOK'
   | 'WORKER'
   | 'MIXED'
   | 'NONE'
   | 'TBD'
+
+/**
+ * "Which Postgres role actually performs the DB operation" — the axis that
+ * directly drives GRANT generation. TENANT_RUNTIME = union_eyes_runtime
+ * (RLS-policy-gated, ordinary `db` import outside any withSystemContext).
+ * SYSTEM_RUNTIME = union_eyes_system (bypasses tenant RLS by design, only
+ * reachable via withSystemContext()/withPlatformAdminRLSContext()). MIXED
+ * = genuinely both, on different code paths (state them in `reason`).
+ *
+ * PERMANENT INVARIANT: a SYSTEM_ONLY-classified table's dbExecutionPrincipal
+ * must never be TENANT_RUNTIME, regardless of how privileged the
+ * INVOKING caller is — invocationAuthority PLATFORM_ADMIN never justifies
+ * dbExecutionPrincipal TENANT_RUNTIME for a SYSTEM_ONLY table. See
+ * db/__tests__/rls-storage-authority-manifest-invariants.test.ts.
+ */
+export type DbExecutionPrincipal = 'TENANT_RUNTIME' | 'SYSTEM_RUNTIME' | 'MIXED' | 'NONE' | 'TBD'
 
 export interface StorageAuthorityEntry {
   /** Exact public schema table name. */
@@ -156,21 +168,26 @@ export interface StorageAuthorityEntry {
   /** File paths (relative to apps/union-eyes) that reference this table outside schema/tests, if any. */
   supportingCapability: string[]
   /**
-   * The DML surface union_eyes_runtime actually needs for this table, once
-   * dispositioned. Empty array for LATENT_UNREACHABLE tables. 'TBD' for
-   * NEEDS_REVIEW entries and any entry not yet individually re-reviewed at
-   * the per-operation level — resolving this is exactly the remaining
-   * work this manifest tracks. This is the input to explicit SQL GRANT
-   * generation, so it must reflect exact operations (SELECT/INSERT/
-   * UPDATE/DELETE), not a coarse bucket.
+   * The DML surface union_eyes_runtime (TENANT_RUNTIME) actually needs for
+   * this table, once dispositioned. Empty array for LATENT_UNREACHABLE
+   * tables, and for any SYSTEM_ONLY table (see DbExecutionPrincipal's
+   * permanent invariant). 'TBD' for NEEDS_REVIEW entries and any entry not
+   * yet individually re-reviewed at the per-operation level. This is the
+   * input to explicit SQL GRANT generation for union_eyes_runtime.
    */
   requiredRuntimePrivileges: readonly RuntimeOperation[] | 'TBD'
   /**
-   * Who/what actually executes DB operations against this table — see
-   * StorageExecutionAuthority. 'TBD' is the default for entries not yet
-   * individually re-reviewed at this dimension.
+   * The DML surface union_eyes_system (SYSTEM_RUNTIME) needs for this
+   * table, if any operation is executed via withSystemContext(). Empty
+   * array if no system-context path touches this table. 'TBD' if not yet
+   * determined. Input to explicit SQL GRANT generation for
+   * union_eyes_system.
    */
-  executionAuthority: StorageExecutionAuthority
+  requiredSystemPrivileges: readonly RuntimeOperation[] | 'TBD'
+  /** Who/what invokes the operation — see InvocationAuthority. */
+  invocationAuthority: InvocationAuthority
+  /** Which Postgres role actually executes the operation — see DbExecutionPrincipal. */
+  dbExecutionPrincipal: DbExecutionPrincipal
   /** Which NEEDS_REVIEW entries to triage first — see file header. */
   reviewPriority: StorageAuthorityReviewPriority
 }
@@ -198,7 +215,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01: direct NOT NULL organization_id column (db/schema/deadlines-schema.ts, Drizzle export 'deadlines'), reachable via multiple live HTTP routes (app/api/deadlines/route.ts, app/api/deadlines/[id]/complete/route.ts, app/api/deadlines/[id]/extend/route.ts, app/api/deadlines/overdue/route.ts, app/api/deadlines/upcoming/route.ts, app/api/cron/deadline-overdue/route.ts) and core services (lib/deadline-tracking-system.ts, lib/deadline-service.ts). Needs the same ue_create_direct_org_rls_policy('claim_deadlines') treatment as the 0108 protected set. HIGH PRIORITY — explicitly named in the PR #752 review as a required grievance-deadline capability.",
     supportingCapability: ["app/api/deadlines/route.ts", "app/api/deadlines/[id]/complete/route.ts", "app/api/deadlines/[id]/extend/route.ts", "app/api/deadlines/overdue/route.ts", "app/api/deadlines/upcoming/route.ts", "app/api/cron/deadline-overdue/route.ts", "lib/deadline-tracking-system.ts", "lib/deadline-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -207,7 +226,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01: direct NOT NULL organization_id column (db/schema/deadline-engine-schema.ts). Written via raw SQL in lib/deadline-engine/reminder-scheduler.ts's scheduleGrievanceDeadlineReminders()/cancelGrievanceDeadlineReminders(), which ARE called from a live HTTP-triggered cron route (app/api/cron/deadline-overdue/route.ts) and from lib/deadline-tracking-system.ts (itself reachable via the claim_deadlines API routes). This is the durable outbox for grievance-deadline reminder delivery — HIGH PRIORITY, explicitly named in the PR #752 review ('deadline reminder/outbox/execution state').",
     supportingCapability: ["app/api/cron/deadline-overdue/route.ts", "lib/deadline-engine/reminder-scheduler.ts", "lib/deadline-tracking-system.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -216,7 +237,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01: direct NOT NULL organization_id column (db/schema/domains/claims/grievance-lifecycle.ts), reachable via live HTTP routes app/api/grievances/[id]/access/route.ts and app/api/grievances/[id]/route.ts, and lib/services/case-access-service.ts (getEffectiveCaseAccess). Grants per-user case access within a grievance — governs who else can see privileged case material, making cross-tenant leakage here especially sensitive.",
     supportingCapability: ["app/api/grievances/[id]/access/route.ts", "app/api/grievances/[id]/route.ts", "lib/services/case-access-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -225,7 +248,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01 (PR #752 review Item #9 audit): its only two referencing modules, lib/case-assignment-engine.ts and lib/workflow-automation-engine.ts, have no production HTTP caller — workflow-automation-engine.ts is imported only by its own test file, and case-assignment-engine.ts is imported only dynamically from within workflow-automation-engine.ts. A trust-boundary guardrail comment was added to case-assignment-engine.ts documenting this for future integrators. Revisit before either module is wired into a live route.",
     supportingCapability: ["lib/case-assignment-engine.ts", "lib/workflow-automation-engine.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -234,7 +259,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01: written only by lib/deadline-engine/assignment-sync.ts's refreshDeadlineRemindersForGrievance(), which is re-exported from lib/deadline-engine/index.ts but has zero real (non-test) importers of that export — only its own test file and lib/reality/capability-registry.ts (documentation, not a call site) reference it. The durable-outbox retry-worker infrastructure exists but is not wired into any live route, action, or cron job today.",
     supportingCapability: ["lib/deadline-engine/assignment-sync.ts", "lib/deadline-engine/index.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -243,7 +270,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01: automated scan's 3 matches are both false positives — app/api/notifications/preferences/route.ts's 'deadlineAlerts' is an unrelated boolean notification-preference field name, not the Drizzle table export; services/financial-service/**/schema.ts's 'deadline_alerts' is a same-named table in that service's OWN separate database (services/financial-service/src/db/index.ts connects via its own process.env.DATABASE_URL and its own drizzle.config.ts — a distinct database boundary, mirroring 0108's own precedent for out-of-scope root-level /migrations/ tables). No real reference to this table's actual Drizzle export was found in the main union-eyes app.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -252,7 +281,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): lib/reality/capability-registry.ts is a static narrative/audit-trail data file (an array of descriptive capability-verification strings), not executable query code — it contains no database calls and its mention of 'deadline_extensions' is commentary, not a call site. No other non-test reference exists in app/, actions/, lib/, or services/. Resolves the prior entry's open question ('needs a manual check of whether it drives real query behavior') — it does not.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -261,7 +292,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): lib/reality/capability-registry.ts is a static narrative/audit-trail data file (an array of descriptive capability-verification strings), not executable query code — it contains no database calls and its mention of 'deadline_rules' is commentary, not a call site. No other non-test reference exists in app/, actions/, lib/, or services/. Resolves the prior entry's open question ('needs a manual check of whether it drives real query behavior') — it does not.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -270,7 +303,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'abTests' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ab-testing/ab-test-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -279,7 +314,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/infrastructure/accessibility.ts), but its sole non-test reference lib/accessibility/accessibility-service.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search).",
     supportingCapability: ["lib/accessibility/accessibility-service.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -288,7 +325,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/infrastructure/accessibility.ts), parent-owned through accessibility_audits, but its sole non-test reference lib/accessibility/accessibility-service.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search — same dead file as accessibility_audits).",
     supportingCapability: ["lib/accessibility/accessibility-service.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -297,7 +336,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'accessibilityTestSuites' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -306,7 +347,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'accessibilityUserTesting' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -315,7 +358,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'accountMappings' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/clc/chart-of-accounts.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -324,7 +369,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'aiBudgets' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ai/services/cost-tracking-wrapper.ts","lib/ai/services/rate-limiter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -333,7 +380,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'aiClauseReasonings' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ai/clause-reasoning.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -342,7 +391,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'aiCopilotSessions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ai/steward-copilot.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -351,7 +402,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/ml/ai-grievance-triage.ts). Sole listed reference lib/ai/grievance-triage.ts is confirmed reachable via live HTTP routes app/api/ai/grievances/triage/route.ts and app/api/ai/grievances/[id]/triage/route.ts — the earlier \"no obvious HTTP-route\" scan result was a false negative.",
     supportingCapability: ["lib/ai/grievance-triage.ts", "app/api/ai/grievances/triage/route.ts", "app/api/ai/grievances/[id]/triage/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -360,7 +413,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'aiInsightReports' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ai/executive-insights.ts","lib/ai/financial-insights.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -369,7 +424,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'aiRateLimits' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -378,7 +435,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'aiUsageMetrics' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/ai/feedback/route.ts","lib/ai/services/cost-tracking-wrapper.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -387,7 +446,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'alertEscalations' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -396,7 +457,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'alertRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/observability/realtime-alerting-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -405,7 +468,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'allocationRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/allocation-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -414,7 +479,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'allocationRuns' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/allocation-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -423,7 +490,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "41 non-test reference(s) to 'analyticsMetrics' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["actions/analytics-actions.ts","app/api/admin/clc/analytics/organizations/route.ts","app/api/analytics/claims/categories/route.ts","app/api/analytics/claims/route.ts","app/api/analytics/claims/stewards/route.ts","app/api/analytics/clause-stats/route.ts","app/api/analytics/comparative/route.ts","app/api/analytics/cross-org/route.ts","app/api/analytics/dashboard/route.ts","app/api/analytics/deadlines-metrics/route.ts","app/api/analytics/executive/route.ts","app/api/analytics/financial/categories/route.ts","app/api/analytics/financial/costs/route.ts","app/api/analytics/financial/outcomes/route.ts","app/api/analytics/financial/route.ts","app/api/analytics/financial/trends/route.ts","app/api/analytics/heatmap/route.ts","app/api/analytics/members/churn-risk/route.ts","app/api/analytics/members/cohorts/route.ts","app/api/analytics/members/route.ts","app/api/analytics/members/trends/route.ts","app/api/analytics/operational/bottlenecks/route.ts","app/api/analytics/operational/queues/route.ts","app/api/analytics/operational/route.ts","app/api/analytics/operational/sla/route.ts","app/api/analytics/operational/workload/route.ts","app/api/analytics/org-activity/route.ts","app/api/analytics/precedent-stats/route.ts","app/api/analytics/predictions/route.ts","app/api/analytics/refresh/route.ts","app/api/analytics/trends/route.ts","app/api/currency/convert/route.ts","app/api/metrics/route.ts","app/api/movement-insights/trends/route.ts","app/api/targets/summary/route.ts","lib/ai/insights-generator.ts","lib/api/crud-factory.ts","lib/services/lro-metrics.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -432,7 +501,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'analyticsScheduledReports' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -441,7 +512,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/health-safety/cnesst-schema.ts). Reachable via live HTTP routes app/api/cnesst/anti-scab/route.ts, app/api/cnesst/anti-scab/[id]/route.ts.",
     supportingCapability: ["app/api/cnesst/anti-scab/route.ts", "app/api/cnesst/anti-scab/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -450,7 +523,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'apiAccessTokens' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -459,7 +534,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'apiIntegrations' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/extensions/[id]/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -468,7 +545,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: NO direct organization_id column (db/schema/grievance-schema.ts) — scoped only through the parent grievances row's organization_id via grievance_id (NOT NULL FK). Reachable via live HTTP routes app/api/arbitrations/route.ts, app/api/arbitrations/[id]/route.ts, app/api/finance/summary/route.ts.",
     supportingCapability: ["app/api/arbitrations/route.ts", "app/api/arbitrations/[id]/route.ts", "app/api/finance/summary/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -477,7 +556,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'automationRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/rewards/automation-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -486,7 +567,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'awardTemplates' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/rewards/template-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -495,7 +578,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'bankAccounts' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -504,7 +589,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'bankReconciliation' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -513,7 +600,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'bankReconciliations' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -522,7 +611,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'bargainingNotes' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/bargaining-notes/[id]/route.ts","app/api/cbas/[id]/route.ts","lib/services/bargaining-notes-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -531,7 +622,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/union-structure-schema.ts). Reachable via live HTTP routes app/api/units/route.ts, app/api/units/[id]/route.ts, app/api/locals/route.ts, app/api/locals/[id]/route.ts, app/api/jurisdiction/clc-compliance/route.ts, app/api/jurisdiction/validate-deadline/route.ts.",
     supportingCapability: ["app/api/units/route.ts", "app/api/units/[id]/route.ts", "app/api/locals/route.ts", "app/api/locals/[id]/route.ts", "app/api/jurisdiction/clc-compliance/route.ts", "app/api/jurisdiction/validate-deadline/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -540,7 +633,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'billingAccounts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/payments/webhooks/stripe/route.ts","app/api/pilot/apply/[id]/commercial-transition/route.ts","services/platform-economics/billing-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -549,7 +644,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'billingAdjustments' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -558,7 +655,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'billingInvoices' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -567,7 +666,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'billingPayments' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -576,7 +677,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'billingPeriods' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/billing/send-batch/route.ts","app/api/dues/billing-cycle/route.ts","services/platform-economics/allocation-engine.ts","services/platform-economics/billing-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -585,7 +688,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'billingSubscriptions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/billing-cycle/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -594,7 +699,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'boardPacketTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -603,7 +710,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'boardPackets' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/governance/board-packets/[id]/route.ts","app/api/governance/board-packets/route.ts","lib/services/board-packet-generator.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -612,7 +721,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'breakPolicies' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/breaks/policies/[id]/route.ts","app/api/breaks/policies/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -621,7 +732,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'budgetPool' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -630,7 +743,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "13 non-test reference(s) to 'calendarEvents' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/calendar/events/[id]/route.ts","app/api/calendar/events/route.ts","app/api/calendars/[id]/events/route.ts","app/api/events/[id]/occurrences/route.ts","app/api/events/[id]/route.ts","app/api/members/appointments/route.ts","lib/calendar-reminder-scheduler.ts","lib/external-calendar-sync/google-calendar-service.ts","lib/external-calendar-sync/microsoft-calendar-service.ts","lib/recurring-events-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -639,7 +754,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): calendarSharing has a real, non-duplicate union-eyes-native pgTable('calendar_sharing', ...) declaration (db/schema/domains/scheduling/calendar.ts, db/schema/calendar-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/scheduling/calendar.ts","db/schema/calendar-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -648,7 +765,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "14 non-test reference(s) to 'calendars' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/calendar/page.tsx","app/api/calendar-sync/connections/[id]/sync/route.ts","app/api/calendars/[id]/route.ts","app/api/calendars/route.ts","app/api/cron/calendar-sync/route.ts","lib/external-calendar-sync/google-calendar-service.ts","lib/external-calendar-sync/microsoft-calendar-service.ts","lib/security/rls-gap-remediation.ts","lib/services/calendar-service.ts","services/financial-service/drizzle/0000_lucky_mole_man.sql","services/financial-service/drizzle/meta/0000_snapshot.json","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -657,7 +776,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 against LIVE staging DB: 27 columns, organization_id present, matching db/schema/domains/communications/campaigns.ts. Heavily reachable (40+ real references across the communications dashboard, API routes, and webhooks), all via the canonical declaration. Round 4 (2026-09-01): re-investigated the previously-disclosed 'broken worker' defect against lib/workers/message-queue-processor.ts, which imported the stale db/schema/phase-4-messaging-schema.ts declaration. Confirmed via git grep for the module path AND every exported symbol name (processMessageQueue, processCampaignMessages, getQueueStatus) across app/, actions/, lib/, services/ that this worker had ZERO production callers - only its own test file imported it. The send-side capability is officially NOT_IMPLEMENTED (app/api/cron/process-messages/route.ts throws ApiError.notImplemented() per Wave 0 finding F-01, docs/union-eyes/reality-remediation/04_FINDINGS_AND_DISPOSITIONS.md) and never invoked this worker. Disposition: deleted the worker, its test, and the now-fully-orphaned phase-4-messaging-schema.ts (verified zero other importers of any of its 3 exports) rather than canonicalizing dead code. No live defect existed - the previous 'redesign required' framing was based on treating 'imports the stale schema' as proof of a real consumer without checking whether the importing module itself was ever invoked.",
     supportingCapability: ["app/[locale]/dashboard/communications/page.tsx", "app/api/communications/campaigns/route.ts", "app/api/communications/track/click/route.ts", "app/api/communications/track/open/[campaignId]/[recipientId]/route.ts", "app/api/communications/unsubscribe/[recipientId]/route.ts", "app/api/communications/webhooks/resend/route.ts", "db/schema/domains/communications/campaigns.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -666,7 +787,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'cardSigningEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -675,7 +798,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/case-repository/[caseId]/documents/route.ts. read-only case-repository document listing; case_documents export has a direct organization_id column and is queried only via SELECT in production code. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/case-repository/[caseId]/documents/route.ts"],
     requiredRuntimePrivileges: ['SELECT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -684,7 +809,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'caseStudies' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/(marketing)/case-studies/page.tsx","app/[locale]/(marketing)/locale-site-footer.tsx","app/api/case-studies/[slug]/route.ts","app/api/case-studies/route.ts","lib/marketing-hero-imagery.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -693,7 +820,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "8 non-test reference(s) to 'cbaClause' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/ai/semantic-search/route.ts","app/api/clauses/route.ts","app/api/clauses/search/route.ts","lib/services/ai/clause-extraction-service.ts","lib/services/ai/vector-search-service.ts","lib/services/clause-intelligence.ts","lib/services/clause-service.ts","services/financial-service/drizzle/relations.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -702,7 +831,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'cbaRuleSetItems' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -711,7 +842,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'cbaRuleVersions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/employer-execution/payroll-runs/[id]/route.ts","app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/remittance-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -720,7 +853,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'chargebackStatements' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/allocation-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -729,7 +864,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'chartOfAccounts' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/general-ledger-service.ts","services/clc/chart-of-accounts.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -738,7 +875,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'chatSessions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ai/chatbot-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -747,7 +886,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'chatbotAnalytics' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -756,7 +897,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'chatbotSuggestions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -765,7 +908,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'clauseComparisons' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/clause-service.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -774,7 +919,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): clauseComparisonsHistory has a real, non-duplicate union-eyes-native pgTable('clause_comparisons_history', ...) declaration (db/schema/domains/agreements/shared-library.ts, db/schema/shared-clause-library-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/agreements/shared-library.ts","db/schema/shared-clause-library-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -783,16 +930,20 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'clcApiConfig' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
     table: 'clc_organization_sync_log',
     classification: 'SYSTEM_ONLY',
-    reason: "Manually verified 2026-09-02: organization_id is NULLABLE (\"Nullable for batch sync operations\" per db/schema/clc-sync-audit-schema.ts) — cross-affiliate CLC federation sync audit log, not a per-tenant-partitionable resource. Reachable via app/[locale]/dashboard/clc/staff/page.tsx, which directly queries the table; that route is gated by app/[locale]/dashboard/clc/layout.tsx's server-side requireUser()+hasMinRole(\"clc_staff\") check restricting /dashboard/clc/* to CLC Staff (role 180) and above — not ordinary tenant-scoped request handling. services/clc/clc-api-integration.ts (the other listed reference) has zero independent callers.",
+    reason: "Manually verified 2026-09-02, corrected 2026-09-02 (round 4 review): organization_id is NULLABLE (\"Nullable for batch sync operations\" per db/schema/clc-sync-audit-schema.ts) — cross-affiliate CLC federation sync audit log, not a per-tenant-partitionable resource. Reachable via app/[locale]/dashboard/clc/staff/page.tsx; that route is gated by app/[locale]/dashboard/clc/layout.tsx's server-side requireUser()+hasMinRole(\"clc_staff\") check restricting /dashboard/clc/* to CLC Staff (role 180) and above. Round-4 correction: request-level PLATFORM_ADMIN authorization does not by itself justify union_eyes_runtime DB access to a SYSTEM_ONLY table — getCLCOperationalMetrics() previously queried this table via the ordinary db import despite the role gate; fixed to run inside withSystemContext(), so dbExecutionPrincipal is SYSTEM_RUNTIME (not TENANT_RUNTIME) and requiredRuntimePrivileges is [] (union_eyes_runtime gets nothing; only union_eyes_system needs SELECT). services/clc/clc-api-integration.ts (the other listed reference) has zero independent callers.",
     supportingCapability: ["app/[locale]/dashboard/clc/staff/page.tsx", "app/[locale]/dashboard/clc/layout.tsx"],
-    requiredRuntimePrivileges: ['SELECT'],
-    executionAuthority: 'PLATFORM_ADMIN',
+    requiredRuntimePrivileges: [],
+    requiredSystemPrivileges: ['SELECT'],
+    invocationAuthority: 'PLATFORM_ADMIN',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -801,7 +952,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'clcPerCapitaBenchmarks' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/external-data/clc-partnership-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -810,7 +963,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'clcRemittanceMapping' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -819,7 +974,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/clc-sync-schema.ts). Reachable via live HTTP routes app/api/clc/sync/route.ts, app/api/clc/dashboard/route.ts, app/api/clc/remittances/route.ts.",
     supportingCapability: ["app/api/clc/sync/route.ts", "app/api/clc/dashboard/route.ts", "app/api/clc/remittances/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -828,7 +985,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference services/clc/clc-api-integration.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search).",
     supportingCapability: ["services/clc/clc-api-integration.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -837,7 +996,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'cmsBlocks' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -846,7 +1007,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'cmsMediaLibrary' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/storage/cleanup/route.ts","app/api/storage/usage/route.ts","app/api/upload/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -855,7 +1018,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'cmsNavigationMenus' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -864,7 +1029,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'cmsPages' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/portal/documents/route.ts","app/api/portal/documents/upload/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -873,7 +1040,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'cmsTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -882,7 +1051,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/health-safety/cnesst-schema.ts). Reachable via live HTTP routes app/api/cnesst/filings/route.ts, app/api/cnesst/filings/[id]/route.ts.",
     supportingCapability: ["app/api/cnesst/filings/route.ts", "app/api/cnesst/filings/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -891,7 +1062,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "11 non-test reference(s) to 'collectiveAgreements' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/agreements/route.ts","app/api/search/universal/route.ts","lib/queries/platform-stats.ts","lib/services/ai/clause-extraction-service.ts","lib/services/case-knowledge-graph-service.ts","lib/services/cba-service.ts","lib/services/clause-intelligence.ts","services/case-intelligence/case-knowledge-graph-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -900,7 +1073,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'commercialContracts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/contracts/route.ts","app/api/pilot/apply/[id]/commercial-transition/route.ts","services/platform-economics/contract-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -909,7 +1084,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'committeeActionItems' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/committee-workspace-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -918,7 +1095,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'committeeDocuments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/committee-workspace-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -927,7 +1106,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'committeeIntelligenceSnapshots' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/committee-workspace-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -936,7 +1117,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'committeeMeetings' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/committee-workspace-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -945,7 +1128,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "30 non-test reference(s) to 'committees' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/(marketing)/conventions/page.tsx","app/[locale]/(marketing)/governance/page.tsx","app/[locale]/(marketing)/pricing/page.tsx","app/[locale]/dashboard/committees/[id]/committee-workspace.tsx","app/[locale]/dashboard/committees/committees-page.tsx","app/[locale]/dashboard/committees/page.tsx","app/[locale]/dashboard/organizational-topology/page.tsx","app/api/cnesst/hs-committees/[id]/route.ts","app/api/cnesst/hs-committees/route.ts","app/api/committees/[id]/action-items/[itemId]/route.ts","app/api/committees/[id]/action-items/route.ts","app/api/committees/[id]/documents/route.ts","app/api/committees/[id]/intelligence/route.ts","app/api/committees/[id]/meetings/[meetingId]/attendance/route.ts","app/api/committees/[id]/meetings/[meetingId]/minutes/route.ts","app/api/committees/[id]/meetings/[meetingId]/route.ts","app/api/committees/[id]/meetings/route.ts","app/api/committees/[id]/route.ts","app/api/committees/route.ts","lib/icra/adaptation/adaptivePassageLibrary.ts","lib/icra/contradictions/contradictionSignalPairs.ts","lib/icra/modalities-v2/registry.ts","lib/icra/questions.ts","lib/icra/scoring.ts","lib/institutional-legitimacy.ts","lib/oci/benchmark/sectorBaselines.ts","lib/oci/benchmark/stewardshipBurdenPatterns.ts","lib/services/committee-workspace-service.ts","lib/workbook/engines/continuityTopologyMapper.ts","services/platform-economics/entitlement-guard.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -954,7 +1139,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'communicationAnalytics' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -963,7 +1150,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'communicationChannels' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -972,7 +1161,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 conflicting declarations exist for physical table 'communication_preferences' (communication-analytics-schema.ts, domains/communications/analytics.ts, domains/communications/campaigns.ts \u2014 all 17-18 cols), but the live runtime evidence is consistent: app/api/communications/unsubscribe/[recipientId]/route.ts resolves the org from the campaign, then selects/updates communicationPreferences by (organization_id, user_id), and app/api/members/[id]/preferences/route.ts exposes the same table as org-scoped CRUD. This is a tenant-scoped membership preference table and must sit behind the same org-isolation policy as campaigns/message_log rather than a broad blanket runtime grant.",
     supportingCapability: ["app/api/communications/unsubscribe/[recipientId]/route.ts","app/api/members/[id]/preferences/route.ts","db/schema/domains/communications/campaigns.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -981,7 +1172,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Django-owned table (backend/notifications/models.py, db_table='communication_preferences_phase4') with no remaining Drizzle/TS declaration \u2014 its only TS-side mirror (db/schema/phase-4-messaging-schema.ts's 'communicationPreferences' export) was deleted in round 4 as dead code with zero consumers (see 'campaigns' entry). Original scanner supportingCapability list included false positives from an unrelated, identically-named 'communicationPreferences' export in db/schema/communication-analytics-schema.ts (a different physical table, see 'communication_preferences' entry) \u2014 removed below pending precise per-import re-verification. Out of this round's bounded scope; full disposition (confirm no TS-side access to this table is needed, or add a canonical Drizzle declaration if it is) tracked as follow-up.",
     supportingCapability: ["app/api/communications/unsubscribe/[recipientId]/route.ts","app/api/communications/webhooks/resend/route.ts","app/api/members/[id]/preferences/route.ts","lib/ml/predictive-scoring.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -990,7 +1183,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'communicationTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -999,7 +1194,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): comparativeAnalyses has a real, non-duplicate union-eyes-native pgTable('comparative_analyses', ...) declaration (db/schema/domains/analytics/analytics.ts, db/schema/analytics.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/analytics/analytics.ts","db/schema/analytics.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1008,7 +1205,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'complianceAlerts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/compliance/alerts/route.ts","lib/ai/employer-risk.ts","lib/ai/executive-insights.ts","lib/services/dashboard-kpi-service.ts","services/lmbp-immigration-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1017,7 +1216,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct organization_id-shaped data (db/schema/domains/data/congress.ts). Sole union-eyes reference is lib/auth/hierarchy-access-control.ts, which has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search) — despite the filename suggesting a core auth module, it is not wired into any real authorization path today. The only other reference is services/financial-service/** — a separately deployed service.",
     supportingCapability: ["lib/auth/hierarchy-access-control.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1026,7 +1227,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified via real runtime usage: app/api/consent/route.ts exposes consentRecords via crudRoutes({ orgScoped: true, readRole: 'member', writeRole: 'steward' }) — GET/POST only, no PUT/PATCH/DELETE handlers are wired (crud-factory only emits the handlers destructured by the route). app/api/communications/unsubscribe/[recipientId]/route.ts inserts consentRecords with the resolved organization_id/user_id and a consent_type of email_marketing while revoking the subscription. No UPDATE or DELETE against this table exists anywhere in production code (git grep confirmed) — the table's own doc comment ('Immutable audit log of all consent changes (CASL/GDPR requirement)') and its column set (no updatedAt) confirm this is an append-only ledger by design, not an oversight. Reads are org-scoped, not user-scoped: the route sets no crud-factory ownerColumn, so any authenticated org member (readRole 'member') can list the org's full consent history — that is the actual implemented product authority (compliance officers/stewards need to see the org's consent posture), not an accidental broad grant, so USER_RLS_REQUIRED would under-scope real reads. TENANT_RLS_REQUIRED via the native organization_id column is correct; requiredRuntimePrivilege is SELECT_INSERT, not FULL_DML.",
     supportingCapability: ["app/api/consent/route.ts","app/api/communications/unsubscribe/[recipientId]/route.ts","db/schema/domains/communications/campaigns.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1035,7 +1238,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/finance/contract-amendments.ts). Sole reference services/platform-economics/entitlement-guard.ts is one of the most widely-used modules in the app — reachable from 50+ live HTTP routes (app/api/grievances/**, app/api/cases/**, app/api/finance/**, app/api/ai/**, app/api/documents/**, app/api/billing/**, etc.) via lib/api/with-api.ts/lib/api/framework.ts.",
     supportingCapability: ["services/platform-economics/entitlement-guard.ts", "lib/api/with-api.ts", "lib/api/framework.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -1044,7 +1249,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'cookieConsents' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/gdpr/consent-manager.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1053,7 +1260,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/correspondence/dispatch/route.ts, app/api/correspondence/sign/route.ts, app/api/correspondence/cancel/route.ts, app/api/correspondence/revision/route.ts. org-scoped correspondence lifecycle (dispatch/sign/cancel/revise) uses SELECT, INSERT and UPDATE against the correspondence table. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/correspondence/dispatch/route.ts","app/api/correspondence/sign/route.ts","app/api/correspondence/cancel/route.ts","app/api/correspondence/revision/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1062,7 +1271,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'costCenters' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1071,7 +1282,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'courseRegistrations' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/education/completions/route.ts","app/api/education/registrations/route.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1080,7 +1293,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/education/course-sessions/route.ts. org-scoped course session CRUD route; crudRoutes destructures GET+POST and production code also performs UPDATE (attendance/status transitions). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/education/course-sessions/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1089,7 +1304,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'currencyExchangeRates' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/exchange-rate-service.ts","lib/services/multi-currency-treasury-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1098,7 +1315,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'customerNpsSurveys' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1107,7 +1326,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'customerOnboardingMilestones' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1116,7 +1337,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'dataAggregationConsent' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/movement-insights/page.tsx","app/[locale]/dashboard/settings/data-sharing/page.tsx","lib/movement-insights/consent-manager.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1125,7 +1348,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference lib/gdpr/consent-manager.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search) — consistent with the entire lib/gdpr/** directory being excluded from the TypeScript project (apps/union-eyes/tsconfig.json exclude list).",
     supportingCapability: ["lib/gdpr/consent-manager.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1134,7 +1359,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'dataProcessingRecords' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1143,7 +1370,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'dataQualityWarnings' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ingestion/fuzzy-dedup.ts","lib/ingestion/migration-metrics.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1152,7 +1381,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'dataResidencyConfigs' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1161,7 +1392,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'dataRetentionPolicies' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1170,7 +1403,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'deadlineAuditEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1179,7 +1414,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified from live API usage: app/api/claims/[id]/evidence/route.ts resolves the claim via requireApiAuth({ orgScoped: true }) then queries defensibilityPacks by case_id only after confirming the claim belongs to the caller's organization (SELECT); lib/workflow-engine.ts inserts a pack when a case reaches a defensibility-triggering transition (INSERT). No UPDATE or DELETE against this table exists in production code (git grep confirmed) — download-count/verification-status columns are written only at generation time, never mutated afterward. Two identical-shape declarations exist (db/schema/defensibility-packs-schema.ts, imported directly by evidence/route.ts and workflow-engine.ts, vs db/schema/domains/infrastructure/defensibility.ts, reached via the '@/db/schema' barrel through domains/infrastructure/index.ts) — column names/types/nullability/defaults are IDENTICAL_OR_PROVEN_COMPATIBLE; the only difference is that the domain-consolidated copy dropped the Drizzle-level .references() FK annotations (case_id→claims.claim_id, pack_id→defensibility_packs.pack_id), which affects migration-generation fidelity but not the physical table or RLS policy target, since both declarations emit pgTable('defensibility_packs', ...) against the same physical table. Authority: the table carries its OWN NOT NULL organization_id column, populated at pack-generation time from the parent claim's org — this is a real, non-invented column (not fabricated to simplify RLS), so a direct TENANT_RLS_REQUIRED policy on organization_id is preferred over a PARENT_OWNED_RLS_REQUIRED join through claims; it is simpler and does not change the effective authorization boundary, which the app already double-enforces by checking claims.organization_id before the pack lookup. requiredRuntimePrivilege is SELECT_INSERT, not FULL_DML.",
     supportingCapability: ["app/api/claims/[id]/evidence/route.ts","lib/workflow-engine.ts","db/schema/defensibility-packs-schema.ts","db/schema/domains/infrastructure/defensibility.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1188,7 +1425,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-01 (round 5, unresolved-duplicate-family closure): two identical-shape declarations exist within the union-eyes app (db/schema/cba-intelligence-schema.ts and db/schema/domains/agreements/intelligence.ts — IDENTICAL_OR_PROVEN_COMPATIBLE; same columns/types/nullability/defaults, the domain copy only drops the Drizzle .references() FK annotation on claim_id→claims.claim_id). Zero non-test references to the 'claimPrecedentAnalysis' Drizzle export exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper — no route, server action, worker, or cron path queries it. The only other repo hits (services/financial-service/src/db/schema.ts, services/financial-service/drizzle/schema.ts, and its compiled .d.ts) are a same-named table in that service's OWN separate database (services/financial-service has its own drizzle.config.ts and package.json, connecting via its own DATABASE_URL — SEPARATE_DATABASE_BOUNDARY, mirroring the deadline_alerts entry's precedent) and are out of this manifest's remit. This table has no organization_id column at all (only claim_id) — if it is ever wired into a live route, it requires PARENT_OWNED_RLS_REQUIRED through claims, not a direct tenant policy.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1197,7 +1436,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'dispatchRequests' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/dispatch-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1206,7 +1447,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'dispatchRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/dispatch-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1215,7 +1458,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/documents/[id]/access-grants/route.ts. read-only grant listing endpoint; documentAccessGrants export has a direct organization_id column. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/documents/[id]/access-grants/route.ts"],
     requiredRuntimePrivileges: ['SELECT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1224,7 +1469,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'documentFolders' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/documents/batch-operations-service.ts","lib/services/document-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1233,7 +1480,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/documents/[id]/links/route.ts. org-scoped document-link creation endpoint; INSERT confirmed, read access presumed for the same listing surface. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/documents/[id]/links/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1242,7 +1491,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'documentSearchIndex' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1251,7 +1502,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/documents/[id]/versions/route.ts. org-scoped document version history endpoint; SELECT+INSERT confirmed (append-only version trail), no UPDATE/DELETE detected. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/documents/[id]/versions/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1260,7 +1513,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'donationCampaigns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/cope/campaigns/route.ts","app/api/cope/canvassing/route.ts","app/api/cope/officials/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1269,7 +1524,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'donationReceipts' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1278,7 +1535,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "32 non-test reference(s) to 'donations' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/clc/chart-of-accounts.ts","services/clc/compliance-reports.ts","services/financial-service/IMPLEMENTATION_COMPLETE.md","services/financial-service/STRIPE_INTEGRATION_COMPLETE.md","services/financial-service/STRIPE_TESTING.md","services/financial-service/TESTING_STATUS.md","services/financial-service/WEEK_12_TESTING_ISSUES.md","services/financial-service/add-missing-tables.sql","services/financial-service/add-missing-tables.ts","services/financial-service/check-donations.ts","services/financial-service/check-tables.ts","services/financial-service/drizzle/0000_lucky_mole_man.sql","services/financial-service/drizzle/meta/0000_snapshot.json","services/financial-service/drizzle/schema.ts","services/financial-service/setup-stripe-testing.ps1","services/financial-service/src/db/schema.ts","services/financial-service/src/index.ts","services/financial-service/src/middleware/idempotency.ts","services/financial-service/src/routes/analytics.ts","services/financial-service/src/routes/donations.ts","services/financial-service/src/routes/payments.ts","services/financial-service/src/services/burn-rate-predictor.ts","services/financial-service/src/services/payment-processing.ts","services/financial-service/src/services/reconciliation-engine.ts","services/financial-service/start-webhook-listener.ps1","services/financial-service/test-analytics.ps1","services/financial-service/test-donations.ps1","services/financial-service/test-payments-quick.ps1","services/financial-service/test-payments-simple.ps1","services/financial-service/test-payments.ps1","services/financial-service/test-webhook-locally.ps1","services/financial-service/validate-setup.ps1"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1287,7 +1546,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'dsrRequests' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1296,7 +1557,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): duesAssignments has a real, non-duplicate union-eyes-native pgTable('dues_assignments', ...) declaration (db/schema/domains/finance/dues-assignments.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/finance/dues-assignments.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1305,7 +1568,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'duesPolicies' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1314,7 +1579,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'duesRates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1323,7 +1590,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "25 non-test reference(s) to 'duesTransactions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/members/dues/route.ts","lib/dues-calculation-engine.ts","lib/jobs/dues-reminder-scheduler.ts","lib/jobs/failed-payment-retry.ts","lib/payment-processor/IMPLEMENTATION_GUIDE.md","lib/payment-processor/README.md","lib/payment-processor/examples/refactored-dues-payment-route.ts","lib/reality/capability-registry.ts","lib/services/billing-cycle-service.ts","lib/services/dues-notifications.ts","lib/services/payment-service.ts","services/financial-service/SCHEMA_ANALYSIS.md","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/financial-service/src/jobs/arrears-management-workflow.ts","services/financial-service/src/jobs/dues-calculation-workflow.ts","services/financial-service/src/jobs/payment-collection-workflow.ts","services/financial-service/src/routes/analytics.ts","services/financial-service/src/routes/arrears.ts","services/financial-service/src/routes/dues-transactions.ts","services/financial-service/src/routes/remittances.ts","services/financial-service/src/services/arrears-detection.ts","services/financial-service/src/services/payment-processing.ts","services/financial-service/src/services/reconciliation-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1332,7 +1601,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'dunningCases' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/dunning-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1341,7 +1612,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'duplicateGroups' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/admin/duplicates/route.ts","lib/ingestion/fuzzy-dedup.ts","lib/ingestion/migration-metrics.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1350,7 +1623,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'employerCommunications' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/employers/communications/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1359,7 +1634,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'employerContacts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/employers/communications/contacts/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1368,7 +1645,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "7 non-test reference(s) to 'employerExecutionArtifacts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx","app/[locale]/dashboard/employer-execution/remittance-runs/[id]/page.tsx","app/api/employer-execution/payroll-runs/[id]/route.ts","app/api/employer-execution/remittance-runs/[id]/route.ts","app/api/employer-execution/remittance-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts","lib/workers/employer-execution/process-evidence-seal.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1377,7 +1656,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "8 non-test reference(s) to 'employerExecutionComplianceEvents' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/compliance/page.tsx","app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx","app/[locale]/dashboard/employer-execution/remittance-runs/[id]/page.tsx","app/api/employer-execution/compliance/route.ts","app/api/employer-execution/payroll-runs/[id]/route.ts","app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts","lib/workers/employer-execution/process-compliance-watchdog.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1386,7 +1667,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/employer-execution/[id]/evidence-links/route.ts. org-scoped employer-execution evidence-link endpoint; INSERT confirmed, read access presumed for the same listing surface. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/employer-execution/[id]/evidence-links/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1395,7 +1678,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'employerExecutionProfiles' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/settings/page.tsx","app/api/employer-execution/payroll-runs/[id]/route.ts","app/api/employer-execution/remittance-runs/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1404,7 +1689,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'employerExecutionReplays' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx","app/api/employer-execution/replay/[runId]/route.ts","lib/workers/employer-execution/process-replay-run.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1413,7 +1700,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'employerPayrollAdjustments' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1422,7 +1711,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'employerPayrollRunItems' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx","app/api/employer-execution/payroll-runs/[id]/route.ts","app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/remittance-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1431,7 +1722,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "7 non-test reference(s) to 'employerPayrollRuns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx","app/[locale]/dashboard/employer-execution/payroll-runs/page.tsx","app/api/employer-execution/payroll-runs/[id]/route.ts","app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/remittance-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts","lib/workers/employer-execution/process-payroll-run.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1440,7 +1733,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'employerRemittanceRunItems' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/employer-execution/remittance-runs/[id]/route.ts","app/api/employer-execution/remittance-runs/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1449,7 +1744,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'employerRemittanceRuns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/remittance-runs/[id]/page.tsx","app/[locale]/dashboard/employer-execution/remittance-runs/page.tsx","app/api/employer-execution/remittance-runs/[id]/route.ts","app/api/employer-execution/remittance-runs/route.ts","lib/workers/employer-execution/process-remittance-run.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1458,7 +1755,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "12 non-test reference(s) to 'employerRemittances' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/dashboard/route.ts","app/api/dues/exceptions/route.ts","app/api/dues/reconciliation/queue/route.ts","app/api/dues/remittances/[id]/route.ts","app/api/dues/remittances/route.ts","app/api/dues/remittances/upload/route.ts","lib/services/dashboard-kpi-service.ts","lib/services/payroll-integration-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/financial-service/src/routes/remittances.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1467,7 +1766,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'employerResponses' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1476,7 +1777,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'employerRiskScores' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/ai/employer-risk.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1485,7 +1788,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'employerTimesheetBatches' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/timesheets/page.tsx","app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/timesheets/route.ts","lib/workers/employer-execution/process-timesheet-validation.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1494,7 +1799,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'employerTimesheetEntries' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/employer-execution/timesheets/page.tsx","app/api/employer-execution/payroll-runs/route.ts","app/api/employer-execution/replay/[runId]/route.ts","app/api/employer-execution/timesheets/route.ts","lib/workers/employer-execution/process-timesheet-validation.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1503,7 +1810,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/union-structure-schema.ts). Reachable via multiple live HTTP routes: app/api/employers/route.ts, app/api/employers/[id]/route.ts, app/api/employers/communications/route.ts, app/api/employers/communications/contacts/route.ts, app/api/ai/employers/[id]/risk/route.ts, app/api/compliance/alerts/route.ts, app/api/compliance/reports/route.ts, app/api/pilot/onboarding/route.ts.",
     supportingCapability: ["app/api/employers/route.ts", "app/api/employers/[id]/route.ts", "app/api/employers/communications/route.ts", "app/api/employers/communications/contacts/route.ts", "app/api/ai/employers/[id]/risk/route.ts", "app/api/compliance/alerts/route.ts", "app/api/compliance/reports/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -1512,7 +1821,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'employmentHistory' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1521,7 +1832,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'entitlementUsageLog' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/contract-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1530,7 +1843,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'erpConnectors' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1539,7 +1854,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'erpInvoices' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1548,7 +1865,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'eventAttendees' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/calendar-reminder-scheduler.ts","lib/recurring-events-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1557,7 +1876,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'eventCheckIns' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1566,7 +1887,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'eventRegistrations' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1575,7 +1898,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id + user_id columns (db/schema/domains/scheduling/calendar.ts), but its sole non-test union-eyes reference is lib/calendar-reminder-scheduler.ts, whose exports (scheduleEventReminders, cancelEventReminders, rescheduleEventReminders, etc.) have zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search). The only other reference is services/financial-service/** — a separately deployed service (own package.json/drizzle.config.ts/server entrypoint), not part of union-eyes' own request handling.",
     supportingCapability: ["lib/calendar-reminder-scheduler.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1584,7 +1909,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/exit-interviews/[id]/documents/route.ts. org-scoped exit-interview document attachment endpoint; SELECT+INSERT confirmed. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/exit-interviews/[id]/documents/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1593,7 +1920,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "11 non-test reference(s) to 'exitInterviewEvents' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/exit-interviews/[id]/governance/route.ts","app/api/exit-interviews/[id]/index/route.ts","app/api/exit-interviews/[id]/publish/route.ts","app/api/exit-interviews/[id]/review/route.ts","app/api/exit-interviews/[id]/route.ts","app/api/exit-interviews/[id]/submit/route.ts","app/api/exit-interviews/[id]/summarize/route.ts","app/api/exit-interviews/analytics/route.ts","app/api/exit-interviews/governance-timeline/route.ts","app/api/exit-interviews/route.ts","lib/knowledge-transfer/governance/consent-controls.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1602,7 +1931,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'exitInterviewSessions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1611,7 +1942,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "22 non-test reference(s) to 'exitInterviews' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/knowledge-transfer/[id]/page.tsx","app/api/exit-interviews/[id]/documents/route.ts","app/api/exit-interviews/[id]/governance/route.ts","app/api/exit-interviews/[id]/index/route.ts","app/api/exit-interviews/[id]/publish/route.ts","app/api/exit-interviews/[id]/review/route.ts","app/api/exit-interviews/[id]/route.ts","app/api/exit-interviews/[id]/submit/route.ts","app/api/exit-interviews/[id]/summarize/route.ts","app/api/exit-interviews/analytics/route.ts","app/api/exit-interviews/expertise-map/route.ts","app/api/exit-interviews/governance-timeline/route.ts","app/api/exit-interviews/route.ts","lib/knowledge-transfer/continuity-risk/risk-detector.ts","lib/knowledge-transfer/forecasting/continuity-forecaster.ts","lib/knowledge-transfer/indexing/semantic-indexer.ts","lib/knowledge-transfer/propagation/dependency-propagator.ts","lib/knowledge-transfer/resilience-index/resilience-calculator.ts","lib/knowledge-transfer/search/hybrid-search.ts","lib/knowledge-transfer/simulation/continuity-simulator.ts","lib/knowledge-transfer/succession/succession-analyzer.ts","lib/knowledge-transfer/topic-graph/topic-graph-builder.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1620,7 +1953,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "7 non-test reference(s) to 'externalAccounts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/external-data/lrb/route.ts","app/api/external-data/route.ts","lib/integrations/adapters/accounting/freshbooks-adapter.ts","lib/integrations/adapters/accounting/quickbooks-adapter.ts","lib/integrations/adapters/accounting/sage-intacct-adapter.ts","lib/integrations/adapters/accounting/sync-utils.ts","lib/integrations/adapters/accounting/xero-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1629,7 +1964,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalBenefitCoverage' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/insurance/greenshield-adapter.ts","lib/integrations/adapters/insurance/sunlife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1638,7 +1975,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalBenefitDependents' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/insurance/sunlife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1647,7 +1986,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalBenefitEnrollments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/insurance/greenshield-adapter.ts","lib/integrations/adapters/insurance/sunlife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1656,7 +1997,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalBenefitPlans' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/insurance/greenshield-adapter.ts","lib/integrations/adapters/insurance/sunlife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1665,7 +2008,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalBenefitUtilization' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/insurance/ia-adapter.ts","lib/integrations/adapters/insurance/manulife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1674,7 +2019,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalCalendarAttendees' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1683,7 +2030,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "10 non-test reference(s) to 'externalCalendarConnections' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/calendar-sync/connections/[id]/route.ts","app/api/calendar-sync/connections/[id]/sync/route.ts","app/api/calendar-sync/connections/route.ts","app/api/calendar-sync/google/callback/route.ts","app/api/calendar-sync/microsoft/callback/route.ts","app/api/cron/calendar-sync/route.ts","lib/external-calendar-sync/google-calendar-service.ts","lib/external-calendar-sync/microsoft-calendar-service.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1692,7 +2041,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalCalendarEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1701,7 +2052,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalCalendarRecurringPatterns' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1710,7 +2063,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalCalendars' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1719,7 +2074,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalCommunicationChannels' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/communication/slack-adapter.ts","lib/integrations/adapters/communication/teams-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1728,7 +2085,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalCommunicationFiles' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/communication/slack-adapter.ts","lib/integrations/adapters/communication/teams-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1737,7 +2096,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalCommunicationMessages' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/communication/slack-adapter.ts","lib/integrations/adapters/communication/teams-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1746,7 +2107,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'externalCommunicationUsers' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/communication/slack-adapter.ts","lib/integrations/adapters/communication/teams-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1755,7 +2118,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'externalCustomers' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/accounting/freshbooks-adapter.ts","lib/integrations/adapters/accounting/quickbooks-adapter.ts","lib/integrations/adapters/accounting/sage-intacct-adapter.ts","lib/integrations/adapters/accounting/sync-utils.ts","lib/integrations/adapters/accounting/wave-adapter.ts","lib/integrations/adapters/accounting/xero-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1764,7 +2129,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'externalDepartments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/hris/adp-adapter.ts","lib/integrations/adapters/hris/bamboohr-adapter.ts","lib/integrations/adapters/hris/workday-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1773,7 +2140,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalDocumentFiles' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/documents/sharepoint-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1782,7 +2151,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalDocumentLibraries' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/documents/sharepoint-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1791,7 +2162,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalDocumentPermissions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/documents/sharepoint-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1800,7 +2173,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalDocumentSites' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/documents/sharepoint-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1809,7 +2184,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'externalEmployees' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/hris/WORKDAY_USAGE.md","lib/integrations/adapters/hris/adp-adapter.ts","lib/integrations/adapters/hris/bamboohr-adapter.ts","lib/integrations/adapters/hris/sync-utils.ts","lib/integrations/adapters/hris/workday-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1818,7 +2195,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'externalInsuranceBeneficiaries' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/insurance/canadalife-adapter.ts","lib/integrations/adapters/insurance/ia-adapter.ts","lib/integrations/adapters/insurance/manulife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1827,7 +2206,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'externalInsuranceClaims' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/graphql/resolvers.ts","lib/integrations/adapters/insurance/canadalife-adapter.ts","lib/integrations/adapters/insurance/greenshield-adapter.ts","lib/integrations/adapters/insurance/ia-adapter.ts","lib/integrations/adapters/insurance/manulife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1836,7 +2217,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'externalInsurancePolicies' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/graphql/resolvers.ts","lib/integrations/adapters/insurance/canadalife-adapter.ts","lib/integrations/adapters/insurance/ia-adapter.ts","lib/integrations/adapters/insurance/manulife-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1845,7 +2228,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "7 non-test reference(s) to 'externalInvoices' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/billing/invoices/route.ts","lib/integrations/adapters/accounting/freshbooks-adapter.ts","lib/integrations/adapters/accounting/quickbooks-adapter.ts","lib/integrations/adapters/accounting/sage-intacct-adapter.ts","lib/integrations/adapters/accounting/sync-utils.ts","lib/integrations/adapters/accounting/wave-adapter.ts","lib/integrations/adapters/accounting/xero-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -1854,7 +2239,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalLmsCompletions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/lms/linkedin-learning-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1863,7 +2250,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalLmsCourses' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/lms/linkedin-learning-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1872,7 +2261,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalLmsEnrollments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/lms/linkedin-learning-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1881,7 +2272,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalLmsLearners' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/lms/linkedin-learning-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1890,7 +2283,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalLmsProgress' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/lms/linkedin-learning-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1899,7 +2294,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'externalPayments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/accounting/freshbooks-adapter.ts","lib/integrations/adapters/accounting/quickbooks-adapter.ts","lib/integrations/adapters/accounting/sage-intacct-adapter.ts","lib/integrations/adapters/accounting/sync-utils.ts","lib/integrations/adapters/accounting/wave-adapter.ts","lib/integrations/adapters/accounting/xero-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1908,7 +2305,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalPensionBeneficiaries' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1917,7 +2316,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalPensionContributions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1926,7 +2327,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalPensionEstimates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1935,7 +2338,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalPensionMembers' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1944,7 +2349,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalPensionPlans' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1953,7 +2360,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'externalPensionServiceCredits' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -1962,7 +2371,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'externalPositions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/hris/workday-adapter.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1971,7 +2382,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/federation/federation-schema.ts — \"Link to organizations table (type: 'federation')\"). Reachable via multiple live HTTP routes: app/api/federations/route.ts, app/api/federations/[id]/route.ts, app/api/federations/[id]/affiliates/route.ts, app/api/federations/[id]/dashboard/route.ts, app/api/federations/[id]/meetings/route.ts, app/api/federations/[id]/remittances/route.ts, app/api/onboarding/discover-federation/route.ts.",
     supportingCapability: ["app/api/federations/route.ts", "app/api/federations/[id]/route.ts", "app/api/federations/[id]/affiliates/route.ts", "app/api/federations/[id]/dashboard/route.ts", "app/api/federations/[id]/meetings/route.ts", "app/api/federations/[id]/remittances/route.ts", "app/api/onboarding/discover-federation/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -1980,7 +2393,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'feeAdjustments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/transaction-fee-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1989,7 +2404,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'feeSettlementLines' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/transaction-fee-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -1998,7 +2415,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'fieldNotes' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2007,7 +2426,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'fieldOrganizerActivities' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2016,7 +2437,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference lib/services/audit-trail-service.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search).",
     supportingCapability: ["lib/services/audit-trail-service.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2025,7 +2448,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'financialPeriods' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/finance/summary/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2034,7 +2459,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'gdprDataRequests' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/gdpr/consent-manager.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2043,7 +2470,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'glAccountMappings' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2052,7 +2481,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference lib/services/general-ledger-service.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search).",
     supportingCapability: ["lib/services/general-ledger-service.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2061,7 +2492,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'glTrialBalance' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/general-ledger-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2070,7 +2503,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "10 non-test reference(s) to 'bylaws' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/(marketing)/governance/page.tsx","app/[locale]/(marketing)/solutions/governance-leadership/page.tsx","app/api/governance/bylaws/route.ts","app/layout.tsx","lib/ai/role-templates.ts","lib/icra/obligations/obligationTaxonomy.ts","lib/icra/obligations/sourceInstruments.ts","lib/icra/questions.ts","lib/services/board-packet-generator.ts","lib/ui-tooltips.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2079,7 +2514,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'governancePolicies' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/governance/policies/rules/route.ts","app/api/governance/policy-templates/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2088,7 +2525,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'signatories' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/governance/signatories/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2097,7 +2536,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference is lib/workflow-automation-engine.ts, which is EXCLUDED from the TypeScript project (apps/union-eyes/tsconfig.json exclude list) and has zero real production callers — consistent with the existing grievance_assignments/deadline_reassignment_convergence LATENT_UNREACHABLE disposition for the same module (see docs/union-eyes/reality-remediation/28_RLS_PRIVILEGED_CALLER_AND_ORG_CONTEXT_AUDIT.md, organization-context audit table).",
     supportingCapability: ["lib/workflow-automation-engine.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2106,7 +2547,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'grievanceCommunications' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2115,7 +2558,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 against LIVE staging DB (nzila-staging-db, information_schema.columns): the real table has organization_id (uuid, NOT NULL), claim_id (uuid, NOT NULL), plus 31 columns total, matching db/schema/domains/claims/workflows.ts exactly. RESOLVED (2026-09-01, same day, PR #752 review round 2): the conflicting 6-column declaration in db/schema/domains/claims/grievance-lifecycle.ts (no organization_id, wrong FK column) has been REMOVED, not just documented. Its two real production consumers were fixed: app/api/grievances/[id]/documents/route.ts's insert into it always threw (referenced columns that do not physically exist), silently breaking the whole document-upload endpoint (outer try/catch masked it as a generic 500) — the dead insert was removed, letting the real governed-documents insert succeed. app/api/grievances/[id]/route.ts's SELECT against it had the same always-throws defect (masked the same way) — replaced with the already-working governed-documents query. Both fixes are net bug fixes, not behavior regressions, since the broken paths never successfully executed against this live schema. grievance_documents no longer appears in the CONFLICTING_SCHEMA section of apps/union-eyes/schema-duplicate-table-report.txt; see docs/union-eyes/reality-remediation/27_RLS_STORAGE_SCHEMA_CANONICALIZATION.md for full detail.",
     supportingCapability: ["app/api/grievances/[id]/documents/route.ts", "app/api/grievances/[id]/route.ts", "lib/document-management-system.ts", "db/schema/domains/claims/workflows.ts", "docs/union-eyes/reality-remediation/27_RLS_STORAGE_SCHEMA_CANONICALIZATION.md"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2124,7 +2569,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'grievanceSettlements' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2133,7 +2580,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference is lib/workflow-automation-engine.ts (excluded from the TS project, zero real callers) — same dead module as grievance_approvals/grievance_workflows.",
     supportingCapability: ["lib/workflow-automation-engine.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2142,7 +2591,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'grievanceTimelineEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2151,7 +2602,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 against LIVE staging DB: 18 columns, organization_id (uuid, NOT NULL) and claim_id (uuid, NOT NULL, FK to claims.claim_id) both present, matching db/schema/domains/claims/workflows.ts exactly. The other declaration (db/schema/grievance-workflow-schema.ts, 19 cols) had a phantom `version` column that does not physically exist and has been converted to a re-export of the canonical declaration (PR #752 review round 3); its one real consumer (lib/workers/report-worker.ts, filtered only by organizationId, a field present in both) was redirected. Direct organization_id column makes this straightforwardly tenant-scoped. NOT YET protected by migration 0108 — actual RLS policy addition is bundled with the other already-classified-but-unprotected tables (claim_deadlines, deadline_reminders, grievance_case_access_assignments, grievance_documents) as a batch follow-up, consistent with this PR's sequencing (manifest convergence before further 0108 changes).",
     supportingCapability: ["app/api/claims/[id]/workflow/history/route.ts","lib/services/case-timeline-service.ts","lib/workers/report-worker.ts","lib/workflow-automation-engine.ts","db/schema/domains/claims/workflows.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2160,7 +2613,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 against LIVE staging DB: physically lives in the PUBLIC schema (12 columns: session_id, user_id, organization_id, session_token, refresh_token, device_info, ip_address, user_agent, expires_at, is_active, created_at, last_used_at). Migration history shows migration 0019 DROPPED the schema-qualified `user_management.user_sessions` table entirely, and migrations 0055/0058/0081 recreated the table in the public schema — migration 0058 ALREADY enables RLS with per-user (`_own`-suffixed) policies (sessions_select_own, sessions_insert_own, sessions_update_own, sessions_delete_own), i.e. this table was already RLS-protected at the DB level before this PR. Both TS declarations (db/schema/user-management-schema.ts and db/schema/domains/member/user-management.ts) still incorrectly declared it as pgSchema('user_management').table(...), which pointed at a table that has not existed since migration 0019 — meaning lib/workers/cleanup-worker.ts's scheduled session-cleanup DELETE queries against this table were failing on every invocation. Fixed (PR #752 review round 3): corrected user-management-schema.ts to a plain pgTable('user_sessions', ...) matching live schema/nullability exactly; converted domains/member/user-management.ts's copy (which also had a phantom session_token_hash column) to a re-export. cleanup-worker.ts already imported from user-management-schema.ts so it is fixed automatically by the schema correction, no import-path change needed. SEPARATE, NOT-YET-INVESTIGATED FINDING: several OTHER tables in these same two files (users, oauth_providers, password_reset_tokens, auth_audit_log) are also declared pgSchema('user_management')-qualified, but only 'organization_users' actually exists under that schema live — this broader user_management-schema mismatch is out of this round's bounded scope and is flagged here for future investigation, not fixed blind.",
     supportingCapability: ["lib/workers/cleanup-worker.ts", "db/schema/user-management-schema.ts", "db/migrations/0058_world_class_rls_policies.sql"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2169,7 +2624,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 against LIVE staging DB: 26 columns, no organization_id — tenancy (if any) can only flow through webhook_id (NOT NULL, FK to a webhooks/integration record) or the nullable subscription_id. Two schema-conflicting declarations exist: db/schema/domains/infrastructure/integrations.ts (10 cols, webhook_id-keyed, references integrationWebhooks) and db/schema/integration-schema.ts (19 cols, subscription_id-keyed, references webhookSubscriptions) — BOTH are individually column-accurate against live (not stale/wrong, just different partial views), suggesting two historically-separate integration delivery flows share this one physical table. git grep across app/, lib/, services/ (excluding tests) found ZERO real production consumers of 'webhookDeliveries' from EITHER declaration — the earlier scan's 'app/api/extensions/[id]/route.ts' bypass flag was a false positive from the pre-fix scanner (that route only imports the unrelated 'apiIntegrations' export from the same integration-schema.ts module path). Given zero reachability, NOT canonicalized in this pass (doing so would require product-level judgment about which delivery flow, if either, is still current) — disposition is LATENT_UNREACHABLE, consistent with 'prove the disposition rather than mechanically canonicalize every historical module.' The schema conflict remains tracked in the fingerprint ratchet.",
     supportingCapability: ["db/schema/domains/infrastructure/integrations.ts", "db/schema/integration-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2178,7 +2635,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference is lib/workflow-automation-engine.ts (excluded from the TS project, zero real callers) — same dead module as grievance_approvals/grievance_stages.",
     supportingCapability: ["lib/workflow-automation-engine.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2187,7 +2646,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "13 non-test reference(s) to 'holidays' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/labour-standards/[jurisdiction]/compliance-check/route.ts","app/api/labour-standards/[jurisdiction]/route.ts","lib/ai/insights-generator.ts","lib/ai/role-templates.ts","lib/canadian-labour-standards/index.ts","lib/canadian-labour-standards/statutory-holidays.ts","lib/ml/models/workload-forecast-model.ts","lib/quebec/labour-law-engine.ts","services/financial-service/drizzle/0000_lucky_mole_man.sql","services/financial-service/drizzle/meta/0000_snapshot.json","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/transfer-pricing-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2196,7 +2657,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. icra_assessments.organization_id references icra_organizations (ICRA's own pseudonymous org-context table), NOT a Union Eyes tenant organization — it must not be classified TENANT_RLS_REQUIRED merely because an organization_id column exists. All application access goes through withSystemContext() (union_eyes_system), gated by: capability verification for the pseudonymous questionnaire/results flow (start/answer/submit/profile/results/report/checkout), auth()+single-use claimToken for the authenticated claim workflow, and a constant-time CRON_SECRET check for the internal report-review mutation. Verified 2026-09-01 (round 7, ICRA capability architecture): no route selects/mutates this table via the ordinary tenant runtime path.",
     supportingCapability: ["app/api/icra/start/route.ts","app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/answer/route.ts","app/api/icra/[assessmentId]/submit/route.ts","app/api/icra/[assessmentId]/profile/route.ts","app/api/icra/[assessmentId]/claim/route.ts","app/api/icra/results/[id]/route.ts","app/api/icra/report/[assessmentId]/route.ts","app/api/icra/report/[assessmentId]/review/route.ts","app/api/icra/checkout/route.ts","app/api/icra/email-results/route.ts","lib/icra/assessment-capability.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2205,7 +2668,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): only reached via withSystemContext() in the capability-gated answer/submit routes (per-question upsert, then read back to compute the profile). No direct organization_id column; scoped only through the parent icra_assessments row and its capability.",
     supportingCapability: ["app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/answer/route.ts","app/api/icra/[assessmentId]/submit/route.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2214,7 +2679,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): only reached via withSystemContext() in the capability-gated submit/profile/results/report routes. No direct organization_id column.",
     supportingCapability: ["app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/submit/route.ts","app/api/icra/[assessmentId]/profile/route.ts","app/api/icra/results/[id]/route.ts","app/api/icra/report/[assessmentId]/route.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2223,7 +2690,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): only reached via withSystemContext() in the capability-gated submit routes (written alongside the maturity profile). No direct organization_id column.",
     supportingCapability: ["app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/submit/route.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2232,7 +2701,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): only reached via withSystemContext() in the capability-gated submit routes. No direct organization_id column.",
     supportingCapability: ["app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/submit/route.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2241,7 +2712,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): only reached via withSystemContext() in the capability-gated submit routes. No direct organization_id column.",
     supportingCapability: ["app/api/icra/submit/route.ts","app/api/icra/[assessmentId]/submit/route.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2250,7 +2723,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "ICRA_PSEUDONYMOUS_NO_LOGIN=APPROVED, ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY=REJECTED (PR #752): the pseudonymous product model is intentional, but assessmentId alone must never authorize DB access. lib/icra/assessment-capability.ts adds a hashed, purpose-bound bearer capability; every route touching an existing assessment now verifies it before entering withSystemContext. Verified 2026-09-01 (round 7, ICRA capability architecture): a pseudonymous org-context record created only via withSystemContext() from app/api/icra/start/route.ts — conceptually distinct from a Union Eyes tenant organization (organizations table); no direct route reads or updates it independently of assessment creation.",
     supportingCapability: ["app/api/icra/start/route.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'SYSTEM',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'SYSTEM_SCHEDULE',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2259,7 +2734,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 7, ICRA capability architecture): zero non-test references to 'icraOperationalIndicators' anywhere in app/, actions/, lib/, or services/. No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2268,7 +2745,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 7, ICRA capability architecture): zero non-test references to 'icraBenchmarkGroups' anywhere in app/, actions/, lib/, or services/. No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2277,7 +2756,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 7, ICRA capability architecture): zero non-test references to 'icraAnonymizedMetrics' anywhere in app/, actions/, lib/, or services/. No known application code path queries this table. If wired up in future for cross-org benchmark reads, prefer GLOBAL_REFERENCE_DATA (read-only, no per-org secrecy) over TENANT_RLS_REQUIRED given its anonymized/aggregate nature — re-review at that time.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2286,7 +2767,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'impactMetrics' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2295,7 +2778,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/communications/notifications.ts). Reachable via live HTTP routes app/api/notifications/route.ts, app/api/notifications/[id]/route.ts, app/api/notifications/count/route.ts, app/api/notifications/mark-all-read/route.ts, and the support-ticket notification surface (app/api/support/tickets/**).",
     supportingCapability: ["app/api/notifications/route.ts", "app/api/notifications/[id]/route.ts", "app/api/notifications/count/route.ts", "app/api/notifications/mark-all-read/route.ts", "app/api/support/tickets/route.ts", "lib/services/notification-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -2304,7 +2789,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'ingestionBatches' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/admin/ingest/retry/route.ts","app/api/grievances/import/route.ts","lib/ingestion/batch-ingest.ts","lib/ingestion/migration-metrics.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2313,7 +2800,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'insightRecommendations' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/analytics/insights/route.ts","app/api/analytics/insights/weekly-summary/route.ts","lib/ai/insights-generator.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2322,7 +2811,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'integrationApiKeys' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/integrations/api-keys/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2331,7 +2822,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'integrationConfigs' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/README.md","lib/integrations/adapters/hris/WORKDAY_USAGE.md","lib/integrations/factory.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2340,7 +2833,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'integrationPartners' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2349,7 +2844,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference lib/integrations/sync-engine.ts has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search).",
     supportingCapability: ["lib/integrations/sync-engine.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2358,7 +2855,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'integrationSyncSchedules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/adapters/hris/WORKDAY_USAGE.md"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2367,7 +2866,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'integrationWebhooks' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2376,7 +2877,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'internationalAddresses' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/address/address-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2385,7 +2888,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'jobApplications' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2394,7 +2899,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'jobClassifications' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2403,7 +2910,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'jobPostings' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2412,7 +2921,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'jobSaved' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2421,7 +2932,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/health-safety/cnesst-schema.ts). Reachable via live HTTP routes app/api/cnesst/hs-committees/route.ts, app/api/cnesst/hs-committees/[id]/route.ts.",
     supportingCapability: ["app/api/cnesst/hs-committees/route.ts", "app/api/cnesst/hs-committees/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -2430,7 +2943,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'journalEntries' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2439,7 +2954,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "8 non-test reference(s) to 'knowledgeBase' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/ai/summarize/route.ts","app/api/exit-interviews/[id]/publish/route.ts","app/api/governance/bylaws/route.ts","app/api/knowledge-base/[id]/route.ts","app/api/knowledge-base/route.ts","lib/ai/chatbot-service.ts","lib/ai/template-engine.ts","lib/knowledge-transfer/indexing/semantic-indexer.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2448,7 +2965,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/kpi/configurations/route.ts. org-scoped KPI configuration CRUD route; crudRoutes destructures GET+POST and production code also performs UPDATE. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/kpi/configurations/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2457,7 +2976,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'legalHolds' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/policy-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2466,7 +2987,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'meetingRooms' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/meeting-rooms/[id]/bookings/route.ts","app/api/meeting-rooms/route.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2475,7 +2998,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'memberAddresses' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/tax-slip-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2484,7 +3009,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/[id]/arrears/route.ts. org-scoped member arrears endpoint; SELECT+UPDATE confirmed (arrears status/amount recalculation). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/[id]/arrears/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2493,7 +3020,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/[id]/breaks/route.ts. org-scoped member-breaks CRUD route; crudRoutes destructures GET+POST+PATCH+DELETE. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/[id]/breaks/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2502,7 +3031,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/education/certifications/route.ts. org-scoped certification CRUD route; crudRoutes destructures GET+POST only (no PATCH/DELETE exposed). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/education/certifications/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2511,7 +3042,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'memberConsents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2520,7 +3053,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'memberContactPreferences' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2529,7 +3064,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/[id]/dues-issues/route.ts. org-scoped dues-issue flagging endpoint; SELECT+INSERT confirmed. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/[id]/dues-issues/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2538,7 +3075,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/dues/balance/route.ts, app/api/dues/deductions/route.ts. org-scoped, append-only dues ledger; SELECT+INSERT confirmed across the dues balance/deduction routes, no UPDATE/DELETE detected (ledger entries are immutable). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/dues/balance/route.ts","app/api/dues/deductions/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2547,7 +3086,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/[id]/employment/route.ts. org-scoped member employment CRUD item route; crudRoutes destructures GET+PATCH+DELETE (no POST — employment record created elsewhere). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/[id]/employment/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2556,7 +3097,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'memberEmploymentDetails' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2565,7 +3108,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/[id]/history/route.ts. org-scoped member history endpoint; SELECT+UPDATE+DELETE confirmed (event correction/removal). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/[id]/history/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2574,7 +3119,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/[id]/jurisdiction-preferences/route.ts. org-scoped member jurisdiction-preference endpoint; SELECT+INSERT+UPDATE confirmed. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/[id]/jurisdiction-preferences/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2583,7 +3130,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'memberLeaves' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2592,7 +3141,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'memberRelationshipScores' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2601,7 +3152,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/members/segments/route.ts. org-scoped member-segment management route; crudRoutes GET+POST plus confirmed UPDATE+DELETE in production code (segment membership recalculation/removal). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/members/segments/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2610,7 +3163,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 against LIVE staging DB: 24 columns, organization_id present, matching db/schema/domains/communications/campaigns.ts's messageLog export. Real consumers (webhook delivery tracking, open/click pixel tracking, unsubscribe flow) already use the canonical shape correctly. Round 4 (2026-09-01): same re-investigation as 'campaigns' \u2014 lib/workers/message-queue-processor.ts's stale db/schema/phase-4-messaging-schema.ts usage (channel/body/variables/scheduledAt/externalId/nextRetryAt columns that do NOT physically exist) had ZERO production callers and has been deleted along with its test and the now-fully-orphaned phase-4-messaging-schema.ts. See 'campaigns' entry for the full reasoning.",
     supportingCapability: ["app/api/communications/track/click/route.ts", "app/api/communications/track/open/[campaignId]/[recipientId]/route.ts", "app/api/communications/unsubscribe/[recipientId]/route.ts", "app/api/communications/webhooks/resend/route.ts", "db/schema/domains/communications/campaigns.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2619,7 +3174,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/communications/message-templates/route.ts. org-scoped message-template CRUD route; crudRoutes destructures GET+POST+PATCH+DELETE. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/communications/message-templates/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2628,7 +3185,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'mfaConfigurations' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2637,7 +3196,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "13 non-test reference(s) to 'mlPredictions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["actions/analytics-actions.ts","app/api/ml/monitoring/drift/route.ts","app/api/ml/monitoring/usage/route.ts","app/api/ml/predictions/claim-outcome/route.ts","app/api/ml/predictions/sla-breach-risk/feedback/route.ts","app/api/ml/predictions/sla-breach-risk/route.ts","app/api/ml/predictions/timeline/route.ts","app/api/ml/predictions/workload-forecast/route.ts","app/api/ml/recommendations/route.ts","lib/ai/insights-generator.ts","lib/feature-flags.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2646,7 +3207,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'mobileAnalytics' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/mobile/analytics.ts","lib/mobile/mobile-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2655,7 +3218,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'mobileAppConfig' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2664,7 +3229,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'mobileDevices' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/mobile/sync/route.ts","lib/mobile/mobile-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2673,7 +3240,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: nullable organization_id, NOT NULL user_id (db/schema/mobile-devices-schema.ts) — would otherwise be a USER_RLS_REQUIRED candidate, but its sole non-test reference is lib/mobile/mobile-engine.ts, whose MobileNotificationService export has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search). Distinct from the separately-reachable app/api/mobile/notifications/route.ts, which reads the \"notifications\" table, not this one.",
     supportingCapability: ["lib/mobile/mobile-engine.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2682,7 +3251,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'mobileSyncQueue' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/mobile/mobile-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -2691,7 +3262,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'modelMetadata' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/ml/predictions/churn-risk/route.ts","app/api/ml/predictions/sla-breach-risk/feedback/route.ts","app/api/ml/predictions/sla-breach-risk/route.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2700,7 +3273,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/bargaining-negotiations-schema.ts). Reachable via live HTTP routes app/api/negotiations/route.ts, app/api/bargaining/negotiations/route.ts, app/api/bargaining/negotiations/[id]/route.ts.",
     supportingCapability: ["app/api/negotiations/route.ts", "app/api/bargaining/negotiations/route.ts", "app/api/bargaining/negotiations/[id]/route.ts", "lib/services/negotiations-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -2709,7 +3284,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'newsletterCampaigns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/billing/batch-status/[jobId]/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2718,7 +3295,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'newsletterDistributionLists' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/communications/page.tsx","app/api/communications/distribution-lists/[id]/route.ts","app/api/communications/distribution-lists/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2727,7 +3306,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'newsletterTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2736,7 +3317,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'nlrbClrbFilings' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2745,7 +3328,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'notificationBounces' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2754,7 +3339,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/communications/notifications.ts). Sole reference lib/services/notification-service.ts is itself reachable via a live HTTP route (app/api/dues/arrears/[id]/reminder/route.ts) and cron schedulers (lib/jobs/dues-reminder-scheduler.ts, lib/jobs/billing-scheduler.ts) — the earlier \"no obvious HTTP-route\" scan result was a false negative; the reference is one hop away, not absent.",
     supportingCapability: ["lib/services/notification-service.ts", "app/api/dues/arrears/[id]/reminder/route.ts", "lib/jobs/dues-reminder-scheduler.ts", "lib/jobs/billing-scheduler.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'MIXED',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'MIXED',
+    dbExecutionPrincipal: 'MIXED',
     reviewPriority: 'HIGH',
   },
   {
@@ -2763,7 +3350,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02 (corrected wording): organization_id EXISTS but is nullable (\"Nullable for system-wide notifications\" per db/schema/domains/communications/notifications.ts). Ordinary tenant RLS policy MUST fail closed as organization_id = current_org — it must NOT be written as organization_id = current_org OR organization_id IS NULL, which would let every tenant read every NULL-org (system-wide) row by default. If the product genuinely needs all tenants to see certain global notifications, that requires a deliberately modeled, explicitly-reviewed system/reference-data read path (e.g. a separate SYSTEM_ONLY-gated query), not an automatic RLS bypass on this table. Reachable via lib/services/notification-service.ts (itself reachable via app/api/dues/arrears/[id]/reminder/route.ts, steward-gated, tenant execution) and lib/workers/{cleanup,email,notification,sms}-worker.ts (background workers — execution authority for the worker path not yet independently confirmed; flagged for follow-up, not blocking this round).",
     supportingCapability: ["lib/services/notification-service.ts", "app/api/dues/arrears/[id]/reminder/route.ts", "lib/workers/cleanup-worker.ts", "lib/workers/email-worker.ts", "lib/workers/notification-worker.ts", "lib/workers/sms-worker.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'MIXED',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'MIXED',
+    dbExecutionPrincipal: 'MIXED',
     reviewPriority: 'HIGH',
   },
   {
@@ -2772,7 +3361,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/infrastructure/clc-per-capita.ts), but its sole non-test reference is services/clc/remittance-notifications.ts, whose exports (sendOverdueAlert, sendMonthlyReminder, processOverdueRemittances, etc.) have zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search). No live route, action, or cron entrypoint reaches this table today.",
     supportingCapability: ["services/clc/remittance-notifications.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2781,7 +3372,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/communications/notifications.ts). Reachable via lib/job-queue.ts (itself reachable via app/api/metrics/operational/route.ts and app/api/union-eyes/queue-status/route.ts) and lib/services/notification-service.ts.",
     supportingCapability: ["lib/job-queue.ts", "app/api/metrics/operational/route.ts", "app/api/union-eyes/queue-status/route.ts", "lib/services/notification-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'MIXED',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'MIXED',
+    dbExecutionPrincipal: 'MIXED',
     reviewPriority: 'HIGH',
   },
   {
@@ -2790,7 +3383,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/communications/notifications.ts) — org-configurable templates alongside seeded system templates (isSystem flag). Reachable via lib/services/notification-service.ts, itself reachable via app/api/dues/arrears/[id]/reminder/route.ts.",
     supportingCapability: ["lib/services/notification-service.ts", "app/api/dues/arrears/[id]/reminder/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -2799,7 +3394,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/communications/notifications.ts). Reachable via lib/services/notification-service.ts (reachable via app/api/dues/arrears/[id]/reminder/route.ts) and services/observability/realtime-alerting-service.ts.",
     supportingCapability: ["lib/services/notification-service.ts", "app/api/dues/arrears/[id]/reminder/route.ts", "services/observability/realtime-alerting-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'MIXED',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'MIXED',
+    dbExecutionPrincipal: 'MIXED',
     reviewPriority: 'HIGH',
   },
   {
@@ -2808,7 +3405,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id + user_id columns (db/schema/domains/communications/notifications.ts). Reachable via multiple live HTTP routes (app/api/notifications/route.ts, app/api/notifications/[id]/route.ts, app/api/notifications/count/route.ts, app/api/notifications/mark-all-read/route.ts, app/api/notifications/preferences/route.ts, app/api/notifications/device/route.ts, app/api/notifications/test/route.ts, app/api/mobile/notifications/route.ts) and cron routes (app/api/cron/education-reminders, overdue-notifications, process-notifications, observability-alerts). Needs the same ue_create_direct_org_rls_policy treatment as the 0108 protected set.",
     supportingCapability: ["app/api/notifications/route.ts", "app/api/notifications/[id]/route.ts", "app/api/notifications/count/route.ts", "app/api/notifications/mark-all-read/route.ts", "app/api/notifications/preferences/route.ts", "app/api/notifications/device/route.ts", "app/api/notifications/test/route.ts", "app/api/mobile/notifications/route.ts", "app/api/cron/education-reminders/route.ts", "app/api/cron/overdue-notifications/route.ts", "app/api/cron/process-notifications/route.ts", "lib/services/notification-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -2817,7 +3416,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'orgEntitlements' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/entitlements/route.ts","services/platform-economics/contract-service.ts","services/platform-economics/entitlement-guard.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2826,7 +3427,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "8 non-test reference(s) to 'orgSubscriptions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/billing/send-batch/route.ts","app/api/billing/subscriptions/[id]/route.ts","app/api/billing/subscriptions/route.ts","app/api/pilot/apply/[id]/commercial-transition/route.ts","services/platform-economics/billing-service.ts","services/platform-economics/dunning-service.ts","services/platform-economics/pricing-template-service.ts","services/platform-economics/subscription-lifecycle-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2835,7 +3438,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'organizationBenchmarkSnapshots' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2844,7 +3449,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Corrected 2026-09-02 (independent review of the 2026-09-01 batch): the only identified live root is POST /api/admin/billing-cycles/trigger-scheduled, which requires platform_lead and calls BillingScheduler.manualTrigger(). BillingScheduler.getOrganizationsForBilling() deliberately enumerates organization_billing_config across ALL organizations to build the scheduled billing run — this is bounded privileged/system execution, not ordinary tenant authority, even though the table itself carries a NOT NULL organization_id (db/schema/domains/finance/billing-config.ts). Fixed: getOrganizationsForBilling() now runs inside withSystemContext() (was: plain db). The platform_lead role check in the route remains the request-facing authorization; withSystemContext is only the execution mechanism, never treated as authorization itself. Regression test: lib/jobs/__tests__/billing-scheduler.test.ts asserts withSystemContext is used and the ordinary db connection is never touched for this query; the route's existing 401/403 tests (app/api/__tests__/admin-billing-cycles-trigger-scheduled.route.test.ts) already prove a non-platform_lead caller is rejected before any DB access.",
     supportingCapability: ["lib/jobs/billing-scheduler.ts", "app/api/admin/billing-cycles/trigger-scheduled/route.ts", "lib/db/with-rls-context.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'PLATFORM_ADMIN',
+    requiredSystemPrivileges: ['SELECT'],
+    invocationAuthority: 'PLATFORM_ADMIN',
+    dbExecutionPrincipal: 'SYSTEM_RUNTIME',
     reviewPriority: 'NONE',
   },
   {
@@ -2853,7 +3460,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: sole non-test reference is services/clc/remittance-notifications.ts, whose exports have zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search, see notification_log finding above — same dead file).",
     supportingCapability: ["services/clc/remittance-notifications.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2862,7 +3471,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/infrastructure/sharing.ts; duplicated verbatim at db/schema/sharing-permissions-schema.ts, a pre-consolidation leftover per db/schema/index.ts's \"Migration Status: COMPLETE — eliminating 18 duplicates\" note — the domains/** copy is canonical). Sole union-eyes reference is lib/clc/data-products.ts, which has zero callers anywhere under app/, actions/, lib/, services/, scripts/ (verified by name-search). The only other reference is services/financial-service/** — a separately deployed service, not part of union-eyes' own request handling.",
     supportingCapability: ["lib/clc/data-products.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2871,7 +3482,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'organizerImpacts' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2880,7 +3493,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'organizerTasks' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/organizer/impact/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2889,7 +3504,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'organizingCampaignMilestones' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2898,7 +3515,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "18 non-test reference(s) to 'organizingCampaigns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/organizing/assignments/[id]/route.ts","app/api/organizing/assignments/route.ts","app/api/organizing/campaigns/route.ts","app/api/organizing/card-check/route.ts","app/api/organizing/committee/route.ts","app/api/organizing/forms/generate/route.ts","app/api/organizing/labour-board/route.ts","app/api/organizing/nlrb-filings/route.ts","app/api/organizing/notes/[id]/route.ts","app/api/organizing/notes/route.ts","app/api/organizing/sequences/[id]/enroll/route.ts","app/api/organizing/sequences/[id]/route.ts","app/api/organizing/sequences/route.ts","app/api/organizing/support-percentage/route.ts","app/api/organizing/workplace-mapping/route.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2907,7 +3526,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "CORRECTED 2026-09-01 (round 7): the round-6 entry was itself a false classification — its verification grep only matched single-line `pgTable('organizing_contacts'` declarations and missed the real, multi-line `export const organizingContacts = pgTable(\n  'organizing_contacts',\n  {...})` declarations at db/schema/domains/infrastructure/organizing.ts and db/schema/organizing-tools-schema.ts (both carry their own organization_id-indexed columns). A repo-wide, multi-line-aware search (scripts/rls-storage-reachability-audit.ts) confirms these ARE real union-eyes-native declarations, but zero non-test references to 'organizingContacts' exist anywhere in app/, actions/, lib/, or services/ (excluding financial-service, which separately declares a same-named table in its own database). Correct disposition is therefore LATENT_UNREACHABLE, not SEPARATE_DATABASE_BOUNDARY — the union-eyes table exists and is part of this schema's remit, it is simply unused.",
     supportingCapability: ["db/schema/domains/infrastructure/organizing.ts","db/schema/organizing-tools-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2916,7 +3537,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'outreachEnrollments' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2925,7 +3548,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'outreachSequences' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2934,7 +3559,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'outreachStepsLog' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2943,7 +3570,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'packDownloadLog' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2952,7 +3581,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'pageAnalytics' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2961,7 +3592,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'payEquityExercises' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/cnesst/pay-equity/[id]/route.ts","app/api/cnesst/pay-equity/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2970,7 +3603,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'paymentCycles' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2979,7 +3614,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'paymentDisputes' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -2988,7 +3625,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'paymentMethods' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/payment-methods/route.ts","lib/payment-processor/processors/stripe-processor.ts","lib/utils/autopay-utils.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -2997,7 +3636,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'paymentPlans' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/payment-plans/route.ts","app/api/finance/summary/route.ts","lib/ai/financial-insights.ts","lib/api/index.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3006,7 +3647,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "95 non-test reference(s) to 'payments' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/admin/dues/page.tsx","app/[locale]/dashboard/admin/dues/payments/[id]/page.tsx","app/[locale]/dashboard/admin/dues/payments/page.tsx","app/[locale]/dashboard/billing-admin/page.tsx","app/[locale]/dashboard/clc/page.tsx","app/[locale]/dashboard/dues/pay/[transactionId]/page.tsx","app/[locale]/dashboard/finance/invoices/[id]/page.tsx","app/api/admin/dues/overview/route.ts","app/api/admin/payments/retry-failed/route.ts","app/api/finance/invoices/[id]/payments/route.ts","app/api/finance/per-capita/inbound/route.ts","app/api/finance/summary/route.ts","app/api/icra/checkout/route.ts","app/api/payments/checkout/create/route.ts","app/api/payments/webhooks/paypal/route.ts","app/api/payments/webhooks/stripe/route.ts","app/api/portal/dues/balance/route.ts","app/api/portal/dues/pay/route.ts","app/api/whop/unauthenticated-checkout/route.ts","app/api/workbook/checkout/route.ts","lib/ai/role-templates.ts","lib/api-auth-guard.ts","lib/api/deprecation.ts","lib/feature-flags.ts","lib/gdpr/consent-manager.ts","lib/integrations/README.md","lib/integrations/adapters/accounting/PHASE_3_COMPLETE.md","lib/integrations/adapters/accounting/freshbooks-adapter.ts","lib/integrations/adapters/accounting/freshbooks-client.ts","lib/integrations/adapters/accounting/quickbooks-adapter.ts","lib/integrations/adapters/accounting/quickbooks-client.ts","lib/integrations/adapters/accounting/sage-intacct-adapter.ts","lib/integrations/adapters/accounting/sage-intacct-client.ts","lib/integrations/adapters/accounting/sync-utils.ts","lib/integrations/adapters/accounting/wave-adapter.ts","lib/integrations/adapters/accounting/wave-client.ts","lib/integrations/adapters/accounting/xero-adapter.ts","lib/integrations/adapters/accounting/xero-client.ts","lib/integrations/registry.ts","lib/jobs/dues-reminder-scheduler.ts","lib/jobs/failed-payment-retry.ts","lib/middleware/auth-middleware.ts","lib/notification-templates/dues-notifications.ts","lib/observability/metrics.ts","lib/payment-processor/IMPLEMENTATION_GUIDE.md","lib/payment-processor/README.md","lib/payment-processor/processors/paypal-processor.ts","lib/payment-processor/processors/square-processor.ts","lib/payment-processor/processors/stripe-processor.ts","lib/payment-processor/processors/whop-processor.ts","lib/public-routes.ts","lib/rate-limiter.ts","lib/reality/capability-registry.ts","lib/receipt-generator.ts","lib/services/feature-flags-service.ts","lib/services/financial-email-service.ts","lib/services/payment-notifications.ts","lib/services/payment-service.ts","lib/services/payroll-integration-service.ts","lib/services/strike-fund-tax-service.ts","lib/stripe-elements.ts","lib/stripe.ts","lib/ui-tooltips.ts","services/clc/compliance-reports.ts","services/financial-service/REMITTANCE_PROCESSING.md","services/financial-service/SCHEMA_ANALYSIS.md","services/financial-service/STRIPE_INTEGRATION_COMPLETE.md","services/financial-service/STRIPE_TESTING.md","services/financial-service/TESTING_STATUS.md","services/financial-service/WEEK_12_TESTING_ISSUES.md","services/financial-service/WEEK_5_6_IMPLEMENTATION.md","services/financial-service/add-missing-tables.sql","services/financial-service/src/db/schema-platform-economics.ts","services/financial-service/src/db/schema.ts","services/financial-service/src/index.ts","services/financial-service/src/jobs/arrears-management-workflow.ts","services/financial-service/src/jobs/payment-collection-workflow.ts","services/financial-service/src/jobs/stipend-processing-workflow.ts","services/financial-service/src/middleware/idempotency.ts","services/financial-service/src/routes/donations.ts","services/financial-service/src/routes/payments.ts","services/financial-service/src/routes/remittances.ts","services/financial-service/src/services/arrears-detection.ts","services/financial-service/src/services/financial-reports.ts","services/financial-service/src/services/financial-reports.ts.broken","services/financial-service/src/services/payment-processing.ts","services/financial-service/src/services/reconciliation-engine.ts","services/financial-service/test-arrears.ps1","services/financial-service/test-donations.ps1","services/financial-service/test-payments-quick.ps1","services/financial-service/test-payments-simple.ps1","services/financial-service/test-payments.ps1","services/platform-economics/billing-service.ts","services/platform-economics/reconciliation-service.ts","services/whiplash-prevention-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3015,7 +3658,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'payrollDeductions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/deductions/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3024,7 +3669,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'pciDssCardholderDataFlow' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3033,7 +3680,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'pciDssEncryptionKeys' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/pci-compliance-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3042,7 +3691,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'pciDssQuarterlyScans' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/pci-compliance-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3051,7 +3702,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'pciDssRequirements' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/pci-compliance-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3060,7 +3713,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'pciDssSaqAssessments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/pci-compliance-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3069,7 +3724,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/pension/benefit-claims/route.ts. org-scoped pension benefit claim submission endpoint; SELECT+INSERT confirmed. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/pension/benefit-claims/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3078,7 +3735,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'pensionContributions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pension/contributions/route.ts","lib/ai/pension-intelligence.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3087,7 +3746,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/pension/members/route.ts. org-scoped pension member enrollment endpoint; SELECT+INSERT confirmed. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/pension/members/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3096,7 +3757,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'pensionPlans' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pension/plans/[id]/route.ts","app/api/pension/plans/route.ts","lib/ai/pension-intelligence.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3105,7 +3768,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pensionT4aRecords' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pension/t4a/route.ts","app/api/tax/t4a/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3114,7 +3779,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'pensionTrusteeMeetings' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pension/trustee-meetings/[id]/route.ts","app/api/pension/trustee-meetings/route.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3123,7 +3790,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'pensionTrustees' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pension/trustees/[id]/route.ts","app/api/pension/trustees/route.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3132,7 +3801,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "24 non-test reference(s) to 'perCapitaRemittances' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/clc/page.tsx","app/[locale]/dashboard/clc/staff/page.tsx","app/[locale]/dashboard/federation/page.tsx","app/api/arrears/case/[memberId]/route.ts","app/api/arrears/cases/route.ts","app/api/arrears/create-payment-plan/route.ts","app/api/arrears/escalate/[caseId]/route.ts","app/api/arrears/log-contact/route.ts","app/api/arrears/resolve/[caseId]/route.ts","app/api/healthwelfare/plans/route.ts","app/api/tax/cope/receipts/route.ts","app/api/tax/cra/export/route.ts","app/api/tax/rl-1/generate/route.ts","app/api/tax/slips/route.ts","app/api/tax/t106/route.ts","lib/graphql/resolvers.ts","services/clc/compliance-reports.ts","services/clc/per-capita-calculator.ts","services/clc/remittance-audit.ts","services/clc/remittance-export.ts","services/clc/remittance-notifications.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3141,7 +3812,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pilotChecklistItems' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pilot/bootstrap/cupe/route.ts","app/api/pilot/onboarding/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3150,7 +3823,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pilotDemoSeeds' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pilot/demo-data/route.ts","app/api/pilot/onboarding/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3159,7 +3834,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pilotEnrollments' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pilot/current/route.ts","app/api/pilot/overview/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3168,7 +3845,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pilotEvents' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/pilot-metrics.ts","lib/services/pilot-tracking.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3177,7 +3856,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'pilotFeedback' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pilot/feedback/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3186,7 +3867,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'pilotMetrics' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pilot/apply/[id]/reference-profile/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3195,7 +3878,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pilotMilestones' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/pilot/current/route.ts","app/api/pilot/overview/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3204,7 +3889,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'platformCostLedgerEntries' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/reality/capability-registry.ts","services/platform-economics/allocation-engine.ts","services/platform-economics/ledger-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3213,7 +3900,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'platformInvoices' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/late-fees/route.ts","app/api/pilot/apply/[id]/commercial-transition/route.ts","services/platform-economics/billing-service.ts","services/platform-economics/reconciliation-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3222,7 +3911,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'platformPayments' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/payments/webhooks/stripe/route.ts","lib/reality/capability-registry.ts","services/platform-economics/billing-service.ts","services/platform-economics/reconciliation-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3231,7 +3922,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'policyRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/policy-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3240,7 +3933,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'pollVotes' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/communications/polls/[pollId]/vote/route.ts","lib/engagement-scoring.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3249,7 +3944,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'polls' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/communications/polls/[pollId]/route.ts","app/api/communications/polls/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3258,7 +3955,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/health-safety/cnesst-schema.ts). Reachable via live HTTP routes app/api/cnesst/preventive-withdrawals/route.ts, app/api/cnesst/preventive-withdrawals/[id]/route.ts.",
     supportingCapability: ["app/api/cnesst/preventive-withdrawals/route.ts", "app/api/cnesst/preventive-withdrawals/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -3267,7 +3966,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): programEnrollments has a real, non-duplicate union-eyes-native pgTable('program_enrollments', ...) declaration (db/schema/domains/scheduling/training.ts, db/schema/education-training-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/scheduling/training.ts","db/schema/education-training-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3276,7 +3977,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'publicContent' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/examples/static-generation-patterns.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3285,7 +3988,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'publicEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3294,7 +3999,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'pushDevices' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/mobile/devices/route.ts","lib/workers/notification-worker.ts","services/fcm-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3303,7 +4010,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'pushNotificationTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3312,7 +4021,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/communications/push-notifications.ts). Reachable via live HTTP routes app/api/mobile/push/subscribe/route.ts and app/api/mobile/push/unsubscribe/route.ts.",
     supportingCapability: ["app/api/mobile/push/subscribe/route.ts", "app/api/mobile/push/unsubscribe/route.ts", "services/fcm-service.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -3321,7 +4032,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'recognitionAwardTypes' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/admin/rewards/analytics/page.tsx","lib/services/rewards/automation-service.ts","lib/services/rewards/award-service.ts","lib/services/rewards/program-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3330,7 +4043,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'recognitionAwards' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/admin/rewards/analytics/page.tsx","lib/services/rewards/automation-service.ts","lib/services/rewards/award-service.ts","lib/services/rewards/export-service.ts","lib/services/rewards/notification-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3339,7 +4054,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'recognitionPrograms' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/admin/rewards/analytics/page.tsx","lib/services/rewards/program-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3348,7 +4065,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'reconciliationExceptions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/reconciliation-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3357,7 +4076,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'reconciliationRuns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/reconciliation/bank/route.ts","services/platform-economics/reconciliation-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3366,7 +4087,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'remittanceExceptions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/payroll-integration-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3375,7 +4098,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "7 non-test reference(s) to 'remittanceLineItems' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/dues/dashboard/route.ts","app/api/dues/exceptions/route.ts","app/api/dues/reconciliation/auto-match/route.ts","app/api/dues/reconciliation/match/route.ts","app/api/dues/reconciliation/queue/route.ts","app/api/dues/reconciliation/reject/route.ts","lib/services/payroll-integration-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3384,7 +4109,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'reportDeliveryHistory' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3393,7 +4120,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): reportExecutions has a real, non-duplicate union-eyes-native pgTable('report_executions', ...) declaration (db/schema/domains/analytics/reports.ts, db/schema/reports-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/analytics/reports.ts","db/schema/reports-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3402,7 +4131,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): reportShares has a real, non-duplicate union-eyes-native pgTable('report_shares', ...) declaration (db/schema/domains/analytics/reports.ts, db/schema/reports-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/analytics/reports.ts","db/schema/reports-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3411,7 +4142,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): reportTemplates has a real, non-duplicate union-eyes-native pgTable('report_templates', ...) declaration (db/schema/domains/analytics/reports.ts, db/schema/reports-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/analytics/reports.ts","db/schema/reports-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3420,7 +4153,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "113 non-test reference(s) to 'reports' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/(marketing)/components/role-page-content.tsx","app/[locale]/(marketing)/executive-intelligence/page.tsx","app/[locale]/(marketing)/solutions/executive-leadership/page.tsx","app/[locale]/dashboard/admin/dues/page.tsx","app/[locale]/dashboard/admin/dues/reports/page.tsx","app/[locale]/dashboard/admin/page.tsx","app/[locale]/dashboard/admin/rewards/page.tsx","app/[locale]/dashboard/admin/rewards/reports/page.tsx","app/[locale]/dashboard/admin/scheduled-reports/page.tsx","app/[locale]/dashboard/committees/[id]/committee-workspace.tsx","app/[locale]/dashboard/compliance-admin/page.tsx","app/[locale]/dashboard/compliance/page.tsx","app/[locale]/dashboard/finance/exports/page.tsx","app/[locale]/dashboard/health-safety/IMPLEMENTATION_SUMMARY.md","app/[locale]/dashboard/health-safety/README.md","app/[locale]/dashboard/health-safety/hazards/page.tsx","app/[locale]/dashboard/ops/performance/page.tsx","app/api/admin/clc/analytics/annual-report/route.ts","app/api/admin/clc/analytics/forecast/route.ts","app/api/admin/clc/analytics/multi-year-trends/route.ts","app/api/admin/clc/analytics/trends/route.ts","app/api/admin/pilot-status/route.ts","app/api/compliance/reports/route.ts","app/api/cron/scheduled-reports/route.ts","app/api/exports/[id]/route.ts","app/api/exports/csv/route.ts","app/api/exports/excel/route.ts","app/api/exports/pdf/route.ts","app/api/exports/route.ts","app/api/financial/budgets/[id]/route.ts","app/api/financial/budgets/route.ts","app/api/financial/expenses/[id]/route.ts","app/api/financial/expenses/route.ts","app/api/financial/vendors/[id]/route.ts","app/api/financial/vendors/route.ts","app/api/gdpr/data-export/route.ts","app/api/grievances/[id]/assign/route.ts","app/api/health-safety/README.md","app/api/health-safety/hazards/stats/route.ts","app/api/reports/[id]/execute/route.ts","app/api/reports/[id]/route.ts","app/api/reports/[id]/run/route.ts","app/api/reports/[id]/share/route.ts","app/api/reports/builder/route.ts","app/api/reports/datasources/route.ts","app/api/reports/datasources/sample/route.ts","app/api/reports/execute/route.ts","app/api/reports/route.ts","app/api/reports/scheduled/[id]/route.ts","app/api/reports/scheduled/route.ts","app/api/reports/templates/route.ts","app/api/social-media/analytics/route.ts","app/api/staging-proof/deadline-engine/scenario/route.ts","app/api/version/route.ts","lib/ai/executive-insights.ts","lib/ai/role-templates.ts","lib/analytics-performance.ts","lib/api-docs/openapi-config.ts","lib/api/deprecation.ts","lib/api/with-api.ts","lib/canadian-labour-standards/pay-equity.ts","lib/clc/nil-executive-service.ts","lib/config/env-validation.ts","lib/dashboard/require-dashboard-access.ts","lib/dashboard/role-experience.ts","lib/email/report-email-templates.ts","lib/governance-observability/types.ts","lib/governance-policy/ai-governance.ts","lib/governance-policy/contracts.ts","lib/governance-policy/evaluation.ts","lib/governance-simulation/ledger.ts","lib/governance-simulation/types.ts","lib/icra-pdf/reportTheme.ts","lib/icra/adaptation/routedSubmissionValidator.ts","lib/icra/assessors/assessorGovernance.ts","lib/icra/claim-tokens.ts","lib/icra/scoring.ts","lib/middleware/auth-middleware.ts","lib/mobile/crash-reporting.ts","lib/organizations/platform-tenant.ts","lib/pilot-admin-operational.ts","lib/public-routes.ts","lib/rate-limiter.ts","lib/reality/capability-registry.ts","lib/runtime/onboarding/successorStewardshipRuntime.ts","lib/runtime/readiness/runtimeContinuityReporting.ts","lib/runtime/readiness/runtimeReadinessEngine.ts","lib/runtime/traceability/runtimeGovernanceTraceability.ts","lib/scheduled-report-executor.ts","lib/security/rls-gap-remediation.ts","lib/trust-center/types.ts","lib/ui-tooltips.ts","lib/whitepaper/continuity-gap.ts","lib/workers/cleanup-worker.ts","lib/workers/report-worker.ts","services/carbon-accounting-integration.ts","services/clc/compliance-reports.ts","services/financial-service/REMITTANCE_PROCESSING.md","services/financial-service/drizzle/0000_lucky_mole_man.sql","services/financial-service/drizzle/meta/0000_snapshot.json","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/financial-service/src/index.ts","services/financial-service/src/jobs/analytics-processor.ts","services/financial-service/src/routes/analytics.ts","services/financial-service/src/routes/reports.ts","services/financial-service/src/services/burn-rate-predictor.ts","services/financial-service/src/services/reconciliation-engine.ts","services/financial-service/test-analytics.ps1","services/financial-service/test-reports.ps1","services/platform-economics/entitlement-guard.ts","services/platform-economics/finance-outputs.ts","services/platform-economics/pricing-calculator.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3429,7 +4164,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'retentionPolicies' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/policy-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3438,7 +4175,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'rewardBudgetEnvelopes' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/admin/rewards/analytics/page.tsx","lib/services/rewards/budget-service.ts","lib/services/rewards/export-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3447,7 +4186,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'rewardRedemptions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/admin/rewards/analytics/page.tsx","lib/services/rewards/export-service.ts","lib/services/rewards/notification-service.ts","lib/services/rewards/redemption-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3456,7 +4197,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "5 non-test reference(s) to 'rewardWalletLedger' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["app/[locale]/dashboard/admin/rewards/analytics/page.tsx","lib/services/rewards/export-service.ts","lib/services/rewards/notification-service.ts","lib/services/rewards/wallet-service.ts","lib/utils/rewards-stats-utils.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3465,7 +4208,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/health-safety/cnesst-schema.ts). Reachable via live HTTP routes app/api/cnesst/right-of-refusal/route.ts, app/api/cnesst/right-of-refusal/[id]/route.ts.",
     supportingCapability: ["app/api/cnesst/right-of-refusal/route.ts", "app/api/cnesst/right-of-refusal/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -3474,7 +4219,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'roleTenureHistory' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3483,7 +4230,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): roomBookings has a real, non-duplicate union-eyes-native pgTable('room_bookings', ...) declaration (db/schema/domains/scheduling/calendar.ts, db/schema/calendar-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/scheduling/calendar.ts","db/schema/calendar-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3492,7 +4241,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'satisfactionSurveys' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/satisfaction-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3501,7 +4252,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): scheduledReports has a real, non-duplicate union-eyes-native pgTable('scheduled_reports', ...) declaration (db/schema/domains/analytics/reports.ts, db/schema/reports-schema.ts), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list for this table only surfaced services/financial-service's own same-named, separately-databased table (its own drizzle.config.ts/DATABASE_URL) and MISSED the real union-eyes declaration entirely — this entry corrects that gap. No known union-eyes application code path queries this table today.",
     supportingCapability: ["db/schema/domains/analytics/reports.ts","db/schema/reports-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3510,7 +4263,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'scimConfigurations' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3519,7 +4274,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'scimEventsLog' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3528,7 +4285,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'publicSecurityEvents' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3537,7 +4296,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'securityPostureChecks' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3546,7 +4307,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'segmentExports' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3555,7 +4318,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "10 non-test reference(s) to 'settlements' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/(marketing)/features/analytics/page.tsx","app/[locale]/dashboard/customer-success/page.tsx","app/[locale]/dashboard/sector-analytics/page.tsx","app/[locale]/dashboard/support/page.tsx","app/api/finance/summary/route.ts","lib/queries/platform-stats.ts","lib/services/cba-intelligence/adapters/esdc-adapter.ts","lib/services/cba-intelligence/adapters/provincial-board-adapter.ts","lib/services/cba-intelligence/adapters/union-bargaining-adapter.ts","lib/services/cba-intelligence/seed-sources.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3564,7 +4329,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'shopifyConfig' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/rewards/shopify-service.ts","lib/services/rewards/webhook-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3573,7 +4340,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'signatureDocuments' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/signature/signature-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3582,7 +4351,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'signatureTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3591,7 +4362,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'signatureWorkflows' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/signature-workflow-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/pki/signature-service.ts","services/pki/workflow-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3600,7 +4373,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'smsCampaigns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/dashboard/communications/page.tsx","app/api/communications/sms/campaigns/route.ts","services/twilio-sms-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3609,7 +4384,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'smsConversations' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/communications/sms/conversations/route.ts","services/twilio-sms-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3618,7 +4395,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/communications/sms/route.ts. org-scoped SMS message CRUD route; crudRoutes GET+POST plus confirmed UPDATE+DELETE (delivery-status update, message removal). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/communications/sms/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3627,7 +4406,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'smsOptOuts' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/twilio-sms-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3636,7 +4417,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'smsRateLimits' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3645,7 +4428,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'smsTemplates' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/twilio-sms-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3654,7 +4439,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'socialAccounts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/social-media/accounts/route.ts","app/api/social-media/analytics/route.ts","app/api/social-media/posts/route.ts","lib/social-media/social-media-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3663,7 +4450,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'socialAnalytics' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/social-media/analytics/route.ts","lib/social-media/social-media-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3672,7 +4461,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'socialCampaigns' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/social-media/analytics/route.ts","app/api/social-media/campaigns/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3681,7 +4472,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'socialEngagement' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3690,7 +4483,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'socialFeeds' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3699,7 +4494,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'socialPosts' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/social-media/analytics/route.ts","app/api/social-media/campaigns/route.ts","app/api/social-media/posts/route.ts","lib/social-media/social-media-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3708,7 +4505,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'ssoProviders' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/enterprise/sso/providers/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3717,7 +4516,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'ssoSessions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3726,7 +4527,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "organization_id present and NOT NULL in the canonical declaration (db/schema/union-structure-schema.ts): steward-to-coverage-area assignment with tenure/training/certification tracking and an optional grievance link. Round 4 (2026-09-01): resolved the CONFLICTING_SCHEMA finding \u2014 db/schema/domains/communications/organizer-workflows.ts previously declared a second, conflicting 'steward_assignments' pgTable for a narrower steward-to-individual-member concept. Confirmed via git grep for the module path, its stewardAssignmentTypeEnum, and every real caller of the 'stewardAssignments' symbol that the stale declaration had ZERO production consumers of its own \u2014 every real caller (app/api/stewards/[id]/route.ts, app/api/stewards/route.ts, db/queries/union-structure-queries.ts, lib/cognition/ue-adapter.ts, lib/services/steward-assignment.ts, db/schema/domains/member/stewards.ts) already resolved to the canonical declaration, either directly or via db/schema/index.ts's explicit override. Deleted the stale table/enum/relations/types rather than re-exporting them. Tenant-isolation fix from round 3 (lib/services/steward-assignment.ts's assignSteward() persisting organization_id on insert) confirmed still present.",
     supportingCapability: ["app/api/stewards/[id]/route.ts","app/api/stewards/route.ts","db/queries/union-structure-queries.ts","lib/cognition/ue-adapter.ts","lib/services/steward-assignment.ts","db/schema/union-structure-schema.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3735,7 +4538,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "57 non-test reference(s) to 'stewards' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/(marketing)/components/animated-reviews.tsx","app/[locale]/(marketing)/pricing/page.tsx","app/[locale]/(marketing)/proof/page.tsx","app/[locale]/dashboard/admin/page.tsx","app/[locale]/dashboard/analytics/layout.tsx","app/[locale]/dashboard/claims/page.tsx","app/[locale]/dashboard/cognition/page.tsx","app/[locale]/dashboard/governance/layout.tsx","app/[locale]/dashboard/leadership/page.tsx","app/[locale]/dashboard/stewards/page.tsx","app/[locale]/dashboard/stewards/ratings/page.tsx","app/api/admin/members/stats/route.ts","app/api/ai/pension/members/[id]/projection/route.ts","app/api/ai/pension/plans/[id]/funding/route.ts","app/api/breaks/compliance/route.ts","app/api/cognition/kpis/route.ts","app/api/cognition/workload/route.ts","app/api/ml/query/route.ts","lib/action-enforcer.ts","lib/ai/steward-copilot.ts","lib/ai/template-engine.ts","lib/ai/transparency.ts","lib/auth/roles.ts","lib/canadian-labour-standards/break-defaults.ts","lib/cognition/ue-adapter.ts","lib/hooks/use-members-console-data.ts","lib/hubspot/syncIcraPurchase.ts","lib/icra-pdf/reportNarrativeEngine.ts","lib/icra/adaptation/adaptivePassageLibrary.ts","lib/icra/adaptation/facilitatorAdaptationGuide.ts","lib/icra/contradictions/contradictionSignalPairs.ts","lib/icra/ges-level5/probes.ts","lib/icra/insight-engine.ts","lib/icra/modalities-v2/registry.ts","lib/institutional-legitimacy.ts","lib/intelligence/sector/sectorContinuityProfiles.ts","lib/intelligence/stewardship/dependencyRecurrenceModel.ts","lib/knowledge-transfer/governance/consent-controls.ts","lib/marketing/organizer-impact.ts","lib/oci/benchmark/sectorBaselines.ts","lib/oci/benchmark/stewardshipBurdenPatterns.ts","lib/oci/benchmark/types.ts","lib/oci/conversations/continuityConversationPrompts.ts","lib/oci/facilitation/executiveWorkshopFlows.ts","lib/oci/facilitation/facilitationGuide.ts","lib/oci/facilitation/institutionalDiscoveryFramework.ts","lib/oci/frameworks/governance-entropy-scale.ts","lib/quebec/break-defaults.ts","lib/representation/protocol-types.ts","lib/runtime/onboarding/successorStewardshipRuntime.ts","lib/services/ai/clause-extraction-service.ts","lib/services/dashboard-kpi-service.ts","lib/services/steward-assignment.ts","lib/workbook/engines/continuityRedistributionPlanner.ts","lib/workbook/engines/precedentContinuityMapper.ts","lib/workbook/engines/stewardshipRedistributionEngine.ts","services/platform-economics/entitlement-guard.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3744,7 +4549,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'strategicGoals' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/executive/dashboard/route.ts","lib/services/dashboard-kpi-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3753,7 +4560,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "CORRECTED 2026-09-01 (round 7): the round-6 entry was itself a false classification — its verification grep only matched single-line `pgTable('stripe_webhook_events'` declarations and missed the real, multi-line declarations at db/schema/domains/finance/payments.ts and db/schema/financial-payments-schema.ts (both carry an organization_id-indexed 'orgIdx'). A repo-wide, multi-line-aware search (scripts/rls-storage-reachability-audit.ts) confirms these ARE real union-eyes-native declarations, but zero non-test references to 'stripeWebhookEvents' exist anywhere in app/, actions/, lib/, or services/ (excluding financial-service, which separately declares a same-named table in its own database, used by its own payment-processing/reconciliation-engine). Correct disposition is therefore LATENT_UNREACHABLE, not SEPARATE_DATABASE_BOUNDARY.",
     supportingCapability: ["db/schema/domains/finance/payments.ts","db/schema/financial-payments-schema.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3762,7 +4571,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/finance/dunning.ts). Reachable via services/platform-economics/subscription-lifecycle-service.ts, which is called from app/api/billing/credits/check-expired/route.ts. The sibling reference services/platform-economics/dunning-service.ts has zero independent callers but shares the same table via the reachable lifecycle service.",
     supportingCapability: ["services/platform-economics/subscription-lifecycle-service.ts", "app/api/billing/credits/check-expired/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -3771,7 +4582,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'supportTickets' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/support-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3780,7 +4593,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'surveyAnswers' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/communications/surveys/[surveyId]/results/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3789,7 +4604,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'surveyQuestions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/communications/surveys/[surveyId]/results/route.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3798,7 +4615,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'surveyResponses' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/communications/surveys/[surveyId]/responses/route.ts","app/api/communications/surveys/[surveyId]/results/route.ts","lib/engagement-scoring.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3807,7 +4626,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "9 non-test reference(s) to 'surveys' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/[locale]/surveys/[surveyId]/page.tsx","app/api/communications/surveys/[surveyId]/route.ts","app/api/communications/surveys/route.ts","app/api/satisfaction/route.ts","lib/ai/insights-generator.ts","lib/marketing/organizer-impact.ts","lib/oci/facilitation/types.ts","lib/services/satisfaction-service.ts","lib/workbook-pdf/loadWorkbookModules.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3816,7 +4637,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'syncJobs' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/sync-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3825,7 +4648,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'taskComments' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3834,7 +4659,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "11 non-test reference(s) to 'trainingCourses' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/education/certifications/generate/route.ts","app/api/education/certifications/renewal-reminders/route.ts","app/api/education/completions/certificates/route.ts","app/api/education/courses/route.ts","app/api/education/notification-preferences/route.ts","app/api/education/programs/[id]/enrollments/route.ts","app/api/education/sessions/[id]/attendance/route.ts","lib/services/education-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3843,7 +4670,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "4 non-test reference(s) to 'trainingPrograms' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/education/programs/route.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3852,7 +4681,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "3 non-test reference(s) to 'transactionFeeEvents' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/payments/webhooks/stripe/route.ts","services/platform-economics/reconciliation-service.ts","services/platform-economics/transaction-fee-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3861,7 +4692,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'transactionFeeRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/transaction-fee-engine.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3870,7 +4703,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "6 non-test reference(s) to 'trendAnalyses' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["actions/analytics-actions.ts","app/api/analytics/claims/trends/route.ts","lib/ai/insights-generator.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3879,7 +4714,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): jobCancellationAuditEvent has a real, org-scoped (organization_id NOT NULL) pgTable declaration in db/schema/gate-13-job-cancellation-governance.ts (exported via the domains barrel), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper. The original scan's supportingCapability list only surfaced services/financial-service's own same-named table (its own separate database) and MISSED the real union-eyes declaration — this entry corrects that gap. financial-service's copy is out of this manifest's remit (SEPARATE_DATABASE_BOUNDARY); union-eyes' own copy is simply unused today.",
     supportingCapability: ["db/schema/gate-13-job-cancellation-governance.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3888,7 +4725,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): jobCancellationRequest has a real, org-scoped (organization_id NOT NULL) pgTable declaration in db/schema/gate-13-job-cancellation-governance.ts (exported via the domains barrel), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper (only financial-service's own separately-databased same-named table is actively used, out of this manifest's remit). Corrects a gap in the original scan, which only surfaced the financial-service reference.",
     supportingCapability: ["db/schema/gate-13-job-cancellation-governance.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3897,7 +4736,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche + reachability-scan correction): jobExecutionState has a real, org-scoped (organization_id NOT NULL) pgTable declaration in db/schema/gate-13-job-cancellation-governance.ts (exported via the domains barrel), but zero non-test references to it exist anywhere in app/, actions/, lib/, or services/ within apps/union-eyes proper (only financial-service's own separately-databased same-named table is actively used, out of this manifest's remit). Corrects a gap in the original scan, which only surfaced the financial-service reference.",
     supportingCapability: ["db/schema/gate-13-job-cancellation-governance.ts"],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3906,7 +4747,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'jobReconciliationPass' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3915,7 +4758,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'uePolicyBindings' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3924,7 +4769,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'unionDuesReceipts' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3933,7 +4780,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'unionDuesYearEnd' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3942,7 +4791,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'unionRepresentationVotes' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3951,7 +4802,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'usageAggregates' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/billing-service.ts","services/platform-economics/usage-metering-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3960,7 +4813,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'usageEvents' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["services/platform-economics/billing-service.ts","services/platform-economics/usage-metering-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -3969,7 +4824,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "2 non-test reference(s) to 'userConsents' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/members/[id]/consents/route.ts","lib/gdpr/consent-manager.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3978,7 +4835,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'userEngagementScores' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -3987,7 +4846,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "10 non-test reference(s) to 'userNotificationPreferences' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
     supportingCapability: ["app/api/messaging/preferences/route.ts","app/api/notifications/device/route.ts","app/api/notifications/preferences/route.ts","lib/services/notification-service.ts","lib/workers/email-worker.ts","lib/workers/notification-worker.ts","lib/workers/sms-worker.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/financial-service/src/services/notification-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -3996,7 +4857,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'userSignatures' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/services/correspondence-service.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -4005,7 +4868,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/governance/voting-sessions/route.ts. org-scoped voting session CRUD route; crudRoutes GET+POST plus confirmed UPDATE+DELETE (session lifecycle transitions/cancellation). Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/governance/voting-sessions/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -4014,7 +4879,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Verified 2026-09-01 (round 6, Phase-3A priority tranche): direct NOT NULL organization_id column, reachable via live HTTP route(s) app/api/wcb/claims/route.ts, app/api/wcb/claims/[id]/route.ts. org-scoped WCB claim CRUD routes; crudRoutes destructures GET+POST on the collection route and GET+PATCH+DELETE on the item route. Minimum runtime privilege set from confirmed DML verbs (crudRoutes handler destructuring and/or direct .insert/.update/.delete/.select call-site evidence), not defaulted to FULL_DML.",
     supportingCapability: ["app/api/wcb/claims/route.ts","app/api/wcb/claims/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'HIGH',
   },
   {
@@ -4023,7 +4890,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/domains/health-safety/provincial-wcb-schema.ts). Reachable via live HTTP routes app/api/wcb/assessments/route.ts, app/api/wcb/assessments/[id]/route.ts.",
     supportingCapability: ["app/api/wcb/assessments/route.ts", "app/api/wcb/assessments/[id]/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
   {
@@ -4032,7 +4901,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "1 non-test reference(s) to 'webhookEvents' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
     supportingCapability: ["lib/integrations/webhook-router.ts"],
     requiredRuntimePrivileges: 'TBD',
-    executionAuthority: 'TBD',
+    requiredSystemPrivileges: 'TBD',
+    invocationAuthority: 'TBD',
+    dbExecutionPrincipal: 'TBD',
     reviewPriority: 'NORMAL',
   },
   {
@@ -4041,7 +4912,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'webhookSubscriptions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -4050,7 +4923,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'websiteSettings' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -4059,7 +4934,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'workflowDefinitions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -4068,7 +4945,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Zero references to the 'workflowExecutions' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",
     supportingCapability: [],
     requiredRuntimePrivileges: [],
-    executionAuthority: 'NONE',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE',
     reviewPriority: 'NONE',
   },
   {
@@ -4077,7 +4956,9 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
     reason: "Manually verified 2026-09-02: direct NOT NULL organization_id column (db/schema/union-structure-schema.ts). Reachable via live HTTP routes app/api/worksites/route.ts, app/api/worksites/[id]/route.ts, app/api/dashboard/export-csv/route.ts, app/api/admin/pilot-status/route.ts, app/api/admin/seed-cupe-pilot/route.ts, app/api/pilot/bootstrap/cupe/route.ts.",
     supportingCapability: ["app/api/worksites/route.ts", "app/api/worksites/[id]/route.ts", "app/api/dashboard/export-csv/route.ts"],
     requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
-    executionAuthority: 'TENANT',
+    requiredSystemPrivileges: [],
+    invocationAuthority: 'TENANT_USER',
+    dbExecutionPrincipal: 'TENANT_RUNTIME',
     reviewPriority: 'HIGH',
   },
 ]

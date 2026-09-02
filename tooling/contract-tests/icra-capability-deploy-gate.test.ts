@@ -30,17 +30,32 @@ describe('ICRA capability migration deploy gate (PR #752)', () => {
   })
 
   it('the deploy job depends on the capability migration gate — deployment cannot run if the gate fails or is skipped', () => {
-    const deployNeeds = doc.jobs.deploy.needs
-    const needsArray = Array.isArray(deployNeeds) ? deployNeeds : [deployNeeds]
+    // This is the ONLY invariant GitHub Actions actually guarantees: job
+    // scheduling is driven by `needs:` edges, never by YAML declaration
+    // order. `deploy` must both declare the dependency AND carry no `if:`
+    // override that would let it run despite an upstream failure (the
+    // GitHub Actions default — skip a job if any of its `needs` failed —
+    // only holds as long as nothing overrides it, e.g. `if: always()`).
+    const deployJob = doc.jobs.deploy as { needs?: string | string[]; if?: unknown }
+    const needsArray = Array.isArray(deployJob.needs) ? deployJob.needs : [deployJob.needs]
     expect(needsArray).toContain('apply-icra-capability-migration')
+    expect(
+      deployJob.if,
+      'deploy must not override the default needs-based skip behavior (e.g. with if: always())',
+    ).toBeUndefined()
   })
 
-  it('the gate runs before build-push (application deployment cannot start before the schema is confirmed)', () => {
-    const jobOrder = Object.keys(doc.jobs)
-    const gateIdx = jobOrder.indexOf('apply-icra-capability-migration')
-    const deployIdx = jobOrder.indexOf('deploy')
-    expect(gateIdx).toBeGreaterThan(-1)
-    expect(deployIdx).toBeGreaterThan(gateIdx)
+  it('build-push is NOT required to wait for the migration gate (building an image has no DB dependency; only deploying it does)', () => {
+    // Explicit, intentional scope: the safety invariant this workflow must
+    // guarantee is "migration confirmed before the application REVISION is
+    // replaced", not "before the image is built". Building in parallel is
+    // safe and faster; only `deploy` (which replaces the live revision)
+    // needs the gate. If this ever needs to change, update this test to
+    // assert build-push.needs contains the gate — do not just add it
+    // silently and leave this test asserting the opposite.
+    const buildPushNeeds = doc.jobs['build-push'].needs
+    const needsArray = Array.isArray(buildPushNeeds) ? buildPushNeeds : [buildPushNeeds]
+    expect(needsArray).not.toContain('apply-icra-capability-migration')
   })
 
   it('fails closed if the migration-admin Key Vault secret is unavailable, before any build/deploy', () => {
