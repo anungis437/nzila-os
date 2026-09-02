@@ -36,7 +36,7 @@ describe('billing/credits/check-expired route', () => {
     const result = await POST({ organizationId: 'org_1', userId: 'u1' });
 
     expect(result).toMatchObject({ data: { expiredCount: 1, actions: [{ organizationId: 'org_1', action: 'expired' }] } });
-    expect(m.expireTrials).toHaveBeenCalled();
+    expect(m.expireTrials).toHaveBeenCalledWith('org_1', expect.any(Function));
     expect(m.logger.info).toHaveBeenCalled();
   });
 

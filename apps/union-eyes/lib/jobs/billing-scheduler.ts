@@ -21,6 +21,7 @@
  */
 
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { organizationBillingConfig } from '@/db/schema/domains/finance/billing-config';
 import { BillingCycleService, type BillingFrequency } from '@/lib/services/billing-cycle-service';
@@ -191,64 +192,70 @@ export class BillingScheduler {
 
   /**
    * Get organizations configured for a specific billing frequency
-   * 
-   * Reads from organization billing configuration when available
+   *
+   * Deliberately cross-organization (organization_billing_config is
+   * SYSTEM_ONLY — see db/rls-storage-authority-manifest.ts): only a
+   * platform_lead-authorized scheduler enumerates every org's billing
+   * config, so this runs through withSystemContext rather than the
+   * ordinary tenant runtime connection.
    */
   private static async getOrganizationsForBilling(
     frequency: BillingFrequency
   ): Promise<BillingScheduleConfig[]> {
     try {
-      const configured = await db
-        .select({
-          organizationId: organizationBillingConfig.organizationId,
-          organizationName: organizations.name,
-          frequency: organizationBillingConfig.billingFrequency,
-          enabled: organizationBillingConfig.enabled,
-        })
-        .from(organizationBillingConfig)
-        .innerJoin(
-          organizations,
-          eq(organizationBillingConfig.organizationId, organizations.id)
-        )
-        .where(
-          and(
-            eq(organizationBillingConfig.enabled, true),
-            eq(organizationBillingConfig.billingFrequency, frequency)
+      return await withSystemContext(async (tx) => {
+        const configured = await tx
+          .select({
+            organizationId: organizationBillingConfig.organizationId,
+            organizationName: organizations.name,
+            frequency: organizationBillingConfig.billingFrequency,
+            enabled: organizationBillingConfig.enabled,
+          })
+          .from(organizationBillingConfig)
+          .innerJoin(
+            organizations,
+            eq(organizationBillingConfig.organizationId, organizations.id)
           )
-        );
-
-      if (configured.length > 0) {
-        return configured as BillingScheduleConfig[];
-      }
-
-      // Fallback: get all active organizations and assume monthly billing
-      const orgs = await db
-        .select({
-          id: organizations.id,
-          name: organizations.name,
-          status: organizations.status,
-        })
-        .from(organizations)
-        .where(eq(organizations.status, 'active'));
-
-      return orgs
-        .filter((org) => org.status === 'active')
-        .map((org) => {
-          // Per-org billing frequency is not yet persisted on the organizations
-          // table. Hardcoding 'monthly' here means quarterly/annual contracts
-          // would be over-billed by this scheduler. Surface loudly until we
-          // either add a column or a billing_subscription table.
-          logger.warn(
-            'billing-scheduler: org billing frequency is hardcoded to monthly; per-org frequency is not persisted',
-            { organizationId: org.id }
+          .where(
+            and(
+              eq(organizationBillingConfig.enabled, true),
+              eq(organizationBillingConfig.billingFrequency, frequency)
+            )
           );
-          return {
-            organizationId: org.id,
-            organizationName: org.name,
-            frequency: 'monthly' as BillingFrequency,
-            enabled: true,
-          };
-        });
+
+        if (configured.length > 0) {
+          return configured as BillingScheduleConfig[];
+        }
+
+        // Fallback: get all active organizations and assume monthly billing
+        const orgs = await tx
+          .select({
+            id: organizations.id,
+            name: organizations.name,
+            status: organizations.status,
+          })
+          .from(organizations)
+          .where(eq(organizations.status, 'active'));
+
+        return orgs
+          .filter((org) => org.status === 'active')
+          .map((org) => {
+            // Per-org billing frequency is not yet persisted on the organizations
+            // table. Hardcoding 'monthly' here means quarterly/annual contracts
+            // would be over-billed by this scheduler. Surface loudly until we
+            // either add a column or a billing_subscription table.
+            logger.warn(
+              'billing-scheduler: org billing frequency is hardcoded to monthly; per-org frequency is not persisted',
+              { organizationId: org.id }
+            );
+            return {
+              organizationId: org.id,
+              organizationName: org.name,
+              frequency: 'monthly' as BillingFrequency,
+              enabled: true,
+            };
+          });
+      });
     } catch (error) {
       logger.error('Error fetching organizations for billing', { error });
       throw error;

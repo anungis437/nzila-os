@@ -331,6 +331,93 @@ jobs:
           fi
           echo "::notice::Migration 0108 applied and role attributes verified for ${{ needs.plan.outputs.environment }}. Next: pnpm --filter @nzila/union-eyes run rls:provision-roles for this environment."
 
+  # Mandatory, always-on pre-deploy gate — NOT an optional operator command
+  # like apply-rls-foundation-migration above. Application code on this
+  # branch reads/writes icra_assessments.capability_token_hash /
+  # capability_token_expires_at (PR #752, ICRA capability architecture), so
+  # every deploy — not just a one-time rollout — must confirm those columns
+  # exist before the new revision goes live. Uses the canonical shared
+  # scoped-migration executor (tooling/scripts/lib/union-eyes-scoped-
+  # migrations.mjs) via icra:capability-rollout:check/:apply — never a
+  # hand-written copy of the 0005 DDL. Fails closed (before build-push/
+  # deploy) if the migration-admin Key Vault secret is unavailable or the
+  # post-apply verification does not reach GO.
+  apply-icra-capability-migration:
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply ICRA Capability Migration (0005, mandatory pre-deploy gate)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Check + apply the ICRA capability scoped migration (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. Capability-dependent application code cannot deploy without the migration-admin credential to confirm/apply the 0005 scoped migration. Refusing to proceed to build/deploy — this must never be left as an optional operator step."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          set +e
+          pnpm --filter @nzila/union-eyes run icra:capability-rollout:check
+          CHECK_STATUS=$?
+          set -e
+
+          if [ "$CHECK_STATUS" -ne 0 ]; then
+            echo "::notice::ICRA capability migration not yet GO for ${{ needs.plan.outputs.environment }} — applying tag 0005 now."
+            set +e
+            pnpm --filter @nzila/union-eyes run icra:capability-rollout:apply
+            APPLY_STATUS=$?
+            set -e
+            if [ "$APPLY_STATUS" -ne 0 ]; then
+              unset RLS_MIGRATION_ADMIN_DATABASE_URL ADMIN_URL
+              echo "::error::ICRA capability migration apply failed for ${{ needs.plan.outputs.environment }}. Refusing to build/deploy capability-dependent application code."
+              exit 1
+            fi
+          fi
+
+          set +e
+          pnpm --filter @nzila/union-eyes run icra:capability-rollout:check
+          FINAL_STATUS=$?
+          set -e
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$FINAL_STATUS" -ne 0 ]; then
+            echo "::error::Post-apply verification did not reach GO for ${{ needs.plan.outputs.environment }}. Refusing to build/deploy."
+            exit 1
+          fi
+          echo "::notice::ICRA capability migration (0005) confirmed GO for ${{ needs.plan.outputs.environment }}."
+
   pre-deploy-gates:
     runs-on: ubuntu-latest
     needs: plan
@@ -605,7 +692,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [plan, pre-deploy-gates, build-push]
+    needs: [plan, pre-deploy-gates, build-push, apply-icra-capability-migration]
     name: Deploy UnionEyes (env-scoped, digest-pinned)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
