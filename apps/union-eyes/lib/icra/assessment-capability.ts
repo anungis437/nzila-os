@@ -50,11 +50,20 @@ export function isCapabilityExpired(
   now: Date = new Date(),
 ): boolean {
   if (!expiresAt) return true; // no expiry on record => never validly issued
-  return expiresAt.getTime() < now.getTime();
+  return expiresAt.getTime() <= now.getTime();
 }
 
 function cookieName(assessmentId: string): string {
   return `${COOKIE_PREFIX}${assessmentId}`;
+}
+
+/** Safe decode: malformed attacker-controlled percent-encoding must deny, never throw/500. */
+function safeDecodeCookieValue(raw: string): string | null {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -78,12 +87,27 @@ export function extractCapabilityToken(request: Request, assessmentId: string): 
       if (eq === -1) continue;
       const key = part.slice(0, eq).trim();
       if (key === name) {
-        return decodeURIComponent(part.slice(eq + 1).trim());
+        return safeDecodeCookieValue(part.slice(eq + 1).trim());
       }
     }
   }
 
   return null;
+}
+
+/**
+ * Server-Component-friendly variant: given the raw cookie value already
+ * resolved via next/headers' cookies().get(name)?.value (no Request object
+ * available there), returns the decoded token or null. Use
+ * capabilityCookieName(assessmentId) to get the cookie name to look up.
+ */
+export function decodeCapabilityCookieValue(rawValue: string | null | undefined): string | null {
+  if (!rawValue) return null;
+  return safeDecodeCookieValue(rawValue);
+}
+
+export function capabilityCookieName(assessmentId: string): string {
+  return cookieName(assessmentId);
 }
 
 /** Sets the HttpOnly issuance cookie on a route response. */

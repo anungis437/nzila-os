@@ -7,7 +7,12 @@ static discovery heuristic (see Methodology) plus individual code-reading
 verification of every flagged file — the heuristic is discovery evidence,
 not final proof; every disposition below reflects the actual call graph.
 
-**Total callers: 61/61 reviewed.**
+**Total callers: 61/61 reviewed** for this methodology's discovery scope
+(direct callers of the privileged-context wrappers). **See "Round 8"
+below: this methodology has a structural blind spot** — it cannot see a
+caller that skips the wrapper entirely via the ordinary `db` import — which
+was found and closed for two ICRA server actions, alongside a new,
+broader ratchet that covers that blind spot going forward.
 
 ## Methodology
 
@@ -98,11 +103,144 @@ See `docs/union-eyes/reality-remediation/icra-assessment-capability.md` for
 the full architecture decision record: `ICRA_PSEUDONYMOUS_NO_LOGIN = APPROVED`,
 `ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY = REJECTED`.
 
-## Result
+## Result (round 7)
 
-**61/61 authority disposition complete.** No open unauthorized-privileged-call
-findings remain as of this artifact's date. Round 7 closed the one real gap
-(ICRA capability) discovered during round 6's audit.
+**61/61 authority disposition complete** for the round-6 methodology's
+discovery scope (files matching a direct textual call to
+`withSystemContext`/`withSystemRLSContext`/`withPlatformAdminRLSContext`).
+Round 7 closed the one real gap (ICRA capability) discovered during round
+6's audit — but see round 8 below: that methodology has a structural blind
+spot that round 7 did not yet address.
+
+## Round 8: methodology blind spot found and closed — bypasses that skip the wrapper entirely
+
+An independent review of round 7's ICRA capability work found that the
+round-6/7 discovery grep (`rg "withSystemContext|withSystemRLSContext|
+withPlatformAdminRLSContext"`) can only ever find callers that **use** one
+of those wrappers. It is structurally blind to a caller that accesses a
+`SYSTEM_ONLY`-classified table (per the storage authority manifest) through
+the **ordinary, un-wrapped `db` import** — i.e. a bypass that skips the
+privilege mechanism entirely rather than misusing it. Two such bypasses
+were found and fixed this round, neither of which appears in the 61-file
+list above because neither called `withSystemContext` at all:
+
+| Caller | Runtime class | Bug found | Fix |
+| --- | --- | --- | --- |
+| `actions/icra/get-profile.ts` (server action, not a route) | Called directly by the results page `app/[locale]/continuity-assessment/results/[id]/page.tsx` | Queried `icra_maturity_profiles` keyed **only** by `assessmentId` via plain `db`, no capability check, no `withSystemContext` — a full UUID-only-takeover of any completed assessment's results, and the results page called it with zero API-layer protection to bypass. | Replaced with `getAuthorizedIcraProfile(assessmentId, capabilityToken)`: executes via `withSystemContext`, requires `checkCapability()` against the assessment's stored capability hash before returning the profile. The results page (`page.tsx`) now reads the HttpOnly capability cookie server-side (`cookies()` + `decodeCapabilityCookieValue`/`capabilityCookieName`) and falls back to a client `IcraCapabilityBootstrap` component + `.../capability/exchange` route for the email-fragment recovery flow, which never rotates the capability. |
+| `actions/icra/get-adaptive-resolution.ts` (server action) | No confirmed production callers as of this audit (dead code) | Same anti-pattern: plain `db`, `assessmentId`-only lookup, no capability check. Fixed proactively before anything wires it up, since the pattern itself — not just its current reachability — is the risk. | Now requires `capabilityToken` and resolves via `withSystemContext` + `checkCapability()`, returning a discriminated result union instead of a bare nullable value. |
+
+A third file, `app/api/payments/webhooks/stripe/route.ts`, reads/mutates
+`icra_assessments`/`icra_maturity_profiles` by `assessmentId` via plain `db`
+in its `checkout.session.completed` handler — but this is a **reviewed
+exemption**, not a bug: the entire `POST` handler is gated by
+`verifyStripeSignature()` (HMAC signature check against
+`STRIPE_WEBHOOK_SECRET`) before any DB access is reached, which is a valid
+system-level authorization distinct from (and not requiring) the
+pseudonymous end-user capability. It was nonetheless converted to
+`withSystemContext` this round for consistency with the `SYSTEM_ONLY`
+runtime-privilege disposition (forward-compatibility with tighter
+`union_eyes_runtime` grants), and is listed in the expanded ratchet's
+`REVIEWED_EXEMPTIONS` with that rationale.
+`lib/hubspot/syncIcraPurchase.ts` (invoked only from that same
+signature-verified webhook branch) is exempted for the same reason.
+
+### New contract: `SYSTEM_ONLY` manifest table → ordinary `db` path = forbidden
+
+This is now a standing invariant, not just an ICRA-specific fix: **any
+production file that touches a table classified `SYSTEM_ONLY` in
+`db/rls-storage-authority-manifest.ts` by a request-supplied identifier,
+through the plain tenant-runtime `db` import rather than
+`withSystemContext`/an equivalent privileged path, is a governance
+violation** — regardless of whether it also happens to skip
+authorization (the two are independent failure modes, and the
+`get-profile.ts` bug was actually both at once).
+
+**Enforcement:** `lib/icra/__tests__/assessment-capability-contract.test.ts`
+was widened in round 8 from scanning only `app/api/icra/**/route.ts` to
+scanning the full production surface (`app/`, `actions/`, `lib/`,
+`components/`) for any file that imports an ICRA table export **and**
+references `assessmentId`, failing unless the file also imports the
+capability guard module or is a reasoned `REVIEWED_EXEMPTIONS` entry. The
+test file includes a `REGRESSION` case that reconstructs the exact
+pre-fix `get-profile.ts` shape as a synthetic fixture and asserts the
+ratchet's detection logic would have flagged it — so this specific
+methodology blind spot cannot silently regress.
+
+This audit's original 61-file table above is **not** re-scoped by round 8
+(it still answers "which `withSystemContext`-calling files have a real
+guard before they call it"); the new ratchet is a structurally different,
+complementary check ("which files touch a `SYSTEM_ONLY` table at all,
+whether or not they call the privileged wrapper"). Both are required for
+the full authorization posture.
+
+## Result (round 8)
+
+**No open unauthorized-privileged-call or unauthorized-bypass findings
+remain as of this artifact's date.** Round 8 closed the two bypasses found
+(`get-profile.ts`, `get-adaptive-resolution.ts`), converted the Stripe
+webhook's ICRA branch to `withSystemContext` for disposition consistency,
+and replaced the API-route-only ratchet with a full-production-surface
+ratchet that has a regression fixture proving it would catch this exact
+bug class again.
+
+## Migration governance for the capability columns (Blocker #4 resolution)
+
+The capability feature added two columns to `icra_assessments`
+(`capability_token_hash`, `capability_token_expires_at`) plus a
+supporting index. An earlier revision added the migration SQL directly
+under the **frozen legacy lineage** (`apps/union-eyes/db/migrations/`),
+which per `db/migrations/LINEAGE-FROZEN.md` and
+`docs/categories/platform-and-operations/architecture/orm-governance/
+historical-migration-lineage-governance.md` is read-only archaeology with
+**no guaranteed apply path** — nothing replays that directory against a
+fresh or existing database. That file has been removed.
+
+Investigation confirmed `db/schema-cache/cache.ts` already does
+`export * from "../schema/icra-schema"` — i.e. the ICRA schema is already
+in-scope for the **canonical scoped Drizzle authority**
+(`drizzle.config.ts` → `db/schema-cache/cache.ts` →
+`db/migrations-cache/`), not Django-owned and not frozen-lineage-only.
+Per `migration-execution-governance.md` §1/§3/§7, the **only** authorized
+entrypoint for scoped Drizzle migrations, in every environment
+(local/dev/staging/demo/pilot, and post-Django-migrate in production), is
+`pnpm --filter @nzila/union-eyes db:bootstrap`
+(`tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs`). That script is
+idempotent — it tracks applied migration hashes in
+`drizzle.__drizzle_migrations` and applies only unapplied journal entries
+— so re-running it against an already-bootstrapped environment applies
+exactly the new entry and nothing else.
+
+**Fix:** generated a properly scoped migration via
+`drizzle-kit generate` — `db/migrations-cache/
+0005_add_icra_assessment_capability_token.sql` — now tracked in
+`db/migrations-cache/meta/_journal.json` alongside `meta/0005_snapshot.json`.
+This is additive-only (`ADD COLUMN` / `CREATE INDEX`, no destructive DDL),
+enforced by `db/__tests__/icra-capability-migration-governance.test.ts`.
+
+**Required rollout ordering** for any environment adopting this PR (per the
+existing `migration-execution-governance.md` sequencing, this capability
+migration slots in as an earlier, ordinary scoped-Drizzle step — it does
+**not** require a bespoke one-off apply script the way `0108` did, because
+`0108` was blocked by the frozen-lineage replay-refusal contract and this
+migration is not):
+
+1. `pnpm --filter @nzila/union-eyes db:bootstrap` — applies the scoped
+   capability migration (and any other pending scoped entries) using
+   migration/admin authority.
+2. `pnpm rls:apply-foundation-migration` (0108 RLS tenant isolation
+   foundation) — unchanged, still its own bespoke apply path.
+3. `scripts/provision-runtime-db-roles.ts` — provision/flip runtime and
+   system role LOGIN credentials.
+4. Key Vault credential creation/update for the provisioned roles.
+5. Enable RLS enforcement.
+6. Deploy application code (including this PR's capability-dependent
+   ICRA routes/actions).
+7. RLS preflight + effective-principal proof.
+
+Step 1 must complete before step 6 for the same reason `0108` must precede
+application code that assumes RLS is enforced: capability-dependent code
+reading/writing `capability_token_hash`/`capability_token_expires_at`
+cannot reach an environment whose DB lacks those columns.
 
 ---
 

@@ -4,24 +4,28 @@
  *
  * POST /api/icra/email-results
  *
- * Sends the results URL to a recipient address so the respondent can
- * recover their report later. Privacy-preserving: the recipient email
- * is never stored. Only a one-way SHA-256 hash is logged with the
+ * Sends the CURRENT results URL (with the caller's own capability re-embedded
+ * in the fragment) to a recipient address, so the respondent can save/share
+ * their existing access link. Privacy-preserving: the recipient email is
+ * never stored. Only a one-way SHA-256 hash is logged with the
  * results_emailed event, alongside the assessment id and IP hash.
  *
  * Rate limited: 5 sends per hour per IP.
  *
- * Capability rotation: the results page now requires the assessment
- * capability (see lib/icra/assessment-capability.ts); this route never has
- * the original raw token (only its hash is ever persisted), so recovery
- * ROTATES a fresh capability and embeds the new raw token in the emailed
- * link's URL FRAGMENT (`#cap=...`), never a query parameter — fragments
- * are not sent to the server or logged in access logs/referrers. FRONTEND
- * FOLLOW-UP REQUIRED: the results page must read `location.hash`, extract
- * `cap`, and present it as `Authorization: Bearer <cap>` (or exchange it for
- * the HttpOnly capability cookie) when calling the results/profile/report
- * APIs — this is out of this API-route audit's scope and must be wired up
- * separately before this recovery flow is fully functional end-to-end.
+ * SECURITY: this is SAVE_MY_CURRENT_RESULTS_ACCESS_LINK, not
+ * RECOVER_ACCESS_FROM_UUID. The caller MUST already present a valid,
+ * unexpired assessment capability (Authorization: Bearer header or the
+ * HttpOnly issuance cookie the browser sends automatically) — knowledge of
+ * assessmentId alone is never sufficient. The capability is NEVER rotated
+ * here: this route only re-embeds the already-presented, already-valid raw
+ * token in the emailed link's URL FRAGMENT (`#cap=...`), never a query
+ * parameter. A prior version of this route rotated the capability on every
+ * call using only the UUID, which reintroduced
+ * ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY (an attacker who knew the UUID
+ * could invalidate the legitimate holder's capability and receive the
+ * replacement) — do not reintroduce that. A true "I lost all access"
+ * recovery flow would require a separately established, verified recovery
+ * identity/contact mechanism; this system intentionally does not store one.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -30,9 +34,9 @@ import { eq } from 'drizzle-orm'
 import { icraAssessments } from '@/db/schema/icra-schema'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import {
-  generateCapabilityToken,
-  hashCapabilityToken,
-  computeCapabilityExpiry,
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability'
 import { rateLimit } from '@/lib/rate-limit'
 import { sendEmail, isValidEmail } from '@/lib/email-service'
@@ -98,41 +102,37 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
   }
 
-  // Confirm the assessment exists and rotate a fresh capability token for
-  // the recovery link. We do NOT require auth: anyone who already holds the
-  // assessmentId can request the link — they would have had it from the
-  // original submission redirect either way, and rotation invalidates any
-  // capability an attacker might have separately obtained.
-  const rotated = await withSystemContext(async (tx) => {
+  // Confirm the assessment exists AND the caller presents a currently valid
+  // capability for THIS assessment. Knowledge of assessmentId alone is never
+  // sufficient (ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY = REJECTED). The
+  // capability is never rotated — we only re-embed the same, already-valid
+  // presented token in the emailed link.
+  const presented = extractCapabilityToken(req, assessmentId)
+  const verification = await withSystemContext(async (tx) => {
     const [assessment] = await tx
-      .select({ id: icraAssessments.id })
+      .select({
+        id: icraAssessments.id,
+        capabilityTokenHash: icraAssessments.capabilityTokenHash,
+        capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+      })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
       .limit(1)
 
-    if (!assessment) return null
-
-    const capabilityToken = generateCapabilityToken()
-    await tx
-      .update(icraAssessments)
-      .set({
-        capabilityTokenHash: hashCapabilityToken(capabilityToken),
-        capabilityTokenExpiresAt: computeCapabilityExpiry(),
-      })
-      .where(eq(icraAssessments.id, assessmentId))
-
-    return capabilityToken
+    return checkCapability(presented, assessment)
   })
 
-  if (!rotated) {
-    // Avoid leaking existence — return 200 silently.
-    return NextResponse.json({ ok: true })
+  if (!verification.ok) {
+    return NextResponse.json(
+      { error: 'Not authorized to email a link for this assessment.' },
+      { status: capabilityDenialStatus(verification.reason) },
+    )
   }
 
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
     `${req.nextUrl.protocol}//${req.nextUrl.host}`
-  const resultsUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}#cap=${encodeURIComponent(rotated)}`
+  const resultsUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}#cap=${encodeURIComponent(presented as string)}`
   const copy = COPY[locale]
 
   const html = `

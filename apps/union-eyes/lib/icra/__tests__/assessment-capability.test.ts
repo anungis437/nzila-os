@@ -7,6 +7,8 @@ import {
   extractCapabilityToken,
   checkCapability,
   capabilityDenialStatus,
+  decodeCapabilityCookieValue,
+  capabilityCookieName,
 } from '../assessment-capability';
 
 describe('lib/icra/assessment-capability', () => {
@@ -36,6 +38,11 @@ describe('lib/icra/assessment-capability', () => {
   it('isCapabilityExpired treats a missing expiry as expired (fail closed)', () => {
     expect(isCapabilityExpired(null)).toBe(true);
     expect(isCapabilityExpired(undefined)).toBe(true);
+  });
+
+  it('isCapabilityExpired treats the exact expiry instant as expired (<=, not <)', () => {
+    const now = new Date('2026-01-15T00:00:00.000Z');
+    expect(isCapabilityExpired(now, now)).toBe(true);
   });
 
   it('isCapabilityExpired compares against the provided "now"', () => {
@@ -71,6 +78,30 @@ describe('lib/icra/assessment-capability', () => {
   it('extractCapabilityToken returns null when nothing is presented', () => {
     const req = new Request('http://localhost');
     expect(extractCapabilityToken(req, 'a1')).toBeNull();
+  });
+
+  it('extractCapabilityToken treats a malformed percent-encoded cookie as absent, never throws', () => {
+    const req = new Request('http://localhost', {
+      headers: { cookie: 'icra_cap_a1=%E0%A4%A' }, // truncated/invalid UTF-8 escape
+    });
+    expect(() => extractCapabilityToken(req, 'a1')).not.toThrow();
+    expect(extractCapabilityToken(req, 'a1')).toBeNull();
+  });
+
+  it('decodeCapabilityCookieValue treats a malformed value as absent, never throws (Server Component path)', () => {
+    expect(() => decodeCapabilityCookieValue('%')).not.toThrow();
+    expect(decodeCapabilityCookieValue('%')).toBeNull();
+    expect(decodeCapabilityCookieValue(undefined)).toBeNull();
+    expect(decodeCapabilityCookieValue(null)).toBeNull();
+  });
+
+  it('decodeCapabilityCookieValue decodes a well-formed value', () => {
+    expect(decodeCapabilityCookieValue(encodeURIComponent('a-real-token'))).toBe('a-real-token');
+  });
+
+  it('capabilityCookieName is stable and per-assessment', () => {
+    expect(capabilityCookieName('a1')).toBe('icra_cap_a1');
+    expect(capabilityCookieName('a1')).not.toBe(capabilityCookieName('a2'));
   });
 
   it('checkCapability denies with not_found when the row is missing', () => {

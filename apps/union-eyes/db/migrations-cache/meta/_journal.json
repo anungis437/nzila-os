@@ -36,6 +36,13 @@
       "when": 1788011111317,
       "tag": "0004_hesitant_chameleon",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788307664621,
+      "tag": "0005_add_icra_assessment_capability_token",
+      "breakpoints": true
     }
   ]
 }
