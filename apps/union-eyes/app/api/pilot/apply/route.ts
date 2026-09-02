@@ -11,12 +11,21 @@ import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
 export const dynamic = 'force-dynamic';
 
+// PILOT_PLATFORM_ACCESS_MIN_LEVEL-equivalent gate (PR #752 round 17): this
+// table has no organizationId column (orgScoped can never filter it), and its
+// rows are sensitive prospective-customer intake data (contact info, member
+// counts, internal "challenges"/"goals") for organizations across the WHOLE
+// platform, not the caller's own org — matches lib/pilot/pilot-ownership.ts's
+// own choice of system_admin as the minimum cross-org pilot-data access
+// level. Previously gated only by an ordinary per-org steward-level role,
+// letting any steward at any org enumerate every other org's pilot
+// applications.
 const { GET } = crudRoutes({
   table: pilotApplications,
   pk: 'id',
   tags: ["Marketing"],
   orgScoped: false,
-  readRole: 'steward',
+  readRole: 'system_admin',
   writeRole: 'member',
 });
 export { GET };

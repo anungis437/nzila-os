@@ -1,20 +1,20 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-02T22:11:32.516Z
+Generated: 2026-09-02T23:07:56.173Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 310
-- Pending review (NEEDS_REVIEW, excluded from plan): 390
-- Tenant-granted tables (union_eyes_runtime): 97
+- Ready for explicit GRANT (CLOSED, fully resolved): 320
+- Pending review (NEEDS_REVIEW, excluded from plan): 380
+- Tenant-granted tables (union_eyes_runtime): 103
 - System-granted tables (union_eyes_system): 19
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 97 | 87 | 62 | 56 |
+| tenant (union_eyes_runtime) | 103 | 91 | 65 | 56 |
 | system (union_eyes_system) | 17 | 9 | 7 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
@@ -135,6 +135,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | dsr_requests | LATENT_UNREACHABLE | NONE | NONE |
 | dues_policies | LATENT_UNREACHABLE | NONE | NONE |
 | dues_rates | LATENT_UNREACHABLE | NONE | NONE |
+| duplicate_group_members | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
 | employer_execution_evidence_links | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | employer_payroll_adjustments | LATENT_UNREACHABLE | NONE | NONE |
 | employer_responses | LATENT_UNREACHABLE | NONE | NONE |
@@ -188,6 +189,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | grievance_transitions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | grievance_workflows | LATENT_UNREACHABLE | NONE | NONE |
 | grievances | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| gss_applications | LATENT_UNREACHABLE | NONE | NONE |
 | hazard_reports | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | icra_anonymized_metrics | LATENT_UNREACHABLE | NONE | NONE |
 | icra_assessment_answers | SYSTEM_ONLY | NONE | NONE |
@@ -201,6 +203,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | icra_organizations | SYSTEM_ONLY | NONE | NONE |
 | impact_metrics | LATENT_UNREACHABLE | NONE | NONE |
 | in_app_notifications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| indigenous_member_data | LATENT_UNREACHABLE | NONE | NONE |
 | injury_logs | LATENT_UNREACHABLE | NONE | NONE |
 | integration_sync_log | LATENT_UNREACHABLE | NONE | NONE |
 | integration_sync_logs | LATENT_UNREACHABLE | NONE | NONE |
@@ -214,6 +217,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | kpi_configurations | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | lrb_employers | LATENT_UNREACHABLE | NONE | NONE |
 | lrb_unions | LATENT_UNREACHABLE | NONE | NONE |
+| member_addresses | LATENT_UNREACHABLE | NONE | NONE |
 | member_arrears | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | member_breaks | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | member_certifications | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
@@ -227,6 +231,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | member_history_events | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | member_jurisdiction_preferences | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | member_leaves | LATENT_UNREACHABLE | NONE | NONE |
+| member_location_consent | USER_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | member_relationship_scores | LATENT_UNREACHABLE | NONE | NONE |
 | member_segments | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | message_log | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT, UPDATE |
@@ -252,12 +257,15 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | notification_tracking | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | notifications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | org_configurations | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| org_entitlements | TENANT_RLS_REQUIRED | SELECT | NONE |
+| org_subscriptions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | org_usage | LATENT_UNREACHABLE | NONE | NONE |
 | organization_benchmark_snapshots | LATENT_UNREACHABLE | NONE | NONE |
 | organization_billing_config | SYSTEM_ONLY | NONE | SELECT |
 | organization_contacts | LATENT_UNREACHABLE | NONE | NONE |
 | organization_members | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT, UPDATE |
 | organization_relationships | SYSTEM_ONLY | NONE | SELECT |
+| organization_sharing_grants | LATENT_UNREACHABLE | NONE | NONE |
 | organization_sharing_settings | LATENT_UNREACHABLE | NONE | NONE |
 | organizations | TENANT_RLS_REQUIRED | SELECT, UPDATE | SELECT, INSERT |
 | organizer_impacts | LATENT_UNREACHABLE | NONE | NONE |
@@ -275,6 +283,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | pci_dss_cardholder_data_flow | LATENT_UNREACHABLE | NONE | NONE |
 | pension_benefit_claims | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | pension_members | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
+| pilot_applications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | ppe_equipment | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | preventive_withdrawals | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | program_enrollments | LATENT_UNREACHABLE | NONE | NONE |
@@ -294,6 +303,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | safety_committee_meetings | LATENT_UNREACHABLE | NONE | NONE |
 | safety_inspections | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | safety_policies | LATENT_UNREACHABLE | NONE | NONE |
+| safety_training_records | TENANT_RLS_REQUIRED | SELECT | NONE |
 | scheduled_reports | LATENT_UNREACHABLE | NONE | NONE |
 | scim_configurations | LATENT_UNREACHABLE | NONE | NONE |
 | scim_events_log | LATENT_UNREACHABLE | NONE | NONE |
