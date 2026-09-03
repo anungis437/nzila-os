@@ -232,11 +232,11 @@ class DonationsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class DonationReceiptsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
+class DonationReceiptsViewSet(viewsets.ModelViewSet):
     """API endpoint for DonationReceipts operations."""
     queryset = DonationReceipts.objects.all()
     serializer_class = DonationReceiptsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -648,8 +648,19 @@ class CrossBorderTransactionsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class AccountMappingsViewSet(GlobalPlusTenantIsolationMixin, viewsets.ModelViewSet):
-    """API endpoint for AccountMappings operations."""
+class AccountMappingsViewSet(GlobalPlusTenantIsolationMixin, viewsets.ReadOnlyModelViewSet):
+    """API endpoint for AccountMappings operations.
+
+    PR #752 round 33 correction: read-only by design, not full ModelViewSet.
+    Independent review found no legitimate writer proven for this table (no
+    TS write call site, no seed path, Django's model is stale/missing the
+    NOT NULL physical columns a real CREATE would need) — granting full DML
+    privileges here would not be least privilege. GlobalPlusTenantIsolationMixin's
+    write methods (perform_create/update/destroy) remain implemented and
+    tested for defense-in-depth/future reuse, but are unreachable via this
+    ViewSet's HTTP surface today (ReadOnlyModelViewSet exposes list/retrieve
+    only).
+    """
     queryset = AccountMappings.objects.all()
     serializer_class = AccountMappingsSerializer
     permission_classes = [permissions.IsAuthenticated]

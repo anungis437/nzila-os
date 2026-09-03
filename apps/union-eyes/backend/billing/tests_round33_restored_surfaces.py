@@ -2,11 +2,12 @@
 Round 33 wiring-lock tests: confirm each ViewSet touched this round uses the
 EXACT isolation mechanism its manifest disposition claims, and that the
 ViewSets deliberately left contained (Category C/D in the round-33 DenyAll
-inventory) still are. This is a regression lock, not a re-proof of mixin
-logic (that's covered by tests_isolation.py and
-tests_mixed_and_multiparty_isolation.py) — it fails loudly if a future edit
-silently swaps a ViewSet's permission_classes/mixin without updating the
-evidence in finance.ts.
+inventory, PLUS donation_receipts — re-contained by the round-33
+correction after independent review found no proven tenant CRUD authority)
+still are. This is a regression lock, not a re-proof of mixin logic (that's
+covered by tests_isolation.py and tests_mixed_and_multiparty_isolation.py)
+— it fails loudly if a future edit silently swaps a ViewSet's
+permission_classes/mixin without updating the evidence in finance.ts.
 
 Run via: python -m unittest billing.tests_round33_restored_surfaces -v
 """
@@ -25,18 +26,19 @@ django.setup()
 from billing import views  # noqa: E402
 from billing.isolation import (  # noqa: E402
     DenyAllPermission,
-    DirectTenantIsolationMixin,
     GlobalPlusTenantIsolationMixin,
     MultiPartyIsolationMixin,
 )
-from rest_framework import permissions  # noqa: E402
+from rest_framework import permissions, viewsets  # noqa: E402
 
 
 class RestoredSurfaceWiringTests(unittest.TestCase):
     """Surfaces restored/remediated this round: correct mixin + permission."""
 
-    def test_account_mappings_uses_global_plus_tenant_mixin(self):
+    def test_account_mappings_uses_global_plus_tenant_mixin_read_only(self):
         self.assertTrue(issubclass(views.AccountMappingsViewSet, GlobalPlusTenantIsolationMixin))
+        self.assertTrue(issubclass(views.AccountMappingsViewSet, viewsets.ReadOnlyModelViewSet))
+        self.assertFalse(issubclass(views.AccountMappingsViewSet, viewsets.ModelViewSet))
         self.assertEqual(views.AccountMappingsViewSet.permission_classes, [permissions.IsAuthenticated])
         self.assertEqual(views.AccountMappingsViewSet.tenant_field, "organization_id")
 
@@ -46,20 +48,21 @@ class RestoredSurfaceWiringTests(unittest.TestCase):
         self.assertEqual(views.PerCapitaRemittancesViewSet.from_field, "from_organization_id")
         self.assertEqual(views.PerCapitaRemittancesViewSet.to_field, "to_organization_id")
 
-    def test_donation_receipts_uses_direct_tenant_mixin(self):
-        self.assertTrue(issubclass(views.DonationReceiptsViewSet, DirectTenantIsolationMixin))
-        self.assertEqual(views.DonationReceiptsViewSet.permission_classes, [permissions.IsAuthenticated])
-        self.assertEqual(views.DonationReceiptsViewSet.tenant_field, "organization_id")
-
 
 class RemainingContainedSurfacesStillDenyAllTests(unittest.TestCase):
     """Category C/D surfaces from the round-33 DenyAll inventory (no
     reliable per-tenant ownership key, or ambiguous platform-vs-tenant
     scope) must remain fail-closed — this is a regression lock, not a new
-    finding: none of these were re-evaluated for remediation this round."""
+    finding: none of these were re-evaluated for remediation this round.
+    donation_receipts is included here too: it WAS restored earlier in
+    round 33, then re-contained by the same round's correction pass after
+    independent review found a clean FK proves scoping is possible but does
+    not prove tenants are supposed to have CRUD authority — no production
+    consumer or business authority model was ever traced for it."""
 
     STILL_CONTAINED = [
         "RemittanceApprovalsViewSet",
+        "DonationReceiptsViewSet",
         "StripeConnectAccountsViewSet",
         "PaymentClassificationPolicyViewSet",
         "PaymentRoutingRulesViewSet",

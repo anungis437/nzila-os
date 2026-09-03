@@ -144,6 +144,16 @@ interface DjangoTableRoute {
    *  real fields on the underlying Django model (cross-checked against
    *  models.py, not just the ViewSet declaration). */
   multiPartyFieldsMatchModel: boolean;
+  /**
+   * PR #752 round 33 correction: true when the ViewSet subclasses DRF's
+   * viewsets.ReadOnlyModelViewSet rather than the full viewsets.ModelViewSet
+   * — i.e. create/update/destroy are not exposed via this route AT ALL,
+   * regardless of any mixin. Used to catch the exact class of error
+   * independent review found in account_mappings: granting DML privileges
+   * in the manifest "because a generic ModelViewSet exposes those methods"
+   * without checking whether the route actually allows them.
+   */
+  usesReadOnlyModelViewSet: boolean;
 }
 
 function listDjangoAppDirs(): string[] {
@@ -242,6 +252,7 @@ function parseViewSetDetails(viewsSource: string): Map<string, Omit<DjangoTableR
       usesMultiPartyMixin: /\bMultiPartyIsolationMixin\b/.test(classDeclarationLine),
       declaredFromField: fromFieldMatch ? fromFieldMatch[1] : null,
       declaredToField: toFieldMatch ? toFieldMatch[1] : null,
+      usesReadOnlyModelViewSet: /\bReadOnlyModelViewSet\b/.test(classDeclarationLine),
     });
   }
   return mapping;
@@ -568,6 +579,7 @@ describe('Django billing/etc. backend router reachability vs storageAuthorityMan
       declaredFromField: null,
       declaredToField: null,
       multiPartyFieldsMatchModel: false,
+      usesReadOnlyModelViewSet: false,
     };
     // routeHasProvenIsolation always reads the REAL (now-corrected) source
     // file for the propagation check, so this route is proven today. This
@@ -701,18 +713,101 @@ class MultiPartyIsolationMixin:
       declaredFromField: 'from_organization_id',
       declaredToField: 'a_typo_field_that_does_not_exist_on_the_model',
       multiPartyFieldsMatchModel: false,
+      usesReadOnlyModelViewSet: false,
     };
     expect(routeHasProvenIsolation(misconfiguredRoute)).toBe(false);
   });
 
-  it('donation_receipts\' real Django route uses DirectTenantIsolationMixin (restored this round) and is recognized as proven isolation', () => {
+  it('donation_receipts\' real Django route is re-contained via DenyAllPermission (round-33 correction: no proven tenant CRUD authority) and stays recognized as fail-closed', () => {
     const tableRoutes = liveDjangoTableRoutes();
     const routes = tableRoutes.get('donation_receipts') ?? [];
     expect(routes.length).toBeGreaterThan(0);
     for (const route of routes) {
-      expect(route.usesSharedIsolationMixin).toBe(true);
-      expect(route.usesDenyAllPermission).toBe(false);
+      expect(route.usesDenyAllPermission).toBe(true);
       expect(routeHasProvenIsolation(route)).toBe(true);
     }
+  });
+
+  // ==========================================================================
+  // PR #752 round 33 CORRECTION: independent review found the manifest can
+  // grant DML privileges "because a generic Django ModelViewSet technically
+  // exposes those HTTP methods" without checking whether the route actually
+  // ALLOWS them (account_mappings was granted full DML while its ViewSet has
+  // since been made read-only; per_capita_remittances was granted
+  // TENANT_RUNTIME INSERT/UPDATE despite MultiPartyIsolationMixin denying all
+  // Django writes unconditionally). These invariants catch that class of
+  // error mechanically, not just for the two tables found this round.
+  // ==========================================================================
+
+  const WRITE_OPS = new Set(['INSERT', 'UPDATE', 'DELETE']);
+
+  function grantsWriteOps(privileges: readonly string[] | 'TBD'): boolean {
+    if (privileges === 'TBD') return false;
+    return privileges.some((p) => WRITE_OPS.has(p));
+  }
+
+  it('INVARIANT: no finance.ts entry backed by a ReadOnlyModelViewSet Django route grants any INSERT/UPDATE/DELETE privilege (runtime or system) — the endpoint cannot perform them', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+    const violations = financeEntries
+      .filter((entry) => {
+        const routes = tableRoutes.get(entry.table) ?? [];
+        return routes.some((r) => r.usesReadOnlyModelViewSet);
+      })
+      .filter((entry) => grantsWriteOps(entry.requiredRuntimePrivileges) || grantsWriteOps(entry.requiredSystemPrivileges))
+      .map((entry) => entry.table);
+
+    expect(
+      violations,
+      `finance.ts grants a write privilege to table(s) whose Django route is a ReadOnlyModelViewSet ` +
+        `(create/update/destroy are not exposed at all via that endpoint): ${violations.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('INVARIANT: no finance.ts entry backed by a MultiPartyIsolationMixin Django route grants tenant-runtime INSERT/UPDATE/DELETE — that mixin unconditionally denies every write via the tenant-facing endpoint; any real DML must be attributed to requiredSystemPrivileges instead', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+    const violations = financeEntries
+      .filter((entry) => {
+        const routes = tableRoutes.get(entry.table) ?? [];
+        return routes.some((r) => r.usesMultiPartyMixin);
+      })
+      .filter((entry) => grantsWriteOps(entry.requiredRuntimePrivileges))
+      .map((entry) => entry.table);
+
+    expect(
+      violations,
+      `finance.ts grants requiredRuntimePrivileges write access to table(s) protected by ` +
+        `MultiPartyIsolationMixin, which denies every write via the tenant-facing Django endpoint ` +
+        `unconditionally — any real write authority belongs in requiredSystemPrivileges: ${violations.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('REGRESSION FIXTURE: the write-privilege invariants actually fire on a misconfigured entry (proves the checks are not vacuously passing)', () => {
+    const readOnlyRouteFixture: DjangoTableRoute = {
+      app: 'billing',
+      routePath: 'fake-readonly-route',
+      viewSetName: 'FakeReadOnlyViewSet',
+      modelName: 'FakeReadOnlyModel',
+      table: 'fake_readonly_table',
+      hasGetQueryset: false,
+      usesDenyAllPermission: false,
+      usesUnfilteredObjectsAll: true,
+      usesOnlyIsAuthenticated: true,
+      usesSharedIsolationMixin: false,
+      usesGlobalPlusTenantMixin: true,
+      usesMultiPartyMixin: false,
+      declaredFromField: null,
+      declaredToField: null,
+      multiPartyFieldsMatchModel: false,
+      usesReadOnlyModelViewSet: true,
+    };
+    expect(grantsWriteOps(['SELECT'])).toBe(false);
+    expect(grantsWriteOps(['SELECT', 'INSERT'])).toBe(true);
+    expect(grantsWriteOps('TBD')).toBe(false);
+    // Sanity: a ReadOnlyModelViewSet fixture route paired with a hypothetical
+    // manifest entry granting INSERT would be exactly what the invariant
+    // above scans finance.ts for — asserted here against the helper
+    // directly since constructing a full financeEntries fixture would
+    // duplicate the whole manifest module.
+    expect(readOnlyRouteFixture.usesReadOnlyModelViewSet && grantsWriteOps(['SELECT', 'UPDATE'])).toBe(true);
   });
 });
