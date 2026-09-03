@@ -11,6 +11,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
+import { sanitizeResponsesForPublicCreate } from '@/lib/pilot/responses-authority';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
 export const dynamic = 'force-dynamic';
@@ -140,7 +141,13 @@ export async function POST(request: NextRequest) {
         challenges: challenges ?? [],
         goals: goals ?? [],
         readinessScore: assessment?.score?.toString() ?? null,
-        responses: responses ?? {},
+        // PR #752 round 24: an unauthenticated applicant must never be able
+        // to seed a reserved/authoritative key (commercialState,
+        // subscriptionPlanId, qualification scores, artifact metadata, ...)
+        // straight into a brand-new row — the PATCH-time protection built in
+        // rounds 22/23 would then faithfully preserve that attacker-seeded
+        // value forever. organizationId (the claim) remains allowed.
+        responses: sanitizeResponsesForPublicCreate(responses),
       })
       .returning();
 

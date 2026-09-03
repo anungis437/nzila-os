@@ -156,4 +156,33 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
       expect.objectContaining({ responses: { organizationId: 'attacker-claimed-org' } }),
     );
   });
+
+  it('round 24: strips reserved/authoritative keys from a public intake payload before insert, but keeps the claim', async () => {
+    const { POST } = await loadRoute();
+    const valuesSpy = vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'pilot-3' }]) }));
+    m.dbInsert.mockReturnValue({ values: valuesSpy });
+
+    await POST(new NextRequest('http://localhost/api/pilot/apply', {
+      method: 'POST',
+      body: JSON.stringify({
+        organizationName: 'Local 1',
+        contactName: 'Ash Bee',
+        contactEmail: 'ash@example.com',
+        responses: {
+          organizationId: 'claimed-org',
+          commercialState: 'subscription_active',
+          subscriptionPlanId: 'attacker-chosen-plan',
+          pilotQualificationScores: { pilotFitScore: 100 },
+          commercialMonetization: { lastState: 'subscription_active' },
+          readinessNotes: 'we use spreadsheets today',
+        },
+      }),
+    }));
+
+    expect(valuesSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        responses: { organizationId: 'claimed-org', readinessNotes: 'we use spreadsheets today' },
+      }),
+    );
+  });
 });

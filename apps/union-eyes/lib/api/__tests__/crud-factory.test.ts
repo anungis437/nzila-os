@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { enforceCreateSecurityInvariants, stripBlockedPatchFields } from '../crud-factory';
+import { SQL } from 'drizzle-orm';
+import type { PgTable } from 'drizzle-orm/pg-core';
+import { enforceCreateSecurityInvariants, stripBlockedPatchFields, buildMergeSetValues } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -166,5 +168,39 @@ describe('crud-factory stripBlockedPatchFields (PR #752 round 21)', () => {
     expect(body.verifiedOrganizationId).toBe('y');
     expect(result.id).toBeUndefined();
     expect(result.verifiedOrganizationId).toBeUndefined();
+  });
+});
+
+describe('crud-factory buildMergeSetValues (PR #752 round 24)', () => {
+  const fakeTable = { responses: {}, notes: {} } as unknown as PgTable;
+
+  it('converts a plain-object value for a merge column into a SQL fragment', () => {
+    const result = buildMergeSetValues({ responses: { readinessNotes: 'ok' } }, fakeTable, ['responses']);
+    expect(result.responses).toBeInstanceOf(SQL);
+  });
+
+  it('leaves non-merge columns as plain values', () => {
+    const result = buildMergeSetValues(
+      { responses: { readinessNotes: 'ok' }, notes: 'plain text' },
+      fakeTable,
+      ['responses'],
+    );
+    expect(result.notes).toBe('plain text');
+  });
+
+  it('leaves a merge column absent when the PATCH does not include it', () => {
+    const result = buildMergeSetValues({ notes: 'plain text' }, fakeTable, ['responses']);
+    expect(result.responses).toBeUndefined();
+  });
+
+  it('leaves a merge column as a plain value when it is not a plain object (null, array)', () => {
+    expect(buildMergeSetValues({ responses: null }, fakeTable, ['responses']).responses).toBeNull();
+    expect(buildMergeSetValues({ responses: ['x'] }, fakeTable, ['responses']).responses).toEqual(['x']);
+  });
+
+  it('does not mutate the input updates object', () => {
+    const updates = { responses: { readinessNotes: 'ok' } };
+    buildMergeSetValues(updates, fakeTable, ['responses']);
+    expect(updates.responses).toEqual({ readinessNotes: 'ok' });
   });
 });

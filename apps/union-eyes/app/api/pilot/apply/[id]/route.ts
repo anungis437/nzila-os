@@ -3,7 +3,8 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
-import { preserveServerOwnedResponsesFields, withPilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { withPilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { stripReservedResponsesKeysForPatch } from '@/lib/pilot/responses-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,12 +36,23 @@ const handlers = crudRoutes({
     'reviewedAt',
     'approvedAt',
   ],
-  // PR #752 round 22/23: responses holds both the CLAIMED owning
-  // organization and commercial-transition's authoritative FSM/scoring
-  // state — nested JSONB subfields blockedPatchFields (flat top-level
-  // keys) can't protect. See preserveServerOwnedResponsesFields's doc
-  // comment in lib/pilot/pilot-ownership.ts for the full key list/rationale.
-  beforeUpdate: (updates, { existing }) => preserveServerOwnedResponsesFields(updates, existing),
+  // PR #752 round 24: responses holds both the CLAIMED owning organization
+  // and commercial-transition's authoritative FSM/scoring state — nested
+  // JSONB subfields blockedPatchFields (flat top-level keys) can't protect.
+  // Strip every reserved key from the client's PATCH fragment (never read
+  // or reproduce its current value), then MERGE the remainder into the
+  // existing responses column (mergeJsonColumns below) rather than
+  // replacing it whole — a concurrent platform write to a reserved key can
+  // therefore never be reverted by this PATCH. See
+  // stripReservedResponsesKeysForPatch's doc comment in
+  // lib/pilot/responses-authority.ts for the full key list/rationale.
+  beforeUpdate: (updates) => {
+    if ('responses' in updates && updates.responses && typeof updates.responses === 'object' && !Array.isArray(updates.responses)) {
+      updates.responses = stripReservedResponsesKeysForPatch(updates.responses as Record<string, unknown>);
+    }
+    return updates;
+  },
+  mergeJsonColumns: ['responses'],
 });
 
 export const GET = withPilotOwnership(handlers.GET, { minRole: 'steward' });

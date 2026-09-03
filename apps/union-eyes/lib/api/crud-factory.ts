@@ -31,7 +31,7 @@
 import { withApi } from './with-api';
 import { ApiError } from './errors';
 import { db } from '@/db/db';
-import { eq, and, desc, count, type SQL } from 'drizzle-orm';
+import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import type { UserRole } from '@/lib/api-auth-guard';
@@ -110,6 +110,24 @@ export interface CrudOptions {
     updates: Record<string, unknown>,
     ctx: { id: string; organizationId?: string | null; userId?: string | null; existing: Record<string, unknown> },
   ) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  /**
+   * JSONB column names whose PATCH value should be MERGED into the
+   * existing value (`col || value`, via a locked read-then-write
+   * transaction) rather than replacing the whole column.
+   *
+   * Use for a JSONB column that mixes server-owned and client-editable
+   * keys: a plain `.set({col: mergedObject})` requires reading the row,
+   * copying server-owned keys' current values into the merged object, then
+   * writing the WHOLE column back — a lost-update race if anything else
+   * changes a server-owned key between the read and the write (the PATCH
+   * would overwrite it with the value it read earlier). A JSONB merge
+   * never mentions server-owned keys at all (the caller is expected to
+   * have already stripped them from the PATCH value, e.g. via a
+   * `beforeUpdate` hook), so a concurrent write to one can never be
+   * reverted — no lock across business logic required, only around the
+   * read+write itself, which this option adds automatically.
+   */
+  mergeJsonColumns?: string[];
 }
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
@@ -187,6 +205,32 @@ export function stripBlockedPatchFields(
   return updates;
 }
 
+/**
+ * Converts each column listed in `mergeJsonColumns` from a plain
+ * replacement value into a JSONB merge SQL fragment
+ * (`COALESCE(col, '{}'::jsonb) || value::jsonb`), when its PATCH value is a
+ * plain object. Exported for direct unit testing of the merge-fragment
+ * construction, independent of the transaction/lock wiring around it (PR
+ * #752 round 24) — see `mergeJsonColumns`'s doc comment on `CrudOptions`
+ * for why a merge (vs. a full-column replace) closes a lost-update race.
+ */
+export function buildMergeSetValues(
+  updates: Record<string, unknown>,
+  table: PgTable,
+  mergeJsonColumns: string[],
+): Record<string, unknown> {
+  const setValues: Record<string, unknown> = { ...updates };
+  for (const col of mergeJsonColumns) {
+    if (!(col in setValues)) continue;
+    const value = setValues[col];
+    const colRef = getColumn(table, col);
+    if (colRef && value && typeof value === 'object' && !Array.isArray(value)) {
+      setValues[col] = sql`COALESCE(${colRef}, '{}'::jsonb) || ${JSON.stringify(value)}::jsonb`;
+    }
+  }
+  return setValues;
+}
+
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
 export function crudRoutes(opts: CrudOptions & { itemRoute?: false | undefined }): CollectionHandlers;
 export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers {
@@ -202,6 +246,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     writeRole = 'steward',
     defaultLimit = 50,
     blockedPatchFields = [],
+    mergeJsonColumns = [],
   } = opts;
 
   const resourceName = opts.resourceName ?? getTableName(table);
@@ -380,30 +425,55 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const id = params[paramName];
         let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
 
-        if (opts.beforeUpdate) {
-          const existingConditions: SQL[] = [eq(pkCol, id)];
-          if (orgScoped && orgCol && organizationId) {
-            existingConditions.push(eq(orgCol, organizationId));
-          }
-          const [existingRow] = await db.select().from(table).where(and(...existingConditions));
-          if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
-          updates = await opts.beforeUpdate(updates, {
-            id,
-            organizationId,
-            userId,
-            existing: existingRow as Record<string, unknown>,
+        const conditions: SQL[] = [eq(pkCol, id)];
+        if (orgScoped && orgCol && organizationId) {
+          conditions.push(eq(orgCol, organizationId));
+        }
+
+        if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
+          // Locked read-then-write: the row cannot change between the hook
+          // seeing it and the final write, closing the lost-update race a
+          // plain read-then-`.set()` (below) cannot. `mergeJsonColumns`
+          // additionally turns each listed column's value into a JSONB
+          // merge (`col || value`) rather than a full-column replace, so a
+          // concurrent write to a key the merge fragment doesn't mention
+          // can never be reverted by this PATCH.
+          const [row] = await db.transaction(async (tx) => {
+            const [existingRow] = await tx
+              .select()
+              .from(table)
+              .where(and(...conditions))
+              .limit(1)
+              .for('update');
+            if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
+
+            if (opts.beforeUpdate) {
+              updates = await opts.beforeUpdate(updates, {
+                id,
+                organizationId,
+                userId,
+                existing: existingRow as Record<string, unknown>,
+              });
+            }
+
+            const updatedAtCol = getColumn(table, 'updatedAt');
+            if (updatedAtCol) {
+              updates.updatedAt = new Date();
+            }
+
+            const setValues = buildMergeSetValues(updates, table, mergeJsonColumns);
+
+            return tx.update(table).set(setValues).where(and(...conditions)).returning();
           });
+
+          if (!row) throw ApiError.notFound(`${resourceName} not found`);
+          return { data: row };
         }
 
         // Auto-set updatedAt if column exists
         const updatedAtCol = getColumn(table, 'updatedAt');
         if (updatedAtCol) {
           updates.updatedAt = new Date();
-        }
-
-        const conditions: SQL[] = [eq(pkCol, id)];
-        if (orgScoped && orgCol && organizationId) {
-          conditions.push(eq(orgCol, organizationId));
         }
 
         const [row] = await db.update(table)
