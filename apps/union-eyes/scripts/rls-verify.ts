@@ -407,7 +407,7 @@ async function runFixtureIsolationMatrix(
   systemSql: postgres.Sql,
   results: CheckResult[],
 ) {
-  const runId = `UE_RA_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${Math.random().toString(36).slice(2, 8)}`
+  const runId = `UE_RA_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`
   const orgA = { id: crypto.randomUUID(), userId: `${runId}_user_a` }
   const orgB = { id: crypto.randomUUID(), userId: `${runId}_user_b` }
 
