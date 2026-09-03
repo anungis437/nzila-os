@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-03T06:33:03.621Z",
+  "generatedAt": "2026-09-03T07:03:25.137Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 374,
-  "pendingReviewCount": 326,
-  "tenantGrantedTableCount": 145,
+  "readyForExplicitGrantCount": 364,
+  "pendingReviewCount": 336,
+  "tenantGrantedTableCount": 144,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 145,
+    "SELECT": 144,
     "INSERT": 122,
     "UPDATE": 83,
     "DELETE": 58
@@ -141,20 +141,6 @@
       "table": "accessibility_user_testing",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
-      "table": "account_balance_reconciliation",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
-      "table": "account_mappings",
-      "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
       "systemPrivileges": []
     },
     {
@@ -1353,12 +1339,6 @@
       "systemPrivileges": []
     },
     {
-      "table": "gl_trial_balance",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
       "table": "golden_shares",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
@@ -2215,24 +2195,12 @@
       "systemPrivileges": []
     },
     {
-      "table": "payment_methods",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
       "table": "payment_plans",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT",
         "INSERT"
       ],
-      "systemPrivileges": []
-    },
-    {
-      "table": "payment_routing_rules",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -2557,12 +2525,6 @@
       "systemPrivileges": []
     },
     {
-      "table": "rl1_tax_slips",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
       "table": "role_tenure_history",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2648,12 +2610,6 @@
       "systemPrivileges": []
     },
     {
-      "table": "separated_payment_transactions",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
       "table": "settlements",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2731,12 +2687,6 @@
       "systemPrivileges": []
     },
     {
-      "table": "stripe_connect_accounts",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
       "table": "stripe_webhook_events",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2760,19 +2710,7 @@
       "systemPrivileges": []
     },
     {
-      "table": "t4a_tax_slips",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
       "table": "task_comments",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
-      "systemPrivileges": []
-    },
-    {
-      "table": "tax_year_end_processing",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -2983,6 +2921,14 @@
     },
     {
       "table": "access_justification_requests",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "account_balance_reconciliation",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "account_mappings",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3654,6 +3600,10 @@
       "classification": "NEEDS_REVIEW"
     },
     {
+      "table": "gl_trial_balance",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
       "table": "grievance_timeline_events",
       "classification": "NEEDS_REVIEW"
     },
@@ -3834,6 +3784,14 @@
       "classification": "NEEDS_REVIEW"
     },
     {
+      "table": "payment_methods",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "payment_routing_rules",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
       "table": "pci_dss_encryption_keys",
       "classification": "NEEDS_REVIEW"
     },
@@ -3998,6 +3956,10 @@
       "classification": "NEEDS_REVIEW"
     },
     {
+      "table": "rl1_tax_slips",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
       "table": "satisfaction_surveys",
       "classification": "NEEDS_REVIEW"
     },
@@ -4007,6 +3969,10 @@
     },
     {
       "table": "security_posture_checks",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "separated_payment_transactions",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4102,6 +4068,10 @@
       "classification": "NEEDS_REVIEW"
     },
     {
+      "table": "stripe_connect_accounts",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
       "table": "support_tickets",
       "classification": "NEEDS_REVIEW"
     },
@@ -4131,6 +4101,14 @@
     },
     {
       "table": "t106_filing_tracking",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "t4a_tax_slips",
+      "classification": "NEEDS_REVIEW"
+    },
+    {
+      "table": "tax_year_end_processing",
       "classification": "NEEDS_REVIEW"
     },
     {
