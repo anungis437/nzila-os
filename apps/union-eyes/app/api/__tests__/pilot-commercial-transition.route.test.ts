@@ -6,6 +6,7 @@ const TEST_ORG_ID = '00000000-0000-0000-0000-000000000001';
 const m = vi.hoisted(() => {
   const state = {
     selectQueue: [] as unknown[][],
+    lockCalls: [] as Array<{ limit: number; mode: string }>,
   };
 
   const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
@@ -14,6 +15,12 @@ const m = vi.hoisted(() => {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
+      limit: vi.fn((n: number) => ({
+        for: vi.fn((mode: string) => {
+          state.lockCalls.push({ limit: n, mode });
+          return nextSelect();
+        }),
+      })),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -30,6 +37,7 @@ const m = vi.hoisted(() => {
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     resetQueues: () => {
       state.selectQueue = [];
+      state.lockCalls = [];
     },
     hasMinRole: vi.fn(),
     authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
@@ -98,6 +106,7 @@ vi.mock('@/lib/pilot/commercialization-wave1', () => ({
   ],
   buildProposalPackage: m.buildProposalPackage,
   buildPilotArtifactVersionRecord: m.buildPilotArtifactVersionRecord,
+  buildPilotContractNumber: (pilotApplicationId: string) => `PILOT-${pilotApplicationId.slice(0, 8).toUpperCase()}`,
   inferPilotStatusFromCommercialState: m.inferPilotStatusFromCommercialState,
   isCommercialTransitionAllowed: m.isCommercialTransitionAllowed,
   normalizeCommercialState: m.normalizeCommercialState,
@@ -290,5 +299,41 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
 
     expect(response.status).toBe(409);
     expect(mockDb.transaction).not.toHaveBeenCalled();
+  });
+
+  it('round 22: locks the pilot row with SELECT ... FOR UPDATE before creating any financial artifact (concurrency hardening)', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect(
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          responses: { commercialState: 'proposal_ready' },
+        },
+      ],
+      [], // round 22 row-lock select — value unused, only the .for('update') call matters
+      [], // billing account lookup — none found, monetization staged only
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent' }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(200);
+    expect(m.state.lockCalls).toContainEqual({ limit: 1, mode: 'update' });
   });
 });

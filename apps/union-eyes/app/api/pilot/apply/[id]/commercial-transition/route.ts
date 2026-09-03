@@ -208,6 +208,21 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
     await withSystemContext(async () =>
       db.transaction(async (tx) => {
+      // PR #752 round 22: lock the pilot row for the duration of this
+      // transaction, same as bindPilotOrganization/rebindPilotOrganization's
+      // own `FOR UPDATE` lock on this row — serializes this monetization
+      // transaction against a concurrent verify/rebind so neither can
+      // observe stale state (a rebind's financial-artifact check running
+      // concurrently with this transaction creating one, or this
+      // transaction reading a verifiedOrganizationId that a concurrent
+      // rebind is about to change out from under it).
+      await tx
+        .select({ id: pilotApplications.id })
+        .from(pilotApplications)
+        .where(eq(pilotApplications.id, application.id))
+        .limit(1)
+        .for('update');
+
       // Verified above — never `responses.organizationId` (the claim).
       const organizationId = verifiedOrganizationId;
 

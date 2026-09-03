@@ -94,6 +94,22 @@ export interface CrudOptions {
     values: Record<string, unknown>,
     ctx: { organizationId?: string | null; userId?: string | null },
   ) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  /**
+   * Optional transform applied to the PATCH payload, after
+   * `blockedPatchFields` have been stripped, before `.set(...)`. Receives
+   * the row's CURRENT (pre-update) values via one extra SELECT — only
+   * fetched when this hook is configured, so it costs nothing for the
+   * ~300+ other crudRoutes() call sites that don't use it.
+   *
+   * Use this to protect a nested/JSON subfield that a flat
+   * `blockedPatchFields` list can't reach — e.g. preserving one key inside
+   * a JSONB column while still allowing the rest of that column to be
+   * edited via ordinary PATCH.
+   */
+  beforeUpdate?: (
+    updates: Record<string, unknown>,
+    ctx: { id: string; organizationId?: string | null; userId?: string | null; existing: Record<string, unknown> },
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
 }
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
@@ -360,9 +376,24 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Updates an existing ${resourceName} record.`,
         },
       },
-      async ({ body, params, organizationId }) => {
+      async ({ body, params, organizationId, userId }) => {
         const id = params[paramName];
-        const updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
+        let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
+
+        if (opts.beforeUpdate) {
+          const existingConditions: SQL[] = [eq(pkCol, id)];
+          if (orgScoped && orgCol && organizationId) {
+            existingConditions.push(eq(orgCol, organizationId));
+          }
+          const [existingRow] = await db.select().from(table).where(and(...existingConditions));
+          if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
+          updates = await opts.beforeUpdate(updates, {
+            id,
+            organizationId,
+            userId,
+            existing: existingRow as Record<string, unknown>,
+          });
+        }
 
         // Auto-set updatedAt if column exists
         const updatedAtCol = getColumn(table, 'updatedAt');

@@ -25,10 +25,9 @@
  * that was previously missing. Fail closed: any missing org context is denied.
  */
 import { NextResponse, type NextRequest } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { commercialContracts, pilotApplications, organizations } from '@/db/schema';
-import { buildPilotContractNumber } from '@/lib/pilot/commercialization-wave1';
+import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
@@ -74,6 +73,46 @@ export function getPilotClaimedOrganizationId(
 }
 
 /**
+ * `beforeUpdate` hook for the pilot item CRUD route (`app/api/pilot/apply/
+ * [id]/route.ts`, PR #752 round 22).
+ *
+ * `responses.organizationId` is the claim `getPilotClaimedOrganizationId()`
+ * reads for ordinary same-org access control. It is a nested JSONB
+ * subfield, so `blockedPatchFields` (a flat list of top-level column names)
+ * cannot protect it — without this hook, a same-org steward could pass the
+ * ownership pre-check on Org A's row, then PATCH `responses.organizationId`
+ * to Org B, silently transferring subsequent same-org access to Org B
+ * entirely at the application layer (an ownership-transfer primitive with
+ * no platform-tier involvement at all). This forces the claimed
+ * organizationId back to the row's EXISTING value no matter what the client
+ * sends; every other key inside `responses` remains ordinarily editable.
+ * Exported for direct unit testing, independent of the crud-factory wiring.
+ */
+export function preserveClaimedOrganizationOnPatch(
+  updates: Record<string, unknown>,
+  existing: { responses?: Record<string, unknown> | null },
+): Record<string, unknown> {
+  if (!('responses' in updates)) {
+    return updates;
+  }
+
+  const existingResponses = (existing.responses ?? {}) as Record<string, unknown>;
+  const claimedOrganizationId = existingResponses.organizationId;
+  const nextResponses =
+    updates.responses && typeof updates.responses === 'object' && !Array.isArray(updates.responses)
+      ? { ...(updates.responses as Record<string, unknown>) }
+      : {};
+
+  if (claimedOrganizationId === undefined) {
+    delete nextResponses.organizationId;
+  } else {
+    nextResponses.organizationId = claimedOrganizationId;
+  }
+
+  return { ...updates, responses: nextResponses };
+}
+
+/**
  * Extract the VERIFIED owning organization id from a loaded pilot
  * application (PR #752 round 20).
  *
@@ -97,6 +136,47 @@ export type BindPilotOrganizationResult =
   | { ok: false; status: 404 | 409; error: string };
 
 /**
+ * True if `pilotId` has ANY real financial artifact — a commercial
+ * contract, platform invoice, or org subscription — created by the
+ * commercial-transition FSM (PR #752 round 22).
+ *
+ * Round 21's rebind guard only checked `commercialContracts` (via the
+ * deterministic `buildPilotContractNumber` key), but commercial-transition's
+ * `invoice_issued` and `subscription_active` branches can each create a
+ * real `platformInvoices`/`orgSubscriptions` row independently of the
+ * `contract_sent` branch (e.g. via `allowSkip`) — so a pilot could carry a
+ * real invoice or subscription with no contract at all, and the old check
+ * would let a rebind proceed without requiring
+ * `acknowledgeFinancialArtifacts`. All three tables are written with the
+ * SAME `metadata: { source: 'pilot-commercial-transition', pilotApplicationId }`
+ * shape by that route, so this checks all three by that shared marker
+ * rather than a table-specific key.
+ */
+async function pilotHasFinancialArtifacts(pilotId: string): Promise<boolean> {
+  const pilotApplicationIdMatch = (column: unknown) => sql`${column}->>'pilotApplicationId' = ${pilotId}`;
+
+  const [contract] = await db
+    .select({ id: commercialContracts.id })
+    .from(commercialContracts)
+    .where(pilotApplicationIdMatch(commercialContracts.metadata));
+  if (contract) return true;
+
+  const [invoice] = await db
+    .select({ id: platformInvoices.id })
+    .from(platformInvoices)
+    .where(pilotApplicationIdMatch(platformInvoices.metadata));
+  if (invoice) return true;
+
+  const [subscription] = await db
+    .select({ id: orgSubscriptions.id })
+    .from(orgSubscriptions)
+    .where(pilotApplicationIdMatch(orgSubscriptions.metadata));
+  if (subscription) return true;
+
+  return false;
+}
+
+/**
  * Platform-only binding of a pilot application to a verified organization
  * (PR #752 round 20; made immutable-by-default in round 21). This is the
  * ONLY function that may write `verified_organization_id`/`verified_by`/
@@ -118,6 +198,17 @@ export type BindPilotOrganizationResult =
  *     which organization a pilot's billing/contracts belong to is a
  *     deliberate correction, not an ordinary verification step — see
  *     `rebindPilotOrganization()` below.
+ *
+ * Concurrency (round 22): the pilot row is read with `FOR UPDATE` inside
+ * `withSystemContext`'s real transaction, so two concurrent binds for the
+ * SAME pilot (e.g. racing verify-organization calls for two different
+ * target orgs) serialize instead of both observing
+ * `verifiedOrganizationId = NULL` and racing to write — the second
+ * transaction blocks until the first commits, then correctly sees the
+ * now-set value and returns idempotent-success or 409 rather than
+ * silently overwriting it. The same lock also serializes against
+ * commercial-transition's monetization transaction, which takes the same
+ * `FOR UPDATE` lock on this row before creating any financial artifact.
  */
 export async function bindPilotOrganization(params: {
   pilotId: string;
@@ -139,7 +230,9 @@ export async function bindPilotOrganization(params: {
     const [pilot] = await db
       .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
       .from(pilotApplications)
-      .where(eq(pilotApplications.id, pilotId));
+      .where(eq(pilotApplications.id, pilotId))
+      .limit(1)
+      .for('update');
 
     if (!pilot) {
       return { ok: false, status: 409, error: 'Pilot application not found' };
@@ -185,29 +278,34 @@ export type RebindPilotOrganizationResult =
  * organization (PR #752 round 21). Deliberately separate from
  * `bindPilotOrganization()` — that function is the ordinary, immutable
  * verification step and now refuses to change an existing binding; this
- * function exists specifically for the rare, audited case where an initial
+ * function exists specifically for the rare case where an initial
  * verification was wrong and must be corrected.
  *
  * Guardrails:
- *   - Requires a non-empty `reason` (audit evidence for why the binding is
- *     being changed) — enforced by the caller's zod schema; this function
- *     also fails closed if `reason` is blank, in case a future caller skips
- *     that validation.
+ *   - Requires a non-empty `reason` — enforced by the caller's zod schema;
+ *     this function also fails closed if `reason` is blank, in case a
+ *     future caller skips that validation.
  *   - Fails closed (404) if the target organization does not exist.
  *   - Fails closed (409) if the pilot is not yet bound at all — a rebind
  *     presupposes an existing binding; use `bindPilotOrganization()` first.
- *   - Fails closed (409) if `commercialContracts` already contains a row for
- *     this pilot (keyed by the same deterministic `buildPilotContractNumber`
- *     used by commercial-transition) UNLESS the caller explicitly passes
- *     `acknowledgeFinancialArtifacts: true`. Rebinding after real financial
- *     records exist would silently misattribute them to the new
- *     organization; this function does NOT migrate those rows — the
- *     acknowledgement is a deliberate opt-in that the caller has a separate
- *     plan for reconciling them, not an automatic migration.
- *   - Logs a warning with the full before/after/reason/actor for audit
- *     trail purposes — this operation is rare and high-consequence by
- *     design and must be traceable outside of just the DB row's own
- *     `verifiedBy`/`verifiedAt` (which get overwritten by the correction).
+ *   - Fails closed (409) if this pilot has any real financial artifact
+ *     (see `pilotHasFinancialArtifacts` — commercial contract, platform
+ *     invoice, OR org subscription, not just a contract) UNLESS the caller
+ *     explicitly passes `acknowledgeFinancialArtifacts: true`. Rebinding
+ *     after real financial records exist would silently misattribute them
+ *     to the new organization; this function does NOT migrate those rows —
+ *     the acknowledgement is a deliberate opt-in that the caller has a
+ *     separate plan for reconciling them, not an automatic migration.
+ *   - The pilot row is locked with `FOR UPDATE` for the same concurrency
+ *     reason described on `bindPilotOrganization()` — this also closes the
+ *     TOCTOU window between this function's own artifact check and a
+ *     concurrent commercial-transition creating one, since both now
+ *     contend for the same row lock before proceeding.
+ *   - Logs a structured warning (`logger.warn`) with the full
+ *     before/after/reason/actor for traceability. This is NOT currently a
+ *     durable, queryable audit-event row (no `audit_logs` write) — treat it
+ *     as "logged for traceability," not "audited," until that gap is
+ *     closed.
  */
 export async function rebindPilotOrganization(params: {
   pilotId: string;
@@ -236,7 +334,9 @@ export async function rebindPilotOrganization(params: {
     const [pilot] = await db
       .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
       .from(pilotApplications)
-      .where(eq(pilotApplications.id, pilotId));
+      .where(eq(pilotApplications.id, pilotId))
+      .limit(1)
+      .for('update');
 
     if (!pilot) {
       return { ok: false, status: 409, error: 'Pilot application not found' };
@@ -256,22 +356,18 @@ export async function rebindPilotOrganization(params: {
       return { ok: true, organizationId, previousOrganizationId };
     }
 
-    const contractNumber = buildPilotContractNumber(pilotId);
-    const [existingContract] = await db
-      .select({ id: commercialContracts.id })
-      .from(commercialContracts)
-      .where(eq(commercialContracts.contractNumber, contractNumber));
+    const hasFinancialArtifacts = await pilotHasFinancialArtifacts(pilotId);
 
-    if (existingContract && !acknowledgeFinancialArtifacts) {
+    if (hasFinancialArtifacts && !acknowledgeFinancialArtifacts) {
       return {
         ok: false,
         status: 409,
         error:
-          'This pilot already has financial artifacts (a commercial contract) under its current ' +
-          'verified organization. Rebinding would misattribute existing commercial records. Pass ' +
-          'acknowledgeFinancialArtifacts=true with an explicit reason to proceed — this does NOT ' +
-          'migrate the existing contract, invoice, or subscription rows, which still reference the ' +
-          'previous organization and must be corrected separately.',
+          'This pilot already has financial artifacts (a commercial contract, platform invoice, or ' +
+          'org subscription) under its current verified organization. Rebinding would misattribute ' +
+          'existing commercial records. Pass acknowledgeFinancialArtifacts=true with an explicit ' +
+          'reason to proceed — this does NOT migrate the existing contract, invoice, or subscription ' +
+          'rows, which still reference the previous organization and must be corrected separately.',
       };
     }
 
@@ -290,7 +386,7 @@ export async function rebindPilotOrganization(params: {
       organizationId,
       verifiedBy,
       reason,
-      hadFinancialArtifacts: Boolean(existingContract),
+      hadFinancialArtifacts: hasFinancialArtifacts,
       acknowledgeFinancialArtifacts,
     });
 

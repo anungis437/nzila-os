@@ -66,6 +66,7 @@ import {
   authorizePilotAccess,
   getPilotClaimedOrganizationId,
   getPilotVerifiedOrganizationId,
+  preserveClaimedOrganizationOnPatch,
   bindPilotOrganization,
   rebindPilotOrganization,
   enforcePilotOwnership,
@@ -89,10 +90,31 @@ const pilotOwnedByA = { responses: { organizationId: ORG_A } };
 const pilotOwnedByB = { responses: { organizationId: ORG_B } };
 const pilotNoOwner = { responses: {} };
 
+/** Records every `.limit(n).for(mode)` row-lock call across a test (PR #752 round 22). */
+let lockCalls: Array<{ limit: number; mode: string }> = [];
+
+/**
+ * A `where()` result that is both directly awaitable (`await db.select()...
+ * where(...)`) AND chainable with `.limit(n).for('update')` (PR #752 round
+ * 22's row-lock reads) — same resolved rows either way.
+ */
+function chainableRows(rows: unknown[]) {
+  const thenable = Promise.resolve(rows) as Promise<unknown[]> & {
+    limit: (n: number) => { for: (mode: string) => Promise<unknown[]> };
+  };
+  thenable.limit = (n: number) => ({
+    for: (mode: string) => {
+      lockCalls.push({ limit: n, mode });
+      return Promise.resolve(rows);
+    },
+  });
+  return thenable;
+}
+
 /** Configure db.select().from().where() to resolve to the given rows. */
 function dbReturns(rows: unknown[]) {
   mockDbSelect.mockImplementation(() => ({
-    from: () => ({ where: () => Promise.resolve(rows) }),
+    from: () => ({ where: () => chainableRows(rows) }),
   }));
 }
 
@@ -116,16 +138,17 @@ function dbUpdateReturns(rows: unknown[]) {
 
 /**
  * Queue up a sequence of one-time `db.select()` results consumed in call
- * order (PR #752 round 21). `bindPilotOrganization`/`rebindPilotOrganization`
- * now issue MULTIPLE selects per invocation (organization existence, pilot
- * lookup, and — for rebind — an existing-financial-artifact check), so a
+ * order (PR #752 round 21/22). `bindPilotOrganization`/
+ * `rebindPilotOrganization` now issue MULTIPLE selects per invocation
+ * (organization existence, pilot lookup with `.limit().for('update')`, and
+ * — for rebind — up to three financial-artifact-census selects), so a
  * single shared `dbReturns(...)` implementation is no longer precise enough
  * to distinguish them.
  */
 function dbSelectSequence(...rowsList: unknown[][]) {
   for (const rows of rowsList) {
     mockDbSelect.mockImplementationOnce(() => ({
-      from: () => ({ where: () => Promise.resolve(rows) }),
+      from: () => ({ where: () => chainableRows(rows) }),
     }));
   }
 }
@@ -139,6 +162,7 @@ function makeNextContext(id?: string) {
 describe('pilot-ownership', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    lockCalls = [];
   });
 
   describe('getPilotClaimedOrganizationId', () => {
@@ -311,6 +335,49 @@ describe('pilot-ownership', () => {
     });
   });
 
+  describe('preserveClaimedOrganizationOnPatch (PR #752 round 22)', () => {
+    it('overwrites a hostile responses.organizationId with the existing row value', () => {
+      const result = preserveClaimedOrganizationOnPatch(
+        { responses: { organizationId: ORG_B, notes: 'attacker note' } },
+        { responses: { organizationId: ORG_A } },
+      );
+      expect(result.responses).toEqual({ organizationId: ORG_A, notes: 'attacker note' });
+    });
+
+    it('leaves other keys inside responses ordinarily editable', () => {
+      const result = preserveClaimedOrganizationOnPatch(
+        { responses: { readinessNotes: 'updated by steward' } },
+        { responses: { organizationId: ORG_A, readinessNotes: 'old' } },
+      );
+      expect(result.responses).toEqual({ organizationId: ORG_A, readinessNotes: 'updated by steward' });
+    });
+
+    it('does not touch responses at all when the PATCH body omits it', () => {
+      const result = preserveClaimedOrganizationOnPatch(
+        { notes: 'just a top-level field' },
+        { responses: { organizationId: ORG_A } },
+      );
+      expect(result).toEqual({ notes: 'just a top-level field' });
+      expect(result.responses).toBeUndefined();
+    });
+
+    it('drops organizationId from the merged responses when the existing row never had a claim', () => {
+      const result = preserveClaimedOrganizationOnPatch(
+        { responses: { organizationId: ORG_B } },
+        { responses: {} },
+      );
+      expect(result.responses).toEqual({});
+    });
+
+    it('treats a non-object responses value in the PATCH body as an empty object, not a crash', () => {
+      const result = preserveClaimedOrganizationOnPatch(
+        { responses: 'not-an-object' },
+        { responses: { organizationId: ORG_A } },
+      );
+      expect(result.responses).toEqual({ organizationId: ORG_A });
+    });
+  });
+
   describe('bindPilotOrganization (PR #752 round 20/21)', () => {
     it('binds the pilot to the target organization when unbound and it exists', async () => {
       dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
@@ -324,6 +391,15 @@ describe('pilot-ownership', () => {
 
       expect(result).toEqual({ ok: true, organizationId: ORG_B });
       expect(mockDbUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    it('round 22: locks the pilot row with SELECT ... FOR UPDATE before reading/writing verifiedOrganizationId (concurrency hardening)', async () => {
+      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      await bindPilotOrganization({ pilotId: 'pilot-1', organizationId: ORG_B, verifiedBy: 'u-sysadmin' });
+
+      expect(lockCalls).toContainEqual({ limit: 1, mode: 'update' });
     });
 
     it('fails closed (404) when the target organization does not exist — a claim that was never real can never become verified', async () => {
@@ -498,8 +574,14 @@ describe('pilot-ownership', () => {
       expect(mockDbUpdate).toHaveBeenCalledTimes(1);
     });
 
-    it('proceeds without needing acknowledgeFinancialArtifacts when no financial artifact exists yet', async () => {
-      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: ORG_A }], []);
+    it('proceeds without needing acknowledgeFinancialArtifacts when no financial artifact exists in any of the 3 tables', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [], // commercialContracts: none
+        [], // platformInvoices: none
+        [], // orgSubscriptions: none
+      );
       dbUpdateReturns([{ id: 'pilot-1' }]);
 
       const result = await rebindPilotOrganization({
@@ -510,6 +592,68 @@ describe('pilot-ownership', () => {
       });
 
       expect(result).toEqual({ ok: true, organizationId: ORG_B, previousOrganizationId: ORG_A });
+    });
+
+    it('round 22: blocks the rebind when a platform invoice exists with NO commercial contract (invoice_issued can happen independently of contract_sent)', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [], // commercialContracts: none
+        [{ id: 'invoice-1' }], // platformInvoices: found
+      );
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B.',
+      });
+
+      expect(result.ok).toBe(false);
+      expect((result as { status: number }).status).toBe(409);
+      expect((result as { error: string }).error).toMatch(/financial artifacts/i);
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('round 22: blocks the rebind when an org subscription exists with NO contract or invoice (subscription_active can happen independently)', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [], // commercialContracts: none
+        [], // platformInvoices: none
+        [{ id: 'subscription-1' }], // orgSubscriptions: found
+      );
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B.',
+      });
+
+      expect(result.ok).toBe(false);
+      expect((result as { status: number }).status).toBe(409);
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('round 22: locks the pilot row with SELECT ... FOR UPDATE before checking financial artifacts (concurrency hardening)', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [],
+        [],
+        [],
+      );
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B.',
+      });
+
+      expect(lockCalls).toContainEqual({ limit: 1, mode: 'update' });
     });
   });
 });

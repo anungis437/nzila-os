@@ -2264,6 +2264,11 @@ describe('pilot/apply/[id]', () => {
     const handlers = [mod.GET, mod.POST, mod.PUT, mod.PATCH, mod.DELETE].filter(Boolean);
     expect(handlers.length).toBeGreaterThan(0);
   });
+
+  it('round 22: does not export DELETE — the generic soft-delete (status=archived) is invalid against pilot_status', async () => {
+    const mod = await import('../pilot/apply/[id]/route');
+    expect(mod.DELETE).toBeUndefined();
+  });
 })
 
 describe('pilot/apply', () => {

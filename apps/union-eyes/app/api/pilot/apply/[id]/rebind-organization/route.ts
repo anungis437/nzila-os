@@ -5,10 +5,13 @@
  * organization (PR #752 round 21). `bindPilotOrganization()` (used by
  * .../verify-organization) is immutable once set — it accepts a repeat call
  * for the SAME organization (idempotent) but rejects a different one with
- * 409. This endpoint is the deliberate, audited exception: it requires an
- * explicit `reason` and refuses to proceed if real financial artifacts
- * already exist for this pilot unless the caller explicitly acknowledges
- * that those artifacts are not being migrated automatically.
+ * 409. This endpoint is the deliberate exception: it requires an explicit
+ * `reason`, refuses to proceed if real financial artifacts already exist
+ * for this pilot unless the caller explicitly acknowledges that those
+ * artifacts are not being migrated automatically, and is logged
+ * (`logger.warn`) for traceability — see `rebindPilotOrganization()`'s doc
+ * comment for the current limits of that logging (structured log only, not
+ * yet a durable `audit_logs` row).
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';

@@ -3,7 +3,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
-import { withPilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { preserveClaimedOrganizationOnPatch, withPilotOwnership } from '@/lib/pilot/pilot-ownership';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +35,24 @@ const handlers = crudRoutes({
     'reviewedAt',
     'approvedAt',
   ],
+  // PR #752 round 22: responses.organizationId is the CLAIMED owning
+  // organization this table's ownership model reads — a nested JSONB
+  // subfield, so blockedPatchFields (flat top-level keys) can't protect it.
+  // See preserveClaimedOrganizationOnPatch's doc comment in
+  // lib/pilot/pilot-ownership.ts for the full rationale.
+  beforeUpdate: (updates, { existing }) => preserveClaimedOrganizationOnPatch(updates, existing),
 });
 
 export const GET = withPilotOwnership(handlers.GET, { minRole: 'steward' });
 export const PATCH = withPilotOwnership(handlers.PATCH, { minRole: 'steward' });
-export const DELETE = withPilotOwnership(handlers.DELETE, { minRole: 'steward' });
+
+// PR #752 round 22: no DELETE export. The shared factory's generic DELETE
+// soft-deletes by writing status = 'archived' whenever a `status` column
+// exists — but round 21 made pilot `status` exclusively FSM-governed by
+// commercial-transition, and `pilot_status` has no 'archived' value at all
+// (submitted|review|approved|active|completed|declined), so this handler
+// both violated the new FSM-ownership rule and would fail against the enum
+// if an authorized admin ever actually invoked it. Removing the export (vs.
+// leaving a broken handler wired up) makes DELETE 405 by default; a real
+// archive/close action belongs in the commercial-transition FSM, not here.
 
