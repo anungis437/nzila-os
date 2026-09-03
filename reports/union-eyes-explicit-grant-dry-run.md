@@ -1,6 +1,6 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-03T20:06:36.792Z
+Generated: 2026-09-03T20:22:49.534Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
@@ -15,7 +15,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
 | tenant (union_eyes_runtime) | 149 | 131 | 94 | 76 |
-| system (union_eyes_system) | 22 | 11 | 10 | 0 |
+| system (union_eyes_system) | 23 | 11 | 10 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
 
@@ -308,7 +308,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | pension_t4a_records | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | pension_trustee_meetings | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | pension_trustees | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
-| per_capita_remittances | MULTI_PARTY_RLS_REQUIRED | SELECT | INSERT, UPDATE |
+| per_capita_remittances | MULTI_PARTY_RLS_REQUIRED | SELECT | SELECT, INSERT, UPDATE |
 | pilot_applications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | SELECT, UPDATE |
 | platform_cost_ledger_entries | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | platform_invoice_line_items | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |

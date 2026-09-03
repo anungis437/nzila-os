@@ -746,20 +746,36 @@ class MultiPartyIsolationMixin:
     return privileges.some((p) => WRITE_OPS.has(p));
   }
 
-  it('INVARIANT: no finance.ts entry backed by a ReadOnlyModelViewSet Django route grants any INSERT/UPDATE/DELETE privilege (runtime or system) — the endpoint cannot perform them', () => {
+  it('INVARIANT: no finance.ts entry backed by a ReadOnlyModelViewSet Django route grants tenant-runtime INSERT/UPDATE/DELETE — that specific endpoint cannot perform them', () => {
+    // NARROW CORRECTION (2026-09-04, round 33, second independent review
+    // pass): only checks requiredRuntimePrivileges (the tenant-facing
+    // Django/TS runtime this specific ReadOnlyModelViewSet route belongs
+    // to). requiredSystemPrivileges describes the table's system-authorized
+    // operations across the WHOLE application, not just this one router
+    // surface — a table can legitimately have a read-only tenant Django
+    // endpoint AND a separate withSystemContext()/background-worker writer
+    // (per_capita_remittances is exactly this shape: MultiPartyIsolationMixin
+    // denies all Django writes, but the monthly cron writes via
+    // withSystemContext(), a completely independent execution path). The
+    // original version of this invariant checked BOTH fields and would have
+    // forced the manifest to falsely omit a proven system write just
+    // because ONE router happens to be read-only. Policing system
+    // privileges requires their OWN reachability/evidence ratchet against
+    // actual system call sites, not inference from an unrelated Django
+    // ViewSet's HTTP method set.
     const tableRoutes = liveDjangoTableRoutes();
     const violations = financeEntries
       .filter((entry) => {
         const routes = tableRoutes.get(entry.table) ?? [];
         return routes.some((r) => r.usesReadOnlyModelViewSet);
       })
-      .filter((entry) => grantsWriteOps(entry.requiredRuntimePrivileges) || grantsWriteOps(entry.requiredSystemPrivileges))
+      .filter((entry) => grantsWriteOps(entry.requiredRuntimePrivileges))
       .map((entry) => entry.table);
 
     expect(
       violations,
-      `finance.ts grants a write privilege to table(s) whose Django route is a ReadOnlyModelViewSet ` +
-        `(create/update/destroy are not exposed at all via that endpoint): ${violations.join(', ')}`,
+      `finance.ts grants tenant-runtime write privilege to table(s) whose Django route is ` +
+        `a ReadOnlyModelViewSet (create/update/destroy are not exposed at all via that endpoint): ${violations.join(', ')}`,
     ).toEqual([]);
   });
 
@@ -809,5 +825,51 @@ class MultiPartyIsolationMixin:
     // directly since constructing a full financeEntries fixture would
     // duplicate the whole manifest module.
     expect(readOnlyRouteFixture.usesReadOnlyModelViewSet && grantsWriteOps(['SELECT', 'UPDATE'])).toBe(true);
+  });
+
+  it('REGRESSION FIXTURE (2nd correction pass): a ReadOnlyModelViewSet Django route paired with a proven, independent system writer is ALLOWED — the narrowed invariant only forbids tenant-runtime writes, never system writes proven through a separate execution path', () => {
+    // Reproduces exactly the per_capita_remittances shape in miniature: a
+    // read-only tenant-facing Django endpoint (or, as here, a hypothetical
+    // ReadOnlyModelViewSet) coexisting with a genuinely separate
+    // withSystemContext()/worker writer for the same table. The ORIGINAL
+    // (over-broad) invariant checked requiredRuntimePrivileges OR
+    // requiredSystemPrivileges and would have wrongly flagged this as a
+    // violation.
+    const readOnlyWithSystemWriterFixture: DjangoTableRoute = {
+      app: 'billing',
+      routePath: 'fake-readonly-with-system-writer-route',
+      viewSetName: 'FakeReadOnlyWithSystemWriterViewSet',
+      modelName: 'FakeReadOnlyWithSystemWriterModel',
+      table: 'fake_readonly_with_system_writer_table',
+      hasGetQueryset: false,
+      usesDenyAllPermission: false,
+      usesUnfilteredObjectsAll: true,
+      usesOnlyIsAuthenticated: true,
+      usesSharedIsolationMixin: false,
+      usesGlobalPlusTenantMixin: false,
+      usesMultiPartyMixin: false,
+      declaredFromField: null,
+      declaredToField: null,
+      multiPartyFieldsMatchModel: false,
+      usesReadOnlyModelViewSet: true,
+    };
+    const legitimateEntryShape = {
+      requiredRuntimePrivileges: ['SELECT'] as const,
+      requiredSystemPrivileges: ['SELECT', 'INSERT', 'UPDATE'] as const,
+    };
+    // The narrowed invariant's actual predicate: violation iff the route is
+    // read-only AND requiredRuntimePrivileges grants a write op. System
+    // privileges are never part of this specific check.
+    const isViolation =
+      readOnlyWithSystemWriterFixture.usesReadOnlyModelViewSet &&
+      grantsWriteOps(legitimateEntryShape.requiredRuntimePrivileges);
+    expect(isViolation).toBe(false);
+    // Sanity: the same fixture WOULD be a violation if requiredRuntimePrivileges
+    // (not requiredSystemPrivileges) ever granted a write op.
+    const misconfiguredEntryShape = { requiredRuntimePrivileges: ['SELECT', 'UPDATE'] as const };
+    expect(
+      readOnlyWithSystemWriterFixture.usesReadOnlyModelViewSet &&
+        grantsWriteOps(misconfiguredEntryShape.requiredRuntimePrivileges),
+    ).toBe(true);
   });
 });
