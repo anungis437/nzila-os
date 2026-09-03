@@ -22,7 +22,7 @@ const handlers = crudRoutes({
   writeRole: 'steward',
 });
 
-export const GET = withPilotOwnership(handlers.GET);
-export const PATCH = withPilotOwnership(handlers.PATCH);
-export const DELETE = withPilotOwnership(handlers.DELETE);
+export const GET = withPilotOwnership(handlers.GET, { minRole: 'steward' });
+export const PATCH = withPilotOwnership(handlers.PATCH, { minRole: 'steward' });
+export const DELETE = withPilotOwnership(handlers.DELETE, { minRole: 'steward' });
 

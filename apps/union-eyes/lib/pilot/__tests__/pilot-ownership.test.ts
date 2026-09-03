@@ -26,9 +26,23 @@ const { mockGetCurrentUser, mockDbSelect } = vi.hoisted(() => ({
 
 // Keep the real api-auth-guard (real ROLE_HIERARCHY + normalizeRole) and only
 // override identity resolution — mirrors app/api/members cross-org tests.
+// hasMinRole is reimplemented against the SAME mocked getCurrentUser (rather
+// than the real auth()+DB role-resolution chain, unavailable in this unit
+// test) so withPilotOwnership's upfront role gate (PR #752 round 19) is
+// exercised faithfully against each fixture's real role level.
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api-auth-guard')>();
-  return { ...actual, getCurrentUser: mockGetCurrentUser };
+  return {
+    ...actual,
+    getCurrentUser: mockGetCurrentUser,
+    hasMinRole: async (minRole: string) => {
+      const user = await mockGetCurrentUser();
+      if (!user) return false;
+      const userLevel = actual.ROLE_HIERARCHY[actual.normalizeRole(user.role ?? 'member')] ?? 0;
+      const minLevel = actual.ROLE_HIERARCHY[actual.normalizeRole(minRole)] ?? 0;
+      return userLevel >= minLevel;
+    },
+  };
 });
 
 vi.mock('@/db', () => ({ db: { select: mockDbSelect } }));
@@ -49,7 +63,7 @@ vi.mock('@/lib/logger', () => ({
 
 import {
   authorizePilotAccess,
-  getPilotOwnerOrganizationId,
+  getPilotClaimedOrganizationId,
   enforcePilotOwnership,
   withPilotOwnership,
   PILOT_PLATFORM_ACCESS_MIN_LEVEL,
@@ -89,23 +103,23 @@ describe('pilot-ownership', () => {
     vi.clearAllMocks();
   });
 
-  describe('getPilotOwnerOrganizationId', () => {
+  describe('getPilotClaimedOrganizationId', () => {
     it('reads responses.organizationId when present', () => {
-      expect(getPilotOwnerOrganizationId(pilotOwnedByA)).toBe(ORG_A);
+      expect(getPilotClaimedOrganizationId(pilotOwnedByA)).toBe(ORG_A);
     });
 
     it('trims surrounding whitespace', () => {
-      expect(getPilotOwnerOrganizationId({ responses: { organizationId: `  ${ORG_B}  ` } })).toBe(ORG_B);
+      expect(getPilotClaimedOrganizationId({ responses: { organizationId: `  ${ORG_B}  ` } })).toBe(ORG_B);
     });
 
     it('returns null when responses is missing, empty, or non-string (fail closed)', () => {
-      expect(getPilotOwnerOrganizationId(pilotNoOwner)).toBeNull();
-      expect(getPilotOwnerOrganizationId({ responses: null })).toBeNull();
-      expect(getPilotOwnerOrganizationId({})).toBeNull();
-      expect(getPilotOwnerOrganizationId(null)).toBeNull();
-      expect(getPilotOwnerOrganizationId({ responses: { organizationId: '' } })).toBeNull();
-      expect(getPilotOwnerOrganizationId({ responses: { organizationId: '   ' } })).toBeNull();
-      expect(getPilotOwnerOrganizationId({ responses: { organizationId: 123 as unknown as string } })).toBeNull();
+      expect(getPilotClaimedOrganizationId(pilotNoOwner)).toBeNull();
+      expect(getPilotClaimedOrganizationId({ responses: null })).toBeNull();
+      expect(getPilotClaimedOrganizationId({})).toBeNull();
+      expect(getPilotClaimedOrganizationId(null)).toBeNull();
+      expect(getPilotClaimedOrganizationId({ responses: { organizationId: '' } })).toBeNull();
+      expect(getPilotClaimedOrganizationId({ responses: { organizationId: '   ' } })).toBeNull();
+      expect(getPilotClaimedOrganizationId({ responses: { organizationId: 123 as unknown as string } })).toBeNull();
     });
   });
 

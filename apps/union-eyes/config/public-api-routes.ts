@@ -13,7 +13,7 @@ export interface PublicRouteConfig {
   /** Human-readable justification for why this route is public */
   reason: string;
   /** Category for grouping */
-  category: 'health' | 'webhook' | 'public-content' | 'tracking' | 'payment' | 'dev-only';
+  category: 'health' | 'webhook' | 'public-content' | 'tracking' | 'payment' | 'public-form' | 'dev-only';
 }
 
 const DEV_ONLY_PUBLIC_ROUTES: PublicRouteConfig[] = process.env.NODE_ENV === 'production'
@@ -121,6 +121,13 @@ export const PUBLIC_API_ROUTES: PublicRouteConfig[] = [
     pattern: '/api/communications/unsubscribe/*',
     reason: 'Email unsubscribe endpoint (requires unsubscribe token)',
     category: 'tracking',
+  },
+
+  // ========== PUBLIC LEAD INTAKE (rate-limited, schema-validated) ==========
+  {
+    pattern: '/api/pilot/apply',
+    reason: 'Public pilot-program lead-intake form (POST only) — prospective unions apply before any account or organization exists, so no auth wrapper is possible. Schema-validated (zod) and rate-limited by IP (PR #752 round 19). GET on this same path requires system_admin and is NOT covered by this allowlist entry — its own auth check runs before this route path check ever matters for GET.',
+    category: 'public-form',
   },
 
   // ========== DEV / TEST ONLY ==========

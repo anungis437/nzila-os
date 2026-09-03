@@ -56,7 +56,7 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   enforcePilotOwnership: vi.fn(async () => null),
   wrapPilotItemRoute: <T,>(handler: T) => handler,
   authorizePilotAccess: vi.fn(async () => ({ ok: true })),
-  getPilotOwnerOrganizationId: vi.fn(() => 'test-org'),
+  getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 

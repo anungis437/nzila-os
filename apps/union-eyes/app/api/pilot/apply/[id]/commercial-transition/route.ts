@@ -11,7 +11,7 @@ import {
   subscriptionPlans,
 } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
-import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { authorizePilotAccess, getPilotClaimedOrganizationId } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
   COMMERCIAL_STATE_ORDER,
@@ -71,7 +71,11 @@ function buildInvoiceNumber(applicationId: string): string {
 
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
   try {
-    const canAccess = await hasMinRole('steward');
+    // Round 19: this route requires platform-tier authority (see the
+    // authorizePilotAccess check below) — check the same tier here, before
+    // touching the database at all, so an under-authorized caller gets a
+    // uniform 403 regardless of whether the pilot id exists.
+    const canAccess = await hasMinRole('system_admin');
     if (!canAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -101,8 +105,31 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
 
-    const denied = await enforcePilotOwnership(application);
-    if (denied) return denied;
+    // PR #752 round 19: `responses.organizationId` (read below via
+    // getPilotClaimedOrganizationId) is an unauthenticated client claim, not
+    // server-verified ownership — see that function's doc comment in
+    // lib/pilot/pilot-ownership.ts. This route creates REAL financial
+    // records (commercialContracts / billingAccounts / orgSubscriptions /
+    // platformInvoices) keyed by that claimed org id, so ordinary same-org
+    // self-service is not sufficient authority here: only an independent
+    // platform-tier decision (system_admin+, per authorizePilotAccess's
+    // 'platform' branch) counts as verification for a billing-mutating
+    // operation. Same-org actors are correctly authorized to VIEW/manage
+    // their own pilot elsewhere (e.g. the [id] CRUD route), just not to
+    // drive commercial-transition.
+    const decision = await authorizePilotAccess(getPilotClaimedOrganizationId(application));
+    if (!decision.ok) {
+      return NextResponse.json(
+        { error: decision.status === 401 ? 'Unauthorized' : 'Forbidden' },
+        { status: decision.status },
+      );
+    }
+    if (decision.reason !== 'platform') {
+      return NextResponse.json(
+        { error: 'Commercial transitions require platform-tier review; the claimed organization on a pilot application is not sufficient authority for billing operations.' },
+        { status: 403 },
+      );
+    }
 
     const now = new Date();
     const nowIso = now.toISOString();

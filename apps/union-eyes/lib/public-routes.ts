@@ -71,7 +71,16 @@ export const PUBLIC_API_ROUTES = new Set([
   // ========================================================================
   '/api/communications/track/',    // Email tracking endpoints (token-based auth in URL)
   '/api/communications/unsubscribe/', // Email unsubscribe (token-based)
-  
+
+  // ========================================================================
+  // PUBLIC LEAD INTAKE
+  // Justification: prospective customers apply before any account/org
+  // exists, so no auth wrapper is possible. Schema-validated + IP-rate-
+  // limited server-side (PR #752 round 19). Exact-path match only — does
+  // NOT cover /api/pilot/apply/[id]/** (those all require authentication).
+  // ========================================================================
+  '/api/pilot/apply', // Public pilot-program lead-intake form (POST only; GET requires system_admin, checked in the route handler itself)
+
   // ========================================================================
   // DEV/TESTING ENDPOINTS
   // Note: Sentry test endpoint removed for production security

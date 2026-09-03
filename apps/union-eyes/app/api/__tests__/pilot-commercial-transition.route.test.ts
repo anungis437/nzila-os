@@ -32,6 +32,7 @@ const m = vi.hoisted(() => {
       state.selectQueue = [];
     },
     hasMinRole: vi.fn(),
+    authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
     withSystemContext: vi.fn(async (fn: (db: unknown) => Promise<unknown>) => fn(mockDb)),
     logger: {
       info: vi.fn(),
@@ -66,8 +67,8 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   // Access granted in unit tests; ownership is exercised by pilot-ownership.test.ts.
   enforcePilotOwnership: vi.fn(async () => null),
   wrapPilotItemRoute: <T,>(handler: T) => handler,
-  authorizePilotAccess: vi.fn(async () => ({ ok: true })),
-  getPilotOwnerOrganizationId: vi.fn(() => 'test-org'),
+  authorizePilotAccess: m.authorizePilotAccess,
+  getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
@@ -109,6 +110,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     vi.clearAllMocks();
     m.resetQueues();
     m.hasMinRole.mockResolvedValue(true);
+    m.authorizePilotAccess.mockResolvedValue({ ok: true, reason: 'platform', actorOrganizationId: null });
     m.isCommercialTransitionAllowed.mockReturnValue(true);
     m.normalizeCommercialState.mockReturnValue('proposal_ready');
     m.inferPilotStatusFromCommercialState.mockReturnValue('approved');
@@ -132,7 +134,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     });
   });
 
-  it('returns 403 when user lacks steward role', async () => {
+  it('returns 403 when user lacks system_admin role', async () => {
     const { POST } = await loadRoute();
     m.hasMinRole.mockResolvedValueOnce(false);
 
@@ -144,6 +146,36 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toMatchObject({ error: 'Forbidden' });
+  });
+
+  it('returns 403 when the ownership decision is same-org, not platform (PR #752 round 19 — billing requires platform-tier verification, not a self-attested claim)', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect([
+      {
+        id: 'app-1',
+        organizationName: 'Union Eyes',
+        organizationType: 'local',
+        contactName: 'Casey',
+        contactEmail: 'casey@example.com',
+        memberCount: 250,
+        jurisdictions: [],
+        sectors: [],
+        currentSystem: 'legacy',
+        challenges: [],
+        goals: [],
+        readinessScore: 65,
+        responses: { commercialState: 'proposal_ready', organizationId: TEST_ORG_ID },
+      },
+    ]);
+    m.authorizePilotAccess.mockResolvedValueOnce({ ok: true, reason: 'same-org', actorOrganizationId: 'test-org' });
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent' }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(403);
   });
 
   it('returns 400 when route params are missing', async () => {

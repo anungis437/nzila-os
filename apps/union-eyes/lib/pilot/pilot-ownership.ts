@@ -29,7 +29,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { pilotApplications } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { getCurrentUser, normalizeRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
 
 /**
@@ -45,10 +45,26 @@ export type PilotAccessDecision =
   | { ok: false; status: 401 | 403; reason: 'unauthenticated' | 'actor-missing-org-context' | 'pilot-missing-org-context' | 'cross-org' };
 
 /**
- * Extract the owning organization id from a loaded pilot application.
- * Returns null when no usable owner organization is present (fail closed).
+ * Extract the CLAIMED owning organization id from a loaded pilot
+ * application (PR #752 round 19: renamed from `getPilotOwnerOrganizationId`
+ * to make the provenance explicit).
+ *
+ * This value comes straight from `responses.organizationId` — a field
+ * submitted wholesale, unauthenticated, by the public `/api/pilot/apply`
+ * intake form (see that route's own POST handler). It is a CLIENT
+ * ASSERTION, never server-attested identity. It is safe to use ONLY for the
+ * same-org self-service access-control gate below (low stakes: a submitter
+ * who claims org X can only ever see/edit the row they themselves claimed —
+ * no cross-tenant read is possible since a REAL member of org X must ALSO
+ * independently match that same claim to pass `authorizePilotAccess`).
+ * It must NEVER be trusted as verified ownership for financial operations —
+ * see app/api/pilot/apply/[id]/commercial-transition/route.ts, which
+ * requires platform-tier authorization (not same-org self-service) before
+ * using this value to resolve or create real billing/contract records,
+ * precisely because this field cannot be trusted for that purpose.
+ * Returns null when no usable claim is present (fail closed).
  */
-export function getPilotOwnerOrganizationId(
+export function getPilotClaimedOrganizationId(
   application: { responses?: Record<string, unknown> | null } | null | undefined,
 ): string | null {
   const responses = (application?.responses ?? {}) as Record<string, unknown>;
@@ -116,7 +132,7 @@ export async function authorizePilotAccess(
 export async function enforcePilotOwnership(
   application: { responses?: Record<string, unknown> | null },
 ): Promise<NextResponse | null> {
-  const decision = await authorizePilotAccess(getPilotOwnerOrganizationId(application));
+  const decision = await authorizePilotAccess(getPilotClaimedOrganizationId(application));
   if (decision.ok) {
     return null;
   }
@@ -168,8 +184,27 @@ export async function loadPilotApplicationForOwnershipCheck(
   );
 }
 
-export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id'): FactoryRouteHandler {
+export function withPilotOwnership(
+  handler: FactoryRouteHandler,
+  options: { paramName?: string; minRole?: UserRole } = {},
+): FactoryRouteHandler {
+  const { paramName = 'id', minRole = 'steward' } = options;
   return async (request, nextContext) => {
+    // Authenticate + enforce the base role tier BEFORE touching the database
+    // at all (PR #752 round 19). Previously the ownership pre-check lookup
+    // ran (on the system connection) before any auth check, so an
+    // unauthenticated request with a real pilot id got further (404 -> then
+    // an auth failure downstream) than one with a made-up id (immediate
+    // 404) — a cross-tenant record-existence oracle, plus a system-principal
+    // SELECT triggered by a request that was never going to be allowed to
+    // proceed. `hasMinRole` returns false for both "unauthenticated" and
+    // "authenticated but under-role" (matching every sibling pilot action
+    // route's own `hasMinRole('steward')` gate), so the response here is
+    // uniform regardless of whether `id` exists.
+    if (!(await hasMinRole(minRole))) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const params = nextContext?.params ? await nextContext.params : undefined;
     const id = params?.[paramName];
 
@@ -194,7 +229,7 @@ export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
 
-    const decision = await authorizePilotAccess(getPilotOwnerOrganizationId(application));
+    const decision = await authorizePilotAccess(getPilotClaimedOrganizationId(application));
     if (!decision.ok) {
       return NextResponse.json(
         { error: decision.status === 401 ? 'Unauthorized' : 'Forbidden' },

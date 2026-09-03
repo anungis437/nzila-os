@@ -3,10 +3,13 @@
  * POST also syncs the applicant to HubSpot as a lead.
  */
 import { NextResponse, type NextRequest } from 'next/server';
+import { z } from 'zod';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { hasMinRole } from '@/lib/api-auth-guard';
+import { rateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
@@ -30,19 +33,70 @@ const { GET: listPilotApplications } = crudRoutes({
   writeRole: 'member',
 });
 
-// Every caller reaching this handler is already system_admin+ (above), so
-// the underlying query always runs cross-org by design — execute it on the
-// system connection rather than the ordinary tenant runtime pool (PR #752
-// round 18), consistent with lib/pilot/pilot-ownership.ts's own platform-tier
+// Every caller reaching this handler is already system_admin+ (checked
+// below, BEFORE the system connection is ever opened — PR #752 round 19: the
+// round-18 version elevated to withSystemContext first and relied on the
+// generated crudRoutes handler's own internal auth check, which meant an
+// unauthenticated/under-authorized request still triggered a system-
+// principal query before being rejected. Authenticate + authorize on the
+// ordinary connection first, THEN elevate for the actual cross-org query),
+// consistent with lib/pilot/pilot-ownership.ts's own platform-tier
 // execution model for the per-item routes.
-export const GET = (
+export const GET = async (
   request: NextRequest,
   context?: { params?: Record<string, string> | Promise<Record<string, string>> },
-) => withSystemContext((_tx) => listPilotApplications(request, context));
+) => {
+  if (!(await hasMinRole('system_admin'))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  return withSystemContext((_tx) => listPilotApplications(request, context));
+};
+
+
+// Public, unauthenticated by design (PR #752 round 19: made explicitly
+// governed — see PUBLIC_API_ROUTES + validate-api-governance.ts's
+// PUBLIC_ROUTE_PREFIXES — rather than public only by omitting an auth
+// wrapper). Prospective unions apply before any account/org exists, so no
+// auth wrapper is possible here; schema-validate the body and rate-limit by
+// IP to bound the unauthenticated attack surface.
+const pilotApplicationBodySchema = z.object({
+  organizationName: z.string().trim().min(1).max(200),
+  contactName: z.string().trim().min(1).max(200),
+  contactEmail: z.string().trim().email().max(320),
+  contactPhone: z.string().trim().max(50).optional().nullable(),
+  memberCount: z.number().int().min(0).max(10_000_000).optional(),
+  organizationType: z.enum(['local', 'regional', 'national']).optional(),
+  jurisdictions: z.array(z.string().trim().max(100)).max(50).optional(),
+  sectors: z.array(z.string().trim().max(100)).max(50).optional(),
+  currentSystem: z.string().trim().max(500).optional().nullable(),
+  challenges: z.array(z.string().trim().max(500)).max(50).optional(),
+  goals: z.array(z.string().trim().max(500)).max(50).optional(),
+  // Free-form intake context. NEVER treated as a trusted identity/ownership
+  // assertion (`responses.organizationId`, if present, is a claim from this
+  // unauthenticated submitter — see getPilotClaimedOrganizationId's doc
+  // comment in lib/pilot/pilot-ownership.ts).
+  responses: z.record(z.unknown()).optional(),
+  assessment: z.object({ score: z.union([z.number(), z.string()]).optional() }).passthrough().optional(),
+});
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, { maxRequests: 5, windowSeconds: 60 * 60 });
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Too many pilot applications submitted. Please try again later.' },
+      { status: 429 },
+    );
+  }
+
   try {
-    const body = await request.json();
+    const rawBody = await request.json().catch(() => null);
+    const parsed = pilotApplicationBodySchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid pilot application payload', details: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
     const {
       organizationName,
       contactName,
@@ -57,14 +111,7 @@ export async function POST(request: NextRequest) {
       goals,
       responses,
       assessment,
-    } = body;
-
-    if (!organizationName || !contactEmail || !contactName) {
-      return NextResponse.json(
-        { error: 'Organization name, contact name, and email are required' },
-        { status: 400 },
-      );
-    }
+    } = parsed.data;
 
     // Insert into DB
     const [row] = await db
@@ -100,10 +147,10 @@ export async function POST(request: NextRequest) {
       lastName: rest.join(' ') || undefined,
       properties: {
         company: organizationName,
-        phone: contactPhone || undefined,
+        ...(contactPhone ? { phone: contactPhone } : {}),
         ue_source: 'pilot-application',
         ue_member_count: String(memberCount ?? ''),
-        ue_org_type: organizationType || undefined,
+        ...(organizationType ? { ue_org_type: organizationType } : {}),
       },
     });
 
