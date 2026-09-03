@@ -238,7 +238,12 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       // re-checked here, under the SAME row lock, against the FRESH read
       // above, never an earlier snapshot.
       if (FINANCIAL_TARGET_STATES.includes(targetState)) {
-        if (application.verifiedMemberCount == null || application.verifiedPilotAmount == null) {
+        if (
+          application.verifiedMemberCount == null ||
+          application.verifiedPilotAmount == null ||
+          application.commercialTermsApprovedBy == null ||
+          application.commercialTermsApprovedAt == null
+        ) {
           throw new CommercialTransitionRejected(409, {
             error:
               'Commercial terms have not been approved for this pilot. Call POST /api/pilot/apply/[id]/approve-commercial-terms ' +
@@ -260,7 +265,10 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       // clears the pilot row's terms (round 26) can never erase proof of
       // which approval a given contract/invoice/subscription came from.
       // Only meaningful (and only ever read) for financial target states;
-      // the gate above guarantees the required fields are non-null there.
+      // the gate above VERIFIES (not merely casts) that every required field
+      // is non-null there, including commercialTermsApprovedBy/At (round 28
+      // — these columns are nullable, so a partially populated/drifted row
+      // must be rejected at runtime rather than assumed non-null via `as`).
       const commercialTermsSnapshot = FINANCIAL_TARGET_STATES.includes(targetState)
         ? buildCommercialTermsSnapshot({
             verifiedOrganizationId,

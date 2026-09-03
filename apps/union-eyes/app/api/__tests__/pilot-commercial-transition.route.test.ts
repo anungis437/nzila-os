@@ -341,6 +341,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           verifiedMemberCount: 250,
           verifiedPilotAmount: '12000.00',
           verifiedSubscriptionPlanId: null,
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
           responses: { commercialState: 'proposal_ready' },
         },
       ], // the locked authoritative read (round 23)
@@ -383,6 +385,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           verifiedMemberCount: 250,
           verifiedPilotAmount: '12000.00',
           verifiedSubscriptionPlanId: null,
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
           responses: { commercialState: 'FRESH_LOCKED_STATE' },
         },
       ],
@@ -442,6 +446,49 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     });
   });
 
+  it('round 28: rejects a financial transition when verifiedMemberCount/Amount are set but commercialTermsApprovedBy/At are still null (partially populated/drifted row)', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: null,
+          // Drifted/partially-populated row: approver/timestamp never set.
+          commercialTermsApprovedBy: null,
+          commercialTermsApprovedAt: null,
+          responses: { commercialState: 'proposal_ready' },
+        },
+      ],
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent' }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringContaining('Commercial terms have not been approved'),
+    });
+  });
+
   it('round 25: rejects subscription_active when no subscription plan has been approved, even with approved member count/amount', async () => {
     const { POST } = await loadRoute();
     m.normalizeCommercialState.mockReturnValueOnce('invoice_issued');
@@ -466,6 +513,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           verifiedMemberCount: 250,
           verifiedPilotAmount: '12000.00',
           verifiedSubscriptionPlanId: null,
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
           responses: { commercialState: 'invoice_issued' },
         },
       ],
@@ -508,6 +557,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           verifiedMemberCount: 250,
           verifiedPilotAmount: '12000.00',
           verifiedSubscriptionPlanId: null,
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
           // Attacker-style stray key — must never be read for billing.
           responses: { commercialState: 'proposal_ready', subscriptionPlanId: 'attacker-chosen-plan' },
         },
@@ -607,6 +658,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           verifiedMemberCount: 250,
           verifiedPilotAmount: '12000.00',
           verifiedSubscriptionPlanId: 'plan-x',
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
           responses: { commercialState: 'invoice_issued' },
         },
       ],
@@ -650,6 +703,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           verifiedMemberCount: 250,
           verifiedPilotAmount: '12000.00',
           verifiedSubscriptionPlanId: 'plan-x',
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
           responses: { commercialState: 'invoice_issued' },
         },
       ],

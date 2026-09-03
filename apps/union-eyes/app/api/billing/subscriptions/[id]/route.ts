@@ -45,6 +45,14 @@ const patchSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
 });
 
+// PR #752 round 28: commercial-transition (app/api/pilot/apply/[id]/
+// commercial-transition/route.ts) stamps these 2 keys into a subscription's
+// metadata at creation as immutable historical provenance (see
+// buildCommercialTermsSnapshot in lib/pilot/commercialization-wave1.ts) — an
+// ordinary steward PATCH here must never be able to erase or forge them by
+// replacing the whole metadata object.
+const SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS = ['commercialTermsSnapshot', 'commercialTermsFingerprint'] as const;
+
 export const PATCH = withApi(
   {
     auth: { minRole: 'steward' },
@@ -64,9 +72,29 @@ export const PATCH = withApi(
 
     if (!existing) throw ApiError.notFound('Subscription not found');
 
+    const setValues: Record<string, unknown> = { ...body, updatedAt: new Date() };
+
+    if ('metadata' in body) {
+      // Strip the client's fragment of the server-owned keys (never trust a
+      // client-supplied value for them, whether erased or forged), then
+      // restore each one from the row's CURRENT value — never from an
+      // earlier read, and never fabricated if the row never had it.
+      const existingMetadata = (existing.metadata ?? {}) as Record<string, unknown>;
+      const sanitizedMetadata: Record<string, unknown> = { ...(body.metadata ?? {}) };
+      for (const key of SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS) {
+        delete sanitizedMetadata[key];
+      }
+      for (const key of SERVER_OWNED_SUBSCRIPTION_METADATA_KEYS) {
+        if (key in existingMetadata) {
+          sanitizedMetadata[key] = existingMetadata[key];
+        }
+      }
+      setValues.metadata = sanitizedMetadata;
+    }
+
     const [updated] = await db
       .update(orgSubscriptions)
-      .set({ ...body, updatedAt: new Date() })
+      .set(setValues)
       .where(eq(orgSubscriptions.id, id))
       .returning();
 
