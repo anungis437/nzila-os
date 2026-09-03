@@ -7,18 +7,28 @@
  *   application belongs to their organization OR the actor holds an explicit
  *   platform-level role.
  *
- * Ownership signal:
- *   The `pilot_applications` table has no `organization_id` column. The
- *   canonical owning organization is carried in `responses.organizationId`
- *   (the same field the commercial-transition route already uses to resolve
- *   the billing account). This module reads ONLY that field.
+ * Ownership signal (PR #752 round 23):
+ *   Application-layer authorization uses the EFFECTIVE owner —
+ *   `getPilotEffectiveOrganizationId()`, defined as
+ *   `verifiedOrganizationId ?? claimedOrganizationId` — never the claim
+ *   alone. Before any platform-tier verification exists, the claim
+ *   (`responses.organizationId`, an unauthenticated intake-form assertion)
+ *   is the only signal available and is used as a low-stakes same-org
+ *   self-service gate. Once `bindPilotOrganization()`/
+ *   `rebindPilotOrganization()` establish a verified owner, THAT becomes
+ *   authoritative everywhere — including after a rebind changes it — so the
+ *   original claim can never keep granting (or keep denying) access once a
+ *   platform-tier decision has superseded it. The eventual tenant RLS
+ *   policy for this table must encode the SAME rule, not a claim-only
+ *   JSONB policy (see `loadPilotApplicationForOwnershipCheck`'s doc
+ *   comment).
  *
  * Platform-level actors:
  *   App-operations / system roles (level >= `system_admin`, i.e. 200) and
  *   users in `PLATFORM_ADMIN_USER_IDS` (resolved by `getCurrentUser()` to
  *   `app_owner`) may act across organizations by design. Organization-level
  *   roles (steward, officer, admin, president, …) remain org-scoped and must
- *   match the pilot's owning organization.
+ *   match the pilot's effective owning organization.
  *
  * This module intentionally does NOT change the existing role gate
  * (`hasMinRole('steward')`) on each route — it adds the org-ownership gate
@@ -73,22 +83,59 @@ export function getPilotClaimedOrganizationId(
 }
 
 /**
- * `beforeUpdate` hook for the pilot item CRUD route (`app/api/pilot/apply/
- * [id]/route.ts`, PR #752 round 22).
- *
- * `responses.organizationId` is the claim `getPilotClaimedOrganizationId()`
- * reads for ordinary same-org access control. It is a nested JSONB
- * subfield, so `blockedPatchFields` (a flat list of top-level column names)
- * cannot protect it — without this hook, a same-org steward could pass the
- * ownership pre-check on Org A's row, then PATCH `responses.organizationId`
- * to Org B, silently transferring subsequent same-org access to Org B
- * entirely at the application layer (an ownership-transfer primitive with
- * no platform-tier involvement at all). This forces the claimed
- * organizationId back to the row's EXISTING value no matter what the client
- * sends; every other key inside `responses` remains ordinarily editable.
- * Exported for direct unit testing, independent of the crud-factory wiring.
+ * Server-owned keys inside the `responses` JSONB blob (PR #752 round 23).
+ * `responses` itself is a free-form blob the public intake form lets an
+ * applicant populate with ANY keys — but commercial-transition (and the
+ * platform verify/rebind-organization routes, for `organizationId`) write
+ * these SPECIFIC keys as authoritative system/commercial state: the
+ * ownership claim, the parallel commercial FSM state, transition history,
+ * qualification/opportunity scoring, artifact-version metadata, monetization
+ * state, and the subscription plan selector commercial-transition reads to
+ * pick which billing plan gets activated. None of these may be set, cleared,
+ * or overwritten by an ordinary steward PATCH — only by the platform routes
+ * that own them.
  */
-export function preserveClaimedOrganizationOnPatch(
+const RESPONSES_SERVER_OWNED_KEYS = [
+  'organizationId',
+  'commercialState',
+  'commercialStateUpdatedAt',
+  'commercialTransitionHistory',
+  'pilotIntelligence',
+  'pilotFitScore',
+  'pilotRiskScore',
+  'pilotRevenueScore',
+  'pilotReadinessScore',
+  'pilotStrategicValueScore',
+  'overallOpportunityScore',
+  'opportunityTier',
+  'pilotQualificationScores',
+  'pilotArtifactVersions',
+  'latestPilotArtifactVersionId',
+  'latestPilotArtifactChecksum',
+  'latestPilotArtifactUpdatedAt',
+  'commercialMonetization',
+  'subscriptionPlanId',
+] as const;
+
+/**
+ * `beforeUpdate` hook for the pilot item CRUD route (`app/api/pilot/apply/
+ * [id]/route.ts`).
+ *
+ * `responses` is a nested JSONB column, so `blockedPatchFields` (a flat list
+ * of top-level column names) cannot protect any of its subfields.
+ * Round 22 protected only `responses.organizationId` — but commercial-
+ * transition uses the SAME object for authoritative commercial state
+ * (`commercialState` drives FSM validation; `subscriptionPlanId` selects
+ * the billing plan on activation; the rest are system-generated outputs).
+ * Without this, a same-org steward could no longer transfer ownership, but
+ * could still rewrite `commercialState`, wipe transition history, overwrite
+ * qualification scores, or redirect which subscription plan gets activated.
+ * This forces every key in `RESPONSES_SERVER_OWNED_KEYS` back to the row's
+ * EXISTING value no matter what the client sends; every other key inside
+ * `responses` remains ordinarily editable. Exported for direct unit
+ * testing, independent of the crud-factory wiring.
+ */
+export function preserveServerOwnedResponsesFields(
   updates: Record<string, unknown>,
   existing: { responses?: Record<string, unknown> | null },
 ): Record<string, unknown> {
@@ -97,16 +144,17 @@ export function preserveClaimedOrganizationOnPatch(
   }
 
   const existingResponses = (existing.responses ?? {}) as Record<string, unknown>;
-  const claimedOrganizationId = existingResponses.organizationId;
   const nextResponses =
     updates.responses && typeof updates.responses === 'object' && !Array.isArray(updates.responses)
       ? { ...(updates.responses as Record<string, unknown>) }
       : {};
 
-  if (claimedOrganizationId === undefined) {
-    delete nextResponses.organizationId;
-  } else {
-    nextResponses.organizationId = claimedOrganizationId;
+  for (const key of RESPONSES_SERVER_OWNED_KEYS) {
+    if (key in existingResponses) {
+      nextResponses[key] = existingResponses[key];
+    } else {
+      delete nextResponses[key];
+    }
   }
 
   return { ...updates, responses: nextResponses };
@@ -129,6 +177,29 @@ export function getPilotVerifiedOrganizationId(
 ): string | null {
   const raw = application?.verifiedOrganizationId;
   return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
+}
+
+/**
+ * The single ownership fact application-layer authorization must use (PR
+ * #752 round 23).
+ *
+ * Before a platform-tier verification exists, the claim is the only signal
+ * available. Once `bindPilotOrganization()`/`rebindPilotOrganization()`
+ * establish a verified owner, it is authoritative — using the claim after
+ * that point would let the ORIGINAL claimed organization keep passing
+ * same-org access checks even after a rebind moves the real, verified
+ * organization elsewhere (and would let the NEW verified organization's own
+ * stewards be denied access to a pilot that is, in fact, now theirs). This
+ * is the ownership rule every application-layer check — and the eventual
+ * tenant RLS policy — must use, not the claim alone.
+ */
+export function getPilotEffectiveOrganizationId(
+  application:
+    | { responses?: Record<string, unknown> | null; verifiedOrganizationId?: string | null }
+    | null
+    | undefined,
+): string | null {
+  return getPilotVerifiedOrganizationId(application) ?? getPilotClaimedOrganizationId(application);
 }
 
 export type BindPilotOrganizationResult =
@@ -452,9 +523,9 @@ export async function authorizePilotAccess(
  * ```
  */
 export async function enforcePilotOwnership(
-  application: { responses?: Record<string, unknown> | null },
+  application: { responses?: Record<string, unknown> | null; verifiedOrganizationId?: string | null },
 ): Promise<NextResponse | null> {
-  const decision = await authorizePilotAccess(getPilotClaimedOrganizationId(application));
+  const decision = await authorizePilotAccess(getPilotEffectiveOrganizationId(application));
   if (decision.ok) {
     return null;
   }
@@ -482,24 +553,26 @@ type FactoryRouteHandler = (
  */
 /**
  * Loads a pilot application row by id for the purpose of an ownership
- * decision (PR #752 round 18).
+ * decision (PR #752 round 18; round 23 also loads `verifiedOrganizationId`
+ * so the decision can use the EFFECTIVE owner, not the claim alone).
  *
  * The ownership decision itself requires seeing the row regardless of the
  * caller's own organization — a same-org actor and a cross-org attacker look
  * identical until the row's owning organization is known. That lookup must
  * therefore run under `withSystemContext()`, never the ordinary tenant
- * runtime connection: once a real RLS policy exists for this table (JSONB-
- * owner policy for tenant reads, per the eventual policy-expansion design),
- * a tenant-runtime connection would only be able to see rows that ALREADY
- * match the caller's own org — making the ownership check itself unable to
- * detect (and therefore reject) a cross-org id.
+ * runtime connection: once a real RLS policy exists for this table (an
+ * effective-owner policy — `verified_organization_id` when set, else the
+ * JSONB claim — per the eventual policy-expansion design), a tenant-runtime
+ * connection would only be able to see rows that ALREADY match the caller's
+ * own org — making the ownership check itself unable to detect (and
+ * therefore reject) a cross-org id.
  */
 export async function loadPilotApplicationForOwnershipCheck(
   id: string,
-): Promise<{ responses: Record<string, unknown> | null } | undefined> {
+): Promise<{ responses: Record<string, unknown> | null; verifiedOrganizationId: string | null } | undefined> {
   return withSystemContext((_tx) =>
     db
-      .select({ responses: pilotApplications.responses })
+      .select({ responses: pilotApplications.responses, verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
       .from(pilotApplications)
       .where(eq(pilotApplications.id, id))
       .then(([application]) => application),
@@ -535,7 +608,7 @@ export function withPilotOwnership(
       return handler(request, nextContext);
     }
 
-    let application: { responses: Record<string, unknown> | null } | undefined;
+    let application: { responses: Record<string, unknown> | null; verifiedOrganizationId: string | null } | undefined;
     try {
       application = await loadPilotApplicationForOwnershipCheck(id);
     } catch (error) {
@@ -551,7 +624,7 @@ export function withPilotOwnership(
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
 
-    const decision = await authorizePilotAccess(getPilotClaimedOrganizationId(application));
+    const decision = await authorizePilotAccess(getPilotEffectiveOrganizationId(application));
     if (!decision.ok) {
       return NextResponse.json(
         { error: decision.status === 401 ? 'Unauthorized' : 'Forbidden' },
@@ -564,7 +637,7 @@ export function withPilotOwnership(
     // the ordinary tenant runtime pool, so it is never gated by a future
     // tenant-scoped RLS policy on this table. Same-org actors keep running
     // on the ordinary runtime connection (app-layer-enforced today; the
-    // eventual JSONB-owner tenant RLS policy scopes this path).
+    // eventual effective-owner tenant RLS policy scopes this path).
     if (decision.reason === 'platform') {
       return withSystemContext(async (_tx) => handler(request, nextContext));
     }

@@ -66,7 +66,8 @@ import {
   authorizePilotAccess,
   getPilotClaimedOrganizationId,
   getPilotVerifiedOrganizationId,
-  preserveClaimedOrganizationOnPatch,
+  getPilotEffectiveOrganizationId,
+  preserveServerOwnedResponsesFields,
   bindPilotOrganization,
   rebindPilotOrganization,
   enforcePilotOwnership,
@@ -269,6 +270,20 @@ describe('pilot-ownership', () => {
       expect(res!.status).toBe(401);
       await expect(res!.json()).resolves.toEqual({ error: 'Unauthorized' });
     });
+
+    it('round 23: after a rebind, the ORIGINAL claimed org no longer passes — the NEW verified org does', async () => {
+      // Pilot claims Org A but was verified/rebound to Org B.
+      const reboundPilot = { responses: { organizationId: ORG_A }, verifiedOrganizationId: ORG_B };
+
+      mockGetCurrentUser.mockResolvedValue(stewardOfA);
+      const deniedForA = await enforcePilotOwnership(reboundPilot);
+      expect(deniedForA).not.toBeNull();
+      expect(deniedForA!.status).toBe(403);
+
+      const stewardOfB = { id: 'u-steward-b', organizationId: ORG_B, role: 'steward' };
+      mockGetCurrentUser.mockResolvedValue(stewardOfB);
+      expect(await enforcePilotOwnership(reboundPilot)).toBeNull();
+    });
   });
 
   describe('withPilotOwnership — factory item-route wrapper', () => {
@@ -314,6 +329,25 @@ describe('pilot-ownership', () => {
       expect(handler).toHaveBeenCalledTimes(1);
       expect(mockDbSelect).not.toHaveBeenCalled();
     });
+
+    it('round 23: uses the effective owner — a rebind moves access, the original claimed org no longer passes', async () => {
+      const reboundRow = { responses: { organizationId: ORG_A }, verifiedOrganizationId: ORG_B };
+
+      mockGetCurrentUser.mockResolvedValue(stewardOfA);
+      dbReturns([reboundRow]);
+      const handlerForA = vi.fn().mockResolvedValue(new Response('ok', { status: 200 }));
+      const deniedRes = await withPilotOwnership(handlerForA)(new Request('http://localhost/api/pilot/apply/p1') as never, makeNextContext('p1'));
+      expect(deniedRes.status).toBe(403);
+      expect(handlerForA).not.toHaveBeenCalled();
+
+      const stewardOfB = { id: 'u-steward-b', organizationId: ORG_B, role: 'steward' };
+      mockGetCurrentUser.mockResolvedValue(stewardOfB);
+      dbReturns([reboundRow]);
+      const handlerForB = vi.fn().mockResolvedValue(new Response('ok', { status: 200 }));
+      const allowedRes = await withPilotOwnership(handlerForB)(new Request('http://localhost/api/pilot/apply/p1') as never, makeNextContext('p1'));
+      expect(allowedRes.status).toBe(200);
+      expect(handlerForB).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('getPilotVerifiedOrganizationId (PR #752 round 20)', () => {
@@ -335,17 +369,41 @@ describe('pilot-ownership', () => {
     });
   });
 
-  describe('preserveClaimedOrganizationOnPatch (PR #752 round 22)', () => {
+  describe('getPilotEffectiveOrganizationId (PR #752 round 23)', () => {
+    it('prefers the verified organization over the claim when both are present', () => {
+      const application = { responses: { organizationId: ORG_A }, verifiedOrganizationId: ORG_B };
+      expect(getPilotEffectiveOrganizationId(application)).toBe(ORG_B);
+    });
+
+    it('falls back to the claim when no verified organization exists yet', () => {
+      const application = { responses: { organizationId: ORG_A }, verifiedOrganizationId: null };
+      expect(getPilotEffectiveOrganizationId(application)).toBe(ORG_A);
+    });
+
+    it('returns null when neither a verified organization nor a claim exists (fail closed)', () => {
+      expect(getPilotEffectiveOrganizationId({ responses: {}, verifiedOrganizationId: null })).toBeNull();
+      expect(getPilotEffectiveOrganizationId(null)).toBeNull();
+    });
+
+    it('reflects a rebind: the ORIGINAL claimed org no longer wins once verification points elsewhere', () => {
+      // Pilot originally claimed Org A, was verified, then platform rebound it to Org B.
+      const rebound = { responses: { organizationId: ORG_A }, verifiedOrganizationId: ORG_B };
+      expect(getPilotEffectiveOrganizationId(rebound)).toBe(ORG_B);
+      expect(getPilotEffectiveOrganizationId(rebound)).not.toBe(ORG_A);
+    });
+  });
+
+  describe('preserveServerOwnedResponsesFields (PR #752 round 22/23)', () => {
     it('overwrites a hostile responses.organizationId with the existing row value', () => {
-      const result = preserveClaimedOrganizationOnPatch(
+      const result = preserveServerOwnedResponsesFields(
         { responses: { organizationId: ORG_B, notes: 'attacker note' } },
         { responses: { organizationId: ORG_A } },
       );
       expect(result.responses).toEqual({ organizationId: ORG_A, notes: 'attacker note' });
     });
 
-    it('leaves other keys inside responses ordinarily editable', () => {
-      const result = preserveClaimedOrganizationOnPatch(
+    it('leaves ordinary (non-server-owned) keys inside responses editable', () => {
+      const result = preserveServerOwnedResponsesFields(
         { responses: { readinessNotes: 'updated by steward' } },
         { responses: { organizationId: ORG_A, readinessNotes: 'old' } },
       );
@@ -353,7 +411,7 @@ describe('pilot-ownership', () => {
     });
 
     it('does not touch responses at all when the PATCH body omits it', () => {
-      const result = preserveClaimedOrganizationOnPatch(
+      const result = preserveServerOwnedResponsesFields(
         { notes: 'just a top-level field' },
         { responses: { organizationId: ORG_A } },
       );
@@ -361,20 +419,71 @@ describe('pilot-ownership', () => {
       expect(result.responses).toBeUndefined();
     });
 
-    it('drops organizationId from the merged responses when the existing row never had a claim', () => {
-      const result = preserveClaimedOrganizationOnPatch(
-        { responses: { organizationId: ORG_B } },
+    it('drops server-owned keys from the merged responses when the existing row never had them', () => {
+      const result = preserveServerOwnedResponsesFields(
+        { responses: { organizationId: ORG_B, commercialState: 'contract_signed' } },
         { responses: {} },
       );
       expect(result.responses).toEqual({});
     });
 
     it('treats a non-object responses value in the PATCH body as an empty object, not a crash', () => {
-      const result = preserveClaimedOrganizationOnPatch(
+      const result = preserveServerOwnedResponsesFields(
         { responses: 'not-an-object' },
         { responses: { organizationId: ORG_A } },
       );
       expect(result.responses).toEqual({ organizationId: ORG_A });
+    });
+
+    it('round 23: rejects an attempt to rewrite commercialState — the parallel commercial FSM lives in this JSONB blob', () => {
+      const result = preserveServerOwnedResponsesFields(
+        { responses: { commercialState: 'subscription_active' } },
+        { responses: { commercialState: 'lead' } },
+      );
+      expect(result.responses).toEqual({ commercialState: 'lead' });
+    });
+
+    it('round 23: rejects an attempt to redirect subscriptionPlanId to a different billing plan', () => {
+      const result = preserveServerOwnedResponsesFields(
+        { responses: { subscriptionPlanId: 'attacker-chosen-plan' } },
+        { responses: { subscriptionPlanId: 'real-plan-id' } },
+      );
+      expect(result.responses).toEqual({ subscriptionPlanId: 'real-plan-id' });
+    });
+
+    it('round 23: rejects an attempt to wipe commercialTransitionHistory/qualification scores/artifact metadata', () => {
+      const existing = {
+        responses: {
+          commercialTransitionHistory: [{ at: '2026-01-01', from: 'lead', to: 'qualified' }],
+          pilotFitScore: 88,
+          pilotQualificationScores: { pilotFitScore: 88 },
+          commercialMonetization: { lastState: 'contract_signed' },
+          pilotArtifactVersions: [{ versionId: 'v1', checksum: 'abc' }],
+          latestPilotArtifactVersionId: 'v1',
+        },
+      };
+      const result = preserveServerOwnedResponsesFields(
+        {
+          responses: {
+            commercialTransitionHistory: [],
+            pilotFitScore: 0,
+            pilotQualificationScores: {},
+            commercialMonetization: {},
+            pilotArtifactVersions: [],
+            latestPilotArtifactVersionId: 'attacker-forged',
+          },
+        },
+        existing,
+      );
+      expect(result.responses).toEqual(existing.responses);
+    });
+
+    it('round 23: still allows arbitrary NEW non-server-owned keys the steward adds', () => {
+      const result = preserveServerOwnedResponsesFields(
+        { responses: { organizationId: ORG_A, someNewFollowUpNote: 'called applicant back' } },
+        { responses: { organizationId: ORG_A } },
+      );
+      expect(result.responses).toEqual({ organizationId: ORG_A, someNewFollowUpNote: 'called applicant back' });
     });
   });
 

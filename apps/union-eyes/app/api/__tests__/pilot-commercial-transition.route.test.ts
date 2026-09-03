@@ -41,6 +41,7 @@ const m = vi.hoisted(() => {
     },
     hasMinRole: vi.fn(),
     authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
+    getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
     getPilotVerifiedOrganizationId: vi.fn(() => TEST_ORG_ID),
     withSystemContext: vi.fn(async (fn: (db: unknown) => Promise<unknown>) => fn(mockDb)),
     logger: {
@@ -77,7 +78,7 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   enforcePilotOwnership: vi.fn(async () => null),
   wrapPilotItemRoute: <T,>(handler: T) => handler,
   authorizePilotAccess: m.authorizePilotAccess,
-  getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
+  getPilotEffectiveOrganizationId: m.getPilotEffectiveOrganizationId,
   getPilotVerifiedOrganizationId: m.getPilotVerifiedOrganizationId,
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -122,6 +123,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     m.resetQueues();
     m.hasMinRole.mockResolvedValue(true);
     m.authorizePilotAccess.mockResolvedValue({ ok: true, reason: 'platform', actorOrganizationId: null });
+    m.getPilotEffectiveOrganizationId.mockReturnValue('test-org');
     m.getPilotVerifiedOrganizationId.mockReturnValue(TEST_ORG_ID);
     m.isCommercialTransitionAllowed.mockReturnValue(true);
     m.normalizeCommercialState.mockReturnValue('proposal_ready');
@@ -230,8 +232,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
 
   it('returns 400 for disallowed state transitions when allowSkip is false', async () => {
     const { POST } = await loadRoute();
-    m.queueSelect([
-      {
+    const appRow = {
         id: 'app-1',
         organizationName: 'Union Eyes',
         organizationType: 'local',
@@ -244,9 +245,12 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
         challenges: [],
         goals: [],
         readinessScore: 65,
+        reviewedAt: null,
+        approvedAt: null,
         responses: { commercialState: 'proposal_ready', organizationId: TEST_ORG_ID },
-      },
-    ]);
+    };
+    // round 23: existence/authorization pre-check read, then the locked authoritative read
+    m.queueSelect([appRow], [appRow]);
     m.normalizeCommercialState.mockReturnValueOnce('proposal_ready');
     m.isCommercialTransitionAllowed.mockReturnValueOnce(false);
 
@@ -266,8 +270,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
   it('returns 409 (round 20) when the pilot organization has not been verified — never falls back to the claimed responses.organizationId', async () => {
     const { POST } = await loadRoute();
     m.getPilotVerifiedOrganizationId.mockReturnValueOnce(null);
-    m.queueSelect([
-      {
+    const appRow = {
         id: 'app-1',
         reviewedAt: null,
         approvedAt: null,
@@ -283,8 +286,10 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
         goals: [],
         readinessScore: 65,
         responses: { commercialState: 'proposal_ready' },
-      },
-    ]);
+    };
+    // round 23: this check now happens INSIDE the locked transaction, so the
+    // transaction DOES get entered (and rolls back) rather than never starting.
+    m.queueSelect([appRow], [appRow]);
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
       method: 'POST',
@@ -298,12 +303,13 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     }), { params: { id: 'app-1' } });
 
     expect(response.status).toBe(409);
-    expect(mockDb.transaction).not.toHaveBeenCalled();
+    expect(mockDb.transaction).toHaveBeenCalledTimes(1);
   });
 
   it('round 22: locks the pilot row with SELECT ... FOR UPDATE before creating any financial artifact (concurrency hardening)', async () => {
     const { POST } = await loadRoute();
     m.queueSelect(
+      [{ id: 'app-1' }], // round 23: existence/authorization pre-check read
       [
         {
           id: 'app-1',
@@ -322,8 +328,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           approvedAt: null,
           responses: { commercialState: 'proposal_ready' },
         },
-      ],
-      [], // round 22 row-lock select — value unused, only the .for('update') call matters
+      ], // the locked authoritative read (round 23)
       [], // billing account lookup — none found, monetization staged only
     );
 
@@ -335,5 +340,45 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
 
     expect(response.status).toBe(200);
     expect(m.state.lockCalls).toContainEqual({ limit: 1, mode: 'update' });
+  });
+
+  it('round 23: derives fromState from the row read INSIDE the lock, not the pre-check snapshot', async () => {
+    const { POST } = await loadRoute();
+    m.normalizeCommercialState.mockImplementation((v: unknown) => (typeof v === 'string' ? v : 'lead'));
+    m.queueSelect(
+      [{ id: 'app-1', responses: { commercialState: 'STALE_PRECHECK_STATE' }, verifiedOrganizationId: 'stale-org' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          responses: { commercialState: 'FRESH_LOCKED_STATE' },
+        },
+      ],
+      [], // billing account lookup
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent', allowSkip: true }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.fromState).toBe('FRESH_LOCKED_STATE');
+    expect(m.normalizeCommercialState).toHaveBeenCalledWith('FRESH_LOCKED_STATE');
+    expect(m.normalizeCommercialState).not.toHaveBeenCalledWith('STALE_PRECHECK_STATE');
   });
 });

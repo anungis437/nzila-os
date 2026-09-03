@@ -3,7 +3,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
-import { preserveClaimedOrganizationOnPatch, withPilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { preserveServerOwnedResponsesFields, withPilotOwnership } from '@/lib/pilot/pilot-ownership';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,12 +35,12 @@ const handlers = crudRoutes({
     'reviewedAt',
     'approvedAt',
   ],
-  // PR #752 round 22: responses.organizationId is the CLAIMED owning
-  // organization this table's ownership model reads — a nested JSONB
-  // subfield, so blockedPatchFields (flat top-level keys) can't protect it.
-  // See preserveClaimedOrganizationOnPatch's doc comment in
-  // lib/pilot/pilot-ownership.ts for the full rationale.
-  beforeUpdate: (updates, { existing }) => preserveClaimedOrganizationOnPatch(updates, existing),
+  // PR #752 round 22/23: responses holds both the CLAIMED owning
+  // organization and commercial-transition's authoritative FSM/scoring
+  // state — nested JSONB subfields blockedPatchFields (flat top-level
+  // keys) can't protect. See preserveServerOwnedResponsesFields's doc
+  // comment in lib/pilot/pilot-ownership.ts for the full key list/rationale.
+  beforeUpdate: (updates, { existing }) => preserveServerOwnedResponsesFields(updates, existing),
 });
 
 export const GET = withPilotOwnership(handlers.GET, { minRole: 'steward' });

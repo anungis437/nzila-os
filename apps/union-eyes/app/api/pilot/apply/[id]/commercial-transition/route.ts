@@ -11,7 +11,7 @@ import {
   subscriptionPlans,
 } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
-import { authorizePilotAccess, getPilotClaimedOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
+import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
   buildPilotContractNumber,
@@ -66,6 +66,22 @@ function buildInvoiceNumber(applicationId: string): string {
   return `PILOT-INV-${stamp}-${applicationId.slice(0, 6).toUpperCase()}`;
 }
 
+/**
+ * Signals a structured, expected rejection discovered AFTER the pilot row
+ * is locked (PR #752 round 23) — thrown from inside the transaction to roll
+ * it back, then translated back into the exact HTTP response by the outer
+ * catch. Distinguishes an expected business rejection (404/409/400) from a
+ * genuine failure (500).
+ */
+class CommercialTransitionRejected extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly body: Record<string, unknown>,
+  ) {
+    super('commercial transition rejected');
+  }
+}
+
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
   try {
     // Round 19: this route requires platform-tier authority (see the
@@ -91,30 +107,44 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'A valid targetState is required' }, { status: 400 });
     }
 
-    const [application] = await withSystemContext((_tx) =>
+    // PR #752 round 23: this is a CHEAP existence + role-tier pre-check
+    // only — never the authoritative snapshot. Every value that feeds a
+    // financial or FSM decision below (verifiedOrganizationId, responses,
+    // fromState, the proposal) is re-derived from a FRESH read taken AFTER
+    // the row lock, inside the transaction. Reusing this snapshot for those
+    // decisions was round 22's gap: a concurrent rebind could change
+    // verifiedOrganizationId (or a concurrent transition change
+    // responses.commercialState) between this read and the lock being
+    // acquired, and the old code kept using the stale values captured here.
+    const [existsRow] = await withSystemContext((_tx) =>
       db
-        .select()
+        .select({
+          id: pilotApplications.id,
+          responses: pilotApplications.responses,
+          verifiedOrganizationId: pilotApplications.verifiedOrganizationId,
+        })
         .from(pilotApplications)
         .where(and(eq(pilotApplications.id, id))),
     );
 
-    if (!application) {
+    if (!existsRow) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
 
-    // PR #752 round 19: `responses.organizationId` (read below via
-    // getPilotClaimedOrganizationId) is an unauthenticated client claim, not
-    // server-verified ownership — see that function's doc comment in
-    // lib/pilot/pilot-ownership.ts. This route creates REAL financial
-    // records (commercialContracts / billingAccounts / orgSubscriptions /
-    // platformInvoices) keyed by that claimed org id, so ordinary same-org
-    // self-service is not sufficient authority here: only an independent
-    // platform-tier decision (system_admin+, per authorizePilotAccess's
-    // 'platform' branch) counts as verification for a billing-mutating
-    // operation. Same-org actors are correctly authorized to VIEW/manage
-    // their own pilot elsewhere (e.g. the [id] CRUD route), just not to
-    // drive commercial-transition.
-    const decision = await authorizePilotAccess(getPilotClaimedOrganizationId(application));
+    // PR #752 round 19: `responses.organizationId` (the claim) is an
+    // unauthenticated client assertion, not server-verified ownership — see
+    // getPilotClaimedOrganizationId's doc comment in lib/pilot/pilot-
+    // ownership.ts. This route creates REAL financial records
+    // (commercialContracts / billingAccounts / orgSubscriptions /
+    // platformInvoices), so ordinary same-org self-service is not
+    // sufficient authority here: only an independent platform-tier decision
+    // (system_admin+, per authorizePilotAccess's 'platform' branch) counts.
+    // The org VALUE used here doesn't affect the outcome for platform
+    // actors (who pass regardless) or non-platform actors (who are
+    // rejected regardless of same-org/cross-org) — only the actor's ROLE
+    // does — so this snapshot is safe to use for authorization even though
+    // it is not used for any financial decision below.
+    const decision = await authorizePilotAccess(getPilotEffectiveOrganizationId(existsRow));
     if (!decision.ok) {
       return NextResponse.json(
         { error: decision.status === 401 ? 'Unauthorized' : 'Forbidden' },
@@ -128,46 +158,6 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       );
     }
 
-    // PR #752 round 20: `responses.organizationId` (the CLAIM) must never be
-    // used for billing — only the server-controlled `verifiedOrganizationId`
-    // column, set exclusively by POST .../verify-organization after an
-    // independent platform-tier confirmation (see bindPilotOrganization's
-    // doc comment in lib/pilot/pilot-ownership.ts). A platform reviewer
-    // approving this transition does NOT, by itself, confirm that the
-    // claimed organization is the real organization behind this
-    // application — that confirmation must happen explicitly and be
-    // persisted (who verified it, and when) before any financial record can
-    // be created from it.
-    const verifiedOrganizationId = getPilotVerifiedOrganizationId(application);
-    if (!verifiedOrganizationId) {
-      return NextResponse.json(
-        {
-          error: 'This pilot application\'s organization has not been verified. Call POST /api/pilot/apply/[id]/verify-organization before commercial transition.',
-        },
-        { status: 409 },
-      );
-    }
-
-    const now = new Date();
-    const nowIso = now.toISOString();
-    const responses = { ...((application.responses ?? {}) as Record<string, unknown>) };
-    const fromState = normalizeCommercialState(responses.commercialState);
-
-    if (!body.allowSkip && !isCommercialTransitionAllowed(fromState, targetState)) {
-      return NextResponse.json(
-        {
-          error: `Invalid transition: ${fromState} -> ${targetState}. Only adjacent transitions are allowed.`,
-          data: {
-            fromState,
-            targetState,
-            allowedNext: COMMERCIAL_STATE_ORDER[COMMERCIAL_STATE_ORDER.indexOf(fromState) + 1] ?? fromState,
-            allowedPrevious: COMMERCIAL_STATE_ORDER[COMMERCIAL_STATE_ORDER.indexOf(fromState) - 1] ?? fromState,
-          },
-        },
-        { status: 400 },
-      );
-    }
-
     if (body.applyReferenceTemplate) {
       // Operational package MUST NOT ship customer-specific reference-template
       // fixtures. The demo package (@nzila/union-eyes-demo) owns those.
@@ -177,28 +167,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       );
     }
 
-    const proposal = buildProposalPackage(
-      {
-        id: application.id,
-        organizationName: application.organizationName,
-        organizationType: application.organizationType as 'local' | 'regional' | 'national',
-        contactName: application.contactName,
-        contactEmail: application.contactEmail,
-        memberCount: application.memberCount,
-        jurisdictions: application.jurisdictions ?? [],
-        sectors: application.sectors ?? [],
-        currentSystem: application.currentSystem,
-        challenges: application.challenges ?? [],
-        goals: application.goals ?? [],
-        readinessScore: application.readinessScore,
-      },
-      {
-        commercialState: targetState,
-        championScore: typeof responses.championScore === 'number' ? responses.championScore : undefined,
-        activityScore: typeof responses.activityScore === 'number' ? responses.activityScore : undefined,
-      },
-    );
-
+    const now = new Date();
+    const nowIso = now.toISOString();
     const monetization: {
       notes: string[];
       contractId?: string;
@@ -206,22 +176,81 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       subscriptionId?: string;
     } = { notes: [] };
 
-    await withSystemContext(async () =>
-      db.transaction(async (tx) => {
+    let fromState!: CommercialState;
+    let qualificationScores!: ReturnType<typeof buildProposalPackage>['qualificationScores'];
+
+    try {
+      await withSystemContext(async () =>
+        db.transaction(async (tx) => {
       // PR #752 round 22: lock the pilot row for the duration of this
       // transaction, same as bindPilotOrganization/rebindPilotOrganization's
       // own `FOR UPDATE` lock on this row — serializes this monetization
       // transaction against a concurrent verify/rebind so neither can
-      // observe stale state (a rebind's financial-artifact check running
-      // concurrently with this transaction creating one, or this
-      // transaction reading a verifiedOrganizationId that a concurrent
-      // rebind is about to change out from under it).
-      await tx
-        .select({ id: pilotApplications.id })
+      // observe stale state. PR #752 round 23: the row is now re-SELECTed
+      // (not just locked by id) — verifiedOrganizationId, responses,
+      // fromState, and the proposal are all derived from THIS locked read,
+      // never the pre-lock snapshot above.
+      const [application] = await tx
+        .select()
         .from(pilotApplications)
-        .where(eq(pilotApplications.id, application.id))
+        .where(eq(pilotApplications.id, id))
         .limit(1)
         .for('update');
+
+      if (!application) {
+        throw new CommercialTransitionRejected(404, { error: 'Pilot application not found' });
+      }
+
+      // PR #752 round 20: `responses.organizationId` (the CLAIM) must never
+      // be used for billing — only the server-controlled
+      // `verifiedOrganizationId` column, set exclusively by POST
+      // .../verify-organization or .../rebind-organization. Re-checked here
+      // (not just at the pre-check above) because a concurrent rebind could
+      // have changed or cleared it between the pre-check read and this lock.
+      const verifiedOrganizationId = getPilotVerifiedOrganizationId(application);
+      if (!verifiedOrganizationId) {
+        throw new CommercialTransitionRejected(409, {
+          error: 'This pilot application\'s organization has not been verified. Call POST /api/pilot/apply/[id]/verify-organization before commercial transition.',
+        });
+      }
+
+      const responses = { ...((application.responses ?? {}) as Record<string, unknown>) };
+      fromState = normalizeCommercialState(responses.commercialState);
+
+      if (!body.allowSkip && !isCommercialTransitionAllowed(fromState, targetState)) {
+        throw new CommercialTransitionRejected(400, {
+          error: `Invalid transition: ${fromState} -> ${targetState}. Only adjacent transitions are allowed.`,
+          data: {
+            fromState,
+            targetState,
+            allowedNext: COMMERCIAL_STATE_ORDER[COMMERCIAL_STATE_ORDER.indexOf(fromState) + 1] ?? fromState,
+            allowedPrevious: COMMERCIAL_STATE_ORDER[COMMERCIAL_STATE_ORDER.indexOf(fromState) - 1] ?? fromState,
+          },
+        });
+      }
+
+      const proposal = buildProposalPackage(
+        {
+          id: application.id,
+          organizationName: application.organizationName,
+          organizationType: application.organizationType as 'local' | 'regional' | 'national',
+          contactName: application.contactName,
+          contactEmail: application.contactEmail,
+          memberCount: application.memberCount,
+          jurisdictions: application.jurisdictions ?? [],
+          sectors: application.sectors ?? [],
+          currentSystem: application.currentSystem,
+          challenges: application.challenges ?? [],
+          goals: application.goals ?? [],
+          readinessScore: application.readinessScore,
+        },
+        {
+          commercialState: targetState,
+          championScore: typeof responses.championScore === 'number' ? responses.championScore : undefined,
+          activityScore: typeof responses.activityScore === 'number' ? responses.activityScore : undefined,
+        },
+      );
+      qualificationScores = proposal.qualificationScores;
 
       // Verified above — never `responses.organizationId` (the claim).
       const organizationId = verifiedOrganizationId;
@@ -492,17 +521,23 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         .update(pilotApplications)
         .set(updatePayload)
         .where(eq(pilotApplications.id, application.id));
-      }),
-    );
+        }),
+      );
+    } catch (err) {
+      if (err instanceof CommercialTransitionRejected) {
+        return NextResponse.json(err.body, { status: err.status });
+      }
+      throw err;
+    }
 
     return NextResponse.json({
       data: {
-        id: application.id,
+        id,
         fromState,
         targetState,
         status: inferPilotStatusFromCommercialState(targetState),
         monetization,
-        qualificationScores: proposal.qualificationScores,
+        qualificationScores,
       },
     });
   } catch (error) {
