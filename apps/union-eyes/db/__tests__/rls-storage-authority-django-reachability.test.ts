@@ -2,24 +2,24 @@
  * ARTIFACT TYPE: Contract test
  * DOCTRINE_VERSION: 1.0.0
  *
- * PR #752 round 30: closes a systemic blind spot found by independent
- * review of round 29/round-1 finance.ts convergence. That round's
+ * PR #752 round 31: closes a systemic blind spot found by independent
+ * review of round 30/round-1 finance.ts convergence. Those rounds'
  * reachability scans only covered this Next.js app's app/api, actions,
  * lib, services — they never looked at apps/union-eyes/backend, a
  * deployed Django REST backend (mounted at api/billing/, api/compliance/,
  * etc. in config/urls.py; built by apps/union-eyes/backend/Dockerfile and
  * pushed/deployed by .github/workflows/deploy-union-eyes.yml). That
- * backend's auto-generated DRF routers exposed 10 tables this registry
- * had marked LATENT_UNREACHABLE in finance.ts alone — including a full
- * unscoped CRUD ModelViewSet over strike_fund_disbursements, a table with
- * no tenant key at all. finance.ts's 10 have already been reopened this
- * round (see finance.ts's per-table `reason` fields).
+ * backend's auto-generated DRF routers exposed tables this registry had
+ * marked LATENT_UNREACHABLE in finance.ts, and several closed
+ * TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED
+ * entries were backed only by TypeScript-side isolation proof while the
+ * Django route remained queryset=Model.objects.all() + IsAuthenticated.
  *
  * Running this scanner against the FULL manifest (not just finance.ts)
  * found the same blind spot is repo-wide: KNOWN_PRE_EXISTING_VIOLATIONS
- * below is the exact baseline of additional LATENT_UNREACHABLE entries,
- * outside finance.ts, that also have a live router-registered Django
- * ModelViewSet as of this round. Reclassifying all ~158 of those (each
+ * below is the exact non-finance baseline of additional
+ * LATENT_UNREACHABLE entries that also have a live router-registered
+ * Django ModelViewSet as of this round. Reclassifying all of those (each
  * needs the same individual evidence-gathering as finance.ts's 10: org
  * column presence, permission_classes, sensitivity, fail-closed decision)
  * is explicitly OUT OF SCOPE for this round — it is deferred to dedicated
@@ -35,13 +35,21 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { storageAuthorityManifest } from '../rls-storage-authority';
+import { financeEntries } from '../rls-storage-authority/finance';
 
 const BACKEND_ROOT = join(__dirname, '..', '..', 'backend');
+const SENSITIVE_RLS_CLASSIFICATIONS = new Set([
+  'TENANT_RLS_REQUIRED',
+  'USER_RLS_REQUIRED',
+  'PARENT_OWNED_RLS_REQUIRED',
+]);
 
 /**
- * Baseline of LATENT_UNREACHABLE manifest entries (outside finance.ts,
- * which was fully reopened this round) already known to have a live
- * Django ModelViewSet as of PR #752 round 30. Tracked here — not silently
+ * Non-finance baseline of LATENT_UNREACHABLE manifest entries already
+ * known to have a live Django ModelViewSet as of PR #752 round 31. Finance
+ * entries are deliberately excluded: finance has a zero-exemption invariant
+ * and no router-mounted finance table may remain LATENT_UNREACHABLE.
+ * Tracked here — not silently
  * ignored — so this is a visible, shrinking TODO list rather than a
  * permanent exemption. Do not add new tables here; fix the manifest entry
  * instead. Only remove entries here once actually reclassified.
@@ -58,9 +66,6 @@ const KNOWN_PRE_EXISTING_VIOLATIONS = new Set<string>([
   'notification_bounces', 'notification_history', 'notification_log', 'organizing_campaign_milestones',
   'sms_rate_limits', 'federation_campaigns', 'federation_communications', 'cms_templates',
   'newsletter_templates', 'push_notification_templates', 'report_templates', 'signature_templates',
-  'bank_accounts', 'bank_reconciliation', 'bank_reconciliations', 'clc_remittance_mapping',
-  'donation_receipts', 'dues_rates', 'erp_invoices', 'gl_transaction_log',
-  'payment_cycles', 'payment_disputes', 'federation_remittances', 'payment_classification_policy',
   'board_packet_templates', 'congress_memberships', 'board_packet_sections', 'committee_memberships',
   'conflict_review_committee', 'accessibility_audits', 'financial_audit_log', 'clc_webhook_log',
   'erp_connectors', 'webhook_deliveries', 'integration_sync_log', 'job_classifications',
@@ -90,6 +95,17 @@ const KNOWN_PRE_EXISTING_VIOLATIONS = new Set<string>([
   'wcag_success_criteria',
 ]);
 
+interface DjangoTableRoute {
+  app: string;
+  routePath: string;
+  viewSetName: string;
+  modelName: string;
+  table: string;
+  hasGetQueryset: boolean;
+  usesDenyAllPermission: boolean;
+  usesUnfilteredObjectsAll: boolean;
+  usesOnlyIsAuthenticated: boolean;
+}
 
 function listDjangoAppDirs(): string[] {
   return readdirSync(BACKEND_ROOT).filter((name) => {
@@ -145,6 +161,26 @@ function parseModelToTable(modelsSource: string): Map<string, string> {
   return mapping;
 }
 
+function parseViewSetDetails(viewsSource: string): Map<string, Omit<DjangoTableRoute, 'app' | 'routePath' | 'table'>> {
+  const mapping = new Map<string, Omit<DjangoTableRoute, 'app' | 'routePath' | 'table'>>();
+  const classBlocks = viewsSource.split(/\nclass /).slice(1);
+  for (const block of classBlocks) {
+    const nameMatch = block.match(/^(\w+)/);
+    const queryMatch = block.match(/queryset\s*=\s*(\w+)\.objects\.all\(\)/);
+    if (!nameMatch || !queryMatch) continue;
+
+    mapping.set(nameMatch[1], {
+      viewSetName: nameMatch[1],
+      modelName: queryMatch[1],
+      hasGetQueryset: /def get_queryset\s*\(/.test(block),
+      usesDenyAllPermission: /DenyAllPermission/.test(block),
+      usesUnfilteredObjectsAll: true,
+      usesOnlyIsAuthenticated: /permission_classes\s*=\s*\[permissions\.IsAuthenticated\]/.test(block),
+    });
+  }
+  return mapping;
+}
+
 /** Physical table names with a live, router-mounted Django ModelViewSet, per Django app. */
 function liveDjangoTablesByApp(): Map<string, Set<string>> {
   const result = new Map<string, Set<string>>();
@@ -169,6 +205,36 @@ function liveDjangoTablesByApp(): Map<string, Set<string>> {
   return result;
 }
 
+/** Physical table names with route/view metadata for live router-mounted Django ModelViewSets. */
+function liveDjangoTableRoutes(): Map<string, DjangoTableRoute[]> {
+  const result = new Map<string, DjangoTableRoute[]>();
+  for (const app of listDjangoAppDirs()) {
+    const urlsSource = readFileSync(join(BACKEND_ROOT, app, 'urls.py'), 'utf8');
+    const viewsSource = readFileSync(join(BACKEND_ROOT, app, 'views.py'), 'utf8');
+    const modelsSource = readFileSync(join(BACKEND_ROOT, app, 'models.py'), 'utf8');
+
+    const registrations = parseRouterRegistrations(urlsSource);
+    const viewSetDetails = parseViewSetDetails(viewsSource);
+    const modelToTable = parseModelToTable(modelsSource);
+
+    for (const [viewSetName, routePath] of registrations) {
+      const details = viewSetDetails.get(viewSetName);
+      if (!details) continue;
+      const table = modelToTable.get(details.modelName);
+      if (!table) continue;
+      const route = { app, routePath, table, ...details };
+      const routes = result.get(table) ?? [];
+      routes.push(route);
+      result.set(table, routes);
+    }
+  }
+  return result;
+}
+
+function routeHasProvenIsolation(route: DjangoTableRoute): boolean {
+  return route.usesDenyAllPermission || route.hasGetQueryset || !route.usesUnfilteredObjectsAll;
+}
+
 describe('Django billing/etc. backend router reachability vs storageAuthorityManifest', () => {
   it('sanity check: the scanner finds a substantial number of Django apps and live router-registered tables (catches a silently-broken scanner)', () => {
     const byApp = liveDjangoTablesByApp();
@@ -186,9 +252,11 @@ describe('Django billing/etc. backend router reachability vs storageAuthorityMan
       }
     }
 
+    const financeTables = new Set(financeEntries.map((entry) => entry.table));
     const violations = storageAuthorityManifest
       .filter((entry) => entry.classification === 'LATENT_UNREACHABLE')
       .filter((entry) => allLiveDjangoTables.has(entry.table))
+      .filter((entry) => !financeTables.has(entry.table))
       .map((entry) => entry.table);
 
     const newViolations = violations
@@ -199,7 +267,7 @@ describe('Django billing/etc. backend router reachability vs storageAuthorityMan
       newViolations,
       `NEW table(s) classified LATENT_UNREACHABLE despite a live, router-registered ` +
         `Django ModelViewSet (apps/union-eyes/backend) — these were not in the tracked ` +
-        `pre-existing baseline and must be reclassified: ${newViolations.join(', ')}`,
+        `non-finance pre-existing baseline and must be reclassified: ${newViolations.join(', ')}`,
     ).toEqual([]);
   });
 
@@ -209,12 +277,63 @@ describe('Django billing/etc. backend router reachability vs storageAuthorityMan
     for (const tables of byApp.values()) {
       for (const table of tables) allLiveDjangoTables.add(table);
     }
+    const financeTables = new Set(financeEntries.map((entry) => entry.table));
 
     const currentViolationCount = storageAuthorityManifest
       .filter((entry) => entry.classification === 'LATENT_UNREACHABLE')
+      .filter((entry) => !financeTables.has(entry.table))
       .filter((entry) => allLiveDjangoTables.has(entry.table)).length;
 
     expect(currentViolationCount).toBeLessThanOrEqual(KNOWN_PRE_EXISTING_VIOLATIONS.size);
+  });
+
+  it('finance has a zero-exemption invariant: no finance.ts LATENT_UNREACHABLE entry may have a live Django ModelViewSet', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+
+    const violations = financeEntries
+      .filter((entry) => entry.classification === 'LATENT_UNREACHABLE')
+      .filter((entry) => tableRoutes.has(entry.table))
+      .map((entry) => {
+        const routes = tableRoutes.get(entry.table) ?? [];
+        return `${entry.table} (${routes.map((route) => `${route.app}/${route.routePath}`).join(', ')})`;
+      });
+
+    expect(
+      violations,
+      `finance.ts has table(s) marked LATENT_UNREACHABLE despite live Django router reachability: ` +
+        `${violations.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('closed sensitive finance classifications with Django routes must prove queryset isolation or fail closed', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+
+    const violations = financeEntries
+      .filter((entry) => SENSITIVE_RLS_CLASSIFICATIONS.has(entry.classification))
+      .flatMap((entry) => {
+        const unsafeRoutes = (tableRoutes.get(entry.table) ?? []).filter((route) => !routeHasProvenIsolation(route));
+        return unsafeRoutes.map((route) =>
+          `${entry.table} (${entry.classification}; ${route.app}/${route.routePath}; ${route.viewSetName})`,
+        );
+      });
+
+    expect(
+      violations,
+      `finance.ts has closed RLS classifications exposed through unfiltered Django ModelViewSets. ` +
+        `Reopen to NEEDS_REVIEW or prove Django get_queryset/DB-level isolation/fail-closed behavior: ` +
+        `${violations.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('the non-finance Django baseline never contains finance.ts tables', () => {
+    const financeTables = new Set(financeEntries.map((entry) => entry.table));
+    const financeBaseline = [...KNOWN_PRE_EXISTING_VIOLATIONS].filter((table) => financeTables.has(table));
+
+    expect(
+      financeBaseline,
+      `KNOWN_PRE_EXISTING_VIOLATIONS is non-finance only; finance entries must be reopened instead: ` +
+        `${financeBaseline.join(', ')}`,
+    ).toEqual([]);
   });
 
   it('REGRESSION FIXTURE: parseRouterRegistrations/parseViewSetToModel/parseModelToTable correctly resolve billing.urls\' strike-fund-disbursements route to the physical strike_fund_disbursements table', () => {
