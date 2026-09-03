@@ -92,10 +92,15 @@ def resolve_organization_context(org_id: Optional[str]):
 
     try:
         from auth_core.models import Organizations  # noqa: PLC0415
-    except ImportError:
-        # Organization model not available (single-org app) — pass the
-        # external id through unresolved rather than failing closed here.
-        return None, org_id
+    except ImportError as exc:
+        # Union Eyes is a mandatory multi-tenant app — the Organizations model
+        # must always be importable. Missing it is a deployment/config defect,
+        # not a "single-org app" case, so fail closed instead of promoting the
+        # unverified external org id into the canonical internal organization_id.
+        logger.exception("Organizations model unavailable during tenant resolution")
+        raise exceptions.AuthenticationFailed(
+            "Organization context unavailable."
+        ) from exc
 
     organization = Organizations.objects.filter(auth_provider_org_id=org_id).first()
     if not organization:

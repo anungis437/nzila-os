@@ -39,6 +39,7 @@ Run via: python -m unittest billing.tests_request_lifecycle -v
 from __future__ import annotations
 
 import os
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -48,7 +49,12 @@ import django  # noqa: E402
 
 django.setup()
 
-from auth_core.authentication import OIDCAuthentication  # noqa: E402
+from rest_framework import exceptions  # noqa: E402
+
+from auth_core.authentication import (  # noqa: E402
+    OIDCAuthentication,
+    resolve_organization_context,
+)
 from billing.isolation import DirectTenantIsolationMixin  # noqa: E402
 
 ORG_A_EXTERNAL = "org_external_aaa"
@@ -203,6 +209,21 @@ class NegativeRegressionMixinAloneIsNotProofTest(unittest.TestCase):
         base_qs.filter.assert_not_called()
         base_qs.none.assert_called_once()
         self.assertIs(result, base_qs.none.return_value)
+
+
+class OrganizationModelImportFailureFailsClosedTest(unittest.TestCase):
+    """Narrow correction requested by independent review: Union Eyes is a
+    mandatory multi-tenant app, so a broken/missing Organizations model
+    import is a deployment defect, not a "single-org app" mode. It must
+    reject authentication, never promote the unverified external org_id
+    into the canonical internal organization_id."""
+
+    def test_organizations_model_import_failure_fails_closed(self):
+        with patch("auth_core.authentication.cache") as mock_cache, \
+             patch.dict(sys.modules, {"auth_core.models": None}):
+            mock_cache.get.return_value = None
+            with self.assertRaises(exceptions.AuthenticationFailed):
+                resolve_organization_context(ORG_A_EXTERNAL)
 
 
 if __name__ == "__main__":
