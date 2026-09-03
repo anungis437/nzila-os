@@ -7,12 +7,13 @@ on:
       - 'Dockerfile'
       - 'apps/orchestrator-api/Dockerfile'
       - '.github/workflows/trivy.yml'
+
+  # GitHub code-scanning PR comparison requires the same SARIF categories
+  # present on main to be uploaded for every PR. Path-filtering this trigger
+  # caused "configurations not found" and false attribution of pre-existing
+  # repository alerts to unrelated PRs.
   pull_request:
     branches: [main]
-    paths:
-      - 'Dockerfile'
-      - 'apps/orchestrator-api/Dockerfile'
-      - '.github/workflows/trivy.yml'
   schedule:
     # Weekly scan to catch newly published CVEs in base images
     - cron: '0 6 * * 1'
