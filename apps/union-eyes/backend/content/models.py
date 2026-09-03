@@ -600,6 +600,25 @@ class PilotApplications(BaseModel):
     )
     verified_by = models.TextField(null=True, blank=True)
     verified_at = models.DateTimeField(null=True, blank=True)
+    # Platform-approved commercial terms (PR #752 round 25/26). memberCount is
+    # applicant-supplied at public intake and steward-PATCH-editable;
+    # responses['subscriptionPlanId'] has no governed writer. Both were being
+    # consumed directly by commercial-transition to size real contract/
+    # invoice amounts and select a real billing plan. These columns are null
+    # until an explicit platform-tier "approve commercial terms" action (see
+    # lib/pilot/commercial-terms-authority.ts's approveCommercialTerms)
+    # independently confirms them; only THEN may commercial-transition
+    # create a real contract, invoice, or subscription. Never a ForeignKey to
+    # subscription_plans (the Drizzle mirror also leaves it unconstrained) —
+    # existence/active-status is validated in approveCommercialTerms()
+    # instead, at the application layer.
+    verified_member_count = models.IntegerField(null=True, blank=True)
+    verified_pilot_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    verified_subscription_plan_id = models.UUIDField(null=True, blank=True)
+    commercial_terms_approved_by = models.TextField(null=True, blank=True)
+    commercial_terms_approved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "pilot_applications"

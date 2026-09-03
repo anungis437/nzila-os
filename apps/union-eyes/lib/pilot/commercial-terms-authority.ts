@@ -1,5 +1,5 @@
 /**
- * Platform-approved pilot commercial terms (PR #752 round 25).
+ * Platform-approved pilot commercial terms (PR #752 round 25/26).
  *
  * Before this module, commercial-transition sized every real contract and
  * invoice from `pilotApplications.memberCount` — an applicant-supplied
@@ -23,12 +23,25 @@
  * `commercial-transition/route.ts` must consume these verified columns
  * exclusively for financial-artifact-creating transitions — never
  * `memberCount` or `responses.subscriptionPlanId` directly.
+ *
+ * Round 26: once a real financial artifact (commercial contract, platform
+ * invoice, or org subscription) exists for this pilot, this function
+ * refuses to approve again at all — see the lifecycle guard below. Before
+ * round 26, an approval could be freely overwritten with different values
+ * even after a contract/invoice had already been produced from the prior
+ * approval, leaving no record of which approval produced which artifact
+ * (an authoritative-state / ledger-state divergence). `rebindPilotOrganization`
+ * (`lib/pilot/pilot-ownership.ts`) separately CLEARS these columns whenever
+ * the verified organization actually changes, forcing a fresh approval
+ * under the new organization's context before this guard can even become
+ * relevant again.
  */
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { pilotApplications, subscriptionPlans } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getRecommendedEconomicsTier, parsePriceBandLowerBound } from './commercialization-wave1';
+import { pilotHasFinancialArtifacts } from './pilot-ownership';
 
 export type ApproveCommercialTermsResult =
   | {
@@ -38,6 +51,10 @@ export type ApproveCommercialTermsResult =
       verifiedSubscriptionPlanId: string | null;
     }
   | { ok: false; status: 404 | 409; error: string };
+
+/** `numeric(12,2)` column bounds — 10 integer digits, 2 decimal places. */
+const MIN_PILOT_AMOUNT = 0.01;
+const MAX_PILOT_AMOUNT = 9999999999.99;
 
 /**
  * Platform-only approval of a pilot application's commercial terms.
@@ -50,22 +67,36 @@ export type ApproveCommercialTermsResult =
  *     fallback (the ambiguity this module exists to remove). Omitting it
  *     is valid for pilots that will never reach `subscription_active`.
  *   - `pilotAmount`, when provided, overrides the deterministic amount
- *     derived from the economics ladder (for a negotiated custom price);
- *     it must be a positive finite number. When omitted, the amount is
- *     computed deterministically from `memberCount` via the SAME
+ *     derived from the economics ladder (for a negotiated custom price).
+ *     Validated on the NORMALIZED (`toFixed(2)`-rounded) value, not the
+ *     raw input — a raw value like `0.001` is positive but rounds to
+ *     `"0.00"`, which would otherwise silently approve a zero-dollar
+ *     contract; the normalized amount must be at least $0.01 and within
+ *     `numeric(12,2)` column bounds. When omitted, the amount is computed
+ *     deterministically from `memberCount` via the SAME
  *     `getRecommendedEconomicsTier`/`parsePriceBandLowerBound` logic
  *     `commercial-transition` already uses for its informational proposal
  *     — so the approved number matches what an approver would have seen.
+ *   - Once this pilot has ANY real financial artifact (see
+ *     `pilotHasFinancialArtifacts` — commercial contract, platform
+ *     invoice, or org subscription), this function refuses to approve
+ *     again at all (409) — an ordinary re-approval must not be able to
+ *     change the authoritative amount/plan after a real artifact has
+ *     already been produced from a prior approval, with nothing tying the
+ *     new approved value to which artifact was actually created under
+ *     which approval. A genuine correction after artifacts exist needs an
+ *     explicit, versioned correction workflow — not implemented here.
  *
  * The pilot row is locked with `FOR UPDATE` for the same reason
  * `bindPilotOrganization` locks it: serializes this approval against a
- * concurrent rebind or commercial-transition attempt on the same row.
- * Re-approving with the SAME values is idempotent; approving again with
- * DIFFERENT values is treated as a deliberate correction (allowed —
- * unlike organization binding, commercial terms are expected to be
- * revised before a pilot reaches its first financial-artifact-creating
- * transition) and simply overwrites the prior approval, re-stamping the
- * approver and timestamp.
+ * concurrent rebind or commercial-transition attempt on the same row —
+ * this also closes the TOCTOU window between the financial-artifact check
+ * below and a concurrent commercial-transition creating one, since both
+ * now contend for the same row lock before proceeding. Re-approving with
+ * the SAME or DIFFERENT values is permitted ONLY before any financial
+ * artifact exists (a deliberate correction is expected during that
+ * window); once one exists, every further approval attempt is rejected
+ * regardless of whether the values would have been identical.
  */
 export async function approveCommercialTerms(params: {
   pilotId: string;
@@ -89,6 +120,15 @@ export async function approveCommercialTerms(params: {
     resolvedAmount = numericAmount.toFixed(2);
   } else {
     resolvedAmount = parsePriceBandLowerBound(getRecommendedEconomicsTier(memberCount).targetPriceRange);
+  }
+
+  const normalizedAmount = Number(resolvedAmount);
+  if (normalizedAmount < MIN_PILOT_AMOUNT || normalizedAmount > MAX_PILOT_AMOUNT) {
+    return {
+      ok: false,
+      status: 409,
+      error: `pilotAmount must normalize to at least $${MIN_PILOT_AMOUNT.toFixed(2)} and at most $${MAX_PILOT_AMOUNT.toFixed(2)}`,
+    };
   }
 
   return withSystemContext(async (_tx) => {
@@ -115,6 +155,19 @@ export async function approveCommercialTerms(params: {
 
     if (!pilot) {
       return { ok: false, status: 404, error: 'Pilot application not found' };
+    }
+
+    if (await pilotHasFinancialArtifacts(pilotId)) {
+      return {
+        ok: false,
+        status: 409,
+        error:
+          'This pilot already has a real financial artifact (a commercial contract, platform invoice, or ' +
+          'org subscription) created from a prior commercial-terms approval. Ordinary re-approval is not ' +
+          'permitted after that point — it would leave no record of which approval produced the existing ' +
+          'artifact. A correction requires an explicit, versioned commercial-terms correction workflow, ' +
+          'not this endpoint.',
+      };
     }
 
     await db

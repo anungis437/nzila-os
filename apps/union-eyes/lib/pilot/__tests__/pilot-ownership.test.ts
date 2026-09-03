@@ -669,5 +669,53 @@ describe('pilot-ownership', () => {
 
       expect(lockCalls).toContainEqual({ limit: 1, mode: 'update' });
     });
+
+    it('round 26: clears previously approved commercial terms when the verified organization actually changes', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [],
+        [],
+        [],
+      );
+      const setCalls: Array<Record<string, unknown>> = [];
+      mockDbUpdate.mockImplementation(() => ({
+        set: (values: Record<string, unknown>) => {
+          setCalls.push(values);
+          return { where: () => Promise.resolve([{ id: 'pilot-1' }]) };
+        },
+      }));
+
+      await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B.',
+      });
+
+      expect(setCalls).toHaveLength(1);
+      expect(setCalls[0]).toMatchObject({
+        verifiedOrganizationId: ORG_B,
+        verifiedMemberCount: null,
+        verifiedPilotAmount: null,
+        verifiedSubscriptionPlanId: null,
+        commercialTermsApprovedBy: null,
+        commercialTermsApprovedAt: null,
+      });
+    });
+
+    it('round 26: does NOT clear commercial terms for the idempotent same-org no-op path', async () => {
+      dbSelectSequence([{ id: ORG_A }], [{ verifiedOrganizationId: ORG_A }]);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_A,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Re-confirming the existing binding.',
+      });
+
+      expect(result).toEqual({ ok: true, organizationId: ORG_A, previousOrganizationId: ORG_A });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
   });
 });

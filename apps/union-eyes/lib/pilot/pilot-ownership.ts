@@ -144,8 +144,15 @@ export type BindPilotOrganizationResult =
  * SAME `metadata: { source: 'pilot-commercial-transition', pilotApplicationId }`
  * shape by that route, so this checks all three by that shared marker
  * rather than a table-specific key.
+ *
+ * Exported (PR #752 round 26) so `lib/pilot/commercial-terms-authority.ts`'s
+ * `approveCommercialTerms()` can reuse the SAME census to refuse an
+ * ordinary re-approval once a real financial artifact already exists —
+ * without it, a pilot could be approved at $10,000, invoiced at $10,000,
+ * then re-approved at $25,000 with no versioning tying the new approved
+ * amount to which artifact was actually produced under which approval.
  */
-async function pilotHasFinancialArtifacts(pilotId: string): Promise<boolean> {
+export async function pilotHasFinancialArtifacts(pilotId: string): Promise<boolean> {
   const pilotApplicationIdMatch = (column: unknown) => sql`${column}->>'pilotApplicationId' = ${pilotId}`;
 
   const [contract] = await db
@@ -293,8 +300,20 @@ export type RebindPilotOrganizationResult =
  *     reason described on `bindPilotOrganization()` — this also closes the
  *     TOCTOU window between this function's own artifact check and a
  *     concurrent commercial-transition creating one, since both now
- *     contend for the same row lock before proceeding.
- *   - Logs a structured warning (`logger.warn`) with the full
+ *     contend for the same row lock before proceeding. *   - Clears any previously approved commercial terms (PR #752 round 26:
+ *     `verifiedMemberCount`/`verifiedPilotAmount`/`verifiedSubscriptionPlanId`/
+ *     `commercialTermsApprovedBy`/`commercialTermsApprovedAt`) whenever the
+ *     verified organization actually changes. Without this, terms approved
+ *     for the PREVIOUS organization's context would remain authoritative
+ *     after the rebind, and commercial-transition could create the NEW
+ *     organization's financial artifacts from an approval made before that
+ *     organization was even the verified owner. Forces a fresh
+ *     `approveCommercialTerms()` call before any further
+ *     financial-artifact-creating transition — matching the SAME
+ *     acknowledge-then-proceed pattern already used for financial artifacts
+ *     above (the clear is unconditional, not gated by
+ *     `acknowledgeFinancialArtifacts`, since stale terms are never safe to
+ *     keep regardless of whether existing artifacts are being acknowledged). *   - Logs a structured warning (`logger.warn`) with the full
  *     before/after/reason/actor for traceability. This is NOT currently a
  *     durable, queryable audit-event row (no `audit_logs` write) — treat it
  *     as "logged for traceability," not "audited," until that gap is
@@ -370,6 +389,15 @@ export async function rebindPilotOrganization(params: {
         verifiedOrganizationId: organizationId,
         verifiedBy,
         verifiedAt: new Date(),
+        // Round 26: stale commercial terms approved under the PREVIOUS
+        // verified organization must never remain authoritative for the
+        // new one — force fresh approveCommercialTerms() before any further
+        // financial-artifact-creating transition.
+        verifiedMemberCount: null,
+        verifiedPilotAmount: null,
+        verifiedSubscriptionPlanId: null,
+        commercialTermsApprovedBy: null,
+        commercialTermsApprovedAt: null,
       })
       .where(eq(pilotApplications.id, pilotId));
 
@@ -381,6 +409,7 @@ export async function rebindPilotOrganization(params: {
       reason,
       hadFinancialArtifacts: hasFinancialArtifacts,
       acknowledgeFinancialArtifacts,
+      clearedCommercialTerms: true,
     });
 
     return { ok: true, organizationId, previousOrganizationId };

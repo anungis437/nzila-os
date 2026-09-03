@@ -8,9 +8,9 @@
 - **Branch:** main
 - **Commit:** local
 - **Short Commit:** local
-- **Generated:** 2026-09-03T03:52:55.830Z
+- **Generated:** 2026-09-03T04:41:51.026Z
 - **Migrations Directory:** `db/migrations`
-- **Total Migrations:** 97
+- **Total Migrations:** 96
 
 ## Migration Files
 
@@ -112,7 +112,6 @@
 | 20260508 | 20260508_fixup_post_0019_align_modern_schema.sql | `163e9a5f...88048bcf` | 5.59 KB | Fixup: align modern schema after 0019 drops + missing newer migrations. |
 | 20260509 | 20260509_fixup_auth_mfa_magic_invites.sql | `aac9d2ab...ef5411fe` | 3.01 KB | 20260509_fixup_auth_mfa_magic_invites.sql |
 | 20260521 | 20260521_fixup_icra_assessments_claim_columns.sql | `56960b63...e8457fba` | 0.85 KB | Fixup: add icra_assessments claim/payment columns that exist in Drizzle schema |
-| 20260903 | 20260903_pilot_commercial_terms_authority.sql | `0d281da3...9124478e` | 1.12 KB | PR #752 round 25: platform-approved commercial terms for pilot_applications. |
 
 ## Verification
 

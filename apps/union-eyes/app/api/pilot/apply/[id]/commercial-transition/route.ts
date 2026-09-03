@@ -8,6 +8,7 @@ import {
   pilotApplications,
   platformInvoiceLineItems,
   platformInvoices,
+  subscriptionPlans,
 } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
@@ -412,34 +413,47 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         if (!selectedPlanId) {
           monetization.notes.push('No approved subscription plan; subscription activation staged only.');
         } else {
-          const [existingSubscription] = await tx
-            .select({ id: orgSubscriptions.id })
-            .from(orgSubscriptions)
-            .where(and(eq(orgSubscriptions.organizationId, organizationId), eq(orgSubscriptions.planId, selectedPlanId)));
+          // Round 26: approval validated the plan was active AT APPROVAL
+          // TIME, but activation can happen much later — isActive=false
+          // means "must not accept new subscriptions", so revalidate under
+          // the SAME lock rather than trusting the stored id alone.
+          const [plan] = await tx
+            .select({ id: subscriptionPlans.id, isActive: subscriptionPlans.isActive })
+            .from(subscriptionPlans)
+            .where(eq(subscriptionPlans.id, selectedPlanId));
 
-          if (existingSubscription) {
-            await tx
-              .update(orgSubscriptions)
-              .set({ status: 'active', updatedAt: now })
-              .where(eq(orgSubscriptions.id, existingSubscription.id));
-            monetization.subscriptionId = existingSubscription.id;
+          if (!plan || !plan.isActive) {
+            monetization.notes.push('Approved subscription plan is no longer active; subscription activation staged only.');
           } else {
-            const [subscription] = await tx
-              .insert(orgSubscriptions)
-              .values({
-                billingAccountId,
-                planId: selectedPlanId,
-                organizationId,
-                status: 'active',
-                startDate: now,
-                metadata: {
-                  source: 'pilot-commercial-transition',
-                  pilotApplicationId: application.id,
-                },
-              })
-              .returning({ id: orgSubscriptions.id });
+            const [existingSubscription] = await tx
+              .select({ id: orgSubscriptions.id })
+              .from(orgSubscriptions)
+              .where(and(eq(orgSubscriptions.organizationId, organizationId), eq(orgSubscriptions.planId, selectedPlanId)));
 
-            monetization.subscriptionId = subscription?.id;
+            if (existingSubscription) {
+              await tx
+                .update(orgSubscriptions)
+                .set({ status: 'active', updatedAt: now })
+                .where(eq(orgSubscriptions.id, existingSubscription.id));
+              monetization.subscriptionId = existingSubscription.id;
+            } else {
+              const [subscription] = await tx
+                .insert(orgSubscriptions)
+                .values({
+                  billingAccountId,
+                  planId: selectedPlanId,
+                  organizationId,
+                  status: 'active',
+                  startDate: now,
+                  metadata: {
+                    source: 'pilot-commercial-transition',
+                    pilotApplicationId: application.id,
+                  },
+                })
+                .returning({ id: orgSubscriptions.id });
+
+              monetization.subscriptionId = subscription?.id;
+            }
           }
         }
       }

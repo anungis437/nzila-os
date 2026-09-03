@@ -518,4 +518,90 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
       expect.objectContaining({ totalContractValue: '12000.00' }),
     );
   });
+
+  it('round 26: revalidates the approved subscription plan is still active AT ACTIVATION TIME, staging only when it is not', async () => {
+    const { POST } = await loadRoute();
+    m.normalizeCommercialState.mockReturnValueOnce('invoice_issued');
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: 'plan-x',
+          responses: { commercialState: 'invoice_issued' },
+        },
+      ],
+      [{ id: 'billing-account-1' }], // billing account lookup — found
+      [{ id: 'plan-x', isActive: false }], // plan revalidation — no longer active
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'subscription_active', allowSkip: true }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.monetization.subscriptionId).toBeUndefined();
+    expect(payload.data.monetization.notes).toContainEqual(expect.stringMatching(/no longer active/));
+  });
+
+  it('round 26: activates the subscription when the approved plan is still active', async () => {
+    const { POST } = await loadRoute();
+    m.normalizeCommercialState.mockReturnValueOnce('invoice_issued');
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: 'plan-x',
+          responses: { commercialState: 'invoice_issued' },
+        },
+      ],
+      [{ id: 'billing-account-1' }], // billing account lookup — found
+      [{ id: 'plan-x', isActive: true }], // plan revalidation — still active
+      [], // existing subscription lookup — none found, triggers insert
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'subscription_active', allowSkip: true }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.monetization.subscriptionId).toBe('generated-id');
+  });
 });
