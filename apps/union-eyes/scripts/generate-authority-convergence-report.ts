@@ -65,6 +65,8 @@ function main() {
   const tenantRlsExpansionRequired: string[] = []
   const parentOwnedExpansionRequired: string[] = []
   const userRlsExpansionRequired: string[] = []
+  const mixedGlobalTenantExpansionRequired: string[] = []
+  const multiPartyExpansionRequired: string[] = []
   const closedWithTbdAuthority: string[] = []
 
   for (const entry of storageAuthorityManifest) {
@@ -92,6 +94,12 @@ function main() {
     }
     if (entry.classification === 'USER_RLS_REQUIRED' && !baseline0108.has(entry.table)) {
       userRlsExpansionRequired.push(entry.table)
+    }
+    if (entry.classification === 'MIXED_GLOBAL_TENANT_RLS_REQUIRED' && !baseline0108.has(entry.table)) {
+      mixedGlobalTenantExpansionRequired.push(entry.table)
+    }
+    if (entry.classification === 'MULTI_PARTY_RLS_REQUIRED' && !baseline0108.has(entry.table)) {
+      multiPartyExpansionRequired.push(entry.table)
     }
 
     // Blanket invariant (round 5): 'TBD' in ANY of the four
@@ -149,14 +157,23 @@ function main() {
     },
     rlsPolicyExpansionRequired: {
       note:
-        'Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 "policyGaps" wording, which conflated this with 0108 losing its own coverage.',
+        'Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED / MIXED_GLOBAL_TENANT_RLS_REQUIRED / MULTI_PARTY_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 "policyGaps" wording, which conflated this with 0108 losing its own coverage. The two RLS_REQUIRED shapes added in round 33 (mixed global/tenant, multi-party) do not yet have a ue_create_*_rls_policy helper — see billing/isolation.py for their proven application-layer equivalents.',
       tenantRlsRequiredExpansionCount: tenantRlsExpansionRequired.length,
       tenantRlsRequiredExpansionTables: tenantRlsExpansionRequired,
       parentOwnedRlsRequiredExpansionCount: parentOwnedExpansionRequired.length,
       parentOwnedRlsRequiredExpansionTables: parentOwnedExpansionRequired,
       userRlsRequiredExpansionCount: userRlsExpansionRequired.length,
       userRlsRequiredExpansionTables: userRlsExpansionRequired,
-      totalExpansionCount: tenantRlsExpansionRequired.length + parentOwnedExpansionRequired.length + userRlsExpansionRequired.length,
+      mixedGlobalTenantRlsRequiredExpansionCount: mixedGlobalTenantExpansionRequired.length,
+      mixedGlobalTenantRlsRequiredExpansionTables: mixedGlobalTenantExpansionRequired,
+      multiPartyRlsRequiredExpansionCount: multiPartyExpansionRequired.length,
+      multiPartyRlsRequiredExpansionTables: multiPartyExpansionRequired,
+      totalExpansionCount:
+        tenantRlsExpansionRequired.length +
+        parentOwnedExpansionRequired.length +
+        userRlsExpansionRequired.length +
+        mixedGlobalTenantExpansionRequired.length +
+        multiPartyExpansionRequired.length,
     },
     blanketGrantBlocker:
       'union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). ' +
@@ -201,6 +218,8 @@ function main() {
     `- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: ${tenantRlsExpansionRequired.length}`,
     `- PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: ${parentOwnedExpansionRequired.length}`,
     `- USER_RLS_REQUIRED tables beyond the 0108 baseline: ${userRlsExpansionRequired.length}`,
+    `- MIXED_GLOBAL_TENANT_RLS_REQUIRED tables beyond the 0108 baseline: ${mixedGlobalTenantExpansionRequired.length}`,
+    `- MULTI_PARTY_RLS_REQUIRED tables beyond the 0108 baseline: ${multiPartyExpansionRequired.length}`,
     `- Total additional policy-expansion tables: ${summary.rlsPolicyExpansionRequired.totalExpansionCount}`,
     '',
     '## Blanket grant blocker',

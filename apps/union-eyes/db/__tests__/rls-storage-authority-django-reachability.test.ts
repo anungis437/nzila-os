@@ -38,10 +38,13 @@ import { storageAuthorityManifest } from '../rls-storage-authority';
 import { financeEntries } from '../rls-storage-authority/finance';
 
 const BACKEND_ROOT = join(__dirname, '..', '..', 'backend');
+const ISOLATION_SOURCE_PATH = join(BACKEND_ROOT, 'billing', 'isolation.py');
 const SENSITIVE_RLS_CLASSIFICATIONS = new Set([
   'TENANT_RLS_REQUIRED',
   'USER_RLS_REQUIRED',
   'PARENT_OWNED_RLS_REQUIRED',
+  'MIXED_GLOBAL_TENANT_RLS_REQUIRED',
+  'MULTI_PARTY_RLS_REQUIRED',
 ]);
 
 /**
@@ -117,6 +120,30 @@ interface DjangoTableRoute {
    * proven isolation even though usesUnfilteredObjectsAll stays true.
    */
   usesSharedIsolationMixin: boolean;
+  /**
+   * PR #752 round 33: mixin presence alone is not universal proof — a
+   * mixed-ownership or multi-party mixin needs its OWN semantic check
+   * (does the shared mixin source actually implement a null-OR-tenant /
+   * from-OR-to filter, not just carry a plausible name), distinct from
+   * DirectTenantIsolationMixin/ParentOwnedIsolationMixin's single-tenant
+   * shape. See mixinSourceImplementsGlobalPlusTenantPolicy() and
+   * mixinSourceImplementsMultiPartyPolicy() below.
+   */
+  usesGlobalPlusTenantMixin: boolean;
+  usesMultiPartyMixin: boolean;
+  /** Only meaningful when usesMultiPartyMixin is true — the ViewSet's own
+   *  declared `from_field`/`to_field` class attributes, which must both be
+   *  non-empty AND correspond to real columns on the underlying model
+   *  (a misconfigured/omitted field is a real runtime bug: Q(**{'': org_id})
+   *  raises, and MultiPartyIsolationMixin's class-level defaults are empty
+   *  strings precisely so this is impossible to satisfy by accident). */
+  declaredFromField: string | null;
+  declaredToField: string | null;
+  /** Only meaningful when usesMultiPartyMixin is true — whether BOTH
+   *  declaredFromField and declaredToField are non-empty AND correspond to
+   *  real fields on the underlying Django model (cross-checked against
+   *  models.py, not just the ViewSet declaration). */
+  multiPartyFieldsMatchModel: boolean;
 }
 
 function listDjangoAppDirs(): string[] {
@@ -173,6 +200,24 @@ function parseModelToTable(modelsSource: string): Map<string, string> {
   return mapping;
 }
 
+/** class SomeModel(BaseModel): ... some_field = models.XField(...) -> Map<ModelClassName, Set<fieldName>> */
+function parseModelFieldNames(modelsSource: string): Map<string, Set<string>> {
+  const mapping = new Map<string, Set<string>>();
+  const classBlocks = modelsSource.split(/\nclass /).slice(1);
+  for (const block of classBlocks) {
+    const nameMatch = block.match(/^(\w+)/);
+    if (!nameMatch) continue;
+    const fields = new Set<string>();
+    const fieldRe = /^\s{4}(\w+)\s*=\s*models\./gm;
+    let fm: RegExpExecArray | null;
+    while ((fm = fieldRe.exec(block)) !== null) {
+      fields.add(fm[1]);
+    }
+    mapping.set(nameMatch[1], fields);
+  }
+  return mapping;
+}
+
 function parseViewSetDetails(viewsSource: string): Map<string, Omit<DjangoTableRoute, 'app' | 'routePath' | 'table'>> {
   const mapping = new Map<string, Omit<DjangoTableRoute, 'app' | 'routePath' | 'table'>>();
   const classBlocks = viewsSource.split(/\nclass /).slice(1);
@@ -181,6 +226,10 @@ function parseViewSetDetails(viewsSource: string): Map<string, Omit<DjangoTableR
     const queryMatch = block.match(/queryset\s*=\s*(\w+)\.objects\.all\(\)/);
     if (!nameMatch || !queryMatch) continue;
 
+    const classDeclarationLine = block.split('\n')[0] ?? '';
+    const fromFieldMatch = block.match(/^\s{4}from_field\s*=\s*['"](\w+)['"]/m);
+    const toFieldMatch = block.match(/^\s{4}to_field\s*=\s*['"](\w+)['"]/m);
+
     mapping.set(nameMatch[1], {
       viewSetName: nameMatch[1],
       modelName: queryMatch[1],
@@ -188,9 +237,11 @@ function parseViewSetDetails(viewsSource: string): Map<string, Omit<DjangoTableR
       usesDenyAllPermission: /DenyAllPermission/.test(block),
       usesUnfilteredObjectsAll: true,
       usesOnlyIsAuthenticated: /permission_classes\s*=\s*\[permissions\.IsAuthenticated\]/.test(block),
-      usesSharedIsolationMixin: /\b(DirectTenantIsolationMixin|ParentOwnedIsolationMixin)\b/.test(
-        block.split('\n')[0] ?? '',
-      ),
+      usesSharedIsolationMixin: /\b(DirectTenantIsolationMixin|ParentOwnedIsolationMixin)\b/.test(classDeclarationLine),
+      usesGlobalPlusTenantMixin: /\bGlobalPlusTenantIsolationMixin\b/.test(classDeclarationLine),
+      usesMultiPartyMixin: /\bMultiPartyIsolationMixin\b/.test(classDeclarationLine),
+      declaredFromField: fromFieldMatch ? fromFieldMatch[1] : null,
+      declaredToField: toFieldMatch ? toFieldMatch[1] : null,
     });
   }
   return mapping;
@@ -231,13 +282,20 @@ function liveDjangoTableRoutes(): Map<string, DjangoTableRoute[]> {
     const registrations = parseRouterRegistrations(urlsSource);
     const viewSetDetails = parseViewSetDetails(viewsSource);
     const modelToTable = parseModelToTable(modelsSource);
+    const modelFieldNames = parseModelFieldNames(modelsSource);
 
     for (const [viewSetName, routePath] of registrations) {
       const details = viewSetDetails.get(viewSetName);
       if (!details) continue;
       const table = modelToTable.get(details.modelName);
       if (!table) continue;
-      const route = { app, routePath, table, ...details };
+      const fields = modelFieldNames.get(details.modelName) ?? new Set<string>();
+      const multiPartyFieldsMatchModel =
+        !!details.declaredFromField &&
+        !!details.declaredToField &&
+        fields.has(details.declaredFromField) &&
+        fields.has(details.declaredToField);
+      const route = { app, routePath, table, ...details, multiPartyFieldsMatchModel };
       const routes = result.get(table) ?? [];
       routes.push(route);
       result.set(table, routes);
@@ -277,8 +335,69 @@ function authenticationLayerPropagatesOrganizationId(
   return callsResolver && assignsOrganizationId;
 }
 
+/**
+ * PR #752 round 33: proves billing/isolation.py's GlobalPlusTenantIsolationMixin
+ * (account_mappings' mixed global+tenant mechanism) actually implements a
+ * null-OR-own-org read filter and forces tenant ownership on write — not
+ * just that a class with a plausible name exists. Checked against the
+ * mixin's get_queryset() body specifically (bounded to the next `def`), so
+ * a regression that silently drops the null-check or the org-force would
+ * be caught here even though the class name/import would still match.
+ */
+function mixinSourceImplementsGlobalPlusTenantPolicy(
+  isolationSource: string = readFileSync(ISOLATION_SOURCE_PATH, 'utf8'),
+): boolean {
+  const classMatch = isolationSource.match(/class GlobalPlusTenantIsolationMixin:[\s\S]*?(?=\nclass |$)/);
+  if (!classMatch) return false;
+  const body = classMatch[0];
+  const getQuerysetMatch = body.match(/def get_queryset\(self\):[\s\S]*?(?=\n    def )/);
+  if (!getQuerysetMatch) return false;
+  const readsGlobalOrOwn = /__isnull.*True/.test(getQuerysetMatch[0]) && /\|/.test(getQuerysetMatch[0]);
+  const forcesOwnOrgOnCreate = /def perform_create[\s\S]*?serializer\.save\(\*\*\{self\.tenant_field: org_id\}\)/.test(body);
+  return readsGlobalOrOwn && forcesOwnOrgOnCreate;
+}
+
+/**
+ * PR #752 round 33: proves billing/isolation.py's MultiPartyIsolationMixin
+ * (per_capita_remittances' remitter/receiver mechanism) actually filters
+ * reads by from-field-OR-to-field, and unconditionally denies every write
+ * — the documented policy for a table with no proven ordinary-tenant
+ * write path.
+ */
+function mixinSourceImplementsMultiPartyPolicy(
+  isolationSource: string = readFileSync(ISOLATION_SOURCE_PATH, 'utf8'),
+): boolean {
+  const classMatch = isolationSource.match(/class MultiPartyIsolationMixin:[\s\S]*?(?=\nclass |$)/);
+  if (!classMatch) return false;
+  const body = classMatch[0];
+  const getQuerysetMatch = body.match(/def get_queryset\(self\):[\s\S]*?(?=\n    def )/);
+  if (!getQuerysetMatch) return false;
+  const readsFromOrTo = /self\.from_field.*org_id/.test(getQuerysetMatch[0]) &&
+    /self\.to_field.*org_id/.test(getQuerysetMatch[0]) &&
+    /\|/.test(getQuerysetMatch[0]);
+  const methodDenies = (methodName: string): boolean => {
+    const methodMatch = body.match(new RegExp(`def ${methodName}\\([\\s\\S]*?(?=\\n    def |$)`));
+    return !!methodMatch && /raise PermissionDenied/.test(methodMatch[0]);
+  };
+  const everyWriteDenied =
+    methodDenies('perform_create') && methodDenies('perform_update') && methodDenies('perform_destroy');
+  return readsFromOrTo && everyWriteDenied;
+}
+
 function routeHasProvenIsolation(route: DjangoTableRoute): boolean {
   if (route.usesDenyAllPermission || !route.usesUnfilteredObjectsAll) return true;
+
+  if (route.usesGlobalPlusTenantMixin) {
+    return mixinSourceImplementsGlobalPlusTenantPolicy() && authenticationLayerPropagatesOrganizationId();
+  }
+  if (route.usesMultiPartyMixin) {
+    return (
+      route.multiPartyFieldsMatchModel &&
+      mixinSourceImplementsMultiPartyPolicy() &&
+      authenticationLayerPropagatesOrganizationId()
+    );
+  }
+
   if (!route.usesSharedIsolationMixin && !route.hasGetQueryset) return false;
   // The mixin/get_queryset is only real proof if the auth layer actually
   // hands it a verified organization_id to filter on — otherwise this is
@@ -444,6 +563,11 @@ describe('Django billing/etc. backend router reachability vs storageAuthorityMan
       usesUnfilteredObjectsAll: true,
       usesOnlyIsAuthenticated: true,
       usesSharedIsolationMixin: true,
+      usesGlobalPlusTenantMixin: false,
+      usesMultiPartyMixin: false,
+      declaredFromField: null,
+      declaredToField: null,
+      multiPartyFieldsMatchModel: false,
     };
     // routeHasProvenIsolation always reads the REAL (now-corrected) source
     // file for the propagation check, so this route is proven today. This
@@ -476,5 +600,119 @@ describe('Django billing/etc. backend router reachability vs storageAuthorityMan
         pass`;
 
     expect(authenticationLayerPropagatesOrganizationId(POST_CORRECTION_AUTHENTICATE_BODY)).toBe(true);
+  });
+
+  // ==========================================================================
+  // PR #752 round 33: GlobalPlusTenantIsolationMixin (account_mappings) and
+  // MultiPartyIsolationMixin (per_capita_remittances) semantic proof — mixin
+  // presence alone must not be treated as universal proof.
+  // ==========================================================================
+
+  it('the real billing/isolation.py GlobalPlusTenantIsolationMixin implements the null-OR-own-org read filter and forces own-org on create', () => {
+    expect(mixinSourceImplementsGlobalPlusTenantPolicy()).toBe(true);
+  });
+
+  it('REGRESSION FIXTURE: a GlobalPlusTenantIsolationMixin missing the null-check (e.g. filters by tenant_field alone) is NOT recognized as proof', () => {
+    const BROKEN_SOURCE = `
+class GlobalPlusTenantIsolationMixin:
+    tenant_field: str = "organization_id"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        org_id = _request_organization_id(self.request)
+        if not org_id:
+            return qs.none()
+        return qs.filter(**{self.tenant_field: org_id})
+
+    def perform_create(self, serializer):
+        org_id = _request_organization_id(self.request)
+        serializer.save(**{self.tenant_field: org_id})
+`;
+    expect(mixinSourceImplementsGlobalPlusTenantPolicy(BROKEN_SOURCE)).toBe(false);
+  });
+
+  it('the real billing/isolation.py MultiPartyIsolationMixin implements the from-OR-to read filter and denies every write', () => {
+    expect(mixinSourceImplementsMultiPartyPolicy()).toBe(true);
+  });
+
+  it('REGRESSION FIXTURE: a MultiPartyIsolationMixin that allows create (no PermissionDenied) is NOT recognized as proof', () => {
+    const BROKEN_SOURCE = `
+class MultiPartyIsolationMixin:
+    from_field: str = ""
+    to_field: str = ""
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        org_id = _request_organization_id(self.request)
+        if not org_id:
+            return qs.none()
+        return qs.filter(Q(**{self.from_field: org_id}) | Q(**{self.to_field: org_id}))
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_update(self, serializer):
+        raise PermissionDenied("no")
+
+    def perform_destroy(self, instance):
+        raise PermissionDenied("no")
+`;
+    expect(mixinSourceImplementsMultiPartyPolicy(BROKEN_SOURCE)).toBe(false);
+  });
+
+  it('account_mappings\' real Django route uses GlobalPlusTenantIsolationMixin and is recognized as proven isolation', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+    const routes = tableRoutes.get('account_mappings') ?? [];
+    expect(routes.length).toBeGreaterThan(0);
+    for (const route of routes) {
+      expect(route.usesGlobalPlusTenantMixin).toBe(true);
+      expect(route.usesDenyAllPermission).toBe(false);
+      expect(routeHasProvenIsolation(route)).toBe(true);
+    }
+  });
+
+  it('per_capita_remittances\' real Django route uses MultiPartyIsolationMixin with fields matching the real model and is recognized as proven isolation', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+    const routes = tableRoutes.get('per_capita_remittances') ?? [];
+    expect(routes.length).toBeGreaterThan(0);
+    for (const route of routes) {
+      expect(route.usesMultiPartyMixin).toBe(true);
+      expect(route.declaredFromField).toBe('from_organization_id');
+      expect(route.declaredToField).toBe('to_organization_id');
+      expect(route.multiPartyFieldsMatchModel).toBe(true);
+      expect(routeHasProvenIsolation(route)).toBe(true);
+    }
+  });
+
+  it('REGRESSION FIXTURE: a MultiPartyIsolationMixin route with fields that do NOT match the real model is NOT recognized as proven isolation', () => {
+    const misconfiguredRoute: DjangoTableRoute = {
+      app: 'billing',
+      routePath: 'fake-multiparty-route',
+      viewSetName: 'FakeMultiPartyViewSet',
+      modelName: 'FakeMultiPartyModel',
+      table: 'fake_multiparty_table',
+      hasGetQueryset: true,
+      usesDenyAllPermission: false,
+      usesUnfilteredObjectsAll: true,
+      usesOnlyIsAuthenticated: true,
+      usesSharedIsolationMixin: false,
+      usesGlobalPlusTenantMixin: false,
+      usesMultiPartyMixin: true,
+      declaredFromField: 'from_organization_id',
+      declaredToField: 'a_typo_field_that_does_not_exist_on_the_model',
+      multiPartyFieldsMatchModel: false,
+    };
+    expect(routeHasProvenIsolation(misconfiguredRoute)).toBe(false);
+  });
+
+  it('donation_receipts\' real Django route uses DirectTenantIsolationMixin (restored this round) and is recognized as proven isolation', () => {
+    const tableRoutes = liveDjangoTableRoutes();
+    const routes = tableRoutes.get('donation_receipts') ?? [];
+    expect(routes.length).toBeGreaterThan(0);
+    for (const route of routes) {
+      expect(route.usesSharedIsolationMixin).toBe(true);
+      expect(route.usesDenyAllPermission).toBe(false);
+      expect(routeHasProvenIsolation(route)).toBe(true);
+    }
   });
 });

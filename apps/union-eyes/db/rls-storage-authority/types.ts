@@ -56,6 +56,31 @@
  *   PARENT_OWNED_RLS_REQUIRED  — no direct org column; scopes through a
  *                                 parent table's organization_id (like
  *                                 message_threads' children in 0108).
+ *   MIXED_GLOBAL_TENANT_RLS_REQUIRED — a single nullable organization_id
+ *                                 column distinguishes shared/global rows
+ *                                 (NULL) from tenant-owned override rows
+ *                                 (non-NULL); reads need global-OR-own-org
+ *                                 visibility and writes must never let a
+ *                                 tenant author/mutate a global row or
+ *                                 reassign ownership class. Needs its own
+ *                                 Postgres RLS policy shape (not yet built
+ *                                 as a ue_create_*_rls_policy helper) —
+ *                                 see billing/isolation.py's
+ *                                 GlobalPlusTenantIsolationMixin for the
+ *                                 proven application-layer equivalent
+ *                                 (PR #752 round 33).
+ *   MULTI_PARTY_RLS_REQUIRED   — two independent FK columns each denote a
+ *                                 legitimate owning organization (e.g. a
+ *                                 remitter and a receiver); either party
+ *                                 may read, writes require a genuinely
+ *                                 separate system/platform authority not
+ *                                 assumed from ordinary tenant
+ *                                 authentication. Needs its own Postgres
+ *                                 RLS policy shape (not yet built) — see
+ *                                 billing/isolation.py's
+ *                                 MultiPartyIsolationMixin for the proven
+ *                                 application-layer equivalent (PR #752
+ *                                 round 33).
  *   SYSTEM_ONLY                — only ever queried by withSystemContext()/
  *                                 background jobs; should carry a
  *                                 union_eyes_system-only policy (or no
@@ -127,6 +152,8 @@ export type StorageAuthorityClassification =
   | 'TENANT_RLS_REQUIRED'
   | 'USER_RLS_REQUIRED'
   | 'PARENT_OWNED_RLS_REQUIRED'
+  | 'MIXED_GLOBAL_TENANT_RLS_REQUIRED'
+  | 'MULTI_PARTY_RLS_REQUIRED'
   | 'SYSTEM_ONLY'
   | 'GLOBAL_REFERENCE_DATA'
   | 'APP_SCOPED_NON_SENSITIVE'
@@ -259,6 +286,8 @@ export const CLOSED_CLASSIFICATIONS: readonly StorageAuthorityClassification[] =
   'TENANT_RLS_REQUIRED',
   'USER_RLS_REQUIRED',
   'PARENT_OWNED_RLS_REQUIRED',
+  'MIXED_GLOBAL_TENANT_RLS_REQUIRED',
+  'MULTI_PARTY_RLS_REQUIRED',
   'SYSTEM_ONLY',
   'GLOBAL_REFERENCE_DATA',
   'APP_SCOPED_NON_SENSITIVE',

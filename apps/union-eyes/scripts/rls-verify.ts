@@ -284,7 +284,13 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
 
   const { storageAuthorityManifest, CLOSED_CLASSIFICATIONS } = await import('../db/rls-storage-authority-manifest')
   const manifestByTable = new Map(storageAuthorityManifest.map((e) => [e.table, e]))
-  const rlsRequiredClassifications = new Set(['TENANT_RLS_REQUIRED', 'USER_RLS_REQUIRED', 'PARENT_OWNED_RLS_REQUIRED'])
+  const rlsRequiredClassifications = new Set([
+    'TENANT_RLS_REQUIRED',
+    'USER_RLS_REQUIRED',
+    'PARENT_OWNED_RLS_REQUIRED',
+    'MIXED_GLOBAL_TENANT_RLS_REQUIRED',
+    'MULTI_PARTY_RLS_REQUIRED',
+  ])
 
   const byTable = new Map<string, string[]>()
   for (const row of rows) {

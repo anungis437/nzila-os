@@ -26,7 +26,12 @@ class DenyAllPermission(permissions.BasePermission):
 from .models import (AutopaySettings, ClcPerCapitaBenchmarks, ClcUnionDensity, ClcBargainingTrends, ClcSyncLog, ClcOauthTokens, PerCapitaRemittances, ClcChartOfAccounts, RemittanceApprovals, ClcWebhookLog, OrganizationContacts, ClcOrganizationSyncLog, ChartOfAccounts, ClcRemittanceMapping, ClcApiConfig, DonationCampaigns, Donations, DonationReceipts, StripeConnectAccounts, PaymentClassificationPolicy, PaymentRoutingRules, SeparatedPaymentTransactions, WhiplashViolations, StrikeFundPaymentAudit, AccountBalanceReconciliation, WhiplashPreventionAudit, CostCenters, GlAccountMappings, GlTransactionLog, GlTrialBalance, OrganizationBillingConfig, DuesTransactions, Payments, PaymentCycles, PaymentMethods, BankReconciliation, PaymentDisputes, StripeWebhookEvents, StrikeFundDisbursements, T4aTaxSlips, Rl1TaxSlips, TaxYearEndProcessing, WeeklyThresholdTracking, CurrencyEnforcementPolicy, BankOfCanadaRates, TransactionCurrencyConversions, CurrencyEnforcementViolations, T106FilingTracking, TransferPricingDocumentation, FxRateAuditLog, CurrencyEnforcementAudit, ExchangeRates, CrossBorderTransactions, AccountMappings, ErpConnectors, JournalEntries, JournalEntryLines, ErpInvoices, BankAccounts, BankTransactions, BankReconciliations, SyncJobs, FinancialAuditLog, CurrencyExchangeRates, FmvPolicy, CpiData, FmvBenchmarks, ProcurementRequests, ProcurementBids, IndependentAppraisals, CpiAdjustedPricing, FmvViolations, FmvAuditLog, DuesRates, MemberDuesLedger, MemberArrears, EmployerRemittances, RemittanceLineItems, RemittanceExceptions, PaymentPlans, FinancialPeriods)
 from .serializers import (AutopaySettingsSerializer, ClcPerCapitaBenchmarksSerializer, ClcUnionDensitySerializer, ClcBargainingTrendsSerializer, ClcSyncLogSerializer, ClcOauthTokensSerializer, PerCapitaRemittancesSerializer, ClcChartOfAccountsSerializer, RemittanceApprovalsSerializer, ClcWebhookLogSerializer, OrganizationContactsSerializer, ClcOrganizationSyncLogSerializer, ChartOfAccountsSerializer, ClcRemittanceMappingSerializer, ClcApiConfigSerializer, DonationCampaignsSerializer, DonationsSerializer, DonationReceiptsSerializer, StripeConnectAccountsSerializer, PaymentClassificationPolicySerializer, PaymentRoutingRulesSerializer, SeparatedPaymentTransactionsSerializer, WhiplashViolationsSerializer, StrikeFundPaymentAuditSerializer, AccountBalanceReconciliationSerializer, WhiplashPreventionAuditSerializer, CostCentersSerializer, GlAccountMappingsSerializer, GlTransactionLogSerializer, GlTrialBalanceSerializer, OrganizationBillingConfigSerializer, DuesTransactionsSerializer, PaymentsSerializer, PaymentCyclesSerializer, PaymentMethodsSerializer, BankReconciliationSerializer, PaymentDisputesSerializer, StripeWebhookEventsSerializer, StrikeFundDisbursementsSerializer, T4aTaxSlipsSerializer, Rl1TaxSlipsSerializer, TaxYearEndProcessingSerializer, WeeklyThresholdTrackingSerializer, CurrencyEnforcementPolicySerializer, BankOfCanadaRatesSerializer, TransactionCurrencyConversionsSerializer, CurrencyEnforcementViolationsSerializer, T106FilingTrackingSerializer, TransferPricingDocumentationSerializer, FxRateAuditLogSerializer, CurrencyEnforcementAuditSerializer, ExchangeRatesSerializer, CrossBorderTransactionsSerializer, AccountMappingsSerializer, ErpConnectorsSerializer, JournalEntriesSerializer, JournalEntryLinesSerializer, ErpInvoicesSerializer, BankAccountsSerializer, BankTransactionsSerializer, BankReconciliationsSerializer, SyncJobsSerializer, FinancialAuditLogSerializer, CurrencyExchangeRatesSerializer, FmvPolicySerializer, CpiDataSerializer, FmvBenchmarksSerializer, ProcurementRequestsSerializer, ProcurementBidsSerializer, IndependentAppraisalsSerializer, CpiAdjustedPricingSerializer, FmvViolationsSerializer, FmvAuditLogSerializer, DuesRatesSerializer, MemberDuesLedgerSerializer, MemberArrearsSerializer, EmployerRemittancesSerializer, RemittanceLineItemsSerializer, RemittanceExceptionsSerializer, PaymentPlansSerializer, FinancialPeriodsSerializer)
 
-from .isolation import DenyAllPermission as SharedDenyAllPermission, DirectTenantIsolationMixin
+from .isolation import (
+    DenyAllPermission as SharedDenyAllPermission,
+    DirectTenantIsolationMixin,
+    GlobalPlusTenantIsolationMixin,
+    MultiPartyIsolationMixin,
+)
 
 
 class AutopaySettingsViewSet(viewsets.ModelViewSet):
@@ -101,7 +106,7 @@ class ClcOauthTokensViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class PerCapitaRemittancesViewSet(viewsets.ModelViewSet):
+class PerCapitaRemittancesViewSet(MultiPartyIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for PerCapitaRemittances operations."""
     queryset = PerCapitaRemittances.objects.all()
     serializer_class = PerCapitaRemittancesSerializer
@@ -109,6 +114,8 @@ class PerCapitaRemittancesViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+    from_field = 'from_organization_id'
+    to_field = 'to_organization_id'
 
 
 class ClcChartOfAccountsViewSet(viewsets.ModelViewSet):
@@ -225,11 +232,11 @@ class DonationsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class DonationReceiptsViewSet(viewsets.ModelViewSet):
+class DonationReceiptsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for DonationReceipts operations."""
     queryset = DonationReceipts.objects.all()
     serializer_class = DonationReceiptsSerializer
-    permission_classes = [SharedDenyAllPermission]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -641,7 +648,7 @@ class CrossBorderTransactionsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class AccountMappingsViewSet(viewsets.ModelViewSet):
+class AccountMappingsViewSet(GlobalPlusTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for AccountMappings operations."""
     queryset = AccountMappings.objects.all()
     serializer_class = AccountMappingsSerializer
