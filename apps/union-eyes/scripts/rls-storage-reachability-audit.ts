@@ -32,9 +32,9 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
 
 const REPO_ROOT = path.resolve(__dirname, '..');
+const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx']);
 
 export type ReachabilityBucket =
   | 'TENANT_HTTP'
@@ -67,13 +67,28 @@ export interface TableProposal {
   proposalReason: string;
 }
 
-function sh(cmd: string): string {
-  try {
-    return execSync(cmd, { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 32 }).toString();
-  } catch (err) {
-    const e = err as { stdout?: Buffer };
-    return e.stdout ? e.stdout.toString() : '';
+function toRepoPath(file: string): string {
+  return path.relative(REPO_ROOT, file).split(path.sep).join('/');
+}
+
+function walkSourceFiles(relativeRoots: string[]): string[] {
+  const out: string[] = [];
+
+  function visit(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === 'dist' || entry.name === 'node_modules') continue;
+        visit(full);
+      } else if (SOURCE_EXTENSIONS.has(path.extname(entry.name))) {
+        out.push(toRepoPath(full));
+      }
+    }
   }
+
+  for (const root of relativeRoots) visit(path.join(REPO_ROOT, root));
+  return out;
 }
 
 /** Finds every file that declares a pgTable() with the given physical table name string. */
@@ -85,10 +100,10 @@ function findDeclarationFiles(table: string): string[] {
   // distinguish LATENT_UNREACHABLE (a real, unused union-eyes declaration
   // exists) from SEPARATE_DATABASE_BOUNDARY (no union-eyes declaration
   // exists at all, only a same-named table elsewhere) — see the file header.
-  const out = sh(
-    `grep -rl "${table}" db/schema services --include="*.ts" 2>/dev/null | grep -v "/dist/\\|/node_modules/"`,
-  );
-  return out.trim().split('\n').filter(Boolean);
+  return walkSourceFiles(['db/schema', 'services']).filter((file) => {
+    const content = fs.readFileSync(path.join(REPO_ROOT, file), 'utf8');
+    return content.includes(`'${table}'`) || content.includes(`"${table}"`);
+  });
 }
 
 /** Extracts the exported Drizzle identifier and org-column presence for a table within a file. */
@@ -121,10 +136,15 @@ function inspectDeclaration(file: string, table: string): DeclarationSite | null
 /** Finds real (non-test, non-schema, non-financial-service) usage files for a Drizzle export name. */
 function findUsageFiles(exportName: string): string[] {
   if (!exportName) return [];
-  const out = sh(
-    `grep -rln "\\b${exportName}\\b" app lib services actions --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "__tests__\\|\\.test\\.\\|financial-service\\|^db/schema"`,
-  );
-  return out.trim().split('\n').filter(Boolean);
+  const exportPattern = new RegExp(`\\b${exportName}\\b`);
+  return walkSourceFiles(['app', 'lib', 'services', 'actions']).filter((file) => {
+    if (file.includes('__tests__') || /\.(test|spec)\.(ts|tsx)$/.test(file)) return false;
+    if (file.startsWith('services/financial-service')) return false;
+    if (file.startsWith('db/schema')) return false;
+
+    const content = fs.readFileSync(path.join(REPO_ROOT, file), 'utf8');
+    return exportPattern.test(content);
+  });
 }
 
 function classifyUsageFile(file: string): ReachabilityBucket {

@@ -5,12 +5,15 @@ import { execFileSync } from 'node:child_process'
 
 const APP_ROOT = resolve(__dirname, '..', '..')
 const REPO_ROOT = resolve(APP_ROOT, '..', '..')
+const TSX_CLI = resolve(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs')
 const REPORT_JSON = resolve(REPO_ROOT, 'reports', 'union-eyes-explicit-grant-dry-run.json')
 const REPORT_MD = resolve(REPO_ROOT, 'reports', 'union-eyes-explicit-grant-dry-run.md')
 
 describe('generate-explicit-grant-dry-run', () => {
   it('runs without throwing and produces an internally consistent plan', () => {
-    execFileSync('npx', ['tsx', 'scripts/generate-explicit-grant-dry-run.ts'], {
+    expect(existsSync(TSX_CLI), 'tsx CLI entrypoint must exist so the generator is actually executed').toBe(true)
+
+    execFileSync(process.execPath, [TSX_CLI, 'scripts/generate-explicit-grant-dry-run.ts'], {
       cwd: APP_ROOT,
       stdio: 'pipe',
     })

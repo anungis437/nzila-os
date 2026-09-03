@@ -79,6 +79,10 @@ const REVIEWED_EXEMPTIONS: Record<string, string> = {
     'Issuance route: creates a brand-new assessment and mints its capability token (generateCapabilityToken + setCapabilityCookie). There is no prior capability to verify at creation time — this request IS the capability\u2019s origin, not a lookup of an existing one.',
 };
 
+function toRepoPath(file: string): string {
+  return path.relative(REPO_ROOT, file).split(path.sep).join('/');
+}
+
 function walk(dir: string): string[] {
   const out: string[] = [];
   if (!fs.existsSync(dir)) return out;
@@ -118,7 +122,7 @@ describe('ICRA assessment-capability contract ratchet (full production surface)'
     const violations: string[] = [];
 
     for (const file of allFiles) {
-      const relative = path.relative(REPO_ROOT, file);
+      const relative = toRepoPath(file);
       if (relative.includes('db/schema/icra-schema.ts')) continue; // the declaration file itself
       if (relative === 'lib/icra/assessment-capability.ts') continue; // the guard module itself
 
@@ -145,6 +149,14 @@ describe('ICRA assessment-capability contract ratchet (full production surface)'
       const full = path.join(REPO_ROOT, relative);
       expect(fs.existsSync(full), `expected ${relative} to exist`).toBe(true);
     }
+  });
+
+  it('canonicalizes scanned paths before matching reviewed exemptions', () => {
+    const exemptPath = path.join(REPO_ROOT, 'app', 'api', 'icra', '[assessmentId]', 'claim', 'route.ts');
+    expect(REVIEWED_EXEMPTIONS[toRepoPath(exemptPath)]).toBeDefined();
+
+    const unrelatedPath = path.join(REPO_ROOT, 'app', 'api', 'icra', '[assessmentId]', 'unreviewed', 'route.ts');
+    expect(REVIEWED_EXEMPTIONS[toRepoPath(unrelatedPath)]).toBeUndefined();
   });
 
   it('REGRESSION Bug A: ICRA table access + assessmentId + no guard import/call at all', () => {
@@ -203,5 +215,4 @@ describe('ICRA assessment-capability contract ratchet (full production surface)'
     expect(isUnauthorizedIcraAccess(fixedFixture)).toBe(false);
   });
 });
-
 

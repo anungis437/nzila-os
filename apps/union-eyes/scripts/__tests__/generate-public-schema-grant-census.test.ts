@@ -5,12 +5,15 @@ import { execFileSync } from 'node:child_process'
 
 const APP_ROOT = resolve(__dirname, '..', '..')
 const REPO_ROOT = resolve(APP_ROOT, '..', '..')
+const TSX_CLI = resolve(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs')
 const REPORT_JSON = resolve(REPO_ROOT, 'reports', 'union-eyes-public-schema-grant-census.json')
 const REPORT_MD = resolve(REPO_ROOT, 'reports', 'union-eyes-public-schema-grant-census.md')
 
 describe('generate-public-schema-grant-census', () => {
   it('runs and produces a valid report; every canonical public-schema table has an authority entry', () => {
-    execFileSync('npx', ['tsx', 'scripts/generate-public-schema-grant-census.ts'], {
+    expect(existsSync(TSX_CLI), 'tsx CLI entrypoint must exist so the generator is actually executed').toBe(true)
+
+    execFileSync(process.execPath, [TSX_CLI, 'scripts/generate-public-schema-grant-census.ts'], {
       cwd: APP_ROOT,
       stdio: 'pipe',
     })

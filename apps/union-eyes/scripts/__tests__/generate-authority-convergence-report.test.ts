@@ -5,12 +5,15 @@ import { execFileSync } from 'node:child_process'
 
 const APP_ROOT = resolve(__dirname, '..', '..')
 const REPO_ROOT = resolve(APP_ROOT, '..', '..')
+const TSX_CLI = resolve(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs')
 const REPORT_JSON = resolve(REPO_ROOT, 'reports', 'union-eyes-authority-convergence-report.json')
 const REPORT_MD = resolve(REPO_ROOT, 'reports', 'union-eyes-authority-convergence-report.md')
 
 describe('generate-authority-convergence-report', () => {
   it('runs and produces a valid, internally-consistent JSON + Markdown report', () => {
-    execFileSync('npx', ['tsx', 'scripts/generate-authority-convergence-report.ts'], {
+    expect(existsSync(TSX_CLI), 'tsx CLI entrypoint must exist so the generator is actually executed').toBe(true)
+
+    execFileSync(process.execPath, [TSX_CLI, 'scripts/generate-authority-convergence-report.ts'], {
       cwd: APP_ROOT,
       stdio: 'pipe',
     })
