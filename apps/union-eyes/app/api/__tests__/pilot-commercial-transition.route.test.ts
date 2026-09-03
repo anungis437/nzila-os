@@ -33,6 +33,7 @@ const m = vi.hoisted(() => {
     },
     hasMinRole: vi.fn(),
     authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
+    getPilotVerifiedOrganizationId: vi.fn(() => TEST_ORG_ID),
     withSystemContext: vi.fn(async (fn: (db: unknown) => Promise<unknown>) => fn(mockDb)),
     logger: {
       info: vi.fn(),
@@ -69,6 +70,7 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   wrapPilotItemRoute: <T,>(handler: T) => handler,
   authorizePilotAccess: m.authorizePilotAccess,
   getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
+  getPilotVerifiedOrganizationId: m.getPilotVerifiedOrganizationId,
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
@@ -111,6 +113,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     m.resetQueues();
     m.hasMinRole.mockResolvedValue(true);
     m.authorizePilotAccess.mockResolvedValue({ ok: true, reason: 'platform', actorOrganizationId: null });
+    m.getPilotVerifiedOrganizationId.mockReturnValue(TEST_ORG_ID);
     m.isCommercialTransitionAllowed.mockReturnValue(true);
     m.normalizeCommercialState.mockReturnValue('proposal_ready');
     m.inferPilotStatusFromCommercialState.mockReturnValue('approved');
@@ -251,8 +254,9 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     });
   });
 
-  it('transitions successfully with allowSkip and returns monetization notes when org context is absent', async () => {
+  it('returns 409 (round 20) when the pilot organization has not been verified — never falls back to the claimed responses.organizationId', async () => {
     const { POST } = await loadRoute();
+    m.getPilotVerifiedOrganizationId.mockReturnValueOnce(null);
     m.queueSelect([
       {
         id: 'app-1',
@@ -283,21 +287,8 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
       }),
       headers: { 'content-type': 'application/json' },
     }), { params: { id: 'app-1' } });
-    const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({
-      id: 'app-1',
-      fromState: 'proposal_ready',
-      targetState: 'contract_sent',
-      status: 'approved',
-      monetization: {
-        notes: expect.arrayContaining([
-          'No organizationId provided in pilot responses; monetization side effects were staged only.',
-        ]),
-      },
-    });
-    expect(mockDb.transaction).toHaveBeenCalled();
-    expect(mockDb.update).toHaveBeenCalled();
+    expect(response.status).toBe(409);
+    expect(mockDb.transaction).not.toHaveBeenCalled();
   });
 });

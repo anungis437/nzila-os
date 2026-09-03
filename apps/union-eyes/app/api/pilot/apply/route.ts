@@ -9,7 +9,7 @@ import { pilotApplications } from '@/db/schema';
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { hasMinRole } from '@/lib/api-auth-guard';
-import { rateLimit } from '@/lib/rate-limit';
+import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
@@ -80,8 +80,19 @@ const pilotApplicationBodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const rl = rateLimit(request, { maxRequests: 5, windowSeconds: 60 * 60 });
-  if (!rl.success) {
+  // Redis/Upstash-backed, fail-closed distributed limiter (PR #752 round
+  // 20) — the in-memory Map-based lib/rate-limit.ts helper used through
+  // round 19 is per-process (every instance/restart has independent state)
+  // and buckets by IP+User-Agent (trivially evaded by changing UA); this is
+  // the same primitive already used for other IP-scoped public/abuse-prone
+  // endpoints (see RATE_LIMITS_PER_IP), and fails CLOSED (rejects, not
+  // allows) when Redis itself is unavailable, since this route has no other
+  // abuse control.
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || 'unknown';
+  const rl = await checkRateLimit(ip, RATE_LIMITS_PER_IP.PILOT_APPLY);
+  if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Too many pilot applications submitted. Please try again later.' },
       { status: 429 },

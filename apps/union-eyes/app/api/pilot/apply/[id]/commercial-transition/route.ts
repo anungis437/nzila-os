@@ -11,7 +11,7 @@ import {
   subscriptionPlans,
 } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
-import { authorizePilotAccess, getPilotClaimedOrganizationId } from '@/lib/pilot/pilot-ownership';
+import { authorizePilotAccess, getPilotClaimedOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
   COMMERCIAL_STATE_ORDER,
@@ -131,6 +131,26 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       );
     }
 
+    // PR #752 round 20: `responses.organizationId` (the CLAIM) must never be
+    // used for billing — only the server-controlled `verifiedOrganizationId`
+    // column, set exclusively by POST .../verify-organization after an
+    // independent platform-tier confirmation (see bindPilotOrganization's
+    // doc comment in lib/pilot/pilot-ownership.ts). A platform reviewer
+    // approving this transition does NOT, by itself, confirm that the
+    // claimed organization is the real organization behind this
+    // application — that confirmation must happen explicitly and be
+    // persisted (who verified it, and when) before any financial record can
+    // be created from it.
+    const verifiedOrganizationId = getPilotVerifiedOrganizationId(application);
+    if (!verifiedOrganizationId) {
+      return NextResponse.json(
+        {
+          error: 'This pilot application\'s organization has not been verified. Call POST /api/pilot/apply/[id]/verify-organization before commercial transition.',
+        },
+        { status: 409 },
+      );
+    }
+
     const now = new Date();
     const nowIso = now.toISOString();
     const responses = { ...((application.responses ?? {}) as Record<string, unknown>) };
@@ -191,10 +211,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
     await withSystemContext(async () =>
       db.transaction(async (tx) => {
-      const organizationId =
-        typeof responses.organizationId === 'string' && responses.organizationId.trim().length > 0
-          ? responses.organizationId
-          : null;
+      // Verified above — never `responses.organizationId` (the claim).
+      const organizationId = verifiedOrganizationId;
 
       let billingAccountId: string | null = null;
 

@@ -127,6 +127,13 @@ vi.mock('@/lib/rate-limiter', () => ({
     PUBLIC: { requests: 500, window: 60 },
     SEARCH: { requests: 30, window: 60 },
   },
+  // Generic per-key proxy so any RATE_LIMITS_PER_IP.<NAME> (present or future)
+  // resolves to a usable config without this smoke test needing to enumerate
+  // every preset (PR #752 round 20 added PILOT_APPLY).
+  RATE_LIMITS_PER_IP: new Proxy(
+    {},
+    { get: (_target, prop) => ({ limit: 100, window: 3600, identifier: String(prop) }) },
+  ),
 }));
 
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({

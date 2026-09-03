@@ -4,6 +4,7 @@ import { join, relative, resolve } from 'node:path';
 import {
   scanRouteFileExports,
   isAllowlistedPublicExport,
+  hasAbuseControl,
   type PublicExportAllowlistEntry,
 } from '../lib/api-route-governance-scanner';
 
@@ -80,6 +81,37 @@ export const GET = async (request, context) => {
     expect(results.find((r) => r.method === 'GET')?.governed).toBe(true);
   });
 
+  it('NEGATIVE FIXTURE (round 20): a handler that ONLY calls rateLimit() before a sensitive operation is NOT governed — rate limiting is not authentication', () => {
+    const fixture = `
+import { rateLimit } from '@/lib/rate-limit';
+
+export async function POST(req) {
+  const rl = rateLimit(req, { maxRequests: 5, windowSeconds: 3600 });
+  if (!rl.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+  return sensitiveOperation();
+}
+`;
+    const results = scanRouteFileExports(fixture);
+    expect(results.find((r) => r.method === 'POST')?.governed).toBe(false);
+  });
+
+  it('NEGATIVE FIXTURE (round 20): checkRateLimit()/verifyTurnstileToken() alone also do not count as governance', () => {
+    const fixture = `
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { verifyTurnstileToken } from '@/lib/icra/turnstile';
+
+export async function POST(req) {
+  await checkRateLimit('k', { limit: 5, window: 3600, identifier: 'x' });
+  await verifyTurnstileToken(req);
+  return sensitiveOperation();
+}
+`;
+    const results = scanRouteFileExports(fixture);
+    expect(results.find((r) => r.method === 'POST')?.governed).toBe(false);
+  });
+
   it('every exported HTTP method under app/api/pilot/** is either per-export governed or explicitly public-allowlisted', () => {
     const files = walkRouteFiles(APP_API_PILOT_ROOT);
     expect(files.length).toBeGreaterThan(0);
@@ -102,5 +134,21 @@ export const GET = async (request, context) => {
   it('the public-export allowlist stays minimal — exactly one entry (the pilot intake POST)', () => {
     expect(PILOT_PUBLIC_EXPORT_ALLOWLIST).toHaveLength(1);
     expect(PILOT_PUBLIC_EXPORT_ALLOWLIST[0]).toEqual({ routePath: '/api/pilot/apply', method: 'POST' });
+  });
+
+  it('every allowlisted public export also carries an explicit abuse control (rate limit / anti-bot) — separate from, not substituting for, authentication', () => {
+    const files = walkRouteFiles(APP_API_PILOT_ROOT);
+    for (const entry of PILOT_PUBLIC_EXPORT_ALLOWLIST) {
+      const file = files.find((f) => routePathFromFile(f) === entry.routePath);
+      expect(file, `no route.ts found for allowlisted path ${entry.routePath}`).toBeDefined();
+      const content = readFileSync(file as string, 'utf8');
+      const results = scanRouteFileExports(content);
+      const result = results.find((r) => r.method === entry.method);
+      expect(result, `no ${entry.method} export found in ${entry.routePath}`).toBeDefined();
+      expect(
+        hasAbuseControl((result as { span: string }).span),
+        `${entry.routePath} ${entry.method} is publicly allowlisted but has no rate-limit/anti-bot control`,
+      ).toBe(true);
+    }
   });
 });

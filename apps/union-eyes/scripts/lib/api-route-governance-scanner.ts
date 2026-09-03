@@ -20,6 +20,18 @@
  * analysis — it tolerates auth checks appearing a few lines into a handler
  * body (e.g. `async (req) => { const user = await getCurrentUser(); ... }`)
  * while still catching a genuinely bare handler with zero auth reference.
+ *
+ * PR #752 round 20 correction: `rateLimit(`/`verifyTurnstileToken(` were
+ * REMOVED from AUTH_ESTABLISHING_IDENTIFIERS. Rate limiting and anti-bot
+ * challenges are abuse controls, not authentication or authorization — a
+ * route calling ONLY `rateLimit(req)` before an unguarded sensitive
+ * operation must still be classified UNGOVERNED. Whether a route is
+ * INTENTIONALLY public is now decided EXCLUSIVELY by the explicit
+ * path+method `PublicExportAllowlistEntry` allowlist (see
+ * `isAllowlistedPublicExport` below), never by the presence of an abuse-
+ * control call. `ABUSE_CONTROL_IDENTIFIERS` exists for a SEPARATE assertion
+ * ("every allowlisted public export also has a rate-limit/schema/Turnstile
+ * control"), not as an alternate route to "governed".
  */
 
 const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"] as const;
@@ -29,7 +41,9 @@ export type HttpMethod = (typeof HTTP_METHODS)[number];
  * Identifiers that establish (or delegate to something that establishes)
  * authentication/authorization for a route export. Intentionally broad —
  * this scanner's job is to catch a TRUE ABSENCE of any auth reference, not
- * to police which specific wrapper is used.
+ * to police which specific wrapper is used. Deliberately excludes rate-
+ * limiting and anti-bot identifiers (see ABUSE_CONTROL_IDENTIFIERS below) —
+ * neither authenticates nor authorizes a caller.
  */
 export const AUTH_ESTABLISHING_IDENTIFIERS = [
   "withApi(",
@@ -50,8 +64,19 @@ export const AUTH_ESTABLISHING_IDENTIFIERS = [
   "verifyCronAuth(",
   "verifyStripeSignature(",
   "verifyWebhookSignature(",
-  "verifyTurnstileToken(",
+] as const;
+
+/**
+ * Abuse-control identifiers: rate limiting and anti-bot challenges. These
+ * are NEVER sufficient on their own to classify an export as "governed" —
+ * they bound unauthenticated abuse, they do not authenticate or authorize.
+ * Used for a separate, additive assertion on allowlisted-public exports
+ * only (an intentionally public route SHOULD also have one of these).
+ */
+export const ABUSE_CONTROL_IDENTIFIERS = [
   "rateLimit(",
+  "checkRateLimit(",
+  "verifyTurnstileToken(",
 ] as const;
 
 export interface RouteExportGovernance {
@@ -131,4 +156,15 @@ export function isAllowlistedPublicExport(
   allowlist: readonly PublicExportAllowlistEntry[],
 ): boolean {
   return allowlist.some((entry) => entry.routePath === routePath && entry.method === method);
+}
+
+/**
+ * True if the given export's span references a rate-limit or anti-bot
+ * identifier. Intended for a SEPARATE assertion on allowlisted-public
+ * exports only ("this public route also has an abuse control") — never as
+ * an alternate path to "governed" (see ABUSE_CONTROL_IDENTIFIERS's own doc
+ * comment for why).
+ */
+export function hasAbuseControl(span: string): boolean {
+  return ABUSE_CONTROL_IDENTIFIERS.some((id) => span.includes(id));
 }

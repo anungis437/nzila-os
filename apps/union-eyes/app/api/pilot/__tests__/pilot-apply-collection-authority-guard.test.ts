@@ -27,14 +27,17 @@ const m = vi.hoisted(() => ({
   hasMinRole: vi.fn(),
   withSystemContext: vi.fn(),
   listHandler: vi.fn(),
-  rateLimit: vi.fn(),
+  checkRateLimit: vi.fn(),
   dbInsert: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: () => ({ GET: m.listHandler }) }));
-vi.mock('@/lib/rate-limit', () => ({ rateLimit: m.rateLimit }));
+vi.mock('@/lib/rate-limiter', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/rate-limiter')>();
+  return { ...actual, checkRateLimit: m.checkRateLimit };
+});
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() } }));
 vi.mock('@/lib/services/crm-service', () => ({ upsertContact: vi.fn(async () => null), createDeal: vi.fn(async () => undefined) }));
 vi.mock('@/db', () => ({
@@ -50,7 +53,7 @@ describe('pilot/apply collection route — runtime authorize-before-elevate (PR 
     vi.clearAllMocks();
     m.listHandler.mockResolvedValue(NextResponse.json({ items: [] }));
     m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => Promise<unknown>) => fn());
-    m.rateLimit.mockReturnValue({ success: true, remaining: 4, resetAt: Date.now() + 1000 });
+    m.checkRateLimit.mockResolvedValue({ allowed: true, current: 1, limit: 5, remaining: 4, resetIn: 3600 });
   });
 
   it('GET rejects an under-authorized caller WITHOUT ever elevating to the system connection', async () => {
@@ -79,7 +82,7 @@ describe('pilot/apply collection route — runtime authorize-before-elevate (PR 
 describe('pilot/apply collection route POST — public intake governance (PR #752 round 19)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.rateLimit.mockReturnValue({ success: true, remaining: 4, resetAt: Date.now() + 1000 });
+    m.checkRateLimit.mockResolvedValue({ allowed: true, current: 1, limit: 5, remaining: 4, resetIn: 3600 });
     m.dbInsert.mockReturnValue({
       values: vi.fn(() => ({
         returning: vi.fn(async () => [{ id: 'pilot-1' }]),
@@ -88,7 +91,7 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
   });
 
   it('returns 429 when the per-IP rate limit is exceeded, without touching the database', async () => {
-    m.rateLimit.mockReturnValue({ success: false, remaining: 0, resetAt: Date.now() + 1000 });
+    m.checkRateLimit.mockResolvedValue({ allowed: false, current: 6, limit: 5, remaining: 0, resetIn: 3600 });
     const { POST } = await loadRoute();
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply', {

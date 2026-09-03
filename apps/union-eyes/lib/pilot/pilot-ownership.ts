@@ -27,7 +27,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { pilotApplications } from '@/db/schema';
+import { pilotApplications, organizations } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
@@ -70,6 +70,76 @@ export function getPilotClaimedOrganizationId(
   const responses = (application?.responses ?? {}) as Record<string, unknown>;
   const raw = responses.organizationId;
   return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
+}
+
+/**
+ * Extract the VERIFIED owning organization id from a loaded pilot
+ * application (PR #752 round 20).
+ *
+ * Unlike `getPilotClaimedOrganizationId()`, this reads the server-controlled
+ * `verified_organization_id` COLUMN — null until an explicit platform-tier
+ * "verify organization" action (`bindPilotOrganization()` below) has
+ * independently confirmed the claim. This is the ONLY value that may be used
+ * for financial operations (billing account resolution, contract/invoice/
+ * subscription creation) or any future RLS policy — never the client-
+ * supplied claim.
+ */
+export function getPilotVerifiedOrganizationId(
+  application: { verifiedOrganizationId?: string | null } | null | undefined,
+): string | null {
+  const raw = application?.verifiedOrganizationId;
+  return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
+}
+
+export type BindPilotOrganizationResult =
+  | { ok: true; organizationId: string }
+  | { ok: false; status: 404 | 409; error: string };
+
+/**
+ * Platform-only binding of a pilot application to a verified organization
+ * (PR #752 round 20). This is the ONLY function that may write
+ * `verified_organization_id`/`verified_by`/`verified_at` — callers must
+ * already have confirmed platform-tier authority (`hasMinRole('system_admin')`)
+ * before calling this; it does not itself perform that check.
+ *
+ * Fails closed if the target organization does not exist (a claimed id that
+ * was never a real organization must never become "verified"). Runs under
+ * `withSystemContext()`: both the existence check and the write need to
+ * operate cross-org, independent of any RLS policy on either table.
+ */
+export async function bindPilotOrganization(params: {
+  pilotId: string;
+  organizationId: string;
+  verifiedBy: string;
+}): Promise<BindPilotOrganizationResult> {
+  const { pilotId, organizationId, verifiedBy } = params;
+
+  return withSystemContext(async (_tx) => {
+    const [org] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.id, organizationId));
+
+    if (!org) {
+      return { ok: false, status: 404, error: 'Organization not found' };
+    }
+
+    const [updated] = await db
+      .update(pilotApplications)
+      .set({
+        verifiedOrganizationId: organizationId,
+        verifiedBy,
+        verifiedAt: new Date(),
+      })
+      .where(eq(pilotApplications.id, pilotId))
+      .returning({ id: pilotApplications.id });
+
+    if (!updated) {
+      return { ok: false, status: 409, error: 'Pilot application not found' };
+    }
+
+    return { ok: true, organizationId };
+  });
 }
 
 /**

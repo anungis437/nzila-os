@@ -587,6 +587,19 @@ class PilotApplications(BaseModel):
     readiness_score = models.DecimalField(
         max_digits=19, decimal_places=2, null=True, blank=True
     )
+    # Server-controlled identity binding (PR #752 round 20). Never set from
+    # the public intake POST — only an explicit platform-tier "verify
+    # organization" action may populate these. responses['organizationId']
+    # remains an unauthenticated client CLAIM only.
+    verified_organization = models.ForeignKey(
+        "auth_core.Organizations",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="verified_pilot_applications",
+    )
+    verified_by = models.TextField(null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "pilot_applications"

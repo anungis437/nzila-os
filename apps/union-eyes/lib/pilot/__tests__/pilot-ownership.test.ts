@@ -19,9 +19,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 /* ── hoisted mocks ──────────────────────────────────────────────────── */
 
-const { mockGetCurrentUser, mockDbSelect } = vi.hoisted(() => ({
+const { mockGetCurrentUser, mockDbSelect, mockDbUpdate } = vi.hoisted(() => ({
   mockGetCurrentUser: vi.fn(),
   mockDbSelect: vi.fn(),
+  mockDbUpdate: vi.fn(),
 }));
 
 // Keep the real api-auth-guard (real ROLE_HIERARCHY + normalizeRole) and only
@@ -45,8 +46,8 @@ vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   };
 });
 
-vi.mock('@/db', () => ({ db: { select: mockDbSelect } }));
-vi.mock('@/db/db', () => ({ db: { select: mockDbSelect } }));
+vi.mock('@/db', () => ({ db: { select: mockDbSelect, update: mockDbUpdate } }));
+vi.mock('@/db/db', () => ({ db: { select: mockDbSelect, update: mockDbUpdate } }));
 
 // withSystemContext is ALS-routing plumbing (PR #752 rounds 16-18) — the
 // mocked `db` above already stands in for both the tenant and system
@@ -64,6 +65,8 @@ vi.mock('@/lib/logger', () => ({
 import {
   authorizePilotAccess,
   getPilotClaimedOrganizationId,
+  getPilotVerifiedOrganizationId,
+  bindPilotOrganization,
   enforcePilotOwnership,
   withPilotOwnership,
   PILOT_PLATFORM_ACCESS_MIN_LEVEL,
@@ -89,6 +92,17 @@ const pilotNoOwner = { responses: {} };
 function dbReturns(rows: unknown[]) {
   mockDbSelect.mockImplementation(() => ({
     from: () => ({ where: () => Promise.resolve(rows) }),
+  }));
+}
+
+/** Configure db.update().set().where().returning() to resolve to the given rows. */
+function dbUpdateReturns(rows: unknown[]) {
+  mockDbUpdate.mockImplementation(() => ({
+    set: () => ({
+      where: () => ({
+        returning: () => Promise.resolve(rows),
+      }),
+    }),
   }));
 }
 
@@ -251,6 +265,67 @@ describe('pilot-ownership', () => {
       expect(res.status).toBe(400);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(mockDbSelect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPilotVerifiedOrganizationId (PR #752 round 20)', () => {
+    it('reads verifiedOrganizationId when present', () => {
+      expect(getPilotVerifiedOrganizationId({ verifiedOrganizationId: ORG_A })).toBe(ORG_A);
+    });
+
+    it('returns null when verifiedOrganizationId is missing, empty, or non-string (fail closed)', () => {
+      expect(getPilotVerifiedOrganizationId({ verifiedOrganizationId: null })).toBeNull();
+      expect(getPilotVerifiedOrganizationId({ verifiedOrganizationId: '' })).toBeNull();
+      expect(getPilotVerifiedOrganizationId({})).toBeNull();
+      expect(getPilotVerifiedOrganizationId(null)).toBeNull();
+    });
+
+    it('is independent of the claimed organization — a claim never satisfies verification', () => {
+      const application = { responses: { organizationId: ORG_A }, verifiedOrganizationId: null };
+      expect(getPilotClaimedOrganizationId(application)).toBe(ORG_A);
+      expect(getPilotVerifiedOrganizationId(application)).toBeNull();
+    });
+  });
+
+  describe('bindPilotOrganization (PR #752 round 20)', () => {
+    it('binds the pilot to the target organization when it exists', async () => {
+      dbReturns([{ id: ORG_B }]);
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await bindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+      });
+
+      expect(result).toEqual({ ok: true, organizationId: ORG_B });
+    });
+
+    it('fails closed (404) when the target organization does not exist — a claim that was never real can never become verified', async () => {
+      dbReturns([]);
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await bindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: 'org-does-not-exist',
+        verifiedBy: 'u-sysadmin',
+      });
+
+      expect(result).toEqual({ ok: false, status: 404, error: 'Organization not found' });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('fails closed (409) when the pilot application does not exist', async () => {
+      dbReturns([{ id: ORG_B }]);
+      dbUpdateReturns([]);
+
+      const result = await bindPilotOrganization({
+        pilotId: 'pilot-missing',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+      });
+
+      expect(result).toEqual({ ok: false, status: 409, error: 'Pilot application not found' });
     });
   });
 });

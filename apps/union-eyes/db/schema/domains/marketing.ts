@@ -199,10 +199,20 @@ export const pilotApplications = pgTable(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     responses: jsonb('responses').notNull().default({}).$type<Record<string, any>>(),
     notes: text('notes'),
+    // Server-controlled identity binding (PR #752 round 20). `responses.organizationId`
+    // is an unauthenticated client CLAIM only — never trusted for RLS, ownership,
+    // or billing. This column is null until an explicit platform-tier "verify
+    // organization" action (see lib/pilot/pilot-ownership.ts's bindPilotOrganization)
+    // independently confirms the claim; only THEN may commercial-transition or any
+    // future RLS policy use it.
+    verifiedOrganizationId: uuid('verified_organization_id').references(() => organizations.id, { onDelete: 'set null' }),
+    verifiedBy: text('verified_by'),
+    verifiedAt: timestamp('verified_at'),
   },
   (table) => ({
     statusIdx: index('pilot_applications_status_idx').on(table.status),
     submittedIdx: index('pilot_applications_submitted_idx').on(table.submittedAt),
+    verifiedOrgIdx: index('pilot_applications_verified_org_idx').on(table.verifiedOrganizationId),
   })
 );
 
