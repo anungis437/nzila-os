@@ -27,7 +27,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { pilotApplications, organizations } from '@/db/schema';
+import { commercialContracts, pilotApplications, organizations } from '@/db/schema';
+import { buildPilotContractNumber } from '@/lib/pilot/commercialization-wave1';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
@@ -97,15 +98,26 @@ export type BindPilotOrganizationResult =
 
 /**
  * Platform-only binding of a pilot application to a verified organization
- * (PR #752 round 20). This is the ONLY function that may write
- * `verified_organization_id`/`verified_by`/`verified_at` — callers must
- * already have confirmed platform-tier authority (`hasMinRole('system_admin')`)
- * before calling this; it does not itself perform that check.
+ * (PR #752 round 20; made immutable-by-default in round 21). This is the
+ * ONLY function that may write `verified_organization_id`/`verified_by`/
+ * `verified_at` — callers must already have confirmed platform-tier
+ * authority (`hasMinRole('system_admin')`) before calling this; it does not
+ * itself perform that check.
  *
  * Fails closed if the target organization does not exist (a claimed id that
  * was never a real organization must never become "verified"). Runs under
  * `withSystemContext()`: both the existence check and the write need to
  * operate cross-org, independent of any RLS policy on either table.
+ *
+ * Immutability (round 21): a pilot application's verified organization is a
+ * financial-identity fact, not a freely-editable field. Once bound:
+ *   - Re-binding to the SAME organization is a no-op success (idempotent —
+ *     a platform admin re-running the same verify call, e.g. after a
+ *     timeout, must not error or re-stamp verifiedAt for no reason).
+ *   - Re-binding to a DIFFERENT organization is rejected with 409. Changing
+ *     which organization a pilot's billing/contracts belong to is a
+ *     deliberate correction, not an ordinary verification step — see
+ *     `rebindPilotOrganization()` below.
  */
 export async function bindPilotOrganization(params: {
   pilotId: string;
@@ -124,6 +136,28 @@ export async function bindPilotOrganization(params: {
       return { ok: false, status: 404, error: 'Organization not found' };
     }
 
+    const [pilot] = await db
+      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .from(pilotApplications)
+      .where(eq(pilotApplications.id, pilotId));
+
+    if (!pilot) {
+      return { ok: false, status: 409, error: 'Pilot application not found' };
+    }
+
+    if (pilot.verifiedOrganizationId) {
+      if (pilot.verifiedOrganizationId === organizationId) {
+        return { ok: true, organizationId };
+      }
+      return {
+        ok: false,
+        status: 409,
+        error:
+          'This pilot application is already bound to a different verified organization. ' +
+          'Use the platform rebind-organization correction flow to change it.',
+      };
+    }
+
     const [updated] = await db
       .update(pilotApplications)
       .set({
@@ -139,6 +173,128 @@ export async function bindPilotOrganization(params: {
     }
 
     return { ok: true, organizationId };
+  });
+}
+
+export type RebindPilotOrganizationResult =
+  | { ok: true; organizationId: string; previousOrganizationId: string }
+  | { ok: false; status: 404 | 409; error: string };
+
+/**
+ * Platform-only CORRECTION of an already-bound pilot application's verified
+ * organization (PR #752 round 21). Deliberately separate from
+ * `bindPilotOrganization()` — that function is the ordinary, immutable
+ * verification step and now refuses to change an existing binding; this
+ * function exists specifically for the rare, audited case where an initial
+ * verification was wrong and must be corrected.
+ *
+ * Guardrails:
+ *   - Requires a non-empty `reason` (audit evidence for why the binding is
+ *     being changed) — enforced by the caller's zod schema; this function
+ *     also fails closed if `reason` is blank, in case a future caller skips
+ *     that validation.
+ *   - Fails closed (404) if the target organization does not exist.
+ *   - Fails closed (409) if the pilot is not yet bound at all — a rebind
+ *     presupposes an existing binding; use `bindPilotOrganization()` first.
+ *   - Fails closed (409) if `commercialContracts` already contains a row for
+ *     this pilot (keyed by the same deterministic `buildPilotContractNumber`
+ *     used by commercial-transition) UNLESS the caller explicitly passes
+ *     `acknowledgeFinancialArtifacts: true`. Rebinding after real financial
+ *     records exist would silently misattribute them to the new
+ *     organization; this function does NOT migrate those rows — the
+ *     acknowledgement is a deliberate opt-in that the caller has a separate
+ *     plan for reconciling them, not an automatic migration.
+ *   - Logs a warning with the full before/after/reason/actor for audit
+ *     trail purposes — this operation is rare and high-consequence by
+ *     design and must be traceable outside of just the DB row's own
+ *     `verifiedBy`/`verifiedAt` (which get overwritten by the correction).
+ */
+export async function rebindPilotOrganization(params: {
+  pilotId: string;
+  organizationId: string;
+  verifiedBy: string;
+  reason: string;
+  acknowledgeFinancialArtifacts?: boolean;
+}): Promise<RebindPilotOrganizationResult> {
+  const { pilotId, organizationId, verifiedBy, acknowledgeFinancialArtifacts = false } = params;
+  const reason = params.reason?.trim() ?? '';
+
+  if (!reason) {
+    return { ok: false, status: 409, error: 'A non-empty reason is required to rebind a pilot application\'s verified organization.' };
+  }
+
+  return withSystemContext(async (_tx) => {
+    const [org] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.id, organizationId));
+
+    if (!org) {
+      return { ok: false, status: 404, error: 'Organization not found' };
+    }
+
+    const [pilot] = await db
+      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .from(pilotApplications)
+      .where(eq(pilotApplications.id, pilotId));
+
+    if (!pilot) {
+      return { ok: false, status: 409, error: 'Pilot application not found' };
+    }
+
+    if (!pilot.verifiedOrganizationId) {
+      return {
+        ok: false,
+        status: 409,
+        error: 'This pilot application is not yet bound to any organization; use bindPilotOrganization (verify-organization) instead of rebind.',
+      };
+    }
+
+    const previousOrganizationId = pilot.verifiedOrganizationId;
+
+    if (previousOrganizationId === organizationId) {
+      return { ok: true, organizationId, previousOrganizationId };
+    }
+
+    const contractNumber = buildPilotContractNumber(pilotId);
+    const [existingContract] = await db
+      .select({ id: commercialContracts.id })
+      .from(commercialContracts)
+      .where(eq(commercialContracts.contractNumber, contractNumber));
+
+    if (existingContract && !acknowledgeFinancialArtifacts) {
+      return {
+        ok: false,
+        status: 409,
+        error:
+          'This pilot already has financial artifacts (a commercial contract) under its current ' +
+          'verified organization. Rebinding would misattribute existing commercial records. Pass ' +
+          'acknowledgeFinancialArtifacts=true with an explicit reason to proceed — this does NOT ' +
+          'migrate the existing contract, invoice, or subscription rows, which still reference the ' +
+          'previous organization and must be corrected separately.',
+      };
+    }
+
+    await db
+      .update(pilotApplications)
+      .set({
+        verifiedOrganizationId: organizationId,
+        verifiedBy,
+        verifiedAt: new Date(),
+      })
+      .where(eq(pilotApplications.id, pilotId));
+
+    logger.warn('pilot application verified-organization rebind (correction)', {
+      pilotId,
+      previousOrganizationId,
+      organizationId,
+      verifiedBy,
+      reason,
+      hadFinancialArtifacts: Boolean(existingContract),
+      acknowledgeFinancialArtifacts,
+    });
+
+    return { ok: true, organizationId, previousOrganizationId };
   });
 }
 

@@ -146,6 +146,31 @@ export function enforceCreateSecurityInvariants(
   return finalValues;
 }
 
+/**
+ * Strips PK, org-scope, and `blockedPatchFields` keys from a raw PATCH body
+ * before it reaches `.set(...)`. Exported for direct unit testing of this
+ * invariant in isolation (PR #752 round 21) — a route that forgets to list
+ * a server-controlled column in `blockedPatchFields` is a silent bypass of
+ * whatever platform-only flow was supposed to be the only writer of that
+ * column (e.g. `verifiedOrganizationId`, FSM-governed `status`).
+ */
+export function stripBlockedPatchFields(
+  body: unknown,
+  guard: { pk: string; orgScoped: boolean; blockedPatchFields: string[] },
+): Record<string, unknown> {
+  const updates: Record<string, unknown> =
+    body && typeof body === 'object' && !Array.isArray(body)
+      ? { ...(body as Record<string, unknown>) }
+      : {};
+
+  delete updates[guard.pk];
+  if (guard.orgScoped) delete updates.organizationId;
+  for (const f of guard.blockedPatchFields) {
+    delete updates[f];
+  }
+  return updates;
+}
+
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
 export function crudRoutes(opts: CrudOptions & { itemRoute?: false | undefined }): CollectionHandlers;
 export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers {
@@ -337,24 +362,12 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       },
       async ({ body, params, organizationId }) => {
         const id = params[paramName];
-        const updates: Record<string, unknown> =
-          body && typeof body === 'object' && !Array.isArray(body)
-            ? { ...(body as Record<string, unknown>) }
-            : {};
+        const updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
 
         // Auto-set updatedAt if column exists
         const updatedAtCol = getColumn(table, 'updatedAt');
         if (updatedAtCol) {
           updates.updatedAt = new Date();
-        }
-
-        // Never allow PK or orgId to be overwritten via PATCH
-        delete updates[pk];
-        if (orgScoped) delete updates.organizationId;
-
-        // Strip FSM-governed and other explicitly blocked fields
-        for (const f of blockedPatchFields) {
-          delete updates[f];
         }
 
         const conditions: SQL[] = [eq(pkCol, id)];

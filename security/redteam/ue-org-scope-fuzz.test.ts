@@ -317,6 +317,19 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
   // verifies responses.organizationId before mutation/export/transition.
   // This is a HARD fail — unlike the trend-based ORG-003 threshold — because
   // the ownership invariant is fully implemented and must not regress.
+  //
+  // PR #752 round 21 correction: this ratchet originally required EVERY
+  // route under pilot/apply/[id]/** to carry a same-org OWNERSHIP marker.
+  // That model doesn't fit platform CONTROL-PLANE routes such as
+  // .../verify-organization and .../rebind-organization — those are
+  // deliberately NOT same-org self-service (a submitter's own claim can
+  // never verify itself); they must instead prove a canonical platform-admin
+  // guard (hasMinRole('system_admin') / PILOT_PLATFORM_ACCESS_MIN_LEVEL)
+  // BEFORE the privileged binding operation. Requiring an ownership marker
+  // on these routes would be backwards — it would suggest same-org actors
+  // should be able to reach them. The stale `getPilotOwnerOrganizationId`
+  // marker (renamed to `getPilotClaimedOrganizationId` in round 19) is also
+  // corrected here.
   // ──────────────────────────────────────────────────────────────────────────
   it('RED-TEAM-ORG-011: every id-scoped pilot route enforces ownership-before-action', () => {
     const PILOT_ITEM_DIR = join(UE_API_DIR, 'pilot', 'apply', '[id]')
@@ -331,14 +344,39 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
       'Expected at least one route.ts under pilot/apply/[id]',
     ).toBeGreaterThan(0)
 
-    // The route must reference the Phase 2 ownership helper (either the direct
-    // guard, the decision core, the factory wrapper, or the owner extractor).
+    // Ordinary tenant pilot routes must prove SAME-ORG ownership before
+    // acting on a pilot application (the direct guard, the decision core,
+    // the factory wrapper, or the claimed-organization extractor).
     const OWNERSHIP_MARKER =
-      /enforcePilotOwnership|authorizePilotAccess|withPilotOwnership|getPilotOwnerOrganizationId/
+      /enforcePilotOwnership|authorizePilotAccess|withPilotOwnership|getPilotClaimedOrganizationId/
+
+    // Platform control-plane routes are explicitly NOT same-org self-service
+    // — they must instead prove a canonical platform-admin guard before the
+    // privileged operation (binding/rebinding verified organization).
+    const PLATFORM_ADMIN_GUARD_MARKER =
+      /hasMinRole\(\s*['"]system_admin['"]\s*\)|PILOT_PLATFORM_ACCESS_MIN_LEVEL/
+
+    // Explicit allowlist, not a name-pattern guess — adding a new
+    // control-plane route here is a deliberate, reviewable decision.
+    const PLATFORM_CONTROL_PLANE_PILOT_ROUTES = new Set([
+      'verify-organization/route.ts',
+      'rebind-organization/route.ts',
+    ])
 
     const unguarded: string[] = []
     for (const route of pilotItemRoutes) {
       const content = readFileSync(route, 'utf-8')
+      const relFromItemDir = route.replace(PILOT_ITEM_DIR, '').replace(/^[/\\]/, '').replace(/\\/g, '/')
+
+      if (PLATFORM_CONTROL_PLANE_PILOT_ROUTES.has(relFromItemDir)) {
+        if (!PLATFORM_ADMIN_GUARD_MARKER.test(content)) {
+          unguarded.push(
+            `${route.replace(ROOT, '').replace(/^[/\\]/, '')} (platform control-plane route missing a canonical platform-admin guard)`,
+          )
+        }
+        continue
+      }
+
       if (!OWNERSHIP_MARKER.test(content)) {
         unguarded.push(route.replace(ROOT, '').replace(/^[/\\]/, ''))
       }
@@ -346,8 +384,9 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
 
     expect(
       unguarded,
-      `These id-scoped pilot routes do NOT enforce org ownership before acting ` +
-        `on a pilot application (cross-org mutation/export/billing risk):\n` +
+      `These id-scoped pilot routes do NOT enforce org ownership (or, for platform ` +
+        `control-plane routes, a platform-admin guard) before acting on a pilot ` +
+        `application (cross-org mutation/export/billing risk):\n` +
         unguarded.map((f) => `  - ${f}`).join('\n'),
     ).toEqual([])
   })

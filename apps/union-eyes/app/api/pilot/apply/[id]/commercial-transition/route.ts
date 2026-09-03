@@ -14,6 +14,7 @@ import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { authorizePilotAccess, getPilotClaimedOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
+  buildPilotContractNumber,
   COMMERCIAL_STATE_ORDER,
   buildProposalPackage,
   inferPilotStatusFromCommercialState,
@@ -58,10 +59,6 @@ function addDays(date: Date, days: number): Date {
   const copy = new Date(date);
   copy.setDate(copy.getDate() + days);
   return copy;
-}
-
-function buildContractNumber(applicationId: string): string {
-  return `PILOT-${applicationId.slice(0, 8).toUpperCase()}`;
 }
 
 function buildInvoiceNumber(applicationId: string): string {
@@ -231,7 +228,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         monetization.notes.push('No organizationId provided in pilot responses; monetization side effects were staged only.');
       }
 
-      const contractNumber = buildContractNumber(application.id);
+      const contractNumber = buildPilotContractNumber(application.id);
       const pilotAmount = parsePriceBandLowerBound(proposal.economicsTier.targetPriceRange);
 
       if (targetState === 'contract_sent' && organizationId && billingAccountId) {

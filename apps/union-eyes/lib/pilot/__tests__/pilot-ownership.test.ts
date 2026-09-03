@@ -67,6 +67,7 @@ import {
   getPilotClaimedOrganizationId,
   getPilotVerifiedOrganizationId,
   bindPilotOrganization,
+  rebindPilotOrganization,
   enforcePilotOwnership,
   withPilotOwnership,
   PILOT_PLATFORM_ACCESS_MIN_LEVEL,
@@ -95,15 +96,38 @@ function dbReturns(rows: unknown[]) {
   }));
 }
 
-/** Configure db.update().set().where().returning() to resolve to the given rows. */
+/**
+ * Configure db.update().set().where() to resolve to the given rows, whether
+ * or not the call chain ends with `.returning()`. `bindPilotOrganization`'s
+ * write uses `.returning()`; `rebindPilotOrganization`'s write does not
+ * (round 21) — both need to resolve correctly against the same mock.
+ */
 function dbUpdateReturns(rows: unknown[]) {
   mockDbUpdate.mockImplementation(() => ({
     set: () => ({
-      where: () => ({
-        returning: () => Promise.resolve(rows),
-      }),
+      where: () => {
+        const result = Promise.resolve(rows);
+        (result as unknown as { returning: () => Promise<unknown[]> }).returning = () => Promise.resolve(rows);
+        return result;
+      },
     }),
   }));
+}
+
+/**
+ * Queue up a sequence of one-time `db.select()` results consumed in call
+ * order (PR #752 round 21). `bindPilotOrganization`/`rebindPilotOrganization`
+ * now issue MULTIPLE selects per invocation (organization existence, pilot
+ * lookup, and — for rebind — an existing-financial-artifact check), so a
+ * single shared `dbReturns(...)` implementation is no longer precise enough
+ * to distinguish them.
+ */
+function dbSelectSequence(...rowsList: unknown[][]) {
+  for (const rows of rowsList) {
+    mockDbSelect.mockImplementationOnce(() => ({
+      from: () => ({ where: () => Promise.resolve(rows) }),
+    }));
+  }
 }
 
 function makeNextContext(id?: string) {
@@ -287,9 +311,9 @@ describe('pilot-ownership', () => {
     });
   });
 
-  describe('bindPilotOrganization (PR #752 round 20)', () => {
-    it('binds the pilot to the target organization when it exists', async () => {
-      dbReturns([{ id: ORG_B }]);
+  describe('bindPilotOrganization (PR #752 round 20/21)', () => {
+    it('binds the pilot to the target organization when unbound and it exists', async () => {
+      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
       dbUpdateReturns([{ id: 'pilot-1' }]);
 
       const result = await bindPilotOrganization({
@@ -299,10 +323,11 @@ describe('pilot-ownership', () => {
       });
 
       expect(result).toEqual({ ok: true, organizationId: ORG_B });
+      expect(mockDbUpdate).toHaveBeenCalledTimes(1);
     });
 
     it('fails closed (404) when the target organization does not exist — a claim that was never real can never become verified', async () => {
-      dbReturns([]);
+      dbSelectSequence([]);
       dbUpdateReturns([{ id: 'pilot-1' }]);
 
       const result = await bindPilotOrganization({
@@ -316,7 +341,7 @@ describe('pilot-ownership', () => {
     });
 
     it('fails closed (409) when the pilot application does not exist', async () => {
-      dbReturns([{ id: ORG_B }]);
+      dbSelectSequence([{ id: ORG_B }], []);
       dbUpdateReturns([]);
 
       const result = await bindPilotOrganization({
@@ -326,6 +351,165 @@ describe('pilot-ownership', () => {
       });
 
       expect(result).toEqual({ ok: false, status: 409, error: 'Pilot application not found' });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('round 21: re-binding to the SAME organization is idempotent — succeeds without writing again', async () => {
+      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: ORG_B }]);
+
+      const result = await bindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin-2',
+      });
+
+      expect(result).toEqual({ ok: true, organizationId: ORG_B });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('round 21: re-binding to a DIFFERENT organization is rejected with 409 — verification is immutable, not a freely-editable field', async () => {
+      dbSelectSequence([{ id: ORG_A }], [{ verifiedOrganizationId: ORG_B }]);
+
+      const result = await bindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_A,
+        verifiedBy: 'u-sysadmin',
+      });
+
+      expect(result.ok).toBe(false);
+      expect((result as { status: number }).status).toBe(409);
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('rebindPilotOrganization (PR #752 round 21) — audited correction flow', () => {
+    it('rejects with 409 when reason is blank (fails closed even if the caller skips zod validation)', async () => {
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: '   ',
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        status: 409,
+        error: "A non-empty reason is required to rebind a pilot application's verified organization.",
+      });
+      expect(mockDbSelect).not.toHaveBeenCalled();
+    });
+
+    it('fails closed (404) when the target organization does not exist', async () => {
+      dbSelectSequence([]);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: 'org-does-not-exist',
+        verifiedBy: 'u-sysadmin',
+        reason: 'Correcting a misfiled claim after manual verification.',
+      });
+
+      expect(result).toEqual({ ok: false, status: 404, error: 'Organization not found' });
+    });
+
+    it('fails closed (409) when the pilot application does not exist', async () => {
+      dbSelectSequence([{ id: ORG_B }], []);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-missing',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Correcting a misfiled claim after manual verification.',
+      });
+
+      expect(result).toEqual({ ok: false, status: 409, error: 'Pilot application not found' });
+    });
+
+    it('fails closed (409) when the pilot is not yet bound — rebind presupposes an existing binding', async () => {
+      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: null }]);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Correcting a misfiled claim after manual verification.',
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        status: 409,
+        error:
+          'This pilot application is not yet bound to any organization; use bindPilotOrganization (verify-organization) instead of rebind.',
+      });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('is idempotent when the target organization matches the current binding', async () => {
+      dbSelectSequence([{ id: ORG_A }], [{ verifiedOrganizationId: ORG_A }]);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_A,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Re-confirming the existing binding.',
+      });
+
+      expect(result).toEqual({ ok: true, organizationId: ORG_A, previousOrganizationId: ORG_A });
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('blocks the rebind with 409 when a financial artifact already exists and acknowledgeFinancialArtifacts is not set', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [{ id: 'contract-1' }],
+      );
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B.',
+      });
+
+      expect(result.ok).toBe(false);
+      expect((result as { status: number }).status).toBe(409);
+      expect((result as { error: string }).error).toMatch(/financial artifacts/i);
+      expect(mockDbUpdate).not.toHaveBeenCalled();
+    });
+
+    it('proceeds when a financial artifact exists AND acknowledgeFinancialArtifacts is explicitly true', async () => {
+      dbSelectSequence(
+        [{ id: ORG_B }],
+        [{ verifiedOrganizationId: ORG_A }],
+        [{ id: 'contract-1' }],
+      );
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B. Financial rows will be corrected manually.',
+        acknowledgeFinancialArtifacts: true,
+      });
+
+      expect(result).toEqual({ ok: true, organizationId: ORG_B, previousOrganizationId: ORG_A });
+      expect(mockDbUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    it('proceeds without needing acknowledgeFinancialArtifacts when no financial artifact exists yet', async () => {
+      dbSelectSequence([{ id: ORG_B }], [{ verifiedOrganizationId: ORG_A }], []);
+      dbUpdateReturns([{ id: 'pilot-1' }]);
+
+      const result = await rebindPilotOrganization({
+        pilotId: 'pilot-1',
+        organizationId: ORG_B,
+        verifiedBy: 'u-sysadmin',
+        reason: 'Org A was a data-entry mistake; the real org is Org B.',
+      });
+
+      expect(result).toEqual({ ok: true, organizationId: ORG_B, previousOrganizationId: ORG_A });
     });
   });
 });

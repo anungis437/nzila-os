@@ -20,6 +20,21 @@ const handlers = crudRoutes({
   itemRoute: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // PR #752 round 21: verifiedOrganizationId/verifiedBy/verifiedAt are
+  // server-controlled — the ONLY legitimate writer is bindPilotOrganization()
+  // via POST .../verify-organization or .../rebind-organization (both
+  // system_admin+). A same-org steward's generic PATCH must never be able to
+  // set, clear, or alter them. status/reviewedAt/approvedAt are likewise
+  // FSM-governed exclusively by commercial-transition (system_admin+) — not
+  // arbitrary steward-editable fields.
+  blockedPatchFields: [
+    'verifiedOrganizationId',
+    'verifiedBy',
+    'verifiedAt',
+    'status',
+    'reviewedAt',
+    'approvedAt',
+  ],
 });
 
 export const GET = withPilotOwnership(handlers.GET, { minRole: 'steward' });

@@ -585,6 +585,19 @@ export function inferPilotStatusFromCommercialState(state: CommercialState): Com
   return 'completed';
 }
 
+/**
+ * Deterministic contract-number key for a pilot application (PR #752 round
+ * 21). Shared between commercial-transition (which creates the
+ * `commercialContracts` row under this number) and pilot-ownership's
+ * rebind-organization correction flow (which checks for this row's
+ * existence to decide whether a rebind would misattribute real financial
+ * artifacts). Keep these two call sites using the SAME function rather than
+ * two independently-maintained string templates.
+ */
+export function buildPilotContractNumber(pilotApplicationId: string): string {
+  return `PILOT-${pilotApplicationId.slice(0, 8).toUpperCase()}`;
+}
+
 export function getQualification(readinessScore: number | null, memberCount: number): 'qualified' | 'review-required' | 'defer' {
   if (readinessScore === null) return 'review-required';
   if (readinessScore >= 75 && memberCount <= 500) return 'qualified';
