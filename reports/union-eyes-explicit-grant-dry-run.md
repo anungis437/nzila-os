@@ -1,6 +1,6 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-03T21:35:48.883Z
+Generated: 2026-09-03T21:50:04.627Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
@@ -15,7 +15,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
 | tenant (union_eyes_runtime) | 149 | 131 | 94 | 76 |
-| system (union_eyes_system) | 23 | 11 | 10 | 0 |
+| system (union_eyes_system) | 23 | 11 | 9 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
 
@@ -323,7 +323,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | reconciliation_exceptions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | reconciliation_matches | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | reconciliation_runs | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
-| remittance_approvals | SYSTEM_ONLY | NONE | SELECT, UPDATE |
+| remittance_approvals | SYSTEM_ONLY | NONE | SELECT |
 | remittance_exceptions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | remittance_line_items | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | report_delivery_history | LATENT_UNREACHABLE | NONE | NONE |

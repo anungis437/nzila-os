@@ -47,6 +47,23 @@
  *      remittance_approvals is app/[locale]/dashboard/clc/staff/page.tsx,
  *      a national CLC dashboard reading via withSystemContext() with no
  *      per-caller organization filter — never an ordinary tenant path.
+ *
+ * ROUND 34 CORRECTION (2026-09-04, second independent review pass):
+ * independent review found the original realImporterFiles() scanned only
+ * 4 hard-coded directories (app, lib, actions, services), making its
+ * "ZERO real callers anywhere" wording stronger than its mechanical proof
+ * — a real caller under components/, scripts/, workers/, or any future
+ * production directory would have been invisible to it. Replaced with a
+ * git-grep-based scan across every tracked *.ts/*.tsx file (git grep run
+ * from this app's root directory is naturally scoped to that
+ * subdirectory, matching every production file git actually tracks, not
+ * a hand-maintained directory allow-list). Also added explicit
+ * zero-direct-call assertions for submitForApproval/approveRemittance/
+ * rejectRemittance individually (previously only checked as a combined
+ * regex group), and a structural (not just substring) proof that the CLC
+ * dashboard's remittanceApprovals SELECT is nested inside its
+ * withSystemContext() call, not merely present somewhere in the same
+ * file.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -55,17 +72,24 @@ import { describe, expect, it } from 'vitest';
 
 const APP_ROOT = resolve(__dirname, '..', '..');
 
+/**
+ * Scans every file `git` tracks under APP_ROOT (git grep run from a
+ * subdirectory is scoped to that subdirectory) for a pattern, restricted
+ * to *.ts/*.tsx — not a hand-maintained list of "production" directories,
+ * so a real caller under components/, scripts/, workers/, or any future
+ * directory is not invisible to this check.
+ */
 function realImporterFiles(moduleSpecifierFragment: string, definingFileRelativePath: string): string[] {
   let out = '';
   try {
     out = execFileSync(
-      'grep',
-      ['-rl', '-E', moduleSpecifierFragment, 'app', 'lib', 'actions', 'services'],
+      'git',
+      ['grep', '-l', '-E', moduleSpecifierFragment, '--', '*.ts', '*.tsx'],
       { cwd: APP_ROOT, encoding: 'utf8' },
     );
   } catch (err: unknown) {
-    // grep exits 1 when there are no matches at all — that's a valid "zero
-    // importers" result.
+    // git grep exits 1 when there are no matches at all — that's a valid
+    // "zero importers" result.
     const execErr = err as { status?: number; stdout?: string };
     if (execErr.status === 1) return [];
     out = execErr.stdout ?? '';
@@ -75,6 +99,10 @@ function realImporterFiles(moduleSpecifierFragment: string, definingFileRelative
     .map((line) => line.trim())
     .filter(Boolean)
     .filter((file) => !file.includes('__tests__') && !file.includes('.test.') && !file.includes('.spec.'))
+    // db/rls-storage-authority/**: the governance manifest itself, which cites
+    // function/class names in prose evidence (never a real import/call) — see
+    // e.g. this exact file's own docstring, which would otherwise self-match.
+    .filter((file) => !file.startsWith('db/rls-storage-authority/'))
     .filter((file) => file !== definingFileRelativePath);
 }
 
@@ -139,11 +167,46 @@ describe('round 34: dead-writer reachability locks for the priority-tranche tabl
     // touches the database.
     expect(submitRouteSource).toMatch(/organizationMembers/);
     expect(submitRouteSource).not.toMatch(/submitForApproval|remittanceApprovals|perCapitaRemittances/);
+
+    // Explicit per-function zero-direct-call assertions (round 34
+    // correction) — the combined-regex check above proves no file matches
+    // ANY of the three names; these prove each name individually has zero
+    // real callers, so a future partial reactivation (e.g. only wiring up
+    // approveRemittance) cannot silently slip past a check that only ever
+    // looked at the group.
+    const auditFile = 'services/clc/remittance-audit.ts';
+    for (const fnName of ['submitForApproval', 'approveRemittance', 'rejectRemittance']) {
+      const source = readFileSync(resolve(APP_ROOT, auditFile), 'utf8');
+      expect(source, `${fnName} must still be exported from ${auditFile}`).toMatch(
+        new RegExp(`export async function ${fnName}\\(`),
+      );
+      const importers = realImporterFiles(`\\b${fnName}\\(`, auditFile);
+      expect(
+        importers,
+        `${fnName} has gained a real caller — remittance_approvals is currently SYSTEM_ONLY with ` +
+          `requiredSystemPrivileges=[SELECT] only (no UPDATE); a real caller of ${fnName} performs an ` +
+          `UPDATE and MUST have this entry's privilege set and containment revisited before it can pass.`,
+      ).toEqual([]);
+    }
   });
 
-  it('remittance_approvals\' only real reader is the national CLC staff dashboard, via withSystemContext with no per-caller organization filter', () => {
+  it('remittance_approvals\' only real reader is the national CLC staff dashboard, and its SELECT is structurally nested inside withSystemContext (not just co-located in the same file)', () => {
     const source = readFileSync(resolve(APP_ROOT, 'app/[locale]/dashboard/clc/staff/page.tsx'), 'utf8');
     expect(source).toMatch(/remittanceApprovals/);
+
+    // Bound the withSystemContext(...) callback body to the next top-level
+    // function declaration (this file's natural sibling-boundary, same
+    // technique used elsewhere in this repo for method-body extraction) —
+    // proves the remittanceApprovals SELECT is INSIDE that block, not
+    // merely present somewhere else in the file.
+    const systemContextBlockMatch = source.match(
+      /withSystemContext\(async \(tx\) => \{[\s\S]*?(?=\nexport default async function )/,
+    );
+    expect(systemContextBlockMatch, 'withSystemContext(async (tx) => { ... }) block not found').toBeTruthy();
+    const systemContextBody = systemContextBlockMatch![0];
+    expect(systemContextBody).toMatch(/\.from\(remittanceApprovals\)/);
+    expect(systemContextBody).toMatch(/eq\(remittanceApprovals\.status, 'pending'\)/);
+
     // Cross-checked against lib/auth/__tests__/clc-national-role-boundary.test.ts's
     // own documentation of this exact dashboard as Model A (national,
     // withSystemContext, no per-caller org filter) — not re-asserted in full
