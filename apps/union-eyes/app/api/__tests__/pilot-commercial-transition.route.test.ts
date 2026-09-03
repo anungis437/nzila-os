@@ -326,6 +326,11 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           readinessScore: 65,
           reviewedAt: null,
           approvedAt: null,
+          // round 25: commercial terms must be platform-approved before any
+          // financial-artifact-creating transition.
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: null,
           responses: { commercialState: 'proposal_ready' },
         },
       ], // the locked authoritative read (round 23)
@@ -363,6 +368,11 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
           readinessScore: 65,
           reviewedAt: null,
           approvedAt: null,
+          // round 25: commercial terms must be platform-approved before any
+          // financial-artifact-creating transition.
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: null,
           responses: { commercialState: 'FRESH_LOCKED_STATE' },
         },
       ],
@@ -380,5 +390,132 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     expect(payload.data.fromState).toBe('FRESH_LOCKED_STATE');
     expect(m.normalizeCommercialState).toHaveBeenCalledWith('FRESH_LOCKED_STATE');
     expect(m.normalizeCommercialState).not.toHaveBeenCalledWith('STALE_PRECHECK_STATE');
+  });
+
+  it('round 25: rejects a financial-artifact-creating transition when commercial terms have not been approved', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          // No verifiedMemberCount/verifiedPilotAmount — terms never approved.
+          verifiedMemberCount: null,
+          verifiedPilotAmount: null,
+          responses: { commercialState: 'proposal_ready' },
+        },
+      ],
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent' }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringContaining('Commercial terms have not been approved'),
+    });
+  });
+
+  it('round 25: rejects subscription_active when no subscription plan has been approved, even with approved member count/amount', async () => {
+    const { POST } = await loadRoute();
+    m.normalizeCommercialState.mockReturnValueOnce('invoice_issued');
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: null,
+          responses: { commercialState: 'invoice_issued' },
+        },
+      ],
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'subscription_active', allowSkip: true }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringContaining('No approved subscription plan'),
+    });
+  });
+
+  it('round 25: uses the platform-approved verifiedPilotAmount, never a client-supplied member count or responses.subscriptionPlanId, for a financial transition', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          // Applicant/steward-controlled memberCount claims a huge org —
+          // must NOT influence the amount actually invoiced.
+          memberCount: 999999,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: null,
+          // Attacker-style stray key — must never be read for billing.
+          responses: { commercialState: 'proposal_ready', subscriptionPlanId: 'attacker-chosen-plan' },
+        },
+      ],
+      [{ id: 'billing-account-1' }], // billing account lookup — found
+      [], // existingContract lookup — none found, triggers insert
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent' }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(200);
+    const insertCall = mockDb.insert.mock.results[0]?.value as { values: ReturnType<typeof vi.fn> } | undefined;
+    expect(insertCall?.values).toHaveBeenCalledWith(
+      expect.objectContaining({ totalContractValue: '12000.00' }),
+    );
   });
 });

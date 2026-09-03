@@ -3,7 +3,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
-import { withPilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { authorizePilotAccess, getPilotEffectiveOrganizationId, withPilotOwnership } from '@/lib/pilot/pilot-ownership';
 import { stripReservedResponsesKeysForPatch } from '@/lib/pilot/responses-authority';
 
 export const dynamic = 'force-dynamic';
@@ -35,6 +35,15 @@ const handlers = crudRoutes({
     'status',
     'reviewedAt',
     'approvedAt',
+    // PR #752 round 25: platform-approved commercial terms — the ONLY
+    // legitimate writer is approveCommercialTerms() via POST
+    // .../approve-commercial-terms (system_admin+). See
+    // lib/pilot/commercial-terms-authority.ts.
+    'verifiedMemberCount',
+    'verifiedPilotAmount',
+    'verifiedSubscriptionPlanId',
+    'commercialTermsApprovedBy',
+    'commercialTermsApprovedAt',
   ],
   // PR #752 round 24: responses holds both the CLAIMED owning organization
   // and commercial-transition's authoritative FSM/scoring state — nested
@@ -53,6 +62,21 @@ const handlers = crudRoutes({
     return updates;
   },
   mergeJsonColumns: ['responses'],
+  // PR #752 round 25: withPilotOwnership's own pre-check (below) runs on an
+  // UNLOCKED read, before this factory's transaction even starts — a
+  // concurrent platform rebind could change the pilot's effective owner
+  // between that pre-check and this PATCH's own `SELECT ... FOR UPDATE`.
+  // Re-run the SAME ownership decision against the row THIS transaction
+  // just locked, so the check and the mutation are atomic with respect to
+  // rebinds regardless of what the earlier pre-check saw.
+  lockedAuthCheck: async (existing) => {
+    const decision = await authorizePilotAccess(
+      getPilotEffectiveOrganizationId(
+        existing as { responses?: Record<string, unknown> | null; verifiedOrganizationId?: string | null },
+      ),
+    );
+    return decision.ok ? { ok: true } : { ok: false, status: decision.status === 401 ? 401 : 403 };
+  },
 });
 
 export const GET = withPilotOwnership(handlers.GET, { minRole: 'steward' });

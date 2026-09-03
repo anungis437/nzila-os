@@ -9,36 +9,23 @@ import {
   normalizeCommercialState,
 } from '@/lib/pilot/commercialization-wave1';
 import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { withLockedPilotMutation } from '@/lib/pilot/pilot-mutation';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-async function buildReferencePayload(id: string) {
-  // Runs before the ownership decision (below, in each handler) can be made,
-  // so it must see the row regardless of the caller's own organization —
-  // must run under withSystemContext (PR #752 round 18), never the ordinary
-  // tenant runtime connection.
-  const [application, metric] = await withSystemContext(async (_tx) => {
-    const [app] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+type PilotApplicationRow = typeof pilotApplications.$inferSelect;
+type PilotMetricRow = typeof pilotMetrics.$inferSelect;
 
-    if (!app) return [undefined, undefined] as const;
-
-    const [m] = await db
-      .select()
-      .from(pilotMetrics)
-      .where(eq(pilotMetrics.pilotId, app.id))
-      .orderBy(desc(pilotMetrics.lastCalculated))
-      .limit(1);
-
-    return [app, m] as const;
-  });
-
-  if (!application) return { application: null };
-
+/**
+ * Pure computation from an already-loaded application + metric row — no DB
+ * access (PR #752 round 25). Split out of the old `buildReferencePayload`
+ * so POST can run it against a `FOR UPDATE`-LOCKED, freshly re-authorized
+ * `application` (from `withLockedPilotMutation`) instead of the unlocked
+ * snapshot GET uses, without duplicating this entire computation.
+ */
+function computeReferenceProfileData(application: PilotApplicationRow, metric: PilotMetricRow | undefined) {
   const responses = (application.responses ?? {}) as Record<string, unknown>;
   const commercialState = normalizeCommercialState(responses.commercialState);
 
@@ -137,12 +124,52 @@ async function buildReferencePayload(id: string) {
   };
 
   return {
-    application,
     responses,
     referenceProfile,
     caseStudy,
     benchmarkDataset,
   };
+}
+
+/** Standalone, read-only latest-metric lookup — not part of the `responses` race POST protects. */
+async function loadLatestPilotMetric(pilotId: string): Promise<PilotMetricRow | undefined> {
+  return withSystemContext(async (_tx) => {
+    const [m] = await db
+      .select()
+      .from(pilotMetrics)
+      .where(eq(pilotMetrics.pilotId, pilotId))
+      .orderBy(desc(pilotMetrics.lastCalculated))
+      .limit(1);
+    return m;
+  });
+}
+
+async function buildReferencePayload(id: string) {
+  // Runs before the ownership decision (below, in each handler) can be made,
+  // so it must see the row regardless of the caller's own organization —
+  // must run under withSystemContext (PR #752 round 18), never the ordinary
+  // tenant runtime connection.
+  const [application, metric] = await withSystemContext(async (_tx) => {
+    const [app] = await db
+      .select()
+      .from(pilotApplications)
+      .where(and(eq(pilotApplications.id, id)));
+
+    if (!app) return [undefined, undefined] as const;
+
+    const [m] = await db
+      .select()
+      .from(pilotMetrics)
+      .where(eq(pilotMetrics.pilotId, app.id))
+      .orderBy(desc(pilotMetrics.lastCalculated))
+      .limit(1);
+
+    return [app, m] as const;
+  });
+
+  if (!application) return { application: null };
+
+  return { application, ...computeReferenceProfileData(application, metric) };
 }
 
 export const GET = withApiAuth(async (_request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
@@ -199,11 +226,6 @@ type PersistReferencePayload = {
 
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
   try {
-    const canAccess = await hasMinRole('steward');
-    if (!canAccess) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     const rawParams = context?.params ? await context.params : undefined;
     const id = rawParams?.id;
     if (!id) {
@@ -211,64 +233,68 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     }
 
     const requestPayload = (await request.json().catch(() => ({}))) as PersistReferencePayload;
-    const payload = await buildReferencePayload(id);
-    if (!payload.application) {
-      return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
-    }
+    // Read-only, unrelated table — fetched BEFORE the lock, never nested
+    // inside withLockedPilotMutation's own transaction (which would grab a
+    // second connection from the pool while still holding the first).
+    const metric = await loadLatestPilotMetric(id);
 
-    const denied = await enforcePilotOwnership(payload.application);
-    if (denied) return denied;
+    // PR #752 round 25: locked, re-authorized, key-specific merge — this
+    // write only ever touches the 4 reference-version fields, never the
+    // whole `responses` column.
+    const outcome = await withLockedPilotMutation<{ persisted: boolean; reason?: string; snapshot: unknown }>(id, 'steward', async ({ application }) => {
+      const computed = computeReferenceProfileData(application, metric);
 
-    const snapshot = buildPilotReferenceVersionRecord({
-      generatedAt: payload.referenceProfile.generatedAt as string,
-      source: requestPayload.source ?? 'manual',
-      milestone: requestPayload.milestone,
-      notes: requestPayload.notes,
-      referenceProfile: payload.referenceProfile,
-      caseStudy: payload.caseStudy,
-      benchmarkDataset: payload.benchmarkDataset,
-    });
-
-    const responses = { ...payload.responses };
-    const existingVersions = Array.isArray(responses.pilotReferenceVersions)
-      ? [...responses.pilotReferenceVersions]
-      : [];
-
-    const existingMatch = existingVersions.find(
-      (version) =>
-        version &&
-        typeof version === 'object' &&
-        'checksum' in version &&
-        (version as { checksum?: string }).checksum === snapshot.checksum,
-    );
-
-    if (existingMatch) {
-      return NextResponse.json({
-        data: {
-          persisted: false,
-          reason: 'Reference snapshot already exists for current content',
-          snapshot: existingMatch,
-        },
+      const snapshot = buildPilotReferenceVersionRecord({
+        generatedAt: computed.referenceProfile.generatedAt as string,
+        source: requestPayload.source ?? 'manual',
+        milestone: requestPayload.milestone,
+        notes: requestPayload.notes,
+        referenceProfile: computed.referenceProfile,
+        caseStudy: computed.caseStudy,
+        benchmarkDataset: computed.benchmarkDataset,
       });
-    }
 
-    existingVersions.push(snapshot);
-    responses.pilotReferenceVersions = existingVersions;
-    responses.latestPilotReferenceVersionId = snapshot.versionId;
-    responses.latestPilotReferenceChecksum = snapshot.checksum;
-    responses.latestPilotReferenceUpdatedAt = payload.referenceProfile.generatedAt;
+      const existingVersions = Array.isArray(computed.responses.pilotReferenceVersions)
+        ? [...computed.responses.pilotReferenceVersions]
+        : [];
 
-    await db
-      .update(pilotApplications)
-      .set({ responses })
-      .where(eq(pilotApplications.id, payload.application.id));
+      const existingMatch = existingVersions.find(
+        (version) =>
+          version &&
+          typeof version === 'object' &&
+          'checksum' in version &&
+          (version as { checksum?: string }).checksum === snapshot.checksum,
+      );
 
-    return NextResponse.json({
-      data: {
-        persisted: true,
-        snapshot,
-      },
+      if (existingMatch) {
+        return {
+          data: {
+            persisted: false,
+            reason: 'Reference snapshot already exists for current content',
+            snapshot: existingMatch,
+          },
+        };
+      }
+
+      existingVersions.push(snapshot);
+
+      return {
+        responsesPatch: {
+          pilotReferenceVersions: existingVersions,
+          latestPilotReferenceVersionId: snapshot.versionId,
+          latestPilotReferenceChecksum: snapshot.checksum,
+          latestPilotReferenceUpdatedAt: computed.referenceProfile.generatedAt,
+        },
+        data: {
+          persisted: true,
+          snapshot,
+        },
+      };
     });
+
+    if (!outcome.ok) return outcome.response;
+
+    return NextResponse.json({ data: outcome.data });
   } catch (error) {
     logger.error('pilot_reference_profile:persist_failed', {
       error: (error as Error).message,

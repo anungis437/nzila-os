@@ -128,6 +128,29 @@ export interface CrudOptions {
    * read+write itself, which this option adds automatically.
    */
   mergeJsonColumns?: string[];
+  /**
+   * Re-authorizes the caller against the row loaded UNDER the PATCH's own
+   * `SELECT ... FOR UPDATE` lock, immediately after it is acquired and
+   * before `beforeUpdate`/the write (PR #752 round 25).
+   *
+   * A caller that enforces ownership/tenancy via a SEPARATE, unlocked
+   * pre-check before ever invoking this factory (e.g. `withPilotOwnership`
+   * wrapping the pilot item route) closes only part of the race: the row
+   * can still change between that pre-check and this PATCH's own lock
+   * being acquired (a concurrent platform rebind, for example) — the
+   * pre-check's decision and the actual mutation are not atomic. This hook
+   * lets the SAME ownership rule be re-evaluated against the row this
+   * transaction is about to write, so the check and the mutation are
+   * atomic with respect to that rule, regardless of what any earlier,
+   * unlocked pre-check decided. Only invoked when `beforeUpdate` or
+   * `mergeJsonColumns` is also configured (the transactional PATCH path);
+   * a caller relying solely on this option with neither configured would
+   * get no lock to re-authorize under.
+   */
+  lockedAuthCheck?: (
+    existing: Record<string, unknown>,
+    ctx: { id: string; organizationId?: string | null; userId?: string | null },
+  ) => Promise<{ ok: true } | { ok: false; status: 401 | 403 }>;
 }
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
@@ -229,6 +252,36 @@ export function buildMergeSetValues(
     }
   }
   return setValues;
+}
+
+/**
+ * Rejects any `mergeJsonColumns` value that is present but NOT a plain JSON
+ * object (PR #752 round 25). `buildMergeSetValues()` only converts a
+ * merge column's value into a JSONB merge fragment when the value is a
+ * plain object — an array, `null`, or a scalar falls through UNCHANGED and
+ * reaches `.set()` as a literal, full-column REPLACEMENT. Since the whole
+ * point of `mergeJsonColumns` is to make server-owned keys structurally
+ * unreachable by a PATCH fragment, silently falling back to replacement
+ * semantics for a non-object value is a direct bypass: a same-org steward
+ * submitting `{"responses":[]}` would wipe `commercialState`, transition
+ * history, scoring evidence, artifact/reference versions, monetization
+ * state, and the ownership claim in one call, since `stripReservedResponsesKeysForPatch`-style
+ * `beforeUpdate` hooks also only strip when the value is a non-array
+ * object and otherwise leave it untouched. Called BEFORE any
+ * `beforeUpdate` hook runs (fail closed at the door, not after a hook has
+ * had a chance to "fix" the shape) — exported for direct unit testing.
+ */
+export function validateMergeJsonColumnValues(
+  updates: Record<string, unknown>,
+  mergeJsonColumns: string[],
+): void {
+  for (const col of mergeJsonColumns) {
+    if (!(col in updates)) continue;
+    const value = updates[col];
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      throw ApiError.badRequest(`${col} must be a JSON object`);
+    }
+  }
 }
 
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
@@ -425,6 +478,14 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const id = params[paramName];
         let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
 
+        // Fail closed BEFORE opening a transaction or running any hook: a
+        // merge column can only ever be safely converted into a JSONB
+        // merge fragment when its value is a plain object (PR #752
+        // round 25) — see validateMergeJsonColumnValues's doc comment.
+        if (mergeJsonColumns.length > 0) {
+          validateMergeJsonColumnValues(updates, mergeJsonColumns);
+        }
+
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
@@ -446,6 +507,20 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
               .limit(1)
               .for('update');
             if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
+
+            if (opts.lockedAuthCheck) {
+              // Re-evaluate ownership/tenancy against THIS locked, guaranteed-
+              // fresh row — not whatever an earlier, unlocked pre-check saw
+              // (PR #752 round 25 rebind-TOCTOU fix).
+              const authResult = await opts.lockedAuthCheck(existingRow as Record<string, unknown>, {
+                id,
+                organizationId,
+                userId,
+              });
+              if (!authResult.ok) {
+                throw authResult.status === 401 ? ApiError.unauthorized() : ApiError.forbidden();
+              }
+            }
 
             if (opts.beforeUpdate) {
               updates = await opts.beforeUpdate(updates, {

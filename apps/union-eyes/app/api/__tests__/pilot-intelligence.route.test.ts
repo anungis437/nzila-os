@@ -12,6 +12,9 @@ const m = vi.hoisted(() => {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
+      limit: vi.fn((_n: number) => ({
+        for: vi.fn((_mode: string) => nextSelect()),
+      })),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -46,13 +49,14 @@ const mockDb = {
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(),
+  withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(mockDb),
 }));
 vi.mock('@/lib/pilot/pilot-ownership', () => ({
   enforcePilotOwnership: vi.fn(async () => null),
   wrapPilotItemRoute: <T,>(handler: T) => handler,
-  authorizePilotAccess: vi.fn(async () => ({ ok: true })),
+  authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
   getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
+  getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: m.hasMinRole,

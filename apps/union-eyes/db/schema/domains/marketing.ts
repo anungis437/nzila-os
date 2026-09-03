@@ -208,6 +208,23 @@ export const pilotApplications = pgTable(
     verifiedOrganizationId: uuid('verified_organization_id').references(() => organizations.id, { onDelete: 'set null' }),
     verifiedBy: text('verified_by'),
     verifiedAt: timestamp('verified_at'),
+    // Platform-approved commercial terms (PR #752 round 25). `memberCount`
+    // (above) is applicant-supplied at public intake and steward-editable
+    // via ordinary PATCH; `responses.subscriptionPlanId` was never backed
+    // by any governed writer (PR #752 round 24's own inventory). Both were
+    // being consumed DIRECTLY by commercial-transition to size real
+    // contract/invoice amounts and select a real billing plan — untrusted
+    // input driving a financial outcome. These columns are null until an
+    // explicit platform-tier "approve commercial terms" action (see
+    // lib/pilot/commercial-terms-authority.ts's approveCommercialTerms)
+    // independently confirms the member count, dollar amount, and exact
+    // subscription plan; only THEN may commercial-transition create a real
+    // contract, invoice, or subscription.
+    verifiedMemberCount: integer('verified_member_count'),
+    verifiedPilotAmount: numeric('verified_pilot_amount', { precision: 12, scale: 2 }),
+    verifiedSubscriptionPlanId: uuid('verified_subscription_plan_id'),
+    commercialTermsApprovedBy: text('commercial_terms_approved_by'),
+    commercialTermsApprovedAt: timestamp('commercial_terms_approved_at'),
   },
   (table) => ({
     statusIdx: index('pilot_applications_status_idx').on(table.status),

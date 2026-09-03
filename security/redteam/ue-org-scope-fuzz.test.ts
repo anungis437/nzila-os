@@ -361,6 +361,12 @@ describe('RED-TEAM-ORG — UE Org-Scope Route Fuzz (static analysis)', () => {
     const PLATFORM_CONTROL_PLANE_PILOT_ROUTES = new Set([
       'verify-organization/route.ts',
       'rebind-organization/route.ts',
+      // PR #752 round 25: platform-only approval of commercial terms
+      // (verifiedMemberCount/verifiedPilotAmount/verifiedSubscriptionPlanId)
+      // — deliberately not same-org self-service, same rationale as the two
+      // routes above (an applicant/steward's own member-count claim cannot
+      // approve itself for financial-artifact creation).
+      'approve-commercial-terms/route.ts',
     ])
 
     const unguarded: string[] = []

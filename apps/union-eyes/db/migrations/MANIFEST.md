@@ -8,9 +8,9 @@
 - **Branch:** main
 - **Commit:** local
 - **Short Commit:** local
-- **Generated:** 2026-09-01T07:29:28.076Z
+- **Generated:** 2026-09-03T03:52:55.830Z
 - **Migrations Directory:** `db/migrations`
-- **Total Migrations:** 96
+- **Total Migrations:** 97
 
 ## Migration Files
 
@@ -28,7 +28,7 @@
 | 0019 | 0019_lonely_stephen_strange.sql | `bf43dc43...edaf6acf` | 55.29 KB | CREATE TYPE "public"."committee_member_role" AS ENUM('chair', 'vice_chair', 'sec |
 | 0020 | 0020_keen_roulette.sql | `66d5a5ce...5119dde4` | 9.43 KB | CREATE TYPE "public"."employment_status" AS ENUM('active', 'on_leave', 'layoff', |
 | 0021 | 0021_steady_darwin.sql | `06b8638a...5f3b311b` | 1.78 KB | CREATE TABLE "member_segments" ( |
-| 0025 | 0025_pilot_enrollments.sql | `6a162d7b...20836154` | 1.35 KB | Pilot enrollment and milestones tables |
+| 0025 | 0025_pilot_enrollments.sql | `357179d0...baf4535f` | 1.31 KB | Pilot enrollment and milestones tables |
 | 0041 | 0041_steady_reavers.sql | `618dc735...983452bc` | 3.52 KB | ALTER TYPE "public"."organization_type" ADD VALUE 'platform' BEFORE 'congress';- |
 | 0042 | 0042_perpetual_karen_page.sql | `b8121577...74d08ef1` | 4.89 KB | CREATE TYPE "public"."exit_interview_event_type" AS ENUM('created', 'updated', ' |
 | 0043 | 0043_fantastic_mysterio.sql | `8d4d2f51...b641fe96` | 2.12 KB | CREATE TYPE "public"."exit_interview_indexing_status" AS ENUM('pending', 'indexi |
@@ -63,12 +63,12 @@
 | 0079 | 0079_ai_cost_tracking_phase1.sql | `5c3bd840...902cf329` | 10.62 KB | Phase 1: AI Cost Tracking and Rate Limiting |
 | 0080 | 0080_add_schema_drift_protection.sql | `d6806b36...2a012166` | 11.05 KB | Migration: Add Schema Drift Protection (DDL Event Logging) |
 | 0081 | 0081_add_missing_critical_indexes.sql | `eccee0f7...eeaa50b2` | 17.71 KB | Migration: Add Missing Critical Database Indexes |
-| 0082 | 0082_add_pilot_tables.sql | `5326f392...ff4d817b` | 2.32 KB | Migration: Add pilot onboarding tables |
-| 0083 | 0083_data_source_tables.sql | `2bc9c4b1...e7483655` | 13.05 KB | Migration: 0083_data_source_tables.sql |
-| 0084 | 0084_claims_monetary_varchar_to_decimal.sql | `d1a1b104...9f56960b` | 1.38 KB | Migration: Convert claim monetary fields from varchar to decimal(14,2) |
+| 0082 | 0082_add_pilot_tables.sql | `b009840e...4a7beab2` | 2.27 KB | Migration: Add pilot onboarding tables |
+| 0083 | 0083_data_source_tables.sql | `53677aa3...8041e709` | 12.73 KB | Migration: 0083_data_source_tables.sql |
+| 0084 | 0084_claims_monetary_varchar_to_decimal.sql | `adb7b9e0...37d0f879` | 1.34 KB | Migration: Convert claim monetary fields from varchar to decimal(14,2) |
 | 0085 | 0085_monetization_infrastructure_layer.sql | `b0f4f4f5...79654796` | 13.47 KB | ============================================================================= |
 | 0086 | 0086_monetization_phase2.sql | `2fad4d82...431a7f47` | 17.54 KB | Migration: 0086_monetization_phase2 |
-| 0087 | 0087_add_member_location_fields.sql | `2e28f590...69ae46af` | 0.61 KB | Add missing columns to organization_members that are referenced by the API |
+| 0087 | 0087_add_member_location_fields.sql | `37e52d23...15a43b65` | 0.60 KB | Add missing columns to organization_members that are referenced by the API |
 | 0088 | 0088_add_fts_gin_index.sql | `dcfff672...1facfa8e` | 1.93 KB | Migration 0088: Full-text search GIN index on organization_members |
 | 0089 | 0089_ingestion_hardening.sql | `86981811...a2d9573d` | 7.37 KB | Migration: 0089_ingestion_hardening.sql |
 | 0090 | 0090_zonga_listeners_user_id_unique.sql | `f7b4cc76...0e0cf7ba` | 0.23 KB | Migration 0090: Add unique index on zonga_listeners.user_id |
@@ -85,11 +85,11 @@
 | 0101 | 0101_auth_password_reset_tokens.sql | `ddf61c8d...d24a3ce4` | 2.92 KB | Migration: 20260711_auth_password_reset_tokens |
 | 0102 | 0102_align_organization_members_columns.sql | `1eb1a0a1...e9c4e137` | 2.48 KB | Re-add columns to organization_members that were dropped in 0002_true_selene |
 | 0103 | 0103_org_users_unique_constraint.sql | `284e1ba6...ae3b623a` | 0.35 KB | Add unique constraint on (user_id, organization_id) to prevent duplicate |
-| 0104 | 0104_dedup_and_quality_warnings.sql | `e9002f65...771a9667` | 4.10 KB | Migration: Dedup Groups & Data Quality Warnings |
+| 0104 | 0104_dedup_and_quality_warnings.sql | `c7726d78...a827fe93` | 4.04 KB | Migration: Dedup Groups & Data Quality Warnings |
 | 0105 | 0105_correspondence_pipeline.sql | `7855d408...10ef63cf` | 6.68 KB | =========================================================================== |
 | 0106 | 0106_integration_fabric.sql | `8d983c5e...2edf8f42` | 10.40 KB | =========================================================================== |
 | 0107 | 0107_ue_policy_bindings.sql | `647a14f0...fc78c704` | 1.42 KB | ============================================================================= |
-| 0108 | 0108_rls_tenant_isolation_foundation.sql | `1c275ff9...406bea22` | 16.03 KB | ============================================================================= |
+| 0108 | 0108_rls_tenant_isolation_foundation.sql | `aba7074a...3328d766` | 21.62 KB | ============================================================================= |
 | 1770880372830 | 1770880372830_consolidate_chart_of_accounts_fixed.sql | `1f4b3853...106ce17e` | 10.59 KB | ============================================================================ |
 | 20260212 | 20260212_add_hris_tables_fixed.sql | `fba48701...41ece925` | 8.66 KB | Migration: HRIS Integration Tables (FIXED) |
 | 20260212 | 20260212_add_integration_framework_fixed.sql | `7235867e...fe0c086e` | 7.28 KB | Integration Framework Database Schema |
@@ -101,17 +101,18 @@
 | 20260327 | 20260327_staging_alignment_phase2.sql | `7c80b562...eda2fb38` | 6.81 KB | ============================================================================ |
 | 20260327 | 20260327_staging_alignment_phase3.sql | `506c64e2...25d5a7e0` | 3.59 KB | ============================================================================ |
 | 20260327 | 20260327_staging_schema_alignment.sql | `38d720a6...beb4e98b` | 13.45 KB | ============================================================================ |
-| 20260328 | 20260328_jurisdiction_preferences.sql | `9cee9f56...1efb3726` | 0.88 KB | Migration: Create member_jurisdiction_preferences table |
+| 20260328 | 20260328_jurisdiction_preferences.sql | `f3a164c2...d5eba375` | 0.86 KB | Migration: Create member_jurisdiction_preferences table |
 | 20260401 | 20260401_cba_intelligence_public_sources.sql | `6d908185...0d67a664` | 17.82 KB | ========================================================================== |
 | 20260402 | 20260402_audit_immutability.sql | `b9bedf84...26209feb` | 2.96 KB | Migration: Audit log immutability — prevent DELETE/UPDATE on review decision rec |
 | 20260402 | 20260402_pgvector_embeddings.sql | `cc36f748...367cbe8e` | 5.18 KB | Migration: Enable pgvector, convert TEXT embedding columns to vector(1536), |
-| 20260404 | 20260404_pilot_observability.sql | `127714a0...7a16a8b5` | 1.48 KB | Pilot observability & feedback tables |
+| 20260404 | 20260404_pilot_observability.sql | `d8f5b606...5b2a2f42` | 1.44 KB | Pilot observability & feedback tables |
 | 20260507 | 20260507_fixup_create_break_glass_activations.sql | `411900e6...335a7692` | 125.27 KB | ============================================================================ |
 | 20260507 | 20260507_fixup_phase5b_org_fks.sql | `b588b8f5...24e2f413` | 3.32 KB | Fixup: re-add FK constraints from 0001_phase5b_inter_union_features that |
 | 20260507 | 20260507_fixup_pre_0008_missing_tables.sql | `92c820f1...77174c69` | 31.60 KB | ============================================================================ |
 | 20260508 | 20260508_fixup_post_0019_align_modern_schema.sql | `163e9a5f...88048bcf` | 5.59 KB | Fixup: align modern schema after 0019 drops + missing newer migrations. |
 | 20260509 | 20260509_fixup_auth_mfa_magic_invites.sql | `aac9d2ab...ef5411fe` | 3.01 KB | 20260509_fixup_auth_mfa_magic_invites.sql |
 | 20260521 | 20260521_fixup_icra_assessments_claim_columns.sql | `56960b63...e8457fba` | 0.85 KB | Fixup: add icra_assessments claim/payment columns that exist in Drizzle schema |
+| 20260903 | 20260903_pilot_commercial_terms_authority.sql | `0d281da3...9124478e` | 1.12 KB | PR #752 round 25: platform-approved commercial terms for pilot_applications. |
 
 ## Verification
 

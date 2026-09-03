@@ -8,7 +8,6 @@ import {
   pilotApplications,
   platformInvoiceLineItems,
   platformInvoices,
-  subscriptionPlans,
 } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
@@ -20,12 +19,19 @@ import {
   inferPilotStatusFromCommercialState,
   isCommercialTransitionAllowed,
   normalizeCommercialState,
+  parsePriceBandLowerBound,
   type CommercialState,
 } from '@/lib/pilot/commercialization-wave1';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+
+// PR #752 round 25: these 3 states each create a REAL financial artifact
+// (commercial contract, platform invoice, or org subscription) below — all
+// require platform-approved commercial terms first (see the gate after the
+// transition-allowed check).
+const FINANCIAL_TARGET_STATES: CommercialState[] = ['contract_sent', 'invoice_issued', 'subscription_active'];
 
 type TransitionPayload = {
   targetState?: string;
@@ -44,15 +50,6 @@ function parseTargetState(value: any): CommercialState | null {
   if (typeof value !== 'string') return null;
   if (!COMMERCIAL_STATE_ORDER.includes(value as CommercialState)) return null;
   return value as CommercialState;
-}
-
-function parsePriceBandLowerBound(amountBand: string): string {
-  const firstSegment = amountBand.split('-')[0]?.trim() ?? '0';
-  const raw = firstSegment.replace(/[$,]/g, '').toUpperCase();
-  const multiplier = raw.endsWith('K') ? 1000 : 1;
-  const numeric = Number(raw.replace('K', ''));
-  if (!Number.isFinite(numeric) || numeric <= 0) return '5000.00';
-  return (numeric * multiplier).toFixed(2);
 }
 
 function addDays(date: Date, days: number): Date {
@@ -229,6 +226,32 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         });
       }
 
+      // PR #752 round 25: `memberCount` is applicant-supplied at public
+      // intake and steward-editable via ordinary PATCH; `responses.
+      // subscriptionPlanId` has no governed writer at all (round 24's own
+      // inventory). Neither may drive a real financial amount or billing
+      // plan selection. Every financial-artifact-creating transition
+      // requires an explicit platform approval first (see
+      // lib/pilot/commercial-terms-authority.ts's approveCommercialTerms) —
+      // re-checked here, under the SAME row lock, against the FRESH read
+      // above, never an earlier snapshot.
+      if (FINANCIAL_TARGET_STATES.includes(targetState)) {
+        if (application.verifiedMemberCount == null || application.verifiedPilotAmount == null) {
+          throw new CommercialTransitionRejected(409, {
+            error:
+              'Commercial terms have not been approved for this pilot. Call POST /api/pilot/apply/[id]/approve-commercial-terms ' +
+              'with a verified memberCount before contract, invoice, or subscription creation.',
+          });
+        }
+        if (targetState === 'subscription_active' && !application.verifiedSubscriptionPlanId) {
+          throw new CommercialTransitionRejected(409, {
+            error:
+              'No approved subscription plan for this pilot. Call POST /api/pilot/apply/[id]/approve-commercial-terms ' +
+              'with an explicit subscriptionPlanId before activating a subscription.',
+          });
+        }
+      }
+
       const proposal = buildProposalPackage(
         {
           id: application.id,
@@ -273,7 +296,10 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       }
 
       const contractNumber = buildPilotContractNumber(application.id);
-      const pilotAmount = parsePriceBandLowerBound(proposal.economicsTier.targetPriceRange);
+      // Guaranteed non-null for the 3 financial target states by the gate
+      // above; the ladder-derived fallback only applies to the non-financial
+      // states that compute `pilotAmount` unconditionally but never use it.
+      const pilotAmount = application.verifiedPilotAmount ?? parsePriceBandLowerBound(proposal.economicsTier.targetPriceRange);
 
       if (targetState === 'contract_sent' && organizationId && billingAccountId) {
         const [existingContract] = await tx
@@ -375,19 +401,16 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
       }
 
       if (targetState === 'subscription_active' && organizationId && billingAccountId) {
-        const explicitPlanId = typeof responses.subscriptionPlanId === 'string' ? responses.subscriptionPlanId : null;
-
-        let selectedPlanId = explicitPlanId;
-        if (!selectedPlanId) {
-          const [fallbackPlan] = await tx
-            .select({ id: subscriptionPlans.id })
-            .from(subscriptionPlans)
-            .where(eq(subscriptionPlans.isActive, true));
-          selectedPlanId = fallbackPlan?.id ?? null;
-        }
+        // Round 25: the ONLY source of truth is the platform-approved
+        // verifiedSubscriptionPlanId column — never responses.subscriptionPlanId
+        // (no governed writer ever set it) and never an ambiguous "any
+        // active plan" fallback (subscription_plans has no uniqueness
+        // constraint on isActive). The gate above makes this branch
+        // unreachable without it set; the null-check below is defensive.
+        const selectedPlanId = application.verifiedSubscriptionPlanId;
 
         if (!selectedPlanId) {
-          monetization.notes.push('No active subscription plan found; subscription activation staged only.');
+          monetization.notes.push('No approved subscription plan; subscription activation staged only.');
         } else {
           const [existingSubscription] = await tx
             .select({ id: orgSubscriptions.id })

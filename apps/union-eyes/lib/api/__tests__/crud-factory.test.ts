@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import { enforceCreateSecurityInvariants, stripBlockedPatchFields, buildMergeSetValues } from '../crud-factory';
+import { enforceCreateSecurityInvariants, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -202,5 +202,36 @@ describe('crud-factory buildMergeSetValues (PR #752 round 24)', () => {
     const updates = { responses: { readinessNotes: 'ok' } };
     buildMergeSetValues(updates, fakeTable, ['responses']);
     expect(updates.responses).toEqual({ readinessNotes: 'ok' });
+  });
+});
+
+describe('crud-factory validateMergeJsonColumnValues (PR #752 round 25)', () => {
+  it('passes for a plain-object merge column value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: { note: 'ok' } }, ['responses'])).not.toThrow();
+  });
+
+  it('passes when the merge column is absent from the PATCH body entirely', () => {
+    expect(() => validateMergeJsonColumnValues({ notes: 'unrelated' }, ['responses'])).not.toThrow();
+  });
+
+  it('rejects an array value — the direct reserved-state destruction bypass this closes', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: [] }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('rejects a non-empty array value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: ['x', 'y'] }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('rejects an explicit null value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: null }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('rejects a scalar (string/number) value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: 'not-an-object' }, ['responses'])).toThrow(/must be a JSON object/);
+    expect(() => validateMergeJsonColumnValues({ responses: 42 }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('only validates columns actually listed in mergeJsonColumns', () => {
+    expect(() => validateMergeJsonColumnValues({ notes: [] }, ['responses'])).not.toThrow();
   });
 });

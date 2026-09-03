@@ -37,6 +37,17 @@
  * (a real column, not a `responses` key — already protected by
  * `blockedPatchFields`, not this registry).
  *
+ * `subscriptionPlanId` SUPERSEDED (PR #752 round 25): commercial-transition
+ * no longer reads this key at all — it consumes the platform-approved
+ * `verifiedSubscriptionPlanId` COLUMN exclusively (set only by
+ * `approveCommercialTerms()`, itself protected by `blockedPatchFields`; see
+ * `lib/pilot/commercial-terms-authority.ts`), because this `responses` key
+ * never had a governed writer to begin with (round 24's own finding) and
+ * commercial-transition's prior "pick any active plan" fallback was
+ * ambiguous. Left in this list purely as defense-in-depth for any legacy
+ * row that already has it set — it is otherwise dead for financial
+ * decisions.
+ *
  * Deliberately NOT reserved: `championScore`/`activityScore`. Verified via
  * the same full-repo scan that NO route ever WRITES these — every
  * reference is a read (`typeof responses.championScore === 'number' ? ... :

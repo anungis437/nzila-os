@@ -546,6 +546,23 @@ export function getRecommendedEconomicsTier(memberCount: number): PilotEconomics
   return PILOT_ECONOMICS_LADDER[PILOT_ECONOMICS_LADDER.length - 1];
 }
 
+/**
+ * Converts a `PilotEconomicsTier.targetPriceRange` band (e.g. `"$25K-$75K"`)
+ * into its lower-bound dollar amount as a fixed-point string (PR #752
+ * round 25: moved here from a private copy in commercial-transition/route.ts
+ * so `lib/pilot/commercial-terms-authority.ts` can derive the SAME
+ * deterministic amount an approver sees when confirming commercial terms —
+ * a single shared implementation, not two copies that could drift.
+ */
+export function parsePriceBandLowerBound(amountBand: string): string {
+  const firstSegment = amountBand.split('-')[0]?.trim() ?? '0';
+  const raw = firstSegment.replace(/[$,]/g, '').toUpperCase();
+  const multiplier = raw.endsWith('K') ? 1000 : 1;
+  const numeric = Number(raw.replace('K', ''));
+  if (!Number.isFinite(numeric) || numeric <= 0) return '5000.00';
+  return (numeric * multiplier).toFixed(2);
+}
+
 export function normalizeCommercialState(value: any): CommercialState {
   if (typeof value === 'string' && COMMERCIAL_STATE_ORDER.includes(value as CommercialState)) {
     return value as CommercialState;
