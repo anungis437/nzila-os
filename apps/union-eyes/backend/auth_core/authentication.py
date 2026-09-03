@@ -90,9 +90,9 @@ class OIDCAuthentication(authentication.BaseAuthentication):
 
             # Attach organization context to request for middleware
             org_id, org_role = _extract_org(payload)
-            request.clerk_org_id = org_id
-            request.clerk_org_role = org_role
-            request.clerk_user_id = payload.get("sub")
+            request.org_id = org_id
+            request.org_role = org_role
+            request.user_id = payload.get("sub")
 
             return (user, payload)
 
@@ -170,17 +170,17 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         """
         User = get_user_model()
 
-        clerk_user_id = payload.get("sub")
-        if not clerk_user_id:
+        auth_user_id = payload.get("sub")
+        if not auth_user_id:
             raise exceptions.AuthenticationFailed("Token missing user ID (sub claim)")
 
         email = payload.get("email", "")
         first_name = payload.get("given_name", "")
         last_name = payload.get("family_name", "")
 
-        # Get or create user by Clerk user ID
+        # Get or create user by auth provider user ID
         user, created = User.objects.get_or_create(
-            username=clerk_user_id,
+            username=auth_user_id,
             defaults={
                 "email": email,
                 "first_name": first_name,
@@ -220,7 +220,7 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         try:
             from apps.profiles.models import Profile
 
-            clerk_user_id = payload.get("sub")
+            auth_user_id = payload.get("sub")
             org_id, _ = _extract_org(payload)
 
             # Update or create profile
@@ -273,17 +273,17 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
 
 # Cache user lookups by auth user ID for 5 minutes
 @lru_cache(maxsize=1000)
-def get_cached_user_by_clerk_id(clerk_user_id: str):
+def get_cached_user_by_auth_id(auth_user_id: str):
     """Cache user lookups for performance.
 
     Args:
-        clerk_user_id: Clerk user ID (sub claim)
+        auth_user_id: Auth provider user ID (sub claim)
 
     Returns:
         User or None
     """
     User = get_user_model()
     try:
-        return User.objects.get(username=clerk_user_id)
+        return User.objects.get(username=auth_user_id)
     except User.DoesNotExist:
         return None

@@ -10,7 +10,7 @@ Endpoints (mounted at /api/tasks/ in config/urls.py):
   POST   /api/tasks/queues/{name}/pause/  Pause a queue
   POST   /api/tasks/queues/{name}/resume/ Resume a queue
 
-Authentication: Clerk JWT (via auth_core.middleware.ClerkJWTMiddleware).
+Authentication: OIDC JWT (via auth_core.middleware.OIDCJWTMiddleware).
 Admin-only routes (queue management) additionally require org_role == 'admin'.
 """
 
@@ -61,7 +61,7 @@ ADMIN_ONLY_JOB_TYPES = {
 
 def _require_admin(request) -> bool:
     """Return True if the request user has admin role."""
-    return getattr(request, "clerk_org_role", None) in ("org:admin", "admin")
+    return getattr(request, "org_role", None) in ("org:admin", "admin")
 
 
 def _get_celery_app():
@@ -140,7 +140,7 @@ class TaskEnqueueView(APIView):
             logger.info(
                 "Enqueued task: type=%s task_id=%s user=%s",
                 job_type, async_result.id,
-                getattr(request, "clerk_user_id", "unknown"),
+                getattr(request, "user_id", "unknown"),
             )
 
             return Response(
@@ -369,7 +369,7 @@ class RetryTaskView(APIView):
             logger.info(
                 "Retried task %s → new task_id=%s user=%s",
                 task_id, new_result.id,
-                getattr(request, "clerk_user_id", "unknown"),
+                getattr(request, "user_id", "unknown"),
             )
 
             return Response({

@@ -41,21 +41,21 @@ class OIDCJWTMiddleware(MiddlewareMixin):
         """Process incoming request to attach org context.
 
         OIDCAuthentication sets these attributes on request:
-        - clerk_user_id: Auth provider user ID (sub claim)
-        - clerk_org_id: Organization ID (org_id claim)
-        - clerk_org_role: User's role in org (org_role claim)
+        - user_id: Auth provider user ID (sub claim)
+        - org_id: Organization ID (org_id claim)
+        - org_role: User's role in org (org_role claim)
         """
         # Skip exempt paths
         if self._is_exempt_path(request.path):
             return None
 
         # Attach default values if not set by auth backend
-        if not hasattr(request, "clerk_user_id"):
-            request.clerk_user_id = None
-        if not hasattr(request, "clerk_org_id"):
-            request.clerk_org_id = None
-        if not hasattr(request, "clerk_org_role"):
-            request.clerk_org_role = None
+        if not hasattr(request, "user_id"):
+            request.user_id = None
+        if not hasattr(request, "org_id"):
+            request.org_id = None
+        if not hasattr(request, "org_role"):
+            request.org_role = None
 
         return None
 
@@ -80,10 +80,6 @@ class OIDCJWTMiddleware(MiddlewareMixin):
         return any(path.startswith(p) for p in self.EXEMPT_PATHS)
 
 
-# Backward compat alias
-ClerkJWTMiddleware = OIDCJWTMiddleware
-
-
 class OrganizationIsolationMiddleware(MiddlewareMixin):
     """Enforces organization-level data isolation for multi-org apps.
 
@@ -101,7 +97,7 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
     def process_request(self, request):
         """Attach organization object to request for multi-org scoping."""
         # Skip if no org_id (anonymous or service account)
-        org_id = getattr(request, "clerk_org_id", None)
+        org_id = getattr(request, "org_id", None)
         if not org_id:
             request.organization = None
             return None
@@ -122,12 +118,12 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
             from auth_core.models import Organizations
 
             organization = Organizations.objects.filter(
-                clerk_organization_id=org_id
+                auth_provider_org_id=org_id
             ).first()
 
             if not organization:
                 logger.warning(
-                    f"Unknown organization {org_id} for user {request.clerk_user_id}"
+                    f"Unknown organization {org_id} for user {request.user_id}"
                 )
                 return JsonResponse(
                     {"error": "Organization not found. Contact support."}, status=403
@@ -193,13 +189,13 @@ class AuditLogMiddleware(MiddlewareMixin):
             duration_ms = int((time.time() - request._audit_start_time) * 1000)
 
         # Dispatch to Celery (fire-and-forget) for authenticated requests
-        if hasattr(request, "clerk_user_id") and request.clerk_user_id:
+        if hasattr(request, "user_id") and request.user_id:
             try:
                 from auth_core.tasks import log_audit_event
 
                 log_audit_event.delay(
-                    user_id=request.clerk_user_id,
-                    org_id=getattr(request, "clerk_org_id", "none"),
+                    user_id=request.user_id,
+                    org_id=getattr(request, "org_id", "none"),
                     method=request.method,
                     path=request.path,
                     status_code=response.status_code,
@@ -212,8 +208,8 @@ class AuditLogMiddleware(MiddlewareMixin):
                 logger.info(
                     "AUTH_REQUEST user=%s org=%s method=%s path=%s "
                     "status=%s duration_ms=%s ip=%s",
-                    request.clerk_user_id,
-                    getattr(request, "clerk_org_id", "none"),
+                    request.user_id,
+                    getattr(request, "org_id", "none"),
                     request.method,
                     request.path,
                     response.status_code,

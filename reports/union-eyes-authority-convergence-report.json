@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-09-03T12:45:57.035Z",
+  "generatedAt": "2026-09-03T16:00:57.634Z",
   "totalTables": 700,
   "byClassification": {
-    "NEEDS_REVIEW": 365,
+    "NEEDS_REVIEW": 345,
     "LATENT_UNREACHABLE": 189,
     "SYSTEM_ONLY": 17,
-    "TENANT_RLS_REQUIRED": 112,
+    "TENANT_RLS_REQUIRED": 132,
     "PARENT_OWNED_RLS_REQUIRED": 11,
     "GLOBAL_REFERENCE_DATA": 3,
     "SEPARATE_DATABASE_BOUNDARY": 2,
     "USER_RLS_REQUIRED": 1
   },
-  "needsReview": 365,
+  "needsReview": 345,
   "authorityModel": {
-    "invocationAuthorityTbd": 365,
-    "dbExecutionPrincipalTbd": 365,
-    "requiredRuntimePrivilegesTbd": 365,
-    "requiredSystemPrivilegesTbd": 365,
+    "invocationAuthorityTbd": 345,
+    "dbExecutionPrincipalTbd": 345,
+    "requiredRuntimePrivilegesTbd": 345,
+    "requiredSystemPrivilegesTbd": 345,
     "closedClassificationWithTbdAuthorityCount": 0,
     "closedClassificationWithTbdAuthorityTables": []
   },
@@ -34,7 +34,7 @@
   },
   "rlsPolicyExpansionRequired": {
     "note": "Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 \"policyGaps\" wording, which conflated this with 0108 losing its own coverage.",
-    "tenantRlsRequiredExpansionCount": 100,
+    "tenantRlsRequiredExpansionCount": 120,
     "tenantRlsRequiredExpansionTables": [
       "claim_deadlines",
       "deadline_reminders",
@@ -77,13 +77,31 @@
       "exit_interview_documents",
       "message_templates",
       "notification_templates",
+      "bank_accounts",
+      "bank_reconciliation",
+      "bank_reconciliations",
       "billing_accounts",
       "billing_periods",
       "billing_subscriptions",
+      "chart_of_accounts",
+      "clc_remittance_mapping",
+      "cost_centers",
       "dues_assignments",
+      "dues_rates",
+      "dues_transactions",
       "employer_payroll_runs",
       "employer_remittance_runs",
+      "employer_remittances",
       "entitlement_usage_log",
+      "erp_invoices",
+      "financial_periods",
+      "gl_account_mappings",
+      "gl_transaction_log",
+      "gl_trial_balance",
+      "payment_cycles",
+      "payment_disputes",
+      "payment_methods",
+      "payment_plans",
       "payroll_deductions",
       "pension_contributions",
       "pension_plans",
@@ -95,6 +113,8 @@
       "platform_payments",
       "reconciliation_exceptions",
       "reconciliation_runs",
+      "remittance_exceptions",
+      "remittance_line_items",
       "subscription_events_log",
       "reconciliation_matches",
       "board_packets",
@@ -153,7 +173,7 @@
     "userRlsRequiredExpansionTables": [
       "member_location_consent"
     ],
-    "totalExpansionCount": 110
+    "totalExpansionCount": 130
   },
   "blanketGrantBlocker": "union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired's tables lack an actual migration adding their RLS policy."
 }

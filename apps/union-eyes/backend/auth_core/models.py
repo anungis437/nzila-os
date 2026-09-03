@@ -204,13 +204,14 @@ class Organizations(BaseModel):
         null=True, blank=True, help_text="e.g., March 31"
     )
 
-    # Clerk Integration
-    clerk_organization_id = models.TextField(
+    # Auth provider integration (was Clerk-specific; auth provider is now
+    # abstracted — see config/settings.py's generic AUTH_* settings).
+    auth_provider_org_id = models.TextField(
         null=True,
         blank=True,
         unique=True,
         db_index=True,
-        help_text="Clerk organization ID (e.g. org_2abc...) — set by webhook on organization.created",
+        help_text="External auth provider organization ID (e.g. org_2abc...) — set by webhook on organization.created",
     )
 
     class Meta:

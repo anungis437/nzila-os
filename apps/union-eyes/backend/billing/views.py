@@ -26,6 +26,8 @@ class DenyAllPermission(permissions.BasePermission):
 from .models import (AutopaySettings, ClcPerCapitaBenchmarks, ClcUnionDensity, ClcBargainingTrends, ClcSyncLog, ClcOauthTokens, PerCapitaRemittances, ClcChartOfAccounts, RemittanceApprovals, ClcWebhookLog, OrganizationContacts, ClcOrganizationSyncLog, ChartOfAccounts, ClcRemittanceMapping, ClcApiConfig, DonationCampaigns, Donations, DonationReceipts, StripeConnectAccounts, PaymentClassificationPolicy, PaymentRoutingRules, SeparatedPaymentTransactions, WhiplashViolations, StrikeFundPaymentAudit, AccountBalanceReconciliation, WhiplashPreventionAudit, CostCenters, GlAccountMappings, GlTransactionLog, GlTrialBalance, OrganizationBillingConfig, DuesTransactions, Payments, PaymentCycles, PaymentMethods, BankReconciliation, PaymentDisputes, StripeWebhookEvents, StrikeFundDisbursements, T4aTaxSlips, Rl1TaxSlips, TaxYearEndProcessing, WeeklyThresholdTracking, CurrencyEnforcementPolicy, BankOfCanadaRates, TransactionCurrencyConversions, CurrencyEnforcementViolations, T106FilingTracking, TransferPricingDocumentation, FxRateAuditLog, CurrencyEnforcementAudit, ExchangeRates, CrossBorderTransactions, AccountMappings, ErpConnectors, JournalEntries, JournalEntryLines, ErpInvoices, BankAccounts, BankTransactions, BankReconciliations, SyncJobs, FinancialAuditLog, CurrencyExchangeRates, FmvPolicy, CpiData, FmvBenchmarks, ProcurementRequests, ProcurementBids, IndependentAppraisals, CpiAdjustedPricing, FmvViolations, FmvAuditLog, DuesRates, MemberDuesLedger, MemberArrears, EmployerRemittances, RemittanceLineItems, RemittanceExceptions, PaymentPlans, FinancialPeriods)
 from .serializers import (AutopaySettingsSerializer, ClcPerCapitaBenchmarksSerializer, ClcUnionDensitySerializer, ClcBargainingTrendsSerializer, ClcSyncLogSerializer, ClcOauthTokensSerializer, PerCapitaRemittancesSerializer, ClcChartOfAccountsSerializer, RemittanceApprovalsSerializer, ClcWebhookLogSerializer, OrganizationContactsSerializer, ClcOrganizationSyncLogSerializer, ChartOfAccountsSerializer, ClcRemittanceMappingSerializer, ClcApiConfigSerializer, DonationCampaignsSerializer, DonationsSerializer, DonationReceiptsSerializer, StripeConnectAccountsSerializer, PaymentClassificationPolicySerializer, PaymentRoutingRulesSerializer, SeparatedPaymentTransactionsSerializer, WhiplashViolationsSerializer, StrikeFundPaymentAuditSerializer, AccountBalanceReconciliationSerializer, WhiplashPreventionAuditSerializer, CostCentersSerializer, GlAccountMappingsSerializer, GlTransactionLogSerializer, GlTrialBalanceSerializer, OrganizationBillingConfigSerializer, DuesTransactionsSerializer, PaymentsSerializer, PaymentCyclesSerializer, PaymentMethodsSerializer, BankReconciliationSerializer, PaymentDisputesSerializer, StripeWebhookEventsSerializer, StrikeFundDisbursementsSerializer, T4aTaxSlipsSerializer, Rl1TaxSlipsSerializer, TaxYearEndProcessingSerializer, WeeklyThresholdTrackingSerializer, CurrencyEnforcementPolicySerializer, BankOfCanadaRatesSerializer, TransactionCurrencyConversionsSerializer, CurrencyEnforcementViolationsSerializer, T106FilingTrackingSerializer, TransferPricingDocumentationSerializer, FxRateAuditLogSerializer, CurrencyEnforcementAuditSerializer, ExchangeRatesSerializer, CrossBorderTransactionsSerializer, AccountMappingsSerializer, ErpConnectorsSerializer, JournalEntriesSerializer, JournalEntryLinesSerializer, ErpInvoicesSerializer, BankAccountsSerializer, BankTransactionsSerializer, BankReconciliationsSerializer, SyncJobsSerializer, FinancialAuditLogSerializer, CurrencyExchangeRatesSerializer, FmvPolicySerializer, CpiDataSerializer, FmvBenchmarksSerializer, ProcurementRequestsSerializer, ProcurementBidsSerializer, IndependentAppraisalsSerializer, CpiAdjustedPricingSerializer, FmvViolationsSerializer, FmvAuditLogSerializer, DuesRatesSerializer, MemberDuesLedgerSerializer, MemberArrearsSerializer, EmployerRemittancesSerializer, RemittanceLineItemsSerializer, RemittanceExceptionsSerializer, PaymentPlansSerializer, FinancialPeriodsSerializer)
 
+from .isolation import DenyAllPermission as SharedDenyAllPermission, DirectTenantIsolationMixin
+
 
 class AutopaySettingsViewSet(viewsets.ModelViewSet):
     """API endpoint for AutopaySettings operations."""
@@ -125,7 +127,7 @@ class RemittanceApprovalsViewSet(viewsets.ModelViewSet):
     """API endpoint for RemittanceApprovals operations."""
     queryset = RemittanceApprovals.objects.all()
     serializer_class = RemittanceApprovalsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['approver_user_id']
     search_fields = ['approver_user_id']
@@ -169,7 +171,7 @@ class ClcOrganizationSyncLogViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class ChartOfAccountsViewSet(viewsets.ModelViewSet):
+class ChartOfAccountsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for ChartOfAccounts operations."""
     queryset = ChartOfAccounts.objects.all()
     serializer_class = ChartOfAccountsSerializer
@@ -181,7 +183,7 @@ class ChartOfAccountsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class ClcRemittanceMappingViewSet(viewsets.ModelViewSet):
+class ClcRemittanceMappingViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for ClcRemittanceMapping operations."""
     queryset = ClcRemittanceMapping.objects.all()
     serializer_class = ClcRemittanceMappingSerializer
@@ -227,7 +229,7 @@ class DonationReceiptsViewSet(viewsets.ModelViewSet):
     """API endpoint for DonationReceipts operations."""
     queryset = DonationReceipts.objects.all()
     serializer_class = DonationReceiptsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -238,7 +240,7 @@ class StripeConnectAccountsViewSet(viewsets.ModelViewSet):
     """API endpoint for StripeConnectAccounts operations."""
     queryset = StripeConnectAccounts.objects.all()
     serializer_class = StripeConnectAccountsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['separate_account', 'trust_account_designation', 'account_verified']
     search_fields = ['id', 'account_type', 'account_purpose', 'stripe_account_id', 'account_status']
@@ -250,7 +252,7 @@ class PaymentClassificationPolicyViewSet(viewsets.ModelViewSet):
     """API endpoint for PaymentClassificationPolicy operations."""
     queryset = PaymentClassificationPolicy.objects.all()
     serializer_class = PaymentClassificationPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['enforce_strict_separation', 'allow_operational_fallback', 'require_trust_account', 'automatic_classification']
     search_fields = ['id', 'policy_name', 'policy_description', 'approved_by']
@@ -262,7 +264,7 @@ class PaymentRoutingRulesViewSet(viewsets.ModelViewSet):
     """API endpoint for PaymentRoutingRules operations."""
     queryset = PaymentRoutingRules.objects.all()
     serializer_class = PaymentRoutingRulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['destination_account_id', 'routing_mandatory', 'fallback_account_id', 'allow_fallback']
     search_fields = ['id', 'payment_type', 'payment_category', 'destination_account_type', 'routing_priority']
@@ -274,7 +276,7 @@ class SeparatedPaymentTransactionsViewSet(viewsets.ModelViewSet):
     """API endpoint for SeparatedPaymentTransactions operations."""
     queryset = SeparatedPaymentTransactions.objects.all()
     serializer_class = SeparatedPaymentTransactionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['routed_to_account_id', 'routing_rule_id', 'separation_enforced', 'correct_account_used']
     search_fields = ['id', 'payment_type', 'payment_category', 'payment_amount', 'payment_currency']
@@ -309,7 +311,7 @@ class AccountBalanceReconciliationViewSet(viewsets.ModelViewSet):
     """API endpoint for AccountBalanceReconciliation operations."""
     queryset = AccountBalanceReconciliation.objects.all()
     serializer_class = AccountBalanceReconciliationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['account_id', 'balance_match']
     search_fields = ['id', 'account_type', 'stripe_reported_balance', 'system_calculated_balance', 'discrepancy_amount']
@@ -329,7 +331,7 @@ class WhiplashPreventionAuditViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class CostCentersViewSet(viewsets.ModelViewSet):
+class CostCentersViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for CostCenters operations."""
     queryset = CostCenters.objects.all()
     serializer_class = CostCentersSerializer
@@ -339,7 +341,7 @@ class CostCentersViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class GlAccountMappingsViewSet(viewsets.ModelViewSet):
+class GlAccountMappingsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for GlAccountMappings operations."""
     queryset = GlAccountMappings.objects.all()
     serializer_class = GlAccountMappingsSerializer
@@ -349,7 +351,7 @@ class GlAccountMappingsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class GlTransactionLogViewSet(viewsets.ModelViewSet):
+class GlTransactionLogViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for GlTransactionLog operations."""
     queryset = GlTransactionLog.objects.all()
     serializer_class = GlTransactionLogSerializer
@@ -359,7 +361,7 @@ class GlTransactionLogViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class GlTrialBalanceViewSet(viewsets.ModelViewSet):
+class GlTrialBalanceViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for GlTrialBalance operations."""
     queryset = GlTrialBalance.objects.all()
     serializer_class = GlTrialBalanceSerializer
@@ -379,7 +381,7 @@ class OrganizationBillingConfigViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class DuesTransactionsViewSet(viewsets.ModelViewSet):
+class DuesTransactionsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for DuesTransactions operations."""
     queryset = DuesTransactions.objects.all()
     serializer_class = DuesTransactionsSerializer
@@ -401,7 +403,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class PaymentCyclesViewSet(viewsets.ModelViewSet):
+class PaymentCyclesViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for PaymentCycles operations."""
     queryset = PaymentCycles.objects.all()
     serializer_class = PaymentCyclesSerializer
@@ -411,7 +413,7 @@ class PaymentCyclesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class PaymentMethodsViewSet(viewsets.ModelViewSet):
+class PaymentMethodsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for PaymentMethods operations."""
     queryset = PaymentMethods.objects.all()
     serializer_class = PaymentMethodsSerializer
@@ -421,7 +423,7 @@ class PaymentMethodsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class BankReconciliationViewSet(viewsets.ModelViewSet):
+class BankReconciliationViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for BankReconciliation operations."""
     queryset = BankReconciliation.objects.all()
     serializer_class = BankReconciliationSerializer
@@ -431,7 +433,7 @@ class BankReconciliationViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class PaymentDisputesViewSet(viewsets.ModelViewSet):
+class PaymentDisputesViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for PaymentDisputes operations."""
     queryset = PaymentDisputes.objects.all()
     serializer_class = PaymentDisputesSerializer
@@ -475,7 +477,7 @@ class T4aTaxSlipsViewSet(viewsets.ModelViewSet):
     """API endpoint for T4aTaxSlips operations."""
     queryset = T4aTaxSlips.objects.all()
     serializer_class = T4aTaxSlipsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -487,7 +489,7 @@ class Rl1TaxSlipsViewSet(viewsets.ModelViewSet):
     """API endpoint for Rl1TaxSlips operations."""
     queryset = Rl1TaxSlips.objects.all()
     serializer_class = Rl1TaxSlipsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -499,7 +501,7 @@ class TaxYearEndProcessingViewSet(viewsets.ModelViewSet):
     """API endpoint for TaxYearEndProcessing operations."""
     queryset = TaxYearEndProcessing.objects.all()
     serializer_class = TaxYearEndProcessingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['tax_year']
     search_fields = ['tax_year']
@@ -680,7 +682,7 @@ class JournalEntryLinesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class ErpInvoicesViewSet(viewsets.ModelViewSet):
+class ErpInvoicesViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for ErpInvoices operations."""
     queryset = ErpInvoices.objects.all()
     serializer_class = ErpInvoicesSerializer
@@ -690,7 +692,7 @@ class ErpInvoicesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class BankAccountsViewSet(viewsets.ModelViewSet):
+class BankAccountsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for BankAccounts operations."""
     queryset = BankAccounts.objects.all()
     serializer_class = BankAccountsSerializer
@@ -711,7 +713,7 @@ class BankTransactionsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class BankReconciliationsViewSet(viewsets.ModelViewSet):
+class BankReconciliationsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for BankReconciliations operations."""
     queryset = BankReconciliations.objects.all()
     serializer_class = BankReconciliationsSerializer
@@ -857,7 +859,7 @@ class FmvAuditLogViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class DuesRatesViewSet(viewsets.ModelViewSet):
+class DuesRatesViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for DuesRates operations."""
     queryset = DuesRates.objects.all()
     serializer_class = DuesRatesSerializer
@@ -889,7 +891,7 @@ class MemberArrearsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class EmployerRemittancesViewSet(viewsets.ModelViewSet):
+class EmployerRemittancesViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for EmployerRemittances operations."""
     queryset = EmployerRemittances.objects.all()
     serializer_class = EmployerRemittancesSerializer
@@ -900,7 +902,7 @@ class EmployerRemittancesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class RemittanceLineItemsViewSet(viewsets.ModelViewSet):
+class RemittanceLineItemsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for RemittanceLineItems operations."""
     queryset = RemittanceLineItems.objects.all()
     serializer_class = RemittanceLineItemsSerializer
@@ -911,7 +913,7 @@ class RemittanceLineItemsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class RemittanceExceptionsViewSet(viewsets.ModelViewSet):
+class RemittanceExceptionsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for RemittanceExceptions operations."""
     queryset = RemittanceExceptions.objects.all()
     serializer_class = RemittanceExceptionsSerializer
@@ -922,7 +924,7 @@ class RemittanceExceptionsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class PaymentPlansViewSet(viewsets.ModelViewSet):
+class PaymentPlansViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for PaymentPlans operations."""
     queryset = PaymentPlans.objects.all()
     serializer_class = PaymentPlansSerializer
@@ -933,7 +935,7 @@ class PaymentPlansViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
-class FinancialPeriodsViewSet(viewsets.ModelViewSet):
+class FinancialPeriodsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet):
     """API endpoint for FinancialPeriods operations."""
     queryset = FinancialPeriods.objects.all()
     serializer_class = FinancialPeriodsSerializer

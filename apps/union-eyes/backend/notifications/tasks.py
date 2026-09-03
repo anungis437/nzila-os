@@ -190,7 +190,7 @@ def send_email_task(
         template: Template key (e.g. 'welcome', 'deadline-alert').
         data:     Template context data.
         priority: 1 = critical (overrides opt-out), 5 = normal.
-        user_id:  Clerk user ID for audit logging.
+        user_id:  Auth provider user ID for audit logging.
     """
     recipients = [to] if isinstance(to, str) else list(to)
     sent = 0
@@ -306,7 +306,7 @@ def send_sms_task(
         to:       Recipient phone number (any format).
         message:  SMS body text.
         priority: 1 = critical (overrides opt-out), 3 = normal.
-        user_id:  Clerk user ID for audit logging.
+        user_id:  Auth provider user ID for audit logging.
     """
     formatted = _format_phone(to)
 
@@ -371,7 +371,7 @@ def send_notification_task(
     fail the task is retried as a whole.
 
     Args:
-        user_id:  Clerk user ID.
+        user_id:  Auth provider user ID.
         title:    Notification headline.
         message:  Notification body text.
         channels: List of channels to dispatch on.

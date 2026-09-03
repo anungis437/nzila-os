@@ -47,7 +47,7 @@ class EvidencePackViewSet(viewsets.ReadOnlyModelViewSet):
         ser.is_valid(raise_exception=True)
 
         org_id = getattr(request, "organization_id", None)
-        actor_id = str(getattr(request, "clerk_user_id", "system"))
+        actor_id = str(getattr(request, "user_id", "system"))
 
         if not org_id:
             return Response(

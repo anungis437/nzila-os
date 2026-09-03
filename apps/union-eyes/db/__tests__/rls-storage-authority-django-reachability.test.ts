@@ -105,6 +105,18 @@ interface DjangoTableRoute {
   usesDenyAllPermission: boolean;
   usesUnfilteredObjectsAll: boolean;
   usesOnlyIsAuthenticated: boolean;
+  /**
+   * PR #752 round 32: true when the ViewSet's base-class list includes
+   * billing.isolation's DirectTenantIsolationMixin or
+   * ParentOwnedIsolationMixin — the shared, adversarially-tested
+   * (billing/tests_isolation.py) primitive that filters get_queryset(),
+   * forces ownership on create, and rejects cross-tenant reassignment on
+   * update/delete. A class-level `queryset = Model.objects.all()` is safe
+   * once one of these mixins is applied — it's a starting point the mixin
+   * further restricts, not the effective queryset — so this must count as
+   * proven isolation even though usesUnfilteredObjectsAll stays true.
+   */
+  usesSharedIsolationMixin: boolean;
 }
 
 function listDjangoAppDirs(): string[] {
@@ -176,6 +188,9 @@ function parseViewSetDetails(viewsSource: string): Map<string, Omit<DjangoTableR
       usesDenyAllPermission: /DenyAllPermission/.test(block),
       usesUnfilteredObjectsAll: true,
       usesOnlyIsAuthenticated: /permission_classes\s*=\s*\[permissions\.IsAuthenticated\]/.test(block),
+      usesSharedIsolationMixin: /\b(DirectTenantIsolationMixin|ParentOwnedIsolationMixin)\b/.test(
+        block.split('\n')[0] ?? '',
+      ),
     });
   }
   return mapping;
@@ -232,7 +247,12 @@ function liveDjangoTableRoutes(): Map<string, DjangoTableRoute[]> {
 }
 
 function routeHasProvenIsolation(route: DjangoTableRoute): boolean {
-  return route.usesDenyAllPermission || route.hasGetQueryset || !route.usesUnfilteredObjectsAll;
+  return (
+    route.usesDenyAllPermission ||
+    route.hasGetQueryset ||
+    route.usesSharedIsolationMixin ||
+    !route.usesUnfilteredObjectsAll
+  );
 }
 
 describe('Django billing/etc. backend router reachability vs storageAuthorityManifest', () => {
