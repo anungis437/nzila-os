@@ -6,12 +6,14 @@
  * .../verify-organization) is immutable once set — it accepts a repeat call
  * for the SAME organization (idempotent) but rejects a different one with
  * 409. This endpoint is the deliberate exception: it requires an explicit
- * `reason`, refuses to proceed if real financial artifacts already exist
- * for this pilot unless the caller explicitly acknowledges that those
- * artifacts are not being migrated automatically, and is logged
- * (`logger.warn`) for traceability — see `rebindPilotOrganization()`'s doc
- * comment for the current limits of that logging (structured log only, not
- * yet a durable `audit_logs` row).
+ * `reason`, refuses to proceed at all (409, no override — PR #752 round 27
+ * removed the prior acknowledgement escape hatch) if real financial
+ * artifacts already exist for this pilot, and is logged (`logger.warn`) for
+ * traceability — see `rebindPilotOrganization()`'s doc comment for the
+ * current limits of that logging (structured log only, not yet a durable
+ * `audit_logs` row) and for why the escape hatch was removed (it combined
+ * with round 26's commercial-terms lifecycle guard to create a permanent
+ * dead end).
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -23,7 +25,6 @@ export const dynamic = 'force-dynamic';
 const rebindOrganizationBodySchema = z.object({
   organizationId: z.string().uuid(),
   reason: z.string().trim().min(10, 'A reason of at least 10 characters is required to rebind a verified organization'),
-  acknowledgeFinancialArtifacts: z.boolean().optional(),
 });
 
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
@@ -58,7 +59,6 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     organizationId: parsed.data.organizationId,
     verifiedBy: user.id,
     reason: parsed.data.reason,
-    acknowledgeFinancialArtifacts: parsed.data.acknowledgeFinancialArtifacts,
   });
 
   if (!result.ok) {

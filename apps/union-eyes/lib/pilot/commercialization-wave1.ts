@@ -272,6 +272,54 @@ function deterministicChecksum(input: string): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+export interface CommercialTermsSnapshot {
+  verifiedOrganizationId: string;
+  verifiedMemberCount: number;
+  verifiedPilotAmount: string;
+  verifiedSubscriptionPlanId: string | null;
+  commercialTermsApprovedBy: string;
+  commercialTermsApprovedAt: string;
+}
+
+/**
+ * Immutable record of the approved commercial terms that produced a given
+ * financial artifact (PR #752 round 27). Stamped into the `metadata` of
+ * every `commercialContracts`/`platformInvoices`/`orgSubscriptions` row
+ * CREATED by commercial-transition, so that if a later organization
+ * correction clears the pilot row's own approved terms (round 26's
+ * `rebindPilotOrganization`), the artifact itself still carries proof of
+ * exactly which approval produced it — the pilot row's terms are the
+ * CURRENT authoritative snapshot; this is the HISTORICAL snapshot in
+ * effect at the moment a specific artifact was created, and the two are
+ * expected to diverge over time (that divergence is exactly what this
+ * exists to make provable). `deterministicChecksum` is the SAME
+ * non-cryptographic DJB2-style hash already used for artifact/reference
+ * version checksums elsewhere in this module — a cheap fingerprint, not a
+ * security control.
+ */
+export function buildCommercialTermsSnapshot(input: {
+  verifiedOrganizationId: string;
+  verifiedMemberCount: number;
+  verifiedPilotAmount: string;
+  verifiedSubscriptionPlanId: string | null;
+  commercialTermsApprovedBy: string;
+  commercialTermsApprovedAt: Date | string;
+}): { snapshot: CommercialTermsSnapshot; fingerprint: string } {
+  const snapshot: CommercialTermsSnapshot = {
+    verifiedOrganizationId: input.verifiedOrganizationId,
+    verifiedMemberCount: input.verifiedMemberCount,
+    verifiedPilotAmount: input.verifiedPilotAmount,
+    verifiedSubscriptionPlanId: input.verifiedSubscriptionPlanId,
+    commercialTermsApprovedBy: input.commercialTermsApprovedBy,
+    commercialTermsApprovedAt:
+      input.commercialTermsApprovedAt instanceof Date
+        ? input.commercialTermsApprovedAt.toISOString()
+        : input.commercialTermsApprovedAt,
+  };
+  const fingerprint = deterministicChecksum(stableStringify(snapshot));
+  return { snapshot, fingerprint };
+}
+
 export function buildPilotArtifactVersionRecord(input: {
   generatedAt: string;
   source: string;

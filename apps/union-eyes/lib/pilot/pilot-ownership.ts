@@ -288,19 +288,26 @@ export type RebindPilotOrganizationResult =
  *   - Fails closed (404) if the target organization does not exist.
  *   - Fails closed (409) if the pilot is not yet bound at all — a rebind
  *     presupposes an existing binding; use `bindPilotOrganization()` first.
- *   - Fails closed (409) if this pilot has any real financial artifact
- *     (see `pilotHasFinancialArtifacts` — commercial contract, platform
- *     invoice, OR org subscription, not just a contract) UNLESS the caller
- *     explicitly passes `acknowledgeFinancialArtifacts: true`. Rebinding
- *     after real financial records exist would silently misattribute them
- *     to the new organization; this function does NOT migrate those rows —
- *     the acknowledgement is a deliberate opt-in that the caller has a
- *     separate plan for reconciling them, not an automatic migration.
+ *   - Fails closed (409), with NO override, if this pilot has any real
+ *     financial artifact (see `pilotHasFinancialArtifacts` — commercial
+ *     contract, platform invoice, OR org subscription, not just a
+ *     contract). PR #752 round 27 REMOVED the prior
+ *     `acknowledgeFinancialArtifacts` escape hatch: round 26 made
+ *     `approveCommercialTerms()` refuse EVERY further approval once any
+ *     financial artifact exists, and this function unconditionally clears
+ *     commercial terms on every organization change — the two rules
+ *     combined created a permanent dead end (acknowledged rebind clears
+ *     terms, but the pre-existing artifact then makes fresh terms
+ *     approval impossible forever, since the artifact is never deleted).
+ *     A post-artifact organization correction now requires a dedicated
+ *     financial-correction workflow that does not exist yet, not this
+ *     function with an acknowledgement flag.
  *   - The pilot row is locked with `FOR UPDATE` for the same concurrency
  *     reason described on `bindPilotOrganization()` — this also closes the
  *     TOCTOU window between this function's own artifact check and a
  *     concurrent commercial-transition creating one, since both now
- *     contend for the same row lock before proceeding. *   - Clears any previously approved commercial terms (PR #752 round 26:
+ *     contend for the same row lock before proceeding.
+ *   - Clears any previously approved commercial terms (PR #752 round 26:
  *     `verifiedMemberCount`/`verifiedPilotAmount`/`verifiedSubscriptionPlanId`/
  *     `commercialTermsApprovedBy`/`commercialTermsApprovedAt`) whenever the
  *     verified organization actually changes. Without this, terms approved
@@ -309,11 +316,10 @@ export type RebindPilotOrganizationResult =
  *     organization's financial artifacts from an approval made before that
  *     organization was even the verified owner. Forces a fresh
  *     `approveCommercialTerms()` call before any further
- *     financial-artifact-creating transition — matching the SAME
- *     acknowledge-then-proceed pattern already used for financial artifacts
- *     above (the clear is unconditional, not gated by
- *     `acknowledgeFinancialArtifacts`, since stale terms are never safe to
- *     keep regardless of whether existing artifacts are being acknowledged). *   - Logs a structured warning (`logger.warn`) with the full
+ *     financial-artifact-creating transition. Reachable only when NO
+ *     financial artifact exists yet (round 27), so this clear can never
+ *     itself create the dead end described above.
+ *   - Logs a structured warning (`logger.warn`) with the full
  *     before/after/reason/actor for traceability. This is NOT currently a
  *     durable, queryable audit-event row (no `audit_logs` write) — treat it
  *     as "logged for traceability," not "audited," until that gap is
@@ -324,9 +330,8 @@ export async function rebindPilotOrganization(params: {
   organizationId: string;
   verifiedBy: string;
   reason: string;
-  acknowledgeFinancialArtifacts?: boolean;
 }): Promise<RebindPilotOrganizationResult> {
-  const { pilotId, organizationId, verifiedBy, acknowledgeFinancialArtifacts = false } = params;
+  const { pilotId, organizationId, verifiedBy } = params;
   const reason = params.reason?.trim() ?? '';
 
   if (!reason) {
@@ -370,16 +375,15 @@ export async function rebindPilotOrganization(params: {
 
     const hasFinancialArtifacts = await pilotHasFinancialArtifacts(pilotId);
 
-    if (hasFinancialArtifacts && !acknowledgeFinancialArtifacts) {
+    if (hasFinancialArtifacts) {
       return {
         ok: false,
         status: 409,
         error:
           'This pilot already has financial artifacts (a commercial contract, platform invoice, or ' +
-          'org subscription) under its current verified organization. Rebinding would misattribute ' +
-          'existing commercial records. Pass acknowledgeFinancialArtifacts=true with an explicit ' +
-          'reason to proceed — this does NOT migrate the existing contract, invoice, or subscription ' +
-          'rows, which still reference the previous organization and must be corrected separately.',
+          'org subscription) under its current verified organization. Rebinding is not permitted once ' +
+          'real financial artifacts exist — a post-artifact organization correction requires a dedicated ' +
+          'financial-correction workflow, not this endpoint.',
       };
     }
 
@@ -407,8 +411,6 @@ export async function rebindPilotOrganization(params: {
       organizationId,
       verifiedBy,
       reason,
-      hadFinancialArtifacts: hasFinancialArtifacts,
-      acknowledgeFinancialArtifacts,
       clearedCommercialTerms: true,
     });
 

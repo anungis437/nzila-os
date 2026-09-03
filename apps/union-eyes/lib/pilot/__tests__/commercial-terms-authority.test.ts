@@ -137,7 +137,7 @@ describe('approveCommercialTerms (PR #752 round 25)', () => {
 
   it('derives the amount deterministically from the economics ladder when no explicit amount is given', async () => {
     const { approveCommercialTerms } = await loadModule();
-    m.queueSelect([{ id: 'p1' }]); // locked pilot lookup
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]); // locked pilot lookup
 
     const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250 });
 
@@ -158,7 +158,7 @@ describe('approveCommercialTerms (PR #752 round 25)', () => {
 
   it('honors an explicit platform-approved pilotAmount override instead of the ladder value', async () => {
     const { approveCommercialTerms } = await loadModule();
-    m.queueSelect([{ id: 'p1' }]);
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]);
 
     const result = await approveCommercialTerms({
       pilotId: 'p1',
@@ -175,7 +175,7 @@ describe('approveCommercialTerms (PR #752 round 25)', () => {
 
   it('approves with an explicit active subscription plan', async () => {
     const { approveCommercialTerms } = await loadModule();
-    m.queueSelect([{ id: 'plan-x', isActive: true }], [{ id: 'p1' }]);
+    m.queueSelect([{ id: 'plan-x', isActive: true }], [{ id: 'p1', verifiedOrganizationId: 'org-1' }]);
 
     const result = await approveCommercialTerms({
       pilotId: 'p1',
@@ -202,7 +202,7 @@ describe('approveCommercialTerms round 26 lifecycle + monetary hardening', () =>
   it('rejects re-approval once a real financial artifact already exists for this pilot', async () => {
     const { approveCommercialTerms } = await loadModule();
     m.pilotHasFinancialArtifacts.mockResolvedValueOnce(true);
-    m.queueSelect([{ id: 'p1' }]); // locked pilot lookup
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]); // locked pilot lookup
 
     const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-2', memberCount: 500 });
 
@@ -217,7 +217,7 @@ describe('approveCommercialTerms round 26 lifecycle + monetary hardening', () =>
   it('rejects re-approval with IDENTICAL values once a financial artifact exists (no silent no-op allowed)', async () => {
     const { approveCommercialTerms } = await loadModule();
     m.pilotHasFinancialArtifacts.mockResolvedValueOnce(true);
-    m.queueSelect([{ id: 'p1' }]);
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]);
 
     const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250, pilotAmount: '5000.00' });
 
@@ -232,7 +232,7 @@ describe('approveCommercialTerms round 26 lifecycle + monetary hardening', () =>
       callOrder.push('artifact-check');
       return false;
     });
-    m.queueSelect([{ id: 'p1' }]);
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]);
     const originalSelect = m.mockDb.select.getMockImplementation();
     m.mockDb.select.mockImplementationOnce((...args: unknown[]) => {
       callOrder.push('row-lock-select');
@@ -259,7 +259,7 @@ describe('approveCommercialTerms round 26 lifecycle + monetary hardening', () =>
 
   it('accepts a pilotAmount that normalizes to exactly $0.01', async () => {
     const { approveCommercialTerms } = await loadModule();
-    m.queueSelect([{ id: 'p1' }]);
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]);
 
     const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250, pilotAmount: '0.006' });
 
@@ -283,3 +283,44 @@ describe('approveCommercialTerms round 26 lifecycle + monetary hardening', () =>
     }
   });
 });
+
+describe('approveCommercialTerms round 27 — requires a verified organization', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.reset();
+    m.pilotHasFinancialArtifacts.mockResolvedValue(false);
+  });
+
+  it('rejects approval when the pilot has no verified organization (first bind NULL -> Org not yet done)', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: null }]);
+
+    const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250 });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.status).toBe(409);
+      expect(result.error).toMatch(/organization has not been verified/);
+    }
+    expect(m.updateCalls).toHaveLength(0);
+  });
+
+  it('checks organization-verification BEFORE the financial-artifact census', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: null }]);
+
+    await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250 });
+
+    expect(m.pilotHasFinancialArtifacts).not.toHaveBeenCalled();
+  });
+
+  it('approves once verifiedOrganizationId is present', async () => {
+    const { approveCommercialTerms } = await loadModule();
+    m.queueSelect([{ id: 'p1', verifiedOrganizationId: 'org-1' }]);
+
+    const result = await approveCommercialTerms({ pilotId: 'p1', approvedBy: 'admin-1', memberCount: 250 });
+
+    expect(result.ok).toBe(true);
+  });
+});
+

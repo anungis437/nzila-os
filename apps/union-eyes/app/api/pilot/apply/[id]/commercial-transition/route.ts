@@ -15,6 +15,7 @@ import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerified
 import {
   buildPilotArtifactVersionRecord,
   buildPilotContractNumber,
+  buildCommercialTermsSnapshot,
   COMMERCIAL_STATE_ORDER,
   buildProposalPackage,
   inferPilotStatusFromCommercialState,
@@ -253,6 +254,24 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         }
       }
 
+      // PR #752 round 27: an immutable record of the approval that produced
+      // whatever artifact this transition creates, stamped into that
+      // artifact's own metadata — so a LATER organization correction that
+      // clears the pilot row's terms (round 26) can never erase proof of
+      // which approval a given contract/invoice/subscription came from.
+      // Only meaningful (and only ever read) for financial target states;
+      // the gate above guarantees the required fields are non-null there.
+      const commercialTermsSnapshot = FINANCIAL_TARGET_STATES.includes(targetState)
+        ? buildCommercialTermsSnapshot({
+            verifiedOrganizationId,
+            verifiedMemberCount: application.verifiedMemberCount as number,
+            verifiedPilotAmount: application.verifiedPilotAmount as string,
+            verifiedSubscriptionPlanId: application.verifiedSubscriptionPlanId,
+            commercialTermsApprovedBy: application.commercialTermsApprovedBy as string,
+            commercialTermsApprovedAt: application.commercialTermsApprovedAt as Date,
+          })
+        : null;
+
       const proposal = buildProposalPackage(
         {
           id: application.id,
@@ -327,6 +346,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
               metadata: {
                 source: 'pilot-commercial-transition',
                 pilotApplicationId: application.id,
+                commercialTermsSnapshot: commercialTermsSnapshot?.snapshot,
+                commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint,
               },
             })
             .returning({ id: commercialContracts.id });
@@ -378,6 +399,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
             metadata: {
               source: 'pilot-commercial-transition',
               pilotApplicationId: application.id,
+              commercialTermsSnapshot: commercialTermsSnapshot?.snapshot,
+              commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint,
             },
           })
           .returning({ id: platformInvoices.id });
@@ -394,6 +417,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
             metadata: {
               source: 'pilot-commercial-transition',
               pilotApplicationId: application.id,
+              commercialTermsSnapshot: commercialTermsSnapshot?.snapshot,
+              commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint,
             },
           });
 
@@ -448,6 +473,8 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
                   metadata: {
                     source: 'pilot-commercial-transition',
                     pilotApplicationId: application.id,
+                    commercialTermsSnapshot: commercialTermsSnapshot?.snapshot,
+                    commercialTermsFingerprint: commercialTermsSnapshot?.fingerprint,
                   },
                 })
                 .returning({ id: orgSubscriptions.id });

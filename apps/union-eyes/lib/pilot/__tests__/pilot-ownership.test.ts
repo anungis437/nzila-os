@@ -548,7 +548,7 @@ describe('pilot-ownership', () => {
       expect(mockDbUpdate).not.toHaveBeenCalled();
     });
 
-    it('blocks the rebind with 409 when a financial artifact already exists and acknowledgeFinancialArtifacts is not set', async () => {
+    it('blocks the rebind with 409 when a financial artifact already exists', async () => {
       dbSelectSequence(
         [{ id: ORG_B }],
         [{ verifiedOrganizationId: ORG_A }],
@@ -568,27 +568,27 @@ describe('pilot-ownership', () => {
       expect(mockDbUpdate).not.toHaveBeenCalled();
     });
 
-    it('proceeds when a financial artifact exists AND acknowledgeFinancialArtifacts is explicitly true', async () => {
+    it('round 27: blocks the rebind with 409 with NO override possible — the acknowledgeFinancialArtifacts escape hatch was removed entirely', async () => {
       dbSelectSequence(
         [{ id: ORG_B }],
         [{ verifiedOrganizationId: ORG_A }],
         [{ id: 'contract-1' }],
       );
-      dbUpdateReturns([{ id: 'pilot-1' }]);
 
       const result = await rebindPilotOrganization({
         pilotId: 'pilot-1',
         organizationId: ORG_B,
         verifiedBy: 'u-sysadmin',
         reason: 'Org A was a data-entry mistake; the real org is Org B. Financial rows will be corrected manually.',
-        acknowledgeFinancialArtifacts: true,
       });
 
-      expect(result).toEqual({ ok: true, organizationId: ORG_B, previousOrganizationId: ORG_A });
-      expect(mockDbUpdate).toHaveBeenCalledTimes(1);
+      expect(result.ok).toBe(false);
+      expect((result as { status: number }).status).toBe(409);
+      expect((result as { error: string }).error).toMatch(/not permitted once/i);
+      expect(mockDbUpdate).not.toHaveBeenCalled();
     });
 
-    it('proceeds without needing acknowledgeFinancialArtifacts when no financial artifact exists in any of the 3 tables', async () => {
+    it('proceeds when no financial artifact exists in any of the 3 tables', async () => {
       dbSelectSequence(
         [{ id: ORG_B }],
         [{ verifiedOrganizationId: ORG_A }],

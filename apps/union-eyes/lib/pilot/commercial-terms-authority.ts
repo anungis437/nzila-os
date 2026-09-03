@@ -61,6 +61,16 @@ const MAX_PILOT_AMOUNT = 9999999999.99;
  *
  * Fails closed:
  *   - `memberCount` must be a positive integer.
+ *   - The pilot's organization must already be VERIFIED
+ *     (`verifiedOrganizationId` non-null — PR #752 round 27) before any
+ *     commercial terms may be approved (409 otherwise). Without this, a
+ *     pilot could be approved while `verifiedOrganizationId` is still
+ *     null, then bound to an organization AFTER the fact
+ *     (`bindPilotOrganization`, the first-time NULL -> org bind) — the
+ *     approved terms would never have been evaluated in that
+ *     organization's context at all. Round 26 only cleared terms on
+ *     `rebindPilotOrganization` (an already-verified org changing to a
+ *     different one); this closes the same gap for the FIRST bind.
  *   - `subscriptionPlanId`, when provided, must reference an existing,
  *     currently-active `subscription_plans` row — never trusted from the
  *     caller's word alone, and never guessed via an "any active plan"
@@ -147,7 +157,7 @@ export async function approveCommercialTerms(params: {
     }
 
     const [pilot] = await db
-      .select({ id: pilotApplications.id })
+      .select({ id: pilotApplications.id, verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
       .from(pilotApplications)
       .where(eq(pilotApplications.id, pilotId))
       .limit(1)
@@ -155,6 +165,17 @@ export async function approveCommercialTerms(params: {
 
     if (!pilot) {
       return { ok: false, status: 404, error: 'Pilot application not found' };
+    }
+
+    if (!pilot.verifiedOrganizationId) {
+      return {
+        ok: false,
+        status: 409,
+        error:
+          'This pilot application\'s organization has not been verified. Call POST /api/pilot/apply/[id]/verify-organization ' +
+          'before approving commercial terms — commercial terms must be bound to a verified organization, never approved ' +
+          'against an unverified pilot.',
+      };
     }
 
     if (await pilotHasFinancialArtifacts(pilotId)) {

@@ -108,6 +108,16 @@ vi.mock('@/lib/pilot/commercialization-wave1', () => ({
   buildProposalPackage: m.buildProposalPackage,
   buildPilotArtifactVersionRecord: m.buildPilotArtifactVersionRecord,
   buildPilotContractNumber: (pilotApplicationId: string) => `PILOT-${pilotApplicationId.slice(0, 8).toUpperCase()}`,
+  buildCommercialTermsSnapshot: (input: Record<string, unknown>) => ({
+    snapshot: {
+      ...input,
+      commercialTermsApprovedAt:
+        input.commercialTermsApprovedAt instanceof Date
+          ? input.commercialTermsApprovedAt.toISOString()
+          : input.commercialTermsApprovedAt,
+    },
+    fingerprint: 'test-fingerprint',
+  }),
   inferPilotStatusFromCommercialState: m.inferPilotStatusFromCommercialState,
   isCommercialTransitionAllowed: m.isCommercialTransitionAllowed,
   normalizeCommercialState: m.normalizeCommercialState,
@@ -516,6 +526,60 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     const insertCall = mockDb.insert.mock.results[0]?.value as { values: ReturnType<typeof vi.fn> } | undefined;
     expect(insertCall?.values).toHaveBeenCalledWith(
       expect.objectContaining({ totalContractValue: '12000.00' }),
+    );
+  });
+
+  it('round 27: stamps an immutable commercial-terms snapshot/fingerprint into the created contract metadata', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect(
+      [{ id: 'app-1' }],
+      [
+        {
+          id: 'app-1',
+          organizationName: 'Union Eyes',
+          organizationType: 'local',
+          contactName: 'Casey',
+          contactEmail: 'casey@example.com',
+          memberCount: 250,
+          jurisdictions: [],
+          sectors: [],
+          currentSystem: 'legacy',
+          challenges: [],
+          goals: [],
+          readinessScore: 65,
+          reviewedAt: null,
+          approvedAt: null,
+          verifiedMemberCount: 250,
+          verifiedPilotAmount: '12000.00',
+          verifiedSubscriptionPlanId: null,
+          commercialTermsApprovedBy: 'admin-1',
+          commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
+          responses: { commercialState: 'proposal_ready' },
+        },
+      ],
+      [{ id: 'billing-account-1' }], // billing account lookup — found
+      [], // existingContract lookup — none found, triggers insert
+    );
+
+    const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
+      method: 'POST',
+      body: JSON.stringify({ targetState: 'contract_sent' }),
+      headers: { 'content-type': 'application/json' },
+    }), { params: { id: 'app-1' } });
+
+    expect(response.status).toBe(200);
+    const insertCall = mockDb.insert.mock.results[0]?.value as { values: ReturnType<typeof vi.fn> } | undefined;
+    expect(insertCall?.values).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          commercialTermsSnapshot: expect.objectContaining({
+            verifiedMemberCount: 250,
+            verifiedPilotAmount: '12000.00',
+            commercialTermsApprovedBy: 'admin-1',
+          }),
+          commercialTermsFingerprint: 'test-fingerprint',
+        }),
+      }),
     );
   });
 

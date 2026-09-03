@@ -109,11 +109,10 @@ describe('pilot/apply/[id]/rebind-organization route (PR #752 round 21)', () => 
       organizationId: VALID_ORG_ID,
       verifiedBy: 'u-sysadmin',
       reason: VALID_REASON,
-      acknowledgeFinancialArtifacts: undefined,
     });
   });
 
-  it('forwards acknowledgeFinancialArtifacts when explicitly set', async () => {
+  it('ignores a client-supplied acknowledgeFinancialArtifacts (PR #752 round 27: the escape hatch was removed entirely)', async () => {
     const { POST } = await loadRoute();
 
     await POST(
@@ -121,12 +120,15 @@ describe('pilot/apply/[id]/rebind-organization route (PR #752 round 21)', () => 
       { params: { id: 'p1' } },
     );
 
-    expect(m.rebindPilotOrganization).toHaveBeenCalledWith(
-      expect.objectContaining({ acknowledgeFinancialArtifacts: true }),
-    );
+    expect(m.rebindPilotOrganization).toHaveBeenCalledWith({
+      pilotId: 'p1',
+      organizationId: VALID_ORG_ID,
+      verifiedBy: 'u-sysadmin',
+      reason: VALID_REASON,
+    });
   });
 
-  it('propagates a 409 when financial artifacts already exist and are not acknowledged', async () => {
+  it('propagates a 409 when financial artifacts already exist — no override is possible', async () => {
     m.rebindPilotOrganization.mockResolvedValue({
       ok: false,
       status: 409,
