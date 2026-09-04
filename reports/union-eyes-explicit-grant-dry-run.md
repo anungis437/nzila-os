@@ -1,20 +1,20 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-04T00:13:05.065Z
+Generated: 2026-09-04T08:57:53.519Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 357
-- Pending review (NEEDS_REVIEW, excluded from plan): 343
-- Tenant-granted tables (union_eyes_runtime): 149
+- Ready for explicit GRANT (CLOSED, fully resolved): 359
+- Pending review (NEEDS_REVIEW, excluded from plan): 341
+- Tenant-granted tables (union_eyes_runtime): 151
 - System-granted tables (union_eyes_system): 25
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 149 | 131 | 94 | 76 |
+| tenant (union_eyes_runtime) | 151 | 133 | 95 | 76 |
 | system (union_eyes_system) | 23 | 11 | 9 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
@@ -331,6 +331,8 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | report_shares | LATENT_UNREACHABLE | NONE | NONE |
 | report_templates | LATENT_UNREACHABLE | NONE | NONE |
 | reserved_matter_votes | SYSTEM_ONLY | NONE | SELECT, INSERT, UPDATE |
+| reward_budget_envelopes | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
+| reward_wallet_ledger | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | right_of_refusal_events | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | role_tenure_history | LATENT_UNREACHABLE | NONE | NONE |
 | room_bookings | LATENT_UNREACHABLE | NONE | NONE |
