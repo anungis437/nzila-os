@@ -50,7 +50,7 @@ class ClcPerCapitaBenchmarksViewSet(viewsets.ModelViewSet):
     """API endpoint for ClcPerCapitaBenchmarks operations."""
     queryset = ClcPerCapitaBenchmarks.objects.all()
     serializer_class = ClcPerCapitaBenchmarksSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     search_fields = ['organization_id']
@@ -765,7 +765,7 @@ class CurrencyExchangeRatesViewSet(viewsets.ModelViewSet):
     """API endpoint for CurrencyExchangeRates operations."""
     queryset = CurrencyExchangeRates.objects.all()
     serializer_class = CurrencyExchangeRatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

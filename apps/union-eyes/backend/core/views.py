@@ -225,7 +225,7 @@ class ExternalCommunicationChannelsViewSet(viewsets.ModelViewSet):
     """API endpoint for ExternalCommunicationChannels operations."""
     queryset = ExternalCommunicationChannels.objects.all()
     serializer_class = ExternalCommunicationChannelsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -245,7 +245,7 @@ class ExternalCommunicationUsersViewSet(viewsets.ModelViewSet):
     """API endpoint for ExternalCommunicationUsers operations."""
     queryset = ExternalCommunicationUsers.objects.all()
     serializer_class = ExternalCommunicationUsersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -265,7 +265,7 @@ class ExternalDocumentSitesViewSet(viewsets.ModelViewSet):
     """API endpoint for ExternalDocumentSites operations."""
     queryset = ExternalDocumentSites.objects.all()
     serializer_class = ExternalDocumentSitesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -275,7 +275,7 @@ class ExternalDocumentLibrariesViewSet(viewsets.ModelViewSet):
     """API endpoint for ExternalDocumentLibraries operations."""
     queryset = ExternalDocumentLibraries.objects.all()
     serializer_class = ExternalDocumentLibrariesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -375,7 +375,7 @@ class ExternalInsuranceClaimsViewSet(viewsets.ModelViewSet):
     """API endpoint for ExternalInsuranceClaims operations."""
     queryset = ExternalInsuranceClaims.objects.all()
     serializer_class = ExternalInsuranceClaimsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -465,7 +465,7 @@ class IntegrationConfigsViewSet(viewsets.ModelViewSet):
     """API endpoint for IntegrationConfigs operations."""
     queryset = IntegrationConfigs.objects.all()
     serializer_class = IntegrationConfigsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -487,7 +487,7 @@ class WebhookEventsViewSet(viewsets.ModelViewSet):
     """API endpoint for WebhookEvents operations."""
     queryset = WebhookEvents.objects.all()
     serializer_class = WebhookEventsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     search_fields = ['id']
@@ -543,7 +543,7 @@ class SupportTicketsViewSet(viewsets.ModelViewSet):
     """API endpoint for SupportTickets operations."""
     queryset = SupportTickets.objects.all()
     serializer_class = SupportTicketsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['ticket_number']
     search_fields = ['ticket_number']

@@ -70,6 +70,16 @@ const OUT_DIR = resolve(REPO_ROOT, 'reports')
 
 type CohortLane = 'DEAD' | 'CONTAINED' | 'SIMPLE_TENANT' | 'PARENT_OWNED' | 'SYSTEM_WORKER' | 'COMPLEX'
 type Confidence = 'HIGH' | 'MEDIUM' | 'LOW'
+type AdvisoryOperation = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'
+type AdvisoryReachabilityKind =
+  | 'NONE'
+  | 'HTTP_ROUTE'
+  | 'SERVER_ACTION'
+  | 'SERVER_PAGE'
+  | 'CRON_OR_WEBHOOK'
+  | 'DJANGO_VIEWSET'
+  | 'LIBRARY_ONLY'
+  | 'MIXED'
 
 interface CensusRow {
   table: string
@@ -102,6 +112,11 @@ interface CensusRow {
     cohortLane: CohortLane
     cohortKey: string
   }
+  operationSet: AdvisoryOperation[]
+  reachabilityKind: AdvisoryReachabilityKind
+  authEvidence: string[]
+  organizationEvidence: string[]
+  mutationBoundaryEvidence: string[]
 }
 
 function realImporterFiles(pattern: string, extensions: string[]): string[] {
@@ -137,6 +152,80 @@ function isProductionHint(filePath: string): boolean {
 
 function isSystemHint(filePath: string): boolean {
   return /cron|webhook|worker|system|scheduled/i.test(filePath)
+}
+
+function pushUnique(target: string[], value: string): void {
+  if (!target.includes(value)) target.push(value)
+}
+
+function inferAdvisoryOperationSet(tableExportName: string | undefined, tableName: string, files: string[]): AdvisoryOperation[] {
+  const operations = new Set<AdvisoryOperation>()
+  for (const file of files) {
+    try {
+      const src = readFileSync(resolve(APP_ROOT, file), 'utf8')
+      const symbols = [tableExportName, tableName].filter(Boolean) as string[]
+      for (const symbol of symbols) {
+        if (new RegExp(`\\.from\\(\\s*${symbol}\\b|db\\.query\\.${symbol}\\b|tx\\.query\\.${symbol}\\b`).test(src)) {
+          operations.add('SELECT')
+        }
+        if (new RegExp(`\\.insert\\(\\s*${symbol}\\b`).test(src)) operations.add('INSERT')
+        if (new RegExp(`\\.update\\(\\s*${symbol}\\b`).test(src)) operations.add('UPDATE')
+        if (new RegExp(`\\.delete\\(\\s*${symbol}\\b`).test(src)) operations.add('DELETE')
+      }
+
+      if (hasPossibleRawSqlReference(tableName, src)) {
+        if (/\bSELECT\b|\bFROM\b/i.test(src)) operations.add('SELECT')
+        if (/\bINSERT\b|\bINTO\b/i.test(src)) operations.add('INSERT')
+        if (/\bUPDATE\b/i.test(src)) operations.add('UPDATE')
+        if (/\bDELETE\b/i.test(src)) operations.add('DELETE')
+      }
+    } catch {
+      // Advisory only: unreadable files should not affect candidate classification.
+    }
+  }
+
+  return [...operations].sort()
+}
+
+function inferReachabilityKind(files: string[], djangoViewSetReachable: boolean): AdvisoryReachabilityKind {
+  const kinds = new Set<AdvisoryReachabilityKind>()
+  if (files.some((file) => file.startsWith('app/api/'))) kinds.add('HTTP_ROUTE')
+  if (files.some((file) => file.startsWith('actions/'))) kinds.add('SERVER_ACTION')
+  if (files.some((file) => /^app\/\[locale\]\//.test(file) || /^app\/[^/]+\/.*page\.tsx$/.test(file))) kinds.add('SERVER_PAGE')
+  if (files.some(isSystemHint)) kinds.add('CRON_OR_WEBHOOK')
+  if (djangoViewSetReachable) kinds.add('DJANGO_VIEWSET')
+  if (files.some((file) => /^(lib|services)\//.test(file))) kinds.add('LIBRARY_ONLY')
+  if (kinds.size === 0) return 'NONE'
+  if (kinds.size === 1) return [...kinds][0]
+  return 'MIXED'
+}
+
+function collectAdvisoryEvidence(files: string[], orgColumn: string | null): Pick<CensusRow, 'authEvidence' | 'organizationEvidence' | 'mutationBoundaryEvidence'> {
+  const authEvidence: string[] = []
+  const organizationEvidence: string[] = []
+  const mutationBoundaryEvidence: string[] = []
+
+  for (const file of files) {
+    try {
+      const src = readFileSync(resolve(APP_ROOT, file), 'utf8')
+      if (/withRoleAuth\(/.test(src)) pushUnique(authEvidence, `${file}: withRoleAuth`)
+      if (/withApi\(/.test(src)) pushUnique(authEvidence, `${file}: withApi`)
+      if (/requireUser\(/.test(src)) pushUnique(authEvidence, `${file}: requireUser`)
+      if (/requireApiAuth\(/.test(src)) pushUnique(authEvidence, `${file}: requireApiAuth`)
+      if (/auth:\s*\{[^}]*required:\s*true|auth:\s*\{[^}]*minRole:/.test(src)) pushUnique(authEvidence, `${file}: explicit auth config`)
+      if (/withRLSContext\(/.test(src)) pushUnique(organizationEvidence, `${file}: withRLSContext`)
+      if (/organizationId|organization_id|orgId|org_id/.test(src)) pushUnique(organizationEvidence, `${file}: organization identifier reference`)
+      if (orgColumn && new RegExp(`\\b${orgColumn}\\b`).test(src)) pushUnique(organizationEvidence, `${file}: ${orgColumn}`)
+      if (/withSystemContext\(/.test(src)) pushUnique(mutationBoundaryEvidence, `${file}: withSystemContext`)
+      if (/\.insert\(|\bINSERT\b/i.test(src)) pushUnique(mutationBoundaryEvidence, `${file}: insert/write path`)
+      if (/\.update\(|\bUPDATE\b/i.test(src)) pushUnique(mutationBoundaryEvidence, `${file}: update/write path`)
+      if (/\.delete\(|\bDELETE\b/i.test(src)) pushUnique(mutationBoundaryEvidence, `${file}: delete/write path`)
+    } catch {
+      // Advisory only.
+    }
+  }
+
+  return { authEvidence, organizationEvidence, mutationBoundaryEvidence }
 }
 
 /** Best-effort snake_case -> Django PascalCase model-name guess (matches this codebase's observed convention: social_accounts -> SocialAccounts). */
@@ -253,6 +342,10 @@ function main() {
     const djangoDetail = django
       ? `model=${django.modelFile}${django.viewSetFile ? `, viewset=${django.viewSetFile}` : ''}${django.routerRegistered ? ', router-registered' : ', not router-registered'}${django.usesDenyAll ? ', DenyAll' : django.usesIsAuthenticatedOnly ? ', IsAuthenticated-only' : ''}`
       : 'no Django model found'
+    const advisoryFiles = [...hintPaths, ...(django?.viewSetFile ? [django.viewSetFile] : [])].filter((f, i, arr) => arr.indexOf(f) === i)
+    const operationSet = inferAdvisoryOperationSet(primary?.exportName, entry.table, advisoryFiles)
+    const reachabilityKind = inferReachabilityKind(hintPaths, djangoViewSetReachable)
+    const { authEvidence, organizationEvidence, mutationBoundaryEvidence } = collectAdvisoryEvidence(advisoryFiles, orgColumn)
 
     const isDead = tsRefs.length === 0 && rawSqlFiles.length === 0 && !djangoViewSetReachable
     const isContained = tsRefs.length === 0 && rawSqlFiles.length === 0 && djangoViewSetReachable && djangoUsesUnconditionalDenyAll
@@ -326,6 +419,11 @@ function main() {
         cohortLane,
         cohortKey,
       },
+      operationSet,
+      reachabilityKind,
+      authEvidence,
+      organizationEvidence,
+      mutationBoundaryEvidence,
     })
   }
 
@@ -390,6 +488,18 @@ function main() {
       md.push(`| ${row.table} | ${row.candidate.blocker} |`)
     }
     md.push('')
+  }
+
+  md.push('## Advisory evidence fields')
+  md.push('')
+  md.push('These fields are generated evidence only. They do not rewrite candidate classifications.')
+  md.push('')
+  md.push('| table | operations | reachability | auth evidence | org evidence | mutation boundary |')
+  md.push('|---|---|---|---|---|---|')
+  for (const row of rows) {
+    md.push(
+      `| ${row.table} | ${row.operationSet.join(', ') || 'none'} | ${row.reachabilityKind} | ${row.authEvidence.join('<br>') || 'none'} | ${row.organizationEvidence.join('<br>') || 'none'} | ${row.mutationBoundaryEvidence.join('<br>') || 'none'} |`,
+    )
   }
 
   writeFileSync(resolve(OUT_DIR, 'union-eyes-storage-authority-census.md'), md.join('\n'))

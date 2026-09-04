@@ -186,11 +186,21 @@ class WebsiteSettingsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class Round40DenyAllPermission(permissions.BasePermission):
+    """Round 40: no legitimate Django consumer exists for contained generated ViewSets."""
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class DocumentFoldersViewSet(viewsets.ModelViewSet):
     """API endpoint for DocumentFolders operations."""
     queryset = DocumentFolders.objects.all()
     serializer_class = DocumentFoldersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -496,7 +506,7 @@ class DataAggregationConsentViewSet(viewsets.ModelViewSet):
     """API endpoint for DataAggregationConsent operations."""
     queryset = DataAggregationConsent.objects.all()
     serializer_class = DataAggregationConsentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

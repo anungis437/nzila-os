@@ -8,6 +8,16 @@ from .models import (CertificationTypes, StaffCertifications, ContinuingEducatio
 from .serializers import (CertificationTypesSerializer, StaffCertificationsSerializer, ContinuingEducationSerializer, LicenseRenewalsSerializer, CertificationAlertsSerializer, CertificationComplianceReportsSerializer, CertificationAuditLogSerializer, DsrRequestsSerializer, DsrActivityLogSerializer, DataResidencyConfigsSerializer, ConsentRecordsSerializer, DataClassificationPolicySerializer, DataClassificationRegistrySerializer, FirewallAccessRulesSerializer, EmployerAccessAttemptsSerializer, AccessJustificationRequestsSerializer, UnionOnlyDataTagsSerializer, FirewallViolationsSerializer, FirewallComplianceAuditSerializer, SwissColdStorageSerializer, BreakGlassSystemSerializer, DisasterRecoveryDrillsSerializer, KeyHolderRegistrySerializer, RecoveryTimeObjectivesSerializer, EmergencyDeclarationsSerializer, BreakGlassActivationsSerializer, UserConsentsSerializer, CookieConsentsSerializer, GdprDataRequestsSerializer, DataProcessingRecordsSerializer, DataRetentionPoliciesSerializer, DataAnonymizationLogSerializer, LocationTrackingSerializer, GeofencesSerializer, GeofenceEventsSerializer, LocationTrackingAuditSerializer, LocationDeletionLogSerializer, LocationTrackingConfigSerializer, ForeignWorkersSerializer, LmbpLettersSerializer, GssApplicationsSerializer, MentorshipsSerializer, LmbpComplianceAlertsSerializer, LmbpComplianceReportsSerializer, BandCouncilsSerializer, BandCouncilConsentSerializer, IndigenousMemberDataSerializer, IndigenousDataAccessLogSerializer, IndigenousDataSharingAgreementsSerializer, TraditionalKnowledgeRegistrySerializer, PciDssSaqAssessmentsSerializer, PciDssRequirementsSerializer, PciDssQuarterlyScansSerializer, PciDssCardholderDataFlowSerializer, PciDssEncryptionKeysSerializer, ProvincialPrivacyConfigSerializer, ProvincialConsentSerializer, PrivacyBreachesSerializer, ProvincialDataHandlingSerializer, DataSubjectAccessRequestsSerializer, LrbAgreementsSerializer, LrbEmployersSerializer, LrbUnionsSerializer, LrbSyncLogSerializer, ConflictOfInterestPolicySerializer, BlindTrustRegistrySerializer, ConflictDisclosuresSerializer, ArmsLengthVerificationSerializer, RecusalTrackingSerializer, ConflictReviewCommitteeSerializer, ConflictTrainingSerializer, ConflictAuditLogSerializer, GoldenSharesSerializer, ReservedMatterVotesSerializer, MissionAuditsSerializer, GovernanceEventsSerializer, CouncilElectionsSerializer, WorkplaceIncidentsSerializer, SafetyInspectionsSerializer, HazardReportsSerializer, SafetyCommitteeMeetingsSerializer, SafetyTrainingRecordsSerializer, PpeEquipmentSerializer, SafetyAuditsSerializer, InjuryLogsSerializer, SafetyPoliciesSerializer, CorrectiveActionsSerializer, SafetyCertificationsSerializer, PolicyRulesSerializer, PolicyEvaluationsSerializer, RetentionPoliciesSerializer, LegalHoldsSerializer, PolicyExceptionsSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 40: no legitimate Django consumer exists for contained generated ViewSets."""
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class CertificationTypesViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationTypes operations."""
     queryset = CertificationTypes.objects.all()
@@ -601,7 +611,7 @@ class PciDssSaqAssessmentsViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssSaqAssessments operations."""
     queryset = PciDssSaqAssessments.objects.all()
     serializer_class = PciDssSaqAssessmentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -611,7 +621,7 @@ class PciDssRequirementsViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssRequirements operations."""
     queryset = PciDssRequirements.objects.all()
     serializer_class = PciDssRequirementsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -621,7 +631,7 @@ class PciDssQuarterlyScansViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssQuarterlyScans operations."""
     queryset = PciDssQuarterlyScans.objects.all()
     serializer_class = PciDssQuarterlyScansSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -641,7 +651,7 @@ class PciDssEncryptionKeysViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssEncryptionKeys operations."""
     queryset = PciDssEncryptionKeys.objects.all()
     serializer_class = PciDssEncryptionKeysSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -1047,7 +1057,7 @@ class PolicyRulesViewSet(viewsets.ModelViewSet):
     """API endpoint for PolicyRules operations."""
     queryset = PolicyRules.objects.all()
     serializer_class = PolicyRulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -1070,7 +1080,7 @@ class RetentionPoliciesViewSet(viewsets.ModelViewSet):
     """API endpoint for RetentionPolicies operations."""
     queryset = RetentionPolicies.objects.all()
     serializer_class = RetentionPoliciesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -1082,7 +1092,7 @@ class LegalHoldsViewSet(viewsets.ModelViewSet):
     """API endpoint for LegalHolds operations."""
     queryset = LegalHolds.objects.all()
     serializer_class = LegalHoldsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']

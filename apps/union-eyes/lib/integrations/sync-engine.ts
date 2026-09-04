@@ -5,9 +5,10 @@
 
 import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
-import { integrationSyncLog, syncJobs } from '@/db/schema';
+import { integrationSyncLog } from '@/db/schema';
+import { integrationProviderEnum, syncStatusEnum, syncTypeEnum } from '@/db/schema/domains/infrastructure/integrations';
 import { eq, and, desc } from 'drizzle-orm';
-import cron from 'node-cron';
+import cron, { type ScheduledTask } from 'node-cron';
 import {
   IntegrationProvider,
   SyncType,
@@ -17,6 +18,10 @@ import {
   IntegrationError,
 } from './types';
 import { IntegrationFactory } from './factory';
+
+type DbIntegrationProvider = (typeof integrationProviderEnum.enumValues)[number];
+type DbSyncStatus = (typeof syncStatusEnum.enumValues)[number];
+type DbSyncType = (typeof syncTypeEnum.enumValues)[number];
 
 /**
  * Sync job configuration
@@ -40,7 +45,7 @@ export class SyncEngine {
   private static instance: SyncEngine;
   private factory: IntegrationFactory;
   private runningJobs: Set<string> = new Set();
-  private scheduledTasks: Map<string, cron.ScheduledTask> = new Map();
+  private scheduledTasks: Map<string, ScheduledTask> = new Map();
 
   private constructor() {
     this.factory = IntegrationFactory.getInstance();
@@ -64,6 +69,19 @@ export class SyncEngine {
     provider: IntegrationProvider,
     options: SyncOptions
   ): Promise<SyncResult> {
+    if (options.trustedContext) {
+      if (
+        options.trustedContext.organizationId !== organizationId ||
+        options.trustedContext.provider !== provider
+      ) {
+        throw new IntegrationError(
+          'Trusted integration execution context does not match requested sync target',
+          provider,
+          'TRUSTED_CONTEXT_MISMATCH'
+        );
+      }
+    }
+
     const jobKey = `${organizationId}:${provider}:${options.type}`;
 
     // Check if job already running
@@ -183,22 +201,6 @@ export class SyncEngine {
       type: config.type,
     });
 
-    // Store sync job configuration in database
-    await db.insert(syncJobs).values({
-      organizationId: config.organizationId,
-      connectorId: '', // Would need to resolve connector ID from provider
-      entityType: config.orgs?.join(',') || 'all',
-      direction: 'pull',
-      status: 'pending',
-      startedAt: new Date(),
-      metadata: {
-        provider: config.provider,
-        syncType: config.type,
-        schedule: config.schedule,
-        enabled: config.enabled,
-      },
-    });
-
     const jobKey = `${config.organizationId}:${config.provider}:${config.type}`;
 
     if (!config.schedule || !config.enabled) {
@@ -253,7 +255,7 @@ export class SyncEngine {
     const conditions = [eq(integrationSyncLog.organizationId, organizationId)];
 
     if (provider) {
-      conditions.push(eq(integrationSyncLog.provider, provider));
+      conditions.push(eq(integrationSyncLog.provider, provider as DbIntegrationProvider));
     }
 
     return db
@@ -277,8 +279,8 @@ export class SyncEngine {
       .where(
         and(
           eq(integrationSyncLog.organizationId, organizationId),
-          eq(integrationSyncLog.provider, provider),
-          eq(integrationSyncLog.status, SyncStatus.SUCCESS)
+          eq(integrationSyncLog.provider, provider as DbIntegrationProvider),
+          eq(integrationSyncLog.status, SyncStatus.SUCCESS as DbSyncStatus)
         )
       )
       .orderBy(desc(integrationSyncLog.completedAt))
@@ -324,10 +326,10 @@ export class SyncEngine {
       .insert(integrationSyncLog)
       .values({
         organizationId,
-        provider,
-        syncType: options.type,
+        provider: provider as DbIntegrationProvider,
+        syncType: options.type as DbSyncType,
         orgs: options.orgs || [],
-        status: SyncStatus.RUNNING,
+        status: SyncStatus.RUNNING as DbSyncStatus,
         startedAt: new Date(),
       })
       .returning({ id: integrationSyncLog.id });
@@ -353,7 +355,7 @@ export class SyncEngine {
   ): Promise<void> {
     await db
       .update(integrationSyncLog)
-      .set(updates)
+      .set({ ...updates, status: updates.status as DbSyncStatus })
       .where(eq(integrationSyncLog.id, logId));
   }
 

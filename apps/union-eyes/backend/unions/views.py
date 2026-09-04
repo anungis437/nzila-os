@@ -605,7 +605,7 @@ class RecognitionProgramsViewSet(viewsets.ModelViewSet):
     """API endpoint for RecognitionPrograms operations."""
     queryset = RecognitionPrograms.objects.all()
     serializer_class = RecognitionProgramsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
