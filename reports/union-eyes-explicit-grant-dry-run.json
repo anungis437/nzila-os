@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-04T08:57:53.519Z",
+  "generatedAt": "2026-09-04T13:24:59.440Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 359,
-  "pendingReviewCount": 341,
-  "tenantGrantedTableCount": 151,
+  "readyForExplicitGrantCount": 360,
+  "pendingReviewCount": 340,
+  "tenantGrantedTableCount": 152,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 151,
-    "INSERT": 133,
-    "UPDATE": 95,
-    "DELETE": 76
+    "SELECT": 152,
+    "INSERT": 134,
+    "UPDATE": 96,
+    "DELETE": 77
   },
   "systemOperationTotals": {
     "SELECT": 23,
@@ -89,6 +89,7 @@
       "right_of_refusal_events",
       "safety_inspections",
       "sms_messages",
+      "social_accounts",
       "steward_assignments",
       "testimonials",
       "voting_sessions",
@@ -2702,6 +2703,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "social_accounts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "social_engagement",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -4089,10 +4101,6 @@
     },
     {
       "table": "sms_templates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "social_accounts",
       "classification": "NEEDS_REVIEW"
     },
     {

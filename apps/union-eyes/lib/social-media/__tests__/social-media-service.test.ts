@@ -160,33 +160,33 @@ describe('refreshAccessToken', () => {
   it('throws when the account is not found', async () => {
     state.selects.socialAccounts = [];
     const svc = new SocialMediaService();
-    await expect(svc.refreshAccessToken('acct-x')).rejects.toThrow(/Account not found/);
+    await expect(svc.refreshAccessToken('acct-x', 'org-1')).rejects.toThrow(/Account not found/);
   });
 
   it('refreshes a Meta (facebook) long-lived token and updates the account', async () => {
     state.selects.socialAccounts = [account({ platform: 'facebook' })];
     const svc = new SocialMediaService();
-    await svc.refreshAccessToken('acct-1');
+    await svc.refreshAccessToken('acct-1', 'org-1');
     expect(clients.meta.getLongLivedToken).toHaveBeenCalled();
   });
 
   it('refreshes a Twitter token using the refresh token', async () => {
     state.selects.socialAccounts = [account({ platform: 'twitter' })];
     const svc = new SocialMediaService();
-    await svc.refreshAccessToken('acct-1');
+    await svc.refreshAccessToken('acct-1', 'org-1');
     expect(clients.twitter.refreshAccessToken).toHaveBeenCalled();
   });
 
   it('throws when a Twitter account has no refresh token', async () => {
     state.selects.socialAccounts = [account({ platform: 'twitter', refreshToken: null })];
     const svc = new SocialMediaService();
-    await expect(svc.refreshAccessToken('acct-1')).rejects.toThrow(/No refresh token/);
+    await expect(svc.refreshAccessToken('acct-1', 'org-1')).rejects.toThrow(/No refresh token/);
   });
 
   it('refreshes a LinkedIn token using the refresh token', async () => {
     state.selects.socialAccounts = [account({ platform: 'linkedin' })];
     const svc = new SocialMediaService();
-    await svc.refreshAccessToken('acct-1');
+    await svc.refreshAccessToken('acct-1', 'org-1');
     expect(clients.linkedin.refreshAccessToken).toHaveBeenCalled();
   });
 
@@ -194,7 +194,7 @@ describe('refreshAccessToken', () => {
     state.selects.socialAccounts = [account({ platform: 'facebook' })];
     clients.meta.getLongLivedToken.mockRejectedValueOnce(new Error('meta boom'));
     const svc = new SocialMediaService();
-    await expect(svc.refreshAccessToken('acct-1')).rejects.toThrow(/meta boom/);
+    await expect(svc.refreshAccessToken('acct-1', 'org-1')).rejects.toThrow(/meta boom/);
   });
 });
 
@@ -354,13 +354,13 @@ describe('fetchAnalytics', () => {
   it('throws when the account is not found', async () => {
     state.selects.socialAccounts = [];
     const svc = new SocialMediaService();
-    await expect(svc.fetchAnalytics('acct-x', new Date(), new Date())).rejects.toThrow(/Account not found/);
+    await expect(svc.fetchAnalytics('org-1', 'acct-x', new Date(), new Date())).rejects.toThrow(/Account not found/);
   });
 
   it('fetches LinkedIn analytics (empty unified set)', async () => {
     state.selects.socialAccounts = [account({ platform: 'linkedin' })];
     const svc = new SocialMediaService();
-    const result = await svc.fetchAnalytics('acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
+    const result = await svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
     expect(Array.isArray(result)).toBe(true);
     expect(clients.linkedin.getOrganizationStatistics).toHaveBeenCalled();
   });
@@ -368,7 +368,7 @@ describe('fetchAnalytics', () => {
   it('fetches Facebook page insights', async () => {
     state.selects.socialAccounts = [account({ platform: 'facebook' })];
     const svc = new SocialMediaService();
-    await svc.fetchAnalytics('acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
+    await svc.fetchAnalytics('org-1', 'acct-1', new Date('2025-01-01'), new Date('2025-01-31'));
     expect(clients.meta.getPageInsights).toHaveBeenCalled();
   });
 });

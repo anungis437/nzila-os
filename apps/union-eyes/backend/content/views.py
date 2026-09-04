@@ -342,11 +342,30 @@ class WebhookReceiptsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 37: no legitimate Django consumer of SocialAccountsViewSet exists.
+
+    The generated model only maps `organization` (not the canonical access_token/
+    refresh_token/platform fields), but Django DELETE/UPDATE still operate on the
+    real physical `social_accounts` row \u2014 an authenticated user of any org could
+    reassign `organization_id` (org-takeover of another org's OAuth-connected
+    account) or delete it, with no queryset scoping (`IsAuthenticated` only,
+    `organization_id` merely query-filterable). Deny unconditionally until a real
+    consumer with proven tenant isolation exists.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class SocialAccountsViewSet(viewsets.ModelViewSet):
     """API endpoint for SocialAccounts operations."""
     queryset = SocialAccounts.objects.all()
     serializer_class = SocialAccountsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']

@@ -51,7 +51,10 @@ const m = vi.hoisted(() => {
     createLinkedInClient: vi.fn(),
     generatePKCE: vi.fn(),
     cookies: vi.fn(async () => cookieStore),
-    withRLSContext: vi.fn(async (fn: (db: unknown) => Promise<unknown>) => fn(mockDb)),
+    withRLSContext: vi.fn(async (contextOrFn: unknown, maybeFn?: (db: unknown) => Promise<unknown>) => {
+      const fn = (typeof contextOrFn === 'function' ? contextOrFn : maybeFn) as (db: unknown) => Promise<unknown>;
+      return fn(mockDb);
+    }),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     queueUpdateWhere: (...results: unknown[][]) => state.updateWhereQueue.push(...results),
     queueDeleteWhere: (...results: unknown[][]) => state.deleteWhereQueue.push(...results),

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-04T08:57:58.930Z",
+  "generatedAt": "2026-09-04T13:24:49.267Z",
   "totalTables": 700,
   "byClassification": {
-    "NEEDS_REVIEW": 341,
+    "NEEDS_REVIEW": 340,
     "LATENT_UNREACHABLE": 189,
     "SYSTEM_ONLY": 17,
-    "TENANT_RLS_REQUIRED": 134,
+    "TENANT_RLS_REQUIRED": 135,
     "PARENT_OWNED_RLS_REQUIRED": 11,
     "GLOBAL_REFERENCE_DATA": 3,
     "MIXED_GLOBAL_TENANT_RLS_REQUIRED": 1,
@@ -13,12 +13,12 @@
     "MULTI_PARTY_RLS_REQUIRED": 1,
     "USER_RLS_REQUIRED": 1
   },
-  "needsReview": 341,
+  "needsReview": 340,
   "authorityModel": {
-    "invocationAuthorityTbd": 341,
-    "dbExecutionPrincipalTbd": 341,
-    "requiredRuntimePrivilegesTbd": 341,
-    "requiredSystemPrivilegesTbd": 341,
+    "invocationAuthorityTbd": 340,
+    "dbExecutionPrincipalTbd": 340,
+    "requiredRuntimePrivilegesTbd": 340,
+    "requiredSystemPrivilegesTbd": 340,
     "closedClassificationWithTbdAuthorityCount": 0,
     "closedClassificationWithTbdAuthorityTables": []
   },
@@ -36,7 +36,7 @@
   },
   "rlsPolicyExpansionRequired": {
     "note": "Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED / MIXED_GLOBAL_TENANT_RLS_REQUIRED / MULTI_PARTY_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 \"policyGaps\" wording, which conflated this with 0108 losing its own coverage. The two RLS_REQUIRED shapes added in round 33 (mixed global/tenant, multi-party) do not yet have a ue_create_*_rls_policy helper — see billing/isolation.py for their proven application-layer equivalents.",
-    "tenantRlsRequiredExpansionCount": 122,
+    "tenantRlsRequiredExpansionCount": 123,
     "tenantRlsRequiredExpansionTables": [
       "claim_deadlines",
       "deadline_reminders",
@@ -119,6 +119,7 @@
       "remittance_line_items",
       "reward_budget_envelopes",
       "reward_wallet_ledger",
+      "social_accounts",
       "subscription_events_log",
       "reconciliation_matches",
       "board_packets",
@@ -185,7 +186,7 @@
     "multiPartyRlsRequiredExpansionTables": [
       "per_capita_remittances"
     ],
-    "totalExpansionCount": 134
+    "totalExpansionCount": 135
   },
   "blanketGrantBlocker": "union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired's tables lack an actual migration adding their RLS policy."
 }

@@ -98,7 +98,7 @@ export class SocialMediaService {
 
     // Check if token is expired and needs refresh
     if (typedAccount.tokenExpiresAt && new Date(typedAccount.tokenExpiresAt) < new Date()) {
-      await this.refreshAccessToken(typedAccount.id);
+      await this.refreshAccessToken(typedAccount.id, typedAccount.organizationId);
       return this.getClient(accountId); // Recursive call with fresh token
     }
 
@@ -119,13 +119,17 @@ export class SocialMediaService {
   }
 
   /**
-   * Refresh access token for an account
+   * Refresh access token for an account.
+   *
+   * organizationId is required and enforced in every query below — this is
+   * a public method with no other org gate, so the ownership check must live
+   * in the query itself rather than rely on a caller-side check.
    */
-  async refreshAccessToken(accountId: string): Promise<void> {
+  async refreshAccessToken(accountId: string, organizationId: string): Promise<void> {
     const [typedAccount] = await db
       .select()
       .from(socialAccounts)
-      .where(eq(socialAccounts.id, accountId))
+      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
       .limit(1);
 
     if (!typedAccount) {
@@ -185,13 +189,13 @@ export class SocialMediaService {
         tokenExpiresAt: expiresAt,
         updatedAt: new Date(),
         ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
-      }).where(eq(socialAccounts.id, accountId));
+      }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)));
     } catch (error) {
       // Update account status to error
       await db.update(socialAccounts).set({
         status: 'expired',
         updatedAt: new Date(),
-      }).where(eq(socialAccounts.id, accountId));
+      }).where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)));
 
       throw error;
     }
@@ -435,9 +439,14 @@ export class SocialMediaService {
   }
 
   /**
-   * Fetch analytics for an account
+   * Fetch analytics for an account.
+   *
+   * organizationId is required and enforced in the account lookup — this is
+   * a public method with no other org gate, so the ownership check must live
+   * in the query itself rather than rely on a caller-side check.
    */
   async fetchAnalytics(
+    organizationId: string,
     accountId: string,
     startDate: Date,
     endDate: Date
@@ -445,7 +454,7 @@ export class SocialMediaService {
     const [typedAccount] = await db
       .select()
       .from(socialAccounts)
-      .where(eq(socialAccounts.id, accountId))
+      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
       .limit(1);
 
     if (!typedAccount) {

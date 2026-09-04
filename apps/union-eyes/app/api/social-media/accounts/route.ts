@@ -197,8 +197,14 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
           );
       }
 
-      // Store OAuth state in cookie
+      // Store OAuth state + initiating platform in cookies (single-use, short-lived)
       cookieStore.set('oauth_state', state, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 600, // 10 minutes
+      });
+      cookieStore.set('oauth_platform', platform, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -293,9 +299,13 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
 // Continue with deletion even if revocation fails
       }
 
-      // Delete account from database
-      await withRLSContext(async () =>
-        db.delete(socialAccounts).where(eq(socialAccounts.id, accountId))
+      // Delete account from database — org predicate is defense-in-depth on top of
+      // the ownership check above; trusted org is passed explicitly rather than
+      // letting withRLSContext silently re-resolve org through an independent auth path.
+      await withRLSContext({ organizationId }, async (tx) =>
+        tx.delete(socialAccounts).where(
+          and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId))
+        )
       );
 
       // Audit log
@@ -406,16 +416,18 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
             throw new Error('Unsupported platform');
         }
 
-        // Update account with new tokens
+        // Update account with new tokens — org predicate is defense-in-depth on top of
+        // the org-scoped SELECT above; trusted org is passed explicitly rather than
+        // letting withRLSContext silently re-resolve org through an independent auth path.
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
-        await withRLSContext(async () =>
-          db.update(socialAccounts).set({
+        await withRLSContext({ organizationId }, async (tx) =>
+          tx.update(socialAccounts).set({
             accessToken: newAccessToken,
             tokenExpiresAt: expiresAt,
             status: 'active',
             updatedAt: new Date(),
             ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
-          }).where(eq(socialAccounts.id, account_id))
+          }).where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
         );
 
         return NextResponse.json({
@@ -423,12 +435,12 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           expires_at: expiresAt.toISOString(),
         });
       } catch (error) {
-        // Update account status to error
-        await withRLSContext(async () =>
-          db.update(socialAccounts).set({
+        // Update account status to error — org predicate is defense-in-depth (see above).
+        await withRLSContext({ organizationId }, async (tx) =>
+          tx.update(socialAccounts).set({
             status: 'expired',
             updatedAt: new Date(),
-          }).where(eq(socialAccounts.id, account_id))
+          }).where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
         );
 
         throw error;
