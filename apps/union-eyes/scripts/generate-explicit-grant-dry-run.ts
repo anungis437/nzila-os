@@ -90,6 +90,10 @@ function main() {
       violations.push(`${entry.table}: LATENT_UNREACHABLE but has non-empty privileges (tenant=${tenantPrivileges.join(',')}, system=${systemPrivileges.join(',')})`)
       continue
     }
+    if (entry.classification === 'CONTAINED_NO_AUTHORITY' && (tenantPrivileges.length > 0 || systemPrivileges.length > 0)) {
+      violations.push(`${entry.table}: CONTAINED_NO_AUTHORITY but has non-empty privileges (tenant=${tenantPrivileges.join(',')}, system=${systemPrivileges.join(',')})`)
+      continue
+    }
     if (!entry.scopeDisposition && entry.table.length === 0) {
       // Unreachable in practice (table is always non-empty), kept only so
       // the scope-identity check has an explicit branch here matching the

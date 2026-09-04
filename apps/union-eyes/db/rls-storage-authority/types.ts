@@ -123,6 +123,46 @@
  *                                 NOT a permanent disposition — if code
  *                                 starts querying it, this entry must be
  *                                 revisited before that code ships.
+ *   CONTAINED_NO_AUTHORITY     — (round 38) the code/route physically
+ *                                 exists and IS reachable (unlike
+ *                                 LATENT_UNREACHABLE), but it is
+ *                                 unconditionally denied all database
+ *                                 authority and no legitimate consumer
+ *                                 exists. The paradigm case is a
+ *                                 router-registered, generated Django
+ *                                 ModelViewSet whose permission_classes is
+ *                                 an unconditional deny-all (e.g.
+ *                                 DenyAllPermission — see ai_budgets,
+ *                                 round 35, and the round-36/37 rewards/
+ *                                 social_accounts precedents) with zero
+ *                                 real consumers anywhere. Distinct from
+ *                                 LATENT_UNREACHABLE (no route exists at
+ *                                 all) and distinct from ordinary
+ *                                 NEEDS_REVIEW (reachable but unresolved) —
+ *                                 this is "reachable, but mechanically
+ *                                 proven to grant nothing to anyone."
+ *                                 STRICT SEMANTICS (permanent invariant,
+ *                                 see db/__tests__/rls-storage-authority-
+ *                                 manifest-invariants.test.ts):
+ *                                 requiredRuntimePrivileges=[],
+ *                                 requiredSystemPrivileges=[],
+ *                                 invocationAuthority=NONE,
+ *                                 dbExecutionPrincipal=NONE,
+ *                                 reviewPriority=NONE. Only valid when a
+ *                                 mechanical ratchet proves BOTH (a) the
+ *                                 reachable surface is unconditionally
+ *                                 fail-closed (deny-all permission class,
+ *                                 not merely IsAuthenticated) and (b) no
+ *                                 legitimate consumer exists (git-grep
+ *                                 census across TS+Python finds none).
+ *                                 AUTOMATICALLY INVALIDATED (must revert
+ *                                 to NEEDS_REVIEW before shipping) if any
+ *                                 of: the deny-all permission is removed
+ *                                 or weakened; a new production consumer
+ *                                 appears; a new direct SQL/ORM operation
+ *                                 appears against the table; a new
+ *                                 alternate route/ViewSet appears; a
+ *                                 system/worker consumer appears.
  *   NEEDS_REVIEW               — real, non-test code references this table
  *                                 (see supportingCapability for the exact
  *                                 files) but the full HTTP-reachability /
@@ -159,6 +199,7 @@ export type StorageAuthorityClassification =
   | 'APP_SCOPED_NON_SENSITIVE'
   | 'SEPARATE_DATABASE_BOUNDARY'
   | 'LATENT_UNREACHABLE'
+  | 'CONTAINED_NO_AUTHORITY'
   | 'NEEDS_REVIEW'
 
 export type StorageAuthorityReviewPriority = 'HIGH' | 'NORMAL' | 'NONE'
@@ -293,4 +334,5 @@ export const CLOSED_CLASSIFICATIONS: readonly StorageAuthorityClassification[] =
   'APP_SCOPED_NON_SENSITIVE',
   'SEPARATE_DATABASE_BOUNDARY',
   'LATENT_UNREACHABLE',
+  'CONTAINED_NO_AUTHORITY',
 ]

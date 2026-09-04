@@ -359,6 +359,18 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
           detail: `SYSTEM_ONLY table has non-empty requiredRuntimePrivileges: ${entry.requiredRuntimePrivileges.join(', ')}.`,
         })
       }
+      if (
+        entry.classification === 'CONTAINED_NO_AUTHORITY' &&
+        entry.requiredRuntimePrivileges !== 'TBD' &&
+        entry.requiredSystemPrivileges !== 'TBD' &&
+        (entry.requiredRuntimePrivileges.length > 0 || entry.requiredSystemPrivileges.length > 0)
+      ) {
+        results.push({
+          name: `storage-authority: ${table} CONTAINED_NO_AUTHORITY invariant (zero privileges on both roles)`,
+          pass: false,
+          detail: `CONTAINED_NO_AUTHORITY table has non-empty privileges (runtime=${entry.requiredRuntimePrivileges.join(', ')}, system=${entry.requiredSystemPrivileges.join(', ')}).`,
+        })
+      }
       if (rlsRequiredClassifications.has(entry.classification)) {
         tablesNeedingRlsCheck.push(table)
       }

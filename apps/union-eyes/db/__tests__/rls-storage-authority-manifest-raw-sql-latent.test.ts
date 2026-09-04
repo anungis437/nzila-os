@@ -16,41 +16,16 @@
  * nicety.
  *
  * This file provides (a) a reusable raw-SQL detector any future manifest
- * generator/scanner should call before assigning LATENT_UNREACHABLE, and
- * (b) the exact regression fixture the review asked for: a table with NO
- * Drizzle-symbol references but a real raw-SQL SELECT must NOT be scored
- * as latent by that detector.
+ * generator/scanner should call before assigning LATENT_UNREACHABLE
+ * (extracted to scripts/lib/raw-sql-detection.ts in round 38 so
+ * scripts/generate-storage-authority-census.ts shares the exact same
+ * detection logic), and (b) the exact regression fixture the review
+ * asked for: a table with NO Drizzle-symbol references but a real
+ * raw-SQL SELECT must NOT be scored as latent by that detector.
  */
 import { describe, expect, it } from 'vitest';
+import { hasPossibleRawSqlReference } from '../../scripts/lib/raw-sql-detection';
 
-/**
- * Detects raw-SQL references to a PHYSICAL table name (snake_case, as it
- * appears in the actual database) within a source file's contents —
- * distinct from a Drizzle EXPORT NAME (camelCase symbol) reachability
- * check, which db/rls-storage-authority-manifest.ts's existing
- * LATENT_UNREACHABLE entries rely on. Intentionally conservative (a
- * simple substring/word-boundary check, not a SQL parser): false
- * positives (flagging a file that merely mentions the table name in a
- * comment) are acceptable here, since the whole point is to route
- * uncertain cases to NEEDS_REVIEW rather than silently defaulting to
- * LATENT_UNREACHABLE's zero-grant outcome. False negatives are the actual
- * risk this function exists to reduce, not eliminate — a human reviewer
- * still makes the final classification call.
- */
-export function hasPossibleRawSqlReference(physicalTableName: string, sourceText: string): boolean {
-  const patterns = [
-    // db.execute(sql`... FROM table_name ...`) / sql`... table_name ...`
-    new RegExp(`FROM\\s+"?${physicalTableName}"?\\b`, 'i'),
-    new RegExp(`INTO\\s+"?${physicalTableName}"?\\b`, 'i'),
-    new RegExp(`UPDATE\\s+"?${physicalTableName}"?\\b`, 'i'),
-    new RegExp(`JOIN\\s+"?${physicalTableName}"?\\b`, 'i'),
-    // A quoted physical table-name string passed to a repository/query
-    // helper or a raw client (e.g. queryTable('some_table'), a migration
-    // helper call, or a schema-introspection string).
-    new RegExp(`['"\`]${physicalTableName}['"\`]`),
-  ];
-  return patterns.some((re) => re.test(sourceText));
-}
 
 describe('hasPossibleRawSqlReference (LATENT_UNREACHABLE raw-SQL detection guard)', () => {
   it('REGRESSION FIXTURE: a file with NO Drizzle-symbol import but a real raw SQL SELECT is detected — such a table must NOT be scored LATENT_UNREACHABLE by a Drizzle-symbol-only scan', () => {

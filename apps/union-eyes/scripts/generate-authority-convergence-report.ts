@@ -56,6 +56,7 @@ function main() {
   let systemTbd = 0
   let systemOnlyExposedToTenant = 0
   let latentExposedToAnyRole = 0
+  let containedExposedToAnyRole = 0
   // RLS_POLICY_EXPANSION_REQUIRED: manifest-discovered tables that are NOT
   // part of 0108's original 24-table baseline but are classified as
   // needing the same kind of RLS policy treatment. This is expansion
@@ -84,6 +85,9 @@ function main() {
     }
     if (entry.classification === 'LATENT_UNREACHABLE') {
       if (entry.dbExecutionPrincipal !== 'NONE') latentExposedToAnyRole += 1
+    }
+    if (entry.classification === 'CONTAINED_NO_AUTHORITY') {
+      if (entry.dbExecutionPrincipal !== 'NONE') containedExposedToAnyRole += 1
     }
 
     if (entry.classification === 'TENANT_RLS_REQUIRED' && !baseline0108.has(entry.table)) {
@@ -144,6 +148,7 @@ function main() {
     invariantViolations: {
       systemOnlyExposedToTenantRuntime: systemOnlyExposedToTenant,
       latentUnreachableExposedToAnyRole: latentExposedToAnyRole,
+      containedNoAuthorityExposedToAnyRole: containedExposedToAnyRole,
     },
     zeroOneZeroEightBaseline: {
       note:
@@ -206,6 +211,7 @@ function main() {
     '',
     `- SYSTEM_ONLY exposed to TENANT_RUNTIME/MIXED: ${systemOnlyExposedToTenant}`,
     `- LATENT_UNREACHABLE exposed to any DB role: ${latentExposedToAnyRole}`,
+    `- CONTAINED_NO_AUTHORITY exposed to any DB role: ${containedExposedToAnyRole}`,
     '',
     '## 0108 original baseline (24-table protected set) — bidirectional consistency',
     '',
@@ -235,6 +241,7 @@ function main() {
   console.log(`Closed classification with TBD (any field): ${closedWithTbdAuthority.length}`)
   console.log(`SYSTEM_ONLY exposed to tenant runtime: ${systemOnlyExposedToTenant}`)
   console.log(`LATENT_UNREACHABLE exposed to any role: ${latentExposedToAnyRole}`)
+  console.log(`CONTAINED_NO_AUTHORITY exposed to any role: ${containedExposedToAnyRole}`)
   console.log(`0108 baseline: ${baseline0108.size} tables; RLS policy expansion required: ${summary.rlsPolicyExpansionRequired.totalExpansionCount} tables`)
   console.log('Report written to reports/union-eyes-authority-convergence-report.{json,md}')
 }

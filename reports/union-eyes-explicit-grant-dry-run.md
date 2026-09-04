@@ -1,12 +1,12 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-04T14:29:56.017Z
+Generated: 2026-09-04T17:30:24.949Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 360
-- Pending review (NEEDS_REVIEW, excluded from plan): 340
+- Ready for explicit GRANT (CLOSED, fully resolved): 362
+- Pending review (NEEDS_REVIEW, excluded from plan): 338
 - Tenant-granted tables (union_eyes_runtime): 152
 - System-granted tables (union_eyes_system): 25
 
@@ -137,6 +137,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | document_search_index | LATENT_UNREACHABLE | NONE | NONE |
 | document_versions | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | documents | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| donation_receipts | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | donations | SEPARATE_DATABASE_BOUNDARY | NONE | NONE |
 | dsr_activity_log | LATENT_UNREACHABLE | NONE | NONE |
 | dsr_requests | LATENT_UNREACHABLE | NONE | NONE |
@@ -295,6 +296,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | pack_verification_log | LATENT_UNREACHABLE | NONE | NONE |
 | page_analytics | LATENT_UNREACHABLE | NONE | NONE |
 | payment_allocations | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
+| payment_classification_policy | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | payment_cycles | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | payment_disputes | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | payment_methods | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |

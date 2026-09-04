@@ -1,34 +1,36 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-04T14:29:47.315Z
+Generated: 2026-09-04T17:30:37.286Z
 
 ## Classification counts
 
 | Classification | Count |
 | --- | --- |
-| NEEDS_REVIEW | 340 |
+| NEEDS_REVIEW | 338 |
 | LATENT_UNREACHABLE | 189 |
 | SYSTEM_ONLY | 17 |
 | TENANT_RLS_REQUIRED | 135 |
 | PARENT_OWNED_RLS_REQUIRED | 11 |
 | GLOBAL_REFERENCE_DATA | 3 |
 | MIXED_GLOBAL_TENANT_RLS_REQUIRED | 1 |
+| CONTAINED_NO_AUTHORITY | 2 |
 | SEPARATE_DATABASE_BOUNDARY | 2 |
 | MULTI_PARTY_RLS_REQUIRED | 1 |
 | USER_RLS_REQUIRED | 1 |
 
 ## Authority-model convergence (invocationAuthority / dbExecutionPrincipal / privileges)
 
-- invocationAuthority = TBD: 340
-- dbExecutionPrincipal = TBD: 340
-- requiredRuntimePrivileges = TBD: 340
-- requiredSystemPrivileges = TBD: 340
+- invocationAuthority = TBD: 338
+- dbExecutionPrincipal = TBD: 338
+- requiredRuntimePrivileges = TBD: 338
+- requiredSystemPrivileges = TBD: 338
 - Closed (non-NEEDS_REVIEW) entries still carrying TBD in ANY of the four fields: 0
 
 ## Invariant violations (must always be zero)
 
 - SYSTEM_ONLY exposed to TENANT_RUNTIME/MIXED: 0
 - LATENT_UNREACHABLE exposed to any DB role: 0
+- CONTAINED_NO_AUTHORITY exposed to any DB role: 0
 
 ## 0108 original baseline (24-table protected set) — bidirectional consistency
 

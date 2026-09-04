@@ -181,6 +181,47 @@ describe('rls-storage-authority-manifest privilege/authority invariants', () => 
     expect(offenders).toEqual([]);
   });
 
+  it('PERMANENT INVARIANT (round 38): CONTAINED_NO_AUTHORITY entries have explicit [] privileges on both roles, NONE/NONE authority, and reviewPriority NONE', () => {
+    // CONTAINED_NO_AUTHORITY is reachable (unlike LATENT_UNREACHABLE) but
+    // mechanically proven to grant nothing to anyone — its authority shape
+    // must therefore be identical to LATENT_UNREACHABLE's, plus the extra
+    // reviewPriority=NONE requirement (a reachable-but-denied surface is
+    // not "awaiting triage").
+    const offenders: string[] = [];
+    for (const entry of storageAuthorityManifest) {
+      if (entry.classification !== 'CONTAINED_NO_AUTHORITY') continue;
+      if (entry.requiredRuntimePrivileges === 'TBD') {
+        offenders.push(`${entry.table} (requiredRuntimePrivileges is unresolved 'TBD')`);
+      } else if (opsOf(entry.requiredRuntimePrivileges).length > 0) {
+        offenders.push(`${entry.table} (runtime privileges)`);
+      }
+      if (entry.requiredSystemPrivileges === 'TBD') {
+        offenders.push(`${entry.table} (requiredSystemPrivileges is unresolved 'TBD')`);
+      } else if (opsOf(entry.requiredSystemPrivileges).length > 0) {
+        offenders.push(`${entry.table} (system privileges)`);
+      }
+      if (entry.invocationAuthority !== 'NONE') offenders.push(`${entry.table} (invocationAuthority=${entry.invocationAuthority})`);
+      if (entry.dbExecutionPrincipal !== 'NONE') offenders.push(`${entry.table} (dbExecutionPrincipal=${entry.dbExecutionPrincipal})`);
+      if (entry.reviewPriority !== 'NONE') offenders.push(`${entry.table} (reviewPriority=${entry.reviewPriority})`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('PERMANENT INVARIANT (round 38): every CONTAINED_NO_AUTHORITY entry\'s reason cites an unconditional deny-all permission and the absence of a legitimate consumer', () => {
+    // A CONTAINED_NO_AUTHORITY disposition is only valid when the reason
+    // documents the specific mechanical proof (deny-all class name +
+    // no-consumer census), not merely asserted by classification alone.
+    const offenders: string[] = [];
+    for (const entry of storageAuthorityManifest) {
+      if (entry.classification !== 'CONTAINED_NO_AUTHORITY') continue;
+      const citesDenyAll = /deny[\s-]?all/i.test(entry.reason);
+      const citesNoConsumer = /no (real |legitimate )?(ts |typescript |django )?consumer/i.test(entry.reason);
+      if (!citesDenyAll) offenders.push(`${entry.table} (reason does not cite a deny-all permission)`);
+      if (!citesNoConsumer) offenders.push(`${entry.table} (reason does not cite the absence of a legitimate consumer)`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('every entry that explicitly claims a narrowed (non-FULL_DML-shaped) DML set names its evidence', () => {
     // Entries mechanically converted from the old FULL_DML enum are
     // explicitly NOT yet reviewed at the per-operation level and are
