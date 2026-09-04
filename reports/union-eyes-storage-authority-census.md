@@ -1,17 +1,17 @@
 # Union Eyes Storage Authority Census (round 38)
 
-Generated: 2026-09-04T17:28:16.975Z
+Generated: 2026-09-04T19:17:17.194Z
 
 CANDIDATES ONLY — this report never rewrites the manifest. Every disposition below must be
 independently reviewed and applied by hand to the relevant db/rls-storage-authority/*.ts domain file.
 
-Total NEEDS_REVIEW entries scanned: 338
+Total NEEDS_REVIEW entries scanned: 320
 
 ## Candidate classification counts
 
 - LATENT_UNREACHABLE (Lane A — Dead, high confidence): 0
 - CONTAINED_NO_AUTHORITY (Lane B — Contained, high confidence): 0
-- Still NEEDS_REVIEW (requires deep review): 338
+- Still NEEDS_REVIEW (requires deep review): 320
 
 ## Cohort counts
 
@@ -19,8 +19,8 @@ Total NEEDS_REVIEW entries scanned: 338
 - PARENT_OWNED:parent:NORMAL: 52
 - COMPLEX:org:HIGH: 48
 - COMPLEX:org:NORMAL: 42
-- SIMPLE_TENANT:org:NORMAL: 40
-- SIMPLE_TENANT:org:HIGH: 28
+- SIMPLE_TENANT:org:HIGH: 27
+- SIMPLE_TENANT:org:NORMAL: 23
 - PARENT_OWNED:parent:HIGH: 19
 - COMPLEX:user:NORMAL: 16
 - COMPLEX:none:HIGH: 8
@@ -36,7 +36,7 @@ Total NEEDS_REVIEW entries scanned: 338
 
 ## Remaining NEEDS_REVIEW, grouped by cohort lane (for batched deep review)
 
-### SIMPLE_TENANT (68)
+### SIMPLE_TENANT (50)
 
 | table | blocker |
 |---|---|
@@ -55,24 +55,6 @@ Total NEEDS_REVIEW entries scanned: 338
 | ai_budgets | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | api_integrations | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | external_accounts | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_benefit_coverage | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_benefit_dependents | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_benefit_enrollments | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_benefit_plans | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_benefit_utilization | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_customers | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_departments | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_employees | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_insurance_beneficiaries | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_insurance_policies | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_invoices | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_lms_completions | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_lms_courses | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_lms_enrollments | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_lms_learners | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_lms_progress | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_payments | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_positions | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | ingestion_batches | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | integration_configs | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | webhook_events | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |

@@ -1,20 +1,20 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-04T17:30:24.949Z
+Generated: 2026-09-04T19:18:22.313Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 362
-- Pending review (NEEDS_REVIEW, excluded from plan): 338
-- Tenant-granted tables (union_eyes_runtime): 152
+- Ready for explicit GRANT (CLOSED, fully resolved): 380
+- Pending review (NEEDS_REVIEW, excluded from plan): 320
+- Tenant-granted tables (union_eyes_runtime): 153
 - System-granted tables (union_eyes_system): 25
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 152 | 134 | 96 | 77 |
+| tenant (union_eyes_runtime) | 153 | 135 | 96 | 77 |
 | system (union_eyes_system) | 23 | 11 | 9 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
@@ -164,16 +164,34 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | event_reminders | LATENT_UNREACHABLE | NONE | NONE |
 | exit_interview_documents | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | exit_interview_sessions | LATENT_UNREACHABLE | NONE | NONE |
+| external_benefit_coverage | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_benefit_dependents | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_benefit_enrollments | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_benefit_plans | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_benefit_utilization | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | external_calendar_attendees | LATENT_UNREACHABLE | NONE | NONE |
 | external_calendar_events | LATENT_UNREACHABLE | NONE | NONE |
 | external_calendar_recurring_patterns | LATENT_UNREACHABLE | NONE | NONE |
 | external_calendars | LATENT_UNREACHABLE | NONE | NONE |
+| external_customers | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_departments | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_employees | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_insurance_beneficiaries | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_insurance_policies | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_invoices | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
+| external_lms_completions | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_lms_courses | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_lms_enrollments | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_lms_learners | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_lms_progress | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| external_payments | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | external_pension_beneficiaries | LATENT_UNREACHABLE | NONE | NONE |
 | external_pension_contributions | LATENT_UNREACHABLE | NONE | NONE |
 | external_pension_estimates | LATENT_UNREACHABLE | NONE | NONE |
 | external_pension_members | LATENT_UNREACHABLE | NONE | NONE |
 | external_pension_plans | LATENT_UNREACHABLE | NONE | NONE |
 | external_pension_service_credits | LATENT_UNREACHABLE | NONE | NONE |
+| external_positions | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | federation_campaigns | LATENT_UNREACHABLE | NONE | NONE |
 | federation_communications | LATENT_UNREACHABLE | NONE | NONE |
 | federation_executives | LATENT_UNREACHABLE | NONE | NONE |

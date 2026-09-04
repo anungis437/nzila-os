@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-04T17:30:24.949Z",
+  "generatedAt": "2026-09-04T19:18:22.313Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 362,
-  "pendingReviewCount": 338,
-  "tenantGrantedTableCount": 152,
+  "readyForExplicitGrantCount": 380,
+  "pendingReviewCount": 320,
+  "tenantGrantedTableCount": 153,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 152,
-    "INSERT": 134,
+    "SELECT": 153,
+    "INSERT": 135,
     "UPDATE": 96,
     "DELETE": 77
   },
@@ -1221,6 +1221,36 @@
       "systemPrivileges": []
     },
     {
+      "table": "external_benefit_coverage",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_benefit_dependents",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_benefit_enrollments",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_benefit_plans",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_benefit_utilization",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "external_calendar_attendees",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -1241,6 +1271,81 @@
     {
       "table": "external_calendars",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_customers",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_departments",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_employees",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_insurance_beneficiaries",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_insurance_policies",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_invoices",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_lms_completions",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_lms_courses",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_lms_enrollments",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_lms_learners",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_lms_progress",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_payments",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -1277,6 +1382,12 @@
     {
       "table": "external_pension_service_credits",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_positions",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -3496,26 +3607,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "external_benefit_coverage",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_benefit_dependents",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_benefit_enrollments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_benefit_plans",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_benefit_utilization",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "external_calendar_connections",
       "classification": "NEEDS_REVIEW"
     },
@@ -3536,15 +3627,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "external_customers",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "external_data_sync_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_departments",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3564,51 +3647,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "external_employees",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_insurance_beneficiaries",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "external_insurance_claims",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_insurance_policies",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_invoices",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_lms_completions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_lms_courses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_lms_enrollments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_lms_learners",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_lms_progress",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_payments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_positions",
       "classification": "NEEDS_REVIEW"
     },
     {
