@@ -113,7 +113,12 @@ describe('round 35: ai_budgets TypeScript reachability lock', () => {
       .filter((f) => f !== 'actions/rewards-actions.ts' && f !== 'lib/services/rewards/budget-service.ts')
       // the governance manifest itself cites this method name in prose
       // evidence (never a real call) — see this exact file's own docstring.
-      .filter((f) => !f.startsWith('db/rls-storage-authority/'));
+      .filter((f) => !f.startsWith('db/rls-storage-authority/'))
+      // this file's own docstring prose mentions ".getUsageSummary()" —
+      // self-citation, never a real call. Exclude it explicitly rather than
+      // excluding __tests__ broadly (this test deliberately does NOT ignore
+      // a real caller under a future unit test).
+      .filter((f) => f !== 'lib/ai/services/__tests__/round35-ai-budgets-reachability-lock.test.ts');
 
     expect(
       callers,
