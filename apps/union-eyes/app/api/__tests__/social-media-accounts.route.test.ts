@@ -202,11 +202,11 @@ describe('social-media/accounts route', () => {
     }));
   });
 
-  it('starts a facebook OAuth flow and stores state in cookies', async () => {
+  it('starts a facebook OAuth flow with a platform-only request and stores state/org/user binding in cookies', async () => {
     const { POST } = await loadRoute();
     const request = new NextRequest('http://localhost/api/social-media/accounts', {
       method: 'POST',
-      body: JSON.stringify({ platform: 'facebook', account_id: '00000000-0000-0000-0000-000000000002' }),
+      body: JSON.stringify({ platform: 'facebook' }),
       headers: { 'content-type': 'application/json' },
     });
 
@@ -217,7 +217,17 @@ describe('social-media/accounts route', () => {
     expect(payload.auth_url).toBe('https://meta.example/authorize');
     expect(m.cookieStore.set).toHaveBeenCalledWith(
       'oauth_state',
-      expect.stringContaining('user_test_001:facebook:'),
+      expect.stringMatching(/^[0-9a-f]{64}$/),
+      expect.objectContaining({ httpOnly: true, maxAge: 600 }),
+    );
+    expect(m.cookieStore.set).toHaveBeenCalledWith(
+      'oauth_organization_id',
+      TEST_USER.organizationId,
+      expect.objectContaining({ httpOnly: true, maxAge: 600 }),
+    );
+    expect(m.cookieStore.set).toHaveBeenCalledWith(
+      'oauth_user_id',
+      TEST_USER.userId,
       expect.objectContaining({ httpOnly: true, maxAge: 600 }),
     );
   });
@@ -226,7 +236,7 @@ describe('social-media/accounts route', () => {
     const { POST } = await loadRoute();
     const request = new NextRequest('http://localhost/api/social-media/accounts', {
       method: 'POST',
-      body: JSON.stringify({ platform: 'twitter', account_id: '00000000-0000-0000-0000-000000000002' }),
+      body: JSON.stringify({ platform: 'twitter' }),
       headers: { 'content-type': 'application/json' },
     });
 
@@ -246,7 +256,7 @@ describe('social-media/accounts route', () => {
     const { POST } = await loadRoute();
     const request = new NextRequest('http://localhost/api/social-media/accounts', {
       method: 'POST',
-      body: JSON.stringify({ platform: 'mastodon', account_id: '00000000-0000-0000-0000-000000000002' }),
+      body: JSON.stringify({ platform: 'mastodon' }),
       headers: { 'content-type': 'application/json' },
     });
 
@@ -264,22 +274,18 @@ describe('social-media/accounts route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'MISSING_REQUIRED_FIELD' });
   });
 
-  it('forbids deleting an account from another organization', async () => {
+  it('reports not found when deleting an account from another organization (org-scoped lookup itself excludes it)', async () => {
     const { DELETE } = await loadRoute();
-    m.queueSelect([
-      {
-        id: 'acct-1',
-        organizationId: '00000000-0000-0000-0000-000000000999',
-        platform: 'twitter',
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-      },
-    ]);
+    // The account SELECT is now org-scoped at the query level, so a
+    // foreign-org accountId never returns a row in the first place \u2014
+    // simulate that by queuing an empty result, matching real predicate
+    // behavior rather than merely asserting on the eventual HTTP status.
+    m.queueSelect([]);
 
     const response = await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=acct-1', { method: 'DELETE' }));
 
-    expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toMatchObject({ code: 'RESOURCE_NOT_FOUND' });
   });
 
   it('revokes twitter credentials and deletes the account', async () => {

@@ -39,6 +39,8 @@ function clearOAuthCookies(cookieStore: CookieStore) {
   };
   cookieStore.set('oauth_state', '', expired);
   cookieStore.set('oauth_platform', '', expired);
+  cookieStore.set('oauth_organization_id', '', expired);
+  cookieStore.set('oauth_user_id', '', expired);
   cookieStore.set('twitter_code_verifier', '', expired);
 }
 
@@ -59,6 +61,8 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
 
     const storedState = cookieStore.get('oauth_state')?.value;
     const storedPlatform = cookieStore.get('oauth_platform')?.value;
+    const storedOrganizationId = cookieStore.get('oauth_organization_id')?.value;
+    const storedUserId = cookieStore.get('oauth_user_id')?.value;
     const codeVerifier = cookieStore.get('twitter_code_verifier')?.value;
 
     // Single-use: clear cookies before any further processing so a replay of
@@ -76,17 +80,24 @@ export const GET = withRoleAuth('steward', async (request: NextRequest, context:
     // CSRF/replay defense: state must match the httpOnly cookie set at
     // connect-initiation time byte-for-byte. Neither the provider nor a
     // third party can forge this without also controlling the victim's
-    // cookie jar (the cookie is never exposed to client-side script).
+    // cookie jar (the cookie is never exposed to client-side script). State
+    // itself is an opaque random nonce — it carries no identity claims.
     if (!storedState || storedState !== state) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state mismatch');
     }
 
-    // Defense in depth: bind the flow to the session that initiated it.
-    // Organization/user identity for the actual account write always comes
-    // from the authenticated server context below, never from this value.
-    const initiatingUserId = storedState.split(':')[0];
-    if (!initiatingUserId || initiatingUserId !== userId) {
+    // Bind the flow to the session AND the organization that initiated it —
+    // both compared against separate httpOnly cookies, never trusted from
+    // query params or the state value. This stops a user who belongs to
+    // multiple organizations from starting the flow under one org and
+    // completing it into another by switching active context mid-flow.
+    // The actual account write below still derives org/user only from the
+    // authenticated server context, never from these cookies directly.
+    if (!storedUserId || storedUserId !== userId) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state does not match the authenticated session');
+    }
+    if (!storedOrganizationId || storedOrganizationId !== organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'OAuth state does not match the authenticated organization');
     }
 
     if (!isSupportedPlatform(storedPlatform)) {

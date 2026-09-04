@@ -310,7 +310,7 @@ describe('deletePost', () => {
   it('throws when the post is not found', async () => {
     state.selects.socialPosts = [];
     const svc = new SocialMediaService();
-    await expect(svc.deletePost('post-x')).rejects.toThrow(/Post not found/);
+    await expect(svc.deletePost('post-x', 'org-1')).rejects.toThrow(/Post not found/);
   });
 
   it('deletes a Twitter post and marks it deleted', async () => {
@@ -320,7 +320,7 @@ describe('deletePost', () => {
     }];
     state.selects.socialAccounts = [account({ platform: 'twitter' })];
     const svc = new SocialMediaService();
-    await svc.deletePost('post-1');
+    await svc.deletePost('post-1', 'org-1');
     expect(clients.twitter.deleteTweet).toHaveBeenCalledWith('tw-post-1');
   });
 
@@ -331,7 +331,7 @@ describe('deletePost', () => {
     }];
     state.selects.socialAccounts = [account({ platform: 'facebook' })];
     const svc = new SocialMediaService();
-    await svc.deletePost('post-2');
+    await svc.deletePost('post-2', 'org-1');
     expect(clients.meta.deletePost).toHaveBeenCalled();
   });
 
@@ -343,7 +343,7 @@ describe('deletePost', () => {
     state.selects.socialAccounts = [account({ platform: 'linkedin' })];
     clients.linkedin.deletePost.mockRejectedValueOnce(new Error('li delete fail'));
     const svc = new SocialMediaService();
-    await expect(svc.deletePost('post-3')).rejects.toThrow(/Failed to delete post: li delete fail/);
+    await expect(svc.deletePost('post-3', 'org-1')).rejects.toThrow(/Failed to delete post: li delete fail/);
   });
 });
 

@@ -81,15 +81,20 @@ export class SocialMediaService {
   constructor() {}
 
   /**
-   * Get API client for a specific account
+   * Get API client for a specific account.
+   *
+   * organizationId is required and enforced in the query below — credential
+   * material must never be loaded for an account outside the caller's own
+   * organization, regardless of how trusted the caller believes accountId is.
    */
   private async getClient(
-    accountId: string
+    accountId: string,
+    organizationId: string
   ): Promise<MetaAPIClient | TwitterAPIClient | LinkedInAPIClient> {
     const [typedAccount] = await db
       .select()
       .from(socialAccounts)
-      .where(eq(socialAccounts.id, accountId))
+      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
       .limit(1);
 
     if (!typedAccount) {
@@ -99,7 +104,7 @@ export class SocialMediaService {
     // Check if token is expired and needs refresh
     if (typedAccount.tokenExpiresAt && new Date(typedAccount.tokenExpiresAt) < new Date()) {
       await this.refreshAccessToken(typedAccount.id, typedAccount.organizationId);
-      return this.getClient(accountId); // Recursive call with fresh token
+      return this.getClient(accountId, organizationId); // Recursive call with fresh token
     }
 
     switch (typedAccount.platform) {
@@ -230,7 +235,7 @@ export class SocialMediaService {
     // Publish to each platform
     for (const account of typedAccounts) {
       try {
-        const client = await this.getClient(account.id);
+        const client = await this.getClient(account.id, organizationId);
         let postId: string;
         let permalink: string | undefined;
 
@@ -379,9 +384,12 @@ export class SocialMediaService {
   }
 
   /**
-   * Delete a post from a platform
+   * Delete a post from a platform.
+   *
+   * organizationId is required and enforced in the join below — this removes
+   * the dependency on any caller having already checked ownership first.
    */
-  async deletePost(postId: string): Promise<void> {
+  async deletePost(postId: string, organizationId: string): Promise<void> {
     const [result] = await db
       .select({
         id: socialPosts.id,
@@ -392,7 +400,7 @@ export class SocialMediaService {
       })
       .from(socialPosts)
       .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
-      .where(eq(socialPosts.id, postId))
+      .where(and(eq(socialPosts.id, postId), eq(socialPosts.organizationId, organizationId)))
       .limit(1);
 
     if (!result?.id) {
@@ -400,7 +408,7 @@ export class SocialMediaService {
     }
 
     const typedPost = result;
-    const client = await this.getClient(result.accountId!);
+    const client = await this.getClient(result.accountId!, organizationId);
 
     try {
       switch (typedPost.platform) {
@@ -461,7 +469,7 @@ export class SocialMediaService {
       throw new Error(`Account not found: ${accountId}`);
     }
 
-    const client = await this.getClient(accountId);
+    const client = await this.getClient(accountId, organizationId);
     const analytics: UnifiedAnalytics[] = [];
 
     try {
@@ -578,7 +586,7 @@ throw error;
 
     for (const account of typedAccounts) {
       try {
-        const client = await this.getClient(account.id);
+        const client = await this.getClient(account.id, organizationId);
         let remaining = 0;
         let limit = 0;
         let resetAt = new Date();

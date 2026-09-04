@@ -57,6 +57,7 @@ const m = vi.hoisted(() => ({
   createTwitterClient: vi.fn(),
   createLinkedInClient: vi.fn(),
   withRLSContextCalls: [] as unknown[],
+  selectPredicates: [] as Predicate[],
   cookieStore: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
 }));
 
@@ -122,6 +123,7 @@ function makeFakeDb() {
     select: (shape?: Record<string, { __col: string }>) => ({
       from: () => ({
         where: (pred: Predicate) => {
+          m.selectPredicates.push(pred);
           const rows = accounts.filter((a) => matches(a as unknown as Record<string, unknown>, pred)).map((a) => project(a, shape));
           return {
             orderBy: () => Promise.resolve(rows),
@@ -215,20 +217,36 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
   beforeEach(() => {
     vi.clearAllMocks();
     m.withRLSContextCalls.length = 0;
+    m.selectPredicates.length = 0;
     seedAccounts();
     m.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 99, resetIn: 0 });
     m.createTwitterClient.mockReturnValue({ revokeToken: vi.fn(async () => undefined) });
   });
 
-  it('negative test 3: Org B cannot delete Org A\'s account even with a valid foreign UUID', async () => {
+  it('negative test 3: Org B cannot delete Org A\'s account even with a valid foreign UUID — the SELECT predicate itself is org-scoped, not just the eventual response', async () => {
     const { DELETE } = await loadRoute();
 
     const response = await DELETE(
       new NextRequest('http://localhost/api/social-media/accounts?id=rogue-account', { method: 'DELETE' })
     );
 
-    expect(response.status).toBe(403);
+    // Org-scoped at the query level: a foreign account is simply not found,
+    // not fetched-then-rejected (which would still have loaded its
+    // credential-bearing row into memory before denying).
+    expect(response.status).toBe(404);
     expect(accounts.find((a) => a.id === 'rogue-account')).toBeDefined();
+
+    // Prove the predicate itself — not merely the HTTP outcome — carries the
+    // organization boundary: every SELECT this request issued must require
+    // both id AND organizationId, and none may match on id alone.
+    expect(m.selectPredicates.length).toBeGreaterThan(0);
+    for (const pred of m.selectPredicates) {
+      expect(pred.__type).toBe('and');
+      const fields = (pred as { __type: 'and'; predicates: Predicate[] }).predicates.map((p) =>
+        p.__type === 'eq' ? p.field : p.__type
+      );
+      expect(fields).toContain('organizationId');
+    }
   });
 
   it('the delete mutation itself carries the trusted organizationId predicate (not id-only)', async () => {

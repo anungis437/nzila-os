@@ -8,6 +8,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 import { createMetaClient } from '@/lib/social-media/meta-api-client';
 import { createTwitterClient, generatePKCE } from '@/lib/social-media/twitter-api-client';
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
@@ -92,13 +93,22 @@ return standardErrorResponse(
 
 
 const socialMediaAccountsSchema = z.object({
-  platform: z.string().min(1, 'platform is required'),
-  account_id: z.string().uuid('Invalid account_id'),
+  platform: z.enum(['facebook', 'instagram', 'twitter', 'linkedin'], {
+    errorMap: () => ({ message: 'Unsupported platform' }),
+  }),
 });
 
-export const POST = withRoleAuth('steward', async (request: NextRequest, context) => {
+export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   try {
       const { userId, organizationId } = context;
+
+      if (!organizationId) {
+        return standardErrorResponse(
+          ErrorCode.FORBIDDEN,
+          'No organization found'
+        );
+      }
+
       const body = await request.json();
     // Validate request body
     const validation = socialMediaAccountsSchema.safeParse(body);
@@ -110,7 +120,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       );
     }
     
-    const { platform, account_id: _account_id } = validation.data;
+    const { platform } = validation.data;
 
       if (!platform) {
         return standardErrorResponse(
@@ -132,8 +142,11 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
     );
       }
 
-      // Generate OAuth state
-      const state = `${userId}:${platform}:${Date.now()}`;
+      // Cryptographically random, unguessable state — carries no semantic
+      // content of its own; user/org/platform binding is enforced separately
+      // via httpOnly cookies compared against the authenticated callback
+      // context, never trusted from the state value itself.
+      const state = randomBytes(32).toString('hex');
       const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/social-media/accounts/callback`;
 
       let authUrl: string;
@@ -197,19 +210,21 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
           );
       }
 
-      // Store OAuth state + initiating platform in cookies (single-use, short-lived)
-      cookieStore.set('oauth_state', state, {
+      // Store OAuth state + initiating platform/organization/user in cookies
+      // (single-use, short-lived). Organization/user are bound here — not
+      // trusted from query params or the state value — so a user who belongs
+      // to multiple organizations cannot start the flow under one org and
+      // finish it under another by switching active context mid-flow.
+      const cookieOpts = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         maxAge: 600, // 10 minutes
-      });
-      cookieStore.set('oauth_platform', platform, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 600, // 10 minutes
-      });
+      };
+      cookieStore.set('oauth_state', state, cookieOpts);
+      cookieStore.set('oauth_platform', platform, cookieOpts);
+      cookieStore.set('oauth_organization_id', organizationId, cookieOpts);
+      cookieStore.set('oauth_user_id', userId, cookieOpts);
 
       // Audit log
       await logApiAuditEvent({
@@ -261,11 +276,13 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
     );
       }
 
-      // Verify user has access to this account
+      // Verify user has access to this account — org-scoped at the query
+      // itself so a foreign-org accountId never loads credential material
+      // into memory at all, rather than being fetched and rejected after.
       const [account] = await db
         .select()
         .from(socialAccounts)
-        .where(eq(socialAccounts.id, accountId))
+        .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.organizationId, organizationId)))
         .limit(1);
 
       if (!account) {
@@ -273,13 +290,6 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       ErrorCode.RESOURCE_NOT_FOUND,
       'Account not found'
     );
-      }
-
-      if (organizationId !== account.organizationId) {
-        return standardErrorResponse(
-          ErrorCode.FORBIDDEN,
-          'Unauthorized'
-        );
       }
 
       // Revoke tokens on the platform (if supported)

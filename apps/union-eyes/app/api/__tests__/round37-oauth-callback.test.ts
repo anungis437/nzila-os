@@ -6,19 +6,26 @@
  *
  * Proves the repaired OAuth callback (app/api/social-media/accounts/
  * callback/route.ts) enforces the required negative properties: state
- * mismatch/replay/missing rejected, the flow is bound to the authenticated
- * session, PKCE is required and consumed for Twitter, organizationId for
- * the resulting INSERT comes only from the authenticated server context
- * (never from query params/state/provider payload), no credential material
- * is ever returned to the caller, and all temporary OAuth cookies are
- * cleared on both success and failure paths.
+ * mismatch/replay/missing rejected, the flow is bound to both the
+ * authenticated session AND the initiating organization (correction
+ * tranche — a user who belongs to multiple orgs cannot start the flow
+ * under one org and finish it into another), PKCE is required and
+ * consumed for Twitter, organizationId for the resulting INSERT comes
+ * only from the authenticated server context (never from query params,
+ * provider payload, or the state/cookie values themselves), no credential
+ * material is ever returned to the caller, and all temporary OAuth
+ * cookies (including the new org/user binding cookies) are cleared on
+ * both success and failure paths.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const ORG_B = 'org-B-uuid';
+const ORG_OTHER = 'org-other-uuid';
 const USER_B = 'user-b-1';
+const USER_OTHER = 'user-other-1';
 const TEST_USER = { userId: USER_B, organizationId: ORG_B, role: 'steward' };
+const STATE = 'a'.repeat(64); // stand-in for a random 32-byte hex nonce
 
 const m = vi.hoisted(() => ({
   logApiAuditEvent: vi.fn(),
@@ -97,7 +104,15 @@ function callbackRequest(query: Record<string, string>) {
   return new NextRequest(`http://localhost/api/social-media/accounts/callback?${params.toString()}`);
 }
 
-describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invariants', () => {
+/** Seeds the cookie jar as if POST /accounts had just initiated the flow. */
+function seedInitiationCookies(overrides: Partial<{ state: string; platform: string; organizationId: string; userId: string }> = {}) {
+  m.cookieStore.values.oauth_state = overrides.state ?? STATE;
+  m.cookieStore.values.oauth_platform = overrides.platform ?? 'facebook';
+  m.cookieStore.values.oauth_organization_id = overrides.organizationId ?? ORG_B;
+  m.cookieStore.values.oauth_user_id = overrides.userId ?? USER_B;
+}
+
+describe('round 37: OAuth callback state/replay/PKCE/org-binding/credential-exposure invariants', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withRLSContextCalls.length = 0;
@@ -106,8 +121,7 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
   });
 
   it('required test #11 / negative: missing state is rejected', async () => {
-    m.cookieStore.values.oauth_state = `${USER_B}:facebook:1000`;
-    m.cookieStore.values.oauth_platform = 'facebook';
+    seedInitiationCookies();
     const { GET } = await loadRoute();
 
     const response = await GET(callbackRequest({ code: 'auth-code' }));
@@ -116,8 +130,7 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
   });
 
   it('state mismatch is rejected', async () => {
-    m.cookieStore.values.oauth_state = `${USER_B}:facebook:1000`;
-    m.cookieStore.values.oauth_platform = 'facebook';
+    seedInitiationCookies();
     const { GET } = await loadRoute();
 
     const response = await GET(callbackRequest({ code: 'auth-code', state: 'attacker-forged-state' }));
@@ -127,9 +140,7 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
   });
 
   it('state replay is rejected: a second callback with the same query string fails after cookies are cleared', async () => {
-    const state = `${USER_B}:facebook:1000`;
-    m.cookieStore.values.oauth_state = state;
-    m.cookieStore.values.oauth_platform = 'facebook';
+    seedInitiationCookies();
     m.createMetaClient.mockReturnValue({
       getAccessToken: vi.fn(async () => ({ access_token: 'short-lived', expires_in: 3600 })),
       getLongLivedToken: vi.fn(async () => ({ access_token: 'long-lived', expires_in: 5_000_000 })),
@@ -137,62 +148,66 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
     });
     const { GET } = await loadRoute();
 
-    const first = await GET(callbackRequest({ code: 'auth-code', state }));
+    const first = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
     expect(first.status).toBe(200);
 
-    // Cookie was cleared by the first request; a replay of the exact same
+    // Cookies were cleared by the first request; a replay of the exact same
     // callback request must now find no oauth_state to compare against.
-    const replay = await GET(callbackRequest({ code: 'auth-code', state }));
+    const replay = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
     expect(replay.status).toBe(403);
   });
 
   it('a session other than the one that initiated the flow is rejected', async () => {
-    const state = 'some-other-user:facebook:1000';
-    m.cookieStore.values.oauth_state = state;
-    m.cookieStore.values.oauth_platform = 'facebook';
+    seedInitiationCookies({ userId: USER_OTHER });
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ code: 'auth-code', state }));
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
   });
 
-  it('a provider error parameter is rejected without attempting a code exchange', async () => {
-    m.cookieStore.values.oauth_state = `${USER_B}:facebook:1000`;
-    m.cookieStore.values.oauth_platform = 'facebook';
+  it('correction tranche: an organization other than the one that initiated the flow is rejected — a user in multiple orgs cannot finish the flow into a different org', async () => {
+    seedInitiationCookies({ organizationId: ORG_OTHER });
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ error: 'access_denied', state: `${USER_B}:facebook:1000` }));
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.insertedValues).toHaveLength(0);
+  });
+
+  it('a provider error parameter is rejected without attempting a code exchange', async () => {
+    seedInitiationCookies();
+    const { GET } = await loadRoute();
+
+    const response = await GET(callbackRequest({ error: 'access_denied', state: STATE }));
 
     expect(response.status).toBe(400);
     expect(m.createMetaClient).not.toHaveBeenCalled();
   });
 
   it('missing PKCE verifier fails Twitter exchange (verifier required and consumed)', async () => {
-    const state = `${USER_B}:twitter:1000`;
-    m.cookieStore.values.oauth_state = state;
-    m.cookieStore.values.oauth_platform = 'twitter';
+    seedInitiationCookies({ platform: 'twitter' });
     // No twitter_code_verifier cookie set.
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ code: 'auth-code', state }));
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
 
     expect(response.status).toBe(400);
     expect(m.createTwitterClient).not.toHaveBeenCalled();
   });
 
   it('Twitter exchange uses and consumes the PKCE verifier cookie', async () => {
-    const state = `${USER_B}:twitter:1000`;
-    m.cookieStore.values.oauth_state = state;
-    m.cookieStore.values.oauth_platform = 'twitter';
+    seedInitiationCookies({ platform: 'twitter' });
     m.cookieStore.values.twitter_code_verifier = 'verifier-xyz';
     const getAccessToken = vi.fn(async () => ({ access_token: 'tw-access', refresh_token: 'tw-refresh', expires_in: 7200 }));
     const getMe = vi.fn(async () => ({ id: 'tw-1', username: 'unioneyes', name: 'Union Eyes' }));
     m.createTwitterClient.mockImplementation((accessToken?: string) => (accessToken ? { getMe } : { getAccessToken }));
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ code: 'auth-code', state }));
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
 
     expect(response.status).toBe(200);
     expect(getAccessToken).toHaveBeenCalledWith('auth-code', expect.any(String), 'verifier-xyz');
@@ -201,24 +216,20 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
   });
 
   it('LinkedIn callback fails closed when no organization page is administered', async () => {
-    const state = `${USER_B}:linkedin:1000`;
-    m.cookieStore.values.oauth_state = state;
-    m.cookieStore.values.oauth_platform = 'linkedin';
+    seedInitiationCookies({ platform: 'linkedin' });
     const getAccessToken = vi.fn(async () => ({ access_token: 'li-access', expires_in: 1800 }));
     const getOrganizations = vi.fn(async () => []);
     m.createLinkedInClient.mockImplementation((accessToken?: string) => (accessToken ? { getOrganizations } : { getAccessToken }));
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ code: 'auth-code', state }));
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
 
     expect(response.status).toBe(400);
     expect(m.insertedValues).toHaveLength(0);
   });
 
   it('successful connect derives organizationId only from the authenticated context and never returns credential material', async () => {
-    const state = `${USER_B}:facebook:1000`;
-    m.cookieStore.values.oauth_state = state;
-    m.cookieStore.values.oauth_platform = 'facebook';
+    seedInitiationCookies();
     m.createMetaClient.mockReturnValue({
       getAccessToken: vi.fn(async () => ({ access_token: 'short-lived', expires_in: 3600 })),
       getLongLivedToken: vi.fn(async () => ({ access_token: 'long-lived', expires_in: 5_000_000 })),
@@ -226,7 +237,7 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
     });
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ code: 'auth-code', state }));
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -241,22 +252,25 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
     const serializedAudit = JSON.stringify(m.logApiAuditEvent.mock.calls);
     expect(serializedAudit).not.toContain('page-secret-token');
     expect(serializedAudit).not.toContain('auth-code');
-    expect(serializedAudit).not.toContain(state);
+    expect(serializedAudit).not.toContain(STATE);
 
-    // Temporary cookies cleared after terminal success.
+    // Temporary cookies cleared after terminal success (state/platform/org/user).
     expect(m.cookieStore.values.oauth_state).toBe('');
     expect(m.cookieStore.values.oauth_platform).toBe('');
+    expect(m.cookieStore.values.oauth_organization_id).toBe('');
+    expect(m.cookieStore.values.oauth_user_id).toBe('');
   });
 
   it('cookies are cleared even on a terminal failure path', async () => {
-    m.cookieStore.values.oauth_state = `${USER_B}:facebook:1000`;
-    m.cookieStore.values.oauth_platform = 'facebook';
+    seedInitiationCookies();
     const { GET } = await loadRoute();
 
     await GET(callbackRequest({ code: 'auth-code', state: 'wrong-state' }));
 
     expect(m.cookieStore.values.oauth_state).toBe('');
     expect(m.cookieStore.values.oauth_platform).toBe('');
+    expect(m.cookieStore.values.oauth_organization_id).toBe('');
+    expect(m.cookieStore.values.oauth_user_id).toBe('');
   });
 
   it('no organization context is rejected before any provider call is made', async () => {
@@ -270,3 +284,4 @@ describe('round 37: OAuth callback state/replay/PKCE/credential-exposure invaria
     expect(m.createLinkedInClient).not.toHaveBeenCalled();
   });
 });
+

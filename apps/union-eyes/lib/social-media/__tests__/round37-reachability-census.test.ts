@@ -6,13 +6,13 @@
  * reachability census.
  *
  * Every real production reference to socialAccounts/SocialAccounts/
- * SocialAccountsViewSet/social_accounts/social-accounts/oauth_state/the
- * OAuth callback path, scanned via git grep across every tracked
- * *.ts/*.tsx/*.py file (not a hand-maintained directory allow-list) so a
- * real caller under any production directory is not invisible to it —
- * same methodology as round 34/35/36's reachability locks (required test
- * #9: reachability census fails if a new production importer/caller
- * appears outside the reviewed set).
+ * SocialAccountsViewSet/social_accounts/social-accounts/oauth_state/
+ * oauth_organization_id/oauth_user_id/the OAuth callback path, scanned via
+ * git grep across every tracked *.ts/*.tsx/*.py file (not a hand-maintained
+ * directory allow-list) so a real caller under any production directory is
+ * not invisible to it — same methodology as round 34/35/36's reachability
+ * locks (required test #9: reachability census fails if a new production
+ * importer/caller appears outside the reviewed set).
  */
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
@@ -96,6 +96,20 @@ describe('round 37: full reachability census for social_accounts', () => {
 
   it('oauth_platform is set and consumed only by the connect route and its own callback', () => {
     const matches = realImporterFiles('oauth_platform', ['*.ts', '*.tsx']).sort();
+    expect(matches).toEqual(
+      ['app/api/social-media/accounts/callback/route.ts', 'app/api/social-media/accounts/route.ts'].sort()
+    );
+  });
+
+  it('correction tranche: oauth_organization_id (org-binding cookie) is set and consumed only by the connect route and its own callback', () => {
+    const matches = realImporterFiles('oauth_organization_id', ['*.ts', '*.tsx']).sort();
+    expect(matches).toEqual(
+      ['app/api/social-media/accounts/callback/route.ts', 'app/api/social-media/accounts/route.ts'].sort()
+    );
+  });
+
+  it('correction tranche: oauth_user_id (session-binding cookie) is set and consumed only by the connect route and its own callback', () => {
+    const matches = realImporterFiles('oauth_user_id', ['*.ts', '*.tsx']).sort();
     expect(matches).toEqual(
       ['app/api/social-media/accounts/callback/route.ts', 'app/api/social-media/accounts/route.ts'].sort()
     );
