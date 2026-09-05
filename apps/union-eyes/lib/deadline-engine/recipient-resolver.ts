@@ -12,7 +12,7 @@
  */
 import { and, eq, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '@/db';
-import { grievances } from '@/db/schema/grievance-schema';
+import { grievances } from '@/db/schema/domains/claims/grievances';
 import { users } from '@/db/schema/user-management-schema';
 import { logger } from '@/lib/logger';
 import type { RecipientSnapshot } from './types';

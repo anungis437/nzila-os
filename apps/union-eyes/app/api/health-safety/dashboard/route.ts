@@ -29,9 +29,8 @@ export const GET = withApi(
       summary: 'Health & Safety dashboard metrics',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const url = new URL(request.url);
-    const organizationId = url.searchParams.get('organizationId');
     const period = url.searchParams.get('period') || '30d';
     const startDate = getStartDate(period);
     const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;

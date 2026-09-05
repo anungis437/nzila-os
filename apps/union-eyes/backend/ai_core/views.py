@@ -8,6 +8,30 @@ from .models import (AbTests, AbTestVariants, AbTestAssignments, AbTestEvents, A
 from .serializers import (AbTestsSerializer, AbTestVariantsSerializer, AbTestAssignmentsSerializer, AbTestEventsSerializer, AccessibilityAuditsSerializer, AccessibilityIssuesSerializer, WcagSuccessCriteriaSerializer, AccessibilityTestSuitesSerializer, AccessibilityUserTestingSerializer, ChatSessionsSerializer, ChatMessagesSerializer, KnowledgeBaseSerializer, ChatbotSuggestionsSerializer, ChatbotAnalyticsSerializer, AiSafetyFiltersSerializer, AiUsageMetricsSerializer, AiRateLimitsSerializer, AiBudgetsSerializer, MlPredictionsSerializer, ModelMetadataSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment: unconditionally denies every request.
+
+    Used for models with no proven legitimate consumer and no tenant
+    isolation mechanism (PR #752 round 35 — AiBudgets: the Django model
+    only maps `organization_id`, omitting the real physical table's NOT
+    NULL monthly_limit_usd/billing_period_start/billing_period_end columns
+    (db/migrations/0079_ai_cost_tracking_phase1.sql), so create() would
+    violate DB constraints; the generated ModelViewSet(queryset=Model.
+    objects.all(), permission_classes=[IsAuthenticated]) pattern otherwise
+    exposes every organization's budget existence/id to any authenticated
+    user and allows unscoped organization_id reassignment + delete. No
+    real TS or Django consumer of this endpoint was found. Remove only
+    once a proven legitimate consumer and organization-bound isolation
+    mechanism exist for this table.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class AbTestsViewSet(viewsets.ModelViewSet):
     """API endpoint for AbTests operations."""
     queryset = AbTests.objects.all()
@@ -189,7 +213,7 @@ class AiBudgetsViewSet(viewsets.ModelViewSet):
     """API endpoint for AiBudgets operations."""
     queryset = AiBudgets.objects.all()
     serializer_class = AiBudgetsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

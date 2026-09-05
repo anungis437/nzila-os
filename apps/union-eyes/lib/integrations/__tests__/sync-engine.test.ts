@@ -119,7 +119,6 @@ describe('SyncEngine', () => {
   });
 
   it('scheduleSync registers a cron task when enabled', async () => {
-    push({}); // db.insert(syncJobs)
     await engine.scheduleSync({
       organizationId: 'org1',
       provider: IntegrationProvider.WORKDAY,
@@ -136,7 +135,6 @@ describe('SyncEngine', () => {
   });
 
   it('scheduleSync stops/skips when not enabled', async () => {
-    push({}); // db.insert(syncJobs)
     await engine.scheduleSync({
       organizationId: 'org1',
       provider: IntegrationProvider.ADP,
@@ -147,7 +145,6 @@ describe('SyncEngine', () => {
   });
 
   it('scheduleSync throws on invalid cron expression', async () => {
-    push({}); // db.insert(syncJobs)
     h.cron.validate.mockReturnValue(false);
     await expect(
       engine.scheduleSync({

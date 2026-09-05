@@ -4,6 +4,8 @@ import { db } from '@/db';
 import { pilotApplications } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { withLockedPilotMutation } from '@/lib/pilot/pilot-mutation';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   buildPilotArtifactDiffSummary,
   buildPilotArtifactVersionRecord,
@@ -29,10 +31,12 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const [application] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+    const [application] = await withSystemContext((_tx) =>
+      db
+        .select()
+        .from(pilotApplications)
+        .where(and(eq(pilotApplications.id, id))),
+    );
 
     if (!application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
@@ -115,11 +119,6 @@ type PersistArtifactsPayload = {
 
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
   try {
-    const canAccess = await hasMinRole('steward');
-    if (!canAccess) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     const rawParams = context?.params ? await context.params : undefined;
     const id = rawParams?.id;
 
@@ -129,96 +128,92 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
 
     const payload = (await request.json().catch(() => ({}))) as PersistArtifactsPayload;
 
-    const [application] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+    // PR #752 round 25: locked, re-authorized, key-specific merge (see
+    // withLockedPilotMutation's doc comment) — this write only ever
+    // touches the 4 artifact-version fields, never the whole `responses`
+    // column, so a concurrent commercial-transition write cannot be
+    // reverted by it and vice versa.
+    const outcome = await withLockedPilotMutation<{ persisted: boolean; reason?: string; snapshot: unknown }>(id, 'steward', async ({ application }) => {
+      const responses = { ...((application.responses ?? {}) as Record<string, unknown>) };
+      const commercialState = normalizeCommercialState(responses.commercialState);
+      const championScore =
+        typeof responses.championScore === 'number' ? responses.championScore : undefined;
+      const activityScore =
+        typeof responses.activityScore === 'number' ? responses.activityScore : undefined;
 
-    if (!application) {
-      return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
-    }
-
-    const denied = await enforcePilotOwnership(application);
-    if (denied) return denied;
-
-    const responses = { ...((application.responses ?? {}) as Record<string, unknown>) };
-    const commercialState = normalizeCommercialState(responses.commercialState);
-    const championScore =
-      typeof responses.championScore === 'number' ? responses.championScore : undefined;
-    const activityScore =
-      typeof responses.activityScore === 'number' ? responses.activityScore : undefined;
-
-    const proposal = buildProposalPackage(
-      {
-        id: application.id,
-        organizationName: application.organizationName,
-        organizationType: application.organizationType as 'local' | 'regional' | 'national',
-        contactName: application.contactName,
-        contactEmail: application.contactEmail,
-        memberCount: application.memberCount,
-        jurisdictions: application.jurisdictions ?? [],
-        sectors: application.sectors ?? [],
-        currentSystem: application.currentSystem,
-        challenges: application.challenges ?? [],
-        goals: application.goals ?? [],
-        readinessScore: application.readinessScore,
-      },
-      {
-        commercialState,
-        championScore,
-        activityScore,
-      },
-    );
-
-    const snapshot = buildPilotArtifactVersionRecord({
-      generatedAt: proposal.generatedAt,
-      source: payload.source ?? 'manual',
-      milestone: payload.milestone,
-      notes: payload.notes,
-      commercialState,
-      qualificationScores: proposal.qualificationScores,
-      artifacts: proposal.artifacts,
-    });
-
-    const existingVersions = Array.isArray(responses.pilotArtifactVersions)
-      ? [...responses.pilotArtifactVersions]
-      : [];
-
-    const existingMatch = existingVersions.find(
-      (version) =>
-        version &&
-        typeof version === 'object' &&
-        'checksum' in version &&
-        (version as { checksum?: string }).checksum === snapshot.checksum,
-    );
-
-    if (existingMatch) {
-      return NextResponse.json({
-        data: {
-          persisted: false,
-          reason: 'Artifact snapshot already exists for current content',
-          snapshot: existingMatch,
+      const proposal = buildProposalPackage(
+        {
+          id: application.id,
+          organizationName: application.organizationName,
+          organizationType: application.organizationType as 'local' | 'regional' | 'national',
+          contactName: application.contactName,
+          contactEmail: application.contactEmail,
+          memberCount: application.memberCount,
+          jurisdictions: application.jurisdictions ?? [],
+          sectors: application.sectors ?? [],
+          currentSystem: application.currentSystem,
+          challenges: application.challenges ?? [],
+          goals: application.goals ?? [],
+          readinessScore: application.readinessScore,
         },
+        {
+          commercialState,
+          championScore,
+          activityScore,
+        },
+      );
+
+      const snapshot = buildPilotArtifactVersionRecord({
+        generatedAt: proposal.generatedAt,
+        source: payload.source ?? 'manual',
+        milestone: payload.milestone,
+        notes: payload.notes,
+        commercialState,
+        qualificationScores: proposal.qualificationScores,
+        artifacts: proposal.artifacts,
       });
-    }
 
-    existingVersions.push(snapshot);
-    responses.pilotArtifactVersions = existingVersions;
-    responses.latestPilotArtifactVersionId = snapshot.versionId;
-    responses.latestPilotArtifactChecksum = snapshot.checksum;
-    responses.latestPilotArtifactUpdatedAt = proposal.generatedAt;
+      const existingVersions = Array.isArray(responses.pilotArtifactVersions)
+        ? [...responses.pilotArtifactVersions]
+        : [];
 
-    await db
-      .update(pilotApplications)
-      .set({ responses })
-      .where(eq(pilotApplications.id, application.id));
+      const existingMatch = existingVersions.find(
+        (version) =>
+          version &&
+          typeof version === 'object' &&
+          'checksum' in version &&
+          (version as { checksum?: string }).checksum === snapshot.checksum,
+      );
 
-    return NextResponse.json({
-      data: {
-        persisted: true,
-        snapshot,
-      },
+      if (existingMatch) {
+        return {
+          data: {
+            persisted: false,
+            reason: 'Artifact snapshot already exists for current content',
+            snapshot: existingMatch,
+          },
+        };
+      }
+
+      existingVersions.push(snapshot);
+
+      return {
+        responsesPatch: {
+          pilotArtifactVersions: existingVersions,
+          latestPilotArtifactVersionId: snapshot.versionId,
+          latestPilotArtifactChecksum: snapshot.checksum,
+          latestPilotArtifactUpdatedAt: proposal.generatedAt,
+        },
+        data: {
+          persisted: true,
+          snapshot,
+        },
+      };
     });
+
+    if (!outcome.ok) return outcome.response;
+
+    return NextResponse.json({ data: outcome.data });
   } catch (error) {
     logger.error('pilot_artifacts:persist_failed', {
       error: (error as Error).message,

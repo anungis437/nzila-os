@@ -29,13 +29,29 @@ import { createSession, setSessionCookie } from '../password/session'
 
 const INVITE_TOKEN_BYTES = 32
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
-const ALLOWED_ROLES = new Set([
+/**
+ * PR #752 round 12: the ONLY roles an ordinary tenant admin's self-service
+ * invite may assign. This is the canonical source of truth — do not
+ * duplicate this list elsewhere; import it.
+ *
+ * 'coo' was REMOVED here — it is a Nzila platform-operations role (level
+ * 295 in apps/union-eyes/lib/api-auth-guard.ts's ROLE_HIERARCHY, above
+ * platform_lead/system_admin/CLC roles), not a tenant-local role. An
+ * ordinary tenant admin (hasMinRole('admin'), level 140) could otherwise
+ * invite a member with role:'coo' into their OWN organization and, since
+ * role-level checks compare hierarchy levels rather than assignability,
+ * that member would then satisfy any `minRole`/hierarchy-level check
+ * requiring platform-operations authority — a real privilege escalation.
+ * If a tenant-scoped "chief operating officer" concept is ever needed,
+ * create a distinct tenant-scoped role; never reuse the platform 'coo'.
+ */
+export const TENANT_SELF_SERVICE_ASSIGNABLE_ROLES = new Set([
   'member',
   'steward',
   'chief_steward',
   'admin',
-  'coo',
 ])
+const ALLOWED_ROLES = TENANT_SELF_SERVICE_ASSIGNABLE_ROLES
 
 export interface CreateInviteInput {
   email: string

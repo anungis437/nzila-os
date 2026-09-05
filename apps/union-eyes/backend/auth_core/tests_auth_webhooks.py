@@ -1,5 +1,5 @@
 """
-Tests for Clerk webhook handler in auth_core/views.py.
+Tests for the auth provider webhook handler in auth_core/views.py.
 
 Covers:
 - HMAC signature verification (base64, multi-sig, whsec_ prefix)
@@ -9,6 +9,7 @@ Covers:
 - Membership create / update / delete handlers
 - End-to-end webhook endpoint tests with signed payloads
 """
+
 
 import base64
 import hashlib
@@ -26,7 +27,7 @@ from auth_core.views import (
     _handle_user_created,
     _handle_user_deleted,
     _handle_user_updated,
-    _verify_clerk_webhook,
+    _verify_auth_webhook,
 )
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
@@ -61,7 +62,7 @@ def _build_svix_headers(body: bytes, secret: str = TEST_WEBHOOK_SECRET):
 
 
 def _make_webhook_request(factory, body: bytes, headers: dict):
-    """Create a Django HttpRequest mimicking a Clerk webhook POST.
+    """Create a Django HttpRequest mimicking an auth provider webhook POST.
 
     ``body`` must be the exact raw bytes that were signed — callers should
     pass the same bytes used with ``_build_svix_headers`` so the HMAC matches.
@@ -82,8 +83,8 @@ def _make_webhook_request(factory, body: bytes, headers: dict):
 
 
 @override_settings(CLERK_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
-class ClerkWebhookVerificationTest(TestCase):
-    """Test _verify_clerk_webhook HMAC-SHA256 base64 verification."""
+class AuthWebhookVerificationTest(TestCase):
+    """Test _verify_auth_webhook HMAC-SHA256 base64 verification."""
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -92,26 +93,26 @@ class ClerkWebhookVerificationTest(TestCase):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
         request = _make_webhook_request(self.factory, body, headers)
-        self.assertTrue(_verify_clerk_webhook(request))
+        self.assertTrue(_verify_auth_webhook(request))
 
     def test_invalid_signature_rejected(self):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
         headers["HTTP_SVIX_SIGNATURE"] = "v1,bm90LWEtdmFsaWQtc2lnbmF0dXJl"
         request = _make_webhook_request(self.factory, body, headers)
-        self.assertFalse(_verify_clerk_webhook(request))
+        self.assertFalse(_verify_auth_webhook(request))
 
     def test_missing_svix_headers_rejected(self):
         body = b'{"type":"user.created","data":{}}'
         request = _make_webhook_request(self.factory, body, {})
-        self.assertFalse(_verify_clerk_webhook(request))
+        self.assertFalse(_verify_auth_webhook(request))
 
     def test_missing_svix_id_rejected(self):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
         del headers["HTTP_SVIX_ID"]
         request = _make_webhook_request(self.factory, body, headers)
-        self.assertFalse(_verify_clerk_webhook(request))
+        self.assertFalse(_verify_auth_webhook(request))
 
     def test_stale_timestamp_rejected(self):
         """Events older than 5 minutes should be rejected (replay protection)."""
@@ -128,7 +129,7 @@ class ClerkWebhookVerificationTest(TestCase):
         ).decode()
         headers["HTTP_SVIX_SIGNATURE"] = f"v1,{sig}"
         request = _make_webhook_request(self.factory, body, headers)
-        self.assertFalse(_verify_clerk_webhook(request))
+        self.assertFalse(_verify_auth_webhook(request))
 
     def test_multi_signature_accepted(self):
         """Svix sends space-separated sigs; accept if any matches."""
@@ -137,14 +138,14 @@ class ClerkWebhookVerificationTest(TestCase):
         real_sig = headers["HTTP_SVIX_SIGNATURE"]
         headers["HTTP_SVIX_SIGNATURE"] = f"v1,aW52YWxpZC1zaWduYXR1cmU= {real_sig}"
         request = _make_webhook_request(self.factory, body, headers)
-        self.assertTrue(_verify_clerk_webhook(request))
+        self.assertTrue(_verify_auth_webhook(request))
 
     @override_settings(CLERK_WEBHOOK_SECRET="")
     def test_missing_secret_rejected(self):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
         request = _make_webhook_request(self.factory, body, headers)
-        self.assertFalse(_verify_clerk_webhook(request))
+        self.assertFalse(_verify_auth_webhook(request))
 
     def test_non_whsec_prefix_fallback(self):
         """Secrets without whsec_ prefix use raw UTF-8 bytes."""
@@ -170,7 +171,7 @@ class ClerkWebhookVerificationTest(TestCase):
 
         with self.settings(CLERK_WEBHOOK_SECRET=raw_secret):
             request = _make_webhook_request(self.factory, body, headers)
-            self.assertTrue(_verify_clerk_webhook(request))
+            self.assertTrue(_verify_auth_webhook(request))
 
 
 # ============================================================================
@@ -178,7 +179,7 @@ class ClerkWebhookVerificationTest(TestCase):
 # ============================================================================
 
 
-class ClerkUserHandlerTest(TestCase):
+class AuthUserHandlerTest(TestCase):
     """Test user.created / updated / deleted handlers."""
 
     def test_handle_user_created(self):
@@ -280,7 +281,7 @@ class ClerkUserHandlerTest(TestCase):
 # ============================================================================
 
 
-class ClerkOrganizationHandlerTest(TestCase):
+class AuthOrganizationHandlerTest(TestCase):
     """Test organization.created / updated handlers."""
 
     def test_handle_organization_created(self):
@@ -292,7 +293,7 @@ class ClerkOrganizationHandlerTest(TestCase):
         }
         _handle_organization_created(data)
 
-        org = Organizations.objects.get(clerk_organization_id="org_test_create_001")
+        org = Organizations.objects.get(auth_provider_org_id="org_test_create_001")
         self.assertEqual(org.name, "CUPE Local 1000")
         self.assertEqual(org.slug, "cupe-local-1000")
         self.assertEqual(org.organization_type, "local")
@@ -311,10 +312,10 @@ class ClerkOrganizationHandlerTest(TestCase):
         _handle_organization_created(data)
 
         self.assertEqual(
-            Organizations.objects.filter(clerk_organization_id="org_test_idem").count(),
+            Organizations.objects.filter(auth_provider_org_id="org_test_idem").count(),
             1,
         )
-        org = Organizations.objects.get(clerk_organization_id="org_test_idem")
+        org = Organizations.objects.get(auth_provider_org_id="org_test_idem")
         self.assertEqual(org.name, "CUPE 2000 Updated")
 
     def test_handle_organization_created_no_slug(self):
@@ -322,7 +323,7 @@ class ClerkOrganizationHandlerTest(TestCase):
         data = {"id": "org_test_noslug", "name": "My Union"}
         _handle_organization_created(data)
 
-        org = Organizations.objects.get(clerk_organization_id="org_test_noslug")
+        org = Organizations.objects.get(auth_provider_org_id="org_test_noslug")
         self.assertEqual(org.slug, "my-union")
 
     def test_handle_organization_created_missing_id(self):
@@ -333,7 +334,7 @@ class ClerkOrganizationHandlerTest(TestCase):
 
     def test_handle_organization_updated(self):
         Organizations.objects.create(
-            clerk_organization_id="org_test_update",
+            auth_provider_org_id="org_test_update",
             name="Old Name",
             slug="old-name",
             organization_type="union",
@@ -345,7 +346,7 @@ class ClerkOrganizationHandlerTest(TestCase):
         }
         _handle_organization_updated(data)
 
-        org = Organizations.objects.get(clerk_organization_id="org_test_update")
+        org = Organizations.objects.get(auth_provider_org_id="org_test_update")
         self.assertEqual(org.name, "New Name")
         self.assertEqual(org.slug, "new-name")
         self.assertEqual(org.display_name, "New Name")
@@ -362,7 +363,7 @@ class ClerkOrganizationHandlerTest(TestCase):
 
         self.assertTrue(
             Organizations.objects.filter(
-                clerk_organization_id="org_test_fallback"
+                auth_provider_org_id="org_test_fallback"
             ).exists()
         )
 
@@ -372,12 +373,12 @@ class ClerkOrganizationHandlerTest(TestCase):
 # ============================================================================
 
 
-class ClerkMembershipHandlerTest(TestCase):
+class AuthMembershipHandlerTest(TestCase):
     """Test organizationMembership.created / updated / deleted handlers."""
 
     def setUp(self):
         self.org = Organizations.objects.create(
-            clerk_organization_id="org_mem_test",
+            auth_provider_org_id="org_mem_test",
             name="Test Org",
             slug="test-org-membership",
             organization_type="union",
@@ -496,7 +497,7 @@ class ClerkMembershipHandlerTest(TestCase):
 
 
 @override_settings(CLERK_WEBHOOK_SECRET=TEST_WEBHOOK_SECRET)
-class ClerkWebhookEndpointTest(TestCase):
+class AuthWebhookEndpointTest(TestCase):
     """Test the full webhook endpoint POST → handler → DB."""
 
     def _post_webhook(self, payload: dict):
@@ -538,13 +539,13 @@ class ClerkWebhookEndpointTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(
             Organizations.objects.filter(
-                clerk_organization_id="org_e2e_create"
+                auth_provider_org_id="org_e2e_create"
             ).exists()
         )
 
     def test_membership_created_end_to_end(self):
         Organizations.objects.create(
-            clerk_organization_id="org_e2e_mem",
+            auth_provider_org_id="org_e2e_mem",
             name="E2E Mem Org",
             slug="e2e-mem-org",
             organization_type="union",
@@ -565,7 +566,7 @@ class ClerkWebhookEndpointTest(TestCase):
 
     def test_membership_updated_end_to_end(self):
         org = Organizations.objects.create(
-            clerk_organization_id="org_e2e_upd",
+            auth_provider_org_id="org_e2e_upd",
             name="E2E Upd Org",
             slug="e2e-upd-org",
             organization_type="union",

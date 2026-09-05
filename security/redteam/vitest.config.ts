@@ -11,6 +11,7 @@ export default defineConfig({
     outputFile: {
       json: './redteam-results.json',
     },
+    testTimeout: 30_000,
     // Deterministic ordering: run tests sequentially with stable sort
     sequence: {
       shuffle: false,

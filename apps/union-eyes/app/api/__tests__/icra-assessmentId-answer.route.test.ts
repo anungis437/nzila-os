@@ -1,4 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHash } from 'crypto';
+
+const TOKEN = 'test-capability-token';
+const TOKEN_HASH = createHash('sha256').update(TOKEN, 'utf8').digest('hex');
+const FUTURE = new Date(Date.now() + 60_000);
 
 const m = vi.hoisted(() => ({
   questionById: vi.fn(),
@@ -22,6 +27,16 @@ vi.mock('@/db/schema/icra-schema', () => ({
   icraAssessmentAnswers: { assessmentId: 'assessmentId', questionId: 'questionId' },
 }));
 
+function req(body: unknown, opts: { authorized?: boolean } = { authorized: true }) {
+  const headers: Record<string, string> = { 'content-type': 'application/json' };
+  if (opts.authorized !== false) headers.authorization = `Bearer ${TOKEN}`;
+  return new Request('http://localhost/api/icra/a1/answer', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+}
+
 async function loadRoute() {
   return import('../icra/[assessmentId]/answer/route');
 }
@@ -44,7 +59,16 @@ describe('icra/[assessmentId]/answer route', () => {
       const tx = {
         select: vi.fn(() => ({
           from: vi.fn(() => ({
-            where: vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'a1', status: 'in_progress' }]) })),
+            where: vi.fn(() => ({
+              limit: vi.fn(async () => [
+                {
+                  id: 'a1',
+                  status: 'in_progress',
+                  capabilityTokenHash: TOKEN_HASH,
+                  capabilityTokenExpiresAt: FUTURE,
+                },
+              ]),
+            })),
           })),
         })),
         delete: vi.fn(() => ({ where: vi.fn(async () => ({})) })),
@@ -57,11 +81,7 @@ describe('icra/[assessmentId]/answer route', () => {
   it('returns 400 for invalid answer payload', async () => {
     const { POST } = await loadRoute();
     const response = await POST(
-      new Request('http://localhost/api/icra/a1/answer', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ questionId: '' }),
-      }),
+      req({ questionId: '' }),
       { params: Promise.resolve({ assessmentId: 'a1' }) },
     );
 
@@ -73,11 +93,7 @@ describe('icra/[assessmentId]/answer route', () => {
     m.questionById.mockReturnValueOnce(null);
 
     const response = await POST(
-      new Request('http://localhost/api/icra/a1/answer', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ questionId: 'qX', rawValue: 'yes' }),
-      }),
+      req({ questionId: 'qX', rawValue: 'yes' }),
       { params: Promise.resolve({ assessmentId: 'a1' }) },
     );
 
@@ -87,11 +103,7 @@ describe('icra/[assessmentId]/answer route', () => {
   it('returns 200 and records answer', async () => {
     const { POST } = await loadRoute();
     const response = await POST(
-      new Request('http://localhost/api/icra/a1/answer', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ questionId: 'q1', rawValue: 'yes' }),
-      }),
+      req({ questionId: 'q1', rawValue: 'yes' }),
       { params: Promise.resolve({ assessmentId: 'a1' }) },
     );
     const payload = await response.json();
@@ -100,16 +112,67 @@ describe('icra/[assessmentId]/answer route', () => {
     expect(payload.ok).toBe(true);
   });
 
+  it('returns 401 when no capability token is presented', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(
+      req({ questionId: 'q1', rawValue: 'yes' }, { authorized: false }),
+      { params: Promise.resolve({ assessmentId: 'a1' }) },
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 401 when the presented capability token does not match', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(
+      new Request('http://localhost/api/icra/a1/answer', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer wrong-token' },
+        body: JSON.stringify({ questionId: 'q1', rawValue: 'yes' }),
+      }),
+      { params: Promise.resolve({ assessmentId: 'a1' }) },
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 401 when the capability token is expired', async () => {
+    m.withSystemContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
+      const tx = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(() => ({
+              limit: vi.fn(async () => [
+                {
+                  id: 'a1',
+                  status: 'in_progress',
+                  capabilityTokenHash: TOKEN_HASH,
+                  capabilityTokenExpiresAt: new Date(Date.now() - 1000),
+                },
+              ]),
+            })),
+          })),
+        })),
+        delete: vi.fn(() => ({ where: vi.fn(async () => ({})) })),
+        insert: vi.fn(() => ({ values: vi.fn(async () => ({})) })),
+      };
+      return fn(tx);
+    });
+    const { POST } = await loadRoute();
+    const response = await POST(
+      req({ questionId: 'q1', rawValue: 'yes' }),
+      { params: Promise.resolve({ assessmentId: 'a1' }) },
+    );
+
+    expect(response.status).toBe(410);
+  });
+
   it('returns 500 when answer transaction fails', async () => {
     const { POST } = await loadRoute();
     m.withSystemContext.mockRejectedValueOnce(new Error('db down'));
 
     const response = await POST(
-      new Request('http://localhost/api/icra/a1/answer', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ questionId: 'q1', rawValue: 'yes' }),
-      }),
+      req({ questionId: 'q1', rawValue: 'yes' }),
       { params: Promise.resolve({ assessmentId: 'a1' }) },
     );
 

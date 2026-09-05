@@ -1,26 +1,19 @@
 /**
- * Member Documents Schema
- * Database schema for member-uploaded documents
+ * DEPRECATED FILE — re-export shim only.
+ *
+ * The canonical `memberDocuments` table (27 columns, live-DB-verified
+ * 2026-09-01) lives in `member-profile-v2-schema.ts`. This file's
+ * declaration was a correct-but-incomplete 10-column subset of the same
+ * physical table; two `pgTable("member_documents", ...)` definitions in
+ * the same workspace cause the same class of drift documented in
+ * `claims-schema.ts`'s equivalent shim. Do NOT add new schema definitions
+ * here.
  */
-import { pgTable, text, integer, timestamp, uuid, index } from 'drizzle-orm/pg-core';
-import { organizations } from '../schema-organizations';
+import { memberDocuments } from './member-profile-v2-schema';
 
-export const memberDocuments = pgTable('member_documents', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: text('user_id').notNull(),
-  organizationId: uuid('organization_id').references(() => organizations.id),
-  fileName: text('file_name').notNull(),
-  fileUrl: text('file_url').notNull(),
-  fileSize: integer('file_size').notNull(),
-  fileType: text('file_type').notNull(),
-  category: text('category').default('General'),
-  uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => [
-  index('idx_member_documents_org').on(table.organizationId),
-  index('idx_member_documents_user').on(table.userId),
-]);
-
+export { memberDocuments };
 export type MemberDocument = typeof memberDocuments.$inferSelect;
 export type NewMemberDocument = typeof memberDocuments.$inferInsert;
+
+
 

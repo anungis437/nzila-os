@@ -89,7 +89,12 @@ vi.mock('../../../db/schema/organization-members-schema', () => new Proxy({}, {
   has: () => true,
   get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })),
 }));
-vi.mock('../../../db/schema/grievance-workflow-schema', () => new Proxy({}, {
+// Production source now pulls grievanceTransitions from the canonical
+// domains/claims/workflows module (PR #752 schema canonicalization); mock
+// that path instead of the deprecated grievance-workflow-schema module so
+// this test doesn't execute the real Drizzle enum/table definitions against
+// the mocked claims-schema module above.
+vi.mock('../../../db/schema/domains/claims/workflows', () => new Proxy({}, {
   has: () => true,
   get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })),
 }));

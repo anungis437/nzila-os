@@ -31,7 +31,7 @@
 import { withApi } from './with-api';
 import { ApiError } from './errors';
 import { db } from '@/db/db';
-import { eq, and, desc, count, type SQL } from 'drizzle-orm';
+import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
 import type { UserRole } from '@/lib/api-auth-guard';
@@ -94,6 +94,63 @@ export interface CrudOptions {
     values: Record<string, unknown>,
     ctx: { organizationId?: string | null; userId?: string | null },
   ) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  /**
+   * Optional transform applied to the PATCH payload, after
+   * `blockedPatchFields` have been stripped, before `.set(...)`. Receives
+   * the row's CURRENT (pre-update) values via one extra SELECT — only
+   * fetched when this hook is configured, so it costs nothing for the
+   * ~300+ other crudRoutes() call sites that don't use it.
+   *
+   * Use this to protect a nested/JSON subfield that a flat
+   * `blockedPatchFields` list can't reach — e.g. preserving one key inside
+   * a JSONB column while still allowing the rest of that column to be
+   * edited via ordinary PATCH.
+   */
+  beforeUpdate?: (
+    updates: Record<string, unknown>,
+    ctx: { id: string; organizationId?: string | null; userId?: string | null; existing: Record<string, unknown> },
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  /**
+   * JSONB column names whose PATCH value should be MERGED into the
+   * existing value (`col || value`, via a locked read-then-write
+   * transaction) rather than replacing the whole column.
+   *
+   * Use for a JSONB column that mixes server-owned and client-editable
+   * keys: a plain `.set({col: mergedObject})` requires reading the row,
+   * copying server-owned keys' current values into the merged object, then
+   * writing the WHOLE column back — a lost-update race if anything else
+   * changes a server-owned key between the read and the write (the PATCH
+   * would overwrite it with the value it read earlier). A JSONB merge
+   * never mentions server-owned keys at all (the caller is expected to
+   * have already stripped them from the PATCH value, e.g. via a
+   * `beforeUpdate` hook), so a concurrent write to one can never be
+   * reverted — no lock across business logic required, only around the
+   * read+write itself, which this option adds automatically.
+   */
+  mergeJsonColumns?: string[];
+  /**
+   * Re-authorizes the caller against the row loaded UNDER the PATCH's own
+   * `SELECT ... FOR UPDATE` lock, immediately after it is acquired and
+   * before `beforeUpdate`/the write (PR #752 round 25).
+   *
+   * A caller that enforces ownership/tenancy via a SEPARATE, unlocked
+   * pre-check before ever invoking this factory (e.g. `withPilotOwnership`
+   * wrapping the pilot item route) closes only part of the race: the row
+   * can still change between that pre-check and this PATCH's own lock
+   * being acquired (a concurrent platform rebind, for example) — the
+   * pre-check's decision and the actual mutation are not atomic. This hook
+   * lets the SAME ownership rule be re-evaluated against the row this
+   * transaction is about to write, so the check and the mutation are
+   * atomic with respect to that rule, regardless of what any earlier,
+   * unlocked pre-check decided. Only invoked when `beforeUpdate` or
+   * `mergeJsonColumns` is also configured (the transactional PATCH path);
+   * a caller relying solely on this option with neither configured would
+   * get no lock to re-authorize under.
+   */
+  lockedAuthCheck?: (
+    existing: Record<string, unknown>,
+    ctx: { id: string; organizationId?: string | null; userId?: string | null },
+  ) => Promise<{ ok: true } | { ok: false; status: 401 | 403 }>;
 }
 
 function getColumn(table: PgTable, name: string): PgColumn | undefined {
@@ -146,6 +203,87 @@ export function enforceCreateSecurityInvariants(
   return finalValues;
 }
 
+/**
+ * Strips PK, org-scope, and `blockedPatchFields` keys from a raw PATCH body
+ * before it reaches `.set(...)`. Exported for direct unit testing of this
+ * invariant in isolation (PR #752 round 21) — a route that forgets to list
+ * a server-controlled column in `blockedPatchFields` is a silent bypass of
+ * whatever platform-only flow was supposed to be the only writer of that
+ * column (e.g. `verifiedOrganizationId`, FSM-governed `status`).
+ */
+export function stripBlockedPatchFields(
+  body: unknown,
+  guard: { pk: string; orgScoped: boolean; blockedPatchFields: string[] },
+): Record<string, unknown> {
+  const updates: Record<string, unknown> =
+    body && typeof body === 'object' && !Array.isArray(body)
+      ? { ...(body as Record<string, unknown>) }
+      : {};
+
+  delete updates[guard.pk];
+  if (guard.orgScoped) delete updates.organizationId;
+  for (const f of guard.blockedPatchFields) {
+    delete updates[f];
+  }
+  return updates;
+}
+
+/**
+ * Converts each column listed in `mergeJsonColumns` from a plain
+ * replacement value into a JSONB merge SQL fragment
+ * (`COALESCE(col, '{}'::jsonb) || value::jsonb`), when its PATCH value is a
+ * plain object. Exported for direct unit testing of the merge-fragment
+ * construction, independent of the transaction/lock wiring around it (PR
+ * #752 round 24) — see `mergeJsonColumns`'s doc comment on `CrudOptions`
+ * for why a merge (vs. a full-column replace) closes a lost-update race.
+ */
+export function buildMergeSetValues(
+  updates: Record<string, unknown>,
+  table: PgTable,
+  mergeJsonColumns: string[],
+): Record<string, unknown> {
+  const setValues: Record<string, unknown> = { ...updates };
+  for (const col of mergeJsonColumns) {
+    if (!(col in setValues)) continue;
+    const value = setValues[col];
+    const colRef = getColumn(table, col);
+    if (colRef && value && typeof value === 'object' && !Array.isArray(value)) {
+      setValues[col] = sql`COALESCE(${colRef}, '{}'::jsonb) || ${JSON.stringify(value)}::jsonb`;
+    }
+  }
+  return setValues;
+}
+
+/**
+ * Rejects any `mergeJsonColumns` value that is present but NOT a plain JSON
+ * object (PR #752 round 25). `buildMergeSetValues()` only converts a
+ * merge column's value into a JSONB merge fragment when the value is a
+ * plain object — an array, `null`, or a scalar falls through UNCHANGED and
+ * reaches `.set()` as a literal, full-column REPLACEMENT. Since the whole
+ * point of `mergeJsonColumns` is to make server-owned keys structurally
+ * unreachable by a PATCH fragment, silently falling back to replacement
+ * semantics for a non-object value is a direct bypass: a same-org steward
+ * submitting `{"responses":[]}` would wipe `commercialState`, transition
+ * history, scoring evidence, artifact/reference versions, monetization
+ * state, and the ownership claim in one call, since `stripReservedResponsesKeysForPatch`-style
+ * `beforeUpdate` hooks also only strip when the value is a non-array
+ * object and otherwise leave it untouched. Called BEFORE any
+ * `beforeUpdate` hook runs (fail closed at the door, not after a hook has
+ * had a chance to "fix" the shape) — exported for direct unit testing.
+ */
+export function validateMergeJsonColumnValues(
+  updates: Record<string, unknown>,
+  mergeJsonColumns: string[],
+): void {
+  for (const col of mergeJsonColumns) {
+    if (!(col in updates)) continue;
+    const value = updates[col];
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      throw ApiError.badRequest(`${col} must be a JSON object`);
+    }
+  }
+}
+
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
 export function crudRoutes(opts: CrudOptions & { itemRoute?: false | undefined }): CollectionHandlers;
 export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers {
@@ -161,6 +299,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     writeRole = 'steward',
     defaultLimit = 50,
     blockedPatchFields = [],
+    mergeJsonColumns = [],
   } = opts;
 
   const resourceName = opts.resourceName ?? getTableName(table);
@@ -335,31 +474,81 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Updates an existing ${resourceName} record.`,
         },
       },
-      async ({ body, params, organizationId }) => {
+      async ({ body, params, organizationId, userId }) => {
         const id = params[paramName];
-        const updates: Record<string, unknown> =
-          body && typeof body === 'object' && !Array.isArray(body)
-            ? { ...(body as Record<string, unknown>) }
-            : {};
+        let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
 
-        // Auto-set updatedAt if column exists
-        const updatedAtCol = getColumn(table, 'updatedAt');
-        if (updatedAtCol) {
-          updates.updatedAt = new Date();
-        }
-
-        // Never allow PK or orgId to be overwritten via PATCH
-        delete updates[pk];
-        if (orgScoped) delete updates.organizationId;
-
-        // Strip FSM-governed and other explicitly blocked fields
-        for (const f of blockedPatchFields) {
-          delete updates[f];
+        // Fail closed BEFORE opening a transaction or running any hook: a
+        // merge column can only ever be safely converted into a JSONB
+        // merge fragment when its value is a plain object (PR #752
+        // round 25) — see validateMergeJsonColumnValues's doc comment.
+        if (mergeJsonColumns.length > 0) {
+          validateMergeJsonColumnValues(updates, mergeJsonColumns);
         }
 
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
+        }
+
+        if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
+          // Locked read-then-write: the row cannot change between the hook
+          // seeing it and the final write, closing the lost-update race a
+          // plain read-then-`.set()` (below) cannot. `mergeJsonColumns`
+          // additionally turns each listed column's value into a JSONB
+          // merge (`col || value`) rather than a full-column replace, so a
+          // concurrent write to a key the merge fragment doesn't mention
+          // can never be reverted by this PATCH.
+          const [row] = await db.transaction(async (tx) => {
+            const [existingRow] = await tx
+              .select()
+              .from(table)
+              .where(and(...conditions))
+              .limit(1)
+              .for('update');
+            if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
+
+            if (opts.lockedAuthCheck) {
+              // Re-evaluate ownership/tenancy against THIS locked, guaranteed-
+              // fresh row — not whatever an earlier, unlocked pre-check saw
+              // (PR #752 round 25 rebind-TOCTOU fix).
+              const authResult = await opts.lockedAuthCheck(existingRow as Record<string, unknown>, {
+                id,
+                organizationId,
+                userId,
+              });
+              if (!authResult.ok) {
+                throw authResult.status === 401 ? ApiError.unauthorized() : ApiError.forbidden();
+              }
+            }
+
+            if (opts.beforeUpdate) {
+              updates = await opts.beforeUpdate(updates, {
+                id,
+                organizationId,
+                userId,
+                existing: existingRow as Record<string, unknown>,
+              });
+            }
+
+            const updatedAtCol = getColumn(table, 'updatedAt');
+            if (updatedAtCol) {
+              updates.updatedAt = new Date();
+            }
+
+            const setValues = buildMergeSetValues(updates, table, mergeJsonColumns);
+
+            return tx.update(table).set(setValues).where(and(...conditions)).returning();
+          });
+
+          if (!row) throw ApiError.notFound(`${resourceName} not found`);
+          return { data: row };
+        }
+
+        // Auto-set updatedAt if column exists
+        const updatedAtCol = getColumn(table, 'updatedAt');
+        if (updatedAtCol) {
+          updates.updatedAt = new Date();
         }
 
         const [row] = await db.update(table)

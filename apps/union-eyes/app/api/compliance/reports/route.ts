@@ -7,8 +7,8 @@
 import { db } from "@/db/db";
 import {
   employerReports,
-  employers,
 } from "@/db/schema/domains/compliance/employer-compliance";
+import { employers } from "@/db/schema/union-structure-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { createLogger } from "@nzila/os-core";
@@ -34,7 +34,7 @@ export const GET = withOrganizationAuth(async (_request, context) => {
     const orgEmployers = await db
       .select({ id: employers.id })
       .from(employers)
-      .where(eq(employers.orgId, organizationId));
+      .where(eq(employers.organizationId, organizationId));
 
     const employerIds = orgEmployers.map((e) => e.id);
 

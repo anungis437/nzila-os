@@ -145,9 +145,20 @@ export async function revokeSession(sessionId: string): Promise<void> {
 
 /**
  * Revoke all sessions for a user (e.g. on password change).
+ *
+ * PR #752 round 13: accepts an optional db executor override. Ordinary
+ * self-service callers (a user revoking their OWN sessions) omit it and
+ * get the default ordinary-credential client. Cross-user platform-admin
+ * callers (e.g. offboarding another user in another organization) MUST
+ * pass @nzila/db/system-client's systemDb explicitly — revoking an
+ * arbitrary other user's sessions is a system-authorized operation, not
+ * an ordinary-credential one.
  */
-export async function revokeAllUserSessions(userId: string): Promise<void> {
-  await db
+export async function revokeAllUserSessions(
+  userId: string,
+  dbExecutor: typeof db = db,
+): Promise<void> {
+  await dbExecutor
     .update(authUserSessions)
     .set({ isActive: false })
     .where(

@@ -8,6 +8,16 @@ from .models import (ArbitrationPrecedents, PrecedentTags, PrecedentCitations, N
 from .serializers import (ArbitrationPrecedentsSerializer, PrecedentTagsSerializer, PrecedentCitationsSerializer, NegotiationsSerializer, BargainingProposalsSerializer, TentativeAgreementsSerializer, NegotiationSessionsSerializer, BargainingTeamMembersSerializer, CbaClausesSerializer, ClauseComparisonsSerializer, WageProgressionsSerializer, BenefitComparisonsSerializer, ArbitrationDecisionsSerializer, ArbitratorProfilesSerializer, BargainingNotesSerializer, CbaFootnotesSerializer, CollectiveAgreementsSerializer, CbaVersionHistorySerializer, CbaContactsSerializer, SharedClauseLibrarySerializer, ClauseLibraryTagsSerializer, ClauseComparisonsHistorySerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 40: no legitimate Django consumer exists for contained generated ViewSets."""
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class ArbitrationPrecedentsViewSet(viewsets.ModelViewSet):
     """API endpoint for ArbitrationPrecedents operations."""
     queryset = ArbitrationPrecedents.objects.all()
@@ -108,7 +118,7 @@ class ClauseComparisonsViewSet(viewsets.ModelViewSet):
     """API endpoint for ClauseComparisons operations."""
     queryset = ClauseComparisons.objects.all()
     serializer_class = ClauseComparisonsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['comparison_name']
     search_fields = ['comparison_name']

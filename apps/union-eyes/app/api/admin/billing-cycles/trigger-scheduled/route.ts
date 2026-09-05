@@ -4,6 +4,19 @@
  * POST /api/admin/billing-cycles/trigger-scheduled - Manually trigger scheduled billing
  * 
  * For testing and manual execution of the automated billing scheduler.
+ *
+ * TRUTHFUL STATUS (PR #752 round 5): this is currently the ONLY live
+ * caller of BillingScheduler — there is no cron/timer trigger wired
+ * anywhere (vercel.json's "crons" list does not include a billing path).
+ * "Automated billing scheduler" describes what lib/jobs/billing-scheduler.ts
+ * is DESIGNED to do once invoked; it does not mean billing runs on a
+ * schedule today. Automated/headless invocation is also blocked by
+ * BillingCycleService.generateBillingCycle()'s unconditional auth()
+ * requirement (see billing-scheduler.ts's documented KNOWN LIMITATION) —
+ * it would throw "Unauthorized" without a real session. Until a genuine
+ * headless entrypoint and a real scheduled trigger both exist, treat
+ * automated recurring billing as LATENT / NOT_OPERATIONAL, not a live
+ * capability.
  * 
  * @module app/api/admin/billing-cycles/trigger-scheduled
  */

@@ -53,6 +53,66 @@ def _extract_org(payload: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]
     return None, None
 
 
+ORG_CACHE_TTL = 300  # 5 minutes
+
+
+def resolve_organization_context(org_id: Optional[str]):
+    """Resolve an external auth-provider org ID to the internal Organizations row.
+
+    PR #752 round-32 correction: this logic used to live in
+    auth_core.middleware.OrganizationIsolationMiddleware.process_request(),
+    which is Django middleware and therefore runs BEFORE DRF authentication
+    classes (OIDCAuthentication.authenticate(), below) ever execute — DRF
+    authentication happens inside the view's dispatch(), after the entire
+    Django middleware chain has already completed. Since that middleware
+    only ever read request.org_id (an attribute this same authentication
+    class is the ONLY thing that sets), request.organization_id was NEVER
+    populated for a real bearer-token request: the middleware always saw
+    org_id as absent and returned early. Every DirectTenantIsolationMixin/
+    ParentOwnedIsolationMixin-protected ViewSet was therefore fail-closed
+    for ALL real traffic (queryset.none() on every read, rejected on every
+    write) — safe, but not a working tenant-scoped endpoint. This function
+    is now called directly from OIDCAuthentication.authenticate() (see
+    below), which is the only point in the request lifecycle guaranteed to
+    run after the org claim is verified and before any view/queryset code.
+
+    Returns:
+        Tuple[Organization | None, str | None]: (organization, organization_id).
+        Both None if org_id itself is None (anonymous/service-account call —
+        not an error). Raises AuthenticationFailed if org_id is present but
+        does not resolve to a known organization (fail closed).
+    """
+    if not org_id:
+        return None, None
+
+    cache_key = f"org:ctx:{org_id}"
+    organization = cache.get(cache_key)
+    if organization is not None:
+        return organization, str(organization.id)
+
+    try:
+        from auth_core.models import Organizations  # noqa: PLC0415
+    except ImportError as exc:
+        # Union Eyes is a mandatory multi-tenant app — the Organizations model
+        # must always be importable. Missing it is a deployment/config defect,
+        # not a "single-org app" case, so fail closed instead of promoting the
+        # unverified external org id into the canonical internal organization_id.
+        logger.exception("Organizations model unavailable during tenant resolution")
+        raise exceptions.AuthenticationFailed(
+            "Organization context unavailable."
+        ) from exc
+
+    organization = Organizations.objects.filter(auth_provider_org_id=org_id).first()
+    if not organization:
+        logger.warning("Unknown organization %s — no local record yet.", org_id)
+        raise exceptions.AuthenticationFailed(
+            "Organization not found. Contact support."
+        )
+
+    cache.set(cache_key, organization, ORG_CACHE_TTL)
+    return organization, str(organization.id)
+
+
 class OIDCAuthentication(authentication.BaseAuthentication):
     """OIDC JWT authentication for DRF.
 
@@ -90,9 +150,17 @@ class OIDCAuthentication(authentication.BaseAuthentication):
 
             # Attach organization context to request for middleware
             org_id, org_role = _extract_org(payload)
-            request.clerk_org_id = org_id
-            request.clerk_org_role = org_role
-            request.clerk_user_id = payload.get("sub")
+            request.org_id = org_id
+            request.org_role = org_role
+            request.user_id = payload.get("sub")
+
+            # Resolve the canonical internal organization_id HERE, not in
+            # OrganizationIsolationMiddleware — see resolve_organization_context's
+            # docstring for why that middleware could never actually do this
+            # for a real bearer-authenticated request. Raises
+            # AuthenticationFailed (fail closed) if org_id is present but
+            # unresolvable.
+            request.organization, request.organization_id = resolve_organization_context(org_id)
 
             return (user, payload)
 
@@ -107,6 +175,12 @@ class OIDCAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed(
                 f"Invalid authentication token: {str(e)}"
             )
+
+        except exceptions.AuthenticationFailed:
+            # Re-raise as-is (e.g. resolve_organization_context's "Organization
+            # not found") instead of letting the catch-all below replace it
+            # with a generic message.
+            raise
 
         except Exception as e:
             logger.exception(f"Unexpected auth error: {e}")
@@ -170,17 +244,17 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         """
         User = get_user_model()
 
-        clerk_user_id = payload.get("sub")
-        if not clerk_user_id:
+        auth_user_id = payload.get("sub")
+        if not auth_user_id:
             raise exceptions.AuthenticationFailed("Token missing user ID (sub claim)")
 
         email = payload.get("email", "")
         first_name = payload.get("given_name", "")
         last_name = payload.get("family_name", "")
 
-        # Get or create user by Clerk user ID
+        # Get or create user by auth provider user ID
         user, created = User.objects.get_or_create(
-            username=clerk_user_id,
+            username=auth_user_id,
             defaults={
                 "email": email,
                 "first_name": first_name,
@@ -220,7 +294,7 @@ class OIDCAuthentication(authentication.BaseAuthentication):
         try:
             from apps.profiles.models import Profile
 
-            clerk_user_id = payload.get("sub")
+            auth_user_id = payload.get("sub")
             org_id, _ = _extract_org(payload)
 
             # Update or create profile
@@ -273,17 +347,17 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
 
 # Cache user lookups by auth user ID for 5 minutes
 @lru_cache(maxsize=1000)
-def get_cached_user_by_clerk_id(clerk_user_id: str):
+def get_cached_user_by_auth_id(auth_user_id: str):
     """Cache user lookups for performance.
 
     Args:
-        clerk_user_id: Clerk user ID (sub claim)
+        auth_user_id: Auth provider user ID (sub claim)
 
     Returns:
         User or None
     """
     User = get_user_model()
     try:
-        return User.objects.get(username=clerk_user_id)
+        return User.objects.get(username=auth_user_id)
     except User.DoesNotExist:
         return None

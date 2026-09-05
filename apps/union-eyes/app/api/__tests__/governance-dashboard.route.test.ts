@@ -15,7 +15,13 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/db/db', () => ({
   db: { execute: m.execute },
 }));
-vi.mock('drizzle-orm', () => ({ sql: (s: TemplateStringsArray) => s.join('') }));
+vi.mock('drizzle-orm', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('drizzle-orm')>();
+  return {
+    ...actual,
+    sql: (s: TemplateStringsArray) => s.join(''),
+  };
+});
 
 async function loadRoute() {
   return import('../governance/dashboard/route');

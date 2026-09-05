@@ -170,6 +170,19 @@ export interface SyncOptions {
   cursor?: string;
   limit?: number;
   dryRun?: boolean;
+  trustedContext?: TrustedIntegrationExecutionContext;
+}
+
+export interface TrustedIntegrationExecutionContext {
+  organizationId: string;
+  integrationId: string;
+  provider: IntegrationProvider;
+  actor: {
+    type: 'tenant_user' | 'system_worker';
+    userId?: string;
+  };
+  principal: 'TENANT_RUNTIME' | 'SYSTEM_RUNTIME';
+  issuedAt: string;
 }
 
 /**

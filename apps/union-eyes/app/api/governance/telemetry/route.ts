@@ -15,6 +15,7 @@ import { db } from '@/db/db'
 import { governanceEvents } from '@/db/schema'
 import { policyEvaluations } from '@/db/schema/policy-engine-schema'
 import { sql } from 'drizzle-orm'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 
 const SERVICE = 'union-eyes'
 
@@ -41,15 +42,20 @@ export async function GET(request: Request) {
       let dbPolicyDenied = policyDeniedCount
 
       try {
-        const [ae] = await db
-          .select({ count: sql<number>`count(*)` })
-          .from(governanceEvents)
+        const [ae, pd] = await withSystemContext(async (_tx) =>
+          Promise.all([
+            db
+              .select({ count: sql<number>`count(*)` })
+              .from(governanceEvents)
+              .then((rows) => rows[0]),
+            db
+              .select({ count: sql<number>`count(*)` })
+              .from(policyEvaluations)
+              .where(sql`${policyEvaluations.actionTaken} = 'denied' OR ${policyEvaluations.passed} = false`)
+              .then((rows) => rows[0]),
+          ])
+        )
         dbAuditEventVolume = Number(ae?.count ?? 0)
-
-        const [pd] = await db
-          .select({ count: sql<number>`count(*)` })
-          .from(policyEvaluations)
-          .where(sql`${policyEvaluations.actionTaken} = 'denied' OR ${policyEvaluations.passed} = false`)
         dbPolicyDenied = Number(pd?.count ?? 0) + policyDeniedCount
       } catch {
         // Fall back to in-process counters when DB unavailable.

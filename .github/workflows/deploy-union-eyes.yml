@@ -20,6 +20,21 @@ on:
           - demo
           - pilot
         default: staging
+      apply_rls_foundation_migration:
+        description: >-
+          One-time rollout step only. Set true to apply
+          db/migrations/0108_rls_tenant_isolation_foundation.sql to the
+          target environment using migration/admin authority, then verify
+          the union_eyes_runtime/union_eyes_system roles exist with the
+          expected pre-provisioning attributes. This is the deterministic
+          replacement for "a human runs psql ... < 0108.sql" (see PR
+          description). Leave false for ordinary deploys — this does NOT
+          run as part of the normal push/deploy path. Requires
+          union-eyes-migration-admin-database-url to already exist in the
+          target environment's Key Vault.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -54,6 +69,8 @@ jobs:
       demo_org_slug: ${{ steps.plan.outputs.demo_org_slug }}
       release_id: ${{ steps.plan.outputs.release_id }}
       build_time: ${{ steps.plan.outputs.build_time }}
+      key_vault_name: ${{ steps.plan.outputs.key_vault_name }}
+      rls_foundation_enforced: ${{ steps.plan.outputs.rls_foundation_enforced }}
     steps:
       - name: Resolve deployment topology
         id: plan
@@ -179,6 +196,30 @@ jobs:
             STAGING_DNS_TARGET="nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
           fi
 
+          # RLS tenant-isolation foundation (docs/union-eyes/reality-remediation/26,
+          # PR #751/#752): per-environment Key Vault holding the
+          # union-eyes-runtime-database-url / union-eyes-system-database-url
+          # secrets, and a per-environment opt-in flag. UE_RLS_FOUNDATION_ENFORCED_*
+          # starts unset (transitional/compatibility mode: warn, keep deploying
+          # against whatever DATABASE_URL secretref already exists) and must be
+          # deliberately set to "true" as a GitHub Environment variable ONLY once
+          # the manual one-time rollout (apply 0108, provision roles, create the
+          # Key Vault secrets) has actually completed for that environment. Once
+          # set, a missing runtime/system secret fails the deployment instead of
+          # silently continuing on the admin credential.
+          case "$DEPLOY_ENV" in
+            production) KEY_VAULT_NAME="${{ vars.AZURE_KEY_VAULT_NAME_PRODUCTION }}"; RLS_FOUNDATION_ENFORCED="${{ vars.UE_RLS_FOUNDATION_ENFORCED_PRODUCTION }}" ;;
+            demo) KEY_VAULT_NAME="${{ vars.AZURE_KEY_VAULT_NAME_DEMO }}"; RLS_FOUNDATION_ENFORCED="${{ vars.UE_RLS_FOUNDATION_ENFORCED_DEMO }}" ;;
+            pilot) KEY_VAULT_NAME="${{ vars.AZURE_KEY_VAULT_NAME_PILOT }}"; RLS_FOUNDATION_ENFORCED="${{ vars.UE_RLS_FOUNDATION_ENFORCED_PILOT }}" ;;
+            *) KEY_VAULT_NAME="${{ vars.AZURE_KEY_VAULT_NAME_STAGING }}"; RLS_FOUNDATION_ENFORCED="${{ vars.UE_RLS_FOUNDATION_ENFORCED_STAGING }}" ;;
+          esac
+          if [ -z "$KEY_VAULT_NAME" ]; then
+            KEY_VAULT_NAME="nzila-staging-kv"
+            if [ "$DEPLOY_ENV" != "staging" ]; then
+              echo "::warning::No AZURE_KEY_VAULT_NAME_* var set for $DEPLOY_ENV; defaulting to nzila-staging-kv, which is almost certainly wrong for this environment. Set vars.AZURE_KEY_VAULT_NAME_$(echo $DEPLOY_ENV | tr '[:lower:]' '[:upper:]')."
+            fi
+          fi
+
           echo "environment=$DEPLOY_ENV" >> "$GITHUB_OUTPUT"
           echo "app_name=$APP_NAME" >> "$GITHUB_OUTPUT"
           echo "resource_group=$RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
@@ -199,6 +240,8 @@ jobs:
           echo "demo_org_slug=$DEMO_ORG_SLUG" >> "$GITHUB_OUTPUT"
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "build_time=$BUILD_TIME" >> "$GITHUB_OUTPUT"
+          echo "key_vault_name=$KEY_VAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "rls_foundation_enforced=$RLS_FOUNDATION_ENFORCED" >> "$GITHUB_OUTPUT"
 
           echo "### Union Eyes Deployment Topology" >> "$GITHUB_STEP_SUMMARY"
           echo "- Environment: $DEPLOY_ENV" >> "$GITHUB_STEP_SUMMARY"
@@ -214,6 +257,166 @@ jobs:
           if [ "$DEPLOY_ENV" = "production" ]; then
             echo "- Note: production runs in dedicated infrastructure (nzila-canada-prod-rg / nzila-canada-prod-env) on a dedicated production database; the hard guard above fails the deploy if prod ever resolves to staging/demo/pilot infra. (Live-verified 2026-06-28, Runtime Separation Wave Phase A.1.)" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  # One-time rollout step, never part of the ordinary push/deploy path (see
+  # the `apply_rls_foundation_migration` input's description on the
+  # workflow_dispatch trigger above). This is the deterministic,
+  # version-controlled replacement for "a human runs
+  # psql ... < 0108_rls_tenant_isolation_foundation.sql" that Review Item #10
+  # required: the migration file is immutable/repository-governed, this job
+  # applies it idempotently using migration/admin authority (never the
+  # application's own runtime or system credential), and immediately
+  # verifies the resulting role attributes before any provisioning happens.
+  # Rollout order for a new environment: (1) this job, (2)
+  # `pnpm --filter @nzila/union-eyes run rls:provision-roles` (adds LOGIN +
+  # pushes secrets to Key Vault), (3) set
+  # vars.UE_RLS_FOUNDATION_ENFORCED_<ENV>=true, (4) redeploy normally (the
+  # existing "RLS foundation preflight (fail-closed)" step then proves the
+  # provisioned credentials are live and RLS is enforced).
+  apply-rls-foundation-migration:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_rls_foundation_migration == 'true' }}
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply RLS Foundation Migration (0108, one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply migration 0108 + verify role attributes (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run — it deliberately does not fall back to any application runtime credential. Create the secret (scoped to a role that can CREATE ROLE / ALTER TABLE / CREATE POLICY on this database) and re-run."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          pnpm --filter @nzila/union-eyes run rls:apply-foundation-migration -- --expect-pre-provisioning
+          MIGRATION_STATUS=$?
+
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$MIGRATION_STATUS" -ne 0 ]; then
+            echo "::error::Migration 0108 apply/verify failed for ${{ needs.plan.outputs.environment }}. Do not proceed to rls:provision-roles until this is resolved."
+            exit 1
+          fi
+          echo "::notice::Migration 0108 applied and role attributes verified for ${{ needs.plan.outputs.environment }}. Next: pnpm --filter @nzila/union-eyes run rls:provision-roles for this environment."
+
+  # Mandatory, always-on pre-deploy gate — NOT an optional operator command
+  # like apply-rls-foundation-migration above. Application code on this
+  # branch reads/writes icra_assessments.capability_token_hash /
+  # capability_token_expires_at (PR #752, ICRA capability architecture), so
+  # every deploy — not just a one-time rollout — must confirm those columns
+  # exist before the new revision goes live. Uses the canonical shared
+  # scoped-migration executor (tooling/scripts/lib/union-eyes-scoped-
+  # migrations.mjs) via icra:capability-rollout:check/:apply — never a
+  # hand-written copy of the 0005 DDL. Fails closed (before build-push/
+  # deploy) if the migration-admin Key Vault secret is unavailable or the
+  # post-apply verification does not reach GO.
+  apply-icra-capability-migration:
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply ICRA Capability Migration (0005, mandatory pre-deploy gate)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Check + apply the ICRA capability scoped migration (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. Capability-dependent application code cannot deploy without the migration-admin credential to confirm/apply the 0005 scoped migration. Refusing to proceed to build/deploy — this must never be left as an optional operator step."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          set +e
+          pnpm --filter @nzila/union-eyes run icra:capability-rollout:check
+          CHECK_STATUS=$?
+          set -e
+
+          if [ "$CHECK_STATUS" -ne 0 ]; then
+            echo "::notice::ICRA capability migration not yet GO for ${{ needs.plan.outputs.environment }} — applying tag 0005 now."
+            set +e
+            pnpm --filter @nzila/union-eyes run icra:capability-rollout:apply
+            APPLY_STATUS=$?
+            set -e
+            if [ "$APPLY_STATUS" -ne 0 ]; then
+              unset RLS_MIGRATION_ADMIN_DATABASE_URL ADMIN_URL
+              echo "::error::ICRA capability migration apply failed for ${{ needs.plan.outputs.environment }}. Refusing to build/deploy capability-dependent application code."
+              exit 1
+            fi
+          fi
+
+          set +e
+          pnpm --filter @nzila/union-eyes run icra:capability-rollout:check
+          FINAL_STATUS=$?
+          set -e
+          unset RLS_MIGRATION_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$FINAL_STATUS" -ne 0 ]; then
+            echo "::error::Post-apply verification did not reach GO for ${{ needs.plan.outputs.environment }}. Refusing to build/deploy."
+            exit 1
+          fi
+          echo "::notice::ICRA capability migration (0005) confirmed GO for ${{ needs.plan.outputs.environment }}."
 
   pre-deploy-gates:
     runs-on: ubuntu-latest
@@ -489,11 +692,12 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [plan, pre-deploy-gates, build-push]
+    needs: [plan, pre-deploy-gates, build-push, apply-icra-capability-migration]
     name: Deploy UnionEyes (env-scoped, digest-pinned)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
 
       # BR-4: environment-scoped deployment identity. This job sets
       # `environment: ${{ needs.plan.outputs.environment }}`, so the
@@ -666,6 +870,53 @@ jobs:
             "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}"
           )
 
+          # RLS foundation remediation (docs/union-eyes/reality-remediation/26,
+          # PR #751/#752): the tenant-scoped DATABASE_URL must point at the
+          # dedicated non-bypass `union_eyes_runtime` role, and system/admin
+          # paths get a SEPARATE SYSTEM_DATABASE_URL for `union_eyes_system`.
+          #
+          # This creates/updates the Container App secrets as native Key Vault
+          # references (same pattern already used for resend-api-key /
+          # cron-secret) whenever the underlying Key Vault secret exists —
+          # writing a Key Vault secret does NOT automatically create a
+          # Container App secret; those are two different stores, and this
+          # step is the explicit handoff between them.
+          #
+          # rls_foundation_enforced is a deliberate per-environment opt-in
+          # (see the plan job). Until an operator sets it to "true" for this
+          # environment — only after actually running the one-time rollout
+          # (apply 0108, provision roles, populate the Key Vault secrets) —
+          # a missing secret only warns and this deploy keeps shipping
+          # against whatever DATABASE_URL secretref already exists. Once set,
+          # a missing secret FAILS the deployment; it must never silently
+          # keep shipping against the admin credential once the dedicated
+          # secret is expected to exist.
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          RLS_FOUNDATION_ENFORCED="${{ needs.plan.outputs.rls_foundation_enforced }}"
+
+          ensure_kv_backed_secret() {
+            local SECRET_NAME="$1"
+            local ENV_VAR_NAME="$2"
+
+            if az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+              az containerapp secret set \
+                --name "$TARGET_APP" \
+                --resource-group "$TARGET_RG" \
+                --secrets "${SECRET_NAME}=keyvaultref:https://${KEY_VAULT_NAME}.vault.azure.net/secrets/${SECRET_NAME},identityref:system" \
+                >/dev/null
+              FRONTEND_ENV_VARS+=("${ENV_VAR_NAME}=secretref:${SECRET_NAME}")
+              echo "::notice::${ENV_VAR_NAME} wired to Key Vault-backed secret ${SECRET_NAME} in ${KEY_VAULT_NAME}."
+            elif [ "$RLS_FOUNDATION_ENFORCED" = "true" ]; then
+              echo "::error::${SECRET_NAME} not found in Key Vault ${KEY_VAULT_NAME}, and rls_foundation_enforced=true for this environment. Refusing to deploy against the admin credential. Run scripts/provision-runtime-db-roles.ts for this environment before retrying."
+              exit 1
+            else
+              echo "::warning::${SECRET_NAME} not found in Key Vault ${KEY_VAULT_NAME} — ${ENV_VAR_NAME} still points at whatever secretref was set previously (transitional mode; rls_foundation_enforced is not yet \"true\" for this environment). Run scripts/provision-runtime-db-roles.ts, then set vars.UE_RLS_FOUNDATION_ENFORCED_* for this environment to make this fail closed."
+            fi
+          }
+
+          ensure_kv_backed_secret "union-eyes-runtime-database-url" "DATABASE_URL"
+          ensure_kv_backed_secret "union-eyes-system-database-url" "SYSTEM_DATABASE_URL"
+
           if [ "${{ needs.plan.outputs.environment }}" = "pilot" ]; then
             FRONTEND_ENV_VARS+=(
               "DJANGO_API_URL=http://nzila-os-union-eyes-django-pilot"
@@ -836,6 +1087,73 @@ jobs:
               "DJANGO_MIGRATE_EXTRA_ARGS=$DJANGO_MIGRATE_EXTRA_ARGS" \
               "DJANGO_SKIP_MIGRATIONS=$DJANGO_SKIP_MIGRATIONS" \
             --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
+
+      - name: RLS foundation preflight (fail-closed)
+        # This proves the Key-Vault-sourced runtime/system credentials are
+        # valid and that the live database policy state (RLS+FORCE RLS,
+        # required policies, no-context-fails-closed) is correct. It does
+        # NOT by itself prove the deployed Container App revision has
+        # actually picked up these secrets and is connecting with them —
+        # Container Apps secrets are revision-scoped, and this step queries
+        # Postgres directly from the runner using the same credentials the
+        # container secret references now point at, not through the running
+        # container. For that operator-facing confirmation, call
+        # GET /api/admin/database/health (platform_lead+) after this deploy
+        # completes and confirm tenantPrincipal.currentUser is
+        # "union_eyes_runtime" (not "nzilaadmin") and
+        # systemPrincipal.currentUser is "union_eyes_system".
+        if: ${{ needs.plan.outputs.rls_foundation_enforced == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          RUNNER_IP=$(curl -sS --max-time 10 https://api.ipify.org)
+          if [ -z "$RUNNER_IP" ]; then
+            echo "::error::Could not determine this runner's public IP; refusing to proceed without a scoped firewall rule."
+            exit 1
+          fi
+          RULE_NAME="gha-rls-preflight-${{ github.run_id }}"
+          POSTGRES_SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER_NAME }}"
+          POSTGRES_RG="${{ vars.AZURE_POSTGRES_RESOURCE_GROUP }}"
+          if [ -z "$POSTGRES_SERVER_NAME" ] || [ -z "$POSTGRES_RG" ]; then
+            echo "::error::vars.AZURE_POSTGRES_SERVER_NAME / vars.AZURE_POSTGRES_RESOURCE_GROUP not set for this environment — required to scope a temporary firewall rule for the RLS preflight. Refusing to proceed."
+            exit 1
+          fi
+
+          cleanup() {
+            az postgres flexible-server firewall-rule delete \
+              --name "$POSTGRES_SERVER_NAME" \
+              --resource-group "$POSTGRES_RG" \
+              --rule-name "$RULE_NAME" \
+              --yes >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          az postgres flexible-server firewall-rule create \
+            --name "$POSTGRES_SERVER_NAME" \
+            --resource-group "$POSTGRES_RG" \
+            --rule-name "$RULE_NAME" \
+            --start-ip-address "$RUNNER_IP" \
+            --end-ip-address "$RUNNER_IP" >/dev/null
+
+          RUNTIME_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-runtime-database-url --query value -o tsv)
+          SYSTEM_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name union-eyes-system-database-url --query value -o tsv)
+
+          set +x  # never trace commands here — the export lines contain secrets
+          export RLS_VERIFY_DATABASE_URL="$RUNTIME_URL"
+          export RLS_VERIFY_SYSTEM_DATABASE_URL="$SYSTEM_URL"
+
+          pnpm --filter @nzila/union-eyes exec tsx scripts/rls-verify.ts --mode=preflight
+          PREFLIGHT_STATUS=$?
+
+          unset RLS_VERIFY_DATABASE_URL RLS_VERIFY_SYSTEM_DATABASE_URL RUNTIME_URL SYSTEM_URL
+
+          if [ "$PREFLIGHT_STATUS" -ne 0 ]; then
+            echo "::error::RLS foundation preflight failed for ${{ needs.plan.outputs.environment }} — the deployed revision is not considered healthy."
+            exit 1
+          fi
+          echo "::notice::RLS foundation preflight passed for ${{ needs.plan.outputs.environment }} — union_eyes_runtime is confirmed NOSUPERUSER/NOBYPASSRLS with RLS enforced on every required table. Confirm the deployed app itself is using these credentials via GET /api/admin/database/health."
 
       - name: Custom domain smoke checks
         shell: bash

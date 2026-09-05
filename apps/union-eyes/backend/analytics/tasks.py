@@ -68,7 +68,7 @@ def generate_report_task(
     Args:
         report_type:  One of 'claims', 'members', 'grievances', 'usage', 'gdpr-export'.
         org_id:       Organization UUID.
-        user_id:      Requesting Clerk user ID.
+        user_id:      Requesting auth provider user ID.
         parameters:   Report-specific parameters (date range, format, etc.).
         notify_user:  Whether to email the user on completion.
     """

@@ -21,6 +21,7 @@
  */
 
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { organizationBillingConfig } from '@/db/schema/domains/finance/billing-config';
 import { BillingCycleService, type BillingFrequency } from '@/lib/services/billing-cycle-service';
@@ -63,13 +64,55 @@ interface BillingSchedulerResult {
 export class BillingScheduler {
   /**
    * Run automated billing for all organizations with the given frequency
-   * 
+   *
    * This is called by cron jobs at scheduled intervals:
    * - Monthly: 1st of month
    * - Bi-weekly: Every other Monday
    * - Weekly: Every Monday
+   *
+   * The ENTIRE cross-org operation — organization enumeration, each org's
+   * billing-cycle generation, and completion/failure notifications — runs
+   * inside a single withSystemContext() so every nested call to the
+   * canonical `db` import (in this file, in BillingCycleService, in the
+   * notification service, in audit-service) resolves to the
+   * union_eyes_system connection via AsyncLocalStorage, not just the
+   * initial organization_billing_config enumeration (see db/db.ts's `db`
+   * Proxy and lib/db/with-rls-context.ts's systemContextStorage).
+   * Request-facing authorization (platform_lead) is still enforced
+   * entirely at the route level, before this is ever called —
+   * withSystemContext is only the execution mechanism.
+   *
+   * KNOWN LIMITATION (pre-existing, not introduced here):
+   * BillingCycleService.generateBillingCycle() internally calls
+   * withRLSContext()'s no-context overload, which calls auth()
+   * unconditionally and throws if there is no authenticated session — that
+   * check happens before any DB access and does not consult the active
+   * system context. This is fine for the only currently-wired caller (the
+   * platform_lead-authenticated admin route, which has a real session),
+   * but if runMonthlyBilling/runWeeklyBilling/runBiWeeklyBilling are ever
+   * invoked from a truly headless cron trigger with no HTTP session,
+   * generateBillingCycle will throw "Unauthorized" regardless of this
+   * SYSTEM wrapper. Fixing that requires BillingCycleService to offer a
+   * system-aware entrypoint — out of scope for this correction.
+   *
+   * PERMANENT DEFENSE-IN-DEPTH CONTRACT (PR #752 round 6): SYSTEM_RUNTIME
+   * bypasses tenant RLS by design — union_eyes_system's own policies grant
+   * unconditional access, so the nested withRLSContext() session variables
+   * set inside this boundary are NOT a security boundary once execution is
+   * already on the system connection. Every per-org query
+   * BillingCycleService issues MUST therefore keep an explicit
+   * organizationId predicate (see its getActiveMembersForBilling query),
+   * proven in lib/jobs/__tests__/billing-scheduler-system-boundary-proof.test.ts.
+   * Do NOT ever remove that predicate on the theory that "we're in system
+   * context, so scoping is unnecessary" — doing so would turn this
+   * single-org iteration into a platform-wide cross-org mutation with no
+   * RLS policy left to catch it.
    */
   static async runScheduledBilling(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
+    return withSystemContext((_tx) => this.runScheduledBillingInSystemContext(frequency));
+  }
+
+  private static async runScheduledBillingInSystemContext(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
     const startTime = Date.now();
 
     logger.info(`Starting scheduled billing run for frequency: ${frequency}`);
@@ -190,9 +233,17 @@ export class BillingScheduler {
   }
 
   /**
-   * Get organizations configured for a specific billing frequency
-   * 
-   * Reads from organization billing configuration when available
+   * Get organizations configured for a specific billing frequency.
+   *
+   * Deliberately cross-organization (organization_billing_config is
+   * SYSTEM_ONLY — see db/rls-storage-authority-manifest.ts). Uses the
+   * canonical `db` import directly rather than opening its own
+   * withSystemContext: this is always called from within
+   * runScheduledBilling's outer withSystemContext, so `db` already
+   * resolves to the union_eyes_system connection via AsyncLocalStorage.
+   * Opening a second, nested withSystemContext here would start an
+   * unrelated second transaction rather than participating in the same
+   * system execution boundary as the rest of the scheduled-billing run.
    */
   private static async getOrganizationsForBilling(
     frequency: BillingFrequency

@@ -32,11 +32,36 @@ class AwardHistoryViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment: unconditionally denies every request.
+
+    Used for models with no proven legitimate Django consumer and no
+    tenant isolation mechanism (PR #752 round 36):
+    - RewardWalletLedger: the Django model maps only user_id — it does
+      not even model org_id, let alone the ledger's financial fields
+      (event_type/amount_credits/balance_after/source_type). The real
+      TS ledger surface is append-only (SELECT/INSERT only); nothing
+      justifies a Django ModelViewSet exposing full CRUD.
+    - RewardBudgetEnvelopes: the Django model maps only a nullable
+      org_id, omitting program_id/name/scope/period/limit/usage/dates.
+      No real TS or Django consumer of either REST endpoint was found
+      anywhere in the app.
+    Remove only once a proven legitimate consumer and organization-bound
+    isolation mechanism exist for the relevant table.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class RewardWalletLedgerViewSet(viewsets.ModelViewSet):
     """API endpoint for RewardWalletLedger operations."""
     queryset = RewardWalletLedger.objects.all()
     serializer_class = RewardWalletLedgerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -580,7 +605,7 @@ class RecognitionProgramsViewSet(viewsets.ModelViewSet):
     """API endpoint for RecognitionPrograms operations."""
     queryset = RecognitionPrograms.objects.all()
     serializer_class = RecognitionProgramsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -610,7 +635,7 @@ class RewardBudgetEnvelopesViewSet(viewsets.ModelViewSet):
     """API endpoint for RewardBudgetEnvelopes operations."""
     queryset = RewardBudgetEnvelopes.objects.all()
     serializer_class = RewardBudgetEnvelopesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

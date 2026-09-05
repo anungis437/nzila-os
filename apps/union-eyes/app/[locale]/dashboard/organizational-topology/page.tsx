@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
+import { hasInstitutionalTopologyAccess } from '@/lib/organizational-topology/access';
 import { getInstitutionalTopologyView } from '@/lib/organizational-topology/source';
 
 export const dynamic = 'force-dynamic';
@@ -31,10 +32,23 @@ function dash(value: number | string | undefined | null): string {
   return String(value);
 }
 
+// PR #752 round 8: getInstitutionalGraph() (lib/organizational-topology/source.ts)
+// deliberately reads organizations + organizationRelationships with no
+// per-org filter — a Model A (national/cross-affiliate) surface, same
+// shape as app/[locale]/dashboard/clc/staff/page.tsx's CLC dashboard.
+// requireUser() alone (any authenticated user, any role) previously gated
+// this page, which meant an ordinary tenant member could view every other
+// organization's institutional topology. See lib/organizational-topology/access.ts.
 export default async function InstitutionalTopologyPage() {
   const user = await requireUser();
   if (!user) {
     redirect('/sign-in');
+  }
+
+  const orgId = user.organizationId;
+  const hasAccess = orgId ? await hasInstitutionalTopologyAccess(user.userId, orgId) : false;
+  if (!hasAccess) {
+    redirect('/dashboard');
   }
 
   const view = await getInstitutionalTopologyView();

@@ -27,9 +27,9 @@ if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
 import { db } from '../../db/db';
 import { claims } from '../../db/schema/claims-schema';
 import { organizationMembers as members } from '../../db/schema/organization-members-schema';
-import { 
+import {
   grievanceTransitions,
-} from '../../db/schema/grievance-workflow-schema';
+} from '../../db/schema/domains/claims/workflows';
 import { getNotificationService } from '../services/notification-service';
 import { eq, and, between, desc } from 'drizzle-orm';
 import { generatePDF } from '../utils/pdf-generator';

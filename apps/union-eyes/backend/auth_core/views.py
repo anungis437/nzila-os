@@ -698,13 +698,13 @@ def _handle_user_created(data: Dict[str, Any]):
 
     Creates Django User when new user signs up via Clerk.
     """
-    clerk_user_id = data.get("id")
+    auth_user_id = data.get("id")
     email = data.get("email_addresses", [{}])[0].get("email_address", "")
     first_name = data.get("first_name", "")
     last_name = data.get("last_name", "")
 
     user, created = User.objects.get_or_create(
-        username=clerk_user_id,
+        username=auth_user_id,
         defaults={
             "email": email,
             "first_name": first_name,
@@ -714,9 +714,9 @@ def _handle_user_created(data: Dict[str, Any]):
     )
 
     if created:
-        logger.info(f"Created user {clerk_user_id} from Clerk webhook")
+        logger.info(f"Created user {auth_user_id} from auth provider webhook")
     else:
-        logger.info(f"User {clerk_user_id} already exists")
+        logger.info(f"User {auth_user_id} already exists")
 
 
 def _handle_user_updated(data: Dict[str, Any]):
@@ -724,10 +724,10 @@ def _handle_user_updated(data: Dict[str, Any]):
 
     Syncs user metadata changes from Clerk to Django.
     """
-    clerk_user_id = data.get("id")
+    auth_user_id = data.get("id")
 
     try:
-        user = User.objects.get(username=clerk_user_id)
+        user = User.objects.get(username=auth_user_id)
 
         email = data.get("email_addresses", [{}])[0].get("email_address", "")
         first_name = data.get("first_name", "")
@@ -746,10 +746,10 @@ def _handle_user_updated(data: Dict[str, Any]):
 
         if updated:
             user.save(update_fields=["email", "first_name", "last_name"])
-            logger.info(f"Updated user {clerk_user_id}")
+            logger.info(f"Updated user {auth_user_id}")
 
     except User.DoesNotExist:
-        logger.warning(f"User {clerk_user_id} not found for update")
+        logger.warning(f"User {auth_user_id} not found for update")
 
 
 def _handle_user_deleted(data: Dict[str, Any]):
@@ -757,36 +757,36 @@ def _handle_user_deleted(data: Dict[str, Any]):
 
     Soft-deletes user in Django (sets is_active=False).
     """
-    clerk_user_id = data.get("id")
+    auth_user_id = data.get("id")
 
     try:
-        user = User.objects.get(username=clerk_user_id)
+        user = User.objects.get(username=auth_user_id)
         user.is_active = False
         user.save(update_fields=["is_active"])
-        logger.info(f"Deactivated user {clerk_user_id}")
+        logger.info(f"Deactivated user {auth_user_id}")
 
     except User.DoesNotExist:
-        logger.warning(f"User {clerk_user_id} not found for deletion")
+        logger.warning(f"User {auth_user_id} not found for deletion")
 
 
 def _handle_organization_created(data: Dict[str, Any]):
     """Handle organization.created webhook event.
 
-    Creates or updates the local Organizations record with the Clerk org ID.
-    This populates clerk_organization_id so proxy requests can scope by org.
+    Creates or updates the local Organizations record with the auth provider org ID.
+    This populates auth_provider_org_id so proxy requests can scope by org.
     """
-    clerk_org_id = data.get("id")
+    auth_org_id = data.get("id")
     org_name = data.get("name", "")
     slug = data.get("slug") or org_name.lower().replace(" ", "-")
     image_url = data.get("image_url")
     metadata = data.get("public_metadata", {})
 
-    if not clerk_org_id:
+    if not auth_org_id:
         logger.warning("organization.created event missing id")
         return
 
     org, created = Organizations.objects.update_or_create(
-        clerk_organization_id=clerk_org_id,
+        auth_provider_org_id=auth_org_id,
         defaults={
             "name": org_name,
             "slug": slug,
@@ -797,55 +797,55 @@ def _handle_organization_created(data: Dict[str, Any]):
     )
     action = "Created" if created else "Updated"
     logger.info(
-        f"{action} organization {clerk_org_id} — {org_name} (local id: {org.id})"
+        f"{action} organization {auth_org_id} — {org_name} (local id: {org.id})"
     )
 
 
 def _handle_organization_updated(data: Dict[str, Any]):
     """Handle organization.updated webhook event."""
-    clerk_org_id = data.get("id")
+    auth_org_id = data.get("id")
     org_name = data.get("name", "")
     slug = data.get("slug") or org_name.lower().replace(" ", "-")
 
-    if not clerk_org_id:
+    if not auth_org_id:
         return
 
     try:
-        org = Organizations.objects.get(clerk_organization_id=clerk_org_id)
+        org = Organizations.objects.get(auth_provider_org_id=auth_org_id)
         org.name = org_name
         org.display_name = org_name
         org.slug = slug
         org.save(update_fields=["name", "display_name", "slug"])
-        logger.info(f"Updated organization {clerk_org_id}")
+        logger.info(f"Updated organization {auth_org_id}")
     except Organizations.DoesNotExist:
-        logger.warning(f"Organization {clerk_org_id} not found for update — creating")
+        logger.warning(f"Organization {auth_org_id} not found for update — creating")
         _handle_organization_created(data)
 
 
 def _handle_membership_created(data: Dict[str, Any]):
     """Handle organizationMembership.created webhook event.
 
-    Creates an OrganizationMembers record linking the Clerk user to the local org.
+    Creates an OrganizationMembers record linking the auth provider user to the local org.
     """
-    clerk_user_id = data.get("public_user_data", {}).get("user_id")
-    clerk_org_id = data.get("organization", {}).get("id")
+    auth_user_id = data.get("public_user_data", {}).get("user_id")
+    auth_org_id = data.get("organization", {}).get("id")
     role = data.get("role", "member")
 
-    if not clerk_user_id or not clerk_org_id:
+    if not auth_user_id or not auth_org_id:
         logger.warning("organizationMembership.created missing user or org id")
         return
 
     try:
-        org = Organizations.objects.get(clerk_organization_id=clerk_org_id)
+        org = Organizations.objects.get(auth_provider_org_id=auth_org_id)
     except Organizations.DoesNotExist:
         logger.warning(
-            f"Cannot create membership — org {clerk_org_id} not found locally. "
+            f"Cannot create membership — org {auth_org_id} not found locally. "
             f"Run organization.created first."
         )
         return
 
     membership, created = OrganizationMembers.objects.update_or_create(
-        user_id=clerk_user_id,
+        user_id=auth_user_id,
         organization=org,
         defaults={
             "role": role,
@@ -855,7 +855,7 @@ def _handle_membership_created(data: Dict[str, Any]):
     )
     action = "Created" if created else "Updated"
     logger.info(
-        f"{action} membership: user {clerk_user_id} in org {clerk_org_id} as {role}"
+        f"{action} membership: user {auth_user_id} in org {auth_org_id} as {role}"
     )
 
 
@@ -864,30 +864,30 @@ def _handle_membership_updated(data: Dict[str, Any]):
 
     Syncs role changes from Clerk to the local OrganizationMembers record.
     """
-    clerk_user_id = data.get("public_user_data", {}).get("user_id")
-    clerk_org_id = data.get("organization", {}).get("id")
+    auth_user_id = data.get("public_user_data", {}).get("user_id")
+    auth_org_id = data.get("organization", {}).get("id")
     role = data.get("role", "member")
 
-    if not clerk_user_id or not clerk_org_id:
+    if not auth_user_id or not auth_org_id:
         logger.warning("organizationMembership.updated missing user or org id")
         return
 
     try:
-        org = Organizations.objects.get(clerk_organization_id=clerk_org_id)
+        org = Organizations.objects.get(auth_provider_org_id=auth_org_id)
     except Organizations.DoesNotExist:
         logger.warning(
-            f"Cannot update membership — org {clerk_org_id} not found locally."
+            f"Cannot update membership — org {auth_org_id} not found locally."
         )
         return
 
     updated = OrganizationMembers.objects.filter(
-        user_id=clerk_user_id,
+        user_id=auth_user_id,
         organization=org,
     ).update(role=role)
 
     if updated:
         logger.info(
-            f"Updated membership role: user {clerk_user_id} in org {clerk_org_id} → {role}"
+            f"Updated membership role: user {auth_user_id} in org {auth_org_id} → {role}"
         )
     else:
         # Membership record doesn't exist yet — create it.
@@ -899,22 +899,22 @@ def _handle_membership_deleted(data: Dict[str, Any]):
 
     Sets the OrganizationMembers status to 'inactive' (soft-delete).
     """
-    clerk_user_id = data.get("public_user_data", {}).get("user_id")
-    clerk_org_id = data.get("organization", {}).get("id")
+    auth_user_id = data.get("public_user_data", {}).get("user_id")
+    auth_org_id = data.get("organization", {}).get("id")
 
-    if not clerk_user_id or not clerk_org_id:
+    if not auth_user_id or not auth_org_id:
         return
 
     try:
-        org = Organizations.objects.get(clerk_organization_id=clerk_org_id)
+        org = Organizations.objects.get(auth_provider_org_id=auth_org_id)
         updated = OrganizationMembers.objects.filter(
-            user_id=clerk_user_id, organization=org
+            user_id=auth_user_id, organization=org
         ).update(status="inactive")
         logger.info(
-            f"Deactivated {updated} membership records for user {clerk_user_id} in org {clerk_org_id}"
+            f"Deactivated {updated} membership records for user {auth_user_id} in org {auth_org_id}"
         )
     except Organizations.DoesNotExist:
-        logger.warning(f"Org {clerk_org_id} not found for membership deletion")
+        logger.warning(f"Org {auth_org_id} not found for membership deletion")
 
 
 @api_view(["GET"])
@@ -928,7 +928,7 @@ def me(request):
             "email": "user@example.com",
             "first_name": "John",
             "last_name": "Doe",
-            "clerk_user_id": "user_2...",
+            "userId": "user_2...",
             "organization": {"id": "org_id", "role": "admin"}
         }
     """
@@ -940,10 +940,10 @@ def me(request):
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "clerk_user_id": user.username,  # Username is Clerk user ID
+            "userId": user.username,  # Username is the auth provider user ID
             "organization": {
-                "id": getattr(request, "clerk_org_id", None),
-                "role": getattr(request, "clerk_org_role", None),
+                "id": getattr(request, "org_id", None),
+                "role": getattr(request, "org_role", None),
             },
         }
     )
@@ -1081,8 +1081,8 @@ def health_check(request):
 def member_profile(request):
     """Enriched member profile endpoint.
 
-    Returns the Clerk-based user profile combined with organization membership
-    info and claims statistics from the local database.
+    Returns the auth-provider-based user profile combined with organization
+    membership info and claims statistics from the local database.
 
     Response shape matches the legacy /api/members/me Next.js route so the
     frontend can be proxied here without code changes.
@@ -1090,7 +1090,7 @@ def member_profile(request):
     from django.db.models import Count, Q  # local import to avoid circular
 
     user = request.user
-    clerk_user_id: str = (
+    auth_user_id: str = (
         user.username
     )  # OIDCAuthentication sets username = auth user ID
 
@@ -1098,7 +1098,7 @@ def member_profile(request):
     try:
         from grievances.models import Claims  # noqa: PLC0415
 
-        qs = Claims.objects.filter(member_id=clerk_user_id)
+        qs = Claims.objects.filter(member_id=auth_user_id)
         total = qs.count()
         active = qs.filter(~Q(status__in=["resolved", "rejected", "closed"])).count()
         resolved = qs.filter(status="resolved").count()
@@ -1127,7 +1127,7 @@ def member_profile(request):
     membership_data = {}
     try:
         membership = (
-            OrganizationMembers.objects.filter(user_id=clerk_user_id, status="active")
+            OrganizationMembers.objects.filter(user_id=auth_user_id, status="active")
             .select_related("organization")
             .first()
         )
@@ -1143,15 +1143,15 @@ def member_profile(request):
     return Response(
         {
             "profile": {
-                "userId": clerk_user_id,
+                "userId": auth_user_id,
                 "email": user.email,
                 "firstName": user.first_name,
                 "lastName": user.last_name,
                 "displayName": f"{user.first_name} {user.last_name}".strip()
                 or user.username,
                 "organization": {
-                    "id": getattr(request, "clerk_org_id", None),
-                    "role": getattr(request, "clerk_org_role", None),
+                    "id": getattr(request, "org_id", None),
+                    "role": getattr(request, "org_role", None),
                 },
                 **membership_data,
                 "claimsStats": {

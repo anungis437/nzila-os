@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   requireSystemAdmin: vi.fn(),
   withRLSContext: vi.fn(),
+  withSystemContext: vi.fn(),
   rowsQueue: [] as unknown[][],
   executeQueue: [] as unknown[][],
   inserted: null as any,
@@ -27,7 +28,7 @@ const mockDb: any = {
 vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   const sqlMock: any = vi.fn((s: any, ...v: any[]) => ({ s, v }));
@@ -56,6 +57,7 @@ describe('organizations route', () => {
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.requireSystemAdmin.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withSystemContext.mockImplementation(async (fn: (tx?: unknown) => unknown) => fn({}));
   });
 
   it('GET returns 401 when unauthenticated', async () => {

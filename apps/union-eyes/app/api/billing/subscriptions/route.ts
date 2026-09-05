@@ -48,12 +48,13 @@ export const POST = withApi(
       summary: 'Pause or resume a subscription',
     },
   },
-  async ({ body, userId }) => {
+  async ({ body, userId, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (body.action === 'pause') {
-      const result = await pauseSubscription(body.subscriptionId, userId!, body.reason);
+      const result = await pauseSubscription(organizationId, body.subscriptionId, userId!, body.reason);
       return { ...result };
     }
-    const result = await resumeSubscription(body.subscriptionId, userId!);
+    const result = await resumeSubscription(organizationId, body.subscriptionId, userId!);
     return { ...result };
   },
 );

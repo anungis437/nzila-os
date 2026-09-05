@@ -34,12 +34,19 @@ export interface SubscriptionAction {
 // ============================================================================
 
 /**
- * Expire trials whose trialEndDate has passed and status is still 'trialing'.
- * Moves to 'active' if payment method on file, otherwise 'cancelled'.
+ * Expire trials whose trialEndDate has passed and status is still 'trialing',
+ * scoped to a single organization. Moves to 'active' if payment method on
+ * file, otherwise 'cancelled'.
+ *
+ * organizationId is required: a tenant-facing caller must never expire
+ * trials outside its own authorized organization (see PR #752 review —
+ * app/api/billing/credits/check-expired/route.ts previously called this
+ * with no org filter, mutating every organization's expired trials).
  *
  * Returns the list of affected subscriptions.
  */
 export async function expireTrials(
+  organizationId: string,
   hasPaymentMethod: (orgId: string) => Promise<boolean>,
 ): Promise<SubscriptionAction[]> {
   const expired = await db
@@ -47,6 +54,7 @@ export async function expireTrials(
     .from(orgSubscriptions)
     .where(
       and(
+        eq(orgSubscriptions.organizationId, organizationId),
         eq(orgSubscriptions.status, 'trialing'),
         lte(orgSubscriptions.trialEndDate, new Date()),
       ),
@@ -65,7 +73,7 @@ export async function expireTrials(
         status: newStatus,
         updatedAt: new Date(),
       })
-      .where(eq(orgSubscriptions.id, sub.id));
+      .where(and(eq(orgSubscriptions.id, sub.id), eq(orgSubscriptions.organizationId, organizationId)));
 
     await db.insert(subscriptionEventsLog).values({
       organizationId: sub.organizationId,
@@ -91,9 +99,10 @@ export async function expireTrials(
 }
 
 /**
- * Send trial-ending-soon warnings for subscriptions expiring within N days.
+ * Send trial-ending-soon warnings for subscriptions expiring within N days,
+ * scoped to a single organization (same cross-org rationale as expireTrials).
  */
-export async function getTrialsEndingSoon(withinDays: number = 3) {
+export async function getTrialsEndingSoon(organizationId: string, withinDays: number = 3) {
   const threshold = new Date(Date.now() + withinDays * 86_400_000);
 
   return await db
@@ -101,6 +110,7 @@ export async function getTrialsEndingSoon(withinDays: number = 3) {
     .from(orgSubscriptions)
     .where(
       and(
+        eq(orgSubscriptions.organizationId, organizationId),
         eq(orgSubscriptions.status, 'trialing'),
         lte(orgSubscriptions.trialEndDate, threshold),
         sql`${orgSubscriptions.trialEndDate} > NOW()`,
@@ -114,8 +124,16 @@ export async function getTrialsEndingSoon(withinDays: number = 3) {
 
 /**
  * Pause an active subscription.
+ *
+ * organizationId is required and enforced in the WHERE clause: a
+ * tenant-facing caller must never pause a subscription belonging to a
+ * different organization merely by supplying its UUID (see PR #752 review
+ * — app/api/billing/subscriptions/route.ts previously called this with
+ * only subscriptionId, an IDOR allowing any steward to pause/resume any
+ * org's subscription).
  */
 export async function pauseSubscription(
+  organizationId: string,
   subscriptionId: string,
   pausedBy: string,
   reason?: string,
@@ -129,13 +147,14 @@ export async function pauseSubscription(
     .where(
       and(
         eq(orgSubscriptions.id, subscriptionId),
+        eq(orgSubscriptions.organizationId, organizationId),
         eq(orgSubscriptions.status, 'active'),
       ),
     )
     .returning();
 
   if (!sub) {
-    throw new Error(`Subscription ${subscriptionId} not found or not active`);
+    throw new Error(`Subscription ${subscriptionId} not found, not active, or not owned by this organization`);
   }
 
   await db.insert(subscriptionEventsLog).values({
@@ -169,8 +188,12 @@ export async function pauseSubscription(
 
 /**
  * Resume a paused subscription.
+ *
+ * organizationId is required and enforced in the WHERE clause — see
+ * pauseSubscription's doc comment for the cross-org rationale.
  */
 export async function resumeSubscription(
+  organizationId: string,
   subscriptionId: string,
   resumedBy: string,
 ): Promise<SubscriptionAction> {
@@ -183,13 +206,14 @@ export async function resumeSubscription(
     .where(
       and(
         eq(orgSubscriptions.id, subscriptionId),
+        eq(orgSubscriptions.organizationId, organizationId),
         eq(orgSubscriptions.status, 'paused'),
       ),
     )
     .returning();
 
   if (!sub) {
-    throw new Error(`Subscription ${subscriptionId} not found or not paused`);
+    throw new Error(`Subscription ${subscriptionId} not found, not paused, or not owned by this organization`);
   }
 
   await db.insert(subscriptionEventsLog).values({
@@ -227,6 +251,11 @@ export async function resumeSubscription(
 /**
  * Process auto-renewals for contracts/subscriptions nearing expiration.
  * Returns list of renewed subscription IDs.
+ *
+ * Deliberately cross-organization (a global renewal sweep) — has zero
+ * production callers as of PR #752's audit. If wired to a cron job, that
+ * job must invoke this through withSystemContext, not the ordinary tenant
+ * runtime connection; it must never be exposed via a tenant-facing route.
  */
 export async function processAutoRenewals(
   withinDays: number = 7,

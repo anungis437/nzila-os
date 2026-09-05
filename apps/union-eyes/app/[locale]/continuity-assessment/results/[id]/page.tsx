@@ -7,13 +7,19 @@
  * shared ICRAProfile body. Lives outside the (marketing) route group so it
  * carries its own non-marketing chrome (see ./layout.tsx).
  *
- * Fully public. No auth. Accessible via the unique link issued at submission.
+ * Pseudonymous, capability-authorized: no login is required, but the
+ * browser must present a valid assessment capability (the HttpOnly cookie
+ * set at creation, or one exchanged from an emailed link's URL fragment via
+ * IcraCapabilityBootstrap) — assessmentId alone is never sufficient.
  */
 
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getIcraProfile } from '@/actions/icra/get-profile';
+import { getAuthorizedIcraProfile } from '@/actions/icra/get-profile';
+import { capabilityCookieName, decodeCapabilityCookieValue } from '@/lib/icra/assessment-capability';
+import { IcraCapabilityBootstrap } from '@/components/icra/IcraCapabilityBootstrap';
 import { ICRAProfile } from '@/components/icra/ICRAProfile';
 import PrintReportButton from '@/components/icra/PrintReportButton';
 import { EmailResultsCard } from '@/components/icra/EmailResultsCard';
@@ -89,8 +95,19 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
   if (!id || !UUID_RE.test(id)) notFound();
 
-  const profile = await getIcraProfile(id);
-  if (!profile) notFound();
+  const cookieStore = await cookies();
+  const rawCookie = cookieStore.get(capabilityCookieName(id))?.value;
+  const capability = decodeCapabilityCookieValue(rawCookie);
+  const result = await getAuthorizedIcraProfile(id, capability);
+
+  if (!result.ok) {
+    // No valid capability from the cookie — render the client bootstrap,
+    // which checks the URL fragment (email-recovery flow) before giving up.
+    return (
+      <IcraCapabilityBootstrap assessmentId={id} locale={locale} />
+    );
+  }
+  const profile = result.profile;
 
   const copy = COPY[locale as 'en-CA' | 'fr-CA'] ?? COPY['en-CA'];
   const tierLabel = tierUnlocked ? TIER_LABEL[tierUnlocked] : null;

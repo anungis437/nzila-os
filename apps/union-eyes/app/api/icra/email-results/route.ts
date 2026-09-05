@@ -4,19 +4,40 @@
  *
  * POST /api/icra/email-results
  *
- * Sends the results URL to a recipient address so the respondent can
- * recover their report later. Privacy-preserving: the recipient email
- * is never stored. Only a one-way SHA-256 hash is logged with the
+ * Sends the CURRENT results URL (with the caller's own capability re-embedded
+ * in the fragment) to a recipient address, so the respondent can save/share
+ * their existing access link. Privacy-preserving: the recipient email is
+ * never stored. Only a one-way SHA-256 hash is logged with the
  * results_emailed event, alongside the assessment id and IP hash.
  *
  * Rate limited: 5 sends per hour per IP.
+ *
+ * SECURITY: this is SAVE_MY_CURRENT_RESULTS_ACCESS_LINK, not
+ * RECOVER_ACCESS_FROM_UUID. The caller MUST already present a valid,
+ * unexpired assessment capability (Authorization: Bearer header or the
+ * HttpOnly issuance cookie the browser sends automatically) — knowledge of
+ * assessmentId alone is never sufficient. The capability is NEVER rotated
+ * here: this route only re-embeds the already-presented, already-valid raw
+ * token in the emailed link's URL FRAGMENT (`#cap=...`), never a query
+ * parameter. A prior version of this route rotated the capability on every
+ * call using only the UUID, which reintroduced
+ * ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY (an attacker who knew the UUID
+ * could invalidate the legitimate holder's capability and receive the
+ * replacement) — do not reintroduce that. A true "I lost all access"
+ * recovery flow would require a separately established, verified recovery
+ * identity/contact mechanism; this system intentionally does not store one.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
 import { eq } from 'drizzle-orm'
-import { db } from '@/db'
 import { icraAssessments } from '@/db/schema/icra-schema'
+import { withSystemContext } from '@/lib/db/with-rls-context'
+import {
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+} from '@/lib/icra/assessment-capability'
 import { rateLimit } from '@/lib/rate-limit'
 import { sendEmail, isValidEmail } from '@/lib/email-service'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
@@ -81,24 +102,37 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
   }
 
-  // Confirm the assessment exists. We do NOT require auth: anyone who
-  // already holds the assessmentId can request the link \u2014 they would
-  // have it from the original submission redirect either way.
-  const [assessment] = await db
-    .select({ id: icraAssessments.id })
-    .from(icraAssessments)
-    .where(eq(icraAssessments.id, assessmentId))
-    .limit(1)
+  // Confirm the assessment exists AND the caller presents a currently valid
+  // capability for THIS assessment. Knowledge of assessmentId alone is never
+  // sufficient (ASSESSMENT_ID_AS_SOLE_BEARER_AUTHORITY = REJECTED). The
+  // capability is never rotated — we only re-embed the same, already-valid
+  // presented token in the emailed link.
+  const presented = extractCapabilityToken(req, assessmentId)
+  const verification = await withSystemContext(async (tx) => {
+    const [assessment] = await tx
+      .select({
+        id: icraAssessments.id,
+        capabilityTokenHash: icraAssessments.capabilityTokenHash,
+        capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+      })
+      .from(icraAssessments)
+      .where(eq(icraAssessments.id, assessmentId))
+      .limit(1)
 
-  if (!assessment) {
-    // Avoid leaking existence \u2014 return 200 silently.
-    return NextResponse.json({ ok: true })
+    return checkCapability(presented, assessment)
+  })
+
+  if (!verification.ok) {
+    return NextResponse.json(
+      { error: 'Not authorized to email a link for this assessment.' },
+      { status: capabilityDenialStatus(verification.reason) },
+    )
   }
 
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
     `${req.nextUrl.protocol}//${req.nextUrl.host}`
-  const resultsUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}`
+  const resultsUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}#cap=${encodeURIComponent(presented as string)}`
   const copy = COPY[locale]
 
   const html = `

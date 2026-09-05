@@ -311,11 +311,14 @@ export async function POST(request: NextRequest) {
         if (isIcraReport && icraAssessmentId && icraTierId) {
           // ── ICRA report tier fulfillment ──
           try {
-            const [existing] = await db
-              .select({ reportTierId: icraAssessments.reportTierId })
-              .from(icraAssessments)
-              .where(eq(icraAssessments.id, icraAssessmentId))
-              .limit(1);
+            const existing = await withSystemContext(async (tx) => {
+              const [row] = await tx
+                .select({ reportTierId: icraAssessments.reportTierId })
+                .from(icraAssessments)
+                .where(eq(icraAssessments.id, icraAssessmentId))
+                .limit(1);
+              return row;
+            });
 
             if (!existing) {
               logger.warn('[stripe-webhook] ICRA assessment not found', { icraAssessmentId });
@@ -340,29 +343,32 @@ export async function POST(request: NextRequest) {
               break;
             }
 
-            // Upgrade the assessment tier
-            await db
-              .update(icraAssessments)
-              .set({ reportTierId: icraTierId })
-              .where(eq(icraAssessments.id, icraAssessmentId));
+            // Upgrade the assessment tier and patch the stored profile payload
+            // (SYSTEM_ONLY table — bounded system execution, not ordinary db) so
+            // the results page reflects the new tier.
+            await withSystemContext(async (tx) => {
+              await tx
+                .update(icraAssessments)
+                .set({ reportTierId: icraTierId })
+                .where(eq(icraAssessments.id, icraAssessmentId));
 
-            // Patch the stored profile payload so the results page reflects the new tier
-            const [profileRow] = await db
-              .select({ profilePayload: icraMaturityProfiles.profilePayload })
-              .from(icraMaturityProfiles)
-              .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
-              .limit(1);
+              const [profileRow] = await tx
+                .select({ profilePayload: icraMaturityProfiles.profilePayload })
+                .from(icraMaturityProfiles)
+                .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
+                .limit(1);
 
-            if (profileRow?.profilePayload) {
-              const updated: InstitutionalContinuityProfile = {
-                ...(profileRow.profilePayload as InstitutionalContinuityProfile),
-                reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
-              };
-              await db
-                .update(icraMaturityProfiles)
-                .set({ profilePayload: updated })
-                .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId));
-            }
+              if (profileRow?.profilePayload) {
+                const updated: InstitutionalContinuityProfile = {
+                  ...(profileRow.profilePayload as InstitutionalContinuityProfile),
+                  reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
+                };
+                await tx
+                  .update(icraMaturityProfiles)
+                  .set({ profilePayload: updated })
+                  .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId));
+              }
+            });
 
             logger.info('[stripe-webhook] ICRA tier upgraded', {
               icraAssessmentId,

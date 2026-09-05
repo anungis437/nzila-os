@@ -20,6 +20,8 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import { getDatabase as getUnifiedDatabase, checkDatabaseHealth } from "@/lib/database/multi-db-client";
 import { logger } from "@/lib/logger";
+import { getActiveSystemDb } from "./system-context-storage";
+import { getActiveTenantDb } from "./tenant-context-storage";
 
 // Legacy PostgreSQL client (for backward compatibility)
 // Consider migrating to getUnifiedDatabase() for multi-database support
@@ -88,7 +90,28 @@ export const client = new Proxy({} as ReturnType<typeof postgres>, {
 });
 
 export const db = new Proxy({} as PostgresJsDatabase<typeof schema>, {
-  get(_target, prop) { return (getDb() as any as Record<string | symbol, unknown>)[prop]; },
+  // Inside withSystemContext()/withPlatformAdminRLSContext(), this resolves
+  // to the active union_eyes_system transaction instead of the tenant
+  // connection — see system-context-storage.ts. This makes the authority
+  // split correct even for the ~90 existing callers that query through this
+  // `db` import directly rather than the tx their callback receives.
+  // Inside withRLSContext()/withExplicitUserContext(), it resolves to the
+  // active tenant transaction that actually carries app.current_org_id/
+  // app.current_user_id — see tenant-context-storage.ts. Without this, a
+  // no-argument callback (`withRLSContext(async () => db.select(...))`)
+  // would run on the ordinary pooled connection, never on the transaction
+  // set_config() was applied to.
+  get(_target, prop) {
+    const activeSystemDb = getActiveSystemDb();
+    if (activeSystemDb) {
+      return (activeSystemDb as any as Record<string | symbol, unknown>)[prop];
+    }
+    const activeTenantDb = getActiveTenantDb();
+    if (activeTenantDb) {
+      return (activeTenantDb as any as Record<string | symbol, unknown>)[prop];
+    }
+    return (getDb() as any as Record<string | symbol, unknown>)[prop];
+  },
 });
 
 // Export unified database client (supports PostgreSQL and Azure SQL)
