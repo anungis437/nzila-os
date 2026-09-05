@@ -107,8 +107,8 @@ function trustedSystemContext(binding: ServerIssuedSyncBinding): TrustedIntegrat
   });
 }
 
-async function loadIntegrationById(organizationId: string, integrationId: string): Promise<IntegrationConfigRow> {
-  const [config] = await db
+async function loadIntegrationById(organizationId: string, integrationId: string, queryClient: typeof db = db): Promise<IntegrationConfigRow> {
+  const [config] = await queryClient
     .select()
     .from(integrationConfigs)
     .where(and(eq(integrationConfigs.id, integrationId), eq(integrationConfigs.organizationId, organizationId)))
@@ -254,8 +254,8 @@ export async function issueBackgroundSyncBinding(
 }
 
 export async function executeBackgroundSyncBinding(binding: ServerIssuedSyncBinding): Promise<SyncResult> {
-  return withSystemContext(async () => {
-    const config = await loadIntegrationById(binding.organizationId, binding.integrationId);
+  return withSystemContext(async (tx) => {
+    const config = await loadIntegrationById(binding.organizationId, binding.integrationId, tx);
     if (!config.enabled || config.provider !== binding.provider) {
       throw new IntegrationError('Background sync binding no longer matches an enabled integration', binding.provider, 'BINDING_INVALID');
     }

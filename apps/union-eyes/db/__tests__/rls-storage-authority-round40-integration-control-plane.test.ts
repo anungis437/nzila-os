@@ -149,7 +149,7 @@ describe('round 40 integration control plane authority root', () => {
     expect(controlPlane).toMatch(/eq\(integrationConfigs\.id,\s*integrationId\)/);
     expect(controlPlane).toMatch(/eq\(integrationConfigs\.organizationId,\s*organizationId\)/);
     expect(controlPlane).toMatch(/withRLSContext\(\{\s*organizationId\s*\}/);
-    expect(controlPlane).toMatch(/withSystemContext\(async\s*\(\)\s*=>/);
+    expect(controlPlane).toMatch(/withSystemContext\(async\s*\(tx\)\s*=>/);
     expect(controlPlane).toMatch(/Object\.freeze\(\{\s*organizationId,/);
     expect(controlPlane).toMatch(/principal:\s*'TENANT_RUNTIME'/);
     expect(controlPlane).toMatch(/principal:\s*'SYSTEM_RUNTIME'/);
