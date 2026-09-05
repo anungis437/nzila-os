@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-04T21:45:22.360Z",
-  "totalNeedsReview": 298,
+  "generatedAt": "2026-09-05T15:52:01.296Z",
+  "totalNeedsReview": 293,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 298
+    "NEEDS_REVIEW": 293
   },
   "cohortCounts": {
-    "COMPLEX:org:NORMAL": 42,
+    "COMPLEX:org:NORMAL": 38,
     "COMPLEX:org:HIGH": 48,
-    "SIMPLE_TENANT:org:HIGH": 28,
+    "SIMPLE_TENANT:org:HIGH": 27,
     "COMPLEX:none:NORMAL": 73,
     "PARENT_OWNED:parent:NORMAL": 52,
     "COMPLEX:none:HIGH": 8,
@@ -2568,70 +2568,6 @@
       ]
     },
     {
-      "table": "external_communication_messages",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/data/communication.externalCommunicationMessages",
-          "db/data/communication.externalCommunicationMessages"
-        ],
-        "orgColumn": "org_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": [
-          "channel_id -> externalCommunicationChannels.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "db/data/communication.ts",
-          "lib/integrations/adapters/communication/slack-adapter.ts",
-          "lib/integrations/adapters/communication/teams-adapter.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "db/data/communication.ts"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "db/data/communication.ts",
-          "lib/integrations/adapters/communication/slack-adapter.ts",
-          "lib/integrations/adapters/communication/teams-adapter.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "db/data/communication.ts: organization identifier reference",
-        "db/data/communication.ts: org_id",
-        "lib/integrations/adapters/communication/slack-adapter.ts: organization identifier reference",
-        "lib/integrations/adapters/communication/teams-adapter.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/integrations/adapters/communication/slack-adapter.ts: insert/write path",
-        "lib/integrations/adapters/communication/teams-adapter.ts: insert/write path"
-      ]
-    },
-    {
       "table": "newsletter_campaigns",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -3904,175 +3840,6 @@
         "app/api/employer-execution/payroll-runs/[id]/route.ts: update/write path",
         "app/api/employer-execution/remittance-runs/route.ts: insert/write path",
         "scripts/seed-employer-execution-marathon.ts: insert/write path"
-      ]
-    },
-    {
-      "table": "external_communication_files",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/data/communication.externalCommunicationFiles",
-          "db/data/communication.externalCommunicationFiles"
-        ],
-        "orgColumn": "org_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": [
-          "channel_id -> externalCommunicationChannels.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "db/data/communication.ts",
-          "lib/integrations/adapters/communication/slack-adapter.ts",
-          "lib/integrations/adapters/communication/teams-adapter.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "db/data/communication.ts"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "db/data/communication.ts",
-          "lib/integrations/adapters/communication/slack-adapter.ts",
-          "lib/integrations/adapters/communication/teams-adapter.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "db/data/communication.ts: organization identifier reference",
-        "db/data/communication.ts: org_id",
-        "lib/integrations/adapters/communication/slack-adapter.ts: organization identifier reference",
-        "lib/integrations/adapters/communication/teams-adapter.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/integrations/adapters/communication/slack-adapter.ts: insert/write path",
-        "lib/integrations/adapters/communication/teams-adapter.ts: insert/write path"
-      ]
-    },
-    {
-      "table": "external_document_files",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/data/documents.externalDocumentFiles"
-        ],
-        "orgColumn": "org_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "library_id -> externalDocumentLibraries.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/integrations/adapters/documents/sharepoint-adapter.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/integrations/adapters/documents/sharepoint-adapter.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/integrations/adapters/documents/sharepoint-adapter.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/integrations/adapters/documents/sharepoint-adapter.ts: insert/write path"
-      ]
-    },
-    {
-      "table": "external_document_permissions",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/data/documents.externalDocumentPermissions"
-        ],
-        "orgColumn": "org_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": [
-          "file_id -> externalDocumentFiles.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/integrations/adapters/documents/sharepoint-adapter.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/integrations/adapters/documents/sharepoint-adapter.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/integrations/adapters/documents/sharepoint-adapter.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/integrations/adapters/documents/sharepoint-adapter.ts: insert/write path"
       ]
     },
     {
@@ -6797,87 +6564,6 @@
         "app/api/employer-execution/timesheets/route.ts: insert/write path",
         "lib/workers/employer-execution/process-timesheet-validation.ts: update/write path",
         "scripts/seed-employer-execution-marathon.ts: insert/write path"
-      ]
-    },
-    {
-      "table": "external_accounts",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/data/accounting.externalAccounts"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/external-data/lrb/route.ts",
-          "app/api/external-data/route.ts",
-          "lib/integrations/adapters/accounting/freshbooks-adapter.ts",
-          "lib/integrations/adapters/accounting/quickbooks-adapter.ts",
-          "lib/integrations/adapters/accounting/sage-intacct-adapter.ts",
-          "lib/integrations/adapters/accounting/sync-utils.ts",
-          "lib/integrations/adapters/accounting/xero-adapter.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/external-data/lrb/route.ts",
-          "app/api/external-data/route.ts",
-          "lib/integrations/adapters/accounting/freshbooks-adapter.ts",
-          "lib/integrations/adapters/accounting/quickbooks-adapter.ts",
-          "lib/integrations/adapters/accounting/sage-intacct-adapter.ts",
-          "lib/integrations/adapters/accounting/sync-utils.ts",
-          "lib/integrations/adapters/accounting/xero-adapter.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/integrations/adapters/accounting/freshbooks-adapter.ts: organization identifier reference",
-        "lib/integrations/adapters/accounting/quickbooks-adapter.ts: organization identifier reference",
-        "lib/integrations/adapters/accounting/sage-intacct-adapter.ts: organization identifier reference",
-        "lib/integrations/adapters/accounting/sync-utils.ts: organization identifier reference",
-        "lib/integrations/adapters/accounting/xero-adapter.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference",
-        "backend/core/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/integrations/adapters/accounting/freshbooks-adapter.ts: insert/write path",
-        "lib/integrations/adapters/accounting/freshbooks-adapter.ts: update/write path",
-        "lib/integrations/adapters/accounting/quickbooks-adapter.ts: insert/write path",
-        "lib/integrations/adapters/accounting/quickbooks-adapter.ts: update/write path",
-        "lib/integrations/adapters/accounting/quickbooks-adapter.ts: delete/write path",
-        "lib/integrations/adapters/accounting/sage-intacct-adapter.ts: insert/write path",
-        "lib/integrations/adapters/accounting/sage-intacct-adapter.ts: update/write path",
-        "lib/integrations/adapters/accounting/sync-utils.ts: insert/write path",
-        "lib/integrations/adapters/accounting/sync-utils.ts: update/write path",
-        "lib/integrations/adapters/accounting/sync-utils.ts: delete/write path",
-        "lib/integrations/adapters/accounting/xero-adapter.ts: insert/write path",
-        "lib/integrations/adapters/accounting/xero-adapter.ts: update/write path"
       ]
     },
     {

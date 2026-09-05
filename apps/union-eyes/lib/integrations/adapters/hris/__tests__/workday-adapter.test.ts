@@ -26,7 +26,10 @@ vi.mock('@/db/schema', () => new Proxy({}, {
     return new Proxy({}, { get: (_o, col) => ({ __col: col }) });
   },
 }));
-vi.mock('drizzle-orm', () => ({ eq: () => ({}), and: () => ({}) }));
+vi.mock('drizzle-orm', () => ({
+  eq: (col: unknown, val: unknown) => ({ __eq: [col, val] }),
+  and: (...conds: unknown[]) => ({ __and: conds }),
+}));
 vi.mock('../workday-client', () => ({
   WorkdayClient: class { constructor() { return h.client; } },
 }));
@@ -107,6 +110,22 @@ describe('WorkdayAdapter', () => {
     const r = await adapter.sync({ type: SyncType.INCREMENTAL, orgs: ['employees'] });
     expect(r.recordsUpdated).toBe(1);
     expect(r.recordsCreated).toBe(1);
+  });
+
+  it('sync employees scopes the existence lookup to organizationId + externalProvider (no cross-tenant match)', async () => {
+    const adapter = await makeConnected();
+    h.client.getEmployees = vi.fn(async () => ({
+      data: [{ id: 'e1', employeeID: 'E1', firstName: 'A', lastName: 'B' }],
+      cursor: undefined,
+    }));
+    h.findFirstQueue.push({ id: 'existing-1' });
+    await adapter.sync({ type: SyncType.FULL, orgs: ['employees'] });
+
+    const call = h.findFirst.mock.calls[0][0] as { where: { __and: Array<{ __eq: [{ __col: string }, unknown] }> } };
+    const comparedColumns = call.where.__and.map((c) => c.__eq[0].__col);
+    expect(comparedColumns).toEqual(['externalId', 'organizationId', 'externalProvider']);
+    expect(call.where.__and.find((c) => c.__eq[0].__col === 'organizationId')?.__eq[1]).toBe('org-1');
+    expect(call.where.__and.find((c) => c.__eq[0].__col === 'externalProvider')?.__eq[1]).toBe('WORKDAY');
   });
 
   it('sync employees counts a per-record failure', async () => {

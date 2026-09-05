@@ -13,6 +13,11 @@ import { and, eq } from 'drizzle-orm';
 import { IntegrationRegistry } from './registry';
 import { SyncEngine } from './sync-engine';
 import {
+  findDisallowedSettingsKeys,
+  findUnapprovedEntities,
+  isProviderApprovedForControlPlane,
+} from './provider-policy';
+import {
   IntegrationError,
   IntegrationProvider,
   IntegrationType,
@@ -51,9 +56,36 @@ export interface ServerIssuedSyncBinding {
 }
 
 function assertKnownProvider(provider: IntegrationProvider): void {
-  const registry = IntegrationRegistry.getInstance();
-  if (!registry.isAvailable(provider)) {
+  // The control-plane approval decision — NOT IntegrationRegistry.isAvailable(),
+  // which is a product/catalog flag (available|beta|deprecated|unavailable) and
+  // must never double as the security authorization boundary. See
+  // provider-policy.ts's doc comment for the incident this guards against.
+  if (!isProviderApprovedForControlPlane(provider)) {
     throw new IntegrationError(`Integration provider ${provider} is not approved for activation`, provider, 'PROVIDER_NOT_APPROVED');
+  }
+}
+
+function assertApprovedSettingsKeys(provider: IntegrationProvider, settings: Record<string, unknown> | undefined): void {
+  if (!settings) return;
+  const disallowed = findDisallowedSettingsKeys(provider, Object.keys(settings));
+  if (disallowed.length > 0) {
+    throw new IntegrationError(
+      `settings contains keys not approved for ${provider}: ${disallowed.join(', ')}. settings is echoed back verbatim via GET and must never hold secret-shaped values — use credentialRef for credential material.`,
+      provider,
+      'SETTINGS_KEY_NOT_APPROVED',
+    );
+  }
+}
+
+function assertApprovedEntities(provider: IntegrationProvider, entities: readonly string[] | undefined): void {
+  if (!entities || entities.length === 0) return;
+  const unapproved = findUnapprovedEntities(provider, entities);
+  if (unapproved.length > 0) {
+    throw new IntegrationError(
+      `entities not approved for ${provider}: ${unapproved.join(', ')}`,
+      provider,
+      'ENTITY_NOT_APPROVED',
+    );
   }
 }
 
@@ -138,6 +170,7 @@ export async function configureIntegrationForOrg(
 ) {
   assertKnownProvider(input.provider);
   assertProviderType(input.provider, input.type);
+  assertApprovedSettingsKeys(input.provider, input.settings);
 
   return withRLSContext({ organizationId }, async () => {
     const [existing] = await db
@@ -212,6 +245,7 @@ export async function initiateTenantIntegrationSync(
     const provider = config.provider as IntegrationProvider;
     assertKnownProvider(provider);
     assertProviderType(provider, config.type as IntegrationType);
+    assertApprovedEntities(provider, request.entities);
 
     const context = trustedTenantContext(organizationId, request.integrationId, provider, userId);
     const options: SyncOptions = {

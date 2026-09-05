@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-04T19:18:22.313Z",
+  "generatedAt": "2026-09-05T15:54:18.401Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 380,
-  "pendingReviewCount": 320,
-  "tenantGrantedTableCount": 153,
+  "readyForExplicitGrantCount": 407,
+  "pendingReviewCount": 293,
+  "tenantGrantedTableCount": 183,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 153,
-    "INSERT": 135,
-    "UPDATE": 96,
+    "SELECT": 176,
+    "INSERT": 163,
+    "UPDATE": 121,
     "DELETE": 77
   },
   "systemOperationTotals": {
@@ -180,6 +180,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "ai_insight_reports",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "ai_rate_limits",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -199,6 +208,12 @@
     },
     {
       "table": "alert_escalations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "allocation_rules",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -579,6 +594,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "clause_comparisons",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "clause_comparisons_history",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -603,6 +626,12 @@
       "systemPrivileges": [
         "SELECT"
       ]
+    },
+    {
+      "table": "clc_per_capita_benchmarks",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
     },
     {
       "table": "clc_remittance_mapping",
@@ -883,6 +912,20 @@
       "systemPrivileges": []
     },
     {
+      "table": "currency_exchange_rates",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_aggregation_consent",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "data_anonymization_log",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -963,6 +1006,15 @@
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "document_folders",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
       ],
       "systemPrivileges": []
     },
@@ -1221,33 +1273,63 @@
       "systemPrivileges": []
     },
     {
+      "table": "external_accounts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "external_benefit_coverage",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_dependents",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_enrollments",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_plans",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_utilization",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1275,33 +1357,126 @@
       "systemPrivileges": []
     },
     {
+      "table": "external_communication_channels",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_communication_files",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_communication_messages",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_communication_users",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "external_customers",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_departments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_document_files",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
-      "table": "external_departments",
+      "table": "external_document_libraries",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_document_permissions",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_document_sites",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
       "table": "external_employees",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_insurance_beneficiaries",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_insurance_claims",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_insurance_policies",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1315,38 +1490,57 @@
     },
     {
       "table": "external_lms_completions",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_courses",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_enrollments",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_learners",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_progress",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
       "table": "external_payments",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1387,8 +1581,12 @@
     },
     {
       "table": "external_positions",
-      "classification": "CONTAINED_NO_AUTHORITY",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1763,9 +1961,23 @@
       "systemPrivileges": []
     },
     {
+      "table": "integration_configs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "integration_sync_log",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1830,6 +2042,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "legal_holds",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -2403,6 +2621,30 @@
       "systemPrivileges": []
     },
     {
+      "table": "pci_dss_encryption_keys",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pci_dss_quarterly_scans",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pci_dss_requirements",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pci_dss_saq_assessments",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "pension_benefit_claims",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2581,6 +2823,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "recognition_programs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "reconciliation_exceptions",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2672,6 +2922,12 @@
         "INSERT",
         "UPDATE"
       ]
+    },
+    {
+      "table": "retention_policies",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
     },
     {
       "table": "reward_budget_envelopes",
@@ -2889,6 +3145,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "support_tickets",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "task_comments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3011,6 +3273,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "webhook_events",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "webhook_subscriptions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3127,10 +3395,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "ai_insight_reports",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "ai_safety_filters",
       "classification": "NEEDS_REVIEW"
     },
@@ -3156,10 +3420,6 @@
     },
     {
       "table": "allocation_rule_versions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "allocation_rules",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3339,10 +3599,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "clause_comparisons",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "clause_embeddings",
       "classification": "NEEDS_REVIEW"
     },
@@ -3356,10 +3612,6 @@
     },
     {
       "table": "clc_oauth_tokens",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "clc_per_capita_benchmarks",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3459,19 +3711,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "currency_exchange_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "customer_nps_surveys",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "customer_onboarding_milestones",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "data_aggregation_consent",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3508,10 +3752,6 @@
     },
     {
       "table": "dispatch_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "document_folders",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3603,51 +3843,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "external_accounts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "external_calendar_connections",
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "external_communication_channels",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_communication_files",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_communication_messages",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_communication_users",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "external_data_sync_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_document_files",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_document_libraries",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_document_permissions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_document_sites",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_insurance_claims",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3755,10 +3955,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "integration_configs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "integration_partners",
       "classification": "NEEDS_REVIEW"
     },
@@ -3784,10 +3980,6 @@
     },
     {
       "table": "knowledge_base_articles",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "legal_holds",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3904,22 +4096,6 @@
     },
     {
       "table": "payments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pci_dss_encryption_keys",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pci_dss_quarterly_scans",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pci_dss_requirements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pci_dss_saq_assessments",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4047,10 +4223,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "recognition_programs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "recovery_time_objectives",
       "classification": "NEEDS_REVIEW"
     },
@@ -4060,10 +4232,6 @@
     },
     {
       "table": "reports",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "retention_policies",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4184,10 +4352,6 @@
     },
     {
       "table": "stripe_connect_accounts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "support_tickets",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4332,10 +4496,6 @@
     },
     {
       "table": "wage_progressions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "webhook_events",
       "classification": "NEEDS_REVIEW"
     },
     {

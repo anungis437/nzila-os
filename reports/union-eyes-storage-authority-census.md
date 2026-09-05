@@ -1,25 +1,25 @@
 # Union Eyes Storage Authority Census (round 38)
 
-Generated: 2026-09-04T21:45:22.360Z
+Generated: 2026-09-05T15:52:01.296Z
 
 CANDIDATES ONLY — this report never rewrites the manifest. Every disposition below must be
 independently reviewed and applied by hand to the relevant db/rls-storage-authority/*.ts domain file.
 
-Total NEEDS_REVIEW entries scanned: 298
+Total NEEDS_REVIEW entries scanned: 293
 
 ## Candidate classification counts
 
 - LATENT_UNREACHABLE (Lane A — Dead, high confidence): 0
 - CONTAINED_NO_AUTHORITY (Lane B — Contained, high confidence): 0
-- Still NEEDS_REVIEW (requires deep review): 298
+- Still NEEDS_REVIEW (requires deep review): 293
 
 ## Cohort counts
 
 - COMPLEX:none:NORMAL: 73
 - PARENT_OWNED:parent:NORMAL: 52
 - COMPLEX:org:HIGH: 48
-- COMPLEX:org:NORMAL: 42
-- SIMPLE_TENANT:org:HIGH: 28
+- COMPLEX:org:NORMAL: 38
+- SIMPLE_TENANT:org:HIGH: 27
 - PARENT_OWNED:parent:HIGH: 19
 - COMPLEX:user:NORMAL: 16
 - COMPLEX:none:HIGH: 8
@@ -35,7 +35,7 @@ Total NEEDS_REVIEW entries scanned: 298
 
 ## Remaining NEEDS_REVIEW, grouped by cohort lane (for batched deep review)
 
-### SIMPLE_TENANT (28)
+### SIMPLE_TENANT (27)
 
 | table | blocker |
 |---|---|
@@ -45,7 +45,6 @@ Total NEEDS_REVIEW entries scanned: 298
 | employer_execution_profiles | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | ai_budgets | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | api_integrations | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
-| external_accounts | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | ingestion_batches | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | break_policies | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | calendars | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
@@ -155,7 +154,7 @@ Total NEEDS_REVIEW entries scanned: 298
 | webhook_receipts | has real TS references, hints suggest system/worker-only invocation — requires confirming no tenant-facing path exists, not auto-closable |
 | shopify_config | has real TS references, hints suggest system/worker-only invocation — requires confirming no tenant-facing path exists, not auto-closable |
 
-### COMPLEX (193)
+### COMPLEX (189)
 
 | table | blocker |
 |---|---|
@@ -183,7 +182,6 @@ Total NEEDS_REVIEW entries scanned: 298
 | cookie_consents | ambiguous shape — needs manual review |
 | donation_campaigns | ambiguous shape — needs manual review |
 | employer_communications | ambiguous shape — needs manual review |
-| external_communication_messages | ambiguous shape — needs manual review |
 | newsletter_campaigns | ambiguous shape — needs manual review |
 | newsletter_distribution_lists | ambiguous shape — needs manual review |
 | organizing_campaigns | ambiguous shape — needs manual review |
@@ -197,9 +195,6 @@ Total NEEDS_REVIEW entries scanned: 298
 | provincial_consent | ambiguous shape — needs manual review |
 | award_templates | ambiguous shape — needs manual review |
 | cms_media_library | ambiguous shape — needs manual review |
-| external_communication_files | ambiguous shape — needs manual review |
-| external_document_files | ambiguous shape — needs manual review |
-| external_document_permissions | ambiguous shape — needs manual review |
 | signature_documents | ambiguous shape — needs manual review |
 | sms_templates | ambiguous shape — needs manual review |
 | arbitrator_profiles | ambiguous shape — needs manual review |
@@ -399,7 +394,6 @@ These fields are generated evidence only. They do not rewrite candidate classifi
 | cookie_consents | INSERT, SELECT, UPDATE | MIXED | none | lib/gdpr/consent-manager.ts: organization identifier reference<br>backend/compliance/views.py: organization identifier reference<br>backend/compliance/views.py: organization_id | lib/gdpr/consent-manager.ts: insert/write path<br>lib/gdpr/consent-manager.ts: update/write path<br>lib/gdpr/consent-manager.ts: delete/write path |
 | donation_campaigns | none | MIXED | none | backend/billing/views.py: organization identifier reference<br>backend/billing/views.py: organization_id | backend/billing/views.py: update/write path |
 | employer_communications | INSERT, SELECT | HTTP_ROUTE | none | app/api/employers/communications/route.ts: organization identifier reference | app/api/employers/communications/route.ts: insert/write path |
-| external_communication_messages | INSERT, SELECT | MIXED | none | db/data/communication.ts: organization identifier reference<br>db/data/communication.ts: org_id<br>lib/integrations/adapters/communication/slack-adapter.ts: organization identifier reference<br>lib/integrations/adapters/communication/teams-adapter.ts: organization identifier reference<br>backend/core/views.py: organization identifier reference | lib/integrations/adapters/communication/slack-adapter.ts: insert/write path<br>lib/integrations/adapters/communication/teams-adapter.ts: insert/write path |
 | newsletter_campaigns | SELECT | MIXED | app/api/billing/batch-status/[jobId]/route.ts: withRoleAuth | app/api/billing/batch-status/[jobId]/route.ts: organization identifier reference<br>backend/notifications/views.py: organization identifier reference<br>backend/notifications/views.py: organization_id | none |
 | newsletter_distribution_lists | SELECT | MIXED | app/[locale]/dashboard/communications/page.tsx: requireUser | app/[locale]/dashboard/communications/page.tsx: organization identifier reference<br>backend/notifications/views.py: organization identifier reference<br>backend/notifications/views.py: organization_id | app/api/communications/distribution-lists/[id]/route.ts: delete/write path |
 | organizing_campaigns | DELETE, SELECT, UPDATE | MIXED | none | services/financial-service/drizzle/relations.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization_id<br>services/financial-service/src/db/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization_id<br>backend/unions/views.py: organization identifier reference<br>backend/unions/views.py: organization_id | app/api/organizing/assignments/[id]/route.ts: delete/write path<br>app/api/organizing/notes/[id]/route.ts: delete/write path<br>app/api/organizing/sequences/[id]/enroll/route.ts: delete/write path<br>app/api/organizing/sequences/[id]/route.ts: delete/write path<br>services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path<br>backend/unions/views.py: insert/write path |
@@ -420,9 +414,6 @@ These fields are generated evidence only. They do not rewrite candidate classifi
 | award_templates | DELETE, INSERT, SELECT, UPDATE | MIXED | none | lib/services/rewards/template-service.ts: organization identifier reference<br>backend/unions/views.py: organization identifier reference<br>backend/unions/views.py: organization_id | lib/services/rewards/template-service.ts: insert/write path<br>lib/services/rewards/template-service.ts: update/write path<br>lib/services/rewards/template-service.ts: delete/write path<br>backend/unions/views.py: insert/write path |
 | cms_media_library | none | MIXED | none | backend/content/views.py: organization identifier reference<br>backend/content/views.py: organization_id | backend/content/views.py: update/write path<br>backend/content/views.py: delete/write path |
 | employer_execution_profiles | INSERT, SELECT | MIXED | app/[locale]/dashboard/employer-execution/settings/page.tsx: requireUser<br>app/api/employer-execution/payroll-runs/[id]/route.ts: withApi<br>app/api/employer-execution/payroll-runs/[id]/route.ts: explicit auth config<br>app/api/employer-execution/remittance-runs/route.ts: withApi<br>app/api/employer-execution/remittance-runs/route.ts: explicit auth config | app/[locale]/dashboard/employer-execution/settings/page.tsx: organization identifier reference<br>app/api/employer-execution/payroll-runs/[id]/route.ts: withRLSContext<br>app/api/employer-execution/payroll-runs/[id]/route.ts: organization identifier reference<br>app/api/employer-execution/remittance-runs/route.ts: withRLSContext<br>app/api/employer-execution/remittance-runs/route.ts: organization identifier reference<br>scripts/seed-employer-execution-marathon.ts: organization identifier reference | app/api/employer-execution/payroll-runs/[id]/route.ts: insert/write path<br>app/api/employer-execution/payroll-runs/[id]/route.ts: update/write path<br>app/api/employer-execution/remittance-runs/route.ts: insert/write path<br>scripts/seed-employer-execution-marathon.ts: insert/write path |
-| external_communication_files | INSERT, SELECT | MIXED | none | db/data/communication.ts: organization identifier reference<br>db/data/communication.ts: org_id<br>lib/integrations/adapters/communication/slack-adapter.ts: organization identifier reference<br>lib/integrations/adapters/communication/teams-adapter.ts: organization identifier reference<br>backend/core/views.py: organization identifier reference | lib/integrations/adapters/communication/slack-adapter.ts: insert/write path<br>lib/integrations/adapters/communication/teams-adapter.ts: insert/write path |
-| external_document_files | INSERT, SELECT | MIXED | none | lib/integrations/adapters/documents/sharepoint-adapter.ts: organization identifier reference<br>backend/core/views.py: organization identifier reference | lib/integrations/adapters/documents/sharepoint-adapter.ts: insert/write path |
-| external_document_permissions | INSERT | MIXED | none | lib/integrations/adapters/documents/sharepoint-adapter.ts: organization identifier reference<br>backend/core/views.py: organization identifier reference | lib/integrations/adapters/documents/sharepoint-adapter.ts: insert/write path |
 | signature_documents | INSERT, SELECT, UPDATE | MIXED | none | lib/signature/signature-service.ts: organization identifier reference<br>backend/content/views.py: organization identifier reference<br>backend/content/views.py: organization_id | lib/signature/signature-service.ts: insert/write path<br>lib/signature/signature-service.ts: update/write path<br>backend/content/views.py: update/write path<br>backend/content/views.py: delete/write path |
 | sms_templates | SELECT | MIXED | none | services/twilio-sms-service.ts: organization identifier reference<br>backend/notifications/views.py: organization identifier reference<br>backend/notifications/views.py: organization_id | services/twilio-sms-service.ts: insert/write path<br>services/twilio-sms-service.ts: update/write path |
 | arbitrator_profiles | DELETE, INSERT, SELECT, UPDATE | MIXED | none | services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization identifier reference | lib/services/precedent-service.ts: insert/write path<br>lib/services/precedent-service.ts: update/write path<br>lib/services/precedent-service.ts: delete/write path<br>services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path |
@@ -463,7 +454,6 @@ These fields are generated evidence only. They do not rewrite candidate classifi
 | whiplash_prevention_audit | INSERT | MIXED | none | backend/billing/views.py: organization identifier reference | services/whiplash-prevention-service.ts: insert/write path<br>services/whiplash-prevention-service.ts: update/write path<br>backend/billing/views.py: update/write path |
 | api_integrations | DELETE, SELECT, UPDATE | MIXED | app/api/extensions/[id]/route.ts: withApi<br>app/api/extensions/[id]/route.ts: explicit auth config | app/api/extensions/[id]/route.ts: organization identifier reference<br>backend/core/views.py: organization identifier reference<br>backend/core/views.py: organization_id | app/api/extensions/[id]/route.ts: update/write path<br>app/api/extensions/[id]/route.ts: delete/write path |
 | employer_timesheet_batches | INSERT, SELECT, UPDATE | MIXED | app/[locale]/dashboard/employer-execution/timesheets/page.tsx: requireUser<br>app/api/employer-execution/payroll-runs/route.ts: withApi<br>app/api/employer-execution/payroll-runs/route.ts: explicit auth config<br>app/api/employer-execution/timesheets/route.ts: withApi<br>app/api/employer-execution/timesheets/route.ts: explicit auth config | app/[locale]/dashboard/employer-execution/timesheets/page.tsx: organization identifier reference<br>app/api/employer-execution/payroll-runs/route.ts: withRLSContext<br>app/api/employer-execution/payroll-runs/route.ts: organization identifier reference<br>app/api/employer-execution/timesheets/route.ts: withRLSContext<br>app/api/employer-execution/timesheets/route.ts: organization identifier reference<br>lib/workers/employer-execution/process-timesheet-validation.ts: organization identifier reference<br>scripts/seed-employer-execution-marathon.ts: organization identifier reference | app/api/employer-execution/payroll-runs/route.ts: insert/write path<br>app/api/employer-execution/timesheets/route.ts: insert/write path<br>lib/workers/employer-execution/process-timesheet-validation.ts: update/write path<br>scripts/seed-employer-execution-marathon.ts: insert/write path |
-| external_accounts | DELETE, INSERT, SELECT, UPDATE | MIXED | none | lib/integrations/adapters/accounting/freshbooks-adapter.ts: organization identifier reference<br>lib/integrations/adapters/accounting/quickbooks-adapter.ts: organization identifier reference<br>lib/integrations/adapters/accounting/sage-intacct-adapter.ts: organization identifier reference<br>lib/integrations/adapters/accounting/sync-utils.ts: organization identifier reference<br>lib/integrations/adapters/accounting/xero-adapter.ts: organization identifier reference<br>backend/core/views.py: organization identifier reference<br>backend/core/views.py: organization_id | lib/integrations/adapters/accounting/freshbooks-adapter.ts: insert/write path<br>lib/integrations/adapters/accounting/freshbooks-adapter.ts: update/write path<br>lib/integrations/adapters/accounting/quickbooks-adapter.ts: insert/write path<br>lib/integrations/adapters/accounting/quickbooks-adapter.ts: update/write path<br>lib/integrations/adapters/accounting/quickbooks-adapter.ts: delete/write path<br>lib/integrations/adapters/accounting/sage-intacct-adapter.ts: insert/write path<br>lib/integrations/adapters/accounting/sage-intacct-adapter.ts: update/write path<br>lib/integrations/adapters/accounting/sync-utils.ts: insert/write path<br>lib/integrations/adapters/accounting/sync-utils.ts: update/write path<br>lib/integrations/adapters/accounting/sync-utils.ts: delete/write path<br>lib/integrations/adapters/accounting/xero-adapter.ts: insert/write path<br>lib/integrations/adapters/accounting/xero-adapter.ts: update/write path |
 | external_calendar_connections | DELETE, INSERT, SELECT, UPDATE | MIXED | app/api/calendar-sync/google/callback/route.ts: withRoleAuth<br>app/api/calendar-sync/microsoft/callback/route.ts: withRoleAuth | app/api/calendar-sync/connections/[id]/sync/route.ts: organization identifier reference<br>app/api/calendar-sync/google/callback/route.ts: withRLSContext<br>app/api/calendar-sync/google/callback/route.ts: organization identifier reference<br>app/api/calendar-sync/microsoft/callback/route.ts: withRLSContext<br>app/api/calendar-sync/microsoft/callback/route.ts: organization identifier reference<br>app/api/cron/calendar-sync/route.ts: organization identifier reference<br>lib/external-calendar-sync/google-calendar-service.ts: organization identifier reference<br>lib/external-calendar-sync/microsoft-calendar-service.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization_id<br>services/financial-service/src/db/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization_id<br>backend/unions/views.py: organization identifier reference<br>backend/unions/views.py: organization_id | app/api/calendar-sync/connections/[id]/route.ts: delete/write path<br>app/api/calendar-sync/connections/[id]/sync/route.ts: update/write path<br>app/api/calendar-sync/google/callback/route.ts: insert/write path<br>app/api/calendar-sync/google/callback/route.ts: update/write path<br>app/api/calendar-sync/microsoft/callback/route.ts: insert/write path<br>app/api/calendar-sync/microsoft/callback/route.ts: update/write path<br>app/api/cron/calendar-sync/route.ts: update/write path<br>lib/external-calendar-sync/google-calendar-service.ts: insert/write path<br>lib/external-calendar-sync/google-calendar-service.ts: update/write path<br>lib/external-calendar-sync/google-calendar-service.ts: delete/write path<br>lib/external-calendar-sync/microsoft-calendar-service.ts: insert/write path<br>lib/external-calendar-sync/microsoft-calendar-service.ts: update/write path<br>lib/external-calendar-sync/microsoft-calendar-service.ts: delete/write path<br>services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path<br>backend/unions/views.py: insert/write path |
 | ingestion_batches | INSERT, SELECT, UPDATE | MIXED | app/api/admin/ingest/retry/route.ts: withApi<br>app/api/admin/ingest/retry/route.ts: explicit auth config | app/api/admin/ingest/retry/route.ts: organization identifier reference<br>app/api/grievances/import/route.ts: withRLSContext<br>app/api/grievances/import/route.ts: organization identifier reference<br>app/api/grievances/import/route.ts: organization_id<br>lib/ingestion/batch-ingest.ts: organization identifier reference<br>lib/ingestion/batch-ingest.ts: organization_id<br>lib/ingestion/migration-metrics.ts: organization identifier reference | app/api/admin/ingest/retry/route.ts: withSystemContext<br>app/api/admin/ingest/retry/route.ts: update/write path<br>app/api/grievances/import/route.ts: insert/write path<br>app/api/grievances/import/route.ts: update/write path<br>lib/ingestion/batch-ingest.ts: insert/write path<br>lib/ingestion/batch-ingest.ts: update/write path |
 | integration_api_keys | none | MIXED | none | backend/core/views.py: organization identifier reference<br>backend/core/views.py: organization_id | none |

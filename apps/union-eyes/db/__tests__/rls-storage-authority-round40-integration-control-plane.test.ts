@@ -9,6 +9,28 @@
  * 1. The round-40 cohort is a fixed 23-table list from the starting census.
  * 2. Only the integration tables reached through the new control plane are
  *    promoted to TENANT_RLS_REQUIRED; generated Django mirrors remain denied.
+ *
+ * STRUCTURAL CORRECTION (round 40 correction pass): the original round-40
+ * authority computation used IntegrationRegistry.isAvailable() — a
+ * product/catalog flag — as the control-plane security authorization
+ * boundary. That conflated "shows up in the product catalog" with "approved
+ * to run against tenant data", and produced two concrete errors, both fixed
+ * here and in lib/integrations/provider-policy.ts (the new, explicit
+ * authorization contract control-plane.ts now consults instead):
+ *   1. external_document_libraries/external_document_sites were classified
+ *      TENANT_RLS_REQUIRED citing "the approved SharePoint adapter", but
+ *      SharePoint has zero entry in IntegrationRegistry AND zero entry in
+ *      the new policy contract — IntegrationFactory being able to
+ *      construct a SharePointAdapter is a factory capability, not
+ *      control-plane approval. Reverted to CONTAINED_NO_AUTHORITY.
+ *   2. integration_configs/integration_sync_log were granted
+ *      requiredSystemPrivileges + invocationAuthority/dbExecutionPrincipal
+ *      'MIXED' to justify issueBackgroundSyncBinding/
+ *      executeBackgroundSyncBinding, which have ZERO production callers
+ *      anywhere in app/, actions/, lib/, services/ — an anticipatory grant
+ *      for dead code. Downgraded to TENANT_USER/TENANT_RUNTIME with no
+ *      system privileges; reopen only if a real scheduler/cron caller is
+ *      added.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -54,10 +76,10 @@ const EXPECTED_AUTHORITY = {
   document_folders: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   external_communication_channels: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   external_communication_users: ['TENANT_RLS_REQUIRED', ['INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
-  external_document_libraries: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
-  external_document_sites: ['TENANT_RLS_REQUIRED', ['INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
+  external_document_libraries: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
+  external_document_sites: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   external_insurance_claims: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
-  integration_configs: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT'], 'MIXED', 'MIXED', 'HIGH'],
+  integration_configs: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   legal_holds: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   pci_dss_encryption_keys: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   pci_dss_quarterly_scans: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
@@ -165,9 +187,26 @@ describe('round 40 integration control plane authority root', () => {
     expect(entry, 'integration_sync_log: missing manifest entry').toBeTruthy();
     expect(entry!.classification).toBe('TENANT_RLS_REQUIRED');
     expect(entry!.requiredRuntimePrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
-    expect(entry!.requiredSystemPrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE']);
-    expect(entry!.invocationAuthority).toBe('MIXED');
-    expect(entry!.dbExecutionPrincipal).toBe('MIXED');
+    expect(entry!.requiredSystemPrivileges).toEqual([]);
+    expect(entry!.invocationAuthority).toBe('TENANT_USER');
+    expect(entry!.dbExecutionPrincipal).toBe('TENANT_RUNTIME');
+  });
+
+  it('gates provider approval through the explicit policy contract, not IntegrationRegistry.isAvailable()', () => {
+    const controlPlane = source('lib/integrations/control-plane.ts');
+    expect(controlPlane).toMatch(/isProviderApprovedForControlPlane\(provider\)/);
+    expect(controlPlane).not.toMatch(/registry\.isAvailable\(provider\)/);
+  });
+
+  it('rejects settings keys and sync entities not approved for the provider', () => {
+    const controlPlane = source('lib/integrations/control-plane.ts');
+    expect(controlPlane).toMatch(/findDisallowedSettingsKeys\(/);
+    expect(controlPlane).toMatch(/findUnapprovedEntities\(/);
+  });
+
+  it('SharePoint has no control-plane policy entry (unreachable, matches CONTAINED_NO_AUTHORITY tables)', () => {
+    const policy = source('lib/integrations/provider-policy.ts');
+    expect(policy).not.toMatch(/^\s*sharepoint:/m);
   });
 });
 
