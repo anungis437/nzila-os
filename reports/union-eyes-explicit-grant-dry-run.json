@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-07T21:51:23.693Z",
+  "generatedAt": "2026-09-07T23:35:14.556Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 467,
-  "pendingReviewCount": 233,
-  "tenantGrantedTableCount": 220,
+  "readyForExplicitGrantCount": 475,
+  "pendingReviewCount": 225,
+  "tenantGrantedTableCount": 224,
   "systemGrantedTableCount": 30,
   "tenantOperationTotals": {
-    "SELECT": 212,
-    "INSERT": 188,
-    "UPDATE": 139,
+    "SELECT": 216,
+    "INSERT": 191,
+    "UPDATE": 141,
     "DELETE": 82
   },
   "systemOperationTotals": {
@@ -1003,6 +1003,12 @@
       ]
     },
     {
+      "table": "communication_preferences_phase4",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "communication_templates",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -1070,6 +1076,16 @@
       "table": "contract_rate_cards",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cookie_consents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2623,6 +2639,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "newsletter_engagement",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "newsletter_recipients",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3488,6 +3510,30 @@
       "systemPrivileges": []
     },
     {
+      "table": "sms_campaign_recipients",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "sms_campaigns",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "sms_conversations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "sms_messages",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3496,6 +3542,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "sms_opt_outs",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3677,6 +3729,15 @@
       "table": "union_representation_votes",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "user_consents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -4050,10 +4111,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "communication_preferences_phase4",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "conflict_audit_log",
       "classification": "NEEDS_REVIEW"
     },
@@ -4075,10 +4132,6 @@
     },
     {
       "table": "contribution_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cookie_consents",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4438,10 +4491,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "newsletter_engagement",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "newsletter_list_subscribers",
       "classification": "NEEDS_REVIEW"
     },
@@ -4614,22 +4663,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "sms_campaign_recipients",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "sms_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "sms_conversations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "sms_opt_outs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "sms_templates",
       "classification": "NEEDS_REVIEW"
     },
@@ -4751,10 +4784,6 @@
     },
     {
       "table": "usage_meters",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "user_consents",
       "classification": "NEEDS_REVIEW"
     },
     {

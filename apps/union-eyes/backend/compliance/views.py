@@ -328,10 +328,21 @@ class BreakGlassActivationsViewSet(viewsets.ModelViewSet):
 
 
 class UserConsentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for UserConsents operations."""
+    """API endpoint for UserConsents operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): user_consents is TENANT_RLS_REQUIRED with an
+    additional per-subject (user_id) scope; its real Next.js consumer
+    (app/api/members/[id]/consents/route.ts) was fixed this round to
+    restrict both reads and mutations to the record's own subject, not
+    just the organization. This generated ModelViewSet has neither scope
+    (IsAuthenticated only) — any authenticated user could read or rewrite
+    any other member's consent record across every organization. No real
+    Django consumer found.
+    """
     queryset = UserConsents.objects.all()
     serializer_class = UserConsentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -339,10 +350,22 @@ class UserConsentsViewSet(viewsets.ModelViewSet):
 
 
 class CookieConsentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for CookieConsents operations."""
+    """API endpoint for CookieConsents operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): cookie_consents is TENANT_RLS_REQUIRED with a
+    nullable user_id (anonymous/pre-login rows are legitimate by design;
+    the real ownership key for those rows is the browser-generated
+    consent_id, not user_id). Its real Next.js consumer
+    (app/api/gdpr/cookie-consent/route.ts) is an intentionally public,
+    unauthenticated endpoint scoped by consent_id. This generated
+    ModelViewSet has no scoping at all (IsAuthenticated only) and would let
+    any authenticated user read/reassign/delete any organization's cookie
+    consent rows. No real Django consumer found.
+    """
     queryset = CookieConsents.objects.all()
     serializer_class = CookieConsentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']

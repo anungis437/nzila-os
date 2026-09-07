@@ -451,11 +451,14 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Returns a single ${resourceName} record.`,
         },
       },
-      async ({ params, organizationId }) => {
+      async ({ params, organizationId, userId }) => {
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
+        }
+        if (ownerCol && userId) {
+          conditions.push(eq(ownerCol, userId));
         }
 
         const [row] = await db.select().from(table).where(and(...conditions));
@@ -489,6 +492,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
+        }
+        if (ownerCol && userId) {
+          conditions.push(eq(ownerCol, userId));
         }
 
         if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
@@ -571,11 +577,14 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Soft-deletes a ${resourceName} record (sets status to archived).`,
         },
       },
-      async ({ params, organizationId }) => {
+      async ({ params, organizationId, userId }) => {
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
+        }
+        if (ownerCol && userId) {
+          conditions.push(eq(ownerCol, userId));
         }
 
         // Try soft delete first (status → archived), fall back to hard delete

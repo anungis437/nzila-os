@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-07T21:51:22.309Z",
-  "totalNeedsReview": 233,
+  "generatedAt": "2026-09-07T23:35:13.136Z",
+  "totalNeedsReview": 225,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 233
+    "NEEDS_REVIEW": 225
   },
   "cohortCounts": {
-    "COMPLEX:org:NORMAL": 36,
-    "COMPLEX:org:HIGH": 44,
+    "COMPLEX:org:NORMAL": 35,
+    "COMPLEX:org:HIGH": 40,
     "SIMPLE_TENANT:org:HIGH": 15,
     "COMPLEX:none:NORMAL": 73,
-    "COMPLEX:none:HIGH": 7,
-    "PARENT_OWNED:parent:NORMAL": 24,
     "PARENT_OWNED:parent:HIGH": 8,
     "COMPLEX:user:NORMAL": 16,
-    "PARENT_OWNED:user:NORMAL": 4,
+    "PARENT_OWNED:user:NORMAL": 3,
+    "COMPLEX:none:HIGH": 6,
+    "PARENT_OWNED:parent:NORMAL": 23,
     "COMPLEX:user:HIGH": 6
   },
   "rows": [
@@ -1534,117 +1534,6 @@
       ]
     },
     {
-      "table": "communication_preferences_phase4",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": false,
-        "canonicalDeclarations": [],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/communications/unsubscribe/[recipientId]/route.ts",
-          "app/api/communications/webhooks/resend/route.ts",
-          "app/api/members/[id]/preferences/route.ts",
-          "lib/ml/predictive-scoring.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "Django route reachable without a proven unconditional deny-all — needs isolation proof or containment, not auto-closable",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:none:HIGH"
-      },
-      "operationSet": [],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "app/api/communications/unsubscribe/[recipientId]/route.ts: organization identifier reference",
-        "app/api/communications/webhooks/resend/route.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/communications/unsubscribe/[recipientId]/route.ts: withSystemContext",
-        "app/api/communications/unsubscribe/[recipientId]/route.ts: insert/write path",
-        "app/api/communications/unsubscribe/[recipientId]/route.ts: update/write path",
-        "app/api/communications/webhooks/resend/route.ts: withSystemContext",
-        "app/api/communications/webhooks/resend/route.ts: update/write path",
-        "app/api/members/[id]/preferences/route.ts: delete/write path",
-        "backend/notifications/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "cookie_consents",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/gdpr.cookieConsents",
-          "gdpr-compliance-schema.cookieConsents"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/gdpr/consent-manager.ts: organization identifier reference",
-        "backend/compliance/views.py: organization identifier reference",
-        "backend/compliance/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/gdpr/consent-manager.ts: insert/write path",
-        "lib/gdpr/consent-manager.ts: update/write path",
-        "lib/gdpr/consent-manager.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
-      ]
-    },
-    {
       "table": "donation_campaigns",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -1863,182 +1752,6 @@
       ]
     },
     {
-      "table": "sms_campaigns",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/sms.smsCampaigns",
-          "sms-communications-schema.smsCampaigns"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "template_id -> smsTemplates.id",
-          "created_by -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/[locale]/dashboard/communications/page.tsx",
-          "app/api/communications/sms/campaigns/route.ts",
-          "services/twilio-sms-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/[locale]/dashboard/communications/page.tsx",
-          "app/api/communications/sms/campaigns/route.ts",
-          "services/twilio-sms-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/communications/page.tsx: requireUser"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/communications/page.tsx: organization identifier reference",
-        "services/twilio-sms-service.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference",
-        "backend/notifications/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path",
-        "backend/notifications/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "sms_conversations",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/sms.smsConversations",
-          "sms-communications-schema.smsConversations"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/communications/sms/conversations/route.ts",
-          "services/twilio-sms-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/communications/sms/conversations/route.ts",
-          "services/twilio-sms-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "services/twilio-sms-service.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference",
-        "backend/notifications/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path",
-        "backend/notifications/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "sms_opt_outs",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/sms.smsOptOuts",
-          "sms-communications-schema.smsOptOuts"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/twilio-sms-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/twilio-sms-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "services/twilio-sms-service.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference",
-        "backend/notifications/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path",
-        "backend/notifications/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "social_campaigns",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -2110,72 +1823,9 @@
       ]
     },
     {
-      "table": "user_consents",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/gdpr.userConsents",
-          "gdpr-compliance-schema.userConsents"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": false,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/members/[id]/consents/route.ts",
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/members/[id]/consents/route.ts",
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/gdpr/consent-manager.ts: organization identifier reference",
-        "backend/compliance/views.py: organization identifier reference",
-        "backend/compliance/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/members/[id]/consents/route.ts: delete/write path",
-        "lib/gdpr/consent-manager.ts: insert/write path",
-        "lib/gdpr/consent-manager.ts: update/write path",
-        "lib/gdpr/consent-manager.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
-      ]
-    },
-    {
       "table": "user_notification_preferences",
       "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
+      "reviewPriority": "NORMAL",
       "schema": {
         "declarationFound": true,
         "canonicalDeclarations": [
@@ -2229,7 +1879,7 @@
         "confidence": "LOW",
         "blocker": "ambiguous shape — needs manual review",
         "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
+        "cohortKey": "COMPLEX:org:NORMAL"
       },
       "operationSet": [
         "DELETE",
@@ -2336,64 +1986,8 @@
         "lib/services/indigenous-data-service.ts: insert/write path",
         "lib/services/indigenous-data-service.ts: update/write path",
         "services/indigenous-data-service.ts: insert/write path",
-        "backend/compliance/views.py: insert/write path"
-      ]
-    },
-    {
-      "table": "newsletter_engagement",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/newsletters.newsletterEngagement",
-          "newsletter-schema.newsletterEngagement"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "campaign_id -> newsletterCampaigns.id",
-          "recipient_id -> newsletterRecipients.id",
-          "profile_id -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "components/communications/unified-analytics-dashboard.tsx",
-          "lib/engagement-scoring.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "components/communications/unified-analytics-dashboard.tsx",
-          "lib/engagement-scoring.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/engagement-scoring.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "backend/notifications/views.py: delete/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -2427,8 +2021,8 @@
         ],
         "djangoModelFound": true,
         "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
+        "djangoUsesUnconditionalDenyAll": true,
+        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, DenyAll"
       },
       "candidate": {
         "classification": "NEEDS_REVIEW",
@@ -2500,64 +2094,8 @@
       "mutationBoundaryEvidence": [
         "services/provincial-privacy-service.ts: insert/write path",
         "services/provincial-privacy-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
-      ]
-    },
-    {
-      "table": "sms_campaign_recipients",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/sms.smsCampaignRecipients",
-          "sms-communications-schema.smsCampaignRecipients"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": [
-          "campaign_id -> smsCampaigns.id",
-          "message_id -> smsMessages.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/gdpr/consent-manager.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:user:NORMAL"
-      },
-      "operationSet": [
-        "DELETE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/gdpr/consent-manager.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/gdpr/consent-manager.ts: insert/write path",
-        "lib/gdpr/consent-manager.ts: update/write path",
-        "lib/gdpr/consent-manager.ts: delete/write path",
-        "backend/notifications/views.py: delete/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -3158,7 +2696,8 @@
       "mutationBoundaryEvidence": [
         "services/break-glass-service.ts: insert/write path",
         "services/break-glass-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -4307,7 +3846,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -4359,7 +3899,8 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -4517,7 +4058,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -4674,7 +4216,8 @@
         "services/geofence-privacy-service.ts: insert/write path",
         "services/geofence-privacy-service.ts: update/write path",
         "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -5471,7 +5014,8 @@
       "mutationBoundaryEvidence": [
         "services/lmbp-immigration-service.ts: insert/write path",
         "services/lmbp-immigration-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -5525,7 +5069,8 @@
       "mutationBoundaryEvidence": [
         "lib/services/external-data/lrb-unified-service.ts: insert/write path",
         "lib/services/external-data/lrb-unified-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -7153,7 +6698,8 @@
         "lib/gdpr/consent-manager.ts: insert/write path",
         "lib/gdpr/consent-manager.ts: update/write path",
         "lib/gdpr/consent-manager.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -10232,7 +9778,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -10613,7 +10160,8 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -10784,7 +10332,8 @@
         "lib/services/indigenous-data-service.ts: insert/write path",
         "lib/services/indigenous-data-service.ts: update/write path",
         "services/indigenous-data-service.ts: insert/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -10891,7 +10440,8 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -10951,7 +10501,8 @@
         "services/break-glass-service.ts: update/write path",
         "services/force-majeure-integration.ts: insert/write path",
         "services/force-majeure-integration.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11005,7 +10556,8 @@
       "mutationBoundaryEvidence": [
         "services/break-glass-service.ts: insert/write path",
         "services/break-glass-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11058,7 +10610,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11110,7 +10663,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11162,7 +10716,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11413,7 +10968,8 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11466,7 +11022,8 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -11521,7 +11078,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12075,7 +11633,8 @@
         "backend/compliance/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12128,7 +11687,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12191,7 +11751,8 @@
       "mutationBoundaryEvidence": [
         "services/provincial-privacy-service.ts: insert/write path",
         "services/provincial-privacy-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12244,7 +11805,8 @@
       "mutationBoundaryEvidence": [
         "services/break-glass-service.ts: insert/write path",
         "services/break-glass-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12454,7 +12016,8 @@
       "mutationBoundaryEvidence": [
         "lib/services/break-glass-service.ts: insert/write path",
         "lib/services/break-glass-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12509,7 +12072,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12684,7 +12248,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12739,7 +12304,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -12952,7 +12518,8 @@
         "services/geofence-privacy-service.ts: insert/write path",
         "services/geofence-privacy-service.ts: update/write path",
         "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13008,7 +12575,8 @@
         "services/geofence-privacy-service.ts: insert/write path",
         "services/geofence-privacy-service.ts: update/write path",
         "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13118,7 +12686,8 @@
         "lib/services/indigenous-data-service.ts: insert/write path",
         "lib/services/indigenous-data-service.ts: update/write path",
         "services/indigenous-data-service.ts: insert/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13170,7 +12739,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/indigenous-data-service.ts: insert/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13223,7 +12793,8 @@
       "mutationBoundaryEvidence": [
         "services/break-glass-service.ts: insert/write path",
         "services/break-glass-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13329,7 +12900,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13383,7 +12955,8 @@
       "mutationBoundaryEvidence": [
         "services/lmbp-immigration-service.ts: insert/write path",
         "services/lmbp-immigration-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13435,7 +13008,8 @@
       "mutationBoundaryEvidence": [
         "services/lmbp-immigration-service.ts: insert/write path",
         "services/lmbp-immigration-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13488,7 +13062,8 @@
       "mutationBoundaryEvidence": [
         "services/lmbp-immigration-service.ts: insert/write path",
         "services/lmbp-immigration-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13541,7 +13116,8 @@
         "services/geofence-privacy-service.ts: insert/write path",
         "services/geofence-privacy-service.ts: update/write path",
         "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13606,7 +13182,8 @@
         "services/geofence-privacy-service.ts: insert/write path",
         "services/geofence-privacy-service.ts: update/write path",
         "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13660,7 +13237,8 @@
         "services/geofence-privacy-service.ts: insert/write path",
         "services/geofence-privacy-service.ts: update/write path",
         "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13714,7 +13292,8 @@
       "mutationBoundaryEvidence": [
         "lib/services/external-data/lrb-unified-service.ts: insert/write path",
         "lib/services/external-data/lrb-unified-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -13768,7 +13347,8 @@
       "mutationBoundaryEvidence": [
         "services/lmbp-immigration-service.ts: insert/write path",
         "services/lmbp-immigration-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14050,7 +13630,8 @@
       "mutationBoundaryEvidence": [
         "services/provincial-privacy-service.ts: insert/write path",
         "services/provincial-privacy-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14209,7 +13790,8 @@
       "mutationBoundaryEvidence": [
         "services/provincial-privacy-service.ts: insert/write path",
         "services/provincial-privacy-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14262,7 +13844,8 @@
       "mutationBoundaryEvidence": [
         "services/provincial-privacy-service.ts: insert/write path",
         "services/provincial-privacy-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14375,7 +13958,8 @@
       "mutationBoundaryEvidence": [
         "services/break-glass-service.ts: insert/write path",
         "services/break-glass-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14427,7 +14011,8 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14802,7 +14387,8 @@
       "mutationBoundaryEvidence": [
         "services/certification-management-service.ts: insert/write path",
         "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -14907,7 +14493,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/indigenous-data-service.ts: insert/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -15017,7 +14604,8 @@
       "mutationBoundaryEvidence": [
         "services/employer-non-interference-service.ts: insert/write path",
         "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path"
+        "backend/compliance/views.py: insert/write path",
+        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
