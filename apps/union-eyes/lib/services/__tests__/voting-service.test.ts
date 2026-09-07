@@ -15,6 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   mockSessionsFindFirst: vi.fn(),
   mockVotesFindFirst: vi.fn(),
+  mockOptionsFindFirst: vi.fn(),
   mockEligibilityFindFirst: vi.fn(),
   mockInsertReturning: vi.fn(),
   mockUpdateReturning: vi.fn(),
@@ -40,6 +41,7 @@ vi.mock('@/db/db', () => ({
     query: {
       votingSessions: { findFirst: mocks.mockSessionsFindFirst },
       votes: { findFirst: mocks.mockVotesFindFirst },
+      votingOptions: { findFirst: mocks.mockOptionsFindFirst },
       voterEligibility: { findFirst: mocks.mockEligibilityFindFirst },
     },
     insert: vi.fn(() => ({
@@ -163,6 +165,7 @@ describe('VotingService', () => {
     mocks.mockSelect.mockReset();
     mocks.mockSessionsFindFirst.mockResolvedValue(baseSession);
     mocks.mockVotesFindFirst.mockResolvedValue(null);
+    mocks.mockOptionsFindFirst.mockResolvedValue({ id: 'opt-1', sessionId: 'session-1' });
     mocks.mockEligibilityFindFirst.mockResolvedValue(baseEligibility);
     mocks.mockInsertReturning.mockResolvedValue([{ id: 'new-1' }]);
     mocks.mockUpdateReturning.mockResolvedValue([baseSession]);
@@ -411,6 +414,13 @@ describe('VotingService', () => {
     it('throws when voter not eligible', async () => {
       mocks.mockEligibilityFindFirst.mockResolvedValue(null);
       await expect(castVote('s', 'o', 'm')).rejects.toThrow('not eligible');
+    });
+
+    it('throws when option does not belong to the session', async () => {
+      mocks.mockOptionsFindFirst.mockResolvedValue(null);
+      await expect(castVote('session-1', 'opt-from-another-session', 'member-1')).rejects.toThrow(
+        'does not belong to this voting session',
+      );
     });
 
     it('throws when already voted', async () => {

@@ -90,7 +90,7 @@ class AlertRecipientsViewSet(viewsets.ModelViewSet):
     """API endpoint for AlertRecipients operations."""
     queryset = AlertRecipients.objects.all()
     serializer_class = AlertRecipientsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['alert_rule_id']
     ordering_fields = ['created_at', 'updated_at']

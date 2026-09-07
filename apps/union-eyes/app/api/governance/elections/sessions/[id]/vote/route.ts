@@ -6,7 +6,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const castVoteSchema = z.object({
@@ -29,11 +29,15 @@ export const GET = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get votes for session' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('/vote')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    const [session] = await db.select().from(votingSessions).where(eq(votingSessions.id, id));
+    const [session] = await db
+      .select()
+      .from(votingSessions)
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
     if (!session) throw ApiError.notFound('Voting session not found');
 
     const options = await db.select().from(votingOptions).where(eq(votingOptions.sessionId, id));
@@ -49,14 +53,34 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Cast vote' },
   },
-  async ({ request, body }) => {
+  async ({ request, body, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('/vote')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     const parsed = castVoteSchema.parse(body);
-    const [vote] = await withRLSContext(async () =>
-      db.insert(votes).values({ ...parsed, sessionId: id }).returning()
-    );
+
+    const [vote] = await withRLSContext({ organizationId }, async () => {
+      const [session] = await db
+        .select()
+        .from(votingSessions)
+        .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
+      if (!session) throw ApiError.notFound('Voting session not found');
+
+      const [option] = await db
+        .select()
+        .from(votingOptions)
+        .where(and(eq(votingOptions.id, parsed.optionId), eq(votingOptions.sessionId, id)));
+      if (!option) throw ApiError.badRequest('Option does not belong to this voting session');
+
+      const [existing] = await db
+        .select()
+        .from(votes)
+        .where(and(eq(votes.sessionId, id), eq(votes.voterId, parsed.voterId)));
+      if (existing) throw ApiError.badRequest('Vote already cast');
+
+      return db.insert(votes).values({ ...parsed, sessionId: id }).returning();
+    });
     return vote;
   },
 );

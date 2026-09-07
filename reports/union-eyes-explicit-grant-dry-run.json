@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-07T10:28:25.249Z",
+  "generatedAt": "2026-09-07T12:06:39.495Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 419,
-  "pendingReviewCount": 281,
-  "tenantGrantedTableCount": 195,
+  "readyForExplicitGrantCount": 429,
+  "pendingReviewCount": 271,
+  "tenantGrantedTableCount": 200,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 188,
-    "INSERT": 171,
-    "UPDATE": 128,
+    "SELECT": 193,
+    "INSERT": 173,
+    "UPDATE": 129,
     "DELETE": 81
   },
   "systemOperationTotals": {
@@ -167,6 +167,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "account_balance_reconciliation",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "account_mappings",
       "classification": "MIXED_GLOBAL_TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -213,6 +219,12 @@
     {
       "table": "alert_escalations",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "alert_recipients",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -484,6 +496,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "budget_reservations",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -829,6 +847,14 @@
       "table": "comparative_analyses",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "compliance_alerts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1239,6 +1265,14 @@
         "INSERT",
         "UPDATE",
         "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_reports",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
       ],
       "systemPrivileges": []
     },
@@ -2027,6 +2061,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "ingestion_records",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "injury_logs",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2380,6 +2424,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "newsletter_recipients",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "newsletter_templates",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2696,6 +2748,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "payment_routing_rules",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3156,6 +3214,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "separated_payment_transactions",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "settlements",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3273,6 +3337,15 @@
       "table": "task_comments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "tentative_agreements",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -3490,10 +3563,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "account_balance_reconciliation",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "address_change_history",
       "classification": "NEEDS_REVIEW"
     },
@@ -3523,10 +3592,6 @@
     },
     {
       "table": "alert_executions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "alert_recipients",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3611,10 +3676,6 @@
     },
     {
       "table": "budget_pool",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "budget_reservations",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3743,10 +3804,6 @@
     },
     {
       "table": "communication_preferences_phase4",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "compliance_alerts",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3910,10 +3967,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "employer_reports",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "employer_risk_scores",
       "classification": "NEEDS_REVIEW"
     },
@@ -4031,10 +4084,6 @@
     },
     {
       "table": "indigenous_data_sharing_agreements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "ingestion_records",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4166,15 +4215,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "newsletter_recipients",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "organizing_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "payment_routing_rules",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4330,10 +4371,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "separated_payment_transactions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "shared_clause_library",
       "classification": "NEEDS_REVIEW"
     },
@@ -4459,10 +4496,6 @@
     },
     {
       "table": "tax_year_end_processing",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "tentative_agreements",
       "classification": "NEEDS_REVIEW"
     },
     {

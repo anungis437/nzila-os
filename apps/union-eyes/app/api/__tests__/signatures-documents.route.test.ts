@@ -66,11 +66,11 @@ describe('signatures/documents route', () => {
   });
 
   it('POST creates a signature request', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
     const { POST } = await loadRoute();
     const form = new FormData();
     form.set('file', new File(['abc'], 'contract.pdf'));
     form.set('title', 'Contract');
-    form.set('organizationId', 'org_1');
     form.set('signers', JSON.stringify([{ email: 'x@y.com' }]));
 
     const response = await POST(new NextRequest('http://localhost/api/signatures/documents', { method: 'POST', body: form }));
@@ -79,17 +79,55 @@ describe('signatures/documents route', () => {
     expect(json.success).toBe(true);
   });
 
-  it('GET validates organizationId query param', async () => {
+  it('POST ignores a client-supplied organizationId and uses the authenticated user\'s org', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
+    const { POST } = await loadRoute();
+    const form = new FormData();
+    form.set('file', new File(['abc'], 'contract.pdf'));
+    form.set('title', 'Contract');
+    form.set('organizationId', 'org_evil');
+    form.set('signers', JSON.stringify([{ email: 'x@y.com' }]));
+
+    const response = await POST(new NextRequest('http://localhost/api/signatures/documents', { method: 'POST', body: form }));
+    expect(response.status).toBe(200);
+    expect(m.createSignatureRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org_1' }),
+    );
+  });
+
+  it('POST rejects when the authenticated user has no organization context', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: null });
+    const { POST } = await loadRoute();
+    const form = new FormData();
+    form.set('file', new File(['abc'], 'contract.pdf'));
+    form.set('title', 'Contract');
+    form.set('organizationId', 'org_1');
+    form.set('signers', JSON.stringify([{ email: 'x@y.com' }]));
+
+    const response = await POST(new NextRequest('http://localhost/api/signatures/documents', { method: 'POST', body: form }));
+    expect(response.status).toBe(400);
+  });
+
+  it('GET rejects when the authenticated user has no organization context', async () => {
     const { GET } = await loadRoute();
     const response = await GET(new NextRequest('http://localhost/api/signatures/documents'));
     expect(response.status).toBe(400);
   });
 
   it('GET returns user documents', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
     const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/signatures/documents?organizationId=org_1'));
+    const response = await GET(new NextRequest('http://localhost/api/signatures/documents'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json).toHaveLength(1);
+  });
+
+  it('GET ignores a client-supplied organizationId query param and uses the authenticated user\'s org', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: 'org_1' });
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/signatures/documents?organizationId=org_evil'));
+    expect(response.status).toBe(200);
+    expect(m.getUserDocuments).toHaveBeenCalledWith('u1', 'org_1');
   });
 });

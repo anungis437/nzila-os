@@ -85,7 +85,7 @@ class BudgetReservationsViewSet(viewsets.ModelViewSet):
     """API endpoint for BudgetReservations operations."""
     queryset = BudgetReservations.objects.all()
     serializer_class = BudgetReservationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['pool_id', 'status']
     search_fields = ['status']

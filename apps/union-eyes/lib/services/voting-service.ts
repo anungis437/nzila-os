@@ -470,6 +470,19 @@ export async function castVote(
       throw new Error("Voter is not eligible");
     }
 
+    // Verify the option actually belongs to this session — prevents a vote
+    // being recorded against an option from a different (possibly
+    // cross-organization) voting session.
+    const option = await db.query.votingOptions.findFirst({
+      where: and(
+        eq(votingOptions.id, optionId),
+        eq(votingOptions.sessionId, sessionId),
+      ),
+    });
+    if (!option) {
+      throw new Error("Option does not belong to this voting session");
+    }
+
     // Check if already voted
     const { voterId } = generateAnonymousVoterId(sessionId, memberId);
     const existingVote = await db.query.votes.findFirst({
