@@ -85,7 +85,10 @@ const EXPECTED_AUTHORITY = {
   pci_dss_quarterly_scans: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   pci_dss_requirements: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   pci_dss_saq_assessments: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
-  policy_rules: ['NEEDS_REVIEW', 'TBD', 'TBD', 'TBD', 'TBD', 'HIGH'],
+  // CLOSED round 41 (DIRECT_ORG_RUNTIME_BATCH), resolving this round-40 exception:
+  // PolicyEngine.evaluate() now requires and filters by organizationId. See
+  // rls-storage-authority-round41-direct-org-runtime-batch.test.ts.
+  policy_rules: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'NONE'],
   recognition_programs: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   retention_policies: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   support_tickets: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],

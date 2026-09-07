@@ -612,7 +612,7 @@ class ApiIntegrationsViewSet(viewsets.ModelViewSet):
     """API endpoint for ApiIntegrations operations."""
     queryset = ApiIntegrations.objects.all()
     serializer_class = ApiIntegrationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']

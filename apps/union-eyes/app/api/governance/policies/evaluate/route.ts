@@ -27,10 +27,14 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     body: evaluateSchema,
   },
-  async ({ body }) => {
+  async ({ body, organizationId }) => {
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 400 });
+    }
     const validatedData = body;
 
     const result = await policyEngine.evaluate(
+      organizationId,
       validatedData.ruleType,
       validatedData.category,
       {

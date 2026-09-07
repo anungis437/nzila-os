@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-05T15:52:01.296Z",
-  "totalNeedsReview": 293,
+  "generatedAt": "2026-09-07T10:28:23.795Z",
+  "totalNeedsReview": 281,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 293
+    "NEEDS_REVIEW": 281
   },
   "cohortCounts": {
     "COMPLEX:org:NORMAL": 38,
     "COMPLEX:org:HIGH": 48,
-    "SIMPLE_TENANT:org:HIGH": 27,
+    "SIMPLE_TENANT:org:HIGH": 15,
     "COMPLEX:none:NORMAL": 73,
     "PARENT_OWNED:parent:NORMAL": 52,
     "COMPLEX:none:HIGH": 8,
@@ -3773,76 +3773,6 @@
       ]
     },
     {
-      "table": "employer_execution_profiles",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/employer-execution/employer-runtime-profile.employerExecutionProfiles"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/[locale]/dashboard/employer-execution/settings/page.tsx",
-          "app/api/employer-execution/payroll-runs/[id]/route.ts",
-          "app/api/employer-execution/remittance-runs/route.ts",
-          "scripts/seed-employer-execution-marathon.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/[locale]/dashboard/employer-execution/settings/page.tsx",
-          "app/api/employer-execution/payroll-runs/[id]/route.ts",
-          "app/api/employer-execution/remittance-runs/route.ts",
-          "scripts/seed-employer-execution-marathon.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/employer-execution/settings/page.tsx: requireUser",
-        "app/api/employer-execution/payroll-runs/[id]/route.ts: withApi",
-        "app/api/employer-execution/payroll-runs/[id]/route.ts: explicit auth config",
-        "app/api/employer-execution/remittance-runs/route.ts: withApi",
-        "app/api/employer-execution/remittance-runs/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/employer-execution/settings/page.tsx: organization identifier reference",
-        "app/api/employer-execution/payroll-runs/[id]/route.ts: withRLSContext",
-        "app/api/employer-execution/payroll-runs/[id]/route.ts: organization identifier reference",
-        "app/api/employer-execution/remittance-runs/route.ts: withRLSContext",
-        "app/api/employer-execution/remittance-runs/route.ts: organization identifier reference",
-        "scripts/seed-employer-execution-marathon.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/employer-execution/payroll-runs/[id]/route.ts: insert/write path",
-        "app/api/employer-execution/payroll-runs/[id]/route.ts: update/write path",
-        "app/api/employer-execution/remittance-runs/route.ts: insert/write path",
-        "scripts/seed-employer-execution-marathon.ts: insert/write path"
-      ]
-    },
-    {
       "table": "signature_documents",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -4634,6 +4564,7 @@
           "lib/integrations/adapters/accounting/wave-client.ts",
           "lib/integrations/adapters/accounting/xero-adapter.ts",
           "lib/integrations/adapters/accounting/xero-client.ts",
+          "lib/integrations/provider-policy.ts",
           "lib/integrations/registry.ts",
           "lib/jobs/dues-reminder-scheduler.ts",
           "lib/jobs/failed-payment-retry.ts",
@@ -4738,6 +4669,7 @@
           "lib/integrations/adapters/accounting/wave-client.ts",
           "lib/integrations/adapters/accounting/xero-adapter.ts",
           "lib/integrations/adapters/accounting/xero-client.ts",
+          "lib/integrations/provider-policy.ts",
           "lib/integrations/registry.ts",
           "lib/jobs/dues-reminder-scheduler.ts",
           "lib/jobs/failed-payment-retry.ts",
@@ -4872,6 +4804,7 @@
         "lib/integrations/adapters/accounting/sync-utils.ts: organization identifier reference",
         "lib/integrations/adapters/accounting/wave-adapter.ts: organization identifier reference",
         "lib/integrations/adapters/accounting/xero-adapter.ts: organization identifier reference",
+        "lib/integrations/provider-policy.ts: organization identifier reference",
         "lib/jobs/dues-reminder-scheduler.ts: organization identifier reference",
         "lib/jobs/failed-payment-retry.ts: organization identifier reference",
         "lib/middleware/auth-middleware.ts: organization identifier reference",
@@ -4937,6 +4870,9 @@
         "lib/integrations/adapters/accounting/xero-adapter.ts: insert/write path",
         "lib/integrations/adapters/accounting/xero-adapter.ts: update/write path",
         "lib/integrations/adapters/accounting/xero-client.ts: update/write path",
+        "lib/integrations/provider-policy.ts: insert/write path",
+        "lib/integrations/provider-policy.ts: update/write path",
+        "lib/integrations/provider-policy.ts: delete/write path",
         "lib/integrations/registry.ts: update/write path",
         "lib/jobs/dues-reminder-scheduler.ts: update/write path",
         "lib/jobs/failed-payment-retry.ts: update/write path",
@@ -6430,63 +6366,6 @@
       ]
     },
     {
-      "table": "api_integrations",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "integration-schema.apiIntegrations"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/extensions/[id]/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/extensions/[id]/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/extensions/[id]/route.ts: withApi",
-        "app/api/extensions/[id]/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/api/extensions/[id]/route.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference",
-        "backend/core/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/extensions/[id]/route.ts: update/write path",
-        "app/api/extensions/[id]/route.ts: delete/write path"
-      ]
-    },
-    {
       "table": "employer_timesheet_batches",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -6670,82 +6549,6 @@
         "services/financial-service/src/db/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: delete/write path",
         "backend/unions/views.py: insert/write path"
-      ]
-    },
-    {
-      "table": "ingestion_batches",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "ingestion-schema.ingestionBatches"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/admin/ingest/retry/route.ts",
-          "app/api/grievances/import/route.ts",
-          "lib/ingestion/batch-ingest.ts",
-          "lib/ingestion/migration-metrics.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/api/grievances/import/route.ts",
-          "lib/ingestion/batch-ingest.ts",
-          "lib/ingestion/post-import-verification.ts",
-          "services/observability/realtime-alerting-service.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/admin/ingest/retry/route.ts",
-          "app/api/grievances/import/route.ts",
-          "lib/ingestion/batch-ingest.ts",
-          "lib/ingestion/migration-metrics.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/admin/ingest/retry/route.ts: withApi",
-        "app/api/admin/ingest/retry/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/api/admin/ingest/retry/route.ts: organization identifier reference",
-        "app/api/grievances/import/route.ts: withRLSContext",
-        "app/api/grievances/import/route.ts: organization identifier reference",
-        "app/api/grievances/import/route.ts: organization_id",
-        "lib/ingestion/batch-ingest.ts: organization identifier reference",
-        "lib/ingestion/batch-ingest.ts: organization_id",
-        "lib/ingestion/migration-metrics.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/admin/ingest/retry/route.ts: withSystemContext",
-        "app/api/admin/ingest/retry/route.ts: update/write path",
-        "app/api/grievances/import/route.ts: insert/write path",
-        "app/api/grievances/import/route.ts: update/write path",
-        "lib/ingestion/batch-ingest.ts: insert/write path",
-        "lib/ingestion/batch-ingest.ts: update/write path"
       ]
     },
     {
@@ -7582,56 +7385,6 @@
         "lib/services/rewards/automation-service.ts: insert/write path",
         "lib/services/rewards/automation-service.ts: update/write path",
         "lib/services/rewards/automation-service.ts: delete/write path"
-      ]
-    },
-    {
-      "table": "break_policies",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/member/member-breaks.breakPolicies"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/breaks/policies/[id]/route.ts",
-          "app/api/breaks/policies/route.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/quebec/break-defaults.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/breaks/policies/[id]/route.ts",
-          "app/api/breaks/policies/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [],
-      "organizationEvidence": [],
-      "mutationBoundaryEvidence": [
-        "app/api/breaks/policies/[id]/route.ts: update/write path",
-        "app/api/breaks/policies/[id]/route.ts: delete/write path"
       ]
     },
     {
@@ -8485,121 +8238,6 @@
       ]
     },
     {
-      "table": "duplicate_groups",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "ingestion-schema.duplicateGroups"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/admin/duplicates/route.ts",
-          "lib/ingestion/fuzzy-dedup.ts",
-          "lib/ingestion/migration-metrics.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/admin/duplicates/route.ts",
-          "lib/ingestion/fuzzy-dedup.ts",
-          "lib/ingestion/migration-metrics.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/admin/duplicates/route.ts: withApi",
-        "app/api/admin/duplicates/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/api/admin/duplicates/route.ts: organization identifier reference",
-        "lib/ingestion/fuzzy-dedup.ts: organization identifier reference",
-        "lib/ingestion/migration-metrics.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/admin/duplicates/route.ts: withSystemContext",
-        "app/api/admin/duplicates/route.ts: update/write path",
-        "lib/ingestion/fuzzy-dedup.ts: insert/write path",
-        "lib/ingestion/fuzzy-dedup.ts: update/write path"
-      ]
-    },
-    {
-      "table": "employer_contacts",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/employer-communications.employerContacts"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/employers/communications/contacts/route.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/api/employers/communications/contacts/route.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/employers/communications/contacts/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "app/api/employers/communications/contacts/route.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/employers/communications/contacts/route.ts: insert/write path"
-      ]
-    },
-    {
       "table": "employer_execution_artifacts",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -9155,168 +8793,6 @@
       ]
     },
     {
-      "table": "exit_interviews",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/infrastructure/exit-interviews.exitInterviews"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/[locale]/dashboard/knowledge-transfer/[id]/page.tsx",
-          "app/api/exit-interviews/[id]/documents/route.ts",
-          "app/api/exit-interviews/[id]/governance/route.ts",
-          "app/api/exit-interviews/[id]/index/route.ts",
-          "app/api/exit-interviews/[id]/publish/route.ts",
-          "app/api/exit-interviews/[id]/review/route.ts",
-          "app/api/exit-interviews/[id]/route.ts",
-          "app/api/exit-interviews/[id]/submit/route.ts",
-          "app/api/exit-interviews/[id]/summarize/route.ts",
-          "app/api/exit-interviews/analytics/route.ts",
-          "app/api/exit-interviews/expertise-map/route.ts",
-          "app/api/exit-interviews/governance-timeline/route.ts",
-          "app/api/exit-interviews/route.ts",
-          "lib/knowledge-transfer/continuity-risk/risk-detector.ts",
-          "lib/knowledge-transfer/forecasting/continuity-forecaster.ts",
-          "lib/knowledge-transfer/indexing/semantic-indexer.ts",
-          "lib/knowledge-transfer/propagation/dependency-propagator.ts",
-          "lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
-          "lib/knowledge-transfer/search/hybrid-search.ts",
-          "lib/knowledge-transfer/simulation/continuity-simulator.ts",
-          "lib/knowledge-transfer/succession/succession-analyzer.ts",
-          "lib/knowledge-transfer/topic-graph/topic-graph-builder.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/knowledge-transfer/search/hybrid-search.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/[locale]/dashboard/knowledge-transfer/[id]/page.tsx",
-          "app/api/exit-interviews/[id]/documents/route.ts",
-          "app/api/exit-interviews/[id]/governance/route.ts",
-          "app/api/exit-interviews/[id]/index/route.ts",
-          "app/api/exit-interviews/[id]/publish/route.ts",
-          "app/api/exit-interviews/[id]/review/route.ts",
-          "app/api/exit-interviews/[id]/route.ts",
-          "app/api/exit-interviews/[id]/submit/route.ts",
-          "app/api/exit-interviews/[id]/summarize/route.ts",
-          "app/api/exit-interviews/analytics/route.ts",
-          "app/api/exit-interviews/expertise-map/route.ts",
-          "app/api/exit-interviews/governance-timeline/route.ts",
-          "app/api/exit-interviews/route.ts",
-          "lib/knowledge-transfer/continuity-risk/risk-detector.ts",
-          "lib/knowledge-transfer/forecasting/continuity-forecaster.ts",
-          "lib/knowledge-transfer/indexing/semantic-indexer.ts",
-          "lib/knowledge-transfer/propagation/dependency-propagator.ts",
-          "lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
-          "lib/knowledge-transfer/search/hybrid-search.ts",
-          "lib/knowledge-transfer/simulation/continuity-simulator.ts",
-          "lib/knowledge-transfer/succession/succession-analyzer.ts",
-          "lib/knowledge-transfer/topic-graph/topic-graph-builder.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/knowledge-transfer/[id]/page.tsx: requireUser",
-        "app/api/exit-interviews/[id]/documents/route.ts: withApi",
-        "app/api/exit-interviews/[id]/documents/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/governance/route.ts: withApi",
-        "app/api/exit-interviews/[id]/governance/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/index/route.ts: withApi",
-        "app/api/exit-interviews/[id]/index/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/publish/route.ts: withApi",
-        "app/api/exit-interviews/[id]/publish/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/review/route.ts: withApi",
-        "app/api/exit-interviews/[id]/review/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/route.ts: withApi",
-        "app/api/exit-interviews/[id]/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/submit/route.ts: withApi",
-        "app/api/exit-interviews/[id]/submit/route.ts: explicit auth config",
-        "app/api/exit-interviews/[id]/summarize/route.ts: withApi",
-        "app/api/exit-interviews/[id]/summarize/route.ts: explicit auth config",
-        "app/api/exit-interviews/analytics/route.ts: withApi",
-        "app/api/exit-interviews/analytics/route.ts: explicit auth config",
-        "app/api/exit-interviews/expertise-map/route.ts: withApi",
-        "app/api/exit-interviews/expertise-map/route.ts: explicit auth config",
-        "app/api/exit-interviews/governance-timeline/route.ts: withApi",
-        "app/api/exit-interviews/governance-timeline/route.ts: explicit auth config",
-        "app/api/exit-interviews/route.ts: withApi",
-        "app/api/exit-interviews/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/knowledge-transfer/[id]/page.tsx: organization identifier reference",
-        "app/api/exit-interviews/[id]/documents/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/governance/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/index/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/publish/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/review/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/submit/route.ts: organization identifier reference",
-        "app/api/exit-interviews/[id]/summarize/route.ts: organization identifier reference",
-        "app/api/exit-interviews/analytics/route.ts: organization identifier reference",
-        "app/api/exit-interviews/expertise-map/route.ts: organization identifier reference",
-        "app/api/exit-interviews/governance-timeline/route.ts: organization identifier reference",
-        "app/api/exit-interviews/route.ts: organization identifier reference",
-        "lib/knowledge-transfer/continuity-risk/risk-detector.ts: organization identifier reference",
-        "lib/knowledge-transfer/forecasting/continuity-forecaster.ts: organization identifier reference",
-        "lib/knowledge-transfer/indexing/semantic-indexer.ts: organization identifier reference",
-        "lib/knowledge-transfer/propagation/dependency-propagator.ts: organization identifier reference",
-        "lib/knowledge-transfer/resilience-index/resilience-calculator.ts: organization identifier reference",
-        "lib/knowledge-transfer/search/hybrid-search.ts: organization identifier reference",
-        "lib/knowledge-transfer/search/hybrid-search.ts: organization_id",
-        "lib/knowledge-transfer/simulation/continuity-simulator.ts: organization identifier reference",
-        "lib/knowledge-transfer/succession/succession-analyzer.ts: organization identifier reference",
-        "lib/knowledge-transfer/topic-graph/topic-graph-builder.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/exit-interviews/[id]/documents/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/documents/route.ts: delete/write path",
-        "app/api/exit-interviews/[id]/governance/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/governance/route.ts: update/write path",
-        "app/api/exit-interviews/[id]/index/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/publish/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/publish/route.ts: update/write path",
-        "app/api/exit-interviews/[id]/review/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/review/route.ts: update/write path",
-        "app/api/exit-interviews/[id]/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/route.ts: update/write path",
-        "app/api/exit-interviews/[id]/submit/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/submit/route.ts: update/write path",
-        "app/api/exit-interviews/[id]/summarize/route.ts: insert/write path",
-        "app/api/exit-interviews/[id]/summarize/route.ts: update/write path",
-        "app/api/exit-interviews/analytics/route.ts: update/write path",
-        "app/api/exit-interviews/governance-timeline/route.ts: update/write path",
-        "app/api/exit-interviews/route.ts: insert/write path",
-        "lib/knowledge-transfer/indexing/semantic-indexer.ts: insert/write path",
-        "lib/knowledge-transfer/indexing/semantic-indexer.ts: update/write path"
-      ]
-    },
-    {
       "table": "fee_adjustments",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -9824,101 +9300,6 @@
       ]
     },
     {
-      "table": "organizer_tasks",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/organizer-workflows.organizerTasks"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/organizer/impact/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/organizer/impact/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/unions/models.py, viewset=backend/unions/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/unions/views.py: organization identifier reference",
-        "backend/unions/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "backend/unions/views.py: insert/write path"
-      ]
-    },
-    {
-      "table": "pay_equity_exercises",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/health-safety/cnesst-schema.payEquityExercises"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/cnesst/pay-equity/[id]/route.ts",
-          "app/api/cnesst/pay-equity/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/cnesst/pay-equity/[id]/route.ts",
-          "app/api/cnesst/pay-equity/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [],
-      "organizationEvidence": [],
-      "mutationBoundaryEvidence": [
-        "app/api/cnesst/pay-equity/[id]/route.ts: delete/write path"
-      ]
-    },
-    {
       "table": "pilot_checklist_items",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -9977,66 +9358,6 @@
         "app/api/pilot/bootstrap/cupe/route.ts: withSystemContext",
         "app/api/pilot/bootstrap/cupe/route.ts: insert/write path",
         "app/api/pilot/bootstrap/cupe/route.ts: delete/write path",
-        "app/api/pilot/onboarding/route.ts: insert/write path",
-        "app/api/pilot/onboarding/route.ts: update/write path"
-      ]
-    },
-    {
-      "table": "pilot_demo_seeds",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/pilot/pilot-demo-seeds.pilotDemoSeeds"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/pilot/demo-data/route.ts",
-          "app/api/pilot/onboarding/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/pilot/demo-data/route.ts",
-          "app/api/pilot/onboarding/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "app/api/pilot/demo-data/route.ts: withRLSContext",
-        "app/api/pilot/demo-data/route.ts: organization identifier reference",
-        "app/api/pilot/onboarding/route.ts: withRLSContext",
-        "app/api/pilot/onboarding/route.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/pilot/demo-data/route.ts: insert/write path",
-        "app/api/pilot/demo-data/route.ts: update/write path",
-        "app/api/pilot/demo-data/route.ts: delete/write path",
         "app/api/pilot/onboarding/route.ts: insert/write path",
         "app/api/pilot/onboarding/route.ts: update/write path"
       ]
@@ -10275,61 +9596,6 @@
       "mutationBoundaryEvidence": [
         "app/api/pilot/current/route.ts: withSystemContext",
         "app/api/pilot/overview/route.ts: withSystemContext"
-      ]
-    },
-    {
-      "table": "policy_rules",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "policy-engine-schema.policyRules"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/services/policy-engine.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "lib/services/policy-engine.ts",
-          "app/api/governance/policies/evaluate/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": true,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, DenyAll"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/governance/policies/evaluate/route.ts: withApi",
-        "app/api/governance/policies/evaluate/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "lib/services/policy-engine.ts: organization identifier reference",
-        "backend/compliance/views.py: organization identifier reference",
-        "backend/compliance/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/services/policy-engine.ts: insert/write path"
       ]
     },
     {
@@ -11701,8 +10967,8 @@
         ],
         "djangoModelFound": true,
         "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/auth_core/models.py, viewset=backend/auth_core/views.py, router-registered, IsAuthenticated-only"
+        "djangoUsesUnconditionalDenyAll": true,
+        "djangoDetail": "model=backend/auth_core/models.py, viewset=backend/auth_core/views.py, router-registered, DenyAll"
       },
       "candidate": {
         "classification": "NEEDS_REVIEW",
@@ -12007,61 +11273,6 @@
         "lib/services/steward-assignment.ts: insert/write path",
         "lib/services/steward-assignment.ts: update/write path"
       ]
-    },
-    {
-      "table": "strategic_goals",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/governance/strategic-goals.strategicGoals"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/executive/dashboard/route.ts",
-          "lib/services/dashboard-kpi-service.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/services/dashboard-kpi-service.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/executive/dashboard/route.ts",
-          "lib/services/dashboard-kpi-service.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/executive/dashboard/route.ts: withApi",
-        "app/api/executive/dashboard/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/api/executive/dashboard/route.ts: organization identifier reference",
-        "lib/services/dashboard-kpi-service.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": []
     },
     {
       "table": "survey_answers",

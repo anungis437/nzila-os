@@ -78,6 +78,7 @@ export class PolicyEngine {
    * Evaluate a subject against applicable policy rules
    */
   async evaluate(
+    organizationId: string,
     ruleType: string,
     category: string,
     context: EvaluationContext
@@ -89,6 +90,7 @@ export class PolicyEngine {
         .from(policyRules)
         .where(
           and(
+            eq(policyRules.organizationId, organizationId),
             eq(policyRules.ruleType, ruleType),
             eq(policyRules.category, category),
             eq(policyRules.status, 'active'),

@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-05T15:54:18.401Z",
+  "generatedAt": "2026-09-07T10:28:25.249Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 407,
-  "pendingReviewCount": 293,
-  "tenantGrantedTableCount": 183,
+  "readyForExplicitGrantCount": 419,
+  "pendingReviewCount": 281,
+  "tenantGrantedTableCount": 195,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 176,
-    "INSERT": 163,
-    "UPDATE": 121,
-    "DELETE": 77
+    "SELECT": 188,
+    "INSERT": 171,
+    "UPDATE": 128,
+    "DELETE": 81
   },
   "systemOperationTotals": {
     "SELECT": 23,
@@ -21,6 +21,7 @@
   "riskSignals": {
     "tenantDeleteGrants": [
       "anti_scab_violations",
+      "api_integrations",
       "arbitration_decisions",
       "arbitration_precedents",
       "arbitrations",
@@ -30,6 +31,7 @@
       "bargaining_notes",
       "bargaining_proposals",
       "bargaining_units",
+      "break_policies",
       "campaigns",
       "case_studies",
       "cba_clauses",
@@ -78,10 +80,12 @@
       "notifications",
       "org_configurations",
       "organization_members",
+      "pay_equity_exercises",
       "payment_cycles",
       "payment_disputes",
       "payment_methods",
       "payment_plans",
+      "pilot_demo_seeds",
       "preventive_withdrawals",
       "push_notifications",
       "remittance_exceptions",
@@ -239,6 +243,16 @@
       "table": "api_access_tokens",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "api_integrations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -458,6 +472,17 @@
         "SELECT",
         "INSERT",
         "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "break_policies",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
       ],
       "systemPrivileges": []
     },
@@ -1125,11 +1150,38 @@
       "systemPrivileges": []
     },
     {
+      "table": "duplicate_groups",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_contacts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "employer_execution_evidence_links",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT",
         "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_execution_profiles",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
       ],
       "systemPrivileges": []
     },
@@ -1270,6 +1322,16 @@
       "table": "exit_interview_sessions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "exit_interviews",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1955,6 +2017,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "ingestion_batches",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "injury_logs",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2500,6 +2572,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "organizer_tasks",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "organizing_campaign_milestones",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2545,6 +2626,17 @@
       "table": "page_analytics",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pay_equity_exercises",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2733,6 +2825,17 @@
       ]
     },
     {
+      "table": "pilot_demo_seeds",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "platform_cost_ledger_entries",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2772,6 +2875,14 @@
         "SELECT",
         "INSERT"
       ]
+    },
+    {
+      "table": "policy_rules",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
     },
     {
       "table": "ppe_equipment",
@@ -3122,6 +3233,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "strategic_goals",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "stripe_webhook_events",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3435,10 +3554,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "api_integrations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "arbitrator_profiles",
       "classification": "NEEDS_REVIEW"
     },
@@ -3492,10 +3607,6 @@
     },
     {
       "table": "break_glass_system",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "break_policies",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3775,10 +3886,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "duplicate_groups",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "emergency_declarations",
       "classification": "NEEDS_REVIEW"
     },
@@ -3791,19 +3898,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "employer_contacts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "employer_execution_artifacts",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "employer_execution_compliance_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_execution_profiles",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3836,10 +3935,6 @@
     },
     {
       "table": "exit_interview_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "exit_interviews",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3936,10 +4031,6 @@
     },
     {
       "table": "indigenous_data_sharing_agreements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "ingestion_batches",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4079,15 +4170,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "organizer_tasks",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "organizing_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pay_equity_exercises",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4104,10 +4187,6 @@
     },
     {
       "table": "pilot_checklist_items",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pilot_demo_seeds",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4136,10 +4215,6 @@
     },
     {
       "table": "policy_exceptions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "policy_rules",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4336,10 +4411,6 @@
     },
     {
       "table": "stewards",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "strategic_goals",
       "classification": "NEEDS_REVIEW"
     },
     {

@@ -23,6 +23,26 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment: unconditionally denies every request.
+
+    Applied to ModelViewSets that have zero legitimate consumer and no
+    tenant-isolation mechanism (`filterset_fields = ['organization_id']` is
+    client-controlled, not enforced) — PR #752 round 41 (SsoProviders):
+    the generated ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) pattern otherwise exposes every
+    organization's SSO provider configuration to any authenticated
+    platform user. Remove only once a reviewed, org-scoped consumer is
+    actually built for the affected ViewSet.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
 from .models import (
     AddressChangeHistory,
     AddressValidationCache,
@@ -490,7 +510,7 @@ class SsoProvidersViewSet(viewsets.ModelViewSet):
 
     queryset = SsoProviders.objects.all()
     serializer_class = SsoProvidersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,

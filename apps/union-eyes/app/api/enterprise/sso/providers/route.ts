@@ -26,7 +26,12 @@ export const GET = withApi(
       .from(ssoProviders)
       .where(eq(ssoProviders.organizationId, organizationId));
 
-    return providers;
+    // Never echo raw credential material back to the client.
+    return providers.map(({ samlCertificate, oidcClientSecret, ...safe }) => ({
+      ...safe,
+      samlCertificate: samlCertificate ? true : null,
+      oidcClientSecret: oidcClientSecret ? true : null,
+    }));
   },
 );
 

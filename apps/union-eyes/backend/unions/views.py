@@ -254,7 +254,7 @@ class OrganizerTasksViewSet(viewsets.ModelViewSet):
     """API endpoint for OrganizerTasks operations."""
     queryset = OrganizerTasks.objects.all()
     serializer_class = OrganizerTasksSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
