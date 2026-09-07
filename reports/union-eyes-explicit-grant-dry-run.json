@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-07T13:38:48.790Z",
+  "generatedAt": "2026-09-07T15:39:30.156Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 441,
-  "pendingReviewCount": 259,
-  "tenantGrantedTableCount": 208,
-  "systemGrantedTableCount": 25,
+  "readyForExplicitGrantCount": 457,
+  "pendingReviewCount": 243,
+  "tenantGrantedTableCount": 213,
+  "systemGrantedTableCount": 27,
   "tenantOperationTotals": {
-    "SELECT": 201,
-    "INSERT": 181,
+    "SELECT": 205,
+    "INSERT": 183,
     "UPDATE": 136,
     "DELETE": 81
   },
   "systemOperationTotals": {
-    "SELECT": 23,
+    "SELECT": 25,
     "INSERT": 11,
     "UPDATE": 9,
     "DELETE": 0
@@ -118,7 +118,8 @@
       "organizations",
       "per_capita_remittances",
       "pilot_applications",
-      "platform_payments"
+      "platform_payments",
+      "policy_evaluations"
     ],
     "systemOnlyBroadSystemDml": [
       "council_elections",
@@ -388,6 +389,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "bargaining_team_members",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "bargaining_units",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -407,6 +414,12 @@
     {
       "table": "benchmark_data",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "benefit_comparisons",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -762,6 +775,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "clause_embeddings",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "clc_api_config",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -1032,6 +1053,15 @@
         "INSERT",
         "UPDATE",
         "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "correspondence_recipients",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
       ],
       "systemPrivileges": []
     },
@@ -2524,6 +2554,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "negotiation_sessions",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "negotiations",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3046,6 +3082,24 @@
       ]
     },
     {
+      "table": "policy_evaluations",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "policy_exceptions",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "policy_rules",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3060,6 +3114,12 @@
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "precedent_tags",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3440,9 +3500,11 @@
     },
     {
       "table": "support_tickets",
-      "classification": "CONTAINED_NO_AUTHORITY",
+      "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": []
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "task_comments",
@@ -3468,6 +3530,18 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ticket_comments",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ticket_history",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3531,6 +3605,26 @@
       "systemPrivileges": []
     },
     {
+      "table": "voter_eligibility",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_audit_log",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_notifications",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "voting_sessions",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3539,6 +3633,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "wage_progressions",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3590,6 +3690,18 @@
     {
       "table": "website_settings",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "whiplash_prevention_audit",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "whiplash_violations",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -3766,14 +3878,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "bargaining_team_members",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "benefit_comparisons",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "blind_trust_registry",
       "classification": "NEEDS_REVIEW"
     },
@@ -3831,10 +3935,6 @@
     },
     {
       "table": "chat_sessions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "clause_embeddings",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -3899,10 +3999,6 @@
     },
     {
       "table": "correspondence_audit_trail",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "correspondence_recipients",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4258,10 +4354,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "negotiation_sessions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "newsletter_campaigns",
       "classification": "NEEDS_REVIEW"
     },
@@ -4314,14 +4406,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "policy_evaluations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "policy_exceptions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "poll_votes",
       "classification": "NEEDS_REVIEW"
     },
@@ -4331,10 +4415,6 @@
     },
     {
       "table": "precedent_citations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "precedent_tags",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4562,14 +4642,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "ticket_comments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "ticket_history",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "traditional_knowledge_registry",
       "classification": "NEEDS_REVIEW"
     },
@@ -4638,19 +4710,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "voter_eligibility",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "votes",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "voting_audit_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "voting_notifications",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4662,23 +4722,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "wage_progressions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "webhook_receipts",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "weekly_threshold_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "whiplash_prevention_audit",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "whiplash_violations",
       "classification": "NEEDS_REVIEW"
     },
     {

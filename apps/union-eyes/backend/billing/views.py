@@ -293,9 +293,11 @@ class SeparatedPaymentTransactionsViewSet(viewsets.ModelViewSet):
 
 class WhiplashViolationsViewSet(viewsets.ModelViewSet):
     """API endpoint for WhiplashViolations operations."""
+    # Round 44: same dead whiplash-prevention-service.ts cluster as
+    # account_balance_reconciliation/payment_routing_rules/separated_payment_transactions.
     queryset = WhiplashViolations.objects.all()
     serializer_class = WhiplashViolationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['transaction_id', 'expected_account_id', 'actual_account_id', 'correction_required']
     search_fields = ['id', 'violation_type', 'severity', 'payment_type', 'violation_description']
@@ -328,9 +330,10 @@ class AccountBalanceReconciliationViewSet(viewsets.ModelViewSet):
 
 class WhiplashPreventionAuditViewSet(viewsets.ModelViewSet):
     """API endpoint for WhiplashPreventionAudit operations."""
+    # Round 44: same dead whiplash-prevention-service.ts cluster.
     queryset = WhiplashPreventionAudit.objects.all()
     serializer_class = WhiplashPreventionAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['account_id', 'transaction_id']
     search_fields = ['id', 'action_type', 'action_description', 'performed_by', 'compliance_impact']

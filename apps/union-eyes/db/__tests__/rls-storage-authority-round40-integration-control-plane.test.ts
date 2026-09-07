@@ -91,7 +91,10 @@ const EXPECTED_AUTHORITY = {
   policy_rules: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'NONE'],
   recognition_programs: ['TENANT_RLS_REQUIRED', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   retention_policies: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
-  support_tickets: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
+  // CORRECTED round 44: a real cross-org platform-admin consumer was found
+  // (raw SQL in 3 dashboard pages) that round 40's scan missed. See
+  // rls-storage-authority-round44-resolved-parent-root.test.ts.
+  support_tickets: ['SYSTEM_ONLY', [], ['SELECT'], 'PLATFORM_ADMIN', 'SYSTEM_RUNTIME', 'NONE'],
   webhook_events: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
 } as const;
 

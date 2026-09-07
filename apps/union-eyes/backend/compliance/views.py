@@ -1067,9 +1067,12 @@ class PolicyRulesViewSet(viewsets.ModelViewSet):
 
 class PolicyEvaluationsViewSet(viewsets.ModelViewSet):
     """API endpoint for PolicyEvaluations operations."""
+    # Round 44: no legitimate Django consumer; real TS paths are the
+    # org-scoped policy-engine.ts insert path and the now-platform-admin-
+    # gated /api/governance/telemetry aggregate read.
     queryset = PolicyEvaluations.objects.all()
     serializer_class = PolicyEvaluationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['rule_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -1102,9 +1105,12 @@ class LegalHoldsViewSet(viewsets.ModelViewSet):
 
 class PolicyExceptionsViewSet(viewsets.ModelViewSet):
     """API endpoint for PolicyExceptions operations."""
+    # Round 44: no legitimate Django consumer; the real TS path
+    # (policy-engine.ts's checkException) is transitively org-scoped
+    # through the caller's own already-filtered rule ids.
     queryset = PolicyExceptions.objects.all()
     serializer_class = PolicyExceptionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['rule_id']
     ordering_fields = ['created_at', 'updated_at']

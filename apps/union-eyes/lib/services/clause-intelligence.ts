@@ -87,12 +87,17 @@ export async function findRelevantClauses(
 ): Promise<ClauseMatch[]> {
   // ── Vector path ────────────────────────────────────────────────────────
   if (embeddingForQuery && embeddingForQuery.length > 0) {
+    // Round 44: scope the embedding scan to the caller's own clauses via an
+    // inner join, rather than pulling every organization's embeddings into
+    // memory before filtering at the hydration step.
     const allEmbeddings = await db
       .select({
         clauseId: clauseEmbeddings.clauseId,
         embeddingVector: clauseEmbeddings.embeddingVector,
       })
-      .from(clauseEmbeddings);
+      .from(clauseEmbeddings)
+      .innerJoin(cbaClause, eq(cbaClause.id, clauseEmbeddings.clauseId))
+      .where(eq(cbaClause.organizationId, orgId));
 
     // Score each embedding
     const scored = allEmbeddings.map((row) => {

@@ -1,25 +1,25 @@
 {
-  "generatedAt": "2026-09-07T13:38:29.959Z",
+  "generatedAt": "2026-09-07T15:39:04.020Z",
   "totalTables": 700,
   "byClassification": {
-    "NEEDS_REVIEW": 259,
+    "NEEDS_REVIEW": 243,
     "TENANT_RLS_REQUIRED": 179,
     "LATENT_UNREACHABLE": 190,
-    "SYSTEM_ONLY": 17,
-    "PARENT_OWNED_RLS_REQUIRED": 15,
+    "SYSTEM_ONLY": 18,
+    "PARENT_OWNED_RLS_REQUIRED": 20,
     "GLOBAL_REFERENCE_DATA": 11,
-    "CONTAINED_NO_AUTHORITY": 24,
+    "CONTAINED_NO_AUTHORITY": 34,
     "MIXED_GLOBAL_TENANT_RLS_REQUIRED": 1,
     "SEPARATE_DATABASE_BOUNDARY": 2,
     "MULTI_PARTY_RLS_REQUIRED": 1,
     "USER_RLS_REQUIRED": 1
   },
-  "needsReview": 259,
+  "needsReview": 243,
   "authorityModel": {
-    "invocationAuthorityTbd": 259,
-    "dbExecutionPrincipalTbd": 259,
-    "requiredRuntimePrivilegesTbd": 259,
-    "requiredSystemPrivilegesTbd": 259,
+    "invocationAuthorityTbd": 243,
+    "dbExecutionPrincipalTbd": 243,
+    "requiredRuntimePrivilegesTbd": 243,
+    "requiredSystemPrivilegesTbd": 243,
     "closedClassificationWithTbdAuthorityCount": 0,
     "closedClassificationWithTbdAuthorityTables": []
   },
@@ -208,7 +208,7 @@
       "wcb_employer_assessments",
       "worksites"
     ],
-    "parentOwnedRlsRequiredExpansionCount": 13,
+    "parentOwnedRlsRequiredExpansionCount": 18,
     "parentOwnedRlsRequiredExpansionTables": [
       "arbitrations",
       "newsletter_recipients",
@@ -221,8 +221,13 @@
       "workbook_governance_lineage_entries",
       "ingestion_records",
       "duplicate_group_members",
+      "clause_embeddings",
+      "correspondence_recipients",
       "employer_reports",
-      "tentative_agreements"
+      "policy_evaluations",
+      "policy_exceptions",
+      "tentative_agreements",
+      "voter_eligibility"
     ],
     "userRlsRequiredExpansionCount": 1,
     "userRlsRequiredExpansionTables": [
@@ -236,7 +241,7 @@
     "multiPartyRlsRequiredExpansionTables": [
       "per_capita_remittances"
     ],
-    "totalExpansionCount": 183
+    "totalExpansionCount": 188
   },
   "blanketGrantBlocker": "union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired's tables lack an actual migration adding their RLS policy."
 }

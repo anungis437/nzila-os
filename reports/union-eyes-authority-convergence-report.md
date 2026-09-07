@@ -1,18 +1,18 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-07T13:38:29.959Z
+Generated: 2026-09-07T15:39:04.020Z
 
 ## Classification counts
 
 | Classification | Count |
 | --- | --- |
-| NEEDS_REVIEW | 259 |
+| NEEDS_REVIEW | 243 |
 | TENANT_RLS_REQUIRED | 179 |
 | LATENT_UNREACHABLE | 190 |
-| SYSTEM_ONLY | 17 |
-| PARENT_OWNED_RLS_REQUIRED | 15 |
+| SYSTEM_ONLY | 18 |
+| PARENT_OWNED_RLS_REQUIRED | 20 |
 | GLOBAL_REFERENCE_DATA | 11 |
-| CONTAINED_NO_AUTHORITY | 24 |
+| CONTAINED_NO_AUTHORITY | 34 |
 | MIXED_GLOBAL_TENANT_RLS_REQUIRED | 1 |
 | SEPARATE_DATABASE_BOUNDARY | 2 |
 | MULTI_PARTY_RLS_REQUIRED | 1 |
@@ -20,10 +20,10 @@ Generated: 2026-09-07T13:38:29.959Z
 
 ## Authority-model convergence (invocationAuthority / dbExecutionPrincipal / privileges)
 
-- invocationAuthority = TBD: 259
-- dbExecutionPrincipal = TBD: 259
-- requiredRuntimePrivileges = TBD: 259
-- requiredSystemPrivileges = TBD: 259
+- invocationAuthority = TBD: 243
+- dbExecutionPrincipal = TBD: 243
+- requiredRuntimePrivileges = TBD: 243
+- requiredSystemPrivileges = TBD: 243
 - Closed (non-NEEDS_REVIEW) entries still carrying TBD in ANY of the four fields: 0
 
 ## Invariant violations (must always be zero)
@@ -41,11 +41,11 @@ Generated: 2026-09-07T13:38:29.959Z
 ## RLS policy expansion required (NEW tables beyond the 0108 baseline, NOT evidence 0108 lost coverage)
 
 - TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 167
-- PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: 13
+- PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: 18
 - USER_RLS_REQUIRED tables beyond the 0108 baseline: 1
 - MIXED_GLOBAL_TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 1
 - MULTI_PARTY_RLS_REQUIRED tables beyond the 0108 baseline: 1
-- Total additional policy-expansion tables: 183
+- Total additional policy-expansion tables: 188
 
 ## Blanket grant blocker
 

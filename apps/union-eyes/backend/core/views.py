@@ -553,9 +553,12 @@ class SupportTicketsViewSet(viewsets.ModelViewSet):
 
 class TicketCommentsViewSet(viewsets.ModelViewSet):
     """API endpoint for TicketComments operations."""
+    # Round 44: support-service.ts's addComment/getTicketComments have zero
+    # real callers (independent of support_tickets, which has a genuine
+    # platform-admin-only consumer elsewhere).
     queryset = TicketComments.objects.all()
     serializer_class = TicketCommentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['ticket_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -564,9 +567,12 @@ class TicketCommentsViewSet(viewsets.ModelViewSet):
 
 class TicketHistoryViewSet(viewsets.ModelViewSet):
     """API endpoint for TicketHistory operations."""
+    # Round 44: support-service.ts's ticketHistory inserts have zero real
+    # callers (independent of support_tickets, which has a genuine
+    # platform-admin-only consumer elsewhere).
     queryset = TicketHistory.objects.all()
     serializer_class = TicketHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['ticket_id']
     ordering_fields = ['created_at', 'updated_at']

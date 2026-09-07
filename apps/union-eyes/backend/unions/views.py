@@ -460,9 +460,12 @@ class VotingSessionsViewSet(viewsets.ModelViewSet):
 
 class VotingOptionsViewSet(viewsets.ModelViewSet):
     """API endpoint for VotingOptions operations."""
+    # Round 44: full CRUD with no organization filter; no legitimate Django
+    # consumer (voting_options TS status remains a round-42 dual-schema
+    # exception, unaffected by this independent Django containment).
     queryset = VotingOptions.objects.all()
     serializer_class = VotingOptionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -471,9 +474,12 @@ class VotingOptionsViewSet(viewsets.ModelViewSet):
 
 class VoterEligibilityViewSet(viewsets.ModelViewSet):
     """API endpoint for VoterEligibility operations."""
+    # Round 44: full CRUD with no organization filter; the real TS path
+    # (voting-service.ts's checkVoterEligibility) only ever does a narrow
+    # point-lookup, never list/create/update/delete via this surface.
     queryset = VoterEligibility.objects.all()
     serializer_class = VoterEligibilitySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -482,9 +488,13 @@ class VoterEligibilityViewSet(viewsets.ModelViewSet):
 
 class VotesViewSet(viewsets.ModelViewSet):
     """API endpoint for Votes operations."""
+    # Round 44: full CRUD with no organization filter, exposing individual
+    # ballots across every organization; no legitimate Django consumer
+    # (votes TS status remains a round-42 dual-schema exception, unaffected
+    # by this independent Django containment).
     queryset = Votes.objects.all()
     serializer_class = VotesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -493,9 +503,10 @@ class VotesViewSet(viewsets.ModelViewSet):
 
 class VotingNotificationsViewSet(viewsets.ModelViewSet):
     """API endpoint for VotingNotifications operations."""
+    # Round 44: no real TS consumer beyond schema/financial-service dual-schema.
     queryset = VotingNotifications.objects.all()
     serializer_class = VotingNotificationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -504,9 +515,11 @@ class VotingNotificationsViewSet(viewsets.ModelViewSet):
 
 class VotingAuditLogViewSet(viewsets.ModelViewSet):
     """API endpoint for VotingAuditLog operations."""
+    # Round 44: voting-crypto-service.ts's createVotingAuditLog/
+    # verifyElectionIntegrity have zero real callers.
     queryset = VotingAuditLog.objects.all()
     serializer_class = VotingAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']

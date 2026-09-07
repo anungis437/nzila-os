@@ -63,14 +63,16 @@ function chain_sfwl(data: any) {
   return { from, where, limit };
 }
 
-/** select → from (terminal thenable — no .where()) */
+/** select → from → innerJoin → where (terminal thenable) */
 function chain_sf(data: any) {
   const thenable = {
     then: (resolve: (v: any) => void, reject?: (e: any) => void) =>
       Promise.resolve(data).then(resolve, reject),
   };
-  const from = vi.fn().mockReturnValue(thenable);
-  return { from };
+  const where = vi.fn().mockReturnValue(thenable);
+  const innerJoin = vi.fn().mockReturnValue({ where });
+  const from = vi.fn().mockReturnValue({ innerJoin, where });
+  return { from, innerJoin, where };
 }
 
 describe("clause-intelligence", () => {

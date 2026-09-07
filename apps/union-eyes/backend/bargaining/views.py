@@ -30,9 +30,10 @@ class ArbitrationPrecedentsViewSet(viewsets.ModelViewSet):
 
 class PrecedentTagsViewSet(viewsets.ModelViewSet):
     """API endpoint for PrecedentTags operations."""
+    # Round 44: no TS reference beyond schema/financial-service dual-schema.
     queryset = PrecedentTags.objects.all()
     serializer_class = PrecedentTagsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -83,9 +84,11 @@ class TentativeAgreementsViewSet(viewsets.ModelViewSet):
 
 class NegotiationSessionsViewSet(viewsets.ModelViewSet):
     """API endpoint for NegotiationSessions operations."""
+    # Round 44: lib/services/negotiations-service.ts's listSessions has zero
+    # real callers (the whole service module is dead).
     queryset = NegotiationSessions.objects.all()
     serializer_class = NegotiationSessionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['negotiation_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -94,9 +97,11 @@ class NegotiationSessionsViewSet(viewsets.ModelViewSet):
 
 class BargainingTeamMembersViewSet(viewsets.ModelViewSet):
     """API endpoint for BargainingTeamMembers operations."""
+    # Round 44: lib/services/negotiations-service.ts's listTeamMembers has
+    # zero real callers (the whole service module is dead).
     queryset = BargainingTeamMembers.objects.all()
     serializer_class = BargainingTeamMembersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['negotiation_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -128,9 +133,11 @@ class ClauseComparisonsViewSet(viewsets.ModelViewSet):
 
 class WageProgressionsViewSet(viewsets.ModelViewSet):
     """API endpoint for WageProgressions operations."""
+    # Round 44: lib/services/clause-service.ts's getWageProgressions/
+    # createWageProgression have zero real callers.
     queryset = WageProgressions.objects.all()
     serializer_class = WageProgressionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -139,9 +146,11 @@ class WageProgressionsViewSet(viewsets.ModelViewSet):
 
 class BenefitComparisonsViewSet(viewsets.ModelViewSet):
     """API endpoint for BenefitComparisons operations."""
+    # Round 44: benefitComparisons is never queried anywhere in the TS app
+    # (type-only import in lib/services/clause-service.ts).
     queryset = BenefitComparisons.objects.all()
     serializer_class = BenefitComparisonsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']

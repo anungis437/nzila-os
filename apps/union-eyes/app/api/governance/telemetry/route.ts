@@ -10,6 +10,7 @@
  */
 import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { isSystemAdmin } from '@/lib/api-auth-guard'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { db } from '@/db/db'
 import { governanceEvents } from '@/db/schema'
@@ -41,24 +42,28 @@ export async function GET(request: Request) {
       let dbAuditEventVolume = 0
       let dbPolicyDenied = policyDeniedCount
 
-      try {
-        const [ae, pd] = await withSystemContext(async (_tx) =>
-          Promise.all([
-            db
-              .select({ count: sql<number>`count(*)` })
-              .from(governanceEvents)
-              .then((rows) => rows[0]),
-            db
-              .select({ count: sql<number>`count(*)` })
-              .from(policyEvaluations)
-              .where(sql`${policyEvaluations.actionTaken} = 'denied' OR ${policyEvaluations.passed} = false`)
-              .then((rows) => rows[0]),
-          ])
-        )
-        dbAuditEventVolume = Number(ae?.count ?? 0)
-        dbPolicyDenied = Number(pd?.count ?? 0) + policyDeniedCount
-      } catch {
-        // Fall back to in-process counters when DB unavailable.
+      // Cross-organization aggregates require genuine platform-staff
+      // authority, not merely being signed in — round 44 defect fix.
+      if (await isSystemAdmin()) {
+        try {
+          const [ae, pd] = await withSystemContext(async (_tx) =>
+            Promise.all([
+              db
+                .select({ count: sql<number>`count(*)` })
+                .from(governanceEvents)
+                .then((rows) => rows[0]),
+              db
+                .select({ count: sql<number>`count(*)` })
+                .from(policyEvaluations)
+                .where(sql`${policyEvaluations.actionTaken} = 'denied' OR ${policyEvaluations.passed} = false`)
+                .then((rows) => rows[0]),
+            ])
+          )
+          dbAuditEventVolume = Number(ae?.count ?? 0)
+          dbPolicyDenied = Number(pd?.count ?? 0) + policyDeniedCount
+        } catch {
+          // Fall back to in-process counters when DB unavailable.
+        }
       }
 
       return NextResponse.json({
