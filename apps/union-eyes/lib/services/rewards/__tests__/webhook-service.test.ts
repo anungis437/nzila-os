@@ -50,21 +50,23 @@ vi.mock('crypto', () => {
   };
 });
 
-vi.mock('@/db', () => {
+vi.mock('@/lib/db/with-rls-context', () => {
   mocks.mockReturning.mockResolvedValue([]);
   mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
   mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
 
   return {
-    db: {
-      insert: mocks.mockInsert,
-      query: {
-        webhookReceipts: {
-          findFirst: mocks.mockFindFirst,
-          findMany: mocks.mockFindMany,
+    withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) =>
+      fn({
+        insert: mocks.mockInsert,
+        query: {
+          webhookReceipts: {
+            findFirst: mocks.mockFindFirst,
+            findMany: mocks.mockFindMany,
+          },
         },
-      },
-    },
+      }),
+    ),
   };
 });
 

@@ -305,10 +305,20 @@ class NotificationBouncesViewSet(viewsets.ModelViewSet):
 
 
 class PushDevicesViewSet(viewsets.ModelViewSet):
-    """API endpoint for PushDevices operations."""
+    """API endpoint for PushDevices operations.
+
+    CONTAINED (PR #752 round 46 — system and mixed execution authority
+    cohort): push_devices is TENANT_RLS_REQUIRED (organization_id + profile_id
+    both NOT NULL); its real Next.js consumer (app/api/mobile/devices/route.ts)
+    was fixed this round to scope both reads (ownerColumn) and writes
+    (beforeCreate) to the caller's own profileId, not just organization_id.
+    This generated ModelViewSet has neither scoping — any authenticated user
+    could list/reassign/delete any other member's registered device. No real
+    Django consumer found.
+    """
     queryset = PushDevices.objects.all()
     serializer_class = PushDevicesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

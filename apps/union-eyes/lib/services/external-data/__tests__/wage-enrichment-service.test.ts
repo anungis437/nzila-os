@@ -26,6 +26,16 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) =>
+    fn({
+      select: mocks.mockSelect,
+      insert: mocks.mockInsert,
+      update: mocks.mockUpdate,
+    }),
+  ),
+}));
+
 vi.mock('@/db/schema', () => ({
   wageBenchmarks: { id: 'id', nocCode: 'nocCode', geographyCode: 'geographyCode', refDate: 'refDate', sex: 'sex' },
   unionDensity: { id: 'id', geographyCode: 'geographyCode', unionStatus: 'unionStatus', refDate: 'refDate' },

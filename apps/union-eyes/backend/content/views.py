@@ -348,20 +348,47 @@ class SignatureVerificationViewSet(viewsets.ModelViewSet):
 
 
 class ShopifyConfigViewSet(viewsets.ModelViewSet):
-    """API endpoint for ShopifyConfig operations."""
+    """API endpoint for ShopifyConfig operations.
+
+    CONTAINED (PR #752 round 46 — system and mixed execution authority
+    cohort, credential-sensitive): shopify_config stores secret REFERENCES
+    (storefront_token_secret_ref, admin_token_secret_ref, webhook_secret_ref
+    — not raw secret values) per organization. The only TS reader
+    (lib/services/rewards/shopify-service.ts's fetchCuratedCollections, which
+    only touches allowedCollections, never the secret ref columns) has ZERO
+    callers anywhere outside its own test file — confirmed dead code. No
+    insert/update path exists anywhere. This generated ModelViewSet was
+    IsAuthenticated-only with no scoping and a default serializer that would
+    have exposed every organization's secret-ref columns to any
+    authenticated user — a credential-adjacent leak even though the values
+    are references rather than raw secrets. No real Django consumer found.
+    """
     queryset = ShopifyConfig.objects.all()
     serializer_class = ShopifyConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class WebhookReceiptsViewSet(viewsets.ModelViewSet):
-    """API endpoint for WebhookReceipts operations."""
+    """API endpoint for WebhookReceipts operations.
+
+    CONTAINED (PR #752 round 46 — system and mixed execution authority
+    cohort): webhook_receipts has no organization_id column at all — it is
+    genuinely global, webhook-invoked (SYSTEM) replay-protection
+    infrastructure shared across all Shopify/PayPal integrations
+    (lib/services/rewards/webhook-service.ts), written only from
+    app/api/integrations/shopify/webhooks/route.ts and
+    app/api/payments/webhooks/paypal/route.ts after HMAC/provider signature
+    verification. This generated ModelViewSet has no scoping at all and
+    would let any authenticated user read/reassign/delete replay-protection
+    receipts (potential replay-attack enablement) via a second API surface.
+    No real Django consumer found.
+    """
     queryset = WebhookReceipts.objects.all()
     serializer_class = WebhookReceiptsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['webhook_id']
     search_fields = ['provider', 'webhook_id']

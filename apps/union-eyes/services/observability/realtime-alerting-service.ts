@@ -1,4 +1,5 @@
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   alertExecutions,
   alertRules,
@@ -121,7 +122,15 @@ async function emitSignal(signal: AlertSignal) {
 }
 
 export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
-  const slaRows = await db.execute<{
+  // SECURITY FIX (round 46): this cross-org enumeration + per-org rule/execution
+  // writes previously ran on the plain tenant `db` import despite being a
+  // SYSTEM_SCHEDULE-invoked (cron) operation. withSystemContext(tx) is used
+  // explicitly for this function's own raw-SQL reads below; emitSignal/
+  // getOrCreateRealtimeRule still query through the module-level `db` import,
+  // which resolves to the same system connection via AsyncLocalStorage
+  // routing (db/db.ts) for the duration of this callback.
+  return withSystemContext(async (tx) => {
+  const slaRows = await tx.execute<{
     organization_id: string;
     count: number;
   }>(sql`
@@ -133,7 +142,7 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
     GROUP BY organization_id
   `);
 
-  const ingestionRows = await db.execute<{
+  const ingestionRows = await tx.execute<{
     organization_id: string;
     count: number;
   }>(sql`
@@ -144,7 +153,7 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
     GROUP BY organization_id
   `);
 
-  const paymentFailureRows = await db.execute<{
+  const paymentFailureRows = await tx.execute<{
     organization_id: string;
     count: number;
   }>(sql`
@@ -200,6 +209,7 @@ export async function runRealtimeObservabilitySweep(): Promise<EmitResult> {
     emitted: signals.length,
     byKind,
   };
+  });
 }
 
 export async function getRecentRealtimeAlerts(organizationId: string, limit = 25) {

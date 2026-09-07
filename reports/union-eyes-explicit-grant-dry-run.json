@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-07T17:10:39.648Z",
+  "generatedAt": "2026-09-07T21:51:23.693Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 462,
-  "pendingReviewCount": 238,
-  "tenantGrantedTableCount": 218,
-  "systemGrantedTableCount": 27,
+  "readyForExplicitGrantCount": 467,
+  "pendingReviewCount": 233,
+  "tenantGrantedTableCount": 220,
+  "systemGrantedTableCount": 30,
   "tenantOperationTotals": {
-    "SELECT": 210,
-    "INSERT": 187,
+    "SELECT": 212,
+    "INSERT": 188,
     "UPDATE": 139,
     "DELETE": 82
   },
   "systemOperationTotals": {
-    "SELECT": 25,
-    "INSERT": 11,
-    "UPDATE": 9,
+    "SELECT": 28,
+    "INSERT": 14,
+    "UPDATE": 10,
     "DELETE": 0
   },
   "riskSignals": {
@@ -104,6 +104,7 @@
       "worksites"
     ],
     "mixedPrincipalTables": [
+      "alert_rules",
       "billing_accounts",
       "campaigns",
       "collective_agreements",
@@ -124,7 +125,8 @@
     ],
     "systemOnlyBroadSystemDml": [
       "council_elections",
-      "reserved_matter_votes"
+      "reserved_matter_votes",
+      "union_density"
     ],
     "globalReferenceDataWithMutations": [
       "case_studies",
@@ -237,6 +239,17 @@
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "alert_rules",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
     },
     {
       "table": "allocation_rules",
@@ -3185,6 +3198,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "push_devices",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "push_notification_templates",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3438,6 +3460,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "shopify_config",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "signature_documents",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3624,6 +3652,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "union_density",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "union_dues_receipts",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3729,6 +3767,15 @@
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "webhook_receipts",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
     },
     {
       "table": "webhook_subscriptions",
@@ -3864,10 +3911,6 @@
     },
     {
       "table": "alert_executions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "alert_rules",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4503,10 +4546,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "push_devices",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "recognition_award_types",
       "classification": "NEEDS_REVIEW"
     },
@@ -4548,10 +4587,6 @@
     },
     {
       "table": "shared_clause_library",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "shopify_config",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4703,10 +4738,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "union_density",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "union_only_data_tags",
       "classification": "NEEDS_REVIEW"
     },
@@ -4748,10 +4779,6 @@
     },
     {
       "table": "wage_benchmarks",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "webhook_receipts",
       "classification": "NEEDS_REVIEW"
     },
     {

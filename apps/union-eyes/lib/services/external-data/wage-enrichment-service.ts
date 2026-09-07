@@ -7,6 +7,7 @@
 
 import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { 
   wageBenchmarks, 
   unionDensity as unionDensityTable, 
@@ -257,6 +258,17 @@ export class WageEnrichmentService {
     geography?: string;
     year?: number;
   }): Promise<SyncResult> {
+    // SECURITY FIX (round 46): union_density has no organizationId column —
+    // it is genuinely global reference data synced only by this real cron
+    // path (app/api/cron/external-data-sync/route.ts). This previously ran
+    // on the plain tenant `db` import despite being SYSTEM_SCHEDULE-invoked.
+    // withSystemContext(tx) is used explicitly for this method's own
+    // select/update/insert calls below; createSyncLog/updateSyncLog (shared
+    // with the other sync* methods, out of this round's scope) still query
+    // through the module-level `db` import, which resolves to the same
+    // system connection via AsyncLocalStorage routing for the duration of
+    // this callback.
+    return withSystemContext(async (tx) => {
     const startTime = Date.now();
     const syncId = await this.createSyncLog('statcan', 'api', 'running', { ...params, type: 'union_density' });
 
@@ -273,7 +285,7 @@ export class WageEnrichmentService {
         recordsProcessed++;
 
         try {
-          const existing = await db.select()
+          const existing = await tx.select()
             .from(unionDensityTable)
             .where(
               and(
@@ -285,7 +297,7 @@ export class WageEnrichmentService {
             .limit(1);
 
           if (existing.length > 0) {
-            await db.update(unionDensityTable)
+            await tx.update(unionDensityTable)
               .set({
                 densityValue: String(record.Value),
                 updatedAt: new Date(),
@@ -294,7 +306,7 @@ export class WageEnrichmentService {
               .where(eq(unionDensityTable.id, existing[0].id));
             recordsUpdated++;
           } else {
-            await db.insert(unionDensityTable).values({
+            await tx.insert(unionDensityTable).values({
               geographyCode: record.GEO,
               geographyName: record.GEOName,
               naicsCode: record.NAICS || null,
@@ -352,6 +364,7 @@ export class WageEnrichmentService {
 
       throw error;
     }
+    });
   }
 
   /**

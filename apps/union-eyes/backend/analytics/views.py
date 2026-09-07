@@ -209,11 +209,30 @@ class WageBenchmarksViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment (PR #752 round 46 — system and mixed execution
+    authority cohort): union_density is SYSTEM_ONLY reference data (no
+    organization_id column, synced only by the real
+    app/api/cron/external-data-sync/route.ts cron job; even its tenant-facing
+    read in app/[locale]/dashboard/data-source/page.tsx executes entirely via
+    withSystemContext(), never the tenant runtime). This generated
+    ModelViewSet defaults to full CRUD for any authenticated user — write
+    access here would let any user corrupt globally-shared reference data
+    seen by every organization. No real Django consumer found.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class UnionDensityViewSet(viewsets.ModelViewSet):
     """API endpoint for UnionDensity operations."""
     queryset = UnionDensity.objects.all()
     serializer_class = UnionDensitySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['geography_code']
     search_fields = ['geography_code']

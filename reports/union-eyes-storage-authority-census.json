@@ -1,24 +1,22 @@
 {
-  "generatedAt": "2026-09-07T17:08:44.941Z",
-  "totalNeedsReview": 238,
+  "generatedAt": "2026-09-07T21:51:22.309Z",
+  "totalNeedsReview": 233,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 238
+    "NEEDS_REVIEW": 233
   },
   "cohortCounts": {
-    "COMPLEX:org:NORMAL": 37,
-    "COMPLEX:org:HIGH": 45,
+    "COMPLEX:org:NORMAL": 36,
+    "COMPLEX:org:HIGH": 44,
     "SIMPLE_TENANT:org:HIGH": 15,
     "COMPLEX:none:NORMAL": 73,
-    "COMPLEX:none:HIGH": 8,
+    "COMPLEX:none:HIGH": 7,
     "PARENT_OWNED:parent:NORMAL": 24,
     "PARENT_OWNED:parent:HIGH": 8,
     "COMPLEX:user:NORMAL": 16,
     "PARENT_OWNED:user:NORMAL": 4,
-    "COMPLEX:user:HIGH": 6,
-    "SYSTEM_WORKER:none:HIGH": 1,
-    "SYSTEM_WORKER:org:NORMAL": 1
+    "COMPLEX:user:HIGH": 6
   },
   "rows": [
     {
@@ -356,7 +354,8 @@
         "lib/services/lro-metrics.ts: insert/write path",
         "services/financial-service/drizzle/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path"
+        "services/financial-service/src/db/schema.ts: delete/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -547,7 +546,8 @@
         "lib/ai/insights-generator.ts: update/write path",
         "services/financial-service/drizzle/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path"
+        "services/financial-service/src/db/schema.ts: delete/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -864,6 +864,7 @@
       "mutationBoundaryEvidence": [
         "app/api/pilot/apply/[id]/reference-profile/route.ts: withSystemContext",
         "app/api/pilot/apply/[id]/reference-profile/route.ts: update/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -930,6 +931,7 @@
         "lib/social-media/social-media-service.ts: insert/write path",
         "lib/social-media/social-media-service.ts: update/write path",
         "lib/social-media/social-media-service.ts: delete/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -1303,6 +1305,7 @@
         "services/pki/signature-service.ts: update/write path",
         "services/pki/workflow-engine.ts: insert/write path",
         "services/pki/workflow-engine.ts: update/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -2101,6 +2104,7 @@
         "app/api/social-media/campaigns/route.ts: insert/write path",
         "app/api/social-media/campaigns/route.ts: update/write path",
         "app/api/social-media/campaigns/route.ts: delete/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -2668,6 +2672,7 @@
         "backend/content/views.py: organization_id"
       ],
       "mutationBoundaryEvidence": [
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -2848,6 +2853,7 @@
       "mutationBoundaryEvidence": [
         "lib/signature/signature-service.ts: insert/write path",
         "lib/signature/signature-service.ts: update/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -4739,6 +4745,7 @@
         "services/financial-service/drizzle/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: delete/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -4797,6 +4804,7 @@
       "mutationBoundaryEvidence": [
         "lib/signature/signature-service.ts: insert/write path",
         "lib/signature/signature-service.ts: update/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -5402,11 +5410,14 @@
       "reachabilityKind": "MIXED",
       "authEvidence": [],
       "organizationEvidence": [
+        "lib/services/external-data/wage-enrichment-service.ts: organization identifier reference",
         "backend/analytics/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
+        "lib/services/external-data/wage-enrichment-service.ts: withSystemContext",
         "lib/services/external-data/wage-enrichment-service.ts: insert/write path",
-        "lib/services/external-data/wage-enrichment-service.ts: update/write path"
+        "lib/services/external-data/wage-enrichment-service.ts: update/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -5518,61 +5529,6 @@
       ]
     },
     {
-      "table": "webhook_receipts",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/infrastructure/rewards.webhookReceipts",
-          "recognition-rewards-schema.webhookReceipts"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/services/rewards/webhook-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/services/rewards/webhook-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references, hints suggest system/worker-only invocation — requires confirming no tenant-facing path exists, not auto-closable",
-        "cohortLane": "SYSTEM_WORKER",
-        "cohortKey": "SYSTEM_WORKER:none:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/services/rewards/webhook-service.ts: organization identifier reference",
-        "backend/content/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/services/rewards/webhook-service.ts: insert/write path",
-        "lib/services/rewards/webhook-service.ts: update/write path",
-        "backend/content/views.py: update/write path",
-        "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "ab_tests",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -5625,69 +5581,6 @@
         "lib/ab-testing/ab-test-engine.ts: insert/write path",
         "lib/ab-testing/ab-test-engine.ts: update/write path",
         "backend/ai_core/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "alert_rules",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "alerting-automation-schema.alertRules",
-          "domains/infrastructure/alerting.alertRules"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "created_by -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/observability/realtime-alerting-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "services/observability/realtime-alerting-service.ts",
-          "app/api/alerts/realtime/route.ts",
-          "app/api/cron/observability-alerts/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/alerts/realtime/route.ts: withApi",
-        "app/api/alerts/realtime/route.ts: explicit auth config",
-        "app/api/cron/observability-alerts/route.ts: withApi"
-      ],
-      "organizationEvidence": [
-        "services/observability/realtime-alerting-service.ts: organization identifier reference",
-        "services/observability/realtime-alerting-service.ts: organization_id",
-        "app/api/alerts/realtime/route.ts: organization identifier reference",
-        "backend/core/views.py: organization identifier reference",
-        "backend/core/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/observability/realtime-alerting-service.ts: insert/write path"
       ]
     },
     {
@@ -6172,6 +6065,7 @@
         "backend/content/views.py: organization_id"
       ],
       "mutationBoundaryEvidence": [
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -8134,72 +8028,9 @@
         "backend/content/views.py: organization_id"
       ],
       "mutationBoundaryEvidence": [
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "push_devices",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/push-notifications.pushDevices",
-          "push-notifications.pushDevices"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "profile_id -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/mobile/devices/route.ts",
-          "lib/workers/notification-worker.ts",
-          "services/fcm-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/mobile/devices/route.ts",
-          "lib/workers/notification-worker.ts",
-          "services/fcm-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/workers/notification-worker.ts: organization identifier reference",
-        "services/fcm-service.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference",
-        "backend/notifications/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/workers/notification-worker.ts: insert/write path",
-        "lib/workers/notification-worker.ts: update/write path",
-        "services/fcm-service.ts: insert/write path",
-        "services/fcm-service.ts: update/write path",
-        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -8934,7 +8765,8 @@
         "services/financial-service/REMITTANCE_PROCESSING.md: update/write path",
         "services/financial-service/drizzle/0000_lucky_mole_man.sql: update/write path",
         "services/financial-service/drizzle/0000_lucky_mole_man.sql: delete/write path",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: update/write path"
+        "services/financial-service/drizzle/meta/0000_snapshot.json: update/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -9175,67 +9007,6 @@
       ]
     },
     {
-      "table": "shopify_config",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/infrastructure/rewards.shopifyConfig",
-          "recognition-rewards-schema.shopifyConfig"
-        ],
-        "orgColumn": "org_id",
-        "orgColumnNullable": true,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/services/rewards/shopify-service.ts",
-          "lib/services/rewards/webhook-service.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/services/rewards/webhook-service.ts"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/services/rewards/shopify-service.ts",
-          "lib/services/rewards/webhook-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references, hints suggest system/worker-only invocation — requires confirming no tenant-facing path exists, not auto-closable",
-        "cohortLane": "SYSTEM_WORKER",
-        "cohortKey": "SYSTEM_WORKER:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/services/rewards/shopify-service.ts: organization identifier reference",
-        "lib/services/rewards/webhook-service.ts: organization identifier reference",
-        "backend/content/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/services/rewards/webhook-service.ts: insert/write path",
-        "lib/services/rewards/webhook-service.ts: update/write path",
-        "backend/content/views.py: update/write path",
-        "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "social_posts",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -9314,6 +9085,7 @@
         "lib/social-media/social-media-service.ts: insert/write path",
         "lib/social-media/social-media-service.ts: update/write path",
         "lib/social-media/social-media-service.ts: delete/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -10104,7 +9876,7 @@
     {
       "table": "transaction_fee_events",
       "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
+      "reviewPriority": "NORMAL",
       "schema": {
         "declarationFound": true,
         "canonicalDeclarations": [
@@ -10144,7 +9916,7 @@
         "confidence": "LOW",
         "blocker": "ambiguous shape — needs manual review",
         "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
+        "cohortKey": "COMPLEX:org:NORMAL"
       },
       "operationSet": [
         "INSERT",
@@ -10299,7 +10071,8 @@
         "lib/ai/insights-generator.ts: update/write path",
         "services/financial-service/drizzle/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path"
+        "services/financial-service/src/db/schema.ts: delete/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -10626,6 +10399,7 @@
         "backend/core/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
+        "services/observability/realtime-alerting-service.ts: withSystemContext",
         "services/observability/realtime-alerting-service.ts: insert/write path"
       ]
     },
@@ -11858,14 +11632,17 @@
       "authEvidence": [],
       "organizationEvidence": [
         "lib/graphql/resolvers.ts: organization identifier reference",
+        "lib/services/external-data/wage-enrichment-service.ts: organization identifier reference",
         "backend/analytics/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
         "lib/graphql/resolvers.ts: insert/write path",
         "lib/graphql/resolvers.ts: update/write path",
         "lib/graphql/resolvers.ts: delete/write path",
+        "lib/services/external-data/wage-enrichment-service.ts: withSystemContext",
         "lib/services/external-data/wage-enrichment-service.ts: insert/write path",
-        "lib/services/external-data/wage-enrichment-service.ts: update/write path"
+        "lib/services/external-data/wage-enrichment-service.ts: update/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -11916,11 +11693,14 @@
       "reachabilityKind": "MIXED",
       "authEvidence": [],
       "organizationEvidence": [
+        "lib/services/external-data/wage-enrichment-service.ts: organization identifier reference",
         "backend/analytics/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
+        "lib/services/external-data/wage-enrichment-service.ts: withSystemContext",
         "lib/services/external-data/wage-enrichment-service.ts: insert/write path",
-        "lib/services/external-data/wage-enrichment-service.ts: update/write path"
+        "lib/services/external-data/wage-enrichment-service.ts: update/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -14044,6 +13824,7 @@
         "backend/content/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -14817,6 +14598,7 @@
       "mutationBoundaryEvidence": [
         "lib/services/signature-workflow-service.ts: insert/write path",
         "lib/services/signature-workflow-service.ts: update/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -14913,6 +14695,7 @@
         "services/pki/signature-service.ts: update/write path",
         "services/pki/workflow-engine.ts: insert/write path",
         "services/pki/workflow-engine.ts: update/write path",
+        "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
       ]
@@ -15182,71 +14965,6 @@
         "services/transfer-pricing-service.ts: insert/write path",
         "services/transfer-pricing-service.ts: update/write path",
         "backend/billing/views.py: update/write path"
-      ]
-    },
-    {
-      "table": "union_density",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/data/benchmarks.unionDensity",
-          "wage-benchmarks-schema.unionDensity"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/[locale]/dashboard/data-source/page.tsx",
-          "app/api/cron/external-data-sync/route.ts",
-          "lib/services/external-data/wage-enrichment-service.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/[locale]/dashboard/data-source/page.tsx",
-          "lib/services/external-data/clc-partnership-service.ts",
-          "lib/services/external-data/wage-enrichment-service.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/[locale]/dashboard/data-source/page.tsx",
-          "app/api/cron/external-data-sync/route.ts",
-          "lib/services/external-data/wage-enrichment-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/analytics/models.py, viewset=backend/analytics/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:none:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/data-source/page.tsx: requireUser",
-        "app/api/cron/external-data-sync/route.ts: withApi"
-      ],
-      "organizationEvidence": [
-        "backend/analytics/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/[locale]/dashboard/data-source/page.tsx: withSystemContext",
-        "lib/services/external-data/wage-enrichment-service.ts: insert/write path",
-        "lib/services/external-data/wage-enrichment-service.ts: update/write path"
       ]
     },
     {
@@ -15725,11 +15443,14 @@
       "reachabilityKind": "MIXED",
       "authEvidence": [],
       "organizationEvidence": [
+        "lib/services/external-data/wage-enrichment-service.ts: organization identifier reference",
         "backend/analytics/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
+        "lib/services/external-data/wage-enrichment-service.ts: withSystemContext",
         "lib/services/external-data/wage-enrichment-service.ts: insert/write path",
-        "lib/services/external-data/wage-enrichment-service.ts: update/write path"
+        "lib/services/external-data/wage-enrichment-service.ts: update/write path",
+        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
