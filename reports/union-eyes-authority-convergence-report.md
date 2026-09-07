@@ -1,18 +1,18 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-07T12:05:45.558Z
+Generated: 2026-09-07T13:38:29.959Z
 
 ## Classification counts
 
 | Classification | Count |
 | --- | --- |
-| NEEDS_REVIEW | 271 |
+| NEEDS_REVIEW | 259 |
 | TENANT_RLS_REQUIRED | 179 |
-| LATENT_UNREACHABLE | 189 |
+| LATENT_UNREACHABLE | 190 |
 | SYSTEM_ONLY | 17 |
 | PARENT_OWNED_RLS_REQUIRED | 15 |
-| GLOBAL_REFERENCE_DATA | 3 |
-| CONTAINED_NO_AUTHORITY | 21 |
+| GLOBAL_REFERENCE_DATA | 11 |
+| CONTAINED_NO_AUTHORITY | 24 |
 | MIXED_GLOBAL_TENANT_RLS_REQUIRED | 1 |
 | SEPARATE_DATABASE_BOUNDARY | 2 |
 | MULTI_PARTY_RLS_REQUIRED | 1 |
@@ -20,10 +20,10 @@ Generated: 2026-09-07T12:05:45.558Z
 
 ## Authority-model convergence (invocationAuthority / dbExecutionPrincipal / privileges)
 
-- invocationAuthority = TBD: 271
-- dbExecutionPrincipal = TBD: 271
-- requiredRuntimePrivileges = TBD: 271
-- requiredSystemPrivileges = TBD: 271
+- invocationAuthority = TBD: 259
+- dbExecutionPrincipal = TBD: 259
+- requiredRuntimePrivileges = TBD: 259
+- requiredSystemPrivileges = TBD: 259
 - Closed (non-NEEDS_REVIEW) entries still carrying TBD in ANY of the four fields: 0
 
 ## Invariant violations (must always be zero)

@@ -1,23 +1,23 @@
 # Union Eyes Storage Authority Census (round 38)
 
-Generated: 2026-09-07T12:05:39.965Z
+Generated: 2026-09-07T13:38:29.130Z
 
 CANDIDATES ONLY — this report never rewrites the manifest. Every disposition below must be
 independently reviewed and applied by hand to the relevant db/rls-storage-authority/*.ts domain file.
 
-Total NEEDS_REVIEW entries scanned: 271
+Total NEEDS_REVIEW entries scanned: 259
 
 ## Candidate classification counts
 
 - LATENT_UNREACHABLE (Lane A — Dead, high confidence): 0
 - CONTAINED_NO_AUTHORITY (Lane B — Contained, high confidence): 0
-- Still NEEDS_REVIEW (requires deep review): 271
+- Still NEEDS_REVIEW (requires deep review): 259
 
 ## Cohort counts
 
 - COMPLEX:none:NORMAL: 73
-- PARENT_OWNED:parent:NORMAL: 52
 - COMPLEX:org:HIGH: 48
+- PARENT_OWNED:parent:NORMAL: 40
 - COMPLEX:org:NORMAL: 38
 - COMPLEX:user:NORMAL: 16
 - SIMPLE_TENANT:org:HIGH: 15
@@ -55,23 +55,11 @@ Total NEEDS_REVIEW entries scanned: 271
 | training_programs | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 | trend_analyses | has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable |
 
-### PARENT_OWNED (65)
+### PARENT_OWNED (53)
 
 | table | blocker |
 |---|---|
 | bargaining_team_members | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_contacts | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_footnotes | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_agreements | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_benchmark_snapshots | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_clauses | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_documents | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_extraction_runs | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_findings | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_freshness_log | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_ingestion_jobs | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_intel_wage_adjustments | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
-| cba_version_history | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
 | chat_messages | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
 | newsletter_engagement | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
 | newsletter_list_subscribers | has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable |
@@ -351,20 +339,8 @@ These fields are generated evidence only. They do not rewrite candidate classifi
 | grievance_timeline_events | INSERT, SELECT, UPDATE | LIBRARY_ONLY | none | lib/ingestion/batch-ingest.ts: organization identifier reference<br>lib/ingestion/batch-ingest.ts: organization_id<br>lib/ingestion/post-import-verification.ts: organization identifier reference<br>lib/ingestion/post-import-verification.ts: organization_id | lib/ingestion/batch-ingest.ts: insert/write path<br>lib/ingestion/batch-ingest.ts: update/write path |
 | signature_workflows | DELETE, INSERT, SELECT, UPDATE | MIXED | none | lib/services/signature-workflow-service.ts: organization identifier reference<br>services/financial-service/drizzle/relations.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization_id<br>services/financial-service/src/db/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization_id<br>services/pki/signature-service.ts: organization identifier reference<br>services/pki/workflow-engine.ts: organization identifier reference<br>backend/content/views.py: organization identifier reference<br>backend/content/views.py: organization_id | lib/services/signature-workflow-service.ts: insert/write path<br>lib/services/signature-workflow-service.ts: update/write path<br>services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path<br>services/pki/signature-service.ts: insert/write path<br>services/pki/signature-service.ts: update/write path<br>services/pki/workflow-engine.ts: insert/write path<br>services/pki/workflow-engine.ts: update/write path<br>backend/content/views.py: update/write path<br>backend/content/views.py: delete/write path |
 | bargaining_team_members | SELECT | MIXED | none | lib/services/negotiations-service.ts: organization identifier reference | none |
-| cba_contacts | DELETE, SELECT, UPDATE | MIXED | none | services/financial-service/drizzle/relations.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization identifier reference | services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path |
-| cba_footnotes | DELETE, SELECT, UPDATE | MIXED | none | services/financial-service/drizzle/relations.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization identifier reference | services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path |
-| cba_intel_agreements | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/benchmark-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: update/write path<br>lib/services/cba-intelligence/review-service.ts: insert/write path<br>lib/services/cba-intelligence/review-service.ts: update/write path |
-| cba_intel_benchmark_snapshots | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/benchmark-service.ts: insert/write path |
-| cba_intel_clauses | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/benchmark-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: update/write path<br>lib/services/cba-intelligence/review-service.ts: insert/write path<br>lib/services/cba-intelligence/review-service.ts: update/write path |
-| cba_intel_documents | INSERT, SELECT, UPDATE | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/document-service.ts: insert/write path<br>lib/services/cba-intelligence/document-service.ts: update/write path<br>lib/services/cba-intelligence/extraction-orchestrator.ts: update/write path<br>lib/services/cba-intelligence/freshness-service.ts: insert/write path<br>scripts/seed-cba-intelligence.ts: insert/write path |
-| cba_intel_extraction_runs | INSERT, SELECT, UPDATE | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/extraction-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: update/write path<br>scripts/seed-cba-intelligence.ts: insert/write path |
-| cba_intel_findings | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/extraction-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: update/write path<br>lib/services/cba-intelligence/review-service.ts: insert/write path<br>lib/services/cba-intelligence/review-service.ts: update/write path<br>scripts/seed-cba-intelligence.ts: insert/write path |
-| cba_intel_freshness_log | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/freshness-service.ts: insert/write path<br>lib/services/cba-intelligence/ingestion-scheduler.ts: insert/write path<br>lib/services/cba-intelligence/ingestion-scheduler.ts: update/write path |
-| cba_intel_ingestion_jobs | INSERT, SELECT, UPDATE | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/ingestion-scheduler.ts: insert/write path<br>lib/services/cba-intelligence/ingestion-scheduler.ts: update/write path<br>lib/services/cba-intelligence/ingestion-service.ts: insert/write path<br>lib/services/cba-intelligence/ingestion-service.ts: update/write path<br>scripts/seed-cba-intelligence.ts: insert/write path |
 | cba_intel_review_decisions | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/review-service.ts: insert/write path<br>lib/services/cba-intelligence/review-service.ts: update/write path<br>scripts/seed-cba-intelligence.ts: insert/write path |
 | cba_intel_sources | INSERT, SELECT, UPDATE | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/freshness-service.ts: insert/write path<br>lib/services/cba-intelligence/ingestion-scheduler.ts: insert/write path<br>lib/services/cba-intelligence/ingestion-scheduler.ts: update/write path<br>lib/services/cba-intelligence/seed-sources.ts: insert/write path<br>lib/services/cba-intelligence/source-registry-service.ts: insert/write path<br>lib/services/cba-intelligence/source-registry-service.ts: update/write path<br>scripts/seed-cba-intelligence.ts: insert/write path |
-| cba_intel_wage_adjustments | INSERT, SELECT | LIBRARY_ONLY | none | none | lib/services/cba-intelligence/benchmark-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: insert/write path<br>lib/services/cba-intelligence/extraction-service.ts: update/write path<br>lib/services/cba-intelligence/review-service.ts: insert/write path<br>lib/services/cba-intelligence/review-service.ts: update/write path |
-| cba_version_history | DELETE, SELECT, UPDATE | MIXED | none | services/financial-service/drizzle/relations.ts: organization identifier reference<br>services/financial-service/drizzle/schema.ts: organization identifier reference<br>services/financial-service/src/db/schema.ts: organization identifier reference | services/financial-service/drizzle/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: update/write path<br>services/financial-service/src/db/schema.ts: delete/write path |
 | clc_bargaining_trends | INSERT, SELECT, UPDATE | MIXED | none | lib/services/external-data/clc-partnership-service.ts: organization identifier reference<br>backend/billing/views.py: organization identifier reference | lib/services/external-data/clc-partnership-service.ts: insert/write path<br>lib/services/external-data/clc-partnership-service.ts: update/write path<br>backend/billing/views.py: update/write path |
 | fee_settlement_batches | INSERT, UPDATE | LIBRARY_ONLY | none | services/platform-economics/transaction-fee-engine.ts: organization identifier reference | services/platform-economics/transaction-fee-engine.ts: insert/write path<br>services/platform-economics/transaction-fee-engine.ts: update/write path |
 | chat_sessions | INSERT, SELECT, UPDATE | MIXED | none | lib/ai/chatbot-service.ts: organization identifier reference<br>backend/ai_core/views.py: organization identifier reference<br>backend/ai_core/views.py: organization_id | lib/ai/chatbot-service.ts: insert/write path<br>lib/ai/chatbot-service.ts: update/write path<br>lib/ai/chatbot-service.ts: delete/write path<br>backend/ai_core/views.py: delete/write path |

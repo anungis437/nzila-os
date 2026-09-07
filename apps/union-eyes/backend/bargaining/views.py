@@ -185,9 +185,12 @@ class BargainingNotesViewSet(viewsets.ModelViewSet):
 
 class CbaFootnotesViewSet(viewsets.ModelViewSet):
     """API endpoint for CbaFootnotes operations."""
+    # Round 43: no legitimate consumer (no organization filter possible via
+    # the generated queryset; contained pending a real parent-owned isolation
+    # design through source_clause -> cba_clauses -> collective_agreements).
     queryset = CbaFootnotes.objects.all()
     serializer_class = CbaFootnotesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source_clause_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -208,9 +211,11 @@ class CollectiveAgreementsViewSet(viewsets.ModelViewSet):
 
 class CbaVersionHistoryViewSet(viewsets.ModelViewSet):
     """API endpoint for CbaVersionHistory operations."""
+    # Round 43: no legitimate consumer; contained pending a real parent-owned
+    # isolation design through cba -> collective_agreements.
     queryset = CbaVersionHistory.objects.all()
     serializer_class = CbaVersionHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -219,9 +224,11 @@ class CbaVersionHistoryViewSet(viewsets.ModelViewSet):
 
 class CbaContactsViewSet(viewsets.ModelViewSet):
     """API endpoint for CbaContacts operations."""
+    # Round 43: no legitimate consumer; contained pending a real parent-owned
+    # isolation design through cba -> collective_agreements.
     queryset = CbaContacts.objects.all()
     serializer_class = CbaContactsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']

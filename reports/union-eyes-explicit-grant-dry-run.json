@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-07T12:06:39.495Z",
+  "generatedAt": "2026-09-07T13:38:48.790Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 429,
-  "pendingReviewCount": 271,
-  "tenantGrantedTableCount": 200,
+  "readyForExplicitGrantCount": 441,
+  "pendingReviewCount": 259,
+  "tenantGrantedTableCount": 208,
   "systemGrantedTableCount": 25,
   "tenantOperationTotals": {
-    "SELECT": 193,
-    "INSERT": 173,
-    "UPDATE": 129,
+    "SELECT": 201,
+    "INSERT": 181,
+    "UPDATE": 136,
     "DELETE": 81
   },
   "systemOperationTotals": {
@@ -126,6 +126,14 @@
     ],
     "globalReferenceDataWithMutations": [
       "case_studies",
+      "cba_intel_agreements",
+      "cba_intel_benchmark_snapshots",
+      "cba_intel_clauses",
+      "cba_intel_documents",
+      "cba_intel_extraction_runs",
+      "cba_intel_findings",
+      "cba_intel_ingestion_jobs",
+      "cba_intel_wage_adjustments",
       "testimonials"
     ]
   },
@@ -561,6 +569,103 @@
       "systemPrivileges": []
     },
     {
+      "table": "cba_contacts",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_footnotes",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_agreements",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_benchmark_snapshots",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_clauses",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_documents",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_extraction_runs",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_findings",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_freshness_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_ingestion_jobs",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_intel_wage_adjustments",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "cba_rule_set_items",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -574,6 +679,12 @@
       "tenantPrivileges": [
         "SELECT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cba_version_history",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3687,59 +3798,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "cba_contacts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_footnotes",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_agreements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_benchmark_snapshots",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_clauses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_documents",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_extraction_runs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_findings",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_freshness_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_ingestion_jobs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "cba_intel_review_decisions",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "cba_intel_sources",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_intel_wage_adjustments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cba_version_history",
       "classification": "NEEDS_REVIEW"
     },
     {
