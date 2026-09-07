@@ -53,6 +53,7 @@ export const POST = withApi(
     const assistantMessage = await chatbotService.sendMessage({
       sessionId: body.sessionId,
       userId: userId!,
+      organizationId: organizationId!,
       content: body.content,
       useRAG: body.useRAG,
     });

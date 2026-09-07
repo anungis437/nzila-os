@@ -239,20 +239,37 @@ class MemberDocumentsViewSet(viewsets.ModelViewSet):
 
 
 class SignatureDocumentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureDocuments operations."""
+    """API endpoint for SignatureDocuments operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    signature_documents is TENANT_RLS_REQUIRED; its real Next.js consumer
+    (lib/signature/signature-service.ts + app/api/signatures/**) enforces
+    org/sender/signer access via SignatureService.verifyDocumentAccess().
+    This generated ModelViewSet has no such scoping (IsAuthenticated only)
+    and would let any authenticated user read/reassign/delete any
+    organization's signature documents. No real Django consumer found.
+    """
     queryset = SignatureDocuments.objects.all()
     serializer_class = SignatureDocumentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class DocumentSignersViewSet(viewsets.ModelViewSet):
-    """API endpoint for DocumentSigners operations."""
+    """API endpoint for DocumentSigners operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    document_signers rows are mutated only via SignatureService.recordSignature(),
+    which this round was fixed to require the signer's own user_id match the
+    authenticated caller (a signature-forgery IDOR otherwise). This generated
+    ModelViewSet has no such check and would let any authenticated user update
+    any signer's status/signature fields directly. No real Django consumer found.
+    """
     queryset = DocumentSigners.objects.all()
     serializer_class = DocumentSignersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

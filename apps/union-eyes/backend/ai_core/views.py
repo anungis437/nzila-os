@@ -127,10 +127,23 @@ class AccessibilityUserTestingViewSet(viewsets.ModelViewSet):
 
 
 class ChatSessionsViewSet(viewsets.ModelViewSet):
-    """API endpoint for ChatSessions operations."""
+    """API endpoint for ChatSessions operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    chat_sessions is a TENANT_RLS_REQUIRED table (organization_id + user_id
+    both NOT NULL) whose real Next.js consumer (lib/ai/chatbot-service.ts)
+    required a security fix this round after an IDOR was found allowing
+    reads/writes across other users'/orgs' sessions. This generated
+    ModelViewSet(queryset=ChatSessions.objects.all(),
+    permission_classes=[IsAuthenticated]) has no organization_id/user_id
+    scoping at all and would reintroduce the same class of cross-tenant
+    IDOR via a second, unrelated API surface. No real Django consumer of
+    this endpoint was found. Remove only once org+user-scoped queryset
+    filtering is implemented.
+    """
     queryset = ChatSessions.objects.all()
     serializer_class = ChatSessionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -138,10 +151,19 @@ class ChatSessionsViewSet(viewsets.ModelViewSet):
 
 
 class ChatMessagesViewSet(viewsets.ModelViewSet):
-    """API endpoint for ChatMessages operations."""
+    """API endpoint for ChatMessages operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    chat_messages is PARENT_OWNED_RLS_REQUIRED via chat_sessions, which
+    itself required an IDOR fix this round. This generated ModelViewSet
+    has no ownership scoping and would let any authenticated user read or
+    write any session's message history/AI responses across organizations.
+    No real Django consumer of this endpoint was found. Remove only once
+    parent-session-ownership-scoped queryset filtering is implemented.
+    """
     queryset = ChatMessages.objects.all()
     serializer_class = ChatMessagesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

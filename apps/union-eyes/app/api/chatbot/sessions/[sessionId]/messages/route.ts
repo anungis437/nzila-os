@@ -12,10 +12,14 @@ const chatbotService = new ChatbotService();
 
 export const GET = withApi(
   {
+    auth: { minRole: 'member' },
     openapi: { tags: ['AI'], summary: 'Get messages for a chat session' },
   },
-  async ({ params }) => {
-    const messages = await chatbotService.getMessages(params.sessionId);
+  async ({ params, userId, organizationId }) => {
+    const messages = await chatbotService.getMessages(params.sessionId, {
+      userId: userId!,
+      organizationId: organizationId!,
+    });
     return { data: messages };
   },
 );

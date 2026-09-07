@@ -137,11 +137,33 @@ class NewsletterTemplatesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment (PR #752 round 45 — dependency-frontier root
+    authority batch): no legitimate Django consumer exists for the generated
+    ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) pattern on newsletter_distribution_lists
+    / newsletter_campaigns. Both tables carry their own NOT NULL
+    organization_id and are properly org-scoped by their real Next.js
+    consumers (crudRoutes({orgScoped: true}) for distribution lists; a
+    read-only org-verified route for campaigns), but this generated
+    ViewSet applies no such scoping — any authenticated user could
+    read/reassign/delete any organization's newsletter lists or campaigns.
+    Remove only once a proven legitimate consumer and org-scoped queryset
+    filtering exist for this table.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class NewsletterDistributionListsViewSet(viewsets.ModelViewSet):
     """API endpoint for NewsletterDistributionLists operations."""
     queryset = NewsletterDistributionLists.objects.all()
     serializer_class = NewsletterDistributionListsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -161,7 +183,7 @@ class NewsletterCampaignsViewSet(viewsets.ModelViewSet):
     """API endpoint for NewsletterCampaigns operations."""
     queryset = NewsletterCampaigns.objects.all()
     serializer_class = NewsletterCampaignsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

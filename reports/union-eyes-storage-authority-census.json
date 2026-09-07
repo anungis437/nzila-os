@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-09-07T15:38:56.374Z",
-  "totalNeedsReview": 243,
+  "generatedAt": "2026-09-07T17:08:44.941Z",
+  "totalNeedsReview": 238,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 243
+    "NEEDS_REVIEW": 238
   },
   "cohortCounts": {
-    "COMPLEX:org:NORMAL": 38,
-    "COMPLEX:org:HIGH": 48,
+    "COMPLEX:org:NORMAL": 37,
+    "COMPLEX:org:HIGH": 45,
     "SIMPLE_TENANT:org:HIGH": 15,
     "COMPLEX:none:NORMAL": 73,
     "COMPLEX:none:HIGH": 8,
-    "PARENT_OWNED:parent:NORMAL": 25,
+    "PARENT_OWNED:parent:NORMAL": 24,
     "PARENT_OWNED:parent:HIGH": 8,
     "COMPLEX:user:NORMAL": 16,
     "PARENT_OWNED:user:NORMAL": 4,
@@ -719,7 +719,8 @@
       "mutationBoundaryEvidence": [
         "lib/mobile/mobile-engine.ts: insert/write path",
         "lib/mobile/mobile-engine.ts: update/write path",
-        "lib/mobile/mobile-engine.ts: delete/write path"
+        "lib/mobile/mobile-engine.ts: delete/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -1530,63 +1531,6 @@
       ]
     },
     {
-      "table": "chat_sessions",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "ai-chatbot-schema.chatSessions",
-          "domains/ml/chatbot.chatSessions"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": "user_id",
-        "userColumnNullable": false,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/ai/chatbot-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/ai/chatbot-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/ai_core/models.py, viewset=backend/ai_core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/ai/chatbot-service.ts: organization identifier reference",
-        "backend/ai_core/views.py: organization identifier reference",
-        "backend/ai_core/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/ai/chatbot-service.ts: insert/write path",
-        "lib/ai/chatbot-service.ts: update/write path",
-        "lib/ai/chatbot-service.ts: delete/write path",
-        "backend/ai_core/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "communication_preferences_phase4",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -1636,7 +1580,8 @@
         "app/api/communications/unsubscribe/[recipientId]/route.ts: update/write path",
         "app/api/communications/webhooks/resend/route.ts: withSystemContext",
         "app/api/communications/webhooks/resend/route.ts: update/write path",
-        "app/api/members/[id]/preferences/route.ts: delete/write path"
+        "app/api/members/[id]/preferences/route.ts: delete/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -1804,123 +1749,6 @@
       ],
       "mutationBoundaryEvidence": [
         "app/api/employers/communications/route.ts: insert/write path"
-      ]
-    },
-    {
-      "table": "newsletter_campaigns",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/newsletters.newsletterCampaigns",
-          "newsletter-schema.newsletterCampaigns"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "template_id -> newsletterTemplates.id",
-          "created_by -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/billing/batch-status/[jobId]/route.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "db/org-registry.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/billing/batch-status/[jobId]/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/billing/batch-status/[jobId]/route.ts: withRoleAuth"
-      ],
-      "organizationEvidence": [
-        "app/api/billing/batch-status/[jobId]/route.ts: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference",
-        "backend/notifications/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": []
-    },
-    {
-      "table": "newsletter_distribution_lists",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/newsletters.newsletterDistributionLists",
-          "newsletter-schema.newsletterDistributionLists"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "created_by -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/[locale]/dashboard/communications/page.tsx",
-          "app/api/communications/distribution-lists/[id]/route.ts",
-          "app/api/communications/distribution-lists/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/[locale]/dashboard/communications/page.tsx",
-          "app/api/communications/distribution-lists/[id]/route.ts",
-          "app/api/communications/distribution-lists/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/communications/page.tsx: requireUser"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/communications/page.tsx: organization identifier reference",
-        "backend/notifications/views.py: organization identifier reference",
-        "backend/notifications/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/communications/distribution-lists/[id]/route.ts: delete/write path"
       ]
     },
     {
@@ -2092,7 +1920,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path"
+        "services/twilio-sms-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -2147,7 +1976,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path"
+        "services/twilio-sms-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -2201,7 +2031,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path"
+        "services/twilio-sms-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -2439,7 +2270,8 @@
         "services/financial-service/src/db/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: delete/write path",
         "services/financial-service/src/services/notification-service.ts: insert/write path",
-        "services/financial-service/src/services/notification-service.ts: update/write path"
+        "services/financial-service/src/services/notification-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -2504,67 +2336,6 @@
       ]
     },
     {
-      "table": "chat_messages",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "ai-chatbot-schema.chatMessages",
-          "domains/ml/chatbot.chatMessages"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "session_id -> chatSessions.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/ai/chatbot-service.ts",
-          "lib/ai/template-engine.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/ai/chatbot-service.ts",
-          "lib/ai/template-engine.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/ai_core/models.py, viewset=backend/ai_core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/ai/chatbot-service.ts: organization identifier reference",
-        "lib/ai/template-engine.ts: organization identifier reference",
-        "backend/ai_core/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/ai/chatbot-service.ts: insert/write path",
-        "lib/ai/chatbot-service.ts: update/write path",
-        "lib/ai/chatbot-service.ts: delete/write path",
-        "lib/ai/template-engine.ts: update/write path",
-        "backend/ai_core/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "newsletter_engagement",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -2617,7 +2388,9 @@
         "lib/engagement-scoring.ts: organization identifier reference",
         "backend/notifications/views.py: organization identifier reference"
       ],
-      "mutationBoundaryEvidence": []
+      "mutationBoundaryEvidence": [
+        "backend/notifications/views.py: delete/write path"
+      ]
     },
     {
       "table": "newsletter_list_subscribers",
@@ -2667,7 +2440,8 @@
         "backend/notifications/views.py: organization identifier reference"
       ],
       "mutationBoundaryEvidence": [
-        "app/api/communications/distribution-lists/[id]/subscribers/route.ts: delete/write path"
+        "app/api/communications/distribution-lists/[id]/subscribers/route.ts: delete/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -2778,7 +2552,8 @@
       "mutationBoundaryEvidence": [
         "lib/gdpr/consent-manager.ts: insert/write path",
         "lib/gdpr/consent-manager.ts: update/write path",
-        "lib/gdpr/consent-manager.ts: delete/write path"
+        "lib/gdpr/consent-manager.ts: delete/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -2898,66 +2673,6 @@
       ]
     },
     {
-      "table": "signature_documents",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/documents/signatures.signatureDocuments",
-          "e-signature-schema.signatureDocuments"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "sent_by -> profiles.userId",
-          "template_id -> signatureTemplates.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/signature/signature-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/signature/signature-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/signature/signature-service.ts: organization identifier reference",
-        "backend/content/views.py: organization identifier reference",
-        "backend/content/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/signature/signature-service.ts: insert/write path",
-        "lib/signature/signature-service.ts: update/write path",
-        "backend/content/views.py: update/write path",
-        "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "sms_templates",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -3009,7 +2724,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/twilio-sms-service.ts: insert/write path",
-        "services/twilio-sms-service.ts: update/write path"
+        "services/twilio-sms-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -3108,8 +2824,8 @@
         ],
         "djangoModelFound": true,
         "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, IsAuthenticated-only"
+        "djangoUsesUnconditionalDenyAll": true,
+        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, DenyAll"
       },
       "candidate": {
         "classification": "NEEDS_REVIEW",
@@ -5582,7 +5298,8 @@
       "mutationBoundaryEvidence": [
         "lib/mobile/mobile-engine.ts: insert/write path",
         "lib/mobile/mobile-engine.ts: update/write path",
-        "lib/mobile/mobile-engine.ts: delete/write path"
+        "lib/mobile/mobile-engine.ts: delete/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -5934,9 +5651,11 @@
         ],
         "hasRawSqlReference": false,
         "rawSqlFiles": [],
-        "routeActionCronHint": false,
+        "routeActionCronHint": true,
         "hintPaths": [
-          "services/observability/realtime-alerting-service.ts"
+          "services/observability/realtime-alerting-service.ts",
+          "app/api/alerts/realtime/route.ts",
+          "app/api/cron/observability-alerts/route.ts"
         ],
         "djangoModelFound": true,
         "djangoViewSetReachable": true,
@@ -5955,10 +5674,15 @@
         "SELECT"
       ],
       "reachabilityKind": "MIXED",
-      "authEvidence": [],
+      "authEvidence": [
+        "app/api/alerts/realtime/route.ts: withApi",
+        "app/api/alerts/realtime/route.ts: explicit auth config",
+        "app/api/cron/observability-alerts/route.ts: withApi"
+      ],
       "organizationEvidence": [
         "services/observability/realtime-alerting-service.ts: organization identifier reference",
         "services/observability/realtime-alerting-service.ts: organization_id",
+        "app/api/alerts/realtime/route.ts: organization identifier reference",
         "backend/core/views.py: organization identifier reference",
         "backend/core/views.py: organization_id"
       ],
@@ -7938,7 +7662,8 @@
         "app/api/mobile/sync/route.ts: insert/write path",
         "lib/mobile/mobile-engine.ts: insert/write path",
         "lib/mobile/mobile-engine.ts: update/write path",
-        "lib/mobile/mobile-engine.ts: delete/write path"
+        "lib/mobile/mobile-engine.ts: delete/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -8416,7 +8141,7 @@
     {
       "table": "push_devices",
       "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
+      "reviewPriority": "NORMAL",
       "schema": {
         "declarationFound": true,
         "canonicalDeclarations": [
@@ -8455,7 +8180,7 @@
         "confidence": "LOW",
         "blocker": "ambiguous shape — needs manual review",
         "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
+        "cohortKey": "COMPLEX:org:NORMAL"
       },
       "operationSet": [
         "SELECT",
@@ -8473,7 +8198,8 @@
         "lib/workers/notification-worker.ts: insert/write path",
         "lib/workers/notification-worker.ts: update/write path",
         "services/fcm-service.ts: insert/write path",
-        "services/fcm-service.ts: update/write path"
+        "services/fcm-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {
@@ -14815,7 +14541,8 @@
       ],
       "mutationBoundaryEvidence": [
         "services/fcm-service.ts: insert/write path",
-        "services/fcm-service.ts: update/write path"
+        "services/fcm-service.ts: update/write path",
+        "backend/notifications/views.py: delete/write path"
       ]
     },
     {

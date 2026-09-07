@@ -368,7 +368,7 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
     table: "signature_workflows",
     classification: "NEEDS_REVIEW",
-    reason: "6 non-test reference(s) to 'signatureWorkflows' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
+    reason: "ROUND 45 EXCEPTION (SEPARATE_DB_ROOT archetype, ejected — dual-schema conflict): services/financial-service/drizzle/schema.ts declares its OWN `signatureWorkflows` pgTable (line 538), a separate physical-table declaration from db/schema's canonical union-eyes export. Per round 41-44 precedent, any table with a duplicate declaration in the financial-service's own database boundary requires a dedicated cross-service review (which service actually owns the physical `signature_workflows` table, whether they are the same Postgres database or two separate databases with the same name) before any RLS/authority classification can be assigned — closing it from only the union-eyes side would risk asserting authority over a table this app does not exclusively own. Not auto-closable this round.",
     supportingCapability: ["lib/services/signature-workflow-service.ts","services/financial-service/drizzle/relations.ts","services/financial-service/drizzle/schema.ts","services/financial-service/src/db/schema.ts","services/pki/signature-service.ts","services/pki/workflow-engine.ts"],
     requiredRuntimePrivileges: "TBD",
     requiredSystemPrivileges: "TBD",

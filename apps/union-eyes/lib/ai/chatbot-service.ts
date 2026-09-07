@@ -317,6 +317,7 @@ export class ChatbotService {
   async sendMessage(data: {
     sessionId: string;
     userId: string;
+    organizationId: string;
     content: string;
     useRAG?: boolean;
   }): Promise<ChatMessage> {
@@ -333,6 +334,11 @@ export class ChatbotService {
     // Get session
     const session = await this.sessionManager.getSession(data.sessionId);
     if (!session) {
+      throw new Error("Session not found");
+    }
+    // A chat session belongs to exactly one user within one organization —
+    // never trust a client-supplied sessionId without verifying both.
+    if (session.userId !== data.userId || session.organizationId !== data.organizationId) {
       throw new Error("Session not found");
     }
     
@@ -466,8 +472,16 @@ export class ChatbotService {
    */
   async getMessages(
     sessionId: string,
+    owner: { userId: string; organizationId: string },
     options: { limit?: number; offset?: number } = {}
   ): Promise<ChatMessage[]> {
+    // A chat session belongs to exactly one user within one organization —
+    // never trust a client-supplied sessionId without verifying both.
+    const session = await this.sessionManager.getSession(sessionId);
+    if (!session || session.userId !== owner.userId || session.organizationId !== owner.organizationId) {
+      throw new Error("Session not found");
+    }
+
     const messages = await db
       .select()
       .from(chatMessages)

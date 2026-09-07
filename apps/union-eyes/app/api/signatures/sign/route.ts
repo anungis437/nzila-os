@@ -30,7 +30,13 @@ const signatureSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Authentication guard
-    const { userId: _userId } = await requireApiAuth();
+    const { userId } = await requireApiAuth();
+    if (!userId) {
+      return standardErrorResponse(
+        ErrorCode.AUTH_REQUIRED,
+        'Unauthorized'
+      );
+    }
 
     const body = await req.json();
     
@@ -59,6 +65,7 @@ export async function POST(req: NextRequest) {
 
     const signer = await SignatureService.recordSignature({
       signerId,
+      actorUserId: userId,
       signatureImageUrl,
       signatureType,
       ipAddress,

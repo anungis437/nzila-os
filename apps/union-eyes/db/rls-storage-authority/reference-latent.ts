@@ -82,8 +82,8 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
     table: "alert_rules",
     classification: "NEEDS_REVIEW",
-    reason: "1 non-test reference(s) to 'alertRules' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
-    supportingCapability: ["services/observability/realtime-alerting-service.ts"],
+    reason: "ROUND 45 EXCEPTION (MIXED_ROOT archetype, ejected — hidden system/cron path despite a direct organization_id column): confirmed a genuine MIXED authority split. Tenant-facing: app/api/alerts/realtime/route.ts (TENANT_USER, SELECT-only, via getRecentRealtimeAlerts()). System-facing: app/api/cron/observability-alerts/route.ts's real cron invokes runRealtimeObservabilitySweep() -> getOrCreateRealtimeRule() in services/observability/realtime-alerting-service.ts, which auto-creates rows across ALL organizations with createdBy: 'system:observability-alerts' (SYSTEM_SCHEDULE, INSERT). The 8 app/api/admin/alerts/* routes are misleading generator artifacts bound to the organizationMembers table, not alert_rules — confirmed by reading each route's actual table import, not just its URL path. A direct organization_id column is therefore NOT sufficient proof of a DIRECT_ORG_TENANT_ROOT archetype; the reverse-dependency graph must also rule out worker/cron writers before a table can be auto-closed. Not auto-closable this round — needs a dedicated MIXED-authority classification (system-scheduled writer + tenant-scoped reader) in a future round.",
+    supportingCapability: ["app/api/alerts/realtime/route.ts","app/api/cron/observability-alerts/route.ts","services/observability/realtime-alerting-service.ts"],
     requiredRuntimePrivileges: "TBD",
     requiredSystemPrivileges: "TBD",
     invocationAuthority: "TBD",
@@ -1215,13 +1215,13 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
     table: "push_devices",
     classification: "NEEDS_REVIEW",
-    reason: "3 non-test reference(s) to 'pushDevices' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review).",
+    reason: "ROUND 45 EXCEPTION (MIXED_ROOT archetype, ejected — hidden worker read path despite a direct organization_id column, same pattern as alert_rules): confirmed MIXED authority. Tenant-facing: app/api/mobile/devices/route.ts (crudRoutes({orgScoped: true}), GET/POST, real organization_id column present so the option is not a no-op). System-facing: lib/workers/notification-worker.ts reads pushDevices filtered by `eq(pushDevices.profileId, userId)` AND `eq(pushDevices.enabled, true)` from within the background notification-delivery worker (SYSTEM_RUNTIME, SELECT, not request-scoped/RLS-bound), to determine which device tokens to push a notification to via services/fcm-service.ts. A direct organization_id column plus a tenant CRUD route is not sufficient proof of a DIRECT_ORG_TENANT_ROOT archetype when a worker also reads the table outside any per-request tenant context. Not auto-closable this round — needs the same dedicated MIXED-authority classification work as alert_rules.",
     supportingCapability: ["app/api/mobile/devices/route.ts","lib/workers/notification-worker.ts","services/fcm-service.ts"],
     requiredRuntimePrivileges: "TBD",
     requiredSystemPrivileges: "TBD",
     invocationAuthority: "TBD",
     dbExecutionPrincipal: "TBD",
-    reviewPriority: "HIGH",
+    reviewPriority: "NORMAL",
   },
   {
     table: "recognition_award_types",
