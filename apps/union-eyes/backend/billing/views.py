@@ -59,10 +59,16 @@ class ClcPerCapitaBenchmarksViewSet(viewsets.ModelViewSet):
 
 
 class ClcUnionDensityViewSet(viewsets.ModelViewSet):
+    """round 51: lib/services/external-data/clc-partnership-service.ts (the sole TS
+    consumer of clcUnionDensity) has zero production importers anywhere in
+    app/, actions/, lib/, services/ outside its own test file (git-grep
+    confirmed) — dead TS code. Contained via SharedDenyAllPermission: no
+    legitimate consumer exists on either side.
+    """
     """API endpoint for ClcUnionDensity operations."""
     queryset = ClcUnionDensity.objects.all()
     serializer_class = ClcUnionDensitySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['sector']
     search_fields = ['sector']
@@ -71,10 +77,14 @@ class ClcUnionDensityViewSet(viewsets.ModelViewSet):
 
 
 class ClcBargainingTrendsViewSet(viewsets.ModelViewSet):
+    """round 51: same dead-TS finding as ClcUnionDensityViewSet above — sole
+    consumer lib/services/external-data/clc-partnership-service.ts has zero
+    production importers. Contained via SharedDenyAllPermission.
+    """
     """API endpoint for ClcBargainingTrends operations."""
     queryset = ClcBargainingTrends.objects.all()
     serializer_class = ClcBargainingTrendsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['sector']
     search_fields = ['sector']
@@ -95,10 +105,16 @@ class ClcSyncLogViewSet(viewsets.ModelViewSet):
 
 
 class ClcOauthTokensViewSet(viewsets.ModelViewSet):
+    """round 51: same dead-TS finding as ClcUnionDensityViewSet above — sole
+    consumer lib/services/external-data/clc-partnership-service.ts has zero
+    production importers. Contained via SharedDenyAllPermission (this table
+    also stores OAuth tokens — credential-sensitive, an extra reason a
+    generated IsAuthenticated-only CRUD surface must not remain reachable).
+    """
     """API endpoint for ClcOauthTokens operations."""
     queryset = ClcOauthTokens.objects.all()
     serializer_class = ClcOauthTokensSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['token_type']
     search_fields = ['access_token', 'refresh_token', 'token_type']
@@ -306,10 +322,14 @@ class WhiplashViolationsViewSet(viewsets.ModelViewSet):
 
 
 class StrikeFundPaymentAuditViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/whiplash-prevention-service.ts has
+    zero production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for StrikeFundPaymentAudit operations."""
     queryset = StrikeFundPaymentAudit.objects.all()
     serializer_class = StrikeFundPaymentAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['id', 'audit_period', 'total_strike_payments', 'total_strike_amount', 'strike_payments_to_correct_account']
     ordering_fields = ['created_at', 'updated_at']
@@ -628,10 +648,15 @@ class CurrencyEnforcementAuditViewSet(viewsets.ModelViewSet):
 
 
 class ExchangeRatesViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer lib/services/currency-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission. (Distinct from the already-closed
+    currency_exchange_rates table.)
+    """
     """API endpoint for ExchangeRates operations."""
     queryset = ExchangeRates.objects.all()
     serializer_class = ExchangeRatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['from_currency']
     search_fields = ['from_currency']
@@ -640,10 +665,15 @@ class ExchangeRatesViewSet(viewsets.ModelViewSet):
 
 
 class CrossBorderTransactionsViewSet(viewsets.ModelViewSet):
+    """round 51: TS consumers lib/services/currency-service.ts and
+    services/currency-enforcement-service.ts both have zero production
+    importers anywhere (git-grep confirmed) — dead TS code. Contained via
+    SharedDenyAllPermission.
+    """
     """API endpoint for CrossBorderTransactions operations."""
     queryset = CrossBorderTransactions.objects.all()
     serializer_class = CrossBorderTransactionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['original_currency']
     search_fields = ['original_currency']
@@ -775,10 +805,14 @@ class CurrencyExchangeRatesViewSet(viewsets.ModelViewSet):
 
 
 class FmvPolicyViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for FmvPolicy operations."""
     queryset = FmvPolicy.objects.all()
     serializer_class = FmvPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['policy_enabled', 'fmv_verification_required']
     ordering_fields = ['created_at', 'updated_at']
@@ -786,10 +820,14 @@ class FmvPolicyViewSet(viewsets.ModelViewSet):
 
 
 class CpiDataViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for CpiData operations."""
     queryset = CpiData.objects.all()
     serializer_class = CpiDataSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['period_year']
     search_fields = ['period_year']
@@ -798,10 +836,14 @@ class CpiDataViewSet(viewsets.ModelViewSet):
 
 
 class FmvBenchmarksViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for FmvBenchmarks operations."""
     queryset = FmvBenchmarks.objects.all()
     serializer_class = FmvBenchmarksSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['item_category']
     search_fields = ['item_category']
@@ -810,10 +852,14 @@ class FmvBenchmarksViewSet(viewsets.ModelViewSet):
 
 
 class ProcurementRequestsViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for ProcurementRequests operations."""
     queryset = ProcurementRequests.objects.all()
     serializer_class = ProcurementRequestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['request_number']
     search_fields = ['request_number']
@@ -822,10 +868,14 @@ class ProcurementRequestsViewSet(viewsets.ModelViewSet):
 
 
 class ProcurementBidsViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for ProcurementBids operations."""
     queryset = ProcurementBids.objects.all()
     serializer_class = ProcurementBidsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['bidder_email']
     search_fields = ['bidder_name', 'bidder_contact', 'bidder_email']
@@ -834,10 +884,14 @@ class ProcurementBidsViewSet(viewsets.ModelViewSet):
 
 
 class IndependentAppraisalsViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for IndependentAppraisals operations."""
     queryset = IndependentAppraisals.objects.all()
     serializer_class = IndependentAppraisalsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['item_type']
     search_fields = ['item_type']
@@ -846,10 +900,14 @@ class IndependentAppraisalsViewSet(viewsets.ModelViewSet):
 
 
 class CpiAdjustedPricingViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for CpiAdjustedPricing operations."""
     queryset = CpiAdjustedPricing.objects.all()
     serializer_class = CpiAdjustedPricingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['item_description']
     ordering_fields = ['created_at', 'updated_at']
@@ -857,10 +915,14 @@ class CpiAdjustedPricingViewSet(viewsets.ModelViewSet):
 
 
 class FmvViolationsViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for FmvViolations operations."""
     queryset = FmvViolations.objects.all()
     serializer_class = FmvViolationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['violation_type']
     search_fields = ['violation_type']
@@ -869,10 +931,14 @@ class FmvViolationsViewSet(viewsets.ModelViewSet):
 
 
 class FmvAuditLogViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer services/joint-trust-fmv-service.ts has zero
+    production importers anywhere (git-grep confirmed) — dead TS code.
+    Contained via SharedDenyAllPermission.
+    """
     """API endpoint for FmvAuditLog operations."""
     queryset = FmvAuditLog.objects.all()
     serializer_class = FmvAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']

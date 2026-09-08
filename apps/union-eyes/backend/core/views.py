@@ -595,10 +595,16 @@ class TicketHistoryViewSet(viewsets.ModelViewSet):
 
 
 class SlaPoliciesViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer lib/services/support-service.ts's
+    getSLAMetrics has zero production callers anywhere (git-grep confirmed) —
+    dead TS code, consistent with round 44's finding that this same file's
+    ticket-comment/ticket-history functions are also dead. Contained via
+    DenyAllPermission.
+    """
     """API endpoint for SlaPolicies operations."""
     queryset = SlaPolicies.objects.all()
     serializer_class = SlaPoliciesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -607,10 +613,15 @@ class SlaPoliciesViewSet(viewsets.ModelViewSet):
 
 
 class KnowledgeBaseArticlesViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumers lib/services/support-service.ts's
+    searchKnowledgeBase/getKBArticleBySlug have zero production callers
+    anywhere (git-grep confirmed) — dead TS code. Contained via
+    DenyAllPermission.
+    """
     """API endpoint for KnowledgeBaseArticles operations."""
     queryset = KnowledgeBaseArticles.objects.all()
     serializer_class = KnowledgeBaseArticlesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['title']
     search_fields = ['title']

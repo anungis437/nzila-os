@@ -22,7 +22,7 @@ class CertificationTypesViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationTypes operations."""
     queryset = CertificationTypes.objects.all()
     serializer_class = CertificationTypesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['certification_code']
     search_fields = ['certification_name', 'certification_code']
@@ -58,7 +58,7 @@ class LicenseRenewalsViewSet(viewsets.ModelViewSet):
     """API endpoint for LicenseRenewals operations."""
     queryset = LicenseRenewals.objects.all()
     serializer_class = LicenseRenewalsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['renewal_year']
     search_fields = ['renewal_year']
@@ -82,7 +82,7 @@ class CertificationComplianceReportsViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationComplianceReports operations."""
     queryset = CertificationComplianceReports.objects.all()
     serializer_class = CertificationComplianceReportsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['report_period']
     search_fields = ['report_period']
@@ -178,7 +178,7 @@ class DataClassificationRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for DataClassificationRegistry operations."""
     queryset = DataClassificationRegistry.objects.all()
     serializer_class = DataClassificationRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['accessible_by_employer', 'accessible_by_union', 'requires_justification']
     search_fields = ['id', 'data_type', 'classification_level', 'data_description', 'legal_basis']
@@ -245,7 +245,7 @@ class UnionOnlyDataTagsViewSet(viewsets.ModelViewSet):
     """API endpoint for UnionOnlyDataTags operations."""
     queryset = UnionOnlyDataTags.objects.all()
     serializer_class = UnionOnlyDataTagsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['union_only_flag', 'employer_access_blocked']
     search_fields = ['id', 'resource_type', 'resource_id', 'resource_name', 'classification_level']
@@ -286,7 +286,7 @@ class SwissColdStorageViewSet(viewsets.ModelViewSet):
     """API endpoint for SwissColdStorage operations."""
     queryset = SwissColdStorage.objects.all()
     serializer_class = SwissColdStorageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['vault_provider']
     search_fields = ['vault_provider']
@@ -298,7 +298,7 @@ class BreakGlassSystemViewSet(viewsets.ModelViewSet):
     """API endpoint for BreakGlassSystem operations."""
     queryset = BreakGlassSystem.objects.all()
     serializer_class = BreakGlassSystemSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['scenario_type']
     search_fields = ['scenario_type']
@@ -310,7 +310,7 @@ class DisasterRecoveryDrillsViewSet(viewsets.ModelViewSet):
     """API endpoint for DisasterRecoveryDrills operations."""
     queryset = DisasterRecoveryDrills.objects.all()
     serializer_class = DisasterRecoveryDrillsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['drill_type']
     search_fields = ['drill_name', 'drill_type']
@@ -334,7 +334,7 @@ class RecoveryTimeObjectivesViewSet(viewsets.ModelViewSet):
     """API endpoint for RecoveryTimeObjectives operations."""
     queryset = RecoveryTimeObjectives.objects.all()
     serializer_class = RecoveryTimeObjectivesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['system_component']
     search_fields = ['system_component']
@@ -346,7 +346,7 @@ class EmergencyDeclarationsViewSet(viewsets.ModelViewSet):
     """API endpoint for EmergencyDeclarations operations."""
     queryset = EmergencyDeclarations.objects.all()
     serializer_class = EmergencyDeclarationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['emergency_type']
     search_fields = ['emergency_type']
@@ -557,7 +557,7 @@ class ForeignWorkersViewSet(viewsets.ModelViewSet):
     """API endpoint for ForeignWorkers operations."""
     queryset = ForeignWorkers.objects.all()
     serializer_class = ForeignWorkersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['requires_lmbp', 'lmbp_letter_generated', 'created_by']
     search_fields = ['first_name', 'last_name', 'email', 'phone_number', 'work_permit_number']
@@ -569,7 +569,7 @@ class LmbpLettersViewSet(viewsets.ModelViewSet):
     """API endpoint for LmbpLetters operations."""
     queryset = LmbpLetters.objects.all()
     serializer_class = LmbpLettersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['created_by']
     search_fields = ['employer_name', 'letter_number', 'compliance_status', 'letter_pdf_url', 'letter_pdf_hash']
@@ -593,7 +593,7 @@ class MentorshipsViewSet(viewsets.ModelViewSet):
     """API endpoint for Mentorships operations."""
     queryset = Mentorships.objects.all()
     serializer_class = MentorshipsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['canadian_worker_trained', 'knowledge_transfer_documented']
     search_fields = ['mentee_name', 'mentor_name', 'meeting_frequency', 'status', 'status_reason']
@@ -605,7 +605,7 @@ class LmbpComplianceAlertsViewSet(viewsets.ModelViewSet):
     """API endpoint for LmbpComplianceAlerts operations."""
     queryset = LmbpComplianceAlerts.objects.all()
     serializer_class = LmbpComplianceAlertsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['resolved_by']
     search_fields = ['alert_type', 'severity', 'title', 'description', 'recommended_action']
@@ -617,7 +617,7 @@ class LmbpComplianceReportsViewSet(viewsets.ModelViewSet):
     """API endpoint for LmbpComplianceReports operations."""
     queryset = LmbpComplianceReports.objects.all()
     serializer_class = LmbpComplianceReportsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['submitted_to_ircc']
     search_fields = ['ircc_confirmation_number']
@@ -629,7 +629,7 @@ class BandCouncilsViewSet(viewsets.ModelViewSet):
     """API endpoint for BandCouncils operations."""
     queryset = BandCouncils.objects.all()
     serializer_class = BandCouncilsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['band_number']
     search_fields = ['band_name', 'band_number']
@@ -641,7 +641,7 @@ class BandCouncilConsentViewSet(viewsets.ModelViewSet):
     """API endpoint for BandCouncilConsent operations."""
     queryset = BandCouncilConsent.objects.all()
     serializer_class = BandCouncilConsentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['consent_type']
     search_fields = ['consent_type']
@@ -677,7 +677,7 @@ class IndigenousDataSharingAgreementsViewSet(viewsets.ModelViewSet):
     """API endpoint for IndigenousDataSharingAgreements operations."""
     queryset = IndigenousDataSharingAgreements.objects.all()
     serializer_class = IndigenousDataSharingAgreementsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['partner_type']
     search_fields = ['partner_name', 'partner_type']
@@ -689,7 +689,7 @@ class TraditionalKnowledgeRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for TraditionalKnowledgeRegistry operations."""
     queryset = TraditionalKnowledgeRegistry.objects.all()
     serializer_class = TraditionalKnowledgeRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['knowledge_type']
     search_fields = ['knowledge_type']
@@ -811,7 +811,7 @@ class LrbAgreementsViewSet(viewsets.ModelViewSet):
     """API endpoint for LrbAgreements operations."""
     queryset = LrbAgreements.objects.all()
     serializer_class = LrbAgreementsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source']
     search_fields = ['source']
@@ -847,7 +847,7 @@ class LrbSyncLogViewSet(viewsets.ModelViewSet):
     """API endpoint for LrbSyncLog operations."""
     queryset = LrbSyncLog.objects.all()
     serializer_class = LrbSyncLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source']
     search_fields = ['source']
@@ -859,7 +859,7 @@ class ConflictOfInterestPolicyViewSet(viewsets.ModelViewSet):
     """API endpoint for ConflictOfInterestPolicy operations."""
     queryset = ConflictOfInterestPolicy.objects.all()
     serializer_class = ConflictOfInterestPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['policy_enabled', 'blind_trust_required', 'annual_disclosure_required', 'disclosure_deadline']
     search_fields = ['disclosure_deadline']
@@ -895,7 +895,7 @@ class ArmsLengthVerificationViewSet(viewsets.ModelViewSet):
     """API endpoint for ArmsLengthVerification operations."""
     queryset = ArmsLengthVerification.objects.all()
     serializer_class = ArmsLengthVerificationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['transaction_type']
     search_fields = ['transaction_type']

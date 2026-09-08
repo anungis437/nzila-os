@@ -119,11 +119,16 @@ class InternationalAddressesViewSet(viewsets.ModelViewSet):
 
 
 class CountryAddressFormatsViewSet(viewsets.ModelViewSet):
+    """round 51: sole TS consumer lib/address/address-service.ts has zero
+    production importers anywhere in app/, actions/, lib/, services/ outside
+    its own test file (git-grep confirmed) — dead TS code. Contained via
+    DenyAllPermission.
+    """
     """API endpoint for CountryAddressFormats operations."""
 
     queryset = CountryAddressFormats.objects.all()
     serializer_class = CountryAddressFormatsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -147,11 +152,15 @@ class CountryAddressFormatsViewSet(viewsets.ModelViewSet):
 
 
 class AddressValidationCacheViewSet(viewsets.ModelViewSet):
+    """round 51: same dead-TS finding as CountryAddressFormatsViewSet above —
+    sole consumer lib/address/address-service.ts has zero production
+    importers. Contained via DenyAllPermission.
+    """
     """API endpoint for AddressValidationCache operations."""
 
     queryset = AddressValidationCache.objects.all()
     serializer_class = AddressValidationCacheSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,

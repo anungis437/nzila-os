@@ -401,10 +401,17 @@ class FederationMeetingsViewSet(viewsets.ModelViewSet):
 
 
 class FederationRemittancesViewSet(viewsets.ModelViewSet):
-    """API endpoint for FederationRemittances operations."""
+    """API endpoint for FederationRemittances operations.
+
+    round 51: FederationRemittances has ZERO TypeScript consumer anywhere
+    (no Drizzle export references this table at all, per the round-51 census) —
+    dead on the TS side, and this generated Django ViewSet exposed
+    queryset=Model.objects.all() + IsAuthenticated-only with NO organization
+    filter of any kind. Contained via DenyAllPermission.
+    """
     queryset = FederationRemittances.objects.all()
     serializer_class = FederationRemittancesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 import { getAllFeatureFlags, toggleFeatureFlag } from '@/lib/feature-flags';
 import { z } from 'zod';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { withAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withAdminAuth, withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
@@ -48,8 +48,19 @@ export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
 
 /**
  * Toggle a feature flag
+ *
+ * Feature flags are platform-wide (no organization_id column — see
+ * db/schema/domains/infrastructure/features.ts), so mutating one affects
+ * every organization on the platform. round 51: this MUST require genuine
+ * platform authority (withSystemAdminAuth -> isSystemAdmin()), not an
+ * ordinary per-organization "admin" role (withAdminAuth ->
+ * hasMinRole('admin')) — any org's own admin previously had authority to
+ * flip a platform-wide kill switch. The dead org-mismatch check below
+ * (comparing body.organizationId to context.organizationId) never fired in
+ * practice since toggleFlagSchema strips unknown fields before this code
+ * runs, and is superseded by the platform-admin requirement.
  */
-export const PATCH = withAdminAuth(async (request, context: BaseAuthContext) => {
+export const PATCH = withSystemAdminAuth(async (request, context: BaseAuthContext) => {
   let rawBody: any;
   try {
     rawBody = await request.json();
@@ -109,4 +120,4 @@ throw error;
     }
 });
 
-
+
