@@ -325,8 +325,28 @@ export async function getActiveContract(organizationId: string) {
 
 /**
  * List contract line items for a contract.
+ *
+ * SECURITY: verifies the contract belongs to the caller's organization
+ * before returning its line items — a bare contractId lookup here would
+ * let any authenticated org member read another organization's contract
+ * pricing/feature/SLA data (round 54 parent-ID injection fix).
  */
-export async function getContractLineItems(contractId: string) {
+export async function getContractLineItems(contractId: string, organizationId: string) {
+  const [contract] = await db
+    .select({ id: commercialContracts.id })
+    .from(commercialContracts)
+    .where(
+      and(
+        eq(commercialContracts.id, contractId),
+        eq(commercialContracts.organizationId, organizationId),
+      ),
+    )
+    .limit(1);
+
+  if (!contract) {
+    return [];
+  }
+
   return await db
     .select()
     .from(contractLineItems)

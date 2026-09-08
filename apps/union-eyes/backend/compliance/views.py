@@ -194,10 +194,18 @@ class DataClassificationRegistryViewSet(viewsets.ModelViewSet):
 
 
 class FirewallAccessRulesViewSet(viewsets.ModelViewSet):
-    """API endpoint for FirewallAccessRules operations."""
+    """API endpoint for FirewallAccessRules operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): the real reachable path is EmployerNonInterferenceServiceViewSet's
+    check_access action (services/api/employer_non_interference_service_views.py,
+    already DenyAllPermission since round 49). This separate generated
+    ModelViewSet is unscoped (IsAuthenticated-only, .objects.all()). No
+    legitimate consumer found.
+    """
     queryset = FirewallAccessRules.objects.all()
     serializer_class = FirewallAccessRulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id', 'access_permitted', 'justification_required', 'requires_approval']
     search_fields = ['id', 'rule_name', 'user_role', 'access_level', 'approver_role']
@@ -261,10 +269,19 @@ class UnionOnlyDataTagsViewSet(viewsets.ModelViewSet):
 
 
 class FirewallViolationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for FirewallViolations operations."""
+    """API endpoint for FirewallViolations operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): the real reachable path is EmployerNonInterferenceServiceViewSet's
+    report_violation action (services/api/employer_non_interference_service_views.py,
+    already DenyAllPermission since round 49). This separate generated
+    ModelViewSet is unscoped (IsAuthenticated-only, .objects.all()) and would
+    expose every organization's security violation records (user emails, IPs,
+    descriptions). No legitimate consumer found.
+    """
     queryset = FirewallViolations.objects.all()
     serializer_class = FirewallViolationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id', 'system_detected']
     search_fields = ['id', 'violation_type', 'severity', 'user_id', 'user_email']

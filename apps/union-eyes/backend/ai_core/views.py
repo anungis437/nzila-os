@@ -221,10 +221,19 @@ class ChatbotAnalyticsViewSet(viewsets.ModelViewSet):
 
 
 class AiSafetyFiltersViewSet(viewsets.ModelViewSet):
-    """API endpoint for AiSafetyFilters operations."""
+    """API endpoint for AiSafetyFilters operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): sole writer lib/ai/chatbot-service.ts's checkContentSafety()
+    is only ever reached via the org/session-verified sendMessage() flow, but
+    this generated ModelViewSet is a separate unscoped surface (IsAuthenticated
+    -only, .objects.all()) that would let any authenticated platform user
+    read/write/delete any organization's flagged chat content. No legitimate
+    frontend consumer found for this endpoint.
+    """
     queryset = AiSafetyFilters.objects.all()
     serializer_class = AiSafetyFiltersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['flagged', 'session_id', 'message_id']
     search_fields = ['input', 'output', 'action', 'reason']

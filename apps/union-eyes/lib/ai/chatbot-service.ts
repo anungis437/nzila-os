@@ -343,7 +343,7 @@ export class ChatbotService {
     }
     
     // Safety filter on input
-    const safetyCheck = await this.checkContentSafety(data.content);
+    const safetyCheck = await this.checkContentSafety(data.content, data.sessionId);
     if (safetyCheck.flagged) {
       // If the safety system itself is unavailable, skip blocking (fail-open for availability)
       // Only block when the moderation API explicitly flags the content
@@ -496,7 +496,7 @@ export class ChatbotService {
   /**
    * Content safety check
    */
-  private async checkContentSafety(content: string): Promise<{
+  private async checkContentSafety(content: string, sessionId?: string): Promise<{
     flagged: boolean;
     categories?: string[];
     reason?: string;
@@ -532,6 +532,8 @@ export class ChatbotService {
           confidenceScores: result.category_scores,
           action: "block",
           reason: "Content policy violation",
+          // round 54: preserve session linkage so flagged rows are traceable to a tenant/session
+          sessionId,
         });
         
         return { flagged: true, categories: flaggedCategories };

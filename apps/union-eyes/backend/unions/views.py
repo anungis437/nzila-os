@@ -8,30 +8,6 @@ from .models import (AwardTemplates, AwardHistory, RewardWalletLedger, BudgetPoo
 from .serializers import (AwardTemplatesSerializer, AwardHistorySerializer, RewardWalletLedgerSerializer, BudgetPoolSerializer, BudgetReservationsSerializer, CalendarsSerializer, CalendarEventsSerializer, EventAttendeesSerializer, MeetingRoomsSerializer, RoomBookingsSerializer, CalendarSharingSerializer, ExternalCalendarConnectionsSerializer, EventRemindersSerializer, CongressMembershipsSerializer, HolidaysSerializer, StewardAssignmentsSerializer, OutreachSequencesSerializer, OutreachEnrollmentsSerializer, OutreachStepsLogSerializer, FieldNotesSerializer, OrganizerTasksSerializer, TaskCommentsSerializer, MemberRelationshipScoresSerializer, SurveysSerializer, SurveyQuestionsSerializer, SurveyResponsesSerializer, SurveyAnswersSerializer, PollsSerializer, PollVotesSerializer, MemberLocationConsentSerializer, FederationsSerializer, FederationMembershipsSerializer, FederationExecutivesSerializer, FederationMeetingsSerializer, FederationRemittancesSerializer, FederationCampaignsSerializer, FederationCommunicationsSerializer, FederationResourcesSerializer, VotingSessionsSerializer, VotingOptionsSerializer, VoterEligibilitySerializer, VotesSerializer, VotingNotificationsSerializer, VotingAuditLogSerializer, OrganizingCampaignsSerializer, OrganizingContactsSerializer, CardSigningEventsSerializer, NlrbClrbFilingsSerializer, UnionRepresentationVotesSerializer, FieldOrganizerActivitiesSerializer, EmployerResponsesSerializer, OrganizingCampaignMilestonesSerializer, RecognitionProgramsSerializer, RecognitionAwardTypesSerializer, RecognitionAwardsSerializer, RewardBudgetEnvelopesSerializer, RewardRedemptionsSerializer, MemberAddressesSerializer, MemberEmploymentSerializer, EmploymentHistorySerializer, MemberLeavesSerializer, JobClassificationsSerializer, MemberSegmentsSerializer, SegmentExecutionsSerializer, SegmentExportsSerializer, TrainingCoursesSerializer, CourseSessionsSerializer, CourseRegistrationsSerializer, MemberCertificationsSerializer, TrainingProgramsSerializer, ProgramEnrollmentsSerializer, EmployersSerializer, WorksitesSerializer, BargainingUnitsSerializer, CommitteesSerializer, CommitteeMembershipsSerializer, RoleTenureHistorySerializer)
 
 
-class AwardTemplatesViewSet(viewsets.ModelViewSet):
-    """API endpoint for AwardTemplates operations."""
-    queryset = AwardTemplates.objects.all()
-    serializer_class = AwardTemplatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['name']
-    search_fields = ['name']
-    ordering_fields = ['created_at', 'updated_at']
-    ordering = ['-created_at']
-
-
-class AwardHistoryViewSet(viewsets.ModelViewSet):
-    """API endpoint for AwardHistory operations."""
-    queryset = AwardHistory.objects.all()
-    serializer_class = AwardHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['template_id', 'recipient_id']
-    search_fields = ['recipient_id']
-    ordering_fields = ['created_at', 'updated_at']
-    ordering = ['-created_at']
-
-
 class DenyAllPermission(permissions.BasePermission):
     """Fail-closed containment: unconditionally denies every request.
 
@@ -46,6 +22,8 @@ class DenyAllPermission(permissions.BasePermission):
       org_id, omitting program_id/name/scope/period/limit/usage/dates.
       No real TS or Django consumer of either REST endpoint was found
       anywhere in the app.
+    - AwardTemplates/AwardHistory (round 54): lib/services/rewards/
+      template-service.ts has zero production callers anywhere.
     Remove only once a proven legitimate consumer and organization-bound
     isolation mechanism exist for the relevant table.
     """
@@ -55,6 +33,37 @@ class DenyAllPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return False
+
+
+class AwardTemplatesViewSet(viewsets.ModelViewSet):
+    """round 54: dead-TS finding (template-service.ts has zero production
+    importers). Contained via DenyAllPermission.
+    """
+    """API endpoint for AwardTemplates operations."""
+    queryset = AwardTemplates.objects.all()
+    serializer_class = AwardTemplatesSerializer
+    permission_classes = [DenyAllPermission]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['name']
+    search_fields = ['name']
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
+
+
+class AwardHistoryViewSet(viewsets.ModelViewSet):
+    """round 54: dead-TS finding (template-service.ts's recordTemplateUsage/
+    getTemplateHistory have zero production callers). Contained via
+    DenyAllPermission.
+    """
+    """API endpoint for AwardHistory operations."""
+    queryset = AwardHistory.objects.all()
+    serializer_class = AwardHistorySerializer
+    permission_classes = [DenyAllPermission]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['template_id', 'recipient_id']
+    search_fields = ['recipient_id']
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
 
 
 class RewardWalletLedgerViewSet(viewsets.ModelViewSet):

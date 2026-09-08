@@ -360,10 +360,20 @@ class PushNotificationsViewSet(viewsets.ModelViewSet):
 
 
 class PushDeliveriesViewSet(viewsets.ModelViewSet):
-    """API endpoint for PushDeliveries operations."""
+    """API endpoint for PushDeliveries operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): both TS-side supportingCapability files are dead code —
+    lib/engagement-scoring.ts has zero real callers (same finding as
+    newsletter_engagement above), and services/fcm-service.ts is only
+    imported by lib/workers/notification-worker.ts, which itself has zero
+    bootstrap/instantiation callers anywhere (same dead-worker finding as
+    push_devices, round 46). This generated ModelViewSet is unscoped
+    (IsAuthenticated-only). No legitimate consumer found on either side.
+    """
     queryset = PushDeliveries.objects.all()
     serializer_class = PushDeliveriesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -503,10 +513,19 @@ class MobileNotificationsViewSet(viewsets.ModelViewSet):
 
 
 class MobileSyncQueueViewSet(viewsets.ModelViewSet):
-    """API endpoint for MobileSyncQueue operations."""
+    """API endpoint for MobileSyncQueue operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): lib/mobile/mobile-engine.ts's MobileOfflineSyncEngine (the
+    sole writer/reader of this table) has zero production importers anywhere
+    in app/, actions/ — fully dead TS code. This generated ModelViewSet is
+    unscoped (IsAuthenticated-only, .objects.all(), no org_id filter despite
+    the table having a real org_id column). No legitimate consumer found on
+    either side.
+    """
     queryset = MobileSyncQueue.objects.all()
     serializer_class = MobileSyncQueueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['device_id']
     ordering_fields = ['created_at', 'updated_at']

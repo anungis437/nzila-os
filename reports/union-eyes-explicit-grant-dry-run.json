@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-08T17:30:47.116Z",
+  "generatedAt": "2026-09-08T19:29:50.447Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 598,
-  "pendingReviewCount": 102,
-  "tenantGrantedTableCount": 274,
-  "systemGrantedTableCount": 42,
+  "readyForExplicitGrantCount": 612,
+  "pendingReviewCount": 88,
+  "tenantGrantedTableCount": 279,
+  "systemGrantedTableCount": 44,
   "tenantOperationTotals": {
-    "SELECT": 260,
-    "INSERT": 231,
-    "UPDATE": 154,
+    "SELECT": 264,
+    "INSERT": 235,
+    "UPDATE": 156,
     "DELETE": 88
   },
   "systemOperationTotals": {
     "SELECT": 36,
-    "INSERT": 20,
-    "UPDATE": 15,
+    "INSERT": 22,
+    "UPDATE": 16,
     "DELETE": 0
   },
   "riskSignals": {
@@ -110,11 +110,13 @@
       "worksites"
     ],
     "mixedPrincipalTables": [
+      "alert_executions",
       "alert_rules",
       "billing_accounts",
       "calendars",
       "campaigns",
       "collective_agreements",
+      "commercial_contracts",
       "communication_preferences",
       "consent_records",
       "deadline_audit_events",
@@ -233,6 +235,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "address_change_history",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "address_validation_cache",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -269,6 +277,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "ai_safety_filters",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "ai_usage_metrics",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -294,6 +310,16 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "alert_executions",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "INSERT"
+      ]
     },
     {
       "table": "alert_recipients",
@@ -457,6 +483,18 @@
     {
       "table": "automation_schedules",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "award_history",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "award_templates",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -1121,6 +1159,19 @@
       ]
     },
     {
+      "table": "commercial_contracts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "committee_action_items",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -1289,6 +1340,15 @@
     {
       "table": "contract_covered_orgs",
       "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "contract_line_items",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT",
         "INSERT"
@@ -1614,6 +1674,16 @@
       "table": "document_search_index",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "document_signers",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2366,7 +2436,19 @@
       "systemPrivileges": []
     },
     {
+      "table": "firewall_access_rules",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "firewall_compliance_audit",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "firewall_violations",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -3192,6 +3274,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "mobile_sync_queue",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "model_metadata",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3924,6 +4012,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "push_deliveries",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "push_devices",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4281,6 +4375,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "signature_verification",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "signature_webhooks_log",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -4288,6 +4388,12 @@
     },
     {
       "table": "signature_workflows",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "signers",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -4875,10 +4981,6 @@
   ],
   "pendingReview": [
     {
-      "table": "address_change_history",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "ai_clause_reasonings",
       "classification": "NEEDS_REVIEW"
     },
@@ -4887,27 +4989,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "ai_safety_filters",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "alert_executions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "automation_rules",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "autopay_settings",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "award_history",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "award_templates",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4947,19 +5033,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "commercial_contracts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "conflict_disclosures",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "continuing_education",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "contract_line_items",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4988,10 +5066,6 @@
     },
     {
       "table": "data_subject_access_requests",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "document_signers",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5044,14 +5118,6 @@
     },
     {
       "table": "fee_settlement_lines",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "firewall_access_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "firewall_violations",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5111,10 +5177,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "mobile_sync_queue",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "newsletter_list_subscribers",
       "classification": "NEEDS_REVIEW"
     },
@@ -5163,10 +5225,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "push_deliveries",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "recusal_tracking",
       "classification": "NEEDS_REVIEW"
     },
@@ -5184,14 +5242,6 @@
     },
     {
       "table": "shared_clause_library",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "signature_verification",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "signers",
       "classification": "NEEDS_REVIEW"
     },
     {

@@ -370,10 +370,23 @@ class SignatureWorkflowsViewSet(viewsets.ModelViewSet):
 
 
 class SignersViewSet(viewsets.ModelViewSet):
-    """API endpoint for Signers operations."""
+    """API endpoint for Signers operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): the ONLY code paths that write/read the real `signers`
+    Drizzle table (services/pki/signature-service.ts's createSignatureRequest/
+    getUserSignatureRequests/completeSignatureRequestStep/cancelSignatureRequest/
+    expireOverdueSignatureRequests/rejectSignature/getDocumentSignatures, and
+    lib/services/signature-workflow-service.ts's createSignatureWorkflow) have
+    zero real callers anywhere in app/, actions/, lib/, services/ (the sole
+    reachable route, app/api/admin/pki/signatures/[id]/sign/route.ts, only
+    calls signDocument()/recordSignature(), neither of which touches this
+    table). This generated ModelViewSet is unscoped (IsAuthenticated-only). No
+    legitimate consumer found on either side.
+    """
     queryset = Signers.objects.all()
     serializer_class = SignersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -400,10 +413,18 @@ class SignatureAuditLogViewSet(viewsets.ModelViewSet):
 
 
 class SignatureVerificationViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureVerification operations."""
+    """API endpoint for SignatureVerification operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): sole writer lib/services/signature-workflow-service.ts's
+    handleSignerCompleted() has zero real callers anywhere (the file is not
+    re-exported from lib/services/index.ts and has no direct importer) —
+    fully dead TS code. This generated ModelViewSet is unscoped
+    (IsAuthenticated-only). No legitimate consumer found on either side.
+    """
     queryset = SignatureVerification.objects.all()
     serializer_class = SignatureVerificationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

@@ -179,11 +179,15 @@ class AddressValidationCacheViewSet(viewsets.ModelViewSet):
 
 
 class AddressChangeHistoryViewSet(viewsets.ModelViewSet):
+    """round 54: dead-TS finding (AddressService has zero production
+    importers, same as AddressValidationCacheViewSet above). Contained via
+    DenyAllPermission.
+    """
     """API endpoint for AddressChangeHistory operations."""
 
     queryset = AddressChangeHistory.objects.all()
     serializer_class = AddressChangeHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,

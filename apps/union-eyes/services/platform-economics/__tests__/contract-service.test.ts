@@ -181,9 +181,15 @@ describe('platform-economics/contract-service', () => {
   });
 
   describe('getContractLineItems', () => {
-    it('returns the line items', async () => {
-      pushSel([{ id: 'li-1' }]);
-      expect(await getContractLineItems('ctr-1')).toHaveLength(1);
+    it('returns the line items when the contract belongs to the org', async () => {
+      pushSel([{ id: 'ctr-1' }]); // contract ownership check
+      pushSel([{ id: 'li-1' }]); // line items
+      expect(await getContractLineItems('ctr-1', 'o1')).toHaveLength(1);
+    });
+
+    it('returns empty when the contract does not belong to the org (cross-org IDOR guard)', async () => {
+      pushSel([]); // contract ownership check finds nothing
+      expect(await getContractLineItems('ctr-1', 'o2')).toEqual([]);
     });
   });
 

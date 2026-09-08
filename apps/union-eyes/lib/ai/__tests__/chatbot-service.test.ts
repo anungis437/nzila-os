@@ -372,6 +372,10 @@ describe("ChatbotService", () => {
     await expect(
       bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "bad content" }),
     ).rejects.toThrow("Message flagged by content safety filter");
+    // round 54: flagged rows must retain sessionId so they're traceable to a tenant/session
+    expect(mocks.mockInsertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId: "sess-1" }),
+    );
     vi.unstubAllGlobals();
     delete process.env.OPENAI_API_KEY;
   });

@@ -22,7 +22,7 @@ export const GET = withApi(
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     const id = (params as Record<string, string>)?.id;
     if (!id) throw ApiError.badRequest('Contract ID is required');
-    const lineItems = await getContractLineItems(id);
+    const lineItems = await getContractLineItems(id, organizationId);
     return { lineItems };
   },
 );
