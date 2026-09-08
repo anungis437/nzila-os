@@ -258,11 +258,19 @@ class OrganizationSharingGrantsViewSet(viewsets.ModelViewSet):
 
 
 class UserUuidMappingViewSet(viewsets.ModelViewSet):
-    """API endpoint for UserUuidMapping operations."""
+    """round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION,
+    CROSS_SERVICE_IDENTITY_MAPPING family): lib/utils/user-uuid-helpers.ts's
+    getOrCreateUserUuid (the only TS code touching this table in this app)
+    has zero production callers anywhere (git-grep confirmed) — dead TS
+    code. This generated Django ViewSet allowed full CRUD (including UPDATE
+    of the clerkUserId->userUuid mapping — an identity-reassignment /
+    account-takeover-equivalent operation) to any authenticated user, with
+    no legitimate consumer of its own. Contained via DenyAllPermission.
+    """
 
     queryset = UserUuidMapping.objects.all()
     serializer_class = UserUuidMappingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -274,11 +282,20 @@ class UserUuidMappingViewSet(viewsets.ModelViewSet):
 
 
 class PendingProfilesViewSet(viewsets.ModelViewSet):
-    """API endpoint for PendingProfiles operations."""
+    """round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, PRE_AUTH_IDENTITY
+    family): the legitimate path is app/api/{onboarding,continuity/
+    inheritance}/route.ts's crudRoutes (readRole now 'support_agent' \u2014 a
+    genuine platform-elevated role, fixed this round from 'member', which
+    let any authenticated user of any org list every pre-signup user's
+    email/Whop-membership/billing data since this table has no
+    organizationId column). This generated Django ViewSet is a separate,
+    unscoped duplicate surface with no legitimate consumer of its own.
+    Contained via DenyAllPermission.
+    """
 
     queryset = PendingProfiles.objects.all()
     serializer_class = PendingProfilesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,

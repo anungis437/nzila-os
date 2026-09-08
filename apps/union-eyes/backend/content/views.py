@@ -600,10 +600,23 @@ class DataAggregationConsentViewSet(viewsets.ModelViewSet):
 
 
 class MovementTrendsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MovementTrends operations."""
+    """API endpoint for MovementTrends operations.
+
+    round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, DERIVED_MOVEMENT_INSIGHT
+    family): movement_trends is a genuine cross-organization aggregate (no
+    organizationId column by design — organizationsContributing is a count,
+    not an FK). The legitimate path is exclusively the two read-only,
+    officer-role-gated Next.js pages (app/[locale]/dashboard/
+    movement-insights/{page,export/page}.tsx via requireUser() +
+    MOVEMENT_INSIGHTS_ROLES); no application code anywhere ever writes this
+    table (git-grep confirmed zero insert/update/delete callers). This
+    generated Django ViewSet allowed full CRUD to ANY authenticated user of
+    ANY organization with no officer-role gate at all — contained via
+    DenyAllPermission.
+    """
     queryset = MovementTrends.objects.all()
     serializer_class = MovementTrendsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['legislative_brief_relevance', 'emerging_pattern']
     search_fields = ['category', 'dimension', 'timeframe', 'insights', 'confidence_level']

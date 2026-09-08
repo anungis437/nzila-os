@@ -8,6 +8,25 @@ from .models import (AnalyticsScheduledReports, ReportDeliveryHistory, Benchmark
 from .serializers import (AnalyticsScheduledReportsSerializer, ReportDeliveryHistorySerializer, BenchmarkCategoriesSerializer, BenchmarkDataSerializer, OrganizationBenchmarkSnapshotsSerializer, AnalyticsMetricsSerializer, KpiConfigurationsSerializer, TrendAnalysesSerializer, InsightRecommendationsSerializer, ComparativeAnalysesSerializer, PageAnalyticsSerializer, CommunicationAnalyticsSerializer, UserEngagementScoresSerializer, ReportsSerializer, ReportTemplatesSerializer, ReportExecutionsSerializer, ScheduledReportsSerializer, ReportSharesSerializer, WageBenchmarksSerializer, UnionDensitySerializer, CostOfLivingDataSerializer, ContributionRatesSerializer, ExternalDataSyncLogSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment (PR #752 round 46 — system and mixed execution
+    authority cohort): union_density is SYSTEM_ONLY reference data (no
+    organization_id column, synced only by the real
+    app/api/cron/external-data-sync/route.ts cron job; even its tenant-facing
+    read in app/[locale]/dashboard/data-source/page.tsx executes entirely via
+    withSystemContext(), never the tenant runtime). This generated
+    ModelViewSet defaults to full CRUD for any authenticated user — write
+    access here would let any user corrupt globally-shared reference data
+    seen by every organization. No real Django consumer found.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class AnalyticsScheduledReportsViewSet(viewsets.ModelViewSet):
     """API endpoint for AnalyticsScheduledReports operations."""
     queryset = AnalyticsScheduledReports.objects.all()
@@ -198,34 +217,24 @@ class ReportSharesViewSet(viewsets.ModelViewSet):
 
 
 class WageBenchmarksViewSet(viewsets.ModelViewSet):
+    """round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, EXTERNAL_REFERENCE_AND_SYNC
+    family): the legitimate path is lib/services/external-data/
+    wage-enrichment-service.ts's syncWageData, invoked only via the real
+    CRON_SECRET-gated app/api/cron/external-data-sync/route.ts and now
+    executed under withSystemContext (SYSTEM_RUNTIME) after this round's
+    principal-mismatch fix. This generated Django ViewSet is a separate,
+    unscoped duplicate surface with no legitimate consumer of its own.
+    Contained via DenyAllPermission.
+    """
     """API endpoint for WageBenchmarks operations."""
     queryset = WageBenchmarks.objects.all()
     serializer_class = WageBenchmarksSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['noc_code']
     search_fields = ['noc_code']
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
-
-
-class DenyAllPermission(permissions.BasePermission):
-    """Fail-closed containment (PR #752 round 46 — system and mixed execution
-    authority cohort): union_density is SYSTEM_ONLY reference data (no
-    organization_id column, synced only by the real
-    app/api/cron/external-data-sync/route.ts cron job; even its tenant-facing
-    read in app/[locale]/dashboard/data-source/page.tsx executes entirely via
-    withSystemContext(), never the tenant runtime). This generated
-    ModelViewSet defaults to full CRUD for any authenticated user — write
-    access here would let any user corrupt globally-shared reference data
-    seen by every organization. No real Django consumer found.
-    """
-
-    def has_permission(self, request, view):
-        return False
-
-    def has_object_permission(self, request, view, obj):
-        return False
 
 
 class UnionDensityViewSet(viewsets.ModelViewSet):
@@ -241,10 +250,14 @@ class UnionDensityViewSet(viewsets.ModelViewSet):
 
 
 class CostOfLivingDataViewSet(viewsets.ModelViewSet):
+    """round 52: same disposition as WageBenchmarksViewSet above — the
+    legitimate path is wage-enrichment-service.ts's syncCOLAData (also now
+    fixed to run under withSystemContext). Contained via DenyAllPermission.
+    """
     """API endpoint for CostOfLivingData operations."""
     queryset = CostOfLivingData.objects.all()
     serializer_class = CostOfLivingDataSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['geography_code']
     search_fields = ['geography_code']
@@ -265,10 +278,17 @@ class ContributionRatesViewSet(viewsets.ModelViewSet):
 
 
 class ExternalDataSyncLogViewSet(viewsets.ModelViewSet):
+    """round 52: this append-only sync log is written by
+    createSyncLog/updateSyncLog (wage-enrichment-service.ts), shared by all
+    sync* methods and invoked only via the CRON_SECRET-gated cron route —
+    never by ordinary tenant traffic. This generated Django ViewSet is a
+    separate, unscoped duplicate surface with no legitimate consumer of its
+    own. Contained via DenyAllPermission.
+    """
     """API endpoint for ExternalDataSyncLog operations."""
     queryset = ExternalDataSyncLog.objects.all()
     serializer_class = ExternalDataSyncLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source']
     search_fields = ['source']

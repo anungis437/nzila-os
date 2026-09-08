@@ -69,6 +69,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 import { WageEnrichmentService } from '../wage-enrichment-service';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 describe('WageEnrichmentService', () => {
   let service: WageEnrichmentService;
@@ -146,6 +147,12 @@ describe('WageEnrichmentService', () => {
       const result = await service.syncWageData({ nocCodes: [] });
       expect(result.syncId).toContain('sync_');
     });
+
+    it('round 52: executes under withSystemContext (SYSTEM_RUNTIME), not the plain tenant db — wage_benchmarks has no organizationId column and is only ever written by this SYSTEM_SCHEDULE cron path', async () => {
+      mocks.mockGetWageData.mockResolvedValue([]);
+      await service.syncWageData({ nocCodes: [] });
+      expect(withSystemContext).toHaveBeenCalled();
+    });
   });
 
   describe('syncUnionDensity', () => {
@@ -188,6 +195,12 @@ describe('WageEnrichmentService', () => {
       expect(result.success).toBe(true);
       expect(result.recordsInserted).toBe(1);
     });
+
+    it('round 52: executes under withSystemContext (SYSTEM_RUNTIME), not the plain tenant db — cost_of_living_data has no organizationId column and is only ever written by this SYSTEM_SCHEDULE cron path', async () => {
+      mocks.mockGetCOLAData.mockResolvedValue([]);
+      await service.syncCOLAData({ geography: '01' });
+      expect(withSystemContext).toHaveBeenCalled();
+    });
   });
 
   describe('syncContributionRates', () => {
@@ -203,6 +216,19 @@ describe('WageEnrichmentService', () => {
       const result = await service.syncContributionRates(2025);
       expect(result.success).toBe(true);
       expect(result.recordsInserted).toBeGreaterThanOrEqual(2);
+    });
+
+    it('round 52: FINANCE FREEZE — contribution_rates is an explicitly deferred finance exception; this round must not touch its runtime principal', async () => {
+      mocks.mockGetEIContributionRates.mockResolvedValue({
+        year: 2025, employeeRate: 1.63, employerRate: 2.28, maxInsurableEarnings: 65700,
+      });
+      mocks.mockGetCPPContributionRates.mockResolvedValue({
+        year: 2025, employeeRate: 5.95, employerRate: 5.95, exemptionLimit: 3500, maximumContribution: 3867,
+      });
+      mocks.mockLimit.mockResolvedValue([]);
+
+      await service.syncContributionRates(2025);
+      expect(withSystemContext).not.toHaveBeenCalled();
     });
 
     it('updates existing contribution rates', async () => {

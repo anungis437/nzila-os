@@ -128,6 +128,13 @@ export class WageEnrichmentService {
     geography?: string;
     year?: number;
   }): Promise<SyncResult> {
+    // SECURITY FIX (round 52): wage_benchmarks has no organizationId column —
+    // it is genuinely global reference data synced only by this real cron
+    // path (app/api/cron/external-data-sync/route.ts). This previously ran
+    // on the plain tenant `db` import despite being SYSTEM_SCHEDULE-invoked,
+    // the same principal-mismatch class round 46 already fixed for
+    // syncUnionDensity below.
+    return withSystemContext(async (tx) => {
     const startTime = Date.now();
     const syncId = await this.createSyncLog('statcan', 'api', 'running', params);
     this.syncId = syncId;
@@ -153,7 +160,7 @@ export class WageEnrichmentService {
             recordsProcessed++;
 
             try {
-              const existing = await db.select()
+              const existing = await tx.select()
                 .from(wageBenchmarks)
                 .where(
                   and(
@@ -168,7 +175,7 @@ export class WageEnrichmentService {
               const wageValue = String(record.Wages.Value);
 
               if (existing.length > 0) {
-                await db.update(wageBenchmarks)
+                await tx.update(wageBenchmarks)
                   .set({
                     wageValue,
                     wageType: this.mapStatisticsToWageType(record.Statistics),
@@ -178,7 +185,7 @@ export class WageEnrichmentService {
                   .where(eq(wageBenchmarks.id, existing[0].id));
                 recordsUpdated++;
               } else {
-                await db.insert(wageBenchmarks).values({
+                await tx.insert(wageBenchmarks).values({
                   nocCode: record.NOC,
                   nocName: record.NOCName,
                   nocCategory: null,
@@ -248,6 +255,7 @@ export class WageEnrichmentService {
 
       throw error;
     }
+    });
   }
 
   /**
@@ -375,6 +383,9 @@ export class WageEnrichmentService {
     startYear?: number;
     endYear?: number;
   }): Promise<SyncResult> {
+    // SECURITY FIX (round 52): cost_of_living_data has no organizationId
+    // column — same principal-mismatch class as syncWageData above.
+    return withSystemContext(async (tx) => {
     const startTime = Date.now();
     const syncId = await this.createSyncLog('statcan', 'api', 'running', { ...params, type: 'cola' });
 
@@ -391,7 +402,7 @@ export class WageEnrichmentService {
         recordsProcessed++;
 
         try {
-          const existing = await db.select()
+          const existing = await tx.select()
             .from(costOfLivingData)
             .where(
               and(
@@ -402,7 +413,7 @@ export class WageEnrichmentService {
             .limit(1);
 
           if (existing.length > 0) {
-            await db.update(costOfLivingData)
+            await tx.update(costOfLivingData)
               .set({
                 cpiValue: String(record.cpi),
                 inflationRate: String(record.inflationRate),
@@ -412,7 +423,7 @@ export class WageEnrichmentService {
               .where(eq(costOfLivingData.id, existing[0].id));
             recordsUpdated++;
           } else {
-            await db.insert(costOfLivingData).values({
+            await tx.insert(costOfLivingData).values({
               geographyCode: record.region,
               geographyName: this.getGeographyName(record.region),
               cpiValue: String(record.cpi),
@@ -460,6 +471,7 @@ export class WageEnrichmentService {
 
       throw error;
     }
+    });
   }
 
   /**

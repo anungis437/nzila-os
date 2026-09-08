@@ -163,10 +163,17 @@ class ConsentRecordsViewSet(viewsets.ModelViewSet):
 
 
 class DataClassificationPolicyViewSet(viewsets.ModelViewSet):
+    """round 52: the legitimate path for this platform-wide policy table is
+    app/api/privacy/{breach,dsar,provincial}/route.ts's crudRoutes (readRole
+    'member', writeRole 'compliance_manager' — a genuine platform-elevated
+    role, fixed this round from 'admin'). This generated Django ViewSet is a
+    separate, unscoped duplicate surface with no legitimate consumer of its
+    own. Contained via DenyAllPermission.
+    """
     """API endpoint for DataClassificationPolicy operations."""
     queryset = DataClassificationPolicy.objects.all()
     serializer_class = DataClassificationPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['enforce_strict_separation', 'allow_bargaining_unit_roster', 'allow_greivance_participation', 'block_strike_plans', 'block_membership_lists', 'block_internal_discussions']
     search_fields = ['id', 'policy_name', 'policy_description', 'approved_by']
@@ -479,10 +486,19 @@ class LocationTrackingViewSet(viewsets.ModelViewSet):
 
 
 class GeofencesViewSet(viewsets.ModelViewSet):
-    """API endpoint for Geofences operations."""
+    """API endpoint for Geofences operations.
+
+    round 52: geofences is tenant-scoped by unionLocalId on the TypeScript
+    side (services/geofence-privacy-service.ts, app/api/location/geofence),
+    but the Next.js frontend never calls this Django backend at all
+    (git-grep confirmed — no legitimate consumer). This generated ViewSet
+    was IsAuthenticated-only with NO organization/union-local filter,
+    exposing every tenant's geofences to any authenticated Django user.
+    Contained via DenyAllPermission.
+    """
     queryset = Geofences.objects.all()
     serializer_class = GeofencesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['geofence_type']
     search_fields = ['name', 'description', 'geofence_type']
@@ -530,10 +546,16 @@ class LocationTrackingAuditViewSet(viewsets.ModelViewSet):
 
 
 class LocationDeletionLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for LocationDeletionLog operations."""
+    """API endpoint for LocationDeletionLog operations.
+
+    round 52: this table has no organization/user column and no legitimate
+    TypeScript reader anywhere (write-only compliance evidence). This
+    generated ViewSet was IsAuthenticated-only with no legitimate consumer
+    on either side. Contained via DenyAllPermission.
+    """
     queryset = LocationDeletionLog.objects.all()
     serializer_class = LocationDeletionLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['deletion_type']
     search_fields = ['deletion_type']
@@ -542,10 +564,18 @@ class LocationDeletionLogViewSet(viewsets.ModelViewSet):
 
 
 class LocationTrackingConfigViewSet(viewsets.ModelViewSet):
-    """API endpoint for LocationTrackingConfig operations."""
+    """API endpoint for LocationTrackingConfig operations.
+
+    round 52: this is a platform-wide singleton config (see
+    db/schema/domains/compliance/geofence.ts) with no legitimate
+    TypeScript-side mutation route and no Django consumer. This generated
+    ViewSet was IsAuthenticated-only, letting any authenticated Django user
+    mutate the platform-wide location-tracking safety configuration
+    (e.g. backgroundTrackingAllowed). Contained via DenyAllPermission.
+    """
     queryset = LocationTrackingConfig.objects.all()
     serializer_class = LocationTrackingConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['location_tracking_enabled', 'max_retention_hours']
     search_fields = ['max_retention_hours']
@@ -748,10 +778,17 @@ class PciDssEncryptionKeysViewSet(viewsets.ModelViewSet):
 
 
 class ProvincialPrivacyConfigViewSet(viewsets.ModelViewSet):
+    """round 52: the legitimate path for this global per-province reference
+    table is services/provincial-privacy-service.ts's getProvinceConfig
+    (read-only, called internally by recordConsent via POST /api/privacy/
+    consent). No production code ever writes this table. This generated
+    Django ViewSet is a separate, unscoped read+write duplicate surface with
+    no legitimate consumer of its own. Contained via DenyAllPermission.
+    """
     """API endpoint for ProvincialPrivacyConfig operations."""
     queryset = ProvincialPrivacyConfig.objects.all()
     serializer_class = ProvincialPrivacyConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['province']
     search_fields = ['province']
@@ -772,10 +809,16 @@ class ProvincialConsentViewSet(viewsets.ModelViewSet):
 
 
 class PrivacyBreachesViewSet(viewsets.ModelViewSet):
+    """round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, PRIVACY_AND_JURISDICTION
+    family): services/provincial-privacy-service.ts's reportBreach/
+    markBreachNotificationSent/getBreachesApproachingDeadline (the only TS
+    code touching this table) have zero production callers anywhere
+    (git-grep confirmed) — dead TS code. Contained via DenyAllPermission.
+    """
     """API endpoint for PrivacyBreaches operations."""
     queryset = PrivacyBreaches.objects.all()
     serializer_class = PrivacyBreachesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['breach_type']
     search_fields = ['breach_type']

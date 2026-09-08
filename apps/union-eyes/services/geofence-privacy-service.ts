@@ -51,7 +51,6 @@ export interface GeofenceDefinition {
   centerLongitude: number;
   radiusMeters: number;
   strikeId?: string;
-  unionLocalId?: string;
 }
 
 export class GeofencePrivacyService {
@@ -220,7 +219,7 @@ export class GeofencePrivacyService {
   /**
    * Create geofence (strike line, union hall, etc.)
    */
-  static async createGeofence(geofence: GeofenceDefinition) {
+  static async createGeofence(geofence: GeofenceDefinition, trustedUnionLocalId: string) {
     const [created] = await db
       .insert(geofences)
       .values({
@@ -231,7 +230,10 @@ export class GeofencePrivacyService {
         centerLongitude: geofence.centerLongitude.toFixed(8),
         radiusMeters: geofence.radiusMeters.toFixed(2),
         strikeId: geofence.strikeId,
-        unionLocalId: geofence.unionLocalId,
+        // round 52: unionLocalId is the tenant boundary for this table (no
+        // organizationId column exists) — always the server-resolved caller
+        // org, never the client-supplied GeofenceDefinition.unionLocalId.
+        unionLocalId: trustedUnionLocalId,
         status: "active",
       })
       .returning();
@@ -246,7 +248,8 @@ export class GeofencePrivacyService {
     userId: string,
     latitude: number,
     longitude: number,
-    geofenceId: string
+    geofenceId: string,
+    trustedUnionLocalId: string
   ): Promise<{ inside: boolean; distance: number }> {
     const geofence = await db
       .select()
@@ -259,6 +262,14 @@ export class GeofencePrivacyService {
     }
 
     const fence = geofence[0];
+
+    // round 52: geofences are tenant-scoped by unionLocalId — a caller from
+    // a different union local must not be able to probe another tenant's
+    // geofence (existence, radius, or entry/exit status).
+    if (fence.unionLocalId !== trustedUnionLocalId) {
+      throw new Error("Geofence not found");
+    }
+
     const distance = this.calculateDistance(
       latitude,
       longitude,

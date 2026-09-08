@@ -170,10 +170,20 @@ class ArbitrationDecisionsViewSet(viewsets.ModelViewSet):
 
 
 class ArbitratorProfilesViewSet(viewsets.ModelViewSet):
-    """API endpoint for ArbitratorProfiles operations."""
+    """API endpoint for ArbitratorProfiles operations.
+
+    round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, DIRECTORY_PROFILE
+    family): lib/services/precedent-service.ts's getArbitratorProfile/
+    updateArbitratorStats/getTopArbitrators (the only TS code touching this
+    table) have zero production callers anywhere (git-grep confirmed) — dead
+    TS code; the real routes (app/api/precedents, app/api/precedents/search)
+    only import listPrecedents/searchPrecedents/createPrecedent/etc., which
+    touch arbitrationDecisions, never arbitratorProfiles. Contained via
+    DenyAllPermission.
+    """
     queryset = ArbitratorProfiles.objects.all()
     serializer_class = ArbitratorProfilesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']

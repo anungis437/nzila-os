@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-08T11:23:15.195Z",
+  "generatedAt": "2026-09-08T14:40:45.440Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 574,
-  "pendingReviewCount": 126,
-  "tenantGrantedTableCount": 256,
-  "systemGrantedTableCount": 36,
+  "readyForExplicitGrantCount": 587,
+  "pendingReviewCount": 113,
+  "tenantGrantedTableCount": 264,
+  "systemGrantedTableCount": 39,
   "tenantOperationTotals": {
-    "SELECT": 244,
-    "INSERT": 217,
-    "UPDATE": 148,
+    "SELECT": 250,
+    "INSERT": 223,
+    "UPDATE": 149,
     "DELETE": 83
   },
   "systemOperationTotals": {
-    "SELECT": 31,
-    "INSERT": 17,
-    "UPDATE": 12,
+    "SELECT": 33,
+    "INSERT": 20,
+    "UPDATE": 15,
     "DELETE": 0
   },
   "riskSignals": {
@@ -114,6 +114,7 @@
       "deadline_audit_events",
       "deadline_reminders",
       "dues_assignments",
+      "external_data_sync_log",
       "grievance_deadlines",
       "message_log",
       "notification_delivery_log",
@@ -145,7 +146,12 @@
       "cba_intel_review_decisions",
       "cba_intel_sources",
       "cba_intel_wage_adjustments",
+      "data_classification_policy",
+      "external_data_sync_log",
       "feature_flags",
+      "location_deletion_log",
+      "location_tracking_config",
+      "pending_profiles",
       "testimonials"
     ]
   },
@@ -414,6 +420,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "arbitrator_profiles",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -1319,6 +1331,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "cost_of_living_data",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "council_elections",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
@@ -1395,6 +1417,15 @@
       "table": "data_anonymization_log",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_classification_policy",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2012,6 +2043,18 @@
       "systemPrivileges": []
     },
     {
+      "table": "external_data_sync_log",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "external_departments",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2320,6 +2363,15 @@
       "table": "foreign_workers",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "geofences",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2779,9 +2831,26 @@
       "systemPrivileges": []
     },
     {
+      "table": "location_deletion_log",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "location_tracking_audit",
       "classification": "USER_RLS_REQUIRED",
       "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "location_tracking_config",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
         "INSERT"
       ],
       "systemPrivileges": []
@@ -3081,6 +3150,14 @@
       "tenantPrivileges": [
         "SELECT",
         "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "movement_trends",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT"
       ],
       "systemPrivileges": []
     },
@@ -3498,6 +3575,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "pending_profiles",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "pension_benefit_claims",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3722,6 +3808,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "privacy_breaches",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "procurement_bids",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -3737,6 +3829,14 @@
       "table": "program_enrollments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "provincial_privacy_config",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -4424,6 +4524,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "user_uuid_mapping",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "voter_eligibility",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4453,6 +4559,16 @@
         "DELETE"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "wage_benchmarks",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
     },
     {
       "table": "wage_progressions",
@@ -4665,10 +4781,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "arbitrator_profiles",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "automation_rules",
       "classification": "NEEDS_REVIEW"
     },
@@ -4745,10 +4857,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "cost_of_living_data",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "course_registrations",
       "classification": "NEEDS_REVIEW"
     },
@@ -4766,10 +4874,6 @@
     },
     {
       "table": "customer_onboarding_milestones",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "data_classification_policy",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4825,10 +4929,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "external_data_sync_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "fee_adjustments",
       "classification": "NEEDS_REVIEW"
     },
@@ -4858,10 +4958,6 @@
     },
     {
       "table": "geofence_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "geofences",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4905,15 +5001,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "location_deletion_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "location_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "location_tracking_config",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4922,10 +5010,6 @@
     },
     {
       "table": "mobile_sync_queue",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "movement_trends",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4938,10 +5022,6 @@
     },
     {
       "table": "payments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pending_profiles",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4977,10 +5057,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "privacy_breaches",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "profiles",
       "classification": "NEEDS_REVIEW"
     },
@@ -4990,10 +5066,6 @@
     },
     {
       "table": "provincial_data_handling",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "provincial_privacy_config",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5125,19 +5197,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "user_uuid_mapping",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "votes",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "voting_options",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "wage_benchmarks",
       "classification": "NEEDS_REVIEW"
     },
     {

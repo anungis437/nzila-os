@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { GeofencePrivacyService } from "@/services/geofence-privacy-service";
-import { withApiAuth } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 
 import {
   ErrorCode,
@@ -12,6 +13,15 @@ import {
  * Geofence Management API
  * POST: Create geofence
  * GET: Check if location is within geofence
+ *
+ * round 52: geofences has no organizationId column, but unionLocalId is the
+ * real tenant boundary (a "union local" is this domain's organization) — it
+ * is always resolved server-side from the authenticated caller, never
+ * trusted from the request body/query (previously any authenticated user
+ * could create/probe geofences under an arbitrary unionLocalId). Similarly,
+ * the entry-check userId is always the caller's own id, never a client-
+ * supplied query param (matches the round-49 fix already applied to
+ * app/api/location/track).
  */
 
 
@@ -23,14 +33,18 @@ const _locationGeofenceSchema = z.object({
   centerLongitude: z.string().min(1, 'centerLongitude is required'),
   radiusMeters: z.unknown().optional(),
   strikeId: z.string().uuid('Invalid strikeId'),
-  unionLocalId: z.string().uuid('Invalid unionLocalId'),
 });
 
 
 export const POST = withApiAuth(async (req: NextRequest) => {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    }
+
     const body = await req.json();
-    const { name, description, geofenceType, centerLatitude, centerLongitude, radiusMeters, strikeId, unionLocalId } = body;
+    const { name, description, geofenceType, centerLatitude, centerLongitude, radiusMeters, strikeId } = body;
 
     if (!name || !geofenceType || centerLatitude === undefined || centerLongitude === undefined || !radiusMeters) {
       return standardErrorResponse(
@@ -61,16 +75,20 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     );
     }
 
-    const geofence = await GeofencePrivacyService.createGeofence({
-      name,
-      description,
-      geofenceType,
-      centerLatitude,
-      centerLongitude,
-      radiusMeters,
-      strikeId,
-      unionLocalId,
-    });
+    const trustedUnionLocalId = await getOrganizationIdForUser(user.id);
+
+    const geofence = await GeofencePrivacyService.createGeofence(
+      {
+        name,
+        description,
+        geofenceType,
+        centerLatitude,
+        centerLongitude,
+        radiusMeters,
+        strikeId,
+      },
+      trustedUnionLocalId,
+    );
 
     return standardSuccessResponse(
       { geofence,
@@ -86,16 +104,20 @@ export const POST = withApiAuth(async (req: NextRequest) => {
 
 export const GET = withApiAuth(async (req: NextRequest) => {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    }
+
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
     const geofenceId = searchParams.get("geofenceId");
     const latitude = searchParams.get("latitude");
     const longitude = searchParams.get("longitude");
 
-    if (!userId || !geofenceId || !latitude || !longitude) {
+    if (!geofenceId || !latitude || !longitude) {
       return standardErrorResponse(
       ErrorCode.VALIDATION_ERROR,
-      'Missing required parameters: userId, geofenceId, latitude, longitude'
+      'Missing required parameters: geofenceId, latitude, longitude'
     );
     }
 
@@ -109,10 +131,11 @@ export const GET = withApiAuth(async (req: NextRequest) => {
     );
     }
 
-    const result = await GeofencePrivacyService.checkGeofenceEntry(userId, lat, lon, geofenceId);
+    const trustedUnionLocalId = await getOrganizationIdForUser(user.id);
+    const result = await GeofencePrivacyService.checkGeofenceEntry(user.id, lat, lon, geofenceId, trustedUnionLocalId);
 
     return NextResponse.json({
-      userId,
+      userId: user.id,
       geofenceId,
       inside: result.inside,
       distance: result.distance,
