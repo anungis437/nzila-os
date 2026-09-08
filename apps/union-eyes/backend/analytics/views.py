@@ -166,10 +166,16 @@ class UserEngagementScoresViewSet(viewsets.ModelViewSet):
 
 
 class ReportsViewSet(viewsets.ModelViewSet):
-    """API endpoint for Reports operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, REPORTING family): the
+    real, live authority surface for reports is the Next.js crudRoutes-based
+    app/api/reports/route.ts and [id]/route.ts (org-scoped). This generated
+    Django ViewSet had no organization_id filter at all and no legitimate
+    TS/frontend consumer of the Django REST path was found anywhere
+    (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = Reports.objects.all()
     serializer_class = ReportsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

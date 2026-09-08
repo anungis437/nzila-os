@@ -100,6 +100,14 @@ export const POST = withApi(
       })
       .returning();
 
-    return created;
+    // Never echo raw credential material back to the client (same
+    // redaction as GET — round 53: the create response previously
+    // returned samlCertificate/oidcClientSecret in the clear).
+    const { samlCertificate: _cert, oidcClientSecret: _secret, ...safe } = created;
+    return {
+      ...safe,
+      samlCertificate: _cert ? true : null,
+      oidcClientSecret: _secret ? true : null,
+    };
   },
 );

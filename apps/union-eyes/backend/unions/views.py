@@ -94,10 +94,17 @@ class BudgetReservationsViewSet(viewsets.ModelViewSet):
 
 
 class CalendarsViewSet(viewsets.ModelViewSet):
-    """API endpoint for Calendars operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, CALENDAR_AND_SCHEDULING
+    family): the real, live authority surface for calendars is the Next.js
+    crudRoutes-based app/api/calendars/route.ts and [id]/route.ts (org- and
+    owner-scoped). This generated Django ViewSet had no organization_id
+    filter at all and no legitimate TS/frontend consumer of the Django REST
+    path was found anywhere (git-grep confirmed). Contained via
+    DenyAllPermission.
+    """
     queryset = Calendars.objects.all()
     serializer_class = CalendarsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -126,20 +133,31 @@ class EventAttendeesViewSet(viewsets.ModelViewSet):
 
 
 class MeetingRoomsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MeetingRooms operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, CALENDAR_AND_SCHEDULING
+    family): the real, live authority surface for meeting_rooms is the
+    Next.js crudRoutes-based app/api/meeting-rooms/route.ts (org-scoped).
+    This generated Django ViewSet had no organization_id filter at all and
+    no legitimate TS/frontend consumer of the Django REST path was found
+    anywhere (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = MeetingRooms.objects.all()
     serializer_class = MeetingRoomsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class RoomBookingsViewSet(viewsets.ModelViewSet):
-    """API endpoint for RoomBookings operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, CALENDAR_AND_SCHEDULING
+    family, adjacent table): room_bookings.roomId FKs to meeting_rooms; git-grep
+    confirms ZERO production TS callers of roomBookings anywhere in this app
+    (dead code) and no Django consumer either. This ViewSet had no
+    organization_id filter at all. Contained via DenyAllPermission.
+    """
     queryset = RoomBookings.objects.all()
     serializer_class = RoomBookingsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['room_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -780,10 +798,16 @@ class SegmentExportsViewSet(viewsets.ModelViewSet):
 
 
 class TrainingCoursesViewSet(viewsets.ModelViewSet):
-    """API endpoint for TrainingCourses operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, TRAINING_AND_REGISTRATION
+    family): real, live authority surface is the Next.js crudRoutes-based
+    app/api/education/courses/route.ts (org-scoped). This generated Django
+    ViewSet had no organization_id filter at all and no legitimate TS/
+    frontend consumer of the Django REST path was found anywhere
+    (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = TrainingCourses.objects.all()
     serializer_class = TrainingCoursesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['course_code']
     search_fields = ['course_code']
@@ -804,10 +828,19 @@ class CourseSessionsViewSet(viewsets.ModelViewSet):
 
 
 class CourseRegistrationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for CourseRegistrations operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, TRAINING_AND_REGISTRATION
+    family): real, live authority surface is the Next.js crudRoutes-based
+    app/api/education/registrations/route.ts (org- and member-scoped). This
+    generated Django ViewSet had no organization_id filter at all (only a
+    member_id filterset field with no ownership check), exposing every
+    organization's registrations — including test scores, attendance, and
+    certification status — to any authenticated user. No legitimate TS/
+    frontend consumer of the Django REST path was found anywhere (git-grep
+    confirmed). Contained via DenyAllPermission.
+    """
     queryset = CourseRegistrations.objects.all()
     serializer_class = CourseRegistrationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['member_id']
     search_fields = ['member_id']
@@ -828,10 +861,16 @@ class MemberCertificationsViewSet(viewsets.ModelViewSet):
 
 
 class TrainingProgramsViewSet(viewsets.ModelViewSet):
-    """API endpoint for TrainingPrograms operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, TRAINING_AND_REGISTRATION
+    family): real, live authority surface is the Next.js crudRoutes-based
+    app/api/education/programs/route.ts (org-scoped). This generated Django
+    ViewSet had no organization_id filter at all and no legitimate TS/
+    frontend consumer of the Django REST path was found anywhere
+    (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = TrainingPrograms.objects.all()
     serializer_class = TrainingProgramsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['program_name']
     search_fields = ['program_name']

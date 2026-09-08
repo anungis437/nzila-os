@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-08T14:24:38.490Z",
-  "totalNeedsReview": 113,
+  "generatedAt": "2026-09-08T17:25:58.406Z",
+  "totalNeedsReview": 102,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 113
+    "NEEDS_REVIEW": 102
   },
   "cohortCounts": {
     "COMPLEX:org:NORMAL": 24,
@@ -14,7 +14,6 @@
     "COMPLEX:user:NORMAL": 14,
     "PARENT_OWNED:user:NORMAL": 2,
     "COMPLEX:user:HIGH": 6,
-    "SIMPLE_TENANT:org:HIGH": 11,
     "PARENT_OWNED:parent:NORMAL": 9
   },
   "rows": [
@@ -257,7 +256,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -1132,7 +1132,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -1163,76 +1164,6 @@
         "services/transfer-pricing-service.ts: insert/write path",
         "services/transfer-pricing-service.ts: update/write path",
         "backend/billing/views.py: update/write path"
-      ]
-    },
-    {
-      "table": "ai_budgets",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "ai-chatbot-schema.aiBudgets",
-          "domains/ml/chatbot.aiBudgets"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/ai/services/cost-tracking-wrapper.ts",
-          "lib/ai/services/rate-limiter.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/organizations/platform-tenant.ts"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/ai/services/cost-tracking-wrapper.ts",
-          "lib/ai/services/rate-limiter.ts",
-          "lib/ai/template-engine.ts",
-          "backend/ai_core/views.py",
-          "backend/ai_core/models.py",
-          "backend/ai_core/tests_round35_ai_budgets_containment.py",
-          "lib/ai/services/__tests__/round35-ai-budgets-reachability-lock.test.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": true,
-        "djangoDetail": "model=backend/ai_core/models.py, viewset=backend/ai_core/views.py, router-registered, DenyAll"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/ai/services/cost-tracking-wrapper.ts: organization identifier reference",
-        "lib/ai/services/rate-limiter.ts: organization identifier reference",
-        "lib/ai/template-engine.ts: organization identifier reference",
-        "backend/ai_core/views.py: organization identifier reference",
-        "backend/ai_core/views.py: organization_id",
-        "backend/ai_core/models.py: organization identifier reference",
-        "backend/ai_core/models.py: organization_id",
-        "backend/ai_core/tests_round35_ai_budgets_containment.py: organization identifier reference",
-        "backend/ai_core/tests_round35_ai_budgets_containment.py: organization_id",
-        "lib/ai/services/__tests__/round35-ai-budgets-reachability-lock.test.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/ai/services/cost-tracking-wrapper.ts: insert/write path",
-        "lib/ai/template-engine.ts: update/write path",
-        "backend/ai_core/views.py: delete/write path"
       ]
     },
     {
@@ -2006,7 +1937,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -2060,7 +1992,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -2781,138 +2714,6 @@
       ]
     },
     {
-      "table": "calendars",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "calendar-schema.calendars",
-          "domains/scheduling/calendar.calendars"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/[locale]/calendar/page.tsx",
-          "app/api/calendar-sync/connections/[id]/sync/route.ts",
-          "app/api/calendars/[id]/route.ts",
-          "app/api/calendars/route.ts",
-          "app/api/cron/calendar-sync/route.ts",
-          "components/calendar/CalendarSidebar.tsx",
-          "components/calendar/CalendarSyncManager.tsx",
-          "components/onboarding/tour-steps.ts",
-          "lib/external-calendar-sync/google-calendar-service.ts",
-          "lib/external-calendar-sync/microsoft-calendar-service.ts",
-          "lib/security/rls-gap-remediation.ts",
-          "lib/services/calendar-service.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "lib/security/rls-gap-remediation.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/[locale]/calendar/page.tsx",
-          "app/api/calendar-sync/connections/[id]/sync/route.ts",
-          "app/api/calendars/[id]/route.ts",
-          "app/api/calendars/route.ts",
-          "app/api/cron/calendar-sync/route.ts",
-          "components/calendar/CalendarSidebar.tsx",
-          "components/calendar/CalendarSyncManager.tsx",
-          "components/onboarding/tour-steps.ts",
-          "lib/external-calendar-sync/google-calendar-service.ts",
-          "lib/external-calendar-sync/microsoft-calendar-service.ts",
-          "lib/security/rls-gap-remediation.ts",
-          "lib/services/calendar-service.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts",
-          "services/financial-service/drizzle/0000_lucky_mole_man.sql",
-          "services/financial-service/drizzle/meta/0000_snapshot.json"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/unions/models.py, viewset=backend/unions/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "app/api/calendar-sync/connections/[id]/sync/route.ts: organization identifier reference",
-        "app/api/cron/calendar-sync/route.ts: organization identifier reference",
-        "lib/external-calendar-sync/google-calendar-service.ts: organization identifier reference",
-        "lib/external-calendar-sync/microsoft-calendar-service.ts: organization identifier reference",
-        "lib/security/rls-gap-remediation.ts: organization identifier reference",
-        "lib/security/rls-gap-remediation.ts: organization_id",
-        "lib/services/calendar-service.ts: organization identifier reference",
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization_id",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: organization identifier reference",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: organization_id",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: organization identifier reference",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: organization_id",
-        "backend/unions/views.py: organization identifier reference",
-        "backend/unions/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/[locale]/calendar/page.tsx: update/write path",
-        "app/[locale]/calendar/page.tsx: delete/write path",
-        "app/api/calendar-sync/connections/[id]/sync/route.ts: update/write path",
-        "app/api/calendars/[id]/route.ts: delete/write path",
-        "app/api/cron/calendar-sync/route.ts: update/write path",
-        "components/calendar/CalendarSyncManager.tsx: update/write path",
-        "components/calendar/CalendarSyncManager.tsx: delete/write path",
-        "components/onboarding/tour-steps.ts: update/write path",
-        "lib/external-calendar-sync/google-calendar-service.ts: insert/write path",
-        "lib/external-calendar-sync/google-calendar-service.ts: update/write path",
-        "lib/external-calendar-sync/google-calendar-service.ts: delete/write path",
-        "lib/external-calendar-sync/microsoft-calendar-service.ts: insert/write path",
-        "lib/external-calendar-sync/microsoft-calendar-service.ts: update/write path",
-        "lib/external-calendar-sync/microsoft-calendar-service.ts: delete/write path",
-        "lib/security/rls-gap-remediation.ts: insert/write path",
-        "lib/security/rls-gap-remediation.ts: update/write path",
-        "lib/security/rls-gap-remediation.ts: delete/write path",
-        "lib/services/calendar-service.ts: insert/write path",
-        "lib/services/calendar-service.ts: update/write path",
-        "lib/services/calendar-service.ts: delete/write path",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: update/write path",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: delete/write path",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: update/write path",
-        "backend/unions/views.py: insert/write path",
-        "backend/unions/views.py: update/write path",
-        "backend/unions/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "chargeback_statements",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -3110,81 +2911,6 @@
         "lib/pilot/pilot-ownership.ts: delete/write path",
         "services/platform-economics/contract-service.ts: insert/write path",
         "services/platform-economics/contract-service.ts: update/write path"
-      ]
-    },
-    {
-      "table": "course_registrations",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/scheduling/training.courseRegistrations",
-          "education-training-schema.courseRegistrations"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/education/completions/route.ts",
-          "app/api/education/registrations/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/api/cron/education-reminders/route.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/education/completions/route.ts",
-          "app/api/education/registrations/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/unions/models.py, viewset=backend/unions/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization_id",
-        "backend/unions/views.py: organization identifier reference",
-        "backend/unions/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "backend/unions/views.py: insert/write path",
-        "backend/unions/views.py: update/write path",
-        "backend/unions/views.py: delete/write path"
       ]
     },
     {
@@ -4229,203 +3955,6 @@
       ]
     },
     {
-      "table": "meeting_rooms",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "calendar-schema.meetingRooms",
-          "domains/scheduling/calendar.meetingRooms"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/meeting-rooms/[id]/bookings/route.ts",
-          "app/api/meeting-rooms/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/meeting-rooms/[id]/bookings/route.ts",
-          "app/api/meeting-rooms/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/unions/models.py, viewset=backend/unions/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization_id",
-        "backend/unions/views.py: organization identifier reference",
-        "backend/unions/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/meeting-rooms/[id]/bookings/route.ts: delete/write path",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "backend/unions/views.py: insert/write path",
-        "backend/unions/views.py: update/write path",
-        "backend/unions/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "pilot_checklist_items",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/pilot/pilot-onboarding.pilotChecklistItems"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/pilot/bootstrap/cupe/route.ts",
-          "app/api/pilot/onboarding/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/pilot/bootstrap/cupe/route.ts",
-          "app/api/pilot/onboarding/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [
-        "app/api/pilot/bootstrap/cupe/route.ts: withApi",
-        "app/api/pilot/bootstrap/cupe/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/api/pilot/bootstrap/cupe/route.ts: organization identifier reference",
-        "app/api/pilot/onboarding/route.ts: withRLSContext",
-        "app/api/pilot/onboarding/route.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/pilot/bootstrap/cupe/route.ts: withSystemContext",
-        "app/api/pilot/bootstrap/cupe/route.ts: insert/write path",
-        "app/api/pilot/bootstrap/cupe/route.ts: delete/write path",
-        "app/api/pilot/onboarding/route.ts: insert/write path",
-        "app/api/pilot/onboarding/route.ts: update/write path"
-      ]
-    },
-    {
-      "table": "pilot_enrollments",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/pilot/pilot-enrollments.pilotEnrollments"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/pilot/current/route.ts",
-          "app/api/pilot/overview/route.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/api/pilot/current/route.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/pilot/current/route.ts",
-          "app/api/pilot/overview/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [
-        "app/api/pilot/overview/route.ts: requireUser"
-      ],
-      "organizationEvidence": [
-        "app/api/pilot/current/route.ts: organization identifier reference",
-        "app/api/pilot/current/route.ts: organization_id",
-        "app/api/pilot/overview/route.ts: organization identifier reference",
-        "app/api/pilot/overview/route.ts: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/pilot/current/route.ts: withSystemContext",
-        "app/api/pilot/overview/route.ts: withSystemContext"
-      ]
-    },
-    {
       "table": "pilot_events",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -4543,63 +4072,6 @@
       ],
       "mutationBoundaryEvidence": [
         "app/api/pilot/feedback/route.ts: insert/write path"
-      ]
-    },
-    {
-      "table": "pilot_milestones",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/pilot/pilot-milestones.pilotMilestones"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/pilot/current/route.ts",
-          "app/api/pilot/overview/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/pilot/current/route.ts",
-          "app/api/pilot/overview/route.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "HTTP_ROUTE",
-      "authEvidence": [
-        "app/api/pilot/overview/route.ts: requireUser"
-      ],
-      "organizationEvidence": [
-        "app/api/pilot/current/route.ts: organization identifier reference",
-        "app/api/pilot/current/route.ts: organization_id",
-        "app/api/pilot/overview/route.ts: organization identifier reference",
-        "app/api/pilot/overview/route.ts: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/pilot/current/route.ts: withSystemContext",
-        "app/api/pilot/overview/route.ts: withSystemContext"
       ]
     },
     {
@@ -4776,575 +4248,6 @@
         "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "reports",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/analytics/reports.reports",
-          "reports-schema.reports"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/(marketing)/components/role-page-content.tsx",
-          "app/[locale]/(marketing)/executive-intelligence/page.tsx",
-          "app/[locale]/(marketing)/solutions/executive-leadership/page.tsx",
-          "app/[locale]/dashboard/admin/dues/page.tsx",
-          "app/[locale]/dashboard/admin/dues/reports/page.tsx",
-          "app/[locale]/dashboard/admin/page.tsx",
-          "app/[locale]/dashboard/admin/rewards/page.tsx",
-          "app/[locale]/dashboard/admin/rewards/reports/page.tsx",
-          "app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx",
-          "app/[locale]/dashboard/compliance-admin/page.tsx",
-          "app/[locale]/dashboard/compliance/page.tsx",
-          "app/[locale]/dashboard/finance/exports/page.tsx",
-          "app/[locale]/dashboard/health-safety/hazards/page.tsx",
-          "app/[locale]/dashboard/ops/performance/page.tsx",
-          "app/api/admin/clc/analytics/annual-report/route.ts",
-          "app/api/admin/clc/analytics/forecast/route.ts",
-          "app/api/admin/clc/analytics/multi-year-trends/route.ts",
-          "app/api/admin/clc/analytics/trends/route.ts",
-          "app/api/admin/pilot-status/route.ts",
-          "app/api/compliance/reports/route.ts",
-          "app/api/cron/scheduled-reports/route.ts",
-          "app/api/exports/[id]/route.ts",
-          "app/api/exports/csv/route.ts",
-          "app/api/exports/excel/route.ts",
-          "app/api/exports/pdf/route.ts",
-          "app/api/exports/route.ts",
-          "app/api/financial/budgets/[id]/route.ts",
-          "app/api/financial/budgets/route.ts",
-          "app/api/financial/expenses/[id]/route.ts",
-          "app/api/financial/expenses/route.ts",
-          "app/api/financial/vendors/[id]/route.ts",
-          "app/api/financial/vendors/route.ts",
-          "app/api/gdpr/data-export/route.ts",
-          "app/api/grievances/[id]/assign/route.ts",
-          "app/api/health-safety/hazards/stats/route.ts",
-          "app/api/reports/[id]/execute/route.ts",
-          "app/api/reports/[id]/route.ts",
-          "app/api/reports/[id]/run/route.ts",
-          "app/api/reports/[id]/share/route.ts",
-          "app/api/reports/builder/route.ts",
-          "app/api/reports/datasources/route.ts",
-          "app/api/reports/datasources/sample/route.ts",
-          "app/api/reports/execute/route.ts",
-          "app/api/reports/route.ts",
-          "app/api/reports/scheduled/[id]/route.ts",
-          "app/api/reports/scheduled/route.ts",
-          "app/api/reports/templates/route.ts",
-          "app/api/social-media/analytics/route.ts",
-          "app/api/staging-proof/deadline-engine/scenario/route.ts",
-          "app/api/version/route.ts",
-          "components/admin/ScheduledReportForm.tsx",
-          "components/admin/audit-logs-dashboard.tsx",
-          "components/admin/compliance-metrics-dashboard.tsx",
-          "components/analytics/DataSourceExplorer.tsx",
-          "components/analytics/analytics-widget-library.tsx",
-          "components/analytics/charts/ChartExporter.tsx",
-          "components/analytics/custom-report-builder.tsx",
-          "components/analytics/report-sharing-hub.tsx",
-          "components/analytics/scheduled-reports-manager.tsx",
-          "components/claims/claim-form-wizard.tsx",
-          "components/federation/FederationDashboard.tsx",
-          "components/federation/FederationResourceLibrary.tsx",
-          "components/financial/APAgingReport.tsx",
-          "components/health-safety/HazardReportForm.tsx",
-          "components/health-safety/HealthSafetyDashboard.tsx",
-          "components/health-safety/IncidentReportForm.tsx",
-          "components/icra/TurnstileWidget.tsx",
-          "components/onboarding/admin-onboarding-wizard.tsx",
-          "components/onboarding/officer-onboarding-wizard.tsx",
-          "components/onboarding/tour-steps.ts",
-          "components/pension/pension-admin-console.tsx",
-          "components/sidebar.tsx",
-          "config/public-api-routes.ts",
-          "db/queries/analytics-queries.ts",
-          "db/queries/scheduled-reports-queries.ts",
-          "lib/ai/executive-insights.ts",
-          "lib/ai/role-templates.ts",
-          "lib/analytics-performance.ts",
-          "lib/api-docs/openapi-config.ts",
-          "lib/api/deprecation.ts",
-          "lib/api/with-api.ts",
-          "lib/canadian-labour-standards/pay-equity.ts",
-          "lib/clc/nil-executive-service.ts",
-          "lib/config/env-validation.ts",
-          "lib/dashboard/require-dashboard-access.ts",
-          "lib/dashboard/role-experience.ts",
-          "lib/email/report-email-templates.ts",
-          "lib/governance-observability/types.ts",
-          "lib/governance-policy/ai-governance.ts",
-          "lib/governance-policy/contracts.ts",
-          "lib/governance-policy/evaluation.ts",
-          "lib/governance-simulation/ledger.ts",
-          "lib/governance-simulation/types.ts",
-          "lib/icra-pdf/reportTheme.ts",
-          "lib/icra/adaptation/routedSubmissionValidator.ts",
-          "lib/icra/assessors/assessorGovernance.ts",
-          "lib/icra/claim-tokens.ts",
-          "lib/icra/scoring.ts",
-          "lib/middleware/auth-middleware.ts",
-          "lib/mobile/crash-reporting.ts",
-          "lib/organizations/platform-tenant.ts",
-          "lib/pilot-admin-operational.ts",
-          "lib/public-routes.ts",
-          "lib/rate-limiter.ts",
-          "lib/reality/capability-registry.ts",
-          "lib/runtime/onboarding/successorStewardshipRuntime.ts",
-          "lib/runtime/readiness/runtimeContinuityReporting.ts",
-          "lib/runtime/readiness/runtimeReadinessEngine.ts",
-          "lib/runtime/traceability/runtimeGovernanceTraceability.ts",
-          "lib/scheduled-report-executor.ts",
-          "lib/security/rls-gap-remediation.ts",
-          "lib/trust-center/types.ts",
-          "lib/ui-tooltips.ts",
-          "lib/whitepaper/continuity-gap.ts",
-          "lib/workers/cleanup-worker.ts",
-          "lib/workers/report-worker.ts",
-          "scripts/generate-authority-convergence-report.ts",
-          "scripts/generate-explicit-grant-dry-run.ts",
-          "scripts/generate-governance-ledger.ts",
-          "scripts/generate-governance-summary.ts",
-          "scripts/generate-observability-report.ts",
-          "scripts/generate-ontology-antipattern-inventory.ts",
-          "scripts/generate-public-schema-grant-census.ts",
-          "scripts/generate-route-registry.ts",
-          "scripts/generate-scope-discriminator-report.ts",
-          "scripts/generate-semantic-observability-baseline.ts",
-          "scripts/generate-simulation-report.ts",
-          "scripts/generate-sovereignty-report.ts",
-          "scripts/generate-storage-authority-census.ts",
-          "scripts/generate-trust-center-manifest.ts",
-          "scripts/generate-trust-center-summary.ts",
-          "scripts/test-reports-query.ts",
-          "scripts/validate-governance-contracts.ts",
-          "scripts/validate-ontology-registry-drift.ts",
-          "scripts/validate-route-policies.ts",
-          "services/carbon-accounting-integration.ts",
-          "services/clc/compliance-reports.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts",
-          "services/financial-service/src/index.ts",
-          "services/financial-service/src/jobs/analytics-processor.ts",
-          "services/financial-service/src/routes/analytics.ts",
-          "services/financial-service/src/routes/reports.ts",
-          "services/financial-service/src/services/burn-rate-predictor.ts",
-          "services/financial-service/src/services/reconciliation-engine.ts",
-          "services/platform-economics/entitlement-guard.ts",
-          "services/platform-economics/finance-outputs.ts",
-          "services/platform-economics/pricing-calculator.ts",
-          "tooling/marketing/narrative-audit.ts",
-          "tooling/marketing/rules/types.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/[locale]/dashboard/admin/page.tsx",
-          "app/[locale]/dashboard/compliance-admin/page.tsx",
-          "components/federation/FederationResourceLibrary.tsx",
-          "components/pension/pension-admin-console.tsx",
-          "db/queries/analytics-queries.ts",
-          "db/queries/scheduled-reports-queries.ts",
-          "lib/dashboard/role-experience.ts",
-          "lib/scheduled-report-executor.ts",
-          "lib/security/rls-gap-remediation.ts",
-          "lib/workers/report-worker.ts",
-          "scripts/generate-authority-convergence-report.ts",
-          "scripts/generate-explicit-grant-dry-run.ts",
-          "scripts/generate-public-schema-grant-census.ts",
-          "scripts/generate-scope-discriminator-report.ts",
-          "scripts/generate-simulation-report.ts",
-          "scripts/generate-sovereignty-report.ts",
-          "scripts/generate-storage-authority-census.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts",
-          "tooling/marketing/narrative-audit.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/(marketing)/components/role-page-content.tsx",
-          "app/[locale]/(marketing)/executive-intelligence/page.tsx",
-          "app/[locale]/(marketing)/solutions/executive-leadership/page.tsx",
-          "app/[locale]/dashboard/admin/dues/page.tsx",
-          "app/[locale]/dashboard/admin/dues/reports/page.tsx",
-          "app/[locale]/dashboard/admin/page.tsx",
-          "app/[locale]/dashboard/admin/rewards/page.tsx",
-          "app/[locale]/dashboard/admin/rewards/reports/page.tsx",
-          "app/[locale]/dashboard/admin/scheduled-reports/page.tsx",
-          "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx",
-          "app/[locale]/dashboard/compliance-admin/page.tsx",
-          "app/[locale]/dashboard/compliance/page.tsx",
-          "app/[locale]/dashboard/finance/exports/page.tsx",
-          "app/[locale]/dashboard/health-safety/hazards/page.tsx",
-          "app/[locale]/dashboard/ops/performance/page.tsx",
-          "app/api/admin/clc/analytics/annual-report/route.ts",
-          "app/api/admin/clc/analytics/forecast/route.ts",
-          "app/api/admin/clc/analytics/multi-year-trends/route.ts",
-          "app/api/admin/clc/analytics/trends/route.ts",
-          "app/api/admin/pilot-status/route.ts",
-          "app/api/compliance/reports/route.ts",
-          "app/api/cron/scheduled-reports/route.ts",
-          "app/api/exports/[id]/route.ts",
-          "app/api/exports/csv/route.ts",
-          "app/api/exports/excel/route.ts",
-          "app/api/exports/pdf/route.ts",
-          "app/api/exports/route.ts",
-          "app/api/financial/budgets/[id]/route.ts",
-          "app/api/financial/budgets/route.ts",
-          "app/api/financial/expenses/[id]/route.ts",
-          "app/api/financial/expenses/route.ts",
-          "app/api/financial/vendors/[id]/route.ts",
-          "app/api/financial/vendors/route.ts",
-          "app/api/gdpr/data-export/route.ts",
-          "app/api/grievances/[id]/assign/route.ts",
-          "app/api/health-safety/hazards/stats/route.ts",
-          "app/api/reports/[id]/execute/route.ts",
-          "app/api/reports/[id]/route.ts",
-          "app/api/reports/[id]/run/route.ts",
-          "app/api/reports/[id]/share/route.ts",
-          "app/api/reports/builder/route.ts",
-          "app/api/reports/datasources/route.ts",
-          "app/api/reports/datasources/sample/route.ts",
-          "app/api/reports/execute/route.ts",
-          "app/api/reports/route.ts",
-          "app/api/reports/scheduled/[id]/route.ts",
-          "app/api/reports/scheduled/route.ts",
-          "app/api/reports/templates/route.ts",
-          "app/api/social-media/analytics/route.ts",
-          "app/api/staging-proof/deadline-engine/scenario/route.ts",
-          "app/api/version/route.ts",
-          "components/admin/ScheduledReportForm.tsx",
-          "components/admin/audit-logs-dashboard.tsx",
-          "components/admin/compliance-metrics-dashboard.tsx",
-          "components/analytics/DataSourceExplorer.tsx",
-          "components/analytics/analytics-widget-library.tsx",
-          "components/analytics/charts/ChartExporter.tsx",
-          "components/analytics/custom-report-builder.tsx",
-          "components/analytics/report-sharing-hub.tsx",
-          "components/analytics/scheduled-reports-manager.tsx",
-          "components/claims/claim-form-wizard.tsx",
-          "components/federation/FederationDashboard.tsx",
-          "components/federation/FederationResourceLibrary.tsx",
-          "components/financial/APAgingReport.tsx",
-          "components/health-safety/HazardReportForm.tsx",
-          "components/health-safety/HealthSafetyDashboard.tsx",
-          "components/health-safety/IncidentReportForm.tsx",
-          "components/icra/TurnstileWidget.tsx",
-          "components/onboarding/admin-onboarding-wizard.tsx",
-          "components/onboarding/officer-onboarding-wizard.tsx",
-          "components/onboarding/tour-steps.ts",
-          "components/pension/pension-admin-console.tsx",
-          "components/sidebar.tsx",
-          "config/public-api-routes.ts",
-          "db/queries/analytics-queries.ts",
-          "db/queries/scheduled-reports-queries.ts",
-          "lib/ai/executive-insights.ts",
-          "lib/ai/role-templates.ts",
-          "lib/analytics-performance.ts",
-          "lib/api-docs/openapi-config.ts",
-          "lib/api/deprecation.ts",
-          "lib/api/with-api.ts",
-          "lib/canadian-labour-standards/pay-equity.ts",
-          "lib/clc/nil-executive-service.ts",
-          "lib/config/env-validation.ts",
-          "lib/dashboard/require-dashboard-access.ts",
-          "lib/dashboard/role-experience.ts",
-          "lib/email/report-email-templates.ts",
-          "lib/governance-observability/types.ts",
-          "lib/governance-policy/ai-governance.ts",
-          "lib/governance-policy/contracts.ts",
-          "lib/governance-policy/evaluation.ts",
-          "lib/governance-simulation/ledger.ts",
-          "lib/governance-simulation/types.ts",
-          "lib/icra-pdf/reportTheme.ts",
-          "lib/icra/adaptation/routedSubmissionValidator.ts",
-          "lib/icra/assessors/assessorGovernance.ts",
-          "lib/icra/claim-tokens.ts",
-          "lib/icra/scoring.ts",
-          "lib/middleware/auth-middleware.ts",
-          "lib/mobile/crash-reporting.ts",
-          "lib/organizations/platform-tenant.ts",
-          "lib/pilot-admin-operational.ts",
-          "lib/public-routes.ts",
-          "lib/rate-limiter.ts",
-          "lib/reality/capability-registry.ts",
-          "lib/runtime/onboarding/successorStewardshipRuntime.ts",
-          "lib/runtime/readiness/runtimeContinuityReporting.ts",
-          "lib/runtime/readiness/runtimeReadinessEngine.ts",
-          "lib/runtime/traceability/runtimeGovernanceTraceability.ts",
-          "lib/scheduled-report-executor.ts",
-          "lib/security/rls-gap-remediation.ts",
-          "lib/trust-center/types.ts",
-          "lib/ui-tooltips.ts",
-          "lib/whitepaper/continuity-gap.ts",
-          "lib/workers/cleanup-worker.ts",
-          "lib/workers/report-worker.ts",
-          "scripts/generate-authority-convergence-report.ts",
-          "scripts/generate-explicit-grant-dry-run.ts",
-          "scripts/generate-governance-ledger.ts",
-          "scripts/generate-governance-summary.ts",
-          "scripts/generate-observability-report.ts",
-          "scripts/generate-ontology-antipattern-inventory.ts",
-          "scripts/generate-public-schema-grant-census.ts",
-          "scripts/generate-route-registry.ts",
-          "scripts/generate-scope-discriminator-report.ts",
-          "scripts/generate-semantic-observability-baseline.ts",
-          "scripts/generate-simulation-report.ts",
-          "scripts/generate-sovereignty-report.ts",
-          "scripts/generate-storage-authority-census.ts",
-          "scripts/generate-trust-center-manifest.ts",
-          "scripts/generate-trust-center-summary.ts",
-          "scripts/test-reports-query.ts",
-          "scripts/validate-governance-contracts.ts",
-          "scripts/validate-ontology-registry-drift.ts",
-          "scripts/validate-route-policies.ts",
-          "services/carbon-accounting-integration.ts",
-          "services/clc/compliance-reports.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts",
-          "services/financial-service/src/index.ts",
-          "services/financial-service/src/jobs/analytics-processor.ts",
-          "services/financial-service/src/routes/analytics.ts",
-          "services/financial-service/src/routes/reports.ts",
-          "services/financial-service/src/services/burn-rate-predictor.ts",
-          "services/financial-service/src/services/reconciliation-engine.ts",
-          "services/platform-economics/entitlement-guard.ts",
-          "services/platform-economics/finance-outputs.ts",
-          "services/platform-economics/pricing-calculator.ts",
-          "tooling/marketing/narrative-audit.ts",
-          "tooling/marketing/rules/types.ts",
-          "app/[locale]/dashboard/health-safety/IMPLEMENTATION_SUMMARY.md",
-          "app/[locale]/dashboard/health-safety/README.md",
-          "app/api/health-safety/README.md",
-          "services/financial-service/REMITTANCE_PROCESSING.md",
-          "services/financial-service/drizzle/0000_lucky_mole_man.sql",
-          "services/financial-service/drizzle/meta/0000_snapshot.json",
-          "services/financial-service/test-analytics.ps1",
-          "services/financial-service/test-reports.ps1"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/analytics/models.py, viewset=backend/analytics/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/admin/rewards/page.tsx: requireUser",
-        "app/[locale]/dashboard/admin/rewards/reports/page.tsx: requireUser",
-        "app/[locale]/dashboard/compliance-admin/page.tsx: requireUser",
-        "app/[locale]/dashboard/ops/performance/page.tsx: requireUser",
-        "app/api/admin/clc/analytics/annual-report/route.ts: withRoleAuth",
-        "app/api/admin/clc/analytics/forecast/route.ts: withRoleAuth",
-        "app/api/admin/clc/analytics/multi-year-trends/route.ts: withRoleAuth",
-        "app/api/admin/clc/analytics/trends/route.ts: withRoleAuth",
-        "app/api/cron/scheduled-reports/route.ts: withApi",
-        "app/api/financial/budgets/[id]/route.ts: withApi",
-        "app/api/financial/budgets/[id]/route.ts: explicit auth config",
-        "app/api/financial/budgets/route.ts: withApi",
-        "app/api/financial/budgets/route.ts: explicit auth config",
-        "app/api/financial/expenses/[id]/route.ts: withApi",
-        "app/api/financial/expenses/[id]/route.ts: explicit auth config",
-        "app/api/financial/expenses/route.ts: withApi",
-        "app/api/financial/expenses/route.ts: explicit auth config",
-        "app/api/financial/vendors/[id]/route.ts: withApi",
-        "app/api/financial/vendors/[id]/route.ts: explicit auth config",
-        "app/api/financial/vendors/route.ts: withApi",
-        "app/api/financial/vendors/route.ts: explicit auth config",
-        "app/api/health-safety/hazards/stats/route.ts: withApi",
-        "app/api/health-safety/hazards/stats/route.ts: explicit auth config",
-        "app/api/reports/execute/route.ts: withRoleAuth",
-        "app/api/social-media/analytics/route.ts: withRoleAuth",
-        "lib/api/with-api.ts: withRoleAuth",
-        "lib/api/with-api.ts: withApi",
-        "lib/api/with-api.ts: explicit auth config",
-        "lib/dashboard/require-dashboard-access.ts: requireUser",
-        "scripts/generate-route-registry.ts: withRoleAuth",
-        "scripts/generate-route-registry.ts: withApi"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/admin/page.tsx: organization identifier reference",
-        "app/[locale]/dashboard/admin/rewards/reports/page.tsx: organization identifier reference",
-        "app/[locale]/dashboard/admin/rewards/reports/page.tsx: organization_id",
-        "app/[locale]/dashboard/committees/[id]/committee-workspace.tsx: organization identifier reference",
-        "app/[locale]/dashboard/health-safety/hazards/page.tsx: organization identifier reference",
-        "app/api/admin/pilot-status/route.ts: organization identifier reference",
-        "app/api/admin/pilot-status/route.ts: organization_id",
-        "app/api/compliance/reports/route.ts: organization identifier reference",
-        "app/api/gdpr/data-export/route.ts: organization identifier reference",
-        "app/api/gdpr/data-export/route.ts: organization_id",
-        "app/api/grievances/[id]/assign/route.ts: withRLSContext",
-        "app/api/grievances/[id]/assign/route.ts: organization identifier reference",
-        "app/api/health-safety/hazards/stats/route.ts: withRLSContext",
-        "app/api/health-safety/hazards/stats/route.ts: organization identifier reference",
-        "app/api/health-safety/hazards/stats/route.ts: organization_id",
-        "app/api/reports/datasources/route.ts: organization identifier reference",
-        "app/api/reports/execute/route.ts: organization identifier reference",
-        "app/api/reports/execute/route.ts: organization_id",
-        "app/api/social-media/analytics/route.ts: organization identifier reference",
-        "app/api/staging-proof/deadline-engine/scenario/route.ts: organization identifier reference",
-        "app/api/staging-proof/deadline-engine/scenario/route.ts: organization_id",
-        "components/claims/claim-form-wizard.tsx: organization identifier reference",
-        "components/financial/APAgingReport.tsx: organization identifier reference",
-        "components/health-safety/HazardReportForm.tsx: organization identifier reference",
-        "components/health-safety/HealthSafetyDashboard.tsx: organization identifier reference",
-        "components/health-safety/IncidentReportForm.tsx: organization identifier reference",
-        "components/pension/pension-admin-console.tsx: organization identifier reference",
-        "db/queries/analytics-queries.ts: withRLSContext",
-        "db/queries/analytics-queries.ts: organization identifier reference",
-        "db/queries/analytics-queries.ts: organization_id",
-        "db/queries/scheduled-reports-queries.ts: organization identifier reference",
-        "db/queries/scheduled-reports-queries.ts: organization_id",
-        "lib/ai/executive-insights.ts: organization identifier reference",
-        "lib/ai/role-templates.ts: organization identifier reference",
-        "lib/analytics-performance.ts: organization identifier reference",
-        "lib/api/deprecation.ts: organization identifier reference",
-        "lib/api/with-api.ts: organization identifier reference",
-        "lib/governance-observability/types.ts: organization identifier reference",
-        "lib/governance-policy/evaluation.ts: organization identifier reference",
-        "lib/middleware/auth-middleware.ts: organization identifier reference",
-        "lib/organizations/platform-tenant.ts: organization identifier reference",
-        "lib/pilot-admin-operational.ts: organization identifier reference",
-        "lib/rate-limiter.ts: organization identifier reference",
-        "lib/reality/capability-registry.ts: organization identifier reference",
-        "lib/scheduled-report-executor.ts: organization identifier reference",
-        "lib/scheduled-report-executor.ts: organization_id",
-        "lib/security/rls-gap-remediation.ts: organization identifier reference",
-        "lib/security/rls-gap-remediation.ts: organization_id",
-        "lib/workers/report-worker.ts: organization identifier reference",
-        "scripts/generate-governance-ledger.ts: organization identifier reference",
-        "scripts/generate-public-schema-grant-census.ts: organization identifier reference",
-        "scripts/generate-public-schema-grant-census.ts: organization_id",
-        "scripts/generate-storage-authority-census.ts: organization identifier reference",
-        "scripts/generate-storage-authority-census.ts: organization_id",
-        "services/clc/compliance-reports.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization_id",
-        "services/financial-service/src/jobs/analytics-processor.ts: organization identifier reference",
-        "services/financial-service/src/routes/analytics.ts: organization identifier reference",
-        "services/financial-service/src/routes/reports.ts: organization identifier reference",
-        "services/financial-service/src/services/burn-rate-predictor.ts: organization identifier reference",
-        "services/platform-economics/entitlement-guard.ts: organization identifier reference",
-        "services/platform-economics/finance-outputs.ts: organization identifier reference",
-        "services/platform-economics/finance-outputs.ts: organization_id",
-        "app/[locale]/dashboard/health-safety/IMPLEMENTATION_SUMMARY.md: organization identifier reference",
-        "app/[locale]/dashboard/health-safety/README.md: organization identifier reference",
-        "app/api/health-safety/README.md: withRLSContext",
-        "app/api/health-safety/README.md: organization identifier reference",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: organization identifier reference",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: organization_id",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: organization identifier reference",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: organization_id",
-        "backend/analytics/views.py: organization identifier reference",
-        "backend/analytics/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/[locale]/dashboard/admin/page.tsx: update/write path",
-        "app/[locale]/dashboard/admin/page.tsx: delete/write path",
-        "app/[locale]/dashboard/admin/rewards/reports/page.tsx: withSystemContext",
-        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx: update/write path",
-        "app/[locale]/dashboard/admin/scheduled-reports/page.tsx: delete/write path",
-        "app/api/admin/pilot-status/route.ts: withSystemContext",
-        "app/api/exports/[id]/route.ts: delete/write path",
-        "app/api/financial/budgets/[id]/route.ts: delete/write path",
-        "app/api/financial/expenses/[id]/route.ts: delete/write path",
-        "app/api/financial/vendors/[id]/route.ts: delete/write path",
-        "app/api/grievances/[id]/assign/route.ts: insert/write path",
-        "app/api/grievances/[id]/assign/route.ts: update/write path",
-        "app/api/reports/[id]/execute/route.ts: delete/write path",
-        "app/api/reports/[id]/route.ts: delete/write path",
-        "app/api/reports/[id]/run/route.ts: delete/write path",
-        "app/api/reports/[id]/share/route.ts: delete/write path",
-        "app/api/reports/scheduled/[id]/route.ts: delete/write path",
-        "app/api/social-media/analytics/route.ts: update/write path",
-        "app/api/social-media/analytics/route.ts: delete/write path",
-        "app/api/staging-proof/deadline-engine/scenario/route.ts: insert/write path",
-        "app/api/staging-proof/deadline-engine/scenario/route.ts: update/write path",
-        "app/api/staging-proof/deadline-engine/scenario/route.ts: delete/write path",
-        "components/admin/ScheduledReportForm.tsx: update/write path",
-        "components/analytics/scheduled-reports-manager.tsx: delete/write path",
-        "components/federation/FederationResourceLibrary.tsx: update/write path",
-        "components/onboarding/tour-steps.ts: update/write path",
-        "components/sidebar.tsx: delete/write path",
-        "db/queries/analytics-queries.ts: insert/write path",
-        "db/queries/analytics-queries.ts: update/write path",
-        "db/queries/analytics-queries.ts: delete/write path",
-        "db/queries/scheduled-reports-queries.ts: insert/write path",
-        "db/queries/scheduled-reports-queries.ts: update/write path",
-        "db/queries/scheduled-reports-queries.ts: delete/write path",
-        "lib/ai/executive-insights.ts: insert/write path",
-        "lib/ai/role-templates.ts: update/write path",
-        "lib/analytics-performance.ts: update/write path",
-        "lib/analytics-performance.ts: delete/write path",
-        "lib/api-docs/openapi-config.ts: update/write path",
-        "lib/api/with-api.ts: delete/write path",
-        "lib/canadian-labour-standards/pay-equity.ts: update/write path",
-        "lib/middleware/auth-middleware.ts: update/write path",
-        "lib/middleware/auth-middleware.ts: delete/write path",
-        "lib/organizations/platform-tenant.ts: insert/write path",
-        "lib/organizations/platform-tenant.ts: update/write path",
-        "lib/rate-limiter.ts: update/write path",
-        "lib/rate-limiter.ts: delete/write path",
-        "lib/reality/capability-registry.ts: insert/write path",
-        "lib/reality/capability-registry.ts: update/write path",
-        "lib/reality/capability-registry.ts: delete/write path",
-        "lib/scheduled-report-executor.ts: insert/write path",
-        "lib/scheduled-report-executor.ts: update/write path",
-        "lib/security/rls-gap-remediation.ts: insert/write path",
-        "lib/security/rls-gap-remediation.ts: update/write path",
-        "lib/security/rls-gap-remediation.ts: delete/write path",
-        "lib/ui-tooltips.ts: update/write path",
-        "lib/workers/cleanup-worker.ts: update/write path",
-        "lib/workers/cleanup-worker.ts: delete/write path",
-        "scripts/generate-authority-convergence-report.ts: insert/write path",
-        "scripts/generate-authority-convergence-report.ts: update/write path",
-        "scripts/generate-authority-convergence-report.ts: delete/write path",
-        "scripts/generate-explicit-grant-dry-run.ts: insert/write path",
-        "scripts/generate-explicit-grant-dry-run.ts: update/write path",
-        "scripts/generate-explicit-grant-dry-run.ts: delete/write path",
-        "scripts/generate-route-registry.ts: delete/write path",
-        "scripts/generate-storage-authority-census.ts: insert/write path",
-        "scripts/generate-storage-authority-census.ts: update/write path",
-        "scripts/generate-storage-authority-census.ts: delete/write path",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "services/platform-economics/finance-outputs.ts: update/write path",
-        "tooling/marketing/narrative-audit.ts: update/write path",
-        "app/[locale]/dashboard/health-safety/IMPLEMENTATION_SUMMARY.md: update/write path",
-        "app/[locale]/dashboard/health-safety/README.md: update/write path",
-        "app/api/health-safety/README.md: update/write path",
-        "app/api/health-safety/README.md: delete/write path",
-        "services/financial-service/REMITTANCE_PROCESSING.md: update/write path",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: update/write path",
-        "services/financial-service/drizzle/0000_lucky_mole_man.sql: delete/write path",
-        "services/financial-service/drizzle/meta/0000_snapshot.json: update/write path",
-        "backend/analytics/views.py: withSystemContext"
       ]
     },
     {
@@ -5561,63 +4464,6 @@
         "backend/content/views.py: insert/write path",
         "backend/content/views.py: update/write path",
         "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "sso_providers",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "sso-scim-schema.ssoProviders"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/enterprise/sso/providers/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/enterprise/sso/providers/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": true,
-        "djangoDetail": "model=backend/auth_core/models.py, viewset=backend/auth_core/views.py, router-registered, DenyAll"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/enterprise/sso/providers/route.ts: withApi",
-        "app/api/enterprise/sso/providers/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "app/api/enterprise/sso/providers/route.ts: organization identifier reference",
-        "backend/auth_core/views.py: organization identifier reference",
-        "backend/auth_core/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/enterprise/sso/providers/route.ts: insert/write path",
-        "backend/auth_core/views.py: update/write path",
-        "backend/auth_core/views.py: delete/write path"
       ]
     },
     {
@@ -6178,175 +5024,6 @@
       ]
     },
     {
-      "table": "training_courses",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/scheduling/training.trainingCourses",
-          "education-training-schema.trainingCourses"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/education/certifications/generate/route.ts",
-          "app/api/education/certifications/renewal-reminders/route.ts",
-          "app/api/education/completions/certificates/route.ts",
-          "app/api/education/courses/route.ts",
-          "app/api/education/notification-preferences/route.ts",
-          "app/api/education/programs/[id]/enrollments/route.ts",
-          "app/api/education/sessions/[id]/attendance/route.ts",
-          "lib/services/education-service.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/[locale]/dashboard/content/page.tsx",
-          "app/api/content/stats/route.ts",
-          "app/api/content/training/route.ts",
-          "app/api/cron/education-reminders/route.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/education/certifications/generate/route.ts",
-          "app/api/education/certifications/renewal-reminders/route.ts",
-          "app/api/education/completions/certificates/route.ts",
-          "app/api/education/courses/route.ts",
-          "app/api/education/notification-preferences/route.ts",
-          "app/api/education/programs/[id]/enrollments/route.ts",
-          "app/api/education/sessions/[id]/attendance/route.ts",
-          "lib/services/education-service.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/unions/models.py, viewset=backend/unions/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/services/education-service.ts: organization identifier reference",
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization_id",
-        "backend/unions/views.py: organization identifier reference",
-        "backend/unions/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/education/programs/[id]/enrollments/route.ts: delete/write path",
-        "app/api/education/sessions/[id]/attendance/route.ts: delete/write path",
-        "lib/services/education-service.ts: insert/write path",
-        "lib/services/education-service.ts: update/write path",
-        "lib/services/education-service.ts: delete/write path",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "backend/unions/views.py: insert/write path",
-        "backend/unions/views.py: update/write path",
-        "backend/unions/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "training_programs",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/scheduling/training.trainingPrograms",
-          "education-training-schema.trainingPrograms"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/education/programs/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/education/programs/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/unions/models.py, viewset=backend/unions/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "MEDIUM",
-        "blocker": "has real TS references — requires HTTP-reachability/auth-boundary trace before closing, not auto-closable",
-        "cohortLane": "SIMPLE_TENANT",
-        "cohortKey": "SIMPLE_TENANT:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization_id",
-        "backend/unions/views.py: organization identifier reference",
-        "backend/unions/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "backend/unions/views.py: insert/write path",
-        "backend/unions/views.py: update/write path",
-        "backend/unions/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "transaction_fee_events",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -6768,7 +5445,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -7188,7 +5866,8 @@
         "hasRawSqlReference": true,
         "rawSqlFiles": [
           "app/[locale]/dashboard/data-source/page.tsx",
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -7252,7 +5931,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -7307,7 +5987,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -8334,7 +7015,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [
@@ -8391,7 +7073,8 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
-          "scripts/generate-scope-discriminator-report.ts"
+          "scripts/generate-scope-discriminator-report.ts",
+          "scripts/generate-scope-remediation-report-round52.ts"
         ],
         "routeActionCronHint": false,
         "hintPaths": [

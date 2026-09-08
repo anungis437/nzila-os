@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-08T14:40:45.440Z",
+  "generatedAt": "2026-09-08T17:30:47.116Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 587,
-  "pendingReviewCount": 113,
-  "tenantGrantedTableCount": 264,
-  "systemGrantedTableCount": 39,
+  "readyForExplicitGrantCount": 598,
+  "pendingReviewCount": 102,
+  "tenantGrantedTableCount": 274,
+  "systemGrantedTableCount": 42,
   "tenantOperationTotals": {
-    "SELECT": 250,
-    "INSERT": 223,
-    "UPDATE": 149,
-    "DELETE": 83
+    "SELECT": 260,
+    "INSERT": 231,
+    "UPDATE": 154,
+    "DELETE": 88
   },
   "systemOperationTotals": {
-    "SELECT": 33,
+    "SELECT": 36,
     "INSERT": 20,
     "UPDATE": 15,
     "DELETE": 0
@@ -32,6 +32,7 @@
       "bargaining_proposals",
       "bargaining_units",
       "break_policies",
+      "calendars",
       "campaigns",
       "case_studies",
       "cba_clauses",
@@ -68,6 +69,7 @@
       "in_app_notifications",
       "joint_hs_committees",
       "kpi_configurations",
+      "meeting_rooms",
       "member_arrears",
       "member_breaks",
       "member_employment",
@@ -86,17 +88,20 @@
       "payment_disputes",
       "payment_methods",
       "payment_plans",
+      "pilot_checklist_items",
       "pilot_demo_seeds",
       "preventive_withdrawals",
       "push_notifications",
       "remittance_exceptions",
       "remittance_line_items",
+      "reports",
       "right_of_refusal_events",
       "safety_inspections",
       "sms_messages",
       "social_accounts",
       "steward_assignments",
       "testimonials",
+      "training_courses",
       "voting_sessions",
       "wcb_claims",
       "wcb_employer_assessments",
@@ -107,6 +112,7 @@
     "mixedPrincipalTables": [
       "alert_rules",
       "billing_accounts",
+      "calendars",
       "campaigns",
       "collective_agreements",
       "communication_preferences",
@@ -123,6 +129,8 @@
       "organizations",
       "per_capita_remittances",
       "pilot_applications",
+      "pilot_enrollments",
+      "pilot_milestones",
       "platform_payments",
       "policy_evaluations",
       "recognition_award_types",
@@ -226,6 +234,12 @@
     },
     {
       "table": "address_validation_cache",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_budgets",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -673,6 +687,19 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "calendars",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "campaigns",
@@ -1354,6 +1381,15 @@
       "table": "country_address_formats",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "course_registrations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2880,6 +2916,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "meeting_rooms",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "member_addresses",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3672,6 +3719,17 @@
       ]
     },
     {
+      "table": "pilot_checklist_items",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "pilot_demo_seeds",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3683,12 +3741,32 @@
       "systemPrivileges": []
     },
     {
+      "table": "pilot_enrollments",
+      "classification": "MIXED_GLOBAL_TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
       "table": "pilot_metrics",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "pilot_milestones",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "platform_cost_ledger_entries",
@@ -3993,6 +4071,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "reports",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "reserved_matter_votes",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
@@ -4288,6 +4377,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "sso_providers",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "sso_sessions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -4409,6 +4507,26 @@
       "table": "traditional_knowledge_registry",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "training_courses",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "training_programs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -4761,10 +4879,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "ai_budgets",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "ai_clause_reasonings",
       "classification": "NEEDS_REVIEW"
     },
@@ -4813,10 +4927,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "calendars",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "certification_alerts",
       "classification": "NEEDS_REVIEW"
     },
@@ -4854,10 +4964,6 @@
     },
     {
       "table": "contribution_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "course_registrations",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5005,10 +5111,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "meeting_rooms",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "mobile_sync_queue",
       "classification": "NEEDS_REVIEW"
     },
@@ -5025,23 +5127,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "pilot_checklist_items",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pilot_enrollments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "pilot_events",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "pilot_feedback",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pilot_milestones",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5081,10 +5171,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "reports",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "reward_redemptions",
       "classification": "NEEDS_REVIEW"
     },
@@ -5118,10 +5204,6 @@
     },
     {
       "table": "social_posts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "sso_providers",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5162,14 +5244,6 @@
     },
     {
       "table": "t4a_tax_slips",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "training_courses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "training_programs",
       "classification": "NEEDS_REVIEW"
     },
     {

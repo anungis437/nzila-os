@@ -28,12 +28,18 @@
  *     entire usage-metering-service.ts pipeline has zero live callers
  *     anywhere and no Django exposure)
  *
- * EXCEPTION retained (documented, NEEDS_REVIEW):
+ * EXCEPTION retained at the time (documented, NEEDS_REVIEW):
  *   ai_budgets — UNKNOWN_LINEAGE. Re-investigated fresh from the current
  *     exact head per the round-48 mandate not to reuse round 35's
  *     disposition blindly; confirmed unchanged (still Django-contained,
  *     still zero live TS callers, still no legitimate business consumer
  *     on either side).
+ *     SUPERSEDED round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE): closed
+ *     CONTAINED_NO_AUTHORITY — see db/rls-storage-authority/finance.ts.
+ *     The facts this round established (Django deny-all, zero TS
+ *     callers) are exactly what CONTAINED_NO_AUTHORITY requires; round 48
+ *     simply never re-applied that classification. See the tests below,
+ *     updated to assert the round-53 disposition rather than round 48's.
  *
  * SECURITY DEFECTS FOUND AND FIXED (cross-tenant IDOR, both real and
  * exploitable via ordinary org-scoped roles, neither requiring any
@@ -167,13 +173,14 @@ describe('round 48 LATENT_UNREACHABLE cohort: usage metering pipeline', () => {
   });
 });
 
-describe('round 48 exception: ai_budgets stays NEEDS_REVIEW', () => {
-  it('is documented as a re-verified UNKNOWN_LINEAGE exception, not silently dropped', () => {
+describe('round 53: ai_budgets closed CONTAINED_NO_AUTHORITY (supersedes round 48 NEEDS_REVIEW)', () => {
+  it('is documented as closed via the mature CONTAINED_NO_AUTHORITY primitive, not silently dropped', () => {
     const entry = entryFor('ai_budgets');
-    expect(entry.classification).toBe('NEEDS_REVIEW');
-    expect(entry.reason).toMatch(/round 48/i);
-    expect(entry.reason).toMatch(/RE-VERIFIED FRESH/);
-    expect(entry.reason).toMatch(/UNKNOWN_LINEAGE/);
+    expect(entry.classification).toBe('CONTAINED_NO_AUTHORITY');
+    expect(entry.reason).toMatch(/round 53/i);
+    expect(entry.requiredRuntimePrivileges).toEqual([]);
+    expect(entry.invocationAuthority).toBe('NONE');
+    expect(entry.dbExecutionPrincipal).toBe('NONE');
   });
 
   it('Django ViewSet is still contained via DenyAllPermission', () => {

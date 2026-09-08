@@ -1,25 +1,25 @@
 {
-  "generatedAt": "2026-09-08T14:40:44.957Z",
+  "generatedAt": "2026-09-08T17:30:46.572Z",
   "totalTables": 700,
   "byClassification": {
-    "NEEDS_REVIEW": 113,
-    "TENANT_RLS_REQUIRED": 210,
+    "NEEDS_REVIEW": 102,
+    "TENANT_RLS_REQUIRED": 219,
     "LATENT_UNREACHABLE": 197,
     "SYSTEM_ONLY": 21,
-    "CONTAINED_NO_AUTHORITY": 100,
+    "CONTAINED_NO_AUTHORITY": 101,
     "PARENT_OWNED_RLS_REQUIRED": 29,
     "GLOBAL_REFERENCE_DATA": 23,
-    "MIXED_GLOBAL_TENANT_RLS_REQUIRED": 1,
+    "MIXED_GLOBAL_TENANT_RLS_REQUIRED": 2,
     "SEPARATE_DATABASE_BOUNDARY": 2,
     "MULTI_PARTY_RLS_REQUIRED": 1,
     "USER_RLS_REQUIRED": 3
   },
-  "needsReview": 113,
+  "needsReview": 102,
   "authorityModel": {
-    "invocationAuthorityTbd": 113,
-    "dbExecutionPrincipalTbd": 113,
-    "requiredRuntimePrivilegesTbd": 113,
-    "requiredSystemPrivilegesTbd": 113,
+    "invocationAuthorityTbd": 102,
+    "dbExecutionPrincipalTbd": 102,
+    "requiredRuntimePrivilegesTbd": 102,
+    "requiredSystemPrivilegesTbd": 102,
     "closedClassificationWithTbdAuthorityCount": 0,
     "closedClassificationWithTbdAuthorityTables": []
   },
@@ -38,7 +38,7 @@
   },
   "rlsPolicyExpansionRequired": {
     "note": "Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED / MIXED_GLOBAL_TENANT_RLS_REQUIRED / MULTI_PARTY_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 \"policyGaps\" wording, which conflated this with 0108 losing its own coverage. The two RLS_REQUIRED shapes added in round 33 (mixed global/tenant, multi-party) do not yet have a ue_create_*_rls_policy helper — see billing/isolation.py for their proven application-layer equivalents.",
-    "tenantRlsRequiredExpansionCount": 198,
+    "tenantRlsRequiredExpansionCount": 207,
     "tenantRlsRequiredExpansionTables": [
       "ai_insight_reports",
       "ai_usage_metrics",
@@ -201,11 +201,13 @@
       "allocation_rules",
       "anti_scab_violations",
       "break_policies",
+      "calendars",
       "clause_comparisons",
       "cnesst_filings",
       "compliance_alerts",
       "contract_covered_orgs",
       "correspondence",
+      "course_registrations",
       "course_sessions",
       "defensibility_packs",
       "dispatch_requests",
@@ -216,22 +218,29 @@
       "exit_interviews",
       "federations",
       "kpi_configurations",
+      "meeting_rooms",
       "mobile_devices",
       "negotiations",
       "organizer_tasks",
       "pay_equity_exercises",
+      "pilot_checklist_items",
       "pilot_demo_seeds",
+      "pilot_milestones",
       "policy_rules",
       "preventive_withdrawals",
       "push_devices",
       "recognition_award_types",
       "recognition_awards",
       "recognition_programs",
+      "reports",
       "right_of_refusal_events",
       "security_events",
       "security_posture_checks",
+      "sso_providers",
       "steward_assignments",
       "strategic_goals",
+      "training_courses",
+      "training_programs",
       "trend_analyses",
       "voting_sessions",
       "wcb_employer_assessments",
@@ -275,15 +284,16 @@
       "member_location_consent",
       "workbooks"
     ],
-    "mixedGlobalTenantRlsRequiredExpansionCount": 1,
+    "mixedGlobalTenantRlsRequiredExpansionCount": 2,
     "mixedGlobalTenantRlsRequiredExpansionTables": [
-      "account_mappings"
+      "account_mappings",
+      "pilot_enrollments"
     ],
     "multiPartyRlsRequiredExpansionCount": 1,
     "multiPartyRlsRequiredExpansionTables": [
       "per_capita_remittances"
     ],
-    "totalExpansionCount": 230
+    "totalExpansionCount": 240
   },
   "blanketGrantBlocker": "union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired's tables lack an actual migration adding their RLS policy."
 }
