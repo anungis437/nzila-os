@@ -182,4 +182,100 @@ describe('ml/predictions/churn-risk route', () => {
     });
     expect(m.predictChurnRisk).toHaveBeenCalled();
   });
+
+  // ROUND 48 REGRESSION: a caller-supplied organizationId (query param on GET,
+  // request body on POST) must NEVER override the caller's own authenticated
+  // organizationId. Prior to the round-48 fix, an 'officer' of one
+  // organization could pass another organization's id and read/generate
+  // predictions for members outside their own tenant (cross-tenant IDOR).
+  const VICTIM_ORG_ID = '00000000-0000-0000-0000-0000000000ff';
+
+  it('GET ignores a caller-supplied organizationId query param (cross-tenant IDOR regression)', async () => {
+    const { GET } = await loadRoute();
+    m.dbExecute.mockResolvedValueOnce([]);
+
+    await GET(new NextRequest(
+      `http://localhost/api/ml/predictions/churn-risk?organizationId=${VICTIM_ORG_ID}`
+    ));
+
+    expect(m.dbExecute).toHaveBeenCalledTimes(1);
+    const queryArg = m.dbExecute.mock.calls[0][0];
+    const serialized = JSON.stringify(queryArg);
+    expect(serialized).toContain(TEST_USER.organizationId);
+    expect(serialized).not.toContain(VICTIM_ORG_ID);
+  });
+
+  it('GET ignores caller-supplied orgId/organization_id/org_id query param aliases (cross-tenant IDOR regression)', async () => {
+    const { GET } = await loadRoute();
+    for (const alias of ['orgId', 'organization_id', 'org_id']) {
+      m.dbExecute.mockClear();
+      m.dbExecute.mockResolvedValueOnce([]);
+
+      await GET(new NextRequest(
+        `http://localhost/api/ml/predictions/churn-risk?${alias}=${VICTIM_ORG_ID}`
+      ));
+
+      const queryArg = m.dbExecute.mock.calls[0][0];
+      const serialized = JSON.stringify(queryArg);
+      expect(serialized).toContain(TEST_USER.organizationId);
+      expect(serialized).not.toContain(VICTIM_ORG_ID);
+    }
+  });
+
+  it('GET returns validation error when caller has no organization context', async () => {
+    const { GET } = await loadRoute();
+    m.getCurrentUser.mockResolvedValueOnce({ id: 'user_no_org' });
+
+    const response = await GET(new NextRequest('http://localhost/api/ml/predictions/churn-risk'));
+
+    expect(response.status).toBe(400);
+    expect(m.dbExecute).not.toHaveBeenCalled();
+  });
+
+  it('POST ignores a caller-supplied organizationId body field (cross-tenant IDOR regression)', async () => {
+    const { POST } = await loadRoute();
+    m.dbExecute.mockResolvedValueOnce([
+      {
+        full_name: 'Casey Worker',
+        days_since_last_activity: 95,
+        resolution_rate: 42,
+        avg_satisfaction: 2.4,
+        total_cases: 4,
+        union_tenure_years: 1.5,
+        negative_feedback_count: 3,
+      },
+    ]).mockResolvedValueOnce([]);
+
+    const response = await POST(new NextRequest('http://localhost/api/ml/predictions/churn-risk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        memberId: '00000000-0000-0000-0000-000000000022',
+        organizationId: VICTIM_ORG_ID,
+      }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(m.dbExecute).toHaveBeenCalledTimes(2);
+    const featureQueryArg = m.dbExecute.mock.calls[0][0];
+    const insertQueryArg = m.dbExecute.mock.calls[1][0];
+    expect(JSON.stringify(featureQueryArg)).toContain(TEST_USER.organizationId);
+    expect(JSON.stringify(featureQueryArg)).not.toContain(VICTIM_ORG_ID);
+    expect(JSON.stringify(insertQueryArg)).toContain(TEST_USER.organizationId);
+    expect(JSON.stringify(insertQueryArg)).not.toContain(VICTIM_ORG_ID);
+  });
+
+  it('POST returns validation error when caller has no organization context', async () => {
+    const { POST } = await loadRoute();
+    m.getCurrentUser.mockResolvedValueOnce({ id: 'user_no_org' });
+
+    const response = await POST(new NextRequest('http://localhost/api/ml/predictions/churn-risk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ memberId: '00000000-0000-0000-0000-000000000022' }),
+    }));
+
+    expect(response.status).toBe(400);
+    expect(m.dbExecute).not.toHaveBeenCalled();
+  });
 });

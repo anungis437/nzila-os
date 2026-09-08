@@ -504,10 +504,24 @@ class MobileSyncQueueViewSet(viewsets.ModelViewSet):
 
 
 class MobileAnalyticsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MobileAnalytics operations."""
+    """API endpoint for MobileAnalytics operations.
+
+    CONTAINED (PR #752 round 48 — derived analytics and AI telemetry
+    authority cohort): mobile_analytics carries a NULLABLE organization_id
+    (anonymous/pre-login mobile events are a legitimate design). No real
+    Django consumer found: the only application-side writer/reader is
+    lib/mobile/mobile-engine.ts's MobileAnalyticsService.flushEvents(),
+    which has zero callers anywhere in app/, actions/, or lib/ outside its
+    own file and tests — fully dead code. This generated ViewSet
+    (queryset=MobileAnalytics.objects.all(), permission_classes=[IsAuthenticated])
+    applies no tenant scoping — any authenticated user of any organization
+    could list/retrieve/mutate every organization's (and every anonymous
+    session's) mobile analytics events. Remove only once a proven
+    legitimate consumer and org-scoped queryset filtering exist.
+    """
     queryset = MobileAnalytics.objects.all()
     serializer_class = MobileAnalyticsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     search_fields = ['session_id']

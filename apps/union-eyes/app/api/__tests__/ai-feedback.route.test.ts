@@ -154,6 +154,20 @@ describe('ai/feedback route', () => {
     expect(response.status).toBe(400);
   });
 
+  // ROUND 48 REGRESSION: GET previously had zero tenant scoping — any
+  // authenticated member of ANY organization could read another
+  // organization's feedback (rating/comment/userId) for a guessed query_id.
+  // GET must reject requests with no organization context, and the select
+  // query must be scoped by organizationId (see route implementation).
+  it('returns 400 for GET when organization context is missing (cross-tenant IDOR regression)', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(
+      new Request('http://localhost/api/ai/feedback?query_id=11111111-1111-1111-1111-111111111111'),
+      { userId: 'u1', organizationId: '' },
+    );
+    expect(response.status).toBe(400);
+  });
+
   it('returns feedback list for a query id', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([

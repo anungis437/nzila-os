@@ -1,21 +1,21 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-07T23:35:14.556Z
+Generated: 2026-09-08T01:27:20.155Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 475
-- Pending review (NEEDS_REVIEW, excluded from plan): 225
-- Tenant-granted tables (union_eyes_runtime): 224
-- System-granted tables (union_eyes_system): 30
+- Ready for explicit GRANT (CLOSED, fully resolved): 489
+- Pending review (NEEDS_REVIEW, excluded from plan): 211
+- Tenant-granted tables (union_eyes_runtime): 233
+- System-granted tables (union_eyes_system): 31
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 216 | 191 | 141 | 82 |
-| system (union_eyes_system) | 28 | 14 | 10 | 0 |
+| tenant (union_eyes_runtime) | 225 | 198 | 141 | 82 |
+| system (union_eyes_system) | 29 | 14 | 10 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
 
@@ -39,12 +39,14 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | ai_grievance_triages | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | ai_insight_reports | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | ai_rate_limits | LATENT_UNREACHABLE | NONE | NONE |
+| ai_usage_metrics | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | alert_actions | LATENT_UNREACHABLE | NONE | NONE |
 | alert_conditions | LATENT_UNREACHABLE | NONE | NONE |
 | alert_escalations | LATENT_UNREACHABLE | NONE | NONE |
 | alert_recipients | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | alert_rules | TENANT_RLS_REQUIRED | SELECT | SELECT, INSERT |
 | allocation_rules | LATENT_UNREACHABLE | NONE | NONE |
+| analytics_metrics | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | analytics_scheduled_reports | LATENT_UNREACHABLE | NONE | NONE |
 | anti_scab_violations | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | api_access_tokens | LATENT_UNREACHABLE | NONE | NONE |
@@ -153,6 +155,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | course_sessions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | cross_org_access_log | SYSTEM_ONLY | NONE | NONE |
 | currency_exchange_rates | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| customer_nps_surveys | SYSTEM_ONLY | NONE | SELECT |
 | data_aggregation_consent | TENANT_RLS_REQUIRED | SELECT | NONE |
 | data_anonymization_log | LATENT_UNREACHABLE | NONE | NONE |
 | data_processing_records | LATENT_UNREACHABLE | NONE | NONE |
@@ -192,6 +195,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | employer_remittances | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | employer_reports | PARENT_OWNED_RLS_REQUIRED | SELECT | NONE |
 | employer_responses | LATENT_UNREACHABLE | NONE | NONE |
+| employer_risk_scores | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | employers | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | employment_history | LATENT_UNREACHABLE | NONE | NONE |
 | entitlement_usage_log | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
@@ -292,6 +296,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | ingestion_batches | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | ingestion_records | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | injury_logs | LATENT_UNREACHABLE | NONE | NONE |
+| insight_recommendations | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | integration_configs | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | integration_sync_log | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | integration_sync_logs | LATENT_UNREACHABLE | NONE | NONE |
@@ -332,8 +337,11 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | messages | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
 | mfa_configurations | LATENT_UNREACHABLE | NONE | NONE |
 | mission_audits | SYSTEM_ONLY | NONE | SELECT, INSERT |
+| ml_predictions | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
+| mobile_analytics | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | mobile_app_config | LATENT_UNREACHABLE | NONE | NONE |
 | mobile_notifications | LATENT_UNREACHABLE | NONE | NONE |
+| model_metadata | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | negotiation_sessions | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | negotiations | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | newsletter_campaigns | TENANT_RLS_REQUIRED | SELECT | NONE |
@@ -396,6 +404,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | per_capita_remittances | MULTI_PARTY_RLS_REQUIRED | SELECT | SELECT, INSERT, UPDATE |
 | pilot_applications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | SELECT, UPDATE |
 | pilot_demo_seeds | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| pilot_metrics | TENANT_RLS_REQUIRED | SELECT | NONE |
 | platform_cost_ledger_entries | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | platform_invoice_line_items | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
 | platform_invoices | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
@@ -453,6 +462,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | sms_opt_outs | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | sms_rate_limits | LATENT_UNREACHABLE | NONE | NONE |
 | social_accounts | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| social_analytics | TENANT_RLS_REQUIRED | SELECT | NONE |
 | social_engagement | LATENT_UNREACHABLE | NONE | NONE |
 | social_feeds | LATENT_UNREACHABLE | NONE | NONE |
 | sso_sessions | LATENT_UNREACHABLE | NONE | NONE |
@@ -467,6 +477,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | testimonials | GLOBAL_REFERENCE_DATA | SELECT, INSERT, UPDATE, DELETE | NONE |
 | ticket_comments | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | ticket_history | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| trend_analyses | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | ue_governance_job_cancellation_audit_event | LATENT_UNREACHABLE | NONE | NONE |
 | ue_governance_job_cancellation_request | LATENT_UNREACHABLE | NONE | NONE |
 | ue_governance_job_execution_state | LATENT_UNREACHABLE | NONE | NONE |
@@ -476,6 +487,9 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | union_dues_receipts | LATENT_UNREACHABLE | NONE | NONE |
 | union_dues_year_end | LATENT_UNREACHABLE | NONE | NONE |
 | union_representation_votes | LATENT_UNREACHABLE | NONE | NONE |
+| usage_aggregates | LATENT_UNREACHABLE | NONE | NONE |
+| usage_events | LATENT_UNREACHABLE | NONE | NONE |
+| usage_meters | LATENT_UNREACHABLE | NONE | NONE |
 | user_consents | TENANT_RLS_REQUIRED | SELECT, UPDATE | NONE |
 | user_engagement_scores | LATENT_UNREACHABLE | NONE | NONE |
 | user_sessions | LATENT_UNREACHABLE | NONE | NONE |

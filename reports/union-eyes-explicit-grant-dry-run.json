@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-07T23:35:14.556Z",
+  "generatedAt": "2026-09-08T01:27:20.155Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 475,
-  "pendingReviewCount": 225,
-  "tenantGrantedTableCount": 224,
-  "systemGrantedTableCount": 30,
+  "readyForExplicitGrantCount": 489,
+  "pendingReviewCount": 211,
+  "tenantGrantedTableCount": 233,
+  "systemGrantedTableCount": 31,
   "tenantOperationTotals": {
-    "SELECT": 216,
-    "INSERT": 191,
+    "SELECT": 225,
+    "INSERT": 198,
     "UPDATE": 141,
     "DELETE": 82
   },
   "systemOperationTotals": {
-    "SELECT": 28,
+    "SELECT": 29,
     "INSERT": 14,
     "UPDATE": 10,
     "DELETE": 0
@@ -217,6 +217,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "ai_usage_metrics",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "alert_actions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -255,6 +264,15 @@
       "table": "allocation_rules",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "analytics_metrics",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1159,6 +1177,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "customer_nps_surveys",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
       "table": "data_aggregation_consent",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -1470,6 +1496,15 @@
       "table": "employer_responses",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_risk_scores",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2267,6 +2302,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "insight_recommendations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "integration_configs",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2591,6 +2635,21 @@
       ]
     },
     {
+      "table": "ml_predictions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "mobile_analytics",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "mobile_app_config",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2600,6 +2659,15 @@
       "table": "mobile_notifications",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "model_metadata",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -3115,6 +3183,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "pilot_metrics",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "platform_cost_ledger_entries",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3568,6 +3644,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "social_analytics",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "social_engagement",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3674,6 +3758,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "trend_analyses",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "ue_governance_job_cancellation_audit_event",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3727,6 +3820,24 @@
     },
     {
       "table": "union_representation_votes",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "usage_aggregates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "usage_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "usage_meters",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -3967,10 +4078,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "ai_usage_metrics",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "alert_executions",
       "classification": "NEEDS_REVIEW"
     },
@@ -3988,10 +4095,6 @@
     },
     {
       "table": "allocation_runs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "analytics_metrics",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4175,10 +4278,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "customer_nps_surveys",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "customer_onboarding_milestones",
       "classification": "NEEDS_REVIEW"
     },
@@ -4260,10 +4359,6 @@
     },
     {
       "table": "employer_execution_replays",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_risk_scores",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4383,10 +4478,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "insight_recommendations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "integration_api_keys",
       "classification": "NEEDS_REVIEW"
     },
@@ -4467,23 +4558,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "ml_predictions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "mobile_analytics",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "mobile_devices",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "mobile_sync_queue",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "model_metadata",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4520,10 +4599,6 @@
     },
     {
       "table": "pilot_feedback",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pilot_metrics",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4667,10 +4742,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "social_analytics",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "social_campaigns",
       "classification": "NEEDS_REVIEW"
     },
@@ -4767,23 +4838,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "trend_analyses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "union_only_data_tags",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "usage_aggregates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "usage_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "usage_meters",
       "classification": "NEEDS_REVIEW"
     },
     {
