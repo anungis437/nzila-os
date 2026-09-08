@@ -124,6 +124,23 @@ describe('automation-service', () => {
       expect(result.processed).toBe(0);
     });
 
+    // ROUND 50 REGRESSION: the anniversary award-type lookup previously
+    // matched by name+kind alone with no org filter, so a cron run for one
+    // organization could pick up ANOTHER organization's "Work Anniversary"
+    // award type (cross-tenant data confusion in a system-invoked job).
+    it('scopes the anniversary award-type lookup to the caller organization', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      mocks.mockQueryRecognitionAwardTypes.findFirst.mockResolvedValue(null);
+
+      await processAnniversaryAwards('org-1');
+
+      expect(mocks.mockQueryRecognitionAwardTypes.findFirst).toHaveBeenCalledTimes(1);
+      const { where } = mocks.mockQueryRecognitionAwardTypes.findFirst.mock.calls[0][0];
+      const types = { orgId: 'orgId', name: 'name', kind: 'kind' };
+      const condition = where(types, { eq: (...a: unknown[]) => a, and: (...a: unknown[]) => a });
+      expect(condition).toContainEqual(['orgId', 'org-1']);
+    });
+
     it('creates and issues awards for anniversaries', async () => {
       mocks.mockExecute.mockResolvedValue([
         { user_id: 'u1', user_name: 'Alice', years_of_service: 5 },

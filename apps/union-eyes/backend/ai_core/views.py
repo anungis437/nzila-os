@@ -33,10 +33,19 @@ class DenyAllPermission(permissions.BasePermission):
 
 
 class AbTestsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTests operations."""
+    """API endpoint for AbTests operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): lib/ab-testing/ab-test-engine.ts (the TS side) has zero
+    real callers anywhere under app/, actions/, lib/, services/ — this
+    generated ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) otherwise exposes every
+    organization's AB test data to any authenticated user with no
+    org scoping. No legitimate consumer found on either side.
+    """
     queryset = AbTests.objects.all()
     serializer_class = AbTestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     search_fields = ['name', 'description', 'type', 'status']
@@ -45,30 +54,42 @@ class AbTestsViewSet(viewsets.ModelViewSet):
 
 
 class AbTestVariantsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTestVariants operations."""
+    """API endpoint for AbTestVariants operations.
+
+    CONTAINED (PR #752 round 50): see AbTestsViewSet — same dead TS engine,
+    same no-consumer finding.
+    """
     queryset = AbTestVariants.objects.all()
     serializer_class = AbTestVariantsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class AbTestAssignmentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTestAssignments operations."""
+    """API endpoint for AbTestAssignments operations.
+
+    CONTAINED (PR #752 round 50): see AbTestsViewSet — same dead TS engine,
+    same no-consumer finding.
+    """
     queryset = AbTestAssignments.objects.all()
     serializer_class = AbTestAssignmentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class AbTestEventsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTestEvents operations."""
+    """API endpoint for AbTestEvents operations.
+
+    CONTAINED (PR #752 round 50): see AbTestsViewSet — same dead TS engine,
+    same no-consumer finding.
+    """
     queryset = AbTestEvents.objects.all()
     serializer_class = AbTestEventsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

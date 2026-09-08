@@ -625,20 +625,34 @@ class RecognitionProgramsViewSet(viewsets.ModelViewSet):
 
 
 class RecognitionAwardTypesViewSet(viewsets.ModelViewSet):
-    """API endpoint for RecognitionAwardTypes operations."""
+    """API endpoint for RecognitionAwardTypes operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): the real TS consumers (lib/services/rewards/*-service.ts,
+    reached via app/[locale]/dashboard/admin/rewards/analytics/page.tsx and
+    app/api/rewards/cron/route.ts) already enforce org scoping in Next.js;
+    this generated ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) has no legitimate Django consumer
+    and no organization scoping of its own — contained via the existing
+    DenyAllPermission used above for RecognitionProgramsViewSet.
+    """
     queryset = RecognitionAwardTypes.objects.all()
     serializer_class = RecognitionAwardTypesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class RecognitionAwardsViewSet(viewsets.ModelViewSet):
-    """API endpoint for RecognitionAwards operations."""
+    """API endpoint for RecognitionAwards operations.
+
+    CONTAINED (PR #752 round 50): see RecognitionAwardTypesViewSet — same
+    no-Django-consumer finding.
+    """
     queryset = RecognitionAwards.objects.all()
     serializer_class = RecognitionAwardsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

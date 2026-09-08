@@ -1,26 +1,26 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-08T06:06:28.651Z
+Generated: 2026-09-08T08:21:02.704Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 502
-- Pending review (NEEDS_REVIEW, excluded from plan): 198
-- Tenant-granted tables (union_eyes_runtime): 239
-- System-granted tables (union_eyes_system): 32
+- Ready for explicit GRANT (CLOSED, fully resolved): 526
+- Pending review (NEEDS_REVIEW, excluded from plan): 174
+- Tenant-granted tables (union_eyes_runtime): 253
+- System-granted tables (union_eyes_system): 36
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 230 | 203 | 141 | 82 |
-| system (union_eyes_system) | 29 | 15 | 10 | 0 |
+| tenant (union_eyes_runtime) | 241 | 215 | 146 | 83 |
+| system (union_eyes_system) | 31 | 17 | 12 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
 
-- Tenant DELETE grants (82): anti_scab_violations, api_integrations, arbitration_decisions, arbitration_precedents, arbitrations, bank_accounts, bank_reconciliation, bank_reconciliations, bargaining_notes, bargaining_proposals, bargaining_units, break_policies, campaigns, case_studies, cba_clauses, chart_of_accounts, claim_deadlines, claims, clc_remittance_mapping, cnesst_filings, collective_agreements, committee_documents, committees, communication_preferences, correspondence, cost_centers, course_sessions, deadline_reminders, documents, dues_rates, dues_transactions, employer_remittances, employers, erp_invoices, federations, financial_periods, gl_account_mappings, gl_transaction_log, gl_trial_balance, grievance_case_access_assignments, grievance_deadlines, grievance_documents, grievance_transitions, grievances, hazard_reports, in_app_notifications, joint_hs_committees, kpi_configurations, member_arrears, member_breaks, member_employment, member_history_events, member_segments, message_log, message_templates, negotiations, newsletter_distribution_lists, notification_queue, notifications, org_configurations, organization_members, pay_equity_exercises, payment_cycles, payment_disputes, payment_methods, payment_plans, pilot_demo_seeds, preventive_withdrawals, push_notifications, remittance_exceptions, remittance_line_items, right_of_refusal_events, safety_inspections, sms_messages, social_accounts, steward_assignments, testimonials, voting_sessions, wcb_claims, wcb_employer_assessments, workplace_incidents, worksites
-- Mixed-principal tables (19): alert_rules, billing_accounts, campaigns, collective_agreements, communication_preferences, consent_records, deadline_audit_events, deadline_reminders, dues_assignments, grievance_deadlines, message_log, notification_delivery_log, notification_queue, organization_members, organizations, per_capita_remittances, pilot_applications, platform_payments, policy_evaluations
+- Tenant DELETE grants (83): anti_scab_violations, api_integrations, arbitration_decisions, arbitration_precedents, arbitrations, bank_accounts, bank_reconciliation, bank_reconciliations, bargaining_notes, bargaining_proposals, bargaining_units, break_policies, campaigns, case_studies, cba_clauses, chart_of_accounts, claim_deadlines, claims, clc_remittance_mapping, cnesst_filings, collective_agreements, committee_documents, committees, communication_preferences, correspondence, cost_centers, course_sessions, deadline_reminders, documents, dues_rates, dues_transactions, employer_remittances, employers, erp_invoices, federations, financial_periods, gl_account_mappings, gl_transaction_log, gl_trial_balance, grievance_case_access_assignments, grievance_deadlines, grievance_documents, grievance_transitions, grievances, hazard_reports, in_app_notifications, joint_hs_committees, kpi_configurations, member_arrears, member_breaks, member_employment, member_history_events, member_segments, message_log, message_templates, negotiations, newsletter_distribution_lists, notification_queue, notifications, org_configurations, organization_members, pay_equity_exercises, payment_cycles, payment_disputes, payment_methods, payment_plans, pilot_demo_seeds, preventive_withdrawals, push_notifications, remittance_exceptions, remittance_line_items, right_of_refusal_events, safety_inspections, sms_messages, social_accounts, steward_assignments, testimonials, voting_sessions, wcb_claims, wcb_employer_assessments, workbook_memory_holders, workplace_incidents, worksites
+- Mixed-principal tables (22): alert_rules, billing_accounts, campaigns, collective_agreements, communication_preferences, consent_records, deadline_audit_events, deadline_reminders, dues_assignments, grievance_deadlines, message_log, notification_delivery_log, notification_queue, organization_members, organizations, per_capita_remittances, pilot_applications, platform_payments, policy_evaluations, recognition_award_types, recognition_awards, workbooks
 - SYSTEM_ONLY tables with broad system DML (>=3 ops) (3): council_elections, reserved_matter_votes, union_density
 - GLOBAL_REFERENCE_DATA with tenant mutations (10): case_studies, cba_intel_agreements, cba_intel_benchmark_snapshots, cba_intel_clauses, cba_intel_documents, cba_intel_extraction_runs, cba_intel_findings, cba_intel_ingestion_jobs, cba_intel_wage_adjustments, testimonials
 
@@ -28,8 +28,10 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 
 | table | classification | tenant (union_eyes_runtime) | system (union_eyes_system) |
 | --- | --- | --- | --- |
-| ab_test_assignments | LATENT_UNREACHABLE | NONE | NONE |
-| ab_test_events | LATENT_UNREACHABLE | NONE | NONE |
+| ab_test_assignments | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| ab_test_events | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| ab_test_variants | CONTAINED_NO_AUTHORITY | NONE | NONE |
+| ab_tests | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | access_justification_requests | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | accessibility_audits | LATENT_UNREACHABLE | NONE | NONE |
 | accessibility_issues | LATENT_UNREACHABLE | NONE | NONE |
@@ -46,7 +48,11 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | alert_escalations | LATENT_UNREACHABLE | NONE | NONE |
 | alert_recipients | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | alert_rules | TENANT_RLS_REQUIRED | SELECT | SELECT, INSERT |
-| allocation_rules | LATENT_UNREACHABLE | NONE | NONE |
+| allocation_basis_snapshots | PARENT_OWNED_RLS_REQUIRED | INSERT | NONE |
+| allocation_rule_versions | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
+| allocation_rules | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
+| allocation_run_lines | PARENT_OWNED_RLS_REQUIRED | INSERT | NONE |
+| allocation_runs | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | analytics_metrics | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | analytics_scheduled_reports | LATENT_UNREACHABLE | NONE | NONE |
 | anti_scab_violations | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
@@ -174,6 +180,9 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | deadline_reminders | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT |
 | deadline_rules | LATENT_UNREACHABLE | NONE | NONE |
 | defensibility_packs | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
+| dispatch_assignments | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
+| dispatch_requests | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
+| dispatch_rules | TENANT_RLS_REQUIRED | SELECT | NONE |
 | document_access_grants | TENANT_RLS_REQUIRED | SELECT | NONE |
 | document_folders | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | document_links | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
@@ -188,6 +197,9 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | dues_policies | LATENT_UNREACHABLE | NONE | NONE |
 | dues_rates | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | dues_transactions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| dunning_cases | LATENT_UNREACHABLE | NONE | NONE |
+| dunning_policies | LATENT_UNREACHABLE | NONE | NONE |
+| dunning_steps | LATENT_UNREACHABLE | NONE | NONE |
 | duplicate_group_members | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT | NONE |
 | duplicate_groups | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | employer_access_attempts | CONTAINED_NO_AUTHORITY | NONE | NONE |
@@ -349,6 +361,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | ml_predictions | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | mobile_analytics | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | mobile_app_config | LATENT_UNREACHABLE | NONE | NONE |
+| mobile_devices | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | mobile_notifications | LATENT_UNREACHABLE | NONE | NONE |
 | model_metadata | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | negotiation_sessions | CONTAINED_NO_AUTHORITY | NONE | NONE |
@@ -424,11 +437,17 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | ppe_equipment | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | precedent_tags | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | preventive_withdrawals | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| pricing_discount_rules | LATENT_UNREACHABLE | NONE | NONE |
+| pricing_regional_deployments | LATENT_UNREACHABLE | NONE | NONE |
+| pricing_template_modules | LATENT_UNREACHABLE | NONE | NONE |
+| pricing_templates | LATENT_UNREACHABLE | NONE | NONE |
 | program_enrollments | LATENT_UNREACHABLE | NONE | NONE |
 | public_events | LATENT_UNREACHABLE | NONE | NONE |
 | push_devices | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | push_notification_templates | LATENT_UNREACHABLE | NONE | NONE |
 | push_notifications | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| recognition_award_types | TENANT_RLS_REQUIRED | SELECT | SELECT |
+| recognition_awards | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | SELECT, INSERT, UPDATE |
 | recognition_programs | TENANT_RLS_REQUIRED | SELECT | NONE |
 | reconciliation_exceptions | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | reconciliation_matches | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
@@ -468,6 +487,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | signature_documents | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | signature_templates | LATENT_UNREACHABLE | NONE | NONE |
 | signature_webhooks_log | LATENT_UNREACHABLE | NONE | NONE |
+| signature_workflows | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | sms_campaign_recipients | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | sms_campaigns | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | sms_conversations | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
@@ -523,9 +543,13 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | whiplash_violations | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | workbook_continuity_breakpoints | LATENT_UNREACHABLE | NONE | NONE |
 | workbook_governance_lineage_entries | PARENT_OWNED_RLS_REQUIRED | SELECT | NONE |
+| workbook_memory_holders | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | workbook_modernization_alignment | LATENT_UNREACHABLE | NONE | NONE |
+| workbook_modules | PARENT_OWNED_RLS_REQUIRED | INSERT | NONE |
+| workbook_purchases | PARENT_OWNED_RLS_REQUIRED | NONE | INSERT |
 | workbook_stewardship_signals | LATENT_UNREACHABLE | NONE | NONE |
 | workbook_transformation_roadmap | LATENT_UNREACHABLE | NONE | NONE |
+| workbooks | USER_RLS_REQUIRED | SELECT, INSERT, UPDATE | UPDATE |
 | workflow_definitions | LATENT_UNREACHABLE | NONE | NONE |
 | workflow_executions | LATENT_UNREACHABLE | NONE | NONE |
 | workplace_incidents | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |

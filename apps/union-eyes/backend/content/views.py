@@ -344,10 +344,26 @@ class SignatureWebhooksLogViewSet(viewsets.ModelViewSet):
 
 
 class SignatureWorkflowsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureWorkflows operations."""
+    """API endpoint for SignatureWorkflows operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): signature_workflows' ONLY writer, services/pki/workflow-engine.ts's
+    createWorkflow(), which persists to the DB, has zero callers anywhere
+    — the admin routes that DO call this file's other exports
+    (recordSignature/advanceWorkflow/cancelWorkflow/getWorkflow) all read
+    from an in-memory workflowStore Map that is NEVER populated (since
+    createWorkflow is unreachable), so those calls always fail with
+    'Workflow not found' against real data — functionally dead despite
+    superficially live-looking admin routes. The REAL, live signature
+    subsystem (lib/signature/signature-service.ts, reached via
+    app/api/signatures/**) operates on the entirely separate
+    signature_documents table, not this one. This generated ModelViewSet
+    is unscoped (permission_classes=[IsAuthenticated]). No legitimate
+    consumer found on either side.
+    """
     queryset = SignatureWorkflows.objects.all()
     serializer_class = SignatureWorkflowsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-08T06:06:28.651Z",
+  "generatedAt": "2026-09-08T08:21:02.704Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 502,
-  "pendingReviewCount": 198,
-  "tenantGrantedTableCount": 239,
-  "systemGrantedTableCount": 32,
+  "readyForExplicitGrantCount": 526,
+  "pendingReviewCount": 174,
+  "tenantGrantedTableCount": 253,
+  "systemGrantedTableCount": 36,
   "tenantOperationTotals": {
-    "SELECT": 230,
-    "INSERT": 203,
-    "UPDATE": 141,
-    "DELETE": 82
+    "SELECT": 241,
+    "INSERT": 215,
+    "UPDATE": 146,
+    "DELETE": 83
   },
   "systemOperationTotals": {
-    "SELECT": 29,
-    "INSERT": 15,
-    "UPDATE": 10,
+    "SELECT": 31,
+    "INSERT": 17,
+    "UPDATE": 12,
     "DELETE": 0
   },
   "riskSignals": {
@@ -100,6 +100,7 @@
       "voting_sessions",
       "wcb_claims",
       "wcb_employer_assessments",
+      "workbook_memory_holders",
       "workplace_incidents",
       "worksites"
     ],
@@ -122,7 +123,10 @@
       "per_capita_remittances",
       "pilot_applications",
       "platform_payments",
-      "policy_evaluations"
+      "policy_evaluations",
+      "recognition_award_types",
+      "recognition_awards",
+      "workbooks"
     ],
     "systemOnlyBroadSystemDml": [
       "council_elections",
@@ -145,13 +149,25 @@
   "readyForExplicitGrant": [
     {
       "table": "ab_test_assignments",
-      "classification": "LATENT_UNREACHABLE",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
       "table": "ab_test_events",
-      "classification": "LATENT_UNREACHABLE",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ab_test_variants",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ab_tests",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -268,9 +284,46 @@
       ]
     },
     {
+      "table": "allocation_basis_snapshots",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "allocation_rule_versions",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "allocation_rules",
-      "classification": "LATENT_UNREACHABLE",
-      "tenantPrivileges": [],
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "allocation_run_lines",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "allocation_runs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1314,6 +1367,33 @@
       "systemPrivileges": []
     },
     {
+      "table": "dispatch_assignments",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dispatch_requests",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dispatch_rules",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "document_access_grants",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -1425,6 +1505,24 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dunning_cases",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dunning_policies",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "dunning_steps",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -2721,6 +2819,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "mobile_devices",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "mobile_notifications",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3349,6 +3457,30 @@
       "systemPrivileges": []
     },
     {
+      "table": "pricing_discount_rules",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pricing_regional_deployments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pricing_template_modules",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pricing_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "program_enrollments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3385,6 +3517,30 @@
         "DELETE"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "recognition_award_types",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "recognition_awards",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
     },
     {
       "table": "recognition_programs",
@@ -3679,6 +3835,12 @@
     {
       "table": "signature_webhooks_log",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "signature_workflows",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -4085,10 +4247,37 @@
       "systemPrivileges": []
     },
     {
+      "table": "workbook_memory_holders",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "workbook_modernization_alignment",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "workbook_modules",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "workbook_purchases",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "INSERT"
+      ]
     },
     {
       "table": "workbook_stewardship_signals",
@@ -4101,6 +4290,18 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "workbooks",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "UPDATE"
+      ]
     },
     {
       "table": "workflow_definitions",
@@ -4139,14 +4340,6 @@
   ],
   "pendingReview": [
     {
-      "table": "ab_test_variants",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "ab_tests",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "address_change_history",
       "classification": "NEEDS_REVIEW"
     },
@@ -4172,22 +4365,6 @@
     },
     {
       "table": "alert_executions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "allocation_basis_snapshots",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "allocation_rule_versions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "allocation_run_lines",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "allocation_runs",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4379,35 +4556,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "dispatch_assignments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "dispatch_requests",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "dispatch_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "document_signers",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "donation_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "dunning_cases",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "dunning_policies",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "dunning_steps",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4619,10 +4772,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "mobile_devices",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "mobile_sync_queue",
       "classification": "NEEDS_REVIEW"
     },
@@ -4679,22 +4828,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "pricing_discount_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pricing_regional_deployments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pricing_template_modules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pricing_templates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "privacy_breaches",
       "classification": "NEEDS_REVIEW"
     },
@@ -4731,14 +4864,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "recognition_award_types",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "recognition_awards",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "recovery_time_objectives",
       "classification": "NEEDS_REVIEW"
     },
@@ -4768,10 +4893,6 @@
     },
     {
       "table": "signature_verification",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "signature_workflows",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4912,22 +5033,6 @@
     },
     {
       "table": "weekly_threshold_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "workbook_memory_holders",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "workbook_modules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "workbook_purchases",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "workbooks",
       "classification": "NEEDS_REVIEW"
     }
   ]

@@ -470,10 +470,20 @@ class SmsRateLimitsViewSet(viewsets.ModelViewSet):
 
 
 class MobileDevicesViewSet(viewsets.ModelViewSet):
-    """API endpoint for MobileDevices operations."""
+    """API endpoint for MobileDevices operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): the real, live TS consumer is app/api/mobile/sync/route.ts
+    (auth-gated, scoped to the caller's own userId+organizationId on read,
+    and ownership-checked on write as of this round). This generated
+    ModelViewSet(queryset=Model.objects.all(), permission_classes=
+    [IsAuthenticated]) has no legitimate Django consumer and no
+    organization/user scoping of its own — contained via the existing
+    DenyAllPermission in this file.
+    """
     queryset = MobileDevices.objects.all()
     serializer_class = MobileDevicesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['device_token']
     search_fields = ['device_token']

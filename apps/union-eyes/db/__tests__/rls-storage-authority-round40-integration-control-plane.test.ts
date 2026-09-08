@@ -68,7 +68,12 @@ const ROUND40_FROZEN_COHORT = [
 
 const EXPECTED_AUTHORITY = {
   ai_insight_reports: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
-  allocation_rules: ['LATENT_UNREACHABLE', [], [], 'NONE', 'NONE', 'NONE'],
+  // CORRECTED round 50: the round-40 finding that allocation-engine.ts had
+  // zero production importers was stale/incorrect — app/api/finance/allocation/
+  // {route,run/route}.ts genuinely call it, org-scoped via trusted auth
+  // context. A cross-tenant rule IDOR was also found and fixed this round.
+  // See rls-storage-authority-manifest reference-latent.ts allocation_rules entry.
+  allocation_rules: ['TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'NONE'],
   clause_comparisons: ['TENANT_RLS_REQUIRED', ['INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME', 'HIGH'],
   clc_per_capita_benchmarks: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],
   currency_exchange_rates: ['CONTAINED_NO_AUTHORITY', [], [], 'NONE', 'NONE', 'NONE'],

@@ -296,7 +296,7 @@ describe("dispatch-engine", () => {
       ];
       mocks.mockReturning.mockResolvedValueOnce(assignments);
 
-      // select for request fetch
+      // select for request ownership check
       const requestWhere = vi.fn().mockResolvedValue([
         { id: "r1", requestedWorkers: 2 },
       ]);
@@ -307,7 +307,7 @@ describe("dispatch-engine", () => {
       const setFn = vi.fn().mockReturnValue({ where: setWhere });
       mocks.mockDb.update.mockReturnValue({ set: setFn });
 
-      const result = await assignWorkersToDispatch("r1", ["m1", "m2"]);
+      const result = await assignWorkersToDispatch("org-1", "r1", ["m1", "m2"]);
       expect(result).toEqual(assignments);
     });
 
@@ -323,24 +323,23 @@ describe("dispatch-engine", () => {
       const setFn = vi.fn().mockReturnValue({ where: setWhere });
       mocks.mockDb.update.mockReturnValue({ set: setFn });
 
-      await assignWorkersToDispatch("r1", ["m1"]);
+      await assignWorkersToDispatch("org-1", "r1", ["m1"]);
       expect(setFn).toHaveBeenCalledWith(expect.objectContaining({ status: "partially_filled" }));
     });
 
-    it("skips status update when request not found after insert (Batch 35)", async () => {
-      mocks.mockReturning.mockResolvedValueOnce([{ requestId: "r1", memberId: "m1" }]);
+    // ROUND 50 REGRESSION: assignWorkersToDispatch() previously took no
+    // orgId and performed no ownership check at all, letting one
+    // organization inject assignment rows into another organization's
+    // dispatch request (cross-tenant IDOR).
+    it("throws and never inserts when the request does not belong to the caller organization", async () => {
       const requestWhere = vi.fn().mockResolvedValue([]);
       const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
       mocks.mockDb.select.mockReturnValue({ from: requestFrom });
 
-      const setWhere = vi.fn().mockResolvedValue(undefined);
-      const setFn = vi.fn().mockReturnValue({ where: setWhere });
-      mocks.mockDb.update.mockReturnValue({ set: setFn });
-
-      const result = await assignWorkersToDispatch("r1", ["m1"]);
-      expect(result).toHaveLength(1);
-      // Update should not be called when request not found
-      expect(setFn).not.toHaveBeenCalled();
+      await expect(
+        assignWorkersToDispatch("org-1", "other-orgs-request", ["m1"]),
+      ).rejects.toThrow("Dispatch request not found.");
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
     });
   });
 });

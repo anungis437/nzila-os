@@ -119,6 +119,7 @@ describe('platform-economics/allocation-engine', () => {
   describe('runAllocation', () => {
     it('runs a posted allocation with ledger entries and chargebacks', async () => {
       pushSel([{ id: 'bp1', isClosed: false, label: 'P1' }]); // billing period
+      pushSel([{ id: 'rule-1' }]); // rule ownership check
       pushSel([{ id: 'ver-1', method: 'per_member_count', weights: null }]); // rule version
       pushSel([{ total: '100.00' }]); // cost total
       const result = await runAllocation({
@@ -137,6 +138,7 @@ describe('platform-economics/allocation-engine', () => {
     });
 
     it('runs a simulation with the weighted_hybrid method', async () => {
+      pushSel([{ id: 'rule-1' }]); // rule ownership check (simulation skips the billing-period read)
       pushSel([{ id: 'ver-1', method: 'weighted_hybrid', weights: { per_member_count: 1, per_active_user: 1 } }]);
       pushSel([{ total: '50.00' }]);
       const result = await runAllocation({
@@ -164,8 +166,21 @@ describe('platform-economics/allocation-engine', () => {
       ).rejects.toThrow('is closed');
     });
 
+    // ROUND 50 REGRESSION: runAllocation() previously resolved ruleId with no
+    // tenant scoping, letting an org apply another org's private allocation
+    // rule to its own cost data (cross-tenant IDOR). See
+    // verifyAllocationRuleOwnership in allocation-engine.ts.
+    it('throws when the rule does not belong to the caller organization (cross-tenant IDOR regression)', async () => {
+      pushSel([{ id: 'bp1', isClosed: false, label: 'P1' }]); // period
+      pushSel([]); // ownership check finds no matching rule for this org
+      await expect(
+        runAllocation({ organizationId: 'o1', billingPeriodId: 'bp1', ruleId: 'other-orgs-rule', localBasis }),
+      ).rejects.toThrow('not found for this organization');
+    });
+
     it('throws when there is no active rule version', async () => {
       pushSel([{ id: 'bp1', isClosed: false, label: 'P1' }]); // period
+      pushSel([{ id: 'r1' }]); // ownership check
       pushSel([]); // rule version missing
       await expect(
         runAllocation({ organizationId: 'o1', billingPeriodId: 'bp1', ruleId: 'r1', localBasis }),
@@ -174,6 +189,7 @@ describe('platform-economics/allocation-engine', () => {
 
     it('throws when there are no unallocated costs', async () => {
       pushSel([{ id: 'bp1', isClosed: false, label: 'P1' }]); // period
+      pushSel([{ id: 'r1' }]); // ownership check
       pushSel([{ id: 'ver-1', method: 'per_member_count', weights: null }]); // version
       pushSel([{ total: '0' }]); // zero cost
       await expect(

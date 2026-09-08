@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
+import { verifyClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +34,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string; holderId: string }> },
 ) {
   const { id: workbookId, holderId } = await params;
+
+  const access = await verifyClaimedWorkbookAccess(workbookId);
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
+  }
 
   let body: any;
   try {
@@ -82,6 +88,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; holderId: string }> },
 ) {
   const { id: workbookId, holderId } = await params;
+
+  const access = await verifyClaimedWorkbookAccess(workbookId);
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
+  }
   try {
     const result = await db
       .delete(workbookMemoryHolders)

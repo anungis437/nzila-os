@@ -1,29 +1,29 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-08T06:06:28.132Z
+Generated: 2026-09-08T08:20:56.944Z
 
 ## Classification counts
 
 | Classification | Count |
 | --- | --- |
-| NEEDS_REVIEW | 198 |
-| TENANT_RLS_REQUIRED | 202 |
-| LATENT_UNREACHABLE | 193 |
+| NEEDS_REVIEW | 174 |
+| TENANT_RLS_REQUIRED | 209 |
+| LATENT_UNREACHABLE | 197 |
 | SYSTEM_ONLY | 21 |
-| CONTAINED_NO_AUTHORITY | 47 |
-| PARENT_OWNED_RLS_REQUIRED | 22 |
+| CONTAINED_NO_AUTHORITY | 52 |
+| PARENT_OWNED_RLS_REQUIRED | 29 |
 | GLOBAL_REFERENCE_DATA | 11 |
 | MIXED_GLOBAL_TENANT_RLS_REQUIRED | 1 |
 | SEPARATE_DATABASE_BOUNDARY | 2 |
 | MULTI_PARTY_RLS_REQUIRED | 1 |
-| USER_RLS_REQUIRED | 2 |
+| USER_RLS_REQUIRED | 3 |
 
 ## Authority-model convergence (invocationAuthority / dbExecutionPrincipal / privileges)
 
-- invocationAuthority = TBD: 198
-- dbExecutionPrincipal = TBD: 198
-- requiredRuntimePrivileges = TBD: 198
-- requiredSystemPrivileges = TBD: 198
+- invocationAuthority = TBD: 174
+- dbExecutionPrincipal = TBD: 174
+- requiredRuntimePrivileges = TBD: 174
+- requiredSystemPrivileges = TBD: 174
 - Closed (non-NEEDS_REVIEW) entries still carrying TBD in ANY of the four fields: 0
 
 ## Invariant violations (must always be zero)
@@ -40,12 +40,12 @@ Generated: 2026-09-08T06:06:28.132Z
 
 ## RLS policy expansion required (NEW tables beyond the 0108 baseline, NOT evidence 0108 lost coverage)
 
-- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 190
-- PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: 20
-- USER_RLS_REQUIRED tables beyond the 0108 baseline: 2
+- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 197
+- PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: 27
+- USER_RLS_REQUIRED tables beyond the 0108 baseline: 3
 - MIXED_GLOBAL_TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 1
 - MULTI_PARTY_RLS_REQUIRED tables beyond the 0108 baseline: 1
-- Total additional policy-expansion tables: 214
+- Total additional policy-expansion tables: 229
 
 ## Blanket grant blocker
 

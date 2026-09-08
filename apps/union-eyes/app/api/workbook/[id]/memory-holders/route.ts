@@ -18,9 +18,9 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import {
   workbookMemoryHolders,
-  workbooks,
 } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
+import { verifyClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -68,22 +68,14 @@ async function loadCartography(workbookId: string) {
   return { holders: rows, cartography };
 }
 
-async function verifyWorkbookExists(workbookId: string): Promise<boolean> {
-  const [row] = await db
-    .select({ id: workbooks.id })
-    .from(workbooks)
-    .where(eq(workbooks.id, workbookId))
-    .limit(1);
-  return Boolean(row);
-}
-
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: workbookId } = await params;
-  if (!(await verifyWorkbookExists(workbookId))) {
-    return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+  const access = await verifyClaimedWorkbookAccess(workbookId);
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
   }
   try {
     const payload = await loadCartography(workbookId);
@@ -100,8 +92,9 @@ export async function POST(
 ) {
   const { id: workbookId } = await params;
 
-  if (!(await verifyWorkbookExists(workbookId))) {
-    return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+  const access = await verifyClaimedWorkbookAccess(workbookId);
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
   }
 
   let body: any;
