@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-09-08T01:27:20.155Z",
+  "generatedAt": "2026-09-08T06:06:28.651Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 489,
-  "pendingReviewCount": 211,
-  "tenantGrantedTableCount": 233,
-  "systemGrantedTableCount": 31,
+  "readyForExplicitGrantCount": 502,
+  "pendingReviewCount": 198,
+  "tenantGrantedTableCount": 239,
+  "systemGrantedTableCount": 32,
   "tenantOperationTotals": {
-    "SELECT": 225,
-    "INSERT": 198,
+    "SELECT": 230,
+    "INSERT": 203,
     "UPDATE": 141,
     "DELETE": 82
   },
   "systemOperationTotals": {
     "SELECT": 29,
-    "INSERT": 14,
+    "INSERT": 15,
     "UPDATE": 10,
     "DELETE": 0
   },
@@ -110,6 +110,7 @@
       "collective_agreements",
       "communication_preferences",
       "consent_records",
+      "deadline_audit_events",
       "deadline_reminders",
       "dues_assignments",
       "grievance_deadlines",
@@ -151,6 +152,12 @@
     {
       "table": "ab_test_events",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "access_justification_requests",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -541,6 +548,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "break_glass_activations",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "break_policies",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -728,6 +741,12 @@
     },
     {
       "table": "cba_version_history",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "certification_audit_log",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -1047,6 +1066,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "conflict_audit_log",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "conflict_review_committee",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -1120,6 +1145,15 @@
         "INSERT",
         "UPDATE",
         "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "correspondence_audit_trail",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
       ],
       "systemPrivileges": []
     },
@@ -1221,6 +1255,17 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "deadline_audit_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "INSERT"
+      ]
     },
     {
       "table": "deadline_extensions",
@@ -1399,6 +1444,12 @@
         "INSERT",
         "UPDATE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_access_attempts",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -1987,6 +2038,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "firewall_compliance_audit",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "gl_account_mappings",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2398,6 +2455,14 @@
       "table": "legal_holds",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "location_tracking_audit",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -3532,6 +3597,23 @@
       "systemPrivileges": []
     },
     {
+      "table": "security_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "security_posture_checks",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "segment_executions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3561,6 +3643,21 @@
       "table": "shopify_config",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "signature_audit_log",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "signature_audit_trail",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -4050,10 +4147,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "access_justification_requests",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "address_change_history",
       "classification": "NEEDS_REVIEW"
     },
@@ -4138,10 +4231,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "break_glass_activations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "break_glass_system",
       "classification": "NEEDS_REVIEW"
     },
@@ -4167,10 +4256,6 @@
     },
     {
       "table": "certification_alerts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "certification_audit_log",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4214,10 +4299,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "conflict_audit_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "conflict_disclosures",
       "classification": "NEEDS_REVIEW"
     },
@@ -4235,10 +4316,6 @@
     },
     {
       "table": "contribution_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "correspondence_audit_trail",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4298,10 +4375,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "deadline_audit_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "disaster_recovery_drills",
       "classification": "NEEDS_REVIEW"
     },
@@ -4339,10 +4412,6 @@
     },
     {
       "table": "emergency_declarations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_access_attempts",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4411,10 +4480,6 @@
     },
     {
       "table": "firewall_access_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "firewall_compliance_audit",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4531,10 +4596,6 @@
     },
     {
       "table": "location_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "location_tracking_audit",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -4702,23 +4763,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "security_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "security_posture_checks",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "shared_clause_library",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "signature_audit_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "signature_audit_trail",
       "classification": "NEEDS_REVIEW"
     },
     {

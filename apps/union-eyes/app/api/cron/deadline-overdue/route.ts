@@ -81,7 +81,7 @@ export const GET = withApi(
           correlationId: runId,
         });
 
-        await writeDeadlineAuditEvent({
+        await withSystemContext((tx) => writeDeadlineAuditEvent({
           organizationId: row.organization_id,
           sourceTable: 'grievance_deadlines',
           sourceDeadlineId: row.id,
@@ -93,7 +93,7 @@ export const GET = withApi(
             scheduled_count: result.scheduled.length,
             due_date: row.due_date,
           },
-        });
+        }, tx));
         scheduled += result.scheduled.length;
       } catch (error) {
         failed++;

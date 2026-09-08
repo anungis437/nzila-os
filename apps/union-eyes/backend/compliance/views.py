@@ -91,10 +91,24 @@ class CertificationComplianceReportsViewSet(viewsets.ModelViewSet):
 
 
 class CertificationAuditLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for CertificationAuditLog operations."""
+    """API endpoint for CertificationAuditLog operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): the TS side (services/certification-management-service.ts)
+    has zero live callers anywhere (the only apparent caller,
+    lib/api/certification-management-service-api.ts, is an unused generated
+    Django-HTTP-client wrapper with zero callers of its own). The real
+    Django surface, services/api/certification_management_service_views.py's
+    CertificationManagementServiceViewSet, applies NO organization_id
+    filtering on any of its 7 models (including this one) and has zero
+    frontend consumers — contained separately in that file. This generated
+    ModelViewSet is likewise unscoped (queryset=CertificationAuditLog.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found on
+    either side.
+    """
     queryset = CertificationAuditLog.objects.all()
     serializer_class = CertificationAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']
@@ -185,10 +199,23 @@ class FirewallAccessRulesViewSet(viewsets.ModelViewSet):
 
 
 class EmployerAccessAttemptsViewSet(viewsets.ModelViewSet):
-    """API endpoint for EmployerAccessAttempts operations."""
+    """API endpoint for EmployerAccessAttempts operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): db/schema/employer-non-interference-schema.ts has
+    NO organization_id column on this table at all, and its sole TS
+    consumer (services/employer-non-interference-service.ts's
+    EmployerNonInterferenceService) has zero callers anywhere. The real
+    Django surface, services/api/employer_non_interference_service_views.py's
+    EmployerNonInterferenceServiceViewSet, correctly org-scopes reads/writes
+    via request.user.organization_id but has zero frontend consumers
+    either — contained separately in that file. This generated ModelViewSet
+    is unscoped (queryset=EmployerAccessAttempts.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found.
+    """
     queryset = EmployerAccessAttempts.objects.all()
     serializer_class = EmployerAccessAttemptsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id', 'access_granted', 'flagged_for_review']
     search_fields = ['id', 'user_id', 'user_email', 'user_role', 'data_type_requested']
@@ -197,10 +224,16 @@ class EmployerAccessAttemptsViewSet(viewsets.ModelViewSet):
 
 
 class AccessJustificationRequestsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AccessJustificationRequests operations."""
+    """API endpoint for AccessJustificationRequests operations.
+
+    CONTAINED (PR #752 round 49 — same finding as EmployerAccessAttempts
+    above): no organization_id column in the TS schema, TS consumer fully
+    dead, and the properly org-scoped Django services/api ViewSet has zero
+    frontend consumers either. This generated ModelViewSet is unscoped.
+    """
     queryset = AccessJustificationRequests.objects.all()
     serializer_class = AccessJustificationRequestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id']
     search_fields = ['id', 'requested_by', 'requested_by_email', 'requested_by_role', 'data_type_requested']
@@ -233,10 +266,16 @@ class FirewallViolationsViewSet(viewsets.ModelViewSet):
 
 
 class FirewallComplianceAuditViewSet(viewsets.ModelViewSet):
-    """API endpoint for FirewallComplianceAudit operations."""
+    """API endpoint for FirewallComplianceAudit operations.
+
+    CONTAINED (PR #752 round 49 — same finding as EmployerAccessAttempts/
+    AccessJustificationRequests above): no organization_id column in the
+    TS schema, TS consumer fully dead, Django services/api ViewSet has
+    zero frontend consumers. This generated ModelViewSet is unscoped.
+    """
     queryset = FirewallComplianceAudit.objects.all()
     serializer_class = FirewallComplianceAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['id', 'audit_period', 'total_access_attempts', 'total_employer_attempts', 'total_denied_access']
     ordering_fields = ['created_at', 'updated_at']
@@ -316,10 +355,23 @@ class EmergencyDeclarationsViewSet(viewsets.ModelViewSet):
 
 
 class BreakGlassActivationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for BreakGlassActivations operations."""
+    """API endpoint for BreakGlassActivations operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): services/break-glass-service.ts's BreakGlassService
+    (and services/force-majeure-integration.ts) have zero callers anywhere
+    in app/, actions/, or lib/ — fully dead TS code. The real Django
+    surface, services/api/break_glass_service_views.py's
+    BreakGlassServiceViewSet, correctly org-scopes reads/writes via
+    request.user.organization_id but has zero frontend consumers either —
+    contained separately in that file. This generated ModelViewSet is
+    unscoped (queryset=BreakGlassActivations.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found on
+    either side for a table this sensitive.
+    """
     queryset = BreakGlassActivations.objects.all()
     serializer_class = BreakGlassActivationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['emergency_id', 'signature1_user_id']
     search_fields = ['activation_reason', 'signature1_user_id']
@@ -451,10 +503,25 @@ class GeofenceEventsViewSet(viewsets.ModelViewSet):
 
 
 class LocationTrackingAuditViewSet(viewsets.ModelViewSet):
-    """API endpoint for LocationTrackingAudit operations."""
+    """API endpoint for LocationTrackingAudit operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): db/schema/domains/compliance/geofence.ts declares no
+    organization_id column (subject-scoped by user_id — real-time strike/
+    picket location tracking is an individual-consent construct). The
+    real writer, services/geofence-privacy-service.ts's
+    GeofencePrivacyService.logAuditAction() (called only for
+    consent_granted/consent_revoked), has NO reader anywhere in app code —
+    this generated ModelViewSet would be the ONLY reader, and it applies
+    no scoping at all (queryset=LocationTrackingAudit.objects.all(),
+    permission_classes=[IsAuthenticated], filterable by ?user_id= to
+    browse ANY user's location-tracking consent history). No legitimate
+    Django consumer found; contained to prevent a same-org/cross-user
+    privacy leak on inherently sensitive location data.
+    """
     queryset = LocationTrackingAudit.objects.all()
     serializer_class = LocationTrackingAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -873,10 +940,22 @@ class ConflictTrainingViewSet(viewsets.ModelViewSet):
 
 
 class ConflictAuditLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for ConflictAuditLog operations."""
+    """API endpoint for ConflictAuditLog operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): services/founder-conflict-service.ts has zero
+    callers anywhere. The real Django surface,
+    services/api/founder_conflict_service_views.py's
+    FounderConflictServiceViewSet, correctly org-scopes its read-only
+    audit_log action via request.user.organization_id but has zero
+    frontend consumers either — contained separately in that file (no
+    write action exists there for this table). This generated
+    ModelViewSet is unscoped (queryset=ConflictAuditLog.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found.
+    """
     queryset = ConflictAuditLog.objects.all()
     serializer_class = ConflictAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']

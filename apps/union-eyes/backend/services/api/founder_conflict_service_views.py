@@ -7,7 +7,7 @@ Auto-generated: 2026-02-18 09:08
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.pagination import CursorPagination
 from django.db import transaction
 from django.utils import timezone
@@ -17,6 +17,24 @@ import logging
 logger = logging.getLogger(__name__)
 from compliance.models import ConflictOfInterestPolicy, BlindTrustRegistry, ConflictDisclosures, ArmsLengthVerification, RecusalTracking, ConflictReviewCommittee, ConflictTraining, ConflictAuditLog
 from core.models import AuditLogs
+
+
+class DenyAllPermission(BasePermission):
+    """CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): no legitimate frontend consumer of this ViewSet
+    exists anywhere (verified by exhaustive grep across app/, actions/,
+    lib/ for 'founder-conflict-service' and 'founder_conflict'). Its
+    writes/reads are correctly org-scoped via request.user.organization_id,
+    but with no real consumer this is untested, unmonitored attack
+    surface. Deny unconditionally until a real consumer exists.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
 
 class FounderConflictServicePagination(CursorPagination):
     page_size = 50
@@ -44,7 +62,7 @@ class FounderConflictServiceViewSet(viewsets.ViewSet):
 - POST /api/services/founder-conflict-service/update_policy/ — Update conflict of interest policy
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     pagination_class = FounderConflictServicePagination
 
     def paginate_queryset(self, queryset):

@@ -110,10 +110,25 @@ class AuditLogsViewSet(viewsets.ModelViewSet):
 
 
 class SecurityEventsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SecurityEvents operations."""
+    """API endpoint for SecurityEvents operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): the real, legitimate consumer is
+    app/api/security/events/route.ts (crudRoutes, orgScoped, now gated to
+    readRole/writeRole='security_manager' — matching the privileged
+    security dashboard's own hasMinRole('security_manager') gate). This
+    generated ViewSet (queryset=SecurityEvents.objects.all(),
+    permission_classes=[IsAuthenticated]) applied no tenant/role scoping
+    at all — any authenticated user of any organization could
+    list/retrieve/create/update/delete every organization's security
+    events, including forging fabricated events via
+    filterset_fields=['organization_id','user_id']. No legitimate Django
+    consumer found. Remove only once a proven legitimate consumer and
+    org+role-scoped queryset filtering exist.
+    """
     queryset = SecurityEvents.objects.all()
     serializer_class = SecurityEventsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id', 'user_id']
     search_fields = ['user_id']

@@ -8,6 +8,25 @@ from .models import (BoardPackets, BoardPacketSections, BoardPacketDistributions
 from .serializers import (BoardPacketsSerializer, BoardPacketSectionsSerializer, BoardPacketDistributionsSerializer, BoardPacketTemplatesSerializer, CmsTemplatesSerializer, CmsPagesSerializer, CmsBlocksSerializer, CmsNavigationMenusSerializer, CmsMediaLibrarySerializer, PublicEventsSerializer, EventRegistrationsSerializer, EventCheckInsSerializer, JobPostingsSerializer, JobApplicationsSerializer, JobSavedSerializer, WebsiteSettingsSerializer, DocumentFoldersSerializer, DocumentsSerializer, PublicContentSerializer, MemberDocumentsSerializer, SignatureDocumentsSerializer, DocumentSignersSerializer, SignatureAuditTrailSerializer, SignatureTemplatesSerializer, SignatureWebhooksLogSerializer, SignatureWorkflowsSerializer, SignersSerializer, SignatureAuditLogSerializer, SignatureVerificationSerializer, ShopifyConfigSerializer, WebhookReceiptsSerializer, SocialAccountsSerializer, SocialPostsSerializer, SocialCampaignsSerializer, SocialAnalyticsSerializer, SocialFeedsSerializer, SocialEngagementSerializer, ImpactMetricsSerializer, CaseStudiesSerializer, TestimonialsSerializer, PilotApplicationsSerializer, PilotMetricsSerializer, OrganizerImpactsSerializer, DataAggregationConsentSerializer, MovementTrendsSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 37: no legitimate Django consumer of SocialAccountsViewSet exists.
+
+    The generated model only maps `organization` (not the canonical access_token/
+    refresh_token/platform fields), but Django DELETE/UPDATE still operate on the
+    real physical `social_accounts` row — an authenticated user of any org could
+    reassign `organization_id` (org-takeover of another org's OAuth-connected
+    account) or delete it, with no queryset scoping (`IsAuthenticated` only,
+    `organization_id` merely query-filterable). Deny unconditionally until a real
+    consumer with proven tenant isolation exists.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class BoardPacketsViewSet(viewsets.ModelViewSet):
     """API endpoint for BoardPackets operations."""
     queryset = BoardPackets.objects.all()
@@ -276,10 +295,27 @@ class DocumentSignersViewSet(viewsets.ModelViewSet):
 
 
 class SignatureAuditTrailViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureAuditTrail operations."""
+    """API endpoint for SignatureAuditTrail operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): the real, legitimate consumer is
+    lib/signature/signature-service.ts's AuditTrailService, reached via
+    app/api/signatures/audit/[documentId]/route.ts,
+    app/api/signatures/documents/route.ts,
+    app/api/signatures/documents/[id]/route.ts, and
+    app/api/signatures/sign/route.ts — all of which now verify document
+    access via SignatureService.verifyDocumentAccess() (the audit route's
+    check was added this round to close a cross-tenant IDOR). This
+    generated ModelViewSet applies no such scoping at all
+    (queryset=SignatureAuditTrail.objects.all(),
+    permission_classes=[IsAuthenticated]) and would let any authenticated
+    user of any organization read every document's signer identities, IPs,
+    and timestamps. No legitimate Django consumer found; contained since
+    the real TS surface already covers this table correctly.
+    """
     queryset = SignatureAuditTrail.objects.all()
     serializer_class = SignatureAuditTrailSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -328,10 +364,20 @@ class SignersViewSet(viewsets.ModelViewSet):
 
 
 class SignatureAuditLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureAuditLog operations."""
+    """API endpoint for SignatureAuditLog operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): lib/services/signature-workflow-service.ts's
+    SignatureWorkflowService (the sole writer of this table) has zero
+    callers anywhere in app/, actions/, or lib/ — fully dead code
+    (lib/services/index.ts explicitly does not re-export it: "import
+    directly from file" — confirmed no direct importer exists either).
+    This generated ModelViewSet is unscoped (permission_classes=
+    [IsAuthenticated]). No legitimate consumer found on either side.
+    """
     queryset = SignatureAuditLog.objects.all()
     serializer_class = SignatureAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -394,25 +440,6 @@ class WebhookReceiptsViewSet(viewsets.ModelViewSet):
     search_fields = ['provider', 'webhook_id']
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
-
-
-class DenyAllPermission(permissions.BasePermission):
-    """Round 37: no legitimate Django consumer of SocialAccountsViewSet exists.
-
-    The generated model only maps `organization` (not the canonical access_token/
-    refresh_token/platform fields), but Django DELETE/UPDATE still operate on the
-    real physical `social_accounts` row \u2014 an authenticated user of any org could
-    reassign `organization_id` (org-takeover of another org's OAuth-connected
-    account) or delete it, with no queryset scoping (`IsAuthenticated` only,
-    `organization_id` merely query-filterable). Deny unconditionally until a real
-    consumer with proven tenant isolation exists.
-    """
-
-    def has_permission(self, request, view):
-        return False
-
-    def has_object_permission(self, request, view, obj):
-        return False
 
 
 class SocialAccountsViewSet(viewsets.ModelViewSet):

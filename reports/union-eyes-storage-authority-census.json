@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-09-08T01:27:18.522Z",
-  "totalNeedsReview": 211,
+  "generatedAt": "2026-09-08T06:06:27.047Z",
+  "totalNeedsReview": 198,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 211
+    "NEEDS_REVIEW": 198
   },
   "cohortCounts": {
-    "COMPLEX:org:NORMAL": 31,
-    "COMPLEX:none:NORMAL": 72,
-    "COMPLEX:org:HIGH": 35,
+    "COMPLEX:org:NORMAL": 30,
+    "COMPLEX:none:NORMAL": 70,
+    "COMPLEX:org:HIGH": 33,
     "PARENT_OWNED:parent:HIGH": 8,
-    "COMPLEX:user:NORMAL": 16,
-    "PARENT_OWNED:user:NORMAL": 3,
+    "COMPLEX:user:NORMAL": 14,
+    "PARENT_OWNED:user:NORMAL": 2,
     "COMPLEX:none:HIGH": 6,
-    "PARENT_OWNED:parent:NORMAL": 23,
+    "PARENT_OWNED:parent:NORMAL": 18,
     "COMPLEX:user:HIGH": 6,
     "SIMPLE_TENANT:org:HIGH": 11
   },
@@ -2704,58 +2704,6 @@
       ]
     },
     {
-      "table": "deadline_audit_events",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "deadline-engine-schema.deadlineAuditEvents"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/api/staging-proof/deadline-engine/scenario/route.ts",
-          "lib/deadline-engine/audit.ts"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/deadline-engine/audit.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "LIBRARY_ONLY",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/deadline-engine/audit.ts: organization identifier reference",
-        "lib/deadline-engine/audit.ts: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/deadline-engine/audit.ts: insert/write path"
-      ]
-    },
-    {
       "table": "ai_safety_filters",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -2813,166 +2761,6 @@
       ]
     },
     {
-      "table": "certification_audit_log",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "certification-management-schema.certificationAuditLog",
-          "domains/compliance/certifications.certificationAuditLog"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": "user_id",
-        "userColumnNullable": true,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/certification-management-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/certification-management-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:user:NORMAL"
-      },
-      "operationSet": [
-        "INSERT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/certification-management-service.ts: insert/write path",
-        "services/certification-management-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "conflict_audit_log",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/governance/conflicts.conflictAuditLog",
-          "founder-conflict-schema.conflictAuditLog"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/founder-conflict-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/founder-conflict-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:none:NORMAL"
-      },
-      "operationSet": [
-        "INSERT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/founder-conflict-service.ts: insert/write path",
-        "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "correspondence_audit_trail",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/documents/correspondence.correspondenceAuditTrail"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "correspondence_id -> correspondence.id",
-          "actor_user_id -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/services/correspondence-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/services/correspondence-service.ts"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "LIBRARY_ONLY",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/services/correspondence-service.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/services/correspondence-service.ts: insert/write path",
-        "lib/services/correspondence-service.ts: update/write path"
-      ]
-    },
-    {
       "table": "currency_enforcement_audit",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -3022,59 +2810,6 @@
         "services/transfer-pricing-service.ts: insert/write path",
         "services/transfer-pricing-service.ts: update/write path",
         "backend/billing/views.py: update/write path"
-      ]
-    },
-    {
-      "table": "firewall_compliance_audit",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/employer-interference.firewallComplianceAudit",
-          "employer-non-interference-schema.firewallComplianceAudit"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/employer-non-interference-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/employer-non-interference-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:none:NORMAL"
-      },
-      "operationSet": [
-        "INSERT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/employer-non-interference-service.ts: insert/write path",
-        "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
       ]
     },
     {
@@ -3179,192 +2914,6 @@
         "services/transfer-pricing-service.ts: insert/write path",
         "services/transfer-pricing-service.ts: update/write path",
         "backend/billing/views.py: update/write path"
-      ]
-    },
-    {
-      "table": "location_tracking_audit",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/geofence.locationTrackingAudit",
-          "geofence-privacy-schema.locationTrackingAudit"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": "user_id",
-        "userColumnNullable": false,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/geofence-privacy-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/geofence-privacy-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:user:NORMAL"
-      },
-      "operationSet": [
-        "INSERT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/geofence-privacy-service.ts: insert/write path",
-        "services/geofence-privacy-service.ts: update/write path",
-        "services/geofence-privacy-service.ts: delete/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "signature_audit_log",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/documents/workflows.signatureAuditLog",
-          "signature-workflows-schema.signatureAuditLog"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "workflow_id -> signatureWorkflows.id",
-          "signer_id -> signers.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/services/signature-workflow-service.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/services/signature-workflow-service.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/services/signature-workflow-service.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "backend/content/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/services/signature-workflow-service.ts: insert/write path",
-        "lib/services/signature-workflow-service.ts: update/write path",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "backend/content/views.py: insert/write path",
-        "backend/content/views.py: update/write path",
-        "backend/content/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "signature_audit_trail",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/documents/signatures.signatureAuditTrail",
-          "e-signature-schema.signatureAuditTrail"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "document_id -> signatureDocuments.id",
-          "signer_id -> documentSigners.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/signature/signature-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "lib/signature/signature-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/content/models.py, viewset=backend/content/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "lib/signature/signature-service.ts: organization identifier reference",
-        "backend/content/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "lib/signature/signature-service.ts: insert/write path",
-        "lib/signature/signature-service.ts: update/write path",
-        "backend/content/views.py: insert/write path",
-        "backend/content/views.py: update/write path",
-        "backend/content/views.py: delete/write path"
       ]
     },
     {
@@ -3654,7 +3203,10 @@
         "backend/core/views.py: organization identifier reference",
         "backend/core/views.py: organization_id"
       ],
-      "mutationBoundaryEvidence": []
+      "mutationBoundaryEvidence": [
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
+      ]
     },
     {
       "table": "integration_partners",
@@ -3754,7 +3306,9 @@
         "backend/core/views.py: organization_id"
       ],
       "mutationBoundaryEvidence": [
-        "lib/integrations/adapters/hris/WORKDAY_USAGE.md: insert/write path"
+        "lib/integrations/adapters/hris/WORKDAY_USAGE.md: insert/write path",
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
       ]
     },
     {
@@ -3808,7 +3362,9 @@
         "backend/core/views.py: organization_id"
       ],
       "mutationBoundaryEvidence": [
-        "app/[locale]/dashboard/integrations/page.tsx: withSystemContext"
+        "app/[locale]/dashboard/integrations/page.tsx: withSystemContext",
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
       ]
     },
     {
@@ -4257,7 +3813,9 @@
       "mutationBoundaryEvidence": [
         "lib/services/rewards/automation-service.ts: insert/write path",
         "lib/services/rewards/automation-service.ts: update/write path",
-        "lib/services/rewards/automation-service.ts: delete/write path"
+        "lib/services/rewards/automation-service.ts: delete/write path",
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
       ]
     },
     {
@@ -7462,112 +7020,6 @@
       ]
     },
     {
-      "table": "security_events",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/infrastructure/audit.publicSecurityEvents"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/[locale]/dashboard/security/page.tsx"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "app/[locale]/dashboard/security/page.tsx"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/core/models.py, viewset=backend/core/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/[locale]/dashboard/security/page.tsx: requireUser"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/security/page.tsx: organization identifier reference",
-        "app/[locale]/dashboard/security/page.tsx: organization_id",
-        "backend/core/views.py: organization identifier reference",
-        "backend/core/views.py: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/[locale]/dashboard/security/page.tsx: withSystemContext"
-      ]
-    },
-    {
-      "table": "security_posture_checks",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/infrastructure/audit.securityPostureChecks"
-        ],
-        "orgColumn": "organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/[locale]/dashboard/security/page.tsx"
-        ],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "app/[locale]/dashboard/security/page.tsx"
-        ],
-        "djangoModelFound": false,
-        "djangoViewSetReachable": false,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "no Django model found"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "SELECT"
-      ],
-      "reachabilityKind": "SERVER_PAGE",
-      "authEvidence": [
-        "app/[locale]/dashboard/security/page.tsx: requireUser"
-      ],
-      "organizationEvidence": [
-        "app/[locale]/dashboard/security/page.tsx: organization identifier reference",
-        "app/[locale]/dashboard/security/page.tsx: organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/[locale]/dashboard/security/page.tsx: withSystemContext"
-      ]
-    },
-    {
       "table": "social_posts",
       "domainModule": "unassigned",
       "reviewPriority": "HIGH",
@@ -8661,62 +8113,6 @@
       ]
     },
     {
-      "table": "access_justification_requests",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/employer-interference.accessJustificationRequests",
-          "employer-non-interference-schema.accessJustificationRequests"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "data_type_id -> dataClassificationRegistry.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/employer-non-interference-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/employer-non-interference-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/employer-non-interference-service.ts: insert/write path",
-        "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "address_change_history",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -8881,7 +8277,9 @@
       ],
       "mutationBoundaryEvidence": [
         "services/observability/realtime-alerting-service.ts: withSystemContext",
-        "services/observability/realtime-alerting-service.ts: insert/write path"
+        "services/observability/realtime-alerting-service.ts: insert/write path",
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
       ]
     },
     {
@@ -9374,67 +8772,6 @@
       "mutationBoundaryEvidence": [
         "services/founder-conflict-service.ts: insert/write path",
         "services/founder-conflict-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
-      ]
-    },
-    {
-      "table": "break_glass_activations",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/force-majeure.breakGlassActivations",
-          "force-majeure-schema.breakGlassActivations"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "emergency_id -> emergencyDeclarations.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/break-glass-service.ts",
-          "services/force-majeure-integration.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/break-glass-service.ts",
-          "services/force-majeure-integration.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/break-glass-service.ts: insert/write path",
-        "services/break-glass-service.ts: update/write path",
-        "services/force-majeure-integration.ts: insert/write path",
-        "services/force-majeure-integration.ts: update/write path",
         "backend/compliance/views.py: insert/write path",
         "backend/compliance/views.py: delete/write path"
       ]
@@ -10955,62 +10292,6 @@
       ]
     },
     {
-      "table": "employer_access_attempts",
-      "domainModule": "unassigned",
-      "reviewPriority": "NORMAL",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/compliance/employer-interference.employerAccessAttempts",
-          "employer-non-interference-schema.employerAccessAttempts"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": "user_id",
-        "userColumnNullable": false,
-        "parentForeignKeys": [
-          "data_type_id -> dataClassificationRegistry.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "services/employer-non-interference-service.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": false,
-        "hintPaths": [
-          "services/employer-non-interference-service.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/compliance/models.py, viewset=backend/compliance/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:user:NORMAL"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/compliance/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/employer-non-interference-service.ts: insert/write path",
-        "services/employer-non-interference-service.ts: update/write path",
-        "backend/compliance/views.py: insert/write path",
-        "backend/compliance/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "exchange_rates",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -11780,7 +11061,9 @@
       ],
       "mutationBoundaryEvidence": [
         "lib/services/support-service.ts: insert/write path",
-        "lib/services/support-service.ts: update/write path"
+        "lib/services/support-service.ts: update/write path",
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
       ]
     },
     {
@@ -13267,7 +12550,9 @@
       ],
       "mutationBoundaryEvidence": [
         "lib/services/support-service.ts: insert/write path",
-        "lib/services/support-service.ts: update/write path"
+        "lib/services/support-service.ts: update/write path",
+        "backend/core/views.py: update/write path",
+        "backend/core/views.py: delete/write path"
       ]
     },
     {

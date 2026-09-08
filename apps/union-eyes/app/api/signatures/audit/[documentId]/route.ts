@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
-import { AuditTrailService } from "@/lib/signature/signature-service";
+import { AuditTrailService, SignatureService } from "@/lib/signature/signature-service";
 
 import {
   ErrorCode,
@@ -25,6 +25,20 @@ export const GET = withApiAuth(async (
     }
 
     const documentId = params.documentId;
+
+    // SECURITY FIX (PR #752 round 49): verify the caller has access to this
+    // document before returning its audit trail (prevent cross-tenant IDOR
+    // — previously any authenticated user of any organization could read
+    // any document's signer identities, IPs, and timestamps by guessing a
+    // documentId). Reuses the same check already applied to
+    // app/api/signatures/documents/[id]/route.ts.
+    const hasAccess = await SignatureService.verifyDocumentAccess(documentId, user.id);
+    if (!hasAccess) {
+      return standardErrorResponse(
+        ErrorCode.FORBIDDEN,
+        'Access denied'
+      );
+    }
     
     // Get query params
     const { searchParams } = new URL(req.url);

@@ -7,7 +7,7 @@ Auto-generated: 2026-02-18 09:08
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.pagination import CursorPagination
 from django.db import transaction
 from django.utils import timezone
@@ -17,6 +17,25 @@ import logging
 logger = logging.getLogger(__name__)
 from compliance.models import BreakGlassSystem, BreakGlassActivations, DisasterRecoveryDrills, KeyHolderRegistry, RecoveryTimeObjectives, EmergencyDeclarations
 from core.models import AuditLogs
+
+
+class DenyAllPermission(BasePermission):
+    """CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): no legitimate frontend consumer of this ViewSet
+    exists anywhere (verified by exhaustive grep across app/, actions/,
+    lib/ for 'break-glass-service' and every action name). Break-glass
+    emergency access is inherently high-sensitivity; deny unconditionally
+    until a real consumer with a proven key-holder/emergency-admin
+    authorization model exists — IsAuthenticated alone is not an
+    acceptable gate for this capability.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
 
 class BreakGlassServicePagination(CursorPagination):
     page_size = 50
@@ -42,7 +61,7 @@ class BreakGlassServiceViewSet(viewsets.ViewSet):
 - GET /api/services/break-glass-service/cold_storage_status/ — Swiss cold storage status
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     pagination_class = BreakGlassServicePagination
 
     def paginate_queryset(self, queryset):
