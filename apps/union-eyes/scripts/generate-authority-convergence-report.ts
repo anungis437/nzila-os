@@ -11,7 +11,7 @@
  * Usage: tsx scripts/generate-authority-convergence-report.ts
  * Output: reports/union-eyes-authority-convergence-report.{json,md}
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
   storageAuthorityManifest,
@@ -24,6 +24,7 @@ import { scanMigrationSqlForProtectedTables } from '../db/rls-0108-migration-sql
 const REPO_ROOT = resolve(__dirname, '..', '..', '..')
 const MIGRATION_0108 = resolve(__dirname, '..', 'db', 'migrations', '0108_rls_tenant_isolation_foundation.sql')
 const OUT_DIR = resolve(REPO_ROOT, 'reports')
+const BLOCKERS_REPORT = resolve(__dirname, '..', 'reports', 'union-eyes-rls-enforcement-blockers.json')
 
 // Best-effort static scan of the 0108 migration SQL — used ONLY to check
 // migration-vs-baseline-list consistency (see baselineTablesMissingFromMigration
@@ -41,6 +42,53 @@ function get0108TablesMentionedInMigrationSql(): Set<string> {
 
 function isTbdOps(v: readonly string[] | 'TBD'): boolean {
   return v === 'TBD'
+}
+
+// Round 58E: this field used to be a hardcoded sentence claiming the
+// blanket grant "still holds" and REVOKE is blocked. That went stale the
+// moment Round 58D actually removed the blanket grant (see PART E of
+// db/migrations/20260910_rls_enforcement_expansion_round58.sql and its own
+// blanketGrantRemovalGateOk self-check) — a hand-maintained prose string
+// cannot track a fact that changes with every regeneration. Recomputed
+// here from the SAME two manifest-level gate conditions the enforcement
+// compiler checks (NEEDS_REVIEW=0, no closed-classification TBD authority)
+// plus the geometry-blockers report the compiler writes, so this report
+// can never again silently diverge from the real generated migration.
+function computeBlanketGrantStatus(args: { needsReview: number; tbdCount: number }): string {
+  let geometryBlockers: number | null = null
+  if (existsSync(BLOCKERS_REPORT)) {
+    try {
+      const parsed = JSON.parse(readFileSync(BLOCKERS_REPORT, 'utf8')) as { blockers?: unknown[] }
+      geometryBlockers = Array.isArray(parsed.blockers) ? parsed.blockers.length : null
+    } catch {
+      geometryBlockers = null
+    }
+  }
+
+  const gateOk = args.needsReview === 0 && args.tbdCount === 0 && geometryBlockers === 0
+
+  if (gateOk) {
+    return (
+      'REMOVED (as of the current generated migration, db/migrations/20260910_rls_enforcement_expansion_round58.sql PART E): ' +
+      'all three gate conditions are satisfied (NEEDS_REVIEW=0, closed-classification TBD authority=0, geometry blockers=0), so ' +
+      "the enforcement compiler's own blanketGrantRemovalGateOk check evaluated true and the migration now revokes union_eyes_runtime/" +
+      'union_eyes_system\'s blanket GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108), replacing it with the ' +
+      "exact per-table GRANTs this manifest generates. Re-run scripts/rls-enforcement/generate-rls-enforcement-migration.ts if this repo's " +
+      'state has changed since this report was generated — the gate is recomputed fresh on every run and will re-widen automatically if a ' +
+      'regression reintroduces any of the three blocking conditions.'
+    )
+  }
+
+  const reasons: string[] = []
+  if (args.needsReview > 0) reasons.push(`NEEDS_REVIEW=${args.needsReview}`)
+  if (args.tbdCount > 0) reasons.push(`closed-classification TBD authority count=${args.tbdCount}`)
+  if (geometryBlockers === null) reasons.push('geometry-blockers report not found or unreadable — run scripts/rls-enforcement/generate-rls-enforcement-migration.ts first')
+  else if (geometryBlockers > 0) reasons.push(`geometry blockers=${geometryBlockers}`)
+
+  return (
+    'STILL BLOCKED: union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). ' +
+    `REVOKE + explicit per-table GRANT generation cannot proceed while: ${reasons.join('; ')}.`
+  )
 }
 
 function main() {
@@ -180,9 +228,10 @@ function main() {
         mixedGlobalTenantExpansionRequired.length +
         multiPartyExpansionRequired.length,
     },
-    blanketGrantBlocker:
-      'union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). ' +
-      'REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired\'s tables lack an actual migration adding their RLS policy.',
+    blanketGrantBlocker: computeBlanketGrantStatus({
+      needsReview,
+      tbdCount: closedWithTbdAuthority.length,
+    }),
   }
 
   mkdirSync(OUT_DIR, { recursive: true })

@@ -1,6 +1,6 @@
 # Operational Evidence Snapshot
 
-> Generated: 2026-09-02T17:35:01.430Z
+> Generated: 2026-09-09T22:44:01.180Z
 > Policy: fields without measurable evidence remain null and include source_needed.
 
 ## Metrics (30-day window unless noted)

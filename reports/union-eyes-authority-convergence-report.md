@@ -1,6 +1,6 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-09T22:29:45.688Z
+Generated: 2026-09-09T22:57:47.681Z
 
 ## Classification counts
 
@@ -48,4 +48,4 @@ Generated: 2026-09-09T22:29:45.688Z
 
 ## Blanket grant blocker
 
-union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired's tables lack an actual migration adding their RLS policy.
+REMOVED (as of the current generated migration, db/migrations/20260910_rls_enforcement_expansion_round58.sql PART E): all three gate conditions are satisfied (NEEDS_REVIEW=0, closed-classification TBD authority=0, geometry blockers=0), so the enforcement compiler's own blanketGrantRemovalGateOk check evaluated true and the migration now revokes union_eyes_runtime/union_eyes_system's blanket GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108), replacing it with the exact per-table GRANTs this manifest generates. Re-run scripts/rls-enforcement/generate-rls-enforcement-migration.ts if this repo's state has changed since this report was generated — the gate is recomputed fresh on every run and will re-widen automatically if a regression reintroduces any of the three blocking conditions.
