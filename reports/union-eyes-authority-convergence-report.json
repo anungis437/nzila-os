@@ -1,25 +1,25 @@
 {
-  "generatedAt": "2026-09-08T19:26:19.494Z",
+  "generatedAt": "2026-09-09T01:49:26.186Z",
   "totalTables": 700,
   "byClassification": {
-    "NEEDS_REVIEW": 88,
+    "NEEDS_REVIEW": 85,
     "TENANT_RLS_REQUIRED": 220,
     "LATENT_UNREACHABLE": 197,
     "SYSTEM_ONLY": 21,
     "CONTAINED_NO_AUTHORITY": 110,
-    "PARENT_OWNED_RLS_REQUIRED": 33,
+    "PARENT_OWNED_RLS_REQUIRED": 34,
     "GLOBAL_REFERENCE_DATA": 23,
     "MIXED_GLOBAL_TENANT_RLS_REQUIRED": 2,
     "SEPARATE_DATABASE_BOUNDARY": 2,
-    "MULTI_PARTY_RLS_REQUIRED": 1,
+    "MULTI_PARTY_RLS_REQUIRED": 3,
     "USER_RLS_REQUIRED": 3
   },
-  "needsReview": 88,
+  "needsReview": 85,
   "authorityModel": {
-    "invocationAuthorityTbd": 88,
-    "dbExecutionPrincipalTbd": 88,
-    "requiredRuntimePrivilegesTbd": 88,
-    "requiredSystemPrivilegesTbd": 88,
+    "invocationAuthorityTbd": 85,
+    "dbExecutionPrincipalTbd": 85,
+    "requiredRuntimePrivilegesTbd": 85,
+    "requiredSystemPrivilegesTbd": 85,
     "closedClassificationWithTbdAuthorityCount": 0,
     "closedClassificationWithTbdAuthorityTables": []
   },
@@ -249,10 +249,11 @@
       "commercial_contracts",
       "geofences"
     ],
-    "parentOwnedRlsRequiredExpansionCount": 31,
+    "parentOwnedRlsRequiredExpansionCount": 32,
     "parentOwnedRlsRequiredExpansionTables": [
       "arbitrations",
       "chat_messages",
+      "newsletter_list_subscribers",
       "newsletter_recipients",
       "document_signers",
       "employer_payroll_run_items",
@@ -294,11 +295,13 @@
       "account_mappings",
       "pilot_enrollments"
     ],
-    "multiPartyRlsRequiredExpansionCount": 1,
+    "multiPartyRlsRequiredExpansionCount": 3,
     "multiPartyRlsRequiredExpansionTables": [
-      "per_capita_remittances"
+      "per_capita_remittances",
+      "clause_library_tags",
+      "shared_clause_library"
     ],
-    "totalExpansionCount": 245
+    "totalExpansionCount": 248
   },
   "blanketGrantBlocker": "union_eyes_runtime still holds GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108). REVOKE + explicit per-table GRANT generation from this manifest cannot proceed while NEEDS_REVIEW > 0, any closed-classification entry has TBD authority/privileges, or rlsPolicyExpansionRequired's tables lack an actual migration adding their RLS policy."
 }

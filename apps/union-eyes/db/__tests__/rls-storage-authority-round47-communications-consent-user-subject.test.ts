@@ -147,13 +147,13 @@ describe('round 47 exception: user_notification_preferences stays NEEDS_REVIEW',
   });
 });
 
-describe('round 47 exception: newsletter_list_subscribers stays NEEDS_REVIEW', () => {
-  it('is documented as an unresolved route-shape exception, not silently dropped', () => {
+describe('round 47 exception CLOSED round 55: newsletter_list_subscribers', () => {
+  it('is documented as closed (route-shape defect fixed), not silently dropped', () => {
     const entry = storageAuthorityManifest.find((e) => e.table === 'newsletter_list_subscribers');
     expect(entry).toBeTruthy();
-    expect(entry!.classification).toBe('NEEDS_REVIEW');
-    expect(entry!.reason).toContain('itemRoute');
-    expect(entry!.reason).toContain('product-level decision');
+    expect(entry!.classification).toBe('PARENT_OWNED_RLS_REQUIRED');
+    expect(entry!.reason).toContain('CLOSED round 55');
+    expect(entry!.reason).toContain('NESTED_COLLECTION_ITEM_AUTHORITY');
   });
 });
 

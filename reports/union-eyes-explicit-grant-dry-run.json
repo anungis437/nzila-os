@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-08T19:29:50.447Z",
+  "generatedAt": "2026-09-09T01:49:26.697Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 612,
-  "pendingReviewCount": 88,
-  "tenantGrantedTableCount": 279,
+  "readyForExplicitGrantCount": 615,
+  "pendingReviewCount": 85,
+  "tenantGrantedTableCount": 282,
   "systemGrantedTableCount": 44,
   "tenantOperationTotals": {
-    "SELECT": 264,
-    "INSERT": 235,
-    "UPDATE": 156,
-    "DELETE": 88
+    "SELECT": 267,
+    "INSERT": 237,
+    "UPDATE": 158,
+    "DELETE": 90
   },
   "systemOperationTotals": {
     "SELECT": 36,
@@ -39,6 +39,7 @@
       "chart_of_accounts",
       "claim_deadlines",
       "claims",
+      "clause_library_tags",
       "clc_remittance_mapping",
       "cnesst_filings",
       "collective_agreements",
@@ -97,6 +98,7 @@
       "reports",
       "right_of_refusal_events",
       "safety_inspections",
+      "shared_clause_library",
       "sms_messages",
       "social_accounts",
       "steward_assignments",
@@ -1043,6 +1045,16 @@
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "clause_library_tags",
+      "classification": "MULTI_PARTY_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "DELETE"
       ],
       "systemPrivileges": []
     },
@@ -3339,6 +3351,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "newsletter_list_subscribers",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "newsletter_recipients",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4338,6 +4359,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "shared_clause_library",
+      "classification": "MULTI_PARTY_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "shopify_config",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -5021,10 +5053,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "clause_library_tags",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "cms_media_library",
       "classification": "NEEDS_REVIEW"
     },
@@ -5177,10 +5205,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "newsletter_list_subscribers",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "organizing_campaigns",
       "classification": "NEEDS_REVIEW"
     },
@@ -5238,10 +5262,6 @@
     },
     {
       "table": "satisfaction_surveys",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "shared_clause_library",
       "classification": "NEEDS_REVIEW"
     },
     {

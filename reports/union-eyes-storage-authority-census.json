@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-09-08T19:20:52.479Z",
-  "totalNeedsReview": 88,
+  "generatedAt": "2026-09-09T01:49:25.389Z",
+  "totalNeedsReview": 85,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 88
+    "NEEDS_REVIEW": 85
   },
   "cohortCounts": {
     "COMPLEX:org:NORMAL": 23,
     "COMPLEX:none:NORMAL": 10,
-    "COMPLEX:org:HIGH": 31,
-    "PARENT_OWNED:parent:HIGH": 4,
+    "COMPLEX:org:HIGH": 30,
     "COMPLEX:user:NORMAL": 14,
-    "COMPLEX:user:HIGH": 6
+    "COMPLEX:user:HIGH": 6,
+    "PARENT_OWNED:parent:HIGH": 2
   },
   "rows": [
     {
@@ -254,6 +254,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -685,58 +686,6 @@
       ]
     },
     {
-      "table": "newsletter_list_subscribers",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/communications/newsletters.newsletterListSubscribers",
-          "newsletter-schema.newsletterListSubscribers"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "list_id -> newsletterDistributionLists.id",
-          "profile_id -> profiles.userId"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/communications/distribution-lists/[id]/subscribers/route.ts"
-        ],
-        "hasRawSqlReference": false,
-        "rawSqlFiles": [],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/communications/distribution-lists/[id]/subscribers/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": true,
-        "djangoDetail": "model=backend/notifications/models.py, viewset=backend/notifications/views.py, router-registered, DenyAll"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:HIGH"
-      },
-      "operationSet": [],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [],
-      "organizationEvidence": [
-        "backend/notifications/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/communications/distribution-lists/[id]/subscribers/route.ts: delete/write path",
-        "backend/notifications/views.py: delete/write path"
-      ]
-    },
-    {
       "table": "provincial_consent",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -1010,6 +959,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -1759,6 +1709,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -1815,6 +1766,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -3507,13 +3459,15 @@
       },
       "reachability": {
         "tsProductionReferences": [
-          "lib/address/address-service.ts"
+          "lib/address/address-service.ts",
+          "scripts/generate-parent-owned-remediation-report-round54.ts"
         ],
         "hasRawSqlReference": false,
         "rawSqlFiles": [],
         "routeActionCronHint": false,
         "hintPaths": [
-          "lib/address/address-service.ts"
+          "lib/address/address-service.ts",
+          "scripts/generate-parent-owned-remediation-report-round54.ts"
         ],
         "djangoModelFound": true,
         "djangoViewSetReachable": true,
@@ -3534,12 +3488,16 @@
       "authEvidence": [],
       "organizationEvidence": [
         "lib/address/address-service.ts: organization identifier reference",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: organization identifier reference",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: organization_id",
         "backend/auth_core/views.py: organization identifier reference",
         "backend/auth_core/views.py: organization_id"
       ],
       "mutationBoundaryEvidence": [
         "lib/address/address-service.ts: insert/write path",
         "lib/address/address-service.ts: update/write path",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: insert/write path",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: delete/write path",
         "backend/auth_core/views.py: update/write path",
         "backend/auth_core/views.py: delete/write path"
       ]
@@ -4961,6 +4919,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -5106,107 +5065,6 @@
       ]
     },
     {
-      "table": "clause_library_tags",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/agreements/shared-library.clauseLibraryTags",
-          "shared-clause-library-schema.clauseLibraryTags"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "clause_id -> sharedClauseLibrary.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/clause-library/[id]/route.ts",
-          "app/api/clause-library/[id]/tags/route.ts",
-          "app/api/clause-library/compare/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/clause-library/[id]/route.ts",
-          "app/api/clause-library/[id]/tags/route.ts",
-          "app/api/clause-library/compare/route.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts",
-          "app/api/clause-library/[id]/share/route.ts",
-          "app/api/clause-library/route.ts",
-          "app/api/clause-library/search/route.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/bargaining/models.py, viewset=backend/bargaining/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "has real TS references — requires verifying the parent relationship is itself org-scoped, not auto-closable",
-        "cohortLane": "PARENT_OWNED",
-        "cohortKey": "PARENT_OWNED:parent:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/clause-library/[id]/route.ts: withApi",
-        "app/api/clause-library/[id]/route.ts: explicit auth config",
-        "app/api/clause-library/[id]/tags/route.ts: withApi",
-        "app/api/clause-library/[id]/tags/route.ts: explicit auth config",
-        "app/api/clause-library/compare/route.ts: withApi",
-        "app/api/clause-library/compare/route.ts: explicit auth config",
-        "app/api/clause-library/[id]/share/route.ts: withApi",
-        "app/api/clause-library/[id]/share/route.ts: explicit auth config",
-        "app/api/clause-library/route.ts: withApi",
-        "app/api/clause-library/route.ts: explicit auth config",
-        "app/api/clause-library/search/route.ts: withApi",
-        "app/api/clause-library/search/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/clause-library/[id]/route.ts: withSystemContext",
-        "app/api/clause-library/[id]/route.ts: update/write path",
-        "app/api/clause-library/[id]/route.ts: delete/write path",
-        "app/api/clause-library/[id]/tags/route.ts: withSystemContext",
-        "app/api/clause-library/[id]/tags/route.ts: insert/write path",
-        "app/api/clause-library/[id]/tags/route.ts: delete/write path",
-        "app/api/clause-library/compare/route.ts: withSystemContext",
-        "app/api/clause-library/compare/route.ts: update/write path",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path",
-        "app/api/clause-library/[id]/share/route.ts: withSystemContext",
-        "app/api/clause-library/[id]/share/route.ts: update/write path",
-        "app/api/clause-library/route.ts: withSystemContext",
-        "app/api/clause-library/route.ts: insert/write path",
-        "app/api/clause-library/search/route.ts: withSystemContext"
-      ]
-    },
-    {
       "table": "conflict_disclosures",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -5342,6 +5200,7 @@
         "hasRawSqlReference": true,
         "rawSqlFiles": [
           "app/[locale]/dashboard/data-source/page.tsx",
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -5408,6 +5267,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -5465,6 +5325,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -5972,121 +5833,6 @@
       ]
     },
     {
-      "table": "shared_clause_library",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/agreements/shared-library.sharedClauseLibrary",
-          "shared-clause-library-schema.sharedClauseLibrary"
-        ],
-        "orgColumn": "source_organization_id",
-        "orgColumnNullable": false,
-        "userColumn": null,
-        "userColumnNullable": null,
-        "parentForeignKeys": [
-          "source_cba_id -> cba.id"
-        ]
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "app/api/clause-library/[id]/route.ts",
-          "app/api/clause-library/[id]/share/route.ts",
-          "app/api/clause-library/[id]/tags/route.ts",
-          "app/api/clause-library/compare/route.ts",
-          "app/api/clause-library/route.ts",
-          "app/api/clause-library/search/route.ts",
-          "lib/clc/data-products.ts",
-          "lib/settlement-recommendation-engine.ts",
-          "lib/utils/smart-onboarding.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "app/api/clause-library/[id]/route.ts",
-          "app/api/clause-library/[id]/share/route.ts",
-          "app/api/clause-library/[id]/tags/route.ts",
-          "app/api/clause-library/compare/route.ts",
-          "app/api/clause-library/route.ts",
-          "app/api/clause-library/search/route.ts",
-          "lib/clc/data-products.ts",
-          "lib/settlement-recommendation-engine.ts",
-          "lib/utils/smart-onboarding.ts",
-          "services/financial-service/drizzle/relations.ts",
-          "services/financial-service/drizzle/schema.ts",
-          "services/financial-service/src/db/schema.ts"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": false,
-        "djangoDetail": "model=backend/bargaining/models.py, viewset=backend/bargaining/views.py, router-registered, IsAuthenticated-only"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:org:HIGH"
-      },
-      "operationSet": [
-        "DELETE",
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/clause-library/[id]/route.ts: withApi",
-        "app/api/clause-library/[id]/route.ts: explicit auth config",
-        "app/api/clause-library/[id]/share/route.ts: withApi",
-        "app/api/clause-library/[id]/share/route.ts: explicit auth config",
-        "app/api/clause-library/[id]/tags/route.ts: withApi",
-        "app/api/clause-library/[id]/tags/route.ts: explicit auth config",
-        "app/api/clause-library/compare/route.ts: withApi",
-        "app/api/clause-library/compare/route.ts: explicit auth config",
-        "app/api/clause-library/route.ts: withApi",
-        "app/api/clause-library/route.ts: explicit auth config",
-        "app/api/clause-library/search/route.ts: withApi",
-        "app/api/clause-library/search/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "lib/clc/data-products.ts: organization identifier reference",
-        "lib/settlement-recommendation-engine.ts: organization identifier reference",
-        "lib/utils/smart-onboarding.ts: organization identifier reference",
-        "services/financial-service/drizzle/relations.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: organization identifier reference",
-        "services/financial-service/drizzle/schema.ts: source_organization_id",
-        "services/financial-service/src/db/schema.ts: organization identifier reference",
-        "services/financial-service/src/db/schema.ts: source_organization_id"
-      ],
-      "mutationBoundaryEvidence": [
-        "app/api/clause-library/[id]/route.ts: withSystemContext",
-        "app/api/clause-library/[id]/route.ts: update/write path",
-        "app/api/clause-library/[id]/route.ts: delete/write path",
-        "app/api/clause-library/[id]/share/route.ts: withSystemContext",
-        "app/api/clause-library/[id]/share/route.ts: update/write path",
-        "app/api/clause-library/[id]/tags/route.ts: withSystemContext",
-        "app/api/clause-library/[id]/tags/route.ts: insert/write path",
-        "app/api/clause-library/[id]/tags/route.ts: delete/write path",
-        "app/api/clause-library/compare/route.ts: withSystemContext",
-        "app/api/clause-library/compare/route.ts: update/write path",
-        "app/api/clause-library/route.ts: withSystemContext",
-        "app/api/clause-library/route.ts: insert/write path",
-        "app/api/clause-library/search/route.ts: withSystemContext",
-        "services/financial-service/drizzle/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: update/write path",
-        "services/financial-service/src/db/schema.ts: delete/write path"
-      ]
-    },
-    {
       "table": "staff_certifications",
       "domainModule": "unassigned",
       "reviewPriority": "NORMAL",
@@ -6163,6 +5909,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -6222,6 +5969,7 @@
         ],
         "hasRawSqlReference": true,
         "rawSqlFiles": [
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "scripts/generate-scope-discriminator-report.ts",
           "scripts/generate-scope-remediation-report-round52.ts",
           "scripts/generate-simple-tenant-remediation-report-round53.ts"
@@ -6319,6 +6067,7 @@
           "lib/services/voting-service.ts",
           "lib/ui-tooltips.ts",
           "scripts/generate-observability-report.ts",
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "services/financial-service/drizzle/relations.ts",
           "services/financial-service/drizzle/schema.ts",
           "services/financial-service/src/db/schema.ts",
@@ -6372,6 +6121,7 @@
           "lib/services/voting-service.ts",
           "lib/ui-tooltips.ts",
           "scripts/generate-observability-report.ts",
+          "scripts/generate-parent-owned-remediation-report-round54.ts",
           "services/financial-service/drizzle/relations.ts",
           "services/financial-service/drizzle/schema.ts",
           "services/financial-service/src/db/schema.ts",
@@ -6429,6 +6179,7 @@
         "lib/rate-limiter.ts: organization identifier reference",
         "lib/services/board-packet-generator.ts: organization identifier reference",
         "lib/services/voting-service.ts: organization identifier reference",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: organization identifier reference",
         "services/financial-service/drizzle/relations.ts: organization identifier reference",
         "services/financial-service/drizzle/schema.ts: organization identifier reference",
         "services/financial-service/src/db/schema.ts: organization identifier reference",
@@ -6462,6 +6213,8 @@
         "lib/services/voting-service.ts: update/write path",
         "lib/services/voting-service.ts: delete/write path",
         "lib/ui-tooltips.ts: update/write path",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: insert/write path",
+        "scripts/generate-parent-owned-remediation-report-round54.ts: delete/write path",
         "services/financial-service/drizzle/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: update/write path",
         "services/financial-service/src/db/schema.ts: delete/write path",

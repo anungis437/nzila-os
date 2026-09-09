@@ -255,20 +255,38 @@ class CbaContactsViewSet(viewsets.ModelViewSet):
 
 
 class SharedClauseLibraryViewSet(viewsets.ModelViewSet):
-    """API endpoint for SharedClauseLibrary operations."""
+    """API endpoint for SharedClauseLibrary operations.
+
+    CONTAINED (PR #752 round 55 — final non-voting parent architecture
+    exceptions): this generated ModelViewSet is IsAuthenticated-only with
+    queryset=Model.objects.all() — no organization/sharing-level scoping
+    whatsoever. The real TS-side authority model (owner + sharingLevel:
+    private/federation/congress/public, see
+    lib/clause-library/sharing-authority.ts) is Next.js-only; reproducing
+    cross-union sharing authorization in Django is out of scope. No
+    legitimate Django consumer found (only a feature-name string literal in
+    lib/utils/smart-onboarding.ts references the URL slug, not an actual
+    caller).
+    """
     queryset = SharedClauseLibrary.objects.all()
     serializer_class = SharedClauseLibrarySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class ClauseLibraryTagsViewSet(viewsets.ModelViewSet):
-    """API endpoint for ClauseLibraryTags operations."""
+    """API endpoint for ClauseLibraryTags operations.
+
+    CONTAINED (PR #752 round 55 — same cohort as SharedClauseLibraryViewSet
+    above): IsAuthenticated-only, queryset=Model.objects.all(), no
+    inheritance of parent-clause read/write authority whatsoever. No
+    legitimate Django consumer found.
+    """
     queryset = ClauseLibraryTags.objects.all()
     serializer_class = ClauseLibraryTagsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
