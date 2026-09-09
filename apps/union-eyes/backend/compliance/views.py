@@ -34,7 +34,7 @@ class StaffCertificationsViewSet(viewsets.ModelViewSet):
     """API endpoint for StaffCertifications operations."""
     queryset = StaffCertifications.objects.all()
     serializer_class = StaffCertificationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -46,7 +46,7 @@ class ContinuingEducationViewSet(viewsets.ModelViewSet):
     """API endpoint for ContinuingEducation operations."""
     queryset = ContinuingEducation.objects.all()
     serializer_class = ContinuingEducationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -70,7 +70,7 @@ class CertificationAlertsViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationAlerts operations."""
     queryset = CertificationAlerts.objects.all()
     serializer_class = CertificationAlertsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -346,7 +346,7 @@ class KeyHolderRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for KeyHolderRegistry operations."""
     queryset = KeyHolderRegistry.objects.all()
     serializer_class = KeyHolderRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -452,7 +452,7 @@ class GdprDataRequestsViewSet(viewsets.ModelViewSet):
     """API endpoint for GdprDataRequests operations."""
     queryset = GdprDataRequests.objects.all()
     serializer_class = GdprDataRequestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -712,7 +712,7 @@ class IndigenousDataAccessLogViewSet(viewsets.ModelViewSet):
     """API endpoint for IndigenousDataAccessLog operations."""
     queryset = IndigenousDataAccessLog.objects.all()
     serializer_class = IndigenousDataAccessLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -931,7 +931,7 @@ class BlindTrustRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for BlindTrustRegistry operations."""
     queryset = BlindTrustRegistry.objects.all()
     serializer_class = BlindTrustRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -943,7 +943,7 @@ class ConflictDisclosuresViewSet(viewsets.ModelViewSet):
     """API endpoint for ConflictDisclosures operations."""
     queryset = ConflictDisclosures.objects.all()
     serializer_class = ConflictDisclosuresSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -967,7 +967,7 @@ class RecusalTrackingViewSet(viewsets.ModelViewSet):
     """API endpoint for RecusalTracking operations."""
     queryset = RecusalTracking.objects.all()
     serializer_class = RecusalTrackingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']

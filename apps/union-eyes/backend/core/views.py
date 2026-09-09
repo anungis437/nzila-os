@@ -164,7 +164,7 @@ class AutomationRulesViewSet(viewsets.ModelViewSet):
     """API endpoint for AutomationRules operations."""
     queryset = AutomationRules.objects.all()
     serializer_class = AutomationRulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -514,7 +514,7 @@ class IntegrationSyncSchedulesViewSet(viewsets.ModelViewSet):
     """API endpoint for IntegrationSyncSchedules operations."""
     queryset = IntegrationSyncSchedules.objects.all()
     serializer_class = IntegrationSyncSchedulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']

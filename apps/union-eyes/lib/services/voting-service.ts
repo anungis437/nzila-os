@@ -435,8 +435,11 @@ function generateAnonymousVoterId(
       votingSecret
     );
 
-    // Create voter hash from memberId+sessionId using HMAC
-    const voterIdContent = `voter:${memberId}:${sessionId}:${Date.now()}`;
+    // Deterministic per (member, session) — required so the "already voted"
+    // lookup below can find a prior vote by the same member. Including a
+    // timestamp here would make every call produce a different voterId,
+    // silently defeating double-vote prevention.
+    const voterIdContent = `voter:${memberId}:${sessionId}`;
     const voterId = createHmac("sha256", sessionKey)
       .update(voterIdContent)
       .digest("hex")

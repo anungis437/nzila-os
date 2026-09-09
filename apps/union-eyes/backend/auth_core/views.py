@@ -104,11 +104,17 @@ User = get_user_model()
 
 
 class InternationalAddressesViewSet(viewsets.ModelViewSet):
-    """API endpoint for InternationalAddresses operations."""
+    """API endpoint for InternationalAddresses operations.
+
+    Round 57: was IsAuthenticated-only + queryset=Model.objects.all() with no
+    organization filter and zero legitimate frontend consumer (all real reads/
+    writes go through the scoped Next.js API routes) — fail-closed via
+    DenyAllPermission.
+    """
 
     queryset = InternationalAddresses.objects.all()
     serializer_class = InternationalAddressesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,

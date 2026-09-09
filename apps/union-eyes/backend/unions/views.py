@@ -143,7 +143,7 @@ class EventAttendeesViewSet(viewsets.ModelViewSet):
     """API endpoint for EventAttendees operations."""
     queryset = EventAttendees.objects.all()
     serializer_class = EventAttendeesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['event_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -715,7 +715,7 @@ class RewardRedemptionsViewSet(viewsets.ModelViewSet):
     """API endpoint for RewardRedemptions operations."""
     queryset = RewardRedemptions.objects.all()
     serializer_class = RewardRedemptionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

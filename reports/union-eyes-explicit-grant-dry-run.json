@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-09T11:28:30.975Z",
+  "generatedAt": "2026-09-09T13:39:09.590Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 651,
-  "pendingReviewCount": 49,
-  "tenantGrantedTableCount": 317,
-  "systemGrantedTableCount": 57,
+  "readyForExplicitGrantCount": 699,
+  "pendingReviewCount": 1,
+  "tenantGrantedTableCount": 334,
+  "systemGrantedTableCount": 64,
   "tenantOperationTotals": {
-    "SELECT": 302,
-    "INSERT": 268,
-    "UPDATE": 178,
+    "SELECT": 317,
+    "INSERT": 280,
+    "UPDATE": 186,
     "DELETE": 98
   },
   "systemOperationTotals": {
-    "SELECT": 49,
-    "INSERT": 26,
-    "UPDATE": 18,
+    "SELECT": 55,
+    "INSERT": 30,
+    "UPDATE": 22,
     "DELETE": 0
   },
   "riskSignals": {
@@ -129,6 +129,7 @@
       "commercial_contracts",
       "communication_preferences",
       "consent_records",
+      "contribution_rates",
       "data_subject_access_requests",
       "deadline_audit_events",
       "deadline_reminders",
@@ -137,6 +138,7 @@
       "employer_execution_compliance_events",
       "employer_execution_replays",
       "external_data_sync_log",
+      "fee_adjustments",
       "geofence_events",
       "grievance_deadlines",
       "holidays",
@@ -148,6 +150,7 @@
       "notification_queue",
       "organization_members",
       "organizations",
+      "payments",
       "per_capita_remittances",
       "pilot_applications",
       "pilot_enrollments",
@@ -159,6 +162,8 @@
       "recognition_award_types",
       "recognition_awards",
       "stewards",
+      "transaction_fee_events",
+      "user_notification_preferences",
       "workbooks"
     ],
     "systemOnlyBroadSystemDml": [
@@ -272,6 +277,26 @@
       "table": "ai_budgets",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_clause_reasonings",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_copilot_sessions",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -503,8 +528,22 @@
       "systemPrivileges": []
     },
     {
+      "table": "automation_rules",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
       "table": "automation_schedules",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "autopay_settings",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -541,6 +580,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "bank_of_canada_rates",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -678,6 +723,12 @@
     {
       "table": "billing_terms",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "blind_trust_registry",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -969,6 +1020,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "certification_alerts",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "certification_audit_log",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -984,6 +1041,14 @@
       "table": "certification_types",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "chargeback_statements",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1370,6 +1435,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "conflict_disclosures",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "conflict_of_interest_policy",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -1405,6 +1476,12 @@
       ]
     },
     {
+      "table": "continuing_education",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "contract_amendments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -1433,6 +1510,18 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "contribution_rates",
+      "classification": "GLOBAL_REFERENCE_DATA",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
     },
     {
       "table": "cookie_consents",
@@ -1561,6 +1650,24 @@
       "systemPrivileges": []
     },
     {
+      "table": "currency_enforcement_audit",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "currency_enforcement_policy",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "currency_enforcement_violations",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "currency_exchange_rates",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -1615,6 +1722,14 @@
       "table": "data_processing_records",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "data_quality_warnings",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2138,6 +2253,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "event_attendees",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "event_check_ins",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2598,6 +2719,28 @@
       "systemPrivileges": []
     },
     {
+      "table": "fee_adjustments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "INSERT"
+      ]
+    },
+    {
+      "table": "fee_settlement_batches",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "fee_settlement_lines",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "field_notes",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2672,6 +2815,22 @@
       "table": "foreign_workers",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "fx_rate_audit_log",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "gdpr_data_requests",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2856,6 +3015,14 @@
       "systemPrivileges": []
     },
     {
+      "table": "grievance_timeline_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "grievance_transitions",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2996,6 +3163,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "indigenous_data_access_log",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "indigenous_data_sharing_agreements",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -3089,6 +3262,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "integration_sync_schedules",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "integration_webhooks",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3097,6 +3276,12 @@
       "systemPrivileges": [
         "SELECT"
       ]
+    },
+    {
+      "table": "international_addresses",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
     },
     {
       "table": "job_applications",
@@ -3142,6 +3327,12 @@
     {
       "table": "journal_entry_lines",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "key_holder_registry",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -3957,6 +4148,20 @@
       "systemPrivileges": []
     },
     {
+      "table": "payments",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "payroll_deductions",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4124,6 +4329,16 @@
       ]
     },
     {
+      "table": "pilot_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "pilot_feedback",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4247,6 +4462,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "precedent_citations",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "precedent_tags",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -4351,6 +4572,12 @@
       "tenantPrivileges": [
         "SELECT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "public_content",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -4459,6 +4686,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "recusal_tracking",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "remittance_approvals",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
@@ -4550,6 +4783,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "reward_redemptions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "reward_wallet_ledger",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4567,6 +4810,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "rl1_tax_slips",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -4621,6 +4870,16 @@
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "satisfaction_surveys",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
       ],
       "systemPrivileges": []
     },
@@ -4811,6 +5070,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "sms_templates",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "social_accounts",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4873,6 +5138,12 @@
     {
       "table": "sso_sessions",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "staff_certifications",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -4995,6 +5266,24 @@
       "systemPrivileges": []
     },
     {
+      "table": "sync_jobs",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "t106_filing_tracking",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "t4a_tax_slips",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "task_comments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -5062,6 +5351,38 @@
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "transaction_currency_conversions",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "transaction_fee_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
+      "table": "transaction_fee_rules",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "transfer_pricing_documentation",
+      "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -5171,9 +5492,31 @@
       "systemPrivileges": []
     },
     {
+      "table": "user_notification_preferences",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "user_sessions",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "user_signatures",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -5191,6 +5534,15 @@
       "systemPrivileges": []
     },
     {
+      "table": "votes",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "voting_audit_log",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -5200,6 +5552,14 @@
       "table": "voting_notifications",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_options",
+      "classification": "PARENT_OWNED_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
       "systemPrivileges": []
     },
     {
@@ -5287,6 +5647,12 @@
     {
       "table": "website_settings",
       "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "weekly_threshold_tracking",
+      "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -5410,199 +5776,7 @@
   ],
   "pendingReview": [
     {
-      "table": "ai_clause_reasonings",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "ai_copilot_sessions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "automation_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "autopay_settings",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "bank_of_canada_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "blind_trust_registry",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "certification_alerts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "chargeback_statements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "conflict_disclosures",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "continuing_education",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "contribution_rates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "currency_enforcement_audit",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "currency_enforcement_policy",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "currency_enforcement_violations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "data_quality_warnings",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "event_attendees",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "fee_adjustments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "fee_settlement_batches",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "fee_settlement_lines",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "fx_rate_audit_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "gdpr_data_requests",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "grievance_timeline_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "indigenous_data_access_log",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "integration_sync_schedules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "international_addresses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "key_holder_registry",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "payments",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "pilot_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "precedent_citations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "public_content",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "recusal_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "reward_redemptions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "rl1_tax_slips",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "satisfaction_surveys",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "sms_templates",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "staff_certifications",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "strike_fund_disbursements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "sync_jobs",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "t106_filing_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "t4a_tax_slips",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "transaction_currency_conversions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "transaction_fee_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "transaction_fee_rules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "transfer_pricing_documentation",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "user_notification_preferences",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "user_signatures",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "votes",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "voting_options",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "weekly_threshold_tracking",
       "classification": "NEEDS_REVIEW"
     }
   ]

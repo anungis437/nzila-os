@@ -148,15 +148,21 @@ describe('round 46: no TBD authority fields remain on the closed cohort', () => 
 
 /* ── Exception retained: transaction_fee_events ───────────────────────── */
 
-describe('round 46 exception: transaction_fee_events stays NEEDS_REVIEW', () => {
-  it('is documented as a PRINCIPAL_MISMATCH exception, not silently dropped', () => {
+describe('round 57: transaction_fee_events closes the round-46 PRINCIPAL_MISMATCH exception', () => {
+  it('is now TENANT_RLS_REQUIRED with a real fix, not a lingering NEEDS_REVIEW', () => {
     const entry = storageAuthorityManifest.find((e) => e.table === 'transaction_fee_events');
     expect(entry).toBeTruthy();
-    expect(entry!.classification).toBe('NEEDS_REVIEW');
-    expect(entry!.reason).toContain('PRINCIPAL_MISMATCH');
-    expect(entry!.reason).toContain('transaction-fee-engine.ts');
+    expect(entry!.classification).toBe('TENANT_RLS_REQUIRED');
+    // Round 57 fixed the round-46 PRINCIPAL_MISMATCH defect by wrapping the
+    // webhook-invoked transaction-fee-engine calls in withSystemContext() at
+    // the call site (app/api/payments/webhooks/stripe/route.ts) rather than
+    // refactoring the whole fee-engine module.
+    expect(entry!.requiredRuntimePrivileges).not.toBe('TBD');
+    expect(entry!.invocationAuthority).not.toBe('TBD');
+    expect(entry!.dbExecutionPrincipal).not.toBe('TBD');
   });
 });
+
 
 /* ── Principal mismatch ratchet (doctrine section 22) ─────────────────── *
  * A real system/webhook-invoked write path must execute via

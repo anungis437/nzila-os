@@ -24,27 +24,27 @@
 import type { StorageAuthorityEntry } from './types';
 
 export const analyticsAiEntries: StorageAuthorityEntry[] = [
-  {
+    {
     table: "ai_clause_reasonings",
-    classification: "NEEDS_REVIEW",
-    reason: "1 non-test reference(s) to 'aiClauseReasonings' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
-    supportingCapability: ["lib/ai/clause-reasoning.ts"],
-    requiredRuntimePrivileges: "TBD",
-    requiredSystemPrivileges: "TBD",
-    invocationAuthority: "TBD",
-    dbExecutionPrincipal: "TBD",
-    reviewPriority: "NORMAL",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "CLOSED round 57: organization_id NOT NULL, parent FK to grievances. Genuinely reachable via app/api/ai/grievances/[id]/clause-reasoning/route.ts (lib/ai/clause-reasoning.ts). AI-generated content: the organization identifier is set from trusted request context, not model output, before persistence.",
+    supportingCapability: ["app/api/ai/grievances/[id]/clause-reasoning/route.ts","lib/ai/clause-reasoning.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
   },
-  {
+    {
     table: "ai_copilot_sessions",
-    classification: "NEEDS_REVIEW",
-    reason: "1 non-test reference(s) to 'aiCopilotSessions' found. No obvious HTTP-route/action/cron/webhook reference found in this scan; likely internal-library-only, but exact reachability not yet traced.",
-    supportingCapability: ["lib/ai/steward-copilot.ts"],
-    requiredRuntimePrivileges: "TBD",
-    requiredSystemPrivileges: "TBD",
-    invocationAuthority: "TBD",
-    dbExecutionPrincipal: "TBD",
-    reviewPriority: "NORMAL",
+    classification: "USER_RLS_REQUIRED",
+    reason: "CLOSED round 57: organization_id AND user_id both NOT NULL. Genuinely reachable via app/api/ai/copilot/sessions/[id]/route.ts and app/api/ai/copilot/query/route.ts (lib/ai/steward-copilot.ts). A copilot session is inherently per-user (same-org members must not read each other's AI conversation sessions merely through tenant RLS) — the real storage boundary is user, not tenant.",
+    supportingCapability: ["app/api/ai/copilot/sessions/[id]/route.ts","app/api/ai/copilot/query/route.ts","lib/ai/steward-copilot.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
   },
   {
     table: "ai_insight_reports",

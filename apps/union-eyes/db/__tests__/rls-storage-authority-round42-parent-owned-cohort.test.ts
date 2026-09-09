@@ -178,18 +178,17 @@ describe('round 42 defect fix: elections vote route is organization- and relatio
     );
   });
 
-  it('POST verifies session org ownership, option-session membership, and rejects duplicate votes', () => {
+  it('POST verifies session org ownership and delegates voter identity/eligibility/duplicate-vote checks to castVote()', () => {
+    // Round 57: the inline option-session/duplicate-vote checks (and the
+    // client-supplied voterId they trusted) were replaced by delegating to
+    // voting-service.ts's castVote(), which derives voterId server-side from
+    // the authenticated user and enforces a real eligibility check — see the
+    // round-57 defect-fix test file governance-elections-session-vote-idor-fix.route.test.ts.
     expect(src).toMatch(
       /and\(eq\(votingSessions\.id,\s*id\),\s*eq\(votingSessions\.organizationId,\s*organizationId\)\)/,
     );
-    expect(src).toMatch(
-      /and\(eq\(votingOptions\.id,\s*parsed\.optionId\),\s*eq\(votingOptions\.sessionId,\s*id\)\)/,
-    );
-    expect(src).toMatch(/Option does not belong to this voting session/);
-    expect(src).toMatch(
-      /and\(eq\(votes\.sessionId,\s*id\),\s*eq\(votes\.voterId,\s*parsed\.voterId\)\)/,
-    );
-    expect(src).toMatch(/Vote already cast/);
+    expect(src).toMatch(/castVote\(id,\s*parsed\.optionId,\s*userId,\s*parsed\.isAnonymous\)/);
+    expect(src).not.toMatch(/voterId:\s*z\.string/);
   });
 });
 

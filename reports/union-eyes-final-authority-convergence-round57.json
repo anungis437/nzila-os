@@ -1,0 +1,83 @@
+{
+  "round": 57,
+  "title": "FINAL_AUTHORITY_CONVERGENCE_AND_ENFORCEMENT_READINESS_GATE",
+  "generatedAt": "2026-09-09T13:45:00Z",
+  "startSha": "6e553c42a986725e46e4b62151b8274467e4d9f6",
+  "activeUniverse": 49,
+  "closedThisRound": 48,
+  "remainingNeedsReview": 1,
+  "finalDispositions": {
+    "TENANT_RLS_REQUIRED": {
+      "count": 12,
+      "tables": ["payments", "chargeback_statements", "fee_adjustments", "transaction_fee_events", "transaction_fee_rules", "automation_rules", "data_quality_warnings", "ai_clause_reasonings", "grievance_timeline_events", "pilot_events", "reward_redemptions", "satisfaction_surveys"]
+    },
+    "USER_RLS_REQUIRED": {
+      "count": 4,
+      "tables": ["user_notification_preferences", "user_signatures", "gdpr_data_requests", "ai_copilot_sessions"]
+    },
+    "PARENT_OWNED_RLS_REQUIRED": {
+      "count": 2,
+      "tables": ["votes", "voting_options"]
+    },
+    "GLOBAL_REFERENCE_DATA": {
+      "count": 1,
+      "tables": ["contribution_rates"]
+    },
+    "LATENT_UNREACHABLE": {
+      "count": 2,
+      "tables": ["fee_settlement_batches", "fee_settlement_lines"]
+    },
+    "CONTAINED_NO_AUTHORITY": {
+      "count": 27,
+      "tables": ["rl1_tax_slips", "t4a_tax_slips", "t106_filing_tracking", "transfer_pricing_documentation", "fx_rate_audit_log", "transaction_currency_conversions", "currency_enforcement_audit", "currency_enforcement_policy", "currency_enforcement_violations", "bank_of_canada_rates", "autopay_settings", "blind_trust_registry", "certification_alerts", "conflict_disclosures", "continuing_education", "indigenous_data_access_log", "key_holder_registry", "recusal_tracking", "staff_certifications", "weekly_threshold_tracking", "integration_sync_schedules", "sync_jobs", "sms_templates", "event_attendees", "international_addresses", "precedent_citations", "public_content"]
+    },
+    "NEEDS_REVIEW_RETAINED": {
+      "count": 1,
+      "tables": ["strike_fund_disbursements"],
+      "blocker": "FINANCE_EXECUTION: no organization_id column exists (user_id only); requires a real per-organization backfill key + migration before a final disposition can be assigned. This is a concrete architecture/security blocker, not unfinished analysis."
+    }
+  },
+  "correctedFromFileNameOnlyFalseNegatives": [
+    { "table": "chargeback_statements", "was": "candidate LATENT_UNREACHABLE", "actual": "TENANT_RLS_REQUIRED", "reason": "reachable via services/platform-economics barrel re-export (index.ts `export * from './allocation-engine'`), missed by a filename-only grep" },
+    { "table": "fee_adjustments", "was": "candidate LATENT_UNREACHABLE", "actual": "TENANT_RLS_REQUIRED", "reason": "reachable via reverseTransactionFee(), invoked from the live Stripe webhook" },
+    { "table": "transaction_fee_rules", "was": "candidate LATENT_UNREACHABLE", "actual": "TENANT_RLS_REQUIRED", "reason": "read-reachable via findApplicableRule() inside evaluateFee(), invoked from the live Stripe webhook" },
+    { "table": "grievance_timeline_events", "was": "candidate LATENT_UNREACHABLE", "actual": "TENANT_RLS_REQUIRED", "reason": "reachable via lib/ingestion/batch-ingest.ts's ingestGrievanceBatch(), called from app/api/admin/ingest/route.ts (a raw-SQL caller, not a Drizzle-symbol import)" }
+  ],
+  "securityDefectsFoundAndFixed": [
+    { "table": "votes", "defect": "generateAnonymousVoterId() embedded Date.now() in its HMAC input, making voterId non-deterministic across calls and silently defeating the 'already voted' duplicate-vote check on every cast — a member could vote unlimited times", "file": "lib/services/voting-service.ts", "fix": "derive voterId deterministically from (memberId, sessionId) only", "test": "lib/services/__tests__/voting-service.test.ts (new determinism regression test)" },
+    { "table": "votes", "defect": "app/api/governance/elections/sessions/[id]/vote/route.ts accepted a client-supplied voterId and never checked voter_eligibility at all, letting a caller impersonate/duplicate ballots", "file": "app/api/governance/elections/sessions/[id]/vote/route.ts", "fix": "delegate to the same castVote() (server-derived voterId + real eligibility check) already used by app/api/voting/sessions/[id]/vote/route.ts", "test": "app/api/__tests__/governance-elections-session-vote-idor-fix.route.test.ts (3 tests)" },
+    { "table": "votes", "defect": "no DB-level uniqueness prevented a concurrent-request race from double-inserting a vote for the same (session, voter)", "file": "db/schema/domains/governance/voting.ts", "fix": "added uniqueIndex votes_session_voter_unique on (session_id, voter_id)", "test": "covered by manifest invariant + composition tests" },
+    { "table": "payments", "defect": "services/financial-service/src/routes/payments.ts's donation endpoints derived organizationId via `getAuthUser(req).organizationId || req.body.organizationId` — an unauthenticated public donor could supply an arbitrary organizationId, misattributing a donation to any organization", "file": "services/financial-service/src/routes/payments.ts, src/services/payment-processing.ts", "fix": "derive organizationId server-side from the strike fund's own tenantId (createDonationPaymentIntent) and from the Stripe payment intent's own metadata (confirmDonationPayment) — never client-suppliable", "test": "services/financial-service/src/tests/unit/payment-processing.test.ts (updated)" },
+    { "table": "transaction_fee_events / fee_adjustments / transaction_fee_rules", "defect": "round-46 documented PRINCIPAL_MISMATCH: services/platform-economics/transaction-fee-engine.ts's evaluateFee/captureTransactionFee/reverseTransactionFee execute on the plain tenant `db` import despite being invoked from a WEBHOOK context", "file": "app/api/payments/webhooks/stripe/route.ts", "fix": "wrapped the 3 call sites (+ paired SELECT) in withSystemContext() at the call site, matching the existing pattern already used for sibling platformPayments writes in the same handler", "test": "app/api/__tests__/payments-stripe-webhook.route.test.ts (10 tests, unchanged, still passing); scripts/__tests__/no-arg-system-context-ratchet.test.ts baseline raised 105->110 with documented rationale" },
+    { "table": "29 Django ViewSets across 9 apps (billing x11 incl. weekly_threshold_tracking, compliance x9, core x2, unions x2, notifications x2, content x1, analytics x1, auth_core x1, bargaining x1)", "defect": "IsAuthenticated-only + queryset=Model.objects.all() with no organization/user filter and zero legitimate frontend consumer", "fix": "DenyAllPermission / SharedDenyAllPermission containment", "test": "9 new tests_round57_*_containment.py files (2 tests each) + billing's file covers 11 ViewSets" }
+  ],
+  "sidecarProgrammeBlockers": {
+    "ai_budgets_policy_ddl": { "status": "EXPLICIT PROGRAMME BLOCKER (unchanged)", "nextAction": "requires a Postgres RLS policy DDL fix referencing a real auth.user_id() equivalent; out of this round's bounded scope (table classification, not policy DDL authoring)" },
+    "report_executor_dynamic_sql": { "status": "EXPLICIT PROGRAMME BLOCKER (unchanged)", "nextAction": "dynamic SQL injection audit for ReportExecutor remains incomplete; requires a dedicated security-audit round" },
+    "sso_providers_plaintext_secret": { "status": "EXPLICIT PROGRAMME BLOCKER (unchanged)", "nextAction": "no established secret-encryption primitive found in this repo to reuse; a new migration/service is required — not invented this round per doctrine (no bespoke cryptography)" },
+    "codeql_task_queue_stack_trace": { "status": "EXPLICIT PROGRAMME BLOCKER (unchanged)", "nextAction": "pre-existing CodeQL finding in task_enqueue_views.py; not touched this round (frozen, per scope discipline)" }
+  },
+  "countsBeforeAfter": {
+    "before": { "NEEDS_REVIEW": 49, "TENANT_RLS_REQUIRED": 248, "PARENT_OWNED_RLS_REQUIRED": 34, "USER_RLS_REQUIRED": 9, "RLS_expansion": 283 },
+    "after": { "NEEDS_REVIEW": 1, "TENANT_RLS_REQUIRED": 260, "PARENT_OWNED_RLS_REQUIRED": 36, "USER_RLS_REQUIRED": 13, "RLS_expansion": 301, "closedWithTBD": 0, "invariantViolations": 0 }
+  },
+  "enforcementReadiness": {
+    "authorityManifestConverged": "NO (1 residual, intentional and documented)",
+    "needsReview": 1,
+    "closedWithTbd": 0,
+    "invariantViolations": 0,
+    "rlsPolicyExpansionTables": 301,
+    "explicitGrantInputComplete": "NO (699/700 ready; strike_fund_disbursements pending)",
+    "finalRlsMigrationReadyToGenerate": "NO (pending strike_fund_disbursements resolution or an explicit exception carve-out)",
+    "finalGrantMigrationReadyToGenerate": "NO (same blocker)"
+  },
+  "validation": {
+    "typecheck": "clean",
+    "unionEyesVitest": { "files": 1222, "tests": 17241, "status": "all passed" },
+    "contractTests": { "files": 278, "tests": 9539, "status": "all passed" },
+    "redTeam": { "files": 7, "tests": 106, "status": "all passed, no baseline increase" },
+    "djangoCheck": "clean (0 issues)",
+    "djangoTargetedTests": "all round-57 + affected round-52/56 modules passed"
+  },
+  "status": "ROUND57 = PARTIAL (1 genuine architecture blocker remains: strike_fund_disbursements; all other 48 tables received a final disposition; local validation fully green, pending remote CI)"
+}

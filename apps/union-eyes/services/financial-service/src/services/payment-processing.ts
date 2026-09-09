@@ -399,7 +399,6 @@ export async function batchProcessStipendPayouts(
  */
 
 export interface CreateDonationPaymentRequest {
-  organizationId: string;
   strikeFundId: string;
   amount: number;
   currency?: string;
@@ -425,10 +424,9 @@ export interface DonationPaymentIntent {
 export async function createDonationPaymentIntent(
   request: CreateDonationPaymentRequest
 ): Promise<DonationPaymentIntent> {
-  const { organizationId, strikeFundId } = request; // Extract for catch block scope
+  const { strikeFundId } = request; // Extract for catch block scope
   try {
     const {
-      organizationId: _organizationId,
       strikeFundId: _strikeFundId,
       amount,
       currency = 'usd',
@@ -438,6 +436,20 @@ export async function createDonationPaymentIntent(
       message,
       paymentMethod = 'card',
     } = request;
+
+    // The donating public never authenticates, so organizationId can never
+    // be trusted from the request — it must be derived from the strike
+    // fund's actual owning tenant, otherwise a caller could misattribute a
+    // donation (and its metadata-derived confirmation record) to an
+    // arbitrary organization.
+    const [strikeFund] = await db
+      .select({ tenantId: schema.strikeFunds.tenantId })
+      .from(schema.strikeFunds)
+      .where(eq(schema.strikeFunds.id, strikeFundId));
+    if (!strikeFund) {
+      throw new Error('Strike fund not found');
+    }
+    const resolvedOrganizationId = strikeFund.tenantId;
 
     // Validate amount (minimum $1.00 for donations)
     if (amount < 1.00) {
@@ -454,7 +466,7 @@ export async function createDonationPaymentIntent(
       payment_method_types: [paymentMethod],
       description: `Donation to strike fund`,
       metadata: {
-        organizationId: request.organizationId,
+        organizationId: resolvedOrganizationId,
         strikeFundId: request.strikeFundId,
         type: 'donation',
         donorEmail: donorEmail || '',
@@ -473,13 +485,12 @@ export async function createDonationPaymentIntent(
       status: paymentIntent.status,
     };
   } catch (error) {
-    logger.error('Error creating donation payment intent', { error, organizationId, strikeFundId });
+    logger.error('Error creating donation payment intent', { error, strikeFundId });
     throw new Error(`Failed to create donation: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 export interface ConfirmDonationRequest {
-  organizationId: string;
   paymentIntentId: string;
 }
 
@@ -489,7 +500,7 @@ export interface ConfirmDonationRequest {
 export async function confirmDonationPayment(
   request: ConfirmDonationRequest
 ): Promise<string> {
-  const { organizationId, paymentIntentId } = request;
+  const { paymentIntentId } = request;
 
   try {
     // Retrieve payment intent from Stripe
@@ -501,6 +512,16 @@ export async function confirmDonationPayment(
 
     const metadata = paymentIntent.metadata;
     const amount = paymentIntent.amount / 100; // Convert from cents
+
+    // organizationId comes from the payment intent's own metadata (set
+    // server-side, from the strike fund's tenant, at intent-creation time in
+    // createDonationPaymentIntent) — never from the client-supplied confirm
+    // request, which would let a caller redirect an already-paid donation to
+    // an arbitrary organization.
+    const organizationId = metadata.organizationId;
+    if (!organizationId) {
+      throw new Error('Payment intent is missing organization metadata');
+    }
 
     // Create donation record
     const [donation] = await db.insert(schema.donations)
@@ -522,7 +543,7 @@ export async function confirmDonationPayment(
     return donation.id;
 
   } catch (error) {
-    logger.error('Error confirming donation payment', { error, organizationId, paymentIntentId });
+    logger.error('Error confirming donation payment', { error, paymentIntentId });
     throw error;
   }
 }

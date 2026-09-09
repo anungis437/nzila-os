@@ -275,7 +275,7 @@ class ContributionRatesViewSet(viewsets.ModelViewSet):
     """API endpoint for ContributionRates operations."""
     queryset = ContributionRates.objects.all()
     serializer_class = ContributionRatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['rate_type']
     search_fields = ['rate_type']

@@ -239,7 +239,7 @@ class PublicContentViewSet(viewsets.ModelViewSet):
     """API endpoint for PublicContent operations."""
     queryset = PublicContent.objects.all()
     serializer_class = PublicContentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']

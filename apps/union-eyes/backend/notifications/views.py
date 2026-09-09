@@ -228,7 +228,7 @@ class UserNotificationPreferencesViewSet(viewsets.ModelViewSet):
     """API endpoint for UserNotificationPreferences operations."""
     queryset = UserNotificationPreferences.objects.all()
     serializer_class = UserNotificationPreferencesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -383,7 +383,7 @@ class SmsTemplatesViewSet(viewsets.ModelViewSet):
     """API endpoint for SmsTemplates operations."""
     queryset = SmsTemplates.objects.all()
     serializer_class = SmsTemplatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

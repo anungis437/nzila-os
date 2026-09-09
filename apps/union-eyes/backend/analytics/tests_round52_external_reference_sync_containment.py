@@ -47,11 +47,15 @@ class Round52ExternalReferenceSyncContainmentTests(unittest.TestCase):
             with self.subTest(viewset=name):
                 self.assertEqual(viewset.permission_classes, [views.DenyAllPermission])
 
-    def test_contribution_rates_viewset_untouched_finance_freeze(self):
-        # FINANCE FREEZE ratchet: contribution_rates must remain exactly as
-        # it was before round 52 -- still IsAuthenticated, not touched.
+    def test_contribution_rates_viewset_closed_round57_finance_freeze_lifted(self):
+        # FINANCE FREEZE ratchet superseded (PR #752 round 57 explicitly lifts
+        # the finance freeze): contribution_rates now has a real disposition
+        # (GLOBAL_REFERENCE_DATA, legitimate GraphQL consumer) and its Django
+        # surface is contained via DenyAllPermission — see
+        # tests_round57_contribution_rates_containment.py for the dedicated
+        # regression test.
         self.assertEqual(
-            views.ContributionRatesViewSet.permission_classes, [views.permissions.IsAuthenticated]
+            views.ContributionRatesViewSet.permission_classes, [views.DenyAllPermission]
         )
 
     def test_deny_all_still_denies_authenticated_and_anonymous_requests(self):

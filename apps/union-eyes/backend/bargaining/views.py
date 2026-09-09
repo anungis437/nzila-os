@@ -43,7 +43,7 @@ class PrecedentCitationsViewSet(viewsets.ModelViewSet):
     """API endpoint for PrecedentCitations operations."""
     queryset = PrecedentCitations.objects.all()
     serializer_class = PrecedentCitationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

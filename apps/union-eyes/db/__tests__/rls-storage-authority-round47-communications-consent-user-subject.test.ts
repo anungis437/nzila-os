@@ -137,13 +137,12 @@ describe('round 47: no TBD authority fields remain on the closed cohort', () => 
 
 /* ── Exceptions retained ───────────────────────────────────────────────── */
 
-describe('round 47 exception: user_notification_preferences stays NEEDS_REVIEW', () => {
-  it('is documented as a DUAL_SCHEMA exception, not silently dropped', () => {
+describe('round 47 exception CLOSED round 57: user_notification_preferences', () => {
+  it('is documented as closed (self+org scoping confirmed), not silently dropped', () => {
     const entry = storageAuthorityManifest.find((e) => e.table === 'user_notification_preferences');
     expect(entry).toBeTruthy();
-    expect(entry!.classification).toBe('NEEDS_REVIEW');
-    expect(entry!.reason).toContain('DUAL_SCHEMA');
-    expect(entry!.reason).toContain('financial-service');
+    expect(entry!.classification).toBe('USER_RLS_REQUIRED');
+    expect(entry!.reason).toContain('CLOSED round 57');
   });
 });
 

@@ -38,7 +38,7 @@ class AutopaySettingsViewSet(viewsets.ModelViewSet):
     """API endpoint for AutopaySettings operations."""
     queryset = AutopaySettings.objects.all()
     serializer_class = AutopaySettingsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -551,10 +551,17 @@ class TaxYearEndProcessingViewSet(viewsets.ModelViewSet):
 
 
 class WeeklyThresholdTrackingViewSet(viewsets.ModelViewSet):
-    """API endpoint for WeeklyThresholdTracking operations."""
+    """API endpoint for WeeklyThresholdTracking operations.
+
+    Round 57: was IsAuthenticated-only + queryset=Model.objects.all() with no
+    organization filter and zero legitimate frontend consumer (the sole TS
+    writer, TaxSlipService.generateT4ASlips/generateRL1Slips, is dead code —
+    see services/__tests__/round34-dead-writer-reachability-lock.test.ts).
+    Fail-closed via SharedDenyAllPermission.
+    """
     queryset = WeeklyThresholdTracking.objects.all()
     serializer_class = WeeklyThresholdTrackingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -566,7 +573,7 @@ class CurrencyEnforcementPolicyViewSet(viewsets.ModelViewSet):
     """API endpoint for CurrencyEnforcementPolicy operations."""
     queryset = CurrencyEnforcementPolicy.objects.all()
     serializer_class = CurrencyEnforcementPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['enforcement_enabled', 'mandatory_currency']
     search_fields = ['mandatory_currency']
@@ -578,7 +585,7 @@ class BankOfCanadaRatesViewSet(viewsets.ModelViewSet):
     """API endpoint for BankOfCanadaRates operations."""
     queryset = BankOfCanadaRates.objects.all()
     serializer_class = BankOfCanadaRatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['currency']
     search_fields = ['currency']
@@ -590,7 +597,7 @@ class TransactionCurrencyConversionsViewSet(viewsets.ModelViewSet):
     """API endpoint for TransactionCurrencyConversions operations."""
     queryset = TransactionCurrencyConversions.objects.all()
     serializer_class = TransactionCurrencyConversionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['transaction_type']
     search_fields = ['transaction_type']
@@ -602,7 +609,7 @@ class CurrencyEnforcementViolationsViewSet(viewsets.ModelViewSet):
     """API endpoint for CurrencyEnforcementViolations operations."""
     queryset = CurrencyEnforcementViolations.objects.all()
     serializer_class = CurrencyEnforcementViolationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['violation_type']
     search_fields = ['violation_type']
@@ -614,7 +621,7 @@ class T106FilingTrackingViewSet(viewsets.ModelViewSet):
     """API endpoint for T106FilingTracking operations."""
     queryset = T106FilingTracking.objects.all()
     serializer_class = T106FilingTrackingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['fiscal_year']
     search_fields = ['fiscal_year']
@@ -626,7 +633,7 @@ class TransferPricingDocumentationViewSet(viewsets.ModelViewSet):
     """API endpoint for TransferPricingDocumentation operations."""
     queryset = TransferPricingDocumentation.objects.all()
     serializer_class = TransferPricingDocumentationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['transaction_type']
     search_fields = ['transaction_type']
@@ -638,7 +645,7 @@ class FxRateAuditLogViewSet(viewsets.ModelViewSet):
     """API endpoint for FxRateAuditLog operations."""
     queryset = FxRateAuditLog.objects.all()
     serializer_class = FxRateAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']
@@ -650,7 +657,7 @@ class CurrencyEnforcementAuditViewSet(viewsets.ModelViewSet):
     """API endpoint for CurrencyEnforcementAudit operations."""
     queryset = CurrencyEnforcementAudit.objects.all()
     serializer_class = CurrencyEnforcementAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']
@@ -789,7 +796,7 @@ class SyncJobsViewSet(viewsets.ModelViewSet):
     """API endpoint for SyncJobs operations."""
     queryset = SyncJobs.objects.all()
     serializer_class = SyncJobsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [SharedDenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

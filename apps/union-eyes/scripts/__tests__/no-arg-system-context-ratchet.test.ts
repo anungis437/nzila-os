@@ -33,7 +33,20 @@ const NO_ARG_PATTERN = /withSystemContext\(\s*(async\s*)?\(\s*\)\s*=>/g;
 // Recorded 2026-09-01 — see file header. Only lower this as call sites are
 // migrated to thread `tx` explicitly; raising it silently defeats the
 // point of the ratchet.
-const BASELINE_COUNT = 105;
+//
+// Raised 105 -> 110 (PR #752 round 57): fixed a documented round-46
+// PRINCIPAL_MISMATCH defect by wrapping app/api/payments/webhooks/stripe/
+// route.ts's evaluateFee/captureTransactionFee/reverseTransactionFee calls
+// (+the paired select) in withSystemContext() so they execute under the
+// system principal instead of the plain tenant `db` import. Those
+// services/platform-economics/transaction-fee-engine.ts functions do not
+// accept a `tx` parameter — threading one through would require the
+// broader fee-engine refactor round 46 explicitly deferred as "too broad
+// for a bounded round" (doctrine section 25), so the no-arg form is used
+// here deliberately, the same way the file's other existing
+// withSystemContext(() => db.insert(...)) call sites in this route
+// already do.
+const BASELINE_COUNT = 110;
 
 function walk(dir: string): string[] {
   const out: string[] = [];
