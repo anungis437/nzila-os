@@ -7,46 +7,21 @@ import { pgTable, uuid, text, timestamp, varchar, boolean, decimal } from "drizz
  * Quebec: RL-1 (Box O - Other Income)
  */
 
-// Strike fund disbursements tracking
-export const strikeFundDisbursements = pgTable("strike_fund_disbursements", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull(),
-  
-  // Strike details
-  strikeId: uuid("strike_id"),
-  strikeName: text("strike_name"),
-  strikeStartDate: timestamp("strike_start_date"),
-  strikeEndDate: timestamp("strike_end_date"),
-  
-  // Payment details
-  paymentDate: timestamp("payment_date").notNull(),
-  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }).notNull(),
-  paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // "direct_deposit", "cheque", "e_transfer"
-  paymentReference: varchar("payment_reference", { length: 100 }),
-  
-  // Tax year tracking
-  taxYear: varchar("tax_year", { length: 4 }).notNull(),
-  taxMonth: varchar("tax_month", { length: 2 }).notNull(),
-  
-  // Weekly threshold tracking ($500/week CRA threshold)
-  weekNumber: varchar("week_number", { length: 10 }).notNull(), // "2025-W01", "2025-W02", etc.
-  weeklyTotal: decimal("weekly_total", { precision: 10, scale: 2 }).notNull(), // Running total for week
-  exceedsThreshold: boolean("exceeds_threshold").notNull().default(false), // >$500/week
-  
-  // Tax slip generation
-  requiresTaxSlip: boolean("requires_tax_slip").notNull().default(false),
-  t4aGenerated: boolean("t4a_generated").notNull().default(false),
-  t4aGeneratedAt: timestamp("t4a_generated_at"),
-  rl1Generated: boolean("rl1_generated").notNull().default(false), // Quebec only
-  rl1GeneratedAt: timestamp("rl1_generated_at"),
-  
-  // Member location (for Quebec RL-1)
-  province: varchar("province", { length: 2 }).notNull(),
-  isQuebecResident: boolean("is_quebec_resident").notNull().default(false),
-  
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+// NOTE (Round 58 Phase 0, 2026-09-09): the `strikeFundDisbursements` table
+// declaration formerly here was removed. This file is not wired into
+// db/schema/index.ts's barrel and had zero real (non-test) importers of
+// `strikeFundDisbursements` anywhere in the codebase (confirmed via
+// exhaustive grep for the module path) — it was a dead, unreachable
+// duplicate of the canonical declaration in
+// db/schema/domains/finance/taxes.ts. Once the canonical declaration
+// gained a `organization_id` column (see that file and
+// db/migrations/20260909_strike_fund_disbursements_organization_id.sql),
+// the two declarations diverged and tripped
+// scripts/__tests__/schema-duplicate-table-ratchet.test.ts's
+// CONFLICTING_SCHEMA detector. Removing the dead duplicate (rather than
+// keeping it in sync) matches this repo's established precedent for
+// resolving that ratchet (see the test file's history for
+// 'public.campaigns' / 'public.message_log' / 'public.steward_assignments').
 
 // T4A tax slips (Federal)
 export const t4aTaxSlips = pgTable("t4a_tax_slips", {

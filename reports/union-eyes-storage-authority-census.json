@@ -1,80 +1,11 @@
 {
-  "generatedAt": "2026-09-09T13:33:33.558Z",
-  "totalNeedsReview": 1,
+  "generatedAt": "2026-09-09T16:01:21.317Z",
+  "totalNeedsReview": 0,
   "candidateCounts": {
     "LATENT_UNREACHABLE": 0,
     "CONTAINED_NO_AUTHORITY": 0,
-    "NEEDS_REVIEW": 1
+    "NEEDS_REVIEW": 0
   },
-  "cohortCounts": {
-    "COMPLEX:user:HIGH": 1
-  },
-  "rows": [
-    {
-      "table": "strike_fund_disbursements",
-      "domainModule": "unassigned",
-      "reviewPriority": "HIGH",
-      "schema": {
-        "declarationFound": true,
-        "canonicalDeclarations": [
-          "domains/finance/taxes.strikeFundDisbursements",
-          "strike-fund-tax-schema.strikeFundDisbursements"
-        ],
-        "orgColumn": null,
-        "orgColumnNullable": null,
-        "userColumn": "user_id",
-        "userColumnNullable": false,
-        "parentForeignKeys": []
-      },
-      "reachability": {
-        "tsProductionReferences": [
-          "lib/services/strike-fund-tax-service.ts",
-          "services/tax-slip-service.ts"
-        ],
-        "hasRawSqlReference": true,
-        "rawSqlFiles": [
-          "app/api/finance/summary/route.ts",
-          "lib/ai/financial-insights.ts"
-        ],
-        "routeActionCronHint": true,
-        "hintPaths": [
-          "lib/services/strike-fund-tax-service.ts",
-          "services/tax-slip-service.ts",
-          "app/api/strike-fund/dashboard/route.ts",
-          "backend/billing/views.py"
-        ],
-        "djangoModelFound": true,
-        "djangoViewSetReachable": true,
-        "djangoUsesUnconditionalDenyAll": true,
-        "djangoDetail": "model=backend/billing/models.py, viewset=backend/billing/views.py, router-registered, DenyAll"
-      },
-      "candidate": {
-        "classification": "NEEDS_REVIEW",
-        "confidence": "LOW",
-        "blocker": "ambiguous shape — needs manual review",
-        "cohortLane": "COMPLEX",
-        "cohortKey": "COMPLEX:user:HIGH"
-      },
-      "operationSet": [
-        "INSERT",
-        "SELECT",
-        "UPDATE"
-      ],
-      "reachabilityKind": "MIXED",
-      "authEvidence": [
-        "app/api/strike-fund/dashboard/route.ts: withApi",
-        "app/api/strike-fund/dashboard/route.ts: explicit auth config"
-      ],
-      "organizationEvidence": [
-        "services/tax-slip-service.ts: organization identifier reference",
-        "app/api/strike-fund/dashboard/route.ts: organization identifier reference",
-        "backend/billing/views.py: organization identifier reference"
-      ],
-      "mutationBoundaryEvidence": [
-        "services/tax-slip-service.ts: insert/write path",
-        "services/tax-slip-service.ts: update/write path",
-        "backend/billing/views.py: update/write path"
-      ]
-    }
-  ]
+  "cohortCounts": {},
+  "rows": []
 }

@@ -1,20 +1,20 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-09T13:39:09.590Z
+Generated: 2026-09-09T17:36:19.723Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
 - Total manifest entries: 700
-- Ready for explicit GRANT (CLOSED, fully resolved): 699
-- Pending review (NEEDS_REVIEW, excluded from plan): 1
-- Tenant-granted tables (union_eyes_runtime): 334
+- Ready for explicit GRANT (CLOSED, fully resolved): 700
+- Pending review (NEEDS_REVIEW, excluded from plan): 0
+- Tenant-granted tables (union_eyes_runtime): 335
 - System-granted tables (union_eyes_system): 64
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 317 | 280 | 186 | 98 |
+| tenant (union_eyes_runtime) | 318 | 280 | 186 | 98 |
 | system (union_eyes_system) | 55 | 30 | 22 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
@@ -648,6 +648,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | steward_assignments | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | stewards | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | SELECT |
 | strategic_goals | TENANT_RLS_REQUIRED | SELECT | NONE |
+| strike_fund_disbursements | TENANT_RLS_REQUIRED | SELECT | NONE |
 | strike_fund_payment_audit | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | stripe_connect_accounts | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | stripe_webhook_events | LATENT_UNREACHABLE | NONE | NONE |

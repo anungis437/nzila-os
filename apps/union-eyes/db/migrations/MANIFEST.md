@@ -8,9 +8,9 @@
 - **Branch:** main
 - **Commit:** local
 - **Short Commit:** local
-- **Generated:** 2026-09-03T04:41:51.026Z
+- **Generated:** 2026-09-09T15:52:22.410Z
 - **Migrations Directory:** `db/migrations`
-- **Total Migrations:** 96
+- **Total Migrations:** 97
 
 ## Migration Files
 
@@ -112,6 +112,7 @@
 | 20260508 | 20260508_fixup_post_0019_align_modern_schema.sql | `163e9a5f...88048bcf` | 5.59 KB | Fixup: align modern schema after 0019 drops + missing newer migrations. |
 | 20260509 | 20260509_fixup_auth_mfa_magic_invites.sql | `aac9d2ab...ef5411fe` | 3.01 KB | 20260509_fixup_auth_mfa_magic_invites.sql |
 | 20260521 | 20260521_fixup_icra_assessments_claim_columns.sql | `56960b63...e8457fba` | 0.85 KB | Fixup: add icra_assessments claim/payment columns that exist in Drizzle schema |
+| 20260909 | 20260909_strike_fund_disbursements_organization_id.sql | `1036e698...fe483606` | 3.44 KB | Round 58 Phase 0: close the final storage-authority blocker for |
 
 ## Verification
 

@@ -64,6 +64,7 @@
     "rls:verify:full": "tsx scripts/rls-verify.ts --mode=full",
     "rls:provision-roles": "tsx scripts/provision-runtime-db-roles.ts",
     "rls:apply-foundation-migration": "tsx scripts/apply-rls-foundation-migration.ts",
+    "rls:verify-strike-fund-backfill": "tsx scripts/verify-strike-fund-org-backfill.ts",
     "icra:capability-rollout:check": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --check",
     "icra:capability-rollout:apply": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --apply",
     "rls:authority-convergence-report": "tsx scripts/generate-authority-convergence-report.ts"
@@ -244,6 +245,7 @@
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
+    "@electric-sql/pglite": "^0.5.4",
     "@next/bundle-analyzer": "^16.1.6",
     "@nzila/config": "workspace:*",
     "@nzila/evidence": "workspace:*",
