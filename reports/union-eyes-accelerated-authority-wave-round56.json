@@ -1,0 +1,63 @@
+{
+  "round": 56,
+  "generatedAt": "2026-09-09T12:00:00Z",
+  "startSha": "38bb2fe868db2bdc8a4466148db8771b95921c39",
+  "activeUniverse": 52,
+  "cohortAccounting": {
+    "orgHigh": { "starting": 30, "closed": 27, "residual": 3 },
+    "userHigh": { "starting": 6, "closed": 3, "residual": 3 },
+    "userNormal": { "starting": 14, "closed": 4, "residual": 10 },
+    "voting": { "starting": 2, "closed": 0, "residual": 2 }
+  },
+  "totals": { "closed": 34, "residualBeforeDjangoFixOnly": 18, "ejected": 16 },
+  "note": "orgHigh residual (3) = payments (ejected FINANCE_EXECUTION) + customer_onboarding_milestones (SYSTEM_ONLY, closed) + holidays (MIXED_GLOBAL_TENANT_RLS_REQUIRED, closed). customer_onboarding_milestones and holidays ARE closed (non-NEEDS_REVIEW) but not TENANT_RLS_REQUIRED, hence tracked as residual-from-fast-path but not residual-from-closure. See archetypeMatrix for the authoritative closed/ejected split: 36 closed (27+2 orgHigh non-payments + 3 userHigh + 4 userNormal), 16 ejected (1 orgHigh payments + 3 userHigh finance + 10 userNormal + 2 voting).",
+  "archetypeMatrix": [
+    { "archetype": "DIRECT_TENANT_RESOURCE", "count": 22, "closed": 22, "residual": 0,
+      "tables": ["donation_campaigns","employer_communications","organizing_campaigns","social_campaigns","cms_media_library","calendar_events","cms_pages","integration_partners","knowledge_base","poll_votes","polls","social_posts","survey_answers","survey_questions","survey_responses","surveys","employer_timesheet_batches","employer_timesheet_entries","budget_pool","stewards","pilot_feedback","exit_interview_events"] },
+    { "archetype": "APPEND_ONLY_EVIDENCE", "count": 2, "closed": 2, "residual": 0,
+      "tables": ["employer_execution_artifacts","employer_execution_compliance_events"] },
+    { "archetype": "WORKER_OR_CRON_EXECUTION", "count": 1, "closed": 1, "residual": 0,
+      "tables": ["employer_execution_replays"] },
+    { "archetype": "CREDENTIAL_OR_INTEGRATION_CONFIG", "count": 3, "closed": 3, "residual": 0,
+      "tables": ["integration_api_keys","integration_webhooks","external_calendar_connections"] },
+    { "archetype": "CROSS_TENANT_PLATFORM_RESOURCE", "count": 1, "closed": 1, "residual": 0,
+      "tables": ["customer_onboarding_milestones"] },
+    { "archetype": "DERIVED_TENANT_DATA", "count": 1, "closed": 1, "residual": 0,
+      "tables": ["holidays"] },
+    { "archetype": "USER_PRIVATE_RESOURCE", "count": 1, "closed": 1, "residual": 0,
+      "tables": ["profiles"] },
+    { "archetype": "PRIVACY_SENSITIVE", "count": 5, "closed": 5, "residual": 0,
+      "tables": ["data_subject_access_requests","geofence_events","location_tracking","provincial_consent","provincial_data_handling"] },
+    { "archetype": "FINANCE_EXECUTION", "count": 4, "closed": 0, "residual": 4,
+      "tables": ["payments","rl1_tax_slips","t4a_tax_slips","strike_fund_disbursements"] },
+    { "archetype": "MULTI_PARTY_AUTHORITY / VOTING_INTEGRITY", "count": 2, "closed": 0, "residual": 2,
+      "tables": ["votes","voting_options"] },
+    { "archetype": "UNKNOWN (reachability verification incomplete)", "count": 10, "closed": 0, "residual": 10,
+      "tables": ["autopay_settings","blind_trust_registry","certification_alerts","conflict_disclosures","continuing_education","indigenous_data_access_log","key_holder_registry","recusal_tracking","staff_certifications","weekly_threshold_tracking"] }
+  ],
+  "securityDefectsFoundAndFixed": [
+    { "table": "pilot_feedback", "defect": "cross-user/cross-org spoofing", "file": "app/api/pilot/feedback/route.ts", "fix": "derive userId/organizationId from authenticated withRoleAuth() context instead of client body/query", "test": "app/api/pilot/__tests__/pilot-feedback-idor-fix.route.test.ts (4 tests)" },
+    { "table": "external_calendar_connections", "defect": "cross-user raw OAuth token exposure (any org member could read any other member's access/refresh tokens)", "file": "app/api/calendar-sync/connections/route.ts, [id]/route.ts", "fix": "added ownerColumn:'userId' + beforeCreate userId stamping to the crud-factory config", "test": "app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts (2 tests)" },
+    { "table": "integration_api_keys", "defect": "cross-tenant Django ViewSet exposure (IsAuthenticated + objects.all(), zero legitimate consumer)", "file": "backend/core/views.py", "fix": "DenyAllPermission", "test": "backend/core/tests_round56_integration_credentials_containment.py" },
+    { "table": "integration_webhooks", "defect": "cross-tenant Django ViewSet exposure of raw webhook signing secret (fields='__all__', zero legitimate consumer)", "file": "backend/core/views.py", "fix": "DenyAllPermission", "test": "backend/core/tests_round56_integration_credentials_containment.py" },
+    { "table": "budget_pool", "defect": "cross-tenant Django ViewSet exposure (missed counterpart to round-42 BudgetReservationsViewSet fix)", "file": "backend/unions/views.py", "fix": "DenyAllPermission", "test": "backend/unions/tests_round56_budget_pool_containment.py" },
+    { "table": "payments", "defect": "cross-tenant Django ViewSet exposure (missed counterpart to rounds 30/32 strike-fund/tax-slip fixes)", "file": "backend/billing/views.py", "fix": "DenyAllPermission", "test": "backend/billing/tests_round56_payments_containment.py" }
+  ],
+  "securityDefectsFoundNotFixed": [
+    { "table": "payments", "defect": "services/financial-service/src/routes/payments.ts falls back to client-supplied req.body.organizationId whenever getAuthUser(req).organizationId is falsy", "disposition": "ejected to Round 57 finance tranche; requires financial-service auth model review before a safe fix" },
+    { "table": "poll_votes", "defect": "generic crud-factory does not cross-validate that client-supplied poll_id belongs to the caller's own organization before inserting a vote row", "disposition": "documented in manifest reason as a residual finding; not blocking (a poll-results data-integrity issue, not a cross-tenant confidentiality breach)" }
+  ],
+  "countsBeforeAfter": {
+    "before": { "NEEDS_REVIEW": 85, "RLS_expansion": 248 },
+    "after": { "NEEDS_REVIEW": 49, "RLS_expansion": 283, "closedWithTBD": 0, "invariantViolations": 0 }
+  },
+  "residualTopologyAfter": {
+    "COMPLEX:org:NORMAL": 23,
+    "COMPLEX:none:NORMAL": 10,
+    "COMPLEX:org:HIGH_residual_finance": 1,
+    "COMPLEX:user:HIGH_residual_finance": 3,
+    "COMPLEX:user:NORMAL_residual_unresolved": 10,
+    "PARENT_OWNED:parent:HIGH_voting": 2
+  },
+  "finalStatus": "ROUND56 = CLOSED / LOCAL VALIDATED (pending remote CI)"
+}

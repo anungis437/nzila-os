@@ -424,10 +424,21 @@ class DuesTransactionsViewSet(DirectTenantIsolationMixin, viewsets.ModelViewSet)
 
 
 class PaymentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for Payments operations."""
+    """API endpoint for Payments operations.
+
+    Round 56: was IsAuthenticated + queryset=Model.objects.all() with no
+    organization filter (no organization_id in filterset_fields either) —
+    a cross-tenant financial data leak (any authenticated user could list
+    every organization's payments). Zero legitimate consumer found (no
+    frontend caller of /api/billing/payments/; the real production
+    surface is app/api/finance/**, app/api/payments/**, and the separate
+    financial-service Express app). Contained via DenyAllPermission, same
+    pattern already applied to the sibling StrikeFundDisbursements/
+    Rl1TaxSlips/T4aTaxSlips ViewSets (rounds 30/32).
+    """
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

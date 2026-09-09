@@ -79,10 +79,19 @@ class RewardWalletLedgerViewSet(viewsets.ModelViewSet):
 
 
 class BudgetPoolViewSet(viewsets.ModelViewSet):
-    """API endpoint for BudgetPool operations."""
+    """API endpoint for BudgetPool operations.
+
+    Round 56: was IsAuthenticated + objects.all() with no org filter — a
+    cross-tenant financial data leak (any authenticated user could read/
+    write any organization's budget pool). Zero legitimate consumer exists
+    (the real app reads budget_pool via tenant-scoped raw SQL in
+    app/api/finance/summary and lib/ai/financial-insights.ts, never this
+    Django REST path); the sibling BudgetReservationsViewSet already got
+    DenyAllPermission in round 42 — this was the missed counterpart.
+    """
     queryset = BudgetPool.objects.all()
     serializer_class = BudgetPoolSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']

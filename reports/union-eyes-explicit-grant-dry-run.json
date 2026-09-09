@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-09T01:49:26.697Z",
+  "generatedAt": "2026-09-09T11:28:30.975Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 615,
-  "pendingReviewCount": 85,
-  "tenantGrantedTableCount": 282,
-  "systemGrantedTableCount": 44,
+  "readyForExplicitGrantCount": 651,
+  "pendingReviewCount": 49,
+  "tenantGrantedTableCount": 317,
+  "systemGrantedTableCount": 57,
   "tenantOperationTotals": {
-    "SELECT": 267,
-    "INSERT": 237,
-    "UPDATE": 158,
-    "DELETE": 90
+    "SELECT": 302,
+    "INSERT": 268,
+    "UPDATE": 178,
+    "DELETE": 98
   },
   "systemOperationTotals": {
-    "SELECT": 36,
-    "INSERT": 22,
-    "UPDATE": 16,
+    "SELECT": 49,
+    "INSERT": 26,
+    "UPDATE": 18,
     "DELETE": 0
   },
   "riskSignals": {
@@ -32,6 +32,7 @@
       "bargaining_proposals",
       "bargaining_units",
       "break_policies",
+      "calendar_events",
       "calendars",
       "campaigns",
       "case_studies",
@@ -41,6 +42,8 @@
       "claims",
       "clause_library_tags",
       "clc_remittance_mapping",
+      "cms_media_library",
+      "cms_pages",
       "cnesst_filings",
       "collective_agreements",
       "committee_documents",
@@ -51,11 +54,13 @@
       "course_sessions",
       "deadline_reminders",
       "documents",
+      "donation_campaigns",
       "dues_rates",
       "dues_transactions",
       "employer_remittances",
       "employers",
       "erp_invoices",
+      "external_calendar_connections",
       "federations",
       "financial_periods",
       "gl_account_mappings",
@@ -84,6 +89,7 @@
       "notifications",
       "org_configurations",
       "organization_members",
+      "organizing_campaigns",
       "pay_equity_exercises",
       "payment_cycles",
       "payment_disputes",
@@ -91,6 +97,7 @@
       "payment_plans",
       "pilot_checklist_items",
       "pilot_demo_seeds",
+      "polls",
       "preventive_withdrawals",
       "push_notifications",
       "remittance_exceptions",
@@ -102,6 +109,7 @@
       "sms_messages",
       "social_accounts",
       "steward_assignments",
+      "surveys",
       "testimonials",
       "training_courses",
       "voting_sessions",
@@ -121,11 +129,20 @@
       "commercial_contracts",
       "communication_preferences",
       "consent_records",
+      "data_subject_access_requests",
       "deadline_audit_events",
       "deadline_reminders",
       "dues_assignments",
+      "employer_execution_artifacts",
+      "employer_execution_compliance_events",
+      "employer_execution_replays",
       "external_data_sync_log",
+      "geofence_events",
       "grievance_deadlines",
+      "holidays",
+      "integration_partners",
+      "integration_webhooks",
+      "location_tracking",
       "message_log",
       "notification_delivery_log",
       "notification_queue",
@@ -137,8 +154,11 @@
       "pilot_milestones",
       "platform_payments",
       "policy_evaluations",
+      "provincial_consent",
+      "provincial_data_handling",
       "recognition_award_types",
       "recognition_awards",
+      "stewards",
       "workbooks"
     ],
     "systemOnlyBroadSystemDml": [
@@ -717,9 +737,28 @@
       "systemPrivileges": []
     },
     {
+      "table": "budget_pool",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "budget_reservations",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "calendar_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1135,9 +1174,31 @@
       "systemPrivileges": []
     },
     {
+      "table": "cms_media_library",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "cms_navigation_menus",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cms_pages",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -1514,6 +1575,14 @@
       ]
     },
     {
+      "table": "customer_onboarding_milestones",
+      "classification": "SYSTEM_ONLY",
+      "tenantPrivileges": [],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
       "table": "data_aggregation_consent",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -1559,6 +1628,19 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "data_subject_access_requests",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "UPDATE"
+      ]
     },
     {
       "table": "deadline_alerts",
@@ -1719,6 +1801,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "donation_campaigns",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "donation_receipts",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -1830,6 +1923,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "employer_communications",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "employer_contacts",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -1837,6 +1940,30 @@
         "INSERT"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "employer_execution_artifacts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
+    },
+    {
+      "table": "employer_execution_compliance_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
     },
     {
       "table": "employer_execution_evidence_links",
@@ -1854,6 +1981,18 @@
         "SELECT"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "employer_execution_replays",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT"
+      ]
     },
     {
       "table": "employer_payroll_adjustments",
@@ -1936,6 +2075,26 @@
       "systemPrivileges": []
     },
     {
+      "table": "employer_timesheet_batches",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "employer_timesheet_entries",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "employers",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2004,6 +2163,15 @@
     },
     {
       "table": "exit_interview_documents",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "exit_interview_events",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT",
@@ -2091,6 +2259,17 @@
       "table": "external_calendar_attendees",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "external_calendar_connections",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2496,6 +2675,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "geofence_events",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
       "table": "geofences",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2711,6 +2901,18 @@
       "systemPrivileges": []
     },
     {
+      "table": "holidays",
+      "classification": "MIXED_GLOBAL_TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ]
+    },
+    {
       "table": "icra_anonymized_metrics",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -2841,6 +3043,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "integration_api_keys",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "integration_configs",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2849,6 +3061,16 @@
         "UPDATE"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "integration_partners",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "integration_sync_log",
@@ -2865,6 +3087,16 @@
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "integration_webhooks",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "job_applications",
@@ -2911,6 +3143,16 @@
       "table": "journal_entry_lines",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "knowledge_base",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -2967,6 +3209,17 @@
         "INSERT"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "location_tracking",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "location_tracking_audit",
@@ -3575,6 +3828,17 @@
       "systemPrivileges": []
     },
     {
+      "table": "organizing_campaigns",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "organizing_contacts",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3860,6 +4124,15 @@
       ]
     },
     {
+      "table": "pilot_feedback",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "pilot_metrics",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3945,6 +4218,26 @@
       "systemPrivileges": []
     },
     {
+      "table": "poll_votes",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "polls",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "ppe_equipment",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4013,10 +4306,44 @@
       "systemPrivileges": []
     },
     {
+      "table": "profiles",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "program_enrollments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
+    },
+    {
+      "table": "provincial_consent",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "table": "provincial_data_handling",
+      "classification": "USER_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "provincial_privacy_config",
@@ -4503,6 +4830,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "social_campaigns",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": []
+    },
+    {
       "table": "social_engagement",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -4512,6 +4849,16 @@
       "table": "social_feeds",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "social_posts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
       "systemPrivileges": []
     },
     {
@@ -4539,6 +4886,18 @@
         "DELETE"
       ],
       "systemPrivileges": []
+    },
+    {
+      "table": "stewards",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemPrivileges": [
+        "SELECT"
+      ]
     },
     {
       "table": "strategic_goals",
@@ -4590,6 +4949,44 @@
       "systemPrivileges": [
         "SELECT"
       ]
+    },
+    {
+      "table": "survey_answers",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "survey_questions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "survey_responses",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "surveys",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "systemPrivileges": []
     },
     {
       "table": "swiss_cold_storage",
@@ -5037,27 +5434,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "budget_pool",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "calendar_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "certification_alerts",
       "classification": "NEEDS_REVIEW"
     },
     {
       "table": "chargeback_statements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cms_media_library",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "cms_pages",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5085,55 +5466,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "customer_onboarding_milestones",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "data_quality_warnings",
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "data_subject_access_requests",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "donation_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_communications",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_execution_artifacts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_execution_compliance_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_execution_replays",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_timesheet_batches",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "employer_timesheet_entries",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "event_attendees",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "exit_interview_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "external_calendar_connections",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5157,15 +5494,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "geofence_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "grievance_timeline_events",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "holidays",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5173,19 +5502,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "integration_api_keys",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "integration_partners",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "integration_sync_schedules",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "integration_webhooks",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5197,18 +5514,6 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "knowledge_base",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "location_tracking",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "organizing_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "payments",
       "classification": "NEEDS_REVIEW"
     },
@@ -5217,31 +5522,7 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "pilot_feedback",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "poll_votes",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "polls",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "precedent_citations",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "profiles",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "provincial_consent",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "provincial_data_handling",
       "classification": "NEEDS_REVIEW"
     },
     {
@@ -5269,39 +5550,11 @@
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "social_campaigns",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "social_posts",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "staff_certifications",
       "classification": "NEEDS_REVIEW"
     },
     {
-      "table": "stewards",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
       "table": "strike_fund_disbursements",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "survey_answers",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "survey_questions",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "survey_responses",
-      "classification": "NEEDS_REVIEW"
-    },
-    {
-      "table": "surveys",
       "classification": "NEEDS_REVIEW"
     },
     {

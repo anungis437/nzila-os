@@ -521,11 +521,20 @@ class IntegrationSyncSchedulesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+# Round 56: both ViewSets below had zero legitimate consumer (the real app
+# reads/writes integration_api_keys via the TS crud-factory route and
+# integration_webhooks via a tenant-scoped raw SQL query — neither ever
+# calls this Django REST path) while exposing every organization's rows
+# to any authenticated platform user via IsAuthenticated + `objects.all()`
+# + `fields = '__all__'` serializers. IntegrationWebhooksViewSet in
+# particular leaked the raw webhook signing secret cross-tenant. See
+# db/rls-storage-authority/integrations-workers.ts for the authority
+# disposition.
 class IntegrationApiKeysViewSet(viewsets.ModelViewSet):
     """API endpoint for IntegrationApiKeys operations."""
     queryset = IntegrationApiKeys.objects.all()
     serializer_class = IntegrationApiKeysSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -536,7 +545,7 @@ class IntegrationWebhooksViewSet(viewsets.ModelViewSet):
     """API endpoint for IntegrationWebhooks operations."""
     queryset = IntegrationWebhooks.objects.all()
     serializer_class = IntegrationWebhooksSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
