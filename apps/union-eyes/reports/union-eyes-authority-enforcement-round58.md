@@ -93,3 +93,38 @@ ROUND58C = PARTIAL
 ```
 
 The 32-blocker core objective is fully closed and extensively proven (behavioral + syntax + ACL + independent-policy oracles + full-migration transactional rollback proof, all green). Deployment-DAG wiring exists, is safe (non-gating, no dispatch), and is proven by a passing contract test. Round 58 cannot reach `CLOSED` because completing it now requires resolving a newly-discovered, concretely evidenced gap — 111 physical tables absent from the authority manifest — before the blanket grant this whole effort exists to eventually remove can be revoked without risking a real production regression. This is reported as an honest, exact blocker rather than worked around or hidden, per this program's own standing instruction that PARTIAL-with-documented-blockers is an explicitly sanctioned outcome.
+
+---
+
+## Round 58D — CANONICAL_DATABASE_CONVERGENCE_SUPABASE_PURGE_AND_FINAL_ENFORCEMENT_CUTOVER
+
+Full structured evidence: [union-eyes-canonical-database-topology-round58d.json](./union-eyes-canonical-database-topology-round58d.json) / [.md](./union-eyes-canonical-database-topology-round58d.md).
+
+### The "111" tables — resolved as 95, not a duplicate-schema problem
+
+A deterministic re-scan found the real count was **95** (not 111 — the earlier figure came from a buggier ad-hoc regex), with **zero** duplicates against the canonical `db/schema/**` tree. Investigation of `services/financial-service`'s actual architecture found it has **no deployment path of any kind** — no Dockerfile, no `docker-compose` entry, no Azure deploy workflow, no infrastructure resource; its only CI presence runs typecheck/lint/test, never a real migration. 84 of the 95 names appear in the historical introspected migration snapshot (real physical relations at that time); 11 were never migrated anywhere. All 19 `v_*`-prefixed names are confirmed ordinary base tables, not SQL views.
+
+**All 95 added to `db/rls-storage-authority/financial-service-latent.ts`** as `LATENT_UNREACHABLE` (zero privileges), with the required `scopeDisposition: DECLARATION_STALE_OR_NONCANONICAL`. Manifest: 700 → 795. `UNKNOWN = 0`.
+
+**Architectural decision**: ONE canonical Union Eyes Azure PostgreSQL data plane. financial-service is a service boundary, not a database boundary — no evidence justifies a separate physical database. No finance-specific DB roles were created, since every financial-service relation is currently zero-privilege; this must be revisited if the service is ever actually deployed.
+
+### Supabase — fully purged from Union Eyes runtime/deployment
+
+0 runtime SDK imports, 0 production package dependencies, 0 runtime env requirements, 0 deployment dependencies (down from 2/2/3/2 respectively), plus one dead file with fictitious architecture claims deleted. A new ratchet test guards against regression.
+
+### arbitration_decisions — global-write defect fixed (not just carried forward)
+
+`writeRole` changed from the ordinary per-tenant `steward` to the genuinely platform-elevated `content_manager` across all 5 routes, with a passing regression test.
+
+### Blanket grant — removed
+
+Every gating condition (Supabase=0, `UNKNOWN`=0, geometry blockers=0, `TBD`=0, arbitration defect closed) is now satisfied. The generator's own self-check (recomputed fresh every run) confirmed the gate is true, and PART E now revokes 0108's blanket table/sequence grants. Every existing proof (behavioral, policy-syntax, ACL oracle, independent policy oracle, full-migration transactional rollback) was re-run against the final PART A+B+C+D+E migration — all green, 795 grant blocks, 322 policies, 0 blockers.
+
+### Verdict
+
+```
+ROUND58 = CLOSED
+```
+
+Every item in the mandate's own section-70/78 close gate is satisfied. `PR #752` remains **NO_GO / DO NOT MERGE** — Round 59 (controlled staging preflight, real DB-role attestation, tenant/system smoke tests, remaining programme security blockers, final SaaS/readiness decision) is still required before any merge decision. Remaining open items (financial-service's eventual real deployment must re-open its latent-table classifications and the no-finance-role decision; the 11 never-migrated tables look like an unrelated SaaS-billing feature worth a product-level cleanup question; one narrow parser-coverage gap for a single table's 3rd Drizzle FK-declaration style; conservative unexpanded federation/congress sharing levels; deployment DAG not yet promoted to a mandatory gate) are documented in full in the topology report and are Round 59 (or later) concerns, not Round 58 blockers.
+

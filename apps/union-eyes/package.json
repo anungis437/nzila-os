@@ -264,7 +264,6 @@
     "@opentelemetry/sdk-node": "^0.217.0",
     "@opentelemetry/semantic-conventions": "^1.39.0",
     "@playwright/test": "^1.58.2",
-    "@supabase/supabase-js": "^2.87.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

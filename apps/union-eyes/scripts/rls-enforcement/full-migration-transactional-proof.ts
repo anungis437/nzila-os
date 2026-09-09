@@ -7,9 +7,9 @@
  * Unlike policy-syntax-dry-run.ts (which applies only PART A+B) and
  * acl-oracle-dry-run.ts (which applies only PART C), this proof applies the
  * ENTIRE committed migration file — PART A (helper functions) + PART B
- * (all 322 policy calls) + PART C (all 700 GRANT blocks) + PART D (ai_
- * budgets cleanup) — as one single transaction against a disposable,
- * synthetic-stub schema, then:
+ * (all 322 policy calls) + PART C (all 795 GRANT blocks) + PART D (ai_
+ * budgets cleanup) + PART E (0108 blanket grant removal, gated) — as one
+ * single transaction against a disposable, synthetic-stub schema, then:
  *   1. Verifies real policy/grant state exists mid-transaction.
  *   2. Deliberately ROLLBACKs and verifies the stub schema's own baseline
  *      (pre-migration) state is fully restored — proving the migration has
@@ -220,7 +220,7 @@ async function main() {
       );
     }
 
-    console.log("Full migration (PART A+B+C+D) applies transactionally, rolls back cleanly, and re-applies identically.");
+    console.log("Full migration (PART A+B+C+D+E) applies transactionally, rolls back cleanly, and re-applies identically.");
     await client.query(`DROP SCHEMA IF EXISTS ${SCHEMA_NAME} CASCADE`);
   } finally {
     await client.end();

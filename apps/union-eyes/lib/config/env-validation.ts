@@ -90,11 +90,6 @@ const envSchema = z.object({
   AZURE_AD_CLIENT_SECRET: z.string().min(10).optional(),
   AZURE_AD_TENANT_ID: z.string().min(10).optional(),
 
-  // ============== HIGH - Supabase (Alternative Database/Auth) ==============
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid SUPABASE_URL').optional(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
-
   // ============== CRITICAL - Voting System ==============
   VOTING_SECRET: z.string()
     .min(32, 'VOTING_SECRET must be at least 32 characters for HMAC-SHA256')

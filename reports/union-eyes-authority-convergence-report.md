@@ -1,6 +1,6 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-09T21:24:57.790Z
+Generated: 2026-09-09T22:29:45.688Z
 
 ## Classification counts
 
@@ -8,7 +8,7 @@ Generated: 2026-09-09T21:24:57.790Z
 | --- | --- |
 | TENANT_RLS_REQUIRED | 260 |
 | USER_RLS_REQUIRED | 13 |
-| LATENT_UNREACHABLE | 199 |
+| LATENT_UNREACHABLE | 294 |
 | SYSTEM_ONLY | 22 |
 | CONTAINED_NO_AUTHORITY | 137 |
 | PARENT_OWNED_RLS_REQUIRED | 36 |

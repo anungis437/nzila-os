@@ -17,22 +17,11 @@
 -- full list of tables this generation run could NOT confidently resolve):
 --   Policies generated this run: 322
 --   Tables blocked (geometry unresolved / ambiguous): 0
---   GRANT blocks generated (covers all 700 manifest entries): 700
+--   GRANT blocks generated (covers all 795 manifest entries): 795
 --
--- NOTE: 0108's predecessor blanket `GRANT ALL ON ALL TABLES IN SCHEMA
--- public` is INTENTIONALLY NOT revoked by this migration. Round 58C found
--- a concrete, evidenced blocker for doing so: 111 physical pgTable(...)
--- declarations exist in this repository with NO entry anywhere in the 700-
--- table storageAuthorityManifest (e.g. members, tenants, strike_funds,
--- budgets, vendors, encryption_keys, pii_access_log — all declared only in
--- services/financial-service's own separate schema files, whose DB-role
--- story relative to union_eyes_runtime/union_eyes_system was NOT verified
--- this round). Revoking the blanket grant now — even though this specific
--- migration generation run has 0 geometry blockers — would risk silently
--- removing all runtime/system access to those 111 tables the moment this
--- migration is ever applied. See reports/union-eyes-authority-enforcement-
--- round58.md for the full finding and required follow-up before the
--- blanket grant can be safely narrowed.
+-- Blanket grant removal gate satisfied at generation time: true
+-- 0108's predecessor blanket GRANT is narrowed by PART E below (see reports/
+-- union-eyes-authority-enforcement-round58.md for the full finding).
 -- =============================================================================
 
 -- =============================================================================
@@ -1703,6 +1692,291 @@ REVOKE ALL ON TABLE "t4a_tax_slips" FROM union_eyes_system;
 REVOKE ALL ON TABLE "tax_year_end_processing" FROM union_eyes_runtime;
 REVOKE ALL ON TABLE "tax_year_end_processing" FROM union_eyes_system;
 
+REVOKE ALL ON TABLE "accounts_payable" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "accounts_payable" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_chunks" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_chunks" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_documents" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_documents" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_feedback" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_feedback" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_feedback_summary" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_feedback_summary" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_queries" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_queries" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_query_logs" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_query_logs" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "ai_usage_by_tenant" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "ai_usage_by_tenant" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "arrears" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "arrears" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "arrears_cases" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "arrears_cases" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "attestation_templates" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "attestation_templates" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "blockchain_audit_anchors" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "blockchain_audit_anchors" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "budget_line_items" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "budget_line_items" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "budgets" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "budgets" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "case_summaries" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "case_summaries" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "certification_applications" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "certification_applications" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "compliance_validations" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "compliance_validations" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "cope_contributions" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "cope_contributions" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "cra_xml_batches" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "cra_xml_batches" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "customer_acquisition" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "customer_acquisition" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "digital_signatures" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "digital_signatures" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "dues_rules" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "dues_rules" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "elected_officials" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "elected_officials" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "encryption_keys" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "encryption_keys" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "equity_snapshots" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "equity_snapshots" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "expense_approvals" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "expense_approvals" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "expense_requests" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "expense_requests" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "fund_eligibility" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "fund_eligibility" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "hardship_applications" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "hardship_applications" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "hw_benefit_claims" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "hw_benefit_claims" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "hw_benefit_enrollments" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "hw_benefit_enrollments" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "hw_benefit_plans" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "hw_benefit_plans" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "jurisdiction_rules" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "jurisdiction_rules" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "jurisdiction_rules_summary" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "jurisdiction_rules_summary" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "jurisdiction_templates" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "jurisdiction_templates" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "legislation_tracking" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "legislation_tracking" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "member_demographics" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "member_demographics" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "member_dues_assignments" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "member_dues_assignments" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "member_political_participation" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "member_political_participation" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "members" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "members" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "members_with_pii" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "members_with_pii" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "mrr_snapshots" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "mrr_snapshots" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "organization_hierarchy_audit" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "organization_hierarchy_audit" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "organization_tree" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "organization_tree" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "organizing_activities" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "organizing_activities" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "organizing_volunteers" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "organizing_volunteers" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "pay_equity_complaints" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "pay_equity_complaints" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "pension_actuarial_valuations" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "pension_actuarial_valuations" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "pension_hours_banks" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "pension_hours_banks" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "pension_trustee_boards" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "pension_trustee_boards" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "picket_attendance" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "picket_attendance" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "picket_tracking" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "picket_tracking" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "pii_access_log" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "pii_access_log" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "political_activities" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "political_activities" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "political_campaigns" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "political_campaigns" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "public_donations" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "public_donations" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "revenue_cohorts" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "revenue_cohorts" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "statcan_submissions" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "statcan_submissions" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "statutory_holidays" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "statutory_holidays" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "stipend_disbursements" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "stipend_disbursements" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "strike_funds" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "strike_funds" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "subscription_events" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "subscription_events" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "tax_slips" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "tax_slips" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "tax_year_configurations" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "tax_year_configurations" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "tenant_management_view" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "tenant_management_view" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "tenants" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "tenants" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "transaction_clc_mappings" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "transaction_clc_mappings" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "trust_compliance_reports" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "trust_compliance_reports" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "trusted_certificate_authorities" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "trusted_certificate_authorities" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_annual_remittance_summary" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_annual_remittance_summary" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_certification_expiry_tracking" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_certification_expiry_tracking" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_cope_member_summary" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_cope_member_summary" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_course_session_dashboard" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_course_session_dashboard" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_critical_deadlines" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_critical_deadlines" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_elected_official_engagement" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_elected_official_engagement" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_equity_statistics_anonymized" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_equity_statistics_anonymized" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_hw_claims_aging" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_hw_claims_aging" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_legislative_priorities" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_legislative_priorities" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_member_benefit_eligibility" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_member_benefit_eligibility" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_member_training_transcript" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_member_training_transcript" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_organizing_campaign_dashboard" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_organizing_campaign_dashboard" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_pay_equity_pipeline" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_pay_equity_pipeline" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_pending_remittances" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_pending_remittances" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_pension_funding_summary" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_pension_funding_summary" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_political_campaign_dashboard" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_political_campaign_dashboard" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_tax_slip_summary" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_tax_slip_summary" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_training_program_progress" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_training_program_progress" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "v_workplace_contact_map" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "v_workplace_contact_map" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "vendor_invoices" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "vendor_invoices" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "vendors" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "vendors" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "vote_merkle_tree" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "vote_merkle_tree" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "voting_auditors" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "voting_auditors" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "voting_key_access_log" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "voting_key_access_log" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "voting_session_auditors" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "voting_session_auditors" FROM union_eyes_system;
+
+REVOKE ALL ON TABLE "voting_session_keys" FROM union_eyes_runtime;
+REVOKE ALL ON TABLE "voting_session_keys" FROM union_eyes_system;
+
 REVOKE ALL ON TABLE "board_packet_templates" FROM union_eyes_runtime;
 REVOKE ALL ON TABLE "board_packet_templates" FROM union_eyes_system;
 
@@ -3237,3 +3511,17 @@ BEGIN
     ALTER TABLE ai_budgets FORCE ROW LEVEL SECURITY;
   END IF;
 END $$;
+
+-- =============================================================================
+-- PART E — blanket grant removal (gated, see header)
+-- =============================================================================
+
+-- Every gating condition was true at generation time (0 geometry blockers,
+-- 0 TBD privilege entries). 0108's blanket table/sequence grants are narrowed
+-- to the exact per-table GRANTs already issued above in PART C. Schema USAGE
+-- and database CONNECT are retained (baseline connection-level access, not
+-- per-table data access). No PostgreSQL sequences exist in this schema (every
+-- table uses a UUID default, not serial/bigserial), so the sequence grant is
+-- removed with no replacement.
+REVOKE SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system;
+REVOKE USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system;

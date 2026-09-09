@@ -39,8 +39,8 @@ describe('rls-storage-authority registry composition (PR #752 round 9)', () => {
     expect(first.storageAuthorityManifest).toEqual(second.storageAuthorityManifest)
   })
 
-  it('aggregate entry count is 700 and every table key is unique', () => {
-    expect(fromIndex.length).toBe(700)
+  it('aggregate entry count is 795 and every table key is unique', () => {
+    expect(fromIndex.length).toBe(795)
     const seen = new Map<string, number>()
     for (const entry of fromIndex) seen.set(entry.table, (seen.get(entry.table) ?? 0) + 1)
     const duplicates = [...seen.entries()].filter(([, count]) => count > 1).map(([table]) => table)

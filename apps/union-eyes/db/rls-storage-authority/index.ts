@@ -21,6 +21,7 @@ import { claimsContinuityEntries } from './claims-continuity'
 import { communicationsNotificationsEntries } from './communications-notifications'
 import { documentsEvidenceEntries } from './documents-evidence'
 import { financeEntries } from './finance'
+import { financialServiceLatentEntries } from './financial-service-latent'
 import { governanceEntries } from './governance'
 import { healthSafetyEntries } from './health-safety'
 import { integrationsWorkersEntries } from './integrations-workers'
@@ -36,6 +37,7 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   ...communicationsNotificationsEntries,
   ...documentsEvidenceEntries,
   ...financeEntries,
+  ...financialServiceLatentEntries,
   ...governanceEntries,
   ...healthSafetyEntries,
   ...integrationsWorkersEntries,

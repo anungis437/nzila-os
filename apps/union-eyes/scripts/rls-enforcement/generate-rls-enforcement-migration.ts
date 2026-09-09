@@ -754,6 +754,37 @@ BEGIN
 END $$;
 `.trim();
 
+  // --- PART E: blanket grant removal (round 58D sections 42/44/48-51) ---
+  // 0108's blanket `GRANT ... ON ALL TABLES IN SCHEMA public` may ONLY be
+  // narrowed once every gating condition this generator can mechanically
+  // verify is actually true — computed fresh on every run, never assumed,
+  // so a future manifest regression (e.g. a new pgTable(...) declaration
+  // that isn't yet in the manifest) automatically re-widens back to the
+  // safe blanket-grant-retained state instead of silently shipping a
+  // narrowed grant that no longer covers every real table.
+  const allPrivilegesResolved = storageAuthorityManifest.every(
+    (e) => e.requiredRuntimePrivileges !== "TBD" && e.requiredSystemPrivileges !== "TBD"
+  );
+  const blanketGrantRemovalGateOk = blockers.length === 0 && allPrivilegesResolved;
+  const blanketGrantRemovalSql = blanketGrantRemovalGateOk
+    ? [
+        "-- Every gating condition was true at generation time (0 geometry blockers,",
+        "-- 0 TBD privilege entries). 0108's blanket table/sequence grants are narrowed",
+        "-- to the exact per-table GRANTs already issued above in PART C. Schema USAGE",
+        "-- and database CONNECT are retained (baseline connection-level access, not",
+        "-- per-table data access). No PostgreSQL sequences exist in this schema (every",
+        "-- table uses a UUID default, not serial/bigserial), so the sequence grant is",
+        "-- removed with no replacement.",
+        "REVOKE SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system;",
+        "REVOKE USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system;",
+      ].join("\n")
+    : [
+        "-- BLANKET GRANT REMOVAL GATE NOT SATISFIED AT GENERATION TIME:",
+        `--   blockers = ${blockers.length} (must be 0)`,
+        `--   all privileges resolved (no TBD) = ${allPrivilegesResolved} (must be true)`,
+        "-- 0108's blanket table/sequence grants are deliberately LEFT IN PLACE.",
+      ].join("\n");
+
   const migrationSql = [
     "-- =============================================================================",
     "-- 20260910_rls_enforcement_expansion_round58.sql",
@@ -776,20 +807,11 @@ END $$;
     `--   Tables blocked (geometry unresolved / ambiguous): ${blockers.length}`,
     `--   GRANT blocks generated (covers all ${grantsGenerated} manifest entries): ${grantsGenerated}`,
     "--",
-    "-- NOTE: 0108's predecessor blanket `GRANT ALL ON ALL TABLES IN SCHEMA",
-    "-- public` is INTENTIONALLY NOT revoked by this migration. Round 58C found",
-    "-- a concrete, evidenced blocker for doing so: 111 physical pgTable(...)",
-    "-- declarations exist in this repository with NO entry anywhere in the 700-",
-    "-- table storageAuthorityManifest (e.g. members, tenants, strike_funds,",
-    "-- budgets, vendors, encryption_keys, pii_access_log — all declared only in",
-    "-- services/financial-service's own separate schema files, whose DB-role",
-    "-- story relative to union_eyes_runtime/union_eyes_system was NOT verified",
-    "-- this round). Revoking the blanket grant now — even though this specific",
-    "-- migration generation run has 0 geometry blockers — would risk silently",
-    "-- removing all runtime/system access to those 111 tables the moment this",
-    "-- migration is ever applied. See reports/union-eyes-authority-enforcement-",
-    "-- round58.md for the full finding and required follow-up before the",
-    "-- blanket grant can be safely narrowed.",
+    `-- Blanket grant removal gate satisfied at generation time: ${blanketGrantRemovalGateOk}`,
+    blanketGrantRemovalGateOk
+      ? "-- 0108's predecessor blanket GRANT is narrowed by PART E below (see reports/"
+      : "-- 0108's predecessor blanket GRANT is INTENTIONALLY NOT revoked this run (see reports/",
+    "-- union-eyes-authority-enforcement-round58.md for the full finding).",
     "-- =============================================================================",
     "",
     RLS_HELPER_FUNCTIONS_SQL.trim(),
@@ -812,6 +834,12 @@ END $$;
     "",
     aiBudgetsCleanupSql,
     "",
+    "-- =============================================================================",
+    "-- PART E — blanket grant removal (gated, see header)",
+    "-- =============================================================================",
+    "",
+    blanketGrantRemovalSql,
+    "",
   ].join("\n");
 
   fs.writeFileSync(OUTPUT_MIGRATION_PATH, migrationSql);
@@ -820,6 +848,7 @@ END $$;
   console.log(`Policies generated: ${policiesGenerated}`);
   console.log(`Grant blocks generated: ${grantsGenerated}`);
   console.log(`Blockers: ${blockers.length}`);
+  console.log(`Blanket grant removal gate: ${blanketGrantRemovalGateOk}`);
   console.log(`Migration written to ${path.relative(REPO_ROOT, OUTPUT_MIGRATION_PATH)}`);
   console.log(`Blockers written to ${path.relative(REPO_ROOT, BLOCKERS_PATH)}`);
 

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-09T21:24:30.066Z",
+  "generatedAt": "2026-09-09T22:29:51.065Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
-  "totalManifestEntries": 700,
-  "readyForExplicitGrantCount": 700,
+  "totalManifestEntries": 795,
+  "readyForExplicitGrantCount": 795,
   "pendingReviewCount": 0,
   "tenantGrantedTableCount": 335,
   "systemGrantedTableCount": 64,
@@ -263,6 +263,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "accounts_payable",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "address_change_history",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -277,6 +283,12 @@
     {
       "table": "ai_budgets",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_chunks",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -301,6 +313,24 @@
       "systemPrivileges": []
     },
     {
+      "table": "ai_documents",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_feedback",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_feedback_summary",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "ai_grievance_triages",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -319,6 +349,18 @@
       "systemPrivileges": []
     },
     {
+      "table": "ai_queries",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_query_logs",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "ai_rate_limits",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -330,6 +372,12 @@
       "tenantPrivileges": [
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "ai_usage_by_tenant",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -519,6 +567,24 @@
     {
       "table": "arms_length_verification",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "arrears",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "arrears_cases",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "attestation_templates",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -734,6 +800,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "blockchain_audit_anchors",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "board_packet_distributions",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -789,6 +861,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "budget_line_items",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "budget_pool",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -799,6 +877,12 @@
     {
       "table": "budget_reservations",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "budgets",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -869,6 +953,12 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "case_summaries",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -1023,6 +1113,12 @@
     {
       "table": "certification_alerts",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "certification_applications",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -1430,6 +1526,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "compliance_validations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "conflict_audit_log",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -1532,6 +1634,12 @@
         "INSERT",
         "UPDATE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "cope_contributions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -1639,6 +1747,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "cra_xml_batches",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "cross_border_transactions",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -1671,6 +1785,12 @@
     {
       "table": "currency_exchange_rates",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "customer_acquisition",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -1819,6 +1939,12 @@
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "digital_signatures",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -1979,6 +2105,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "dues_rules",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "dues_transactions",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -2024,6 +2156,12 @@
         "INSERT",
         "UPDATE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "elected_officials",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -2228,12 +2366,24 @@
       "systemPrivileges": []
     },
     {
+      "table": "encryption_keys",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "entitlement_usage_log",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "equity_snapshots",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -2315,6 +2465,18 @@
         "INSERT",
         "UPDATE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "expense_approvals",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "expense_requests",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -2819,6 +2981,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "fund_eligibility",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "fx_rate_audit_log",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -3058,6 +3226,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "hardship_applications",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "hazard_reports",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3079,6 +3253,24 @@
         "INSERT",
         "UPDATE"
       ]
+    },
+    {
+      "table": "hw_benefit_claims",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "hw_benefit_enrollments",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "hw_benefit_plans",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
     },
     {
       "table": "icra_anonymized_metrics",
@@ -3332,6 +3524,24 @@
       "systemPrivileges": []
     },
     {
+      "table": "jurisdiction_rules",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "jurisdiction_rules_summary",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "jurisdiction_templates",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "key_holder_registry",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -3367,6 +3577,12 @@
     {
       "table": "legal_holds",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "legislation_tracking",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -3515,7 +3731,19 @@
       "systemPrivileges": []
     },
     {
+      "table": "member_demographics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "member_documents",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "member_dues_assignments",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -3593,6 +3821,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "member_political_participation",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "member_relationship_scores",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -3607,6 +3841,18 @@
         "UPDATE",
         "DELETE"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "members",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "members_with_pii",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3751,6 +3997,12 @@
       "tenantPrivileges": [
         "SELECT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "mrr_snapshots",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -3953,6 +4205,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "organization_hierarchy_audit",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "organization_members",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -3987,6 +4245,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "organization_tree",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "organizations",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4014,6 +4278,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "organizing_activities",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "organizing_campaign_milestones",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -4032,6 +4302,12 @@
     },
     {
       "table": "organizing_contacts",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "organizing_volunteers",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -4068,6 +4344,12 @@
     },
     {
       "table": "page_analytics",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pay_equity_complaints",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -4210,6 +4492,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "pension_actuarial_valuations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "pension_benefit_claims",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4225,6 +4513,12 @@
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pension_hours_banks",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -4252,6 +4546,12 @@
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pension_trustee_boards",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -4283,6 +4583,24 @@
         "INSERT",
         "UPDATE"
       ]
+    },
+    {
+      "table": "picket_attendance",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "picket_tracking",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "pii_access_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
     },
     {
       "table": "pilot_applications",
@@ -4434,6 +4752,18 @@
       "systemPrivileges": []
     },
     {
+      "table": "political_activities",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "political_campaigns",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "poll_votes",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -4578,6 +4908,12 @@
     {
       "table": "public_content",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "public_donations",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -4770,6 +5106,12 @@
     {
       "table": "retention_policies",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "revenue_cohorts",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -5149,6 +5491,18 @@
       "systemPrivileges": []
     },
     {
+      "table": "statcan_submissions",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "statutory_holidays",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "steward_assignments",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -5170,6 +5524,12 @@
       "systemPrivileges": [
         "SELECT"
       ]
+    },
+    {
+      "table": "stipend_disbursements",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
     },
     {
       "table": "strategic_goals",
@@ -5194,6 +5554,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "strike_funds",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "stripe_connect_accounts",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -5201,6 +5567,12 @@
     },
     {
       "table": "stripe_webhook_events",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "subscription_events",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
@@ -5299,8 +5671,32 @@
       "systemPrivileges": []
     },
     {
+      "table": "tax_slips",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "tax_year_configurations",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "tax_year_end_processing",
       "classification": "CONTAINED_NO_AUTHORITY",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "tenant_management_view",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "tenants",
+      "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
       "systemPrivileges": []
     },
@@ -5363,6 +5759,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "transaction_clc_mappings",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "transaction_currency_conversions",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -5401,6 +5803,18 @@
         "SELECT",
         "INSERT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "trust_compliance_reports",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "trusted_certificate_authorities",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {
@@ -5535,6 +5949,138 @@
       "systemPrivileges": []
     },
     {
+      "table": "v_annual_remittance_summary",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_certification_expiry_tracking",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_cope_member_summary",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_course_session_dashboard",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_critical_deadlines",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_elected_official_engagement",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_equity_statistics_anonymized",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_hw_claims_aging",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_legislative_priorities",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_member_benefit_eligibility",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_member_training_transcript",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_organizing_campaign_dashboard",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_pay_equity_pipeline",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_pending_remittances",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_pension_funding_summary",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_political_campaign_dashboard",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_tax_slip_summary",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_training_program_progress",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "v_workplace_contact_map",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "vendor_invoices",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "vendors",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "vote_merkle_tree",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "voter_eligibility",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [
@@ -5558,6 +6104,18 @@
       "systemPrivileges": []
     },
     {
+      "table": "voting_auditors",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_key_access_log",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
       "table": "voting_notifications",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -5569,6 +6127,18 @@
       "tenantPrivileges": [
         "SELECT"
       ],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_session_auditors",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
+      "systemPrivileges": []
+    },
+    {
+      "table": "voting_session_keys",
+      "classification": "LATENT_UNREACHABLE",
+      "tenantPrivileges": [],
       "systemPrivileges": []
     },
     {

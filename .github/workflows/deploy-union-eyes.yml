@@ -41,13 +41,14 @@ on:
           yet. Set true to apply db/migrations/20260910_rls_enforcement_
           expansion_round58.sql to the target environment. DO NOT SET TRUE
           until Round 59's controlled staging/live-principal acceptance has
-          run: Round 58C found 111 physical tables with pgTable(...)
-          declarations that have NO entry in db/rls-storage-authority's
-          manifest (see reports/union-eyes-authority-enforcement-
-          round58.md) — 0108's blanket GRANT is still relied on for those
-          and is intentionally NOT revoked by this migration. Leave false
-          for ordinary deploys — this does NOT run as part of the normal
-          push/deploy path.
+          run: this migration (round 58D) now revokes 0108's blanket GRANT
+          on ALL TABLES/SEQUENCES IN SCHEMA public — it has never been
+          applied to any real environment (see reports/union-eyes-
+          authority-enforcement-round58.md and reports/union-eyes-
+          canonical-database-topology-round58d.md for the full disposable-
+          Postgres proof this is based on). Leave false for ordinary
+          deploys — this does NOT run as part of the normal push/deploy
+          path.
         required: false
         type: boolean
         default: false
@@ -352,12 +353,13 @@ jobs:
   # workflow_dispatch + an explicit boolean input). Applies db/migrations/
   # 20260910_rls_enforcement_expansion_round58.sql using migration/admin
   # authority. NOT YET a mandatory pre-deploy gate (unlike apply-icra-
-  # capability-migration below) because Round 58C found a concrete,
-  # unresolved blocker (111 physical tables with no db/rls-storage-
-  # authority manifest entry — see reports/union-eyes-authority-
-  # enforcement-round58.md) that must be resolved before 0108's blanket
-  # GRANT can be safely narrowed. Round 59 owns deciding when/whether to
-  # promote this to a mandatory gate.
+  # capability-migration below): Round 58D resolved the prior blocker (all
+  # 795 physical relations are now dispositioned in db/rls-storage-
+  # authority, 0 UNKNOWN, 0 geometry blockers, Supabase runtime dependency
+  # = 0, arbitration_decisions defect closed) and this migration now
+  # removes 0108's blanket GRANT — but it has never been applied to any
+  # real environment. Round 59 owns the controlled staging proof and the
+  # decision of when/whether to promote this to a mandatory gate.
   apply-authority-enforcement-migration:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_enforcement_migration == 'true' }}
     runs-on: ubuntu-latest
