@@ -60,6 +60,15 @@ const REPO_ROOT = path.resolve(__dirname, "../..");
 const SCHEMA_DIRS = [
   path.join(REPO_ROOT, "db/schema"),
 ];
+// Legacy top-level db/schema-*.ts files predate the db/schema/ directory
+// convention and are NOT under it, so the directory walk above misses them
+// entirely (round 58c finding: org_configurations lives in
+// db/schema-organizations.ts with a perfectly ordinary organization_id
+// column that was silently never scanned).
+const EXTRA_SCHEMA_FILES = [
+  path.join(REPO_ROOT, "db/schema-organizations.ts"),
+  path.join(REPO_ROOT, "db/schema-applications.ts"),
+];
 
 export type ColumnRef = {
   propertyName: string;
@@ -101,6 +110,9 @@ function listSchemaFiles(): string[] {
   }
   for (const dir of SCHEMA_DIRS) {
     if (fs.existsSync(dir)) walk(dir);
+  }
+  for (const file of EXTRA_SCHEMA_FILES) {
+    if (fs.existsSync(file)) out.push(file);
   }
   return out;
 }
@@ -241,7 +253,12 @@ export function deriveGeometry(): {
             const { physicalName, referencesIdent } = analyzeColumnExpression(prop.initializer);
             if (!physicalName) continue;
 
-            if (physicalName === "organization_id") {
+            if (physicalName === "organization_id" || physicalName === "org_id") {
+              // `org_id` is a plain (usually FK-less) abbreviation of
+              // organization_id seen in several tables (dispatch_requests,
+              // dispatch_rules, stewards, compliance_alerts) - round 58c
+              // finding, unambiguous naming convention, safe to treat
+              // identically to the full name.
               directOrgColumns.push(physicalName);
             } else if (referencesIdent && orgLocalName && referencesIdent === orgLocalName) {
               // FK to organizations under a different physical column name

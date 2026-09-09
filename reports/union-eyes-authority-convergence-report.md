@@ -1,18 +1,18 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-09T17:36:08.490Z
+Generated: 2026-09-09T21:24:57.790Z
 
 ## Classification counts
 
 | Classification | Count |
 | --- | --- |
-| TENANT_RLS_REQUIRED | 261 |
+| TENANT_RLS_REQUIRED | 260 |
 | USER_RLS_REQUIRED | 13 |
 | LATENT_UNREACHABLE | 199 |
 | SYSTEM_ONLY | 22 |
 | CONTAINED_NO_AUTHORITY | 137 |
 | PARENT_OWNED_RLS_REQUIRED | 36 |
-| GLOBAL_REFERENCE_DATA | 24 |
+| GLOBAL_REFERENCE_DATA | 25 |
 | MIXED_GLOBAL_TENANT_RLS_REQUIRED | 3 |
 | SEPARATE_DATABASE_BOUNDARY | 2 |
 | MULTI_PARTY_RLS_REQUIRED | 3 |
@@ -39,12 +39,12 @@ Generated: 2026-09-09T17:36:08.490Z
 
 ## RLS policy expansion required (NEW tables beyond the 0108 baseline, NOT evidence 0108 lost coverage)
 
-- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 249
+- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 248
 - PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: 34
 - USER_RLS_REQUIRED tables beyond the 0108 baseline: 13
 - MIXED_GLOBAL_TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 3
 - MULTI_PARTY_RLS_REQUIRED tables beyond the 0108 baseline: 3
-- Total additional policy-expansion tables: 302
+- Total additional policy-expansion tables: 301
 
 ## Blanket grant blocker
 

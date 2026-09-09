@@ -26,6 +26,7 @@ import { Client } from "pg";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { storageAuthorityManifest } from "../../db/rls-storage-authority/index";
+import { ENFORCEMENT_GEOMETRY_OVERRIDES } from "./enforcement-geometry-overrides";
 
 const REPO_ROOT = path.resolve(__dirname, "../..");
 const MIGRATION_PATH = path.join(REPO_ROOT, "db/migrations/20260910_rls_enforcement_expansion_round58.sql");
@@ -89,17 +90,24 @@ async function main() {
     // dependency order (parents before children), from the geometry file +
     // manifest, and create a minimal but STRUCTURALLY REAL stub for each.
     const created = new Set<string>();
+    const overridesByTable = new Map(ENFORCEMENT_GEOMETRY_OVERRIDES.map((o) => [o.table, o]));
 
     function createStub(table: string) {
       if (created.has(table)) return [];
       created.add(table);
       const g = geometryFile.tables[table];
+      const colNames = new Set<string>();
       const cols: string[] = ["id uuid primary key default gen_random_uuid()"];
-      if (g?.confidence === "HIGH_CONFIDENCE_DIRECT") cols.push(`${g.directOrgColumns[0]} uuid`);
-      if (g?.confidence === "CANDIDATE_MULTI_PARTY") {
-        for (const c of g.directOrgColumns) cols.push(`${c} uuid`);
+      function addCol(name: string, type: string) {
+        if (colNames.has(name)) return;
+        colNames.add(name);
+        cols.push(`${name} ${type}`);
       }
-      if (g?.userConfidence === "HIGH_CONFIDENCE_USER") cols.push(`${g.directUserColumns[0]} text`);
+      if (g?.confidence === "HIGH_CONFIDENCE_DIRECT") addCol(g.directOrgColumns[0], "uuid");
+      if (g?.confidence === "CANDIDATE_MULTI_PARTY") {
+        for (const c of g.directOrgColumns) addCol(c, "uuid");
+      }
+      if (g?.userConfidence === "HIGH_CONFIDENCE_USER") addCol(g.directUserColumns[0], "text");
       // Always add any FK columns too (a table can have BOTH a direct org
       // column and an FK to a parent — e.g. arbitrations has its own
       // organization_id AND a grievance_id FK, but the manifest still
@@ -107,7 +115,36 @@ async function main() {
       // references grievance_id, which must exist on the stub regardless
       // of which geometry "confidence" bucket the table fell into).
       for (const fk of g?.otherForeignKeys ?? []) {
-        cols.push(`${fk.column} uuid`);
+        addCol(fk.column, "uuid");
+      }
+      // Round 58C: override-registry-driven column shapes bypass generic
+      // geometry entirely for these tables, so add whatever columns the
+      // specific override kind requires (deduped against columns geometry
+      // already added, e.g. an FK column with a real .references() clause
+      // is already present via otherForeignKeys above).
+      const override = overridesByTable.get(table);
+      if (override?.kind === "EXPLICIT_DIRECT_COLUMN_OVERRIDE") {
+        addCol(override.orgColumn, "uuid");
+      }
+      if (override?.kind === "USER_DIRECT_COLUMN_OVERRIDE") {
+        addCol(override.userColumn, "text");
+      }
+      if (
+        override?.kind === "TENANT_VIA_PARENT" ||
+        override?.kind === "PARENT" ||
+        override?.kind === "PARENT_VIA_USER" ||
+        override?.kind === "SHARED_LIBRARY_CHILD"
+      ) {
+        addCol(override.fkColumn, "uuid");
+      }
+      if (override?.kind === "MULTI_PARTY") {
+        addCol(override.orgColumnA, "uuid");
+        addCol(override.orgColumnB, "uuid");
+      }
+      if (override?.kind === "SHARED_LIBRARY_ROOT") {
+        addCol(override.orgColumn, "uuid");
+        addCol(override.sharingLevelColumn, "varchar(50) not null default 'private'");
+        addCol(override.sharedWithColumn, "uuid[]");
       }
       return [`CREATE TABLE IF NOT EXISTS ${quoteIdent(table)} (${cols.join(", ")});`];
     }
@@ -119,11 +156,20 @@ async function main() {
 
     for (const entry of storageAuthorityManifest) {
       const g = geometryFile.tables[entry.table];
-      if (!g) continue;
-      // Create any FK parent stub first (single-hop only, matching the compiler's own resolution).
-      for (const fk of g.otherForeignKeys) {
-        const parentPhysical = geometryFile.exportNameToPhysicalTable[fk.referencesImportName];
-        if (parentPhysical) ddl.push(...createStub(parentPhysical));
+      if (g) {
+        // Create any FK parent stub first (single-hop only, matching the compiler's own resolution).
+        for (const fk of g.otherForeignKeys) {
+          const parentPhysical = geometryFile.exportNameToPhysicalTable[fk.referencesImportName];
+          if (parentPhysical) ddl.push(...createStub(parentPhysical));
+        }
+      }
+      // Round 58C: also create any override-registry parent table ahead of the child.
+      const override = overridesByTable.get(entry.table);
+      if (override && "parentTable" in override) {
+        ddl.push(...createStub(override.parentTable));
+      }
+      if (override?.kind === "SHARED_LIBRARY_CHILD") {
+        ddl.push(...createStub("shared_clause_library"));
       }
       ddl.push(...createStub(entry.table));
     }

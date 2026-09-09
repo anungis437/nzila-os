@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T17:36:19.723Z",
+  "generatedAt": "2026-09-09T21:24:30.066Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
   "totalManifestEntries": 700,
   "readyForExplicitGrantCount": 700,
@@ -172,6 +172,7 @@
       "union_density"
     ],
     "globalReferenceDataWithMutations": [
+      "arbitration_decisions",
       "case_studies",
       "cba_intel_agreements",
       "cba_intel_benchmark_snapshots",
@@ -478,7 +479,7 @@
     },
     {
       "table": "arbitration_decisions",
-      "classification": "TENANT_RLS_REQUIRED",
+      "classification": "GLOBAL_REFERENCE_DATA",
       "tenantPrivileges": [
         "SELECT",
         "INSERT",

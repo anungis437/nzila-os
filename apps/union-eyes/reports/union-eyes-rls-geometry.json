@@ -532,6 +532,15 @@
       "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "NO_USER_COLUMN"
     },
+    "applications": {
+      "physicalTable": "applications",
+      "sourceFile": "db/schema-applications.ts",
+      "directOrgColumns": [],
+      "directUserColumns": [],
+      "otherForeignKeys": [],
+      "confidence": "UNRESOLVED",
+      "userConfidence": "NO_USER_COLUMN"
+    },
     "arbitration_decisions": {
       "physicalTable": "arbitration_decisions",
       "sourceFile": "db/schema/cba-intelligence-schema.ts",
@@ -2204,7 +2213,9 @@
     "compliance_alerts": {
       "physicalTable": "compliance_alerts",
       "sourceFile": "db/schema/domains/compliance/employer-compliance.ts",
-      "directOrgColumns": [],
+      "directOrgColumns": [
+        "org_id"
+      ],
       "directUserColumns": [],
       "otherForeignKeys": [
         {
@@ -2212,7 +2223,7 @@
           "referencesImportName": "employers"
         }
       ],
-      "confidence": "NO_DIRECT_ORG_COLUMN",
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "NO_USER_COLUMN"
     },
     "conflict_audit_log": {
@@ -2841,19 +2852,23 @@
     "dispatch_requests": {
       "physicalTable": "dispatch_requests",
       "sourceFile": "db/schema/domains/dispatch/dispatch.ts",
-      "directOrgColumns": [],
+      "directOrgColumns": [
+        "org_id"
+      ],
       "directUserColumns": [],
       "otherForeignKeys": [],
-      "confidence": "UNRESOLVED",
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "NO_USER_COLUMN"
     },
     "dispatch_rules": {
       "physicalTable": "dispatch_rules",
       "sourceFile": "db/schema/domains/dispatch/dispatch.ts",
-      "directOrgColumns": [],
+      "directOrgColumns": [
+        "org_id"
+      ],
       "directUserColumns": [],
       "otherForeignKeys": [],
-      "confidence": "UNRESOLVED",
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "NO_USER_COLUMN"
     },
     "document_access_grants": {
@@ -4387,13 +4402,14 @@
       "physicalTable": "financial_audit_log",
       "sourceFile": "db/schema/domains/infrastructure/erp.ts",
       "directOrgColumns": [
-        "organization_id"
+        "organization_id",
+        "org_id"
       ],
       "directUserColumns": [
         "user_id"
       ],
       "otherForeignKeys": [],
-      "confidence": "HIGH_CONFIDENCE_DIRECT",
+      "confidence": "CANDIDATE_MULTI_PARTY",
       "userConfidence": "HIGH_CONFIDENCE_USER"
     },
     "financial_periods": {
@@ -6005,7 +6021,9 @@
     "mobile_sync_queue": {
       "physicalTable": "mobile_sync_queue",
       "sourceFile": "db/schema/mobile-devices-schema.ts",
-      "directOrgColumns": [],
+      "directOrgColumns": [
+        "org_id"
+      ],
       "directUserColumns": [],
       "otherForeignKeys": [
         {
@@ -6013,7 +6031,7 @@
           "referencesImportName": "mobileDevices"
         }
       ],
-      "confidence": "NO_DIRECT_ORG_COLUMN",
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "NO_USER_COLUMN"
     },
     "model_metadata": {
@@ -6296,6 +6314,17 @@
       "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "HIGH_CONFIDENCE_USER"
     },
+    "org_configurations": {
+      "physicalTable": "org_configurations",
+      "sourceFile": "db/schema-organizations.ts",
+      "directOrgColumns": [
+        "organization_id"
+      ],
+      "directUserColumns": [],
+      "otherForeignKeys": [],
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
+      "userConfidence": "NO_USER_COLUMN"
+    },
     "org_entitlements": {
       "physicalTable": "org_entitlements",
       "sourceFile": "db/schema/domains/finance/contracts.ts",
@@ -6329,6 +6358,17 @@
           "referencesImportName": "subscriptionPlans"
         }
       ],
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
+      "userConfidence": "NO_USER_COLUMN"
+    },
+    "org_usage": {
+      "physicalTable": "org_usage",
+      "sourceFile": "db/schema-organizations.ts",
+      "directOrgColumns": [
+        "organization_id"
+      ],
+      "directUserColumns": [],
+      "otherForeignKeys": [],
       "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "NO_USER_COLUMN"
     },
@@ -6372,6 +6412,37 @@
       "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "HIGH_CONFIDENCE_USER"
     },
+    "organization_members": {
+      "physicalTable": "organization_members",
+      "sourceFile": "db/schema-organizations.ts",
+      "directOrgColumns": [
+        "organization_id"
+      ],
+      "directUserColumns": [
+        "user_id"
+      ],
+      "otherForeignKeys": [],
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
+      "userConfidence": "HIGH_CONFIDENCE_USER"
+    },
+    "organization_relationships": {
+      "physicalTable": "organization_relationships",
+      "sourceFile": "db/schema-organizations.ts",
+      "directOrgColumns": [],
+      "directUserColumns": [],
+      "otherForeignKeys": [
+        {
+          "column": "parent_org_id",
+          "referencesImportName": "organizations"
+        },
+        {
+          "column": "child_org_id",
+          "referencesImportName": "organizations"
+        }
+      ],
+      "confidence": "NO_DIRECT_ORG_COLUMN",
+      "userConfidence": "NO_USER_COLUMN"
+    },
     "organization_sharing_grants": {
       "physicalTable": "organization_sharing_grants",
       "sourceFile": "db/schema/sharing-permissions-schema.ts",
@@ -6393,6 +6464,24 @@
       "directUserColumns": [],
       "otherForeignKeys": [],
       "confidence": "HIGH_CONFIDENCE_DIRECT",
+      "userConfidence": "NO_USER_COLUMN"
+    },
+    "organizations": {
+      "physicalTable": "organizations",
+      "sourceFile": "db/schema-organizations.ts",
+      "directOrgColumns": [],
+      "directUserColumns": [],
+      "otherForeignKeys": [
+        {
+          "column": "parent_id",
+          "referencesImportName": "organizations"
+        },
+        {
+          "column": "app_id",
+          "referencesImportName": "applications"
+        }
+      ],
+      "confidence": "NO_DIRECT_ORG_COLUMN",
       "userConfidence": "NO_USER_COLUMN"
     },
     "organizer_impacts": {
@@ -8428,12 +8517,14 @@
     "stewards": {
       "physicalTable": "stewards",
       "sourceFile": "db/schema/domains/member/stewards.ts",
-      "directOrgColumns": [],
+      "directOrgColumns": [
+        "org_id"
+      ],
       "directUserColumns": [
         "user_id"
       ],
       "otherForeignKeys": [],
-      "confidence": "UNRESOLVED",
+      "confidence": "HIGH_CONFIDENCE_DIRECT",
       "userConfidence": "HIGH_CONFIDENCE_USER"
     },
     "strategic_goals": {
@@ -10198,6 +10289,12 @@
     "workbookContinuityBreakpoints": "workbook_continuity_breakpoints",
     "workbookModernizationAlignment": "workbook_modernization_alignment",
     "workbookTransformationRoadmap": "workbook_transformation_roadmap",
-    "workbookPurchases": "workbook_purchases"
+    "workbookPurchases": "workbook_purchases",
+    "organizations": "organizations",
+    "organizationRelationships": "organization_relationships",
+    "organizationMembers": "organization_members",
+    "orgConfigurations": "org_configurations",
+    "orgUsage": "org_usage",
+    "applications": "applications"
   }
 }

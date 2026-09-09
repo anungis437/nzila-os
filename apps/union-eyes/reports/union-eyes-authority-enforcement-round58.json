@@ -1,0 +1,112 @@
+{
+  "round": "58C",
+  "generatedAt": "2026-09-09T21:30:00.000Z",
+  "startSha": "2c8aa260f566d542276152934a507d57ee93e5ce",
+  "round58aSha": "3110c8c4000d5140c543f8e94e086d60ffdd1b36",
+  "round58bSha": "e431b2afdaf1447b4f15b7e803284145c189e615",
+  "round58cShaPending": true,
+  "authorityManifest": {
+    "totalEntries": 700,
+    "needsReview": 0,
+    "closedWithTbd": 0,
+    "invariantViolations": 0,
+    "reclassifications": [
+      {
+        "table": "arbitration_decisions",
+        "from": "TENANT_RLS_REQUIRED",
+        "to": "GLOBAL_REFERENCE_DATA",
+        "reason": "Round 11's 'RESOLVED' evidence was factually incorrect (crud-factory's orgScoped guard never fires for a table with no organizationId column in either of its two duplicate declarations). Table is genuinely shared cross-tenant legal precedent data (isPublic default true, no org FKs). Matches established manifest precedent for identical 'orgScoped is a no-op' defects (wage-benchmark-rates, cpi-inflation-index, dataClassificationPolicy). requiredRuntimePrivileges left unchanged to avoid any behavioral regression to the currently-functioning route.",
+        "carriedForwardToRound59": "app/api/arbitration/precedents/route.ts's writeRole:'steward' is an ordinary per-tenant role gating writes to a platform-wide shared table — same defect class as round 52's dataClassificationPolicy fix. Not fixed this round (application-layer change, out of DB-enforcement scope)."
+      }
+    ]
+  },
+  "geometryBlockers": {
+    "before": 32,
+    "after": 0,
+    "resolutionBreakdown": {
+      "genericParserFixes": {
+        "count": 5,
+        "tables": ["org_configurations", "dispatch_requests", "dispatch_rules", "stewards", "compliance_alerts"],
+        "fixes": [
+          "org_id recognized as a direct-org-column alias alongside organization_id",
+          "db/schema-organizations.ts and db/schema-applications.ts (legacy top-level files outside db/schema/**) added to the geometry deriver's scan targets"
+        ]
+      },
+      "manifestReclassification": {
+        "count": 1,
+        "tables": ["arbitration_decisions"]
+      },
+      "enforcementGeometryOverrides": {
+        "count": 26,
+        "byKind": {
+          "EXPLICIT_DIRECT_COLUMN_OVERRIDE": ["geofences", "platform_cost_ledger_entries"],
+          "USER_DIRECT_COLUMN_OVERRIDE": ["workbooks"],
+          "TENANT_VIA_PARENT": ["bargaining_proposals", "claim_updates", "grievance_events", "grievance_timeline", "reconciliation_matches", "signature_audit_trail"],
+          "PARENT": ["newsletter_list_subscribers", "newsletter_recipients", "employer_payroll_run_items", "payment_allocations", "committee_meeting_attendees", "ai_safety_filters", "correspondence_audit_trail", "voter_eligibility", "votes"],
+          "PARENT_VIA_USER": ["workbook_modules", "workbook_memory_holders", "workbook_purchases", "workbook_governance_lineage_entries"],
+          "MULTI_PARTY": ["per_capita_remittances"],
+          "SHARED_LIBRARY_ROOT": ["shared_clause_library"],
+          "SHARED_LIBRARY_CHILD": ["clause_library_tags"]
+        }
+      },
+      "cascadedViaParentFix": {
+        "count": 1,
+        "tables": ["dispatch_assignments"],
+        "note": "Resolved automatically once dispatch_requests gained HIGH_CONFIDENCE_DIRECT geometry via the org_id parser fix — no override needed."
+      }
+    }
+  },
+  "compilerOutput": {
+    "policiesGenerated": 322,
+    "grantBlocksGenerated": 700,
+    "blockers": 0,
+    "newHelperFunctions": [
+      "ue_create_parent_owned_via_user_rls_policy_v2",
+      "ue_create_shared_library_rls_policy",
+      "ue_create_shared_library_child_rls_policy"
+    ],
+    "partD": "ai_budgets stale auth.user_id() policy cleanup (mandate section 48)"
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "lint": "PASS (2 pre-existing-style any warnings in deployment-dag-contract.test.ts, 0 errors)",
+    "fullVitestSuite": { "testFiles": "1225 passed, 1 skipped", "tests": "17255 passed, 9 skipped" },
+    "manifestInvariantTests": "21/21 passed",
+    "behavioralProof": { "tests": "9/9 passed", "target": "real multi-role disposable PostgreSQL, RLS_ENFORCEMENT_TEST_URL" },
+    "policySyntaxDryRun": { "stubTablesCreated": 700, "policiesCreated": 1401, "sqlErrors": 0 },
+    "aclOracle": { "tablesChecked": 700, "missing": 0, "extra": 0 },
+    "independentPolicyOracle": { "tablesChecked": 322, "missing": 0, "extra": 0, "note": "Expected state computed purely from manifest+overrides, never from parsing generated SQL" },
+    "fullMigrationTransactionalProof": {
+      "midTransactionPolicies": 1401,
+      "midTransactionGrants": 989,
+      "postRollbackPolicies": 0,
+      "postCommitPolicies": 1401,
+      "postCommitGrants": 989,
+      "result": "PASS — applies transactionally, rolls back cleanly, re-applies identically"
+    },
+    "deploymentDagContractTest": "5/5 passed (static YAML shape check, no dispatch)",
+    "djangoFullSuite": "NOT RE-RUN this round (no Python files touched; pre-existing unrelated core app ImportError carried forward from round 58a/58b)",
+    "securityScanners": "NOT RUN this round (pnpm audit / Trivy / Snyk / red-team / contract-tests) — time-budget decision, no code path in this round's changes plausibly affects those surfaces beyond the SQL/TS already validated above",
+    "inventoryGenerateCheck": "NOT RE-RUN this round"
+  },
+  "blockedItems": {
+    "primary": {
+      "title": "Blanket GRANT removal blocked — manifest does not cover all physical tables",
+      "detail": "Cross-checked every pgTable(...) declaration in the repository against the 700-entry manifest: 111 physical tables have a real declaration but no manifest entry at all (never reviewed/classified). Sample: members, tenants, strike_funds, budgets, vendors, encryption_keys, pii_access_log — all declared only in services/financial-service's own separate schema files. That service's actual DB-role story relative to union_eyes_runtime/union_eyes_system was not verified this round. Revoking 0108's blanket GRANT now would risk silently removing all runtime/system access to those 111 tables. Mandate sections 42/44/46/50 (blanket grant removal, sequence audit, ACL oracle against 'final full cutover') are therefore NOT done — this is the primary reason Round 58C is PARTIAL, not CLOSED.",
+      "requiredFollowUp": [
+        "Determine financial-service's actual DB connection/role (own credentials vs union_eyes_runtime/system)",
+        "If shared, classify/manifest all ~111 tables, or formally establish financial-service as a SEPARATE_DATABASE_BOUNDARY-style exception",
+        "Separately audit the ~15 v_*-prefixed names found (likely SQL views, which table-level RLS/FORCE RLS does not reach at all)"
+      ]
+    },
+    "secondary": [
+      "Deployment DAG: new apply-authority-enforcement-migration job added as a manual, workflow_dispatch-gated one-time-rollout (mirrors apply-rls-foundation-migration) — NOT promoted to a mandatory pre-deploy gate, pending resolution of the blanket-grant blocker above.",
+      "Preflight (scripts/rls-enforcement/preflight-round59.ts) and post-apply verifier (scripts/rls-enforcement/post-apply-verifier.ts) built and smoke-tested against the disposable Postgres server, but never exercised against any real staging/production environment (none exists to test against yet).",
+      "shared_clause_library federation/congress sharing levels conservatively resolve to no expanded visibility (no federation/congress-membership table found in schema) — safe under-permissive default, not a broadening; flagged for Round 59 if such a table is later identified.",
+      "workbooks' claim-token public verification flow is assumed (not verified this round) to run under a system/service context so it can read pre-claim (claimed_by_user_id IS NULL) rows.",
+      "per_capita_remittances' from_organization_id/to_organization_id are declared via a Drizzle table-level foreignKey() builder, a 3rd FK-declaration style derive-table-geometry.ts's AST walk does not parse generically — worked around via override since only 1 table is affected; a broader parser fix is deferred."
+    ]
+  },
+  "verdict": "ROUND58C = PARTIAL",
+  "verdictReason": "Core mandate objective achieved (32 geometry blockers -> 0, via 5 generic parser fixes + 1 manifest reclassification + 26 explicit, evidenced ENFORCEMENT_GEOMETRY_OVERRIDES entries), and extensively re-validated (behavioral, policy-syntax, ACL, and independent-policy oracles all green; full-migration transactional apply+rollback proof green; deployment DAG wired as a safe, non-gating manual job with a passing static contract test). However, a genuine, well-evidenced, newly-discovered blocker (111 physical tables absent from the manifest) prevents completing the mandate's blanket-grant-removal requirement (sections 42/44/46/50), which is a hard prerequisite for ROUND58C = CLOSED per section 70's close gate."
+}

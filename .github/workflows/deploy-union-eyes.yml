@@ -35,6 +35,22 @@ on:
         required: false
         type: boolean
         default: false
+      apply_authority_enforcement_migration:
+        description: >-
+          Round 58 — one-time rollout step only, NOT gated for general use
+          yet. Set true to apply db/migrations/20260910_rls_enforcement_
+          expansion_round58.sql to the target environment. DO NOT SET TRUE
+          until Round 59's controlled staging/live-principal acceptance has
+          run: Round 58C found 111 physical tables with pgTable(...)
+          declarations that have NO entry in db/rls-storage-authority's
+          manifest (see reports/union-eyes-authority-enforcement-
+          round58.md) — 0108's blanket GRANT is still relied on for those
+          and is intentionally NOT revoked by this migration. Leave false
+          for ordinary deploys — this does NOT run as part of the normal
+          push/deploy path.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -330,6 +346,75 @@ jobs:
             exit 1
           fi
           echo "::notice::Migration 0108 applied and role attributes verified for ${{ needs.plan.outputs.environment }}. Next: pnpm --filter @nzila/union-eyes run rls:provision-roles for this environment."
+
+  # Round 58 — one-time rollout step, mirrors apply-rls-foundation-migration
+  # above exactly (never part of the ordinary push/deploy path — gated on
+  # workflow_dispatch + an explicit boolean input). Applies db/migrations/
+  # 20260910_rls_enforcement_expansion_round58.sql using migration/admin
+  # authority. NOT YET a mandatory pre-deploy gate (unlike apply-icra-
+  # capability-migration below) because Round 58C found a concrete,
+  # unresolved blocker (111 physical tables with no db/rls-storage-
+  # authority manifest entry — see reports/union-eyes-authority-
+  # enforcement-round58.md) that must be resolved before 0108's blanket
+  # GRANT can be safely narrowed. Round 59 owns deciding when/whether to
+  # promote this to a mandatory gate.
+  apply-authority-enforcement-migration:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_enforcement_migration == 'true' }}
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply Authority Enforcement Migration (round 58, one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply Round 58 enforcement migration (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          psql "$RLS_ENFORCEMENT_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20260910_rls_enforcement_expansion_round58.sql
+          MIGRATION_STATUS=$?
+
+          unset RLS_ENFORCEMENT_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$MIGRATION_STATUS" -ne 0 ]; then
+            echo "::error::Round 58 enforcement migration apply failed for ${{ needs.plan.outputs.environment }}."
+            exit 1
+          fi
+          echo "::notice::Round 58 enforcement migration applied for ${{ needs.plan.outputs.environment }}."
 
   # Mandatory, always-on pre-deploy gate — NOT an optional operator command
   # like apply-rls-foundation-migration above. Application code on this

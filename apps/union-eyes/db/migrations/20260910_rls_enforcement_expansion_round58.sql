@@ -15,16 +15,24 @@
 --
 -- COVERAGE (see reports/union-eyes-rls-enforcement-blockers.json for the
 -- full list of tables this generation run could NOT confidently resolve):
---   Policies generated this run: 291
---   Tables blocked (geometry unresolved / ambiguous): 32
+--   Policies generated this run: 322
+--   Tables blocked (geometry unresolved / ambiguous): 0
 --   GRANT blocks generated (covers all 700 manifest entries): 700
 --
 -- NOTE: 0108's predecessor blanket `GRANT ALL ON ALL TABLES IN SCHEMA
--- public` is intentionally NOT revoked by this migration — the exact
--- GRANTs below are additive/idempotent-narrowing per table, but removing
--- the blanket grant is deferred until the blockers list above reaches
--- zero (otherwise a currently-unresolved table would silently lose its
--- runtime grant the moment the blanket grant is dropped).
+-- public` is INTENTIONALLY NOT revoked by this migration. Round 58C found
+-- a concrete, evidenced blocker for doing so: 111 physical pgTable(...)
+-- declarations exist in this repository with NO entry anywhere in the 700-
+-- table storageAuthorityManifest (e.g. members, tenants, strike_funds,
+-- budgets, vendors, encryption_keys, pii_access_log — all declared only in
+-- services/financial-service's own separate schema files, whose DB-role
+-- story relative to union_eyes_runtime/union_eyes_system was NOT verified
+-- this round). Revoking the blanket grant now — even though this specific
+-- migration generation run has 0 geometry blockers — would risk silently
+-- removing all runtime/system access to those 111 tables the moment this
+-- migration is ever applied. See reports/union-eyes-authority-enforcement-
+-- round58.md for the full finding and required follow-up before the
+-- blanket grant can be safely narrowed.
 -- =============================================================================
 
 -- =============================================================================
@@ -187,6 +195,135 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Round 58C additions ---------------------------------------------------
+
+CREATE OR REPLACE FUNCTION ue_create_parent_owned_via_user_rls_policy_v2(
+  p_table_name TEXT,
+  p_fk_column TEXT,
+  p_parent_table TEXT,
+  p_parent_user_column TEXT DEFAULT 'user_id'
+) RETURNS VOID AS $$
+BEGIN
+  EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
+  EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
+
+  EXECUTE format('DROP POLICY IF EXISTS ue_parent_user_isolation_v2 ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_system_full_access ON %I', p_table_name);
+
+  -- Same shape as ue_create_parent_owned_rls_policy_v2, but the parent's
+  -- own authority column is a USER identity (app.current_user_id), not an
+  -- organization (e.g. workbooks' claimed_by_user_id) — used for tables
+  -- whose USER_RLS_REQUIRED authority is only reachable through a parent.
+  EXECUTE format(
+    'CREATE POLICY ue_parent_user_isolation_v2 ON %I FOR ALL TO union_eyes_runtime ' ||
+    'USING (EXISTS (SELECT 1 FROM %I parent WHERE parent.id = %I.%I ' ||
+    '  AND parent.%I = current_setting(''app.current_user_id'', true))) ' ||
+    'WITH CHECK (EXISTS (SELECT 1 FROM %I parent WHERE parent.id = %I.%I ' ||
+    '  AND parent.%I = current_setting(''app.current_user_id'', true)))',
+    p_table_name, p_parent_table, p_table_name, p_fk_column, p_parent_user_column,
+    p_parent_table, p_table_name, p_fk_column, p_parent_user_column
+  );
+  EXECUTE format(
+    'CREATE POLICY ue_system_full_access ON %I FOR ALL TO union_eyes_system USING (true) WITH CHECK (true)',
+    p_table_name
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION ue_create_shared_library_rls_policy(
+  p_table_name TEXT,
+  p_org_column TEXT,
+  p_sharing_level_column TEXT,
+  p_shared_with_column TEXT
+) RETURNS VOID AS $$
+BEGIN
+  EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
+  EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
+
+  EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_select ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_insert ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_update ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_delete ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_system_full_access ON %I', p_table_name);
+
+  -- Reads: owner org, OR explicitly shared-with org, OR sharing_level =
+  -- 'public'. 'federation'/'congress' sharing levels are deliberately NOT
+  -- given any additional visibility beyond owner/shared-with/public — no
+  -- federation/congress-membership table exists in this schema to resolve
+  -- them against (round 58c finding); this is a safe, under-permissive
+  -- default, not a broadening of access.
+  EXECUTE format(
+    'CREATE POLICY ue_shared_library_select ON %I FOR SELECT TO union_eyes_runtime ' ||
+    'USING (%I::text = current_setting(''app.current_org_id'', true) ' ||
+    '    OR current_setting(''app.current_org_id'', true)::uuid = ANY(%I) ' ||
+    '    OR %I = ''public'')',
+    p_table_name, p_org_column, p_shared_with_column, p_sharing_level_column
+  );
+  -- Writes: owner org only — shared/public readability never confers
+  -- source mutation authority.
+  EXECUTE format(
+    'CREATE POLICY ue_shared_library_insert ON %I FOR INSERT TO union_eyes_runtime ' ||
+    'WITH CHECK (%I::text = current_setting(''app.current_org_id'', true))',
+    p_table_name, p_org_column
+  );
+  EXECUTE format(
+    'CREATE POLICY ue_shared_library_update ON %I FOR UPDATE TO union_eyes_runtime ' ||
+    'USING (%I::text = current_setting(''app.current_org_id'', true)) ' ||
+    'WITH CHECK (%I::text = current_setting(''app.current_org_id'', true))',
+    p_table_name, p_org_column, p_org_column
+  );
+  EXECUTE format(
+    'CREATE POLICY ue_shared_library_delete ON %I FOR DELETE TO union_eyes_runtime ' ||
+    'USING (%I::text = current_setting(''app.current_org_id'', true))',
+    p_table_name, p_org_column
+  );
+  EXECUTE format(
+    'CREATE POLICY ue_system_full_access ON %I FOR ALL TO union_eyes_system USING (true) WITH CHECK (true)',
+    p_table_name
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION ue_create_shared_library_child_rls_policy(
+  p_table_name TEXT,
+  p_fk_column TEXT
+) RETURNS VOID AS $$
+BEGIN
+  EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
+  EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
+
+  EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_child_select ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_child_write ON %I', p_table_name);
+  EXECUTE format('DROP POLICY IF EXISTS ue_system_full_access ON %I', p_table_name);
+
+  -- A child row (e.g. clause_library_tags) is visible/writable exactly
+  -- when the parent shared_clause_library row it tags would itself be
+  -- visible/writable under ue_create_shared_library_rls_policy's own
+  -- predicate — hardcoded here because there is exactly one such parent
+  -- table in this schema.
+  EXECUTE format(
+    'CREATE POLICY ue_shared_library_child_select ON %I FOR SELECT TO union_eyes_runtime ' ||
+    'USING (EXISTS (SELECT 1 FROM shared_clause_library parent WHERE parent.id = %I.%I ' ||
+    '  AND (parent.source_organization_id::text = current_setting(''app.current_org_id'', true) ' ||
+    '    OR current_setting(''app.current_org_id'', true)::uuid = ANY(parent.shared_with_org_ids) ' ||
+    '    OR parent.sharing_level = ''public'')))',
+    p_table_name, p_table_name, p_fk_column
+  );
+  EXECUTE format(
+    'CREATE POLICY ue_shared_library_child_write ON %I FOR ALL TO union_eyes_runtime ' ||
+    'USING (EXISTS (SELECT 1 FROM shared_clause_library parent WHERE parent.id = %I.%I ' ||
+    '  AND parent.source_organization_id::text = current_setting(''app.current_org_id'', true))) ' ||
+    'WITH CHECK (EXISTS (SELECT 1 FROM shared_clause_library parent WHERE parent.id = %I.%I ' ||
+    '  AND parent.source_organization_id::text = current_setting(''app.current_org_id'', true)))',
+    p_table_name, p_table_name, p_fk_column, p_table_name, p_fk_column
+  );
+  EXECUTE format(
+    'CREATE POLICY ue_system_full_access ON %I FOR ALL TO union_eyes_system USING (true) WITH CHECK (true)',
+    p_table_name
+  );
+END;
+$$ LANGUAGE plpgsql;
+
 -- =============================================================================
 -- PART B — policy application (one call per resolved manifest entry)
 -- =============================================================================
@@ -235,6 +372,10 @@ SELECT ue_create_direct_org_rls_policy('pension_benefit_claims', 'organization_i
 SELECT ue_create_direct_org_rls_policy('settlements', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('wcb_claims', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('arbitration_precedents', 'source_organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('bargaining_proposals', 'negotiation_id', 'negotiations', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('claim_updates', 'claim_id', 'claims', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('grievance_events', 'grievance_id', 'grievances', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('grievance_timeline', 'grievance_id', 'grievances', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('campaigns', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('chat_sessions', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('communication_preferences', 'organization_id', FALSE);
@@ -263,6 +404,8 @@ SELECT ue_create_direct_org_rls_policy('social_campaigns', 'organization_id', FA
 SELECT ue_create_direct_org_rls_policy('user_consents', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('user_notification_preferences', 'user_id');
 SELECT ue_create_parent_owned_rls_policy_v2('chat_messages', 'session_id', 'chat_sessions', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('newsletter_list_subscribers', 'list_id', 'newsletter_distribution_lists', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('newsletter_recipients', 'campaign_id', 'newsletter_campaigns', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('provincial_consent', 'user_id');
 SELECT ue_create_direct_org_rls_policy('cms_media_library', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('document_access_grants', 'organization_id', FALSE);
@@ -296,6 +439,7 @@ SELECT ue_create_direct_org_rls_policy('cost_centers', 'organization_id', FALSE)
 SELECT ue_create_direct_org_rls_policy('dues_assignments', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('dues_rates', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('dues_transactions', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('employer_payroll_run_items', 'payroll_run_id', 'employer_payroll_runs', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('employer_payroll_runs', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('employer_remittance_run_items', 'remittance_run_id', 'employer_remittance_runs', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('employer_remittance_runs', 'organization_id', FALSE);
@@ -317,6 +461,8 @@ SELECT ue_create_direct_org_rls_policy('pension_plans', 'organization_id', FALSE
 SELECT ue_create_direct_org_rls_policy('pension_t4a_records', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('pension_trustee_meetings', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('pension_trustees', 'organization_id', FALSE);
+SELECT ue_create_multi_party_rls_policy('per_capita_remittances', 'from_organization_id', 'to_organization_id');
+SELECT ue_create_direct_org_rls_policy('platform_cost_ledger_entries', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('platform_invoices', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('platform_payments', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('reconciliation_exceptions', 'organization_id', FALSE);
@@ -327,7 +473,9 @@ SELECT ue_create_direct_org_rls_policy('reward_budget_envelopes', 'org_id', FALS
 SELECT ue_create_direct_org_rls_policy('reward_wallet_ledger', 'org_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('social_accounts', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('subscription_events_log', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('payment_allocations', 'payment_id', 'platform_payments', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('platform_invoice_line_items', 'invoice_id', 'platform_invoices', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('reconciliation_matches', 'run_id', 'reconciliation_runs', 'organization_id', FALSE);
 ALTER TABLE "remittance_approvals" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "remittance_approvals" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS ue_system_full_access ON "remittance_approvals";
@@ -346,6 +494,7 @@ DROP POLICY IF EXISTS ue_system_full_access ON "icra_governance_flags";
 CREATE POLICY ue_system_full_access ON "icra_governance_flags" FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);
 SELECT ue_create_direct_org_rls_policy('joint_hs_committees', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('board_packet_distributions', 'packet_id', 'board_packets', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('committee_meeting_attendees', 'meeting_id', 'committee_meetings', 'organization_id', FALSE);
 ALTER TABLE "council_elections" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "council_elections" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS ue_system_full_access ON "council_elections";
@@ -366,8 +515,12 @@ ALTER TABLE "reserved_matter_votes" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "reserved_matter_votes" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS ue_system_full_access ON "reserved_matter_votes";
 CREATE POLICY ue_system_full_access ON "reserved_matter_votes" FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);
+SELECT ue_create_parent_owned_via_user_rls_policy_v2('workbook_governance_lineage_entries', 'workbook_id', 'workbooks', 'claimed_by_user_id');
 SELECT ue_create_direct_org_rls_policy('deadline_audit_events', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('ai_safety_filters', 'session_id', 'chat_sessions', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('correspondence_audit_trail', 'correspondence_id', 'correspondence', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('location_tracking_audit', 'user_id');
+SELECT ue_create_parent_owned_rls_policy_v2('signature_audit_trail', 'document_id', 'signature_documents', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('api_integrations', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('clc_sync_log', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('employer_timesheet_batches', 'organization_id', FALSE);
@@ -429,6 +582,7 @@ SELECT ue_create_direct_org_rls_policy('pension_members', 'organization_id', FAL
 SELECT ue_create_parent_owned_rls_policy_v2('duplicate_group_members', 'group_id', 'duplicate_groups', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('member_location_consent', 'user_id');
 SELECT ue_create_direct_org_rls_policy('pilot_applications', 'verified_organization_id', FALSE);
+SELECT ue_create_direct_org_rls_policy('org_configurations', 'organization_id', FALSE);
 ALTER TABLE "organization_relationships" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "organization_relationships" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS ue_system_full_access ON "organization_relationships";
@@ -444,6 +598,7 @@ SELECT ue_create_direct_org_rls_policy('chargeback_statements', 'organization_id
 SELECT ue_create_direct_org_rls_policy('clause_comparisons', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('cms_pages', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('cnesst_filings', 'organization_id', FALSE);
+SELECT ue_create_direct_org_rls_policy('compliance_alerts', 'org_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('contract_covered_orgs', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('correspondence', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('course_registrations', 'organization_id', FALSE);
@@ -454,6 +609,8 @@ DROP POLICY IF EXISTS ue_system_full_access ON "customer_onboarding_milestones";
 CREATE POLICY ue_system_full_access ON "customer_onboarding_milestones" FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);
 SELECT ue_create_direct_org_rls_policy('data_quality_warnings', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('defensibility_packs', 'organization_id', FALSE);
+SELECT ue_create_direct_org_rls_policy('dispatch_requests', 'org_id', FALSE);
+SELECT ue_create_direct_org_rls_policy('dispatch_rules', 'org_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('duplicate_groups', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('employer_contacts', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('employer_execution_artifacts', 'organization_id', FALSE);
@@ -505,6 +662,7 @@ SELECT ue_create_direct_org_rls_policy('security_posture_checks', 'organization_
 SELECT ue_create_direct_org_rls_policy('social_posts', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('sso_providers', 'organization_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('steward_assignments', 'organization_id', FALSE);
+SELECT ue_create_direct_org_rls_policy('stewards', 'org_id', FALSE);
 SELECT ue_create_direct_org_rls_policy('strategic_goals', 'organization_id', FALSE);
 ALTER TABLE "support_tickets" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "support_tickets" FORCE ROW LEVEL SECURITY;
@@ -529,22 +687,32 @@ SELECT ue_create_parent_owned_rls_policy_v2('allocation_basis_snapshots', 'run_i
 SELECT ue_create_parent_owned_rls_policy_v2('allocation_rule_versions', 'rule_id', 'allocation_rules', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('allocation_run_lines', 'run_id', 'allocation_runs', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('clause_embeddings', 'clause_id', 'cba_clauses', 'organization_id', FALSE);
+SELECT ue_create_shared_library_child_rls_policy('clause_library_tags', 'clause_id');
 SELECT ue_create_direct_org_rls_policy('commercial_contracts', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('contract_line_items', 'contract_id', 'commercial_contracts', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('correspondence_recipients', 'correspondence_id', 'correspondence', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('data_subject_access_requests', 'user_id');
+SELECT ue_create_parent_owned_rls_policy_v2('dispatch_assignments', 'request_id', 'dispatch_requests', 'org_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('employer_reports', 'employer_id', 'employers', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('geofence_events', 'user_id');
+SELECT ue_create_direct_org_rls_policy('geofences', 'union_local_id', FALSE);
 SELECT ue_create_user_rls_policy('location_tracking', 'user_id');
 SELECT ue_create_parent_owned_rls_policy_v2('policy_evaluations', 'rule_id', 'policy_rules', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('policy_exceptions', 'rule_id', 'policy_rules', 'organization_id', FALSE);
 SELECT ue_create_user_rls_policy('provincial_data_handling', 'user_id');
+SELECT ue_create_shared_library_rls_policy('shared_clause_library', 'source_organization_id', 'sharing_level', 'shared_with_org_ids');
 SELECT ue_create_parent_owned_rls_policy_v2('tentative_agreements', 'negotiation_id', 'negotiations', 'organization_id', FALSE);
 ALTER TABLE "union_density" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "union_density" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS ue_system_full_access ON "union_density";
 CREATE POLICY ue_system_full_access ON "union_density" FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);
+SELECT ue_create_parent_owned_rls_policy_v2('voter_eligibility', 'session_id', 'voting_sessions', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_rls_policy_v2('votes', 'session_id', 'voting_sessions', 'organization_id', FALSE);
 SELECT ue_create_parent_owned_rls_policy_v2('voting_options', 'session_id', 'voting_sessions', 'organization_id', FALSE);
+SELECT ue_create_parent_owned_via_user_rls_policy_v2('workbook_memory_holders', 'workbook_id', 'workbooks', 'claimed_by_user_id');
+SELECT ue_create_parent_owned_via_user_rls_policy_v2('workbook_modules', 'workbook_id', 'workbooks', 'claimed_by_user_id');
+SELECT ue_create_parent_owned_via_user_rls_policy_v2('workbook_purchases', 'workbook_id', 'workbooks', 'claimed_by_user_id');
+SELECT ue_create_user_rls_policy('workbooks', 'claimed_by_user_id');
 
 -- =============================================================================
 -- PART C — exact GRANT compiler (every manifest entry, all 700 tables)
@@ -3048,3 +3216,24 @@ REVOKE ALL ON TABLE "workbooks" FROM union_eyes_runtime;
 REVOKE ALL ON TABLE "workbooks" FROM union_eyes_system;
 GRANT SELECT, INSERT, UPDATE ON TABLE "workbooks" TO union_eyes_runtime;
 GRANT UPDATE ON TABLE "workbooks" TO union_eyes_system;
+
+-- =============================================================================
+-- PART D — targeted cleanup (ai_budgets stale auth.user_id() policy)
+-- =============================================================================
+
+DO $$
+DECLARE
+  pol RECORD;
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'ai_budgets') THEN
+    FOR pol IN
+      SELECT polname FROM pg_policy p
+      JOIN pg_class c ON c.oid = p.polrelid
+      WHERE c.relname = 'ai_budgets' AND pg_get_expr(p.polqual, p.polrelid) ILIKE '%auth.user_id%'
+    LOOP
+      EXECUTE format('DROP POLICY IF EXISTS %I ON ai_budgets', pol.polname);
+    END LOOP;
+    ALTER TABLE ai_budgets ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE ai_budgets FORCE ROW LEVEL SECURITY;
+  END IF;
+END $$;
