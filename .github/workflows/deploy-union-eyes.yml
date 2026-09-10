@@ -871,9 +871,132 @@ jobs:
           echo "Resolved frontend digest: $FRONTEND_DIGEST"
           echo "Resolved backend digest: $BACKEND_DIGEST"
 
+  # Round 59C — mandatory pre-deploy gate, ephemeral migration authority.
+  # Django migrations require DDL/table-owner privileges the runtime role
+  # (union_eyes_runtime) must not have. Previously the persistent
+  # django-backend container ran `manage.py migrate` on every startup
+  # using PGADMIN_USER/PGADMIN_PASSWORD wired directly onto its own
+  # environment — meaning a compromise of that long-running container
+  # (RCE, dependency compromise, debug shell, etc.) could recover a
+  # migration/admin database credential. This job replaces that: it pulls
+  # the exact digest-pinned backend image just built, runs
+  # `manage.py migrate` ONCE in a throwaway `docker run` invocation with
+  # the migration-admin credential injected only into that process's
+  # environment, verifies no migrations remain unapplied, and then exits —
+  # no process anywhere retains the migration-admin credential afterward.
+  # django-backend itself never receives PGADMIN_*/migration-admin secrets
+  # (see the "Update Container App" step below).
+  apply-django-migrations:
+    runs-on: ubuntu-latest
+    needs: [plan, build-push]
+    name: Apply Django Migrations (ephemeral migration authority)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - name: Assert build identity is configured (fail-closed)
+        env:
+          BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_CLIENT_ID}" ]; then
+            echo "::error::No build identity available to pull the backend image for migration. Refusing to proceed."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, build identity — ACR pull only)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR login + pull digest-pinned backend image
+        run: |
+          set -euo pipefail
+          az acr login --name ${{ needs.plan.outputs.acr_name }}
+          docker pull ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
+
+      # Re-authenticate as the environment-scoped deployment identity (BR-4)
+      # so the Key Vault lookup below resolves to the correct per-environment
+      # migration-admin secret. This replaces the build identity's Azure CLI
+      # session; the backend image is already pulled locally and needs no
+      # further registry access.
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run migrations with ephemeral migration-admin authority (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. django-backend migrations require a dedicated migration-admin connection string — this job deliberately does not fall back to any application runtime credential. Refusing to deploy the backend container."
+            exit 1
+          fi
+
+          MIGRATION_ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this block — it handles a secret
+          urldecode() { local d="${1//+/ }"; printf '%b' "${d//%/\\x}"; }
+          UE_ADMIN_REST="${MIGRATION_ADMIN_URL#*://}"
+          UE_ADMIN_CREDS="${UE_ADMIN_REST%%@*}"
+          UE_ADMIN_HOSTPART="${UE_ADMIN_REST#*@}"
+          UE_ADMIN_HOSTPORT="${UE_ADMIN_HOSTPART%%/*}"
+          UE_ADMIN_DBANDQUERY="${UE_ADMIN_HOSTPART#*/}"
+          ADMIN_PGUSER=$(urldecode "${UE_ADMIN_CREDS%%:*}")
+          ADMIN_PGPASSWORD=$(urldecode "${UE_ADMIN_CREDS#*:}")
+          ADMIN_PGHOST="${UE_ADMIN_HOSTPORT%%:*}"
+          ADMIN_PGPORT="${UE_ADMIN_HOSTPORT#*:}"
+          [ "$ADMIN_PGPORT" = "$ADMIN_PGHOST" ] && ADMIN_PGPORT="5432"
+          ADMIN_PGDATABASE="${UE_ADMIN_DBANDQUERY%%\?*}"
+
+          MIGRATE_EXTRA_ARGS=""
+          if [ "${{ needs.plan.outputs.environment }}" = "demo" ]; then
+            MIGRATE_EXTRA_ARGS="--fake-initial"
+          fi
+
+          set +e
+          docker run --rm \
+            -e PGHOST="$ADMIN_PGHOST" \
+            -e PGPORT="$ADMIN_PGPORT" \
+            -e PGDATABASE="$ADMIN_PGDATABASE" \
+            -e PGUSER="$ADMIN_PGUSER" \
+            -e PGPASSWORD="$ADMIN_PGPASSWORD" \
+            -e PGSSLMODE="require" \
+            ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }} \
+            sh -c "python manage.py migrate --noinput ${MIGRATE_EXTRA_ARGS} && python manage.py migrate --check"
+          MIGRATION_STATUS=$?
+          set -e
+
+          unset MIGRATION_ADMIN_URL ADMIN_PGUSER ADMIN_PGPASSWORD UE_ADMIN_REST UE_ADMIN_CREDS UE_ADMIN_HOSTPART UE_ADMIN_HOSTPORT UE_ADMIN_DBANDQUERY
+
+          if [ "$MIGRATION_STATUS" -ne 0 ]; then
+            echo "::error::Django migration apply/verify failed for ${{ needs.plan.outputs.environment }}. Refusing to deploy the application revision — the database may be partially migrated; do not proceed until this is resolved."
+            exit 1
+          fi
+          echo "::notice::Django migrations applied and verified (no unapplied migrations remain) for ${{ needs.plan.outputs.environment }}. No process retains the migration-admin credential beyond this job."
+
   deploy:
     runs-on: ubuntu-latest
-    needs: [plan, pre-deploy-gates, build-push, apply-icra-capability-migration]
+    needs: [plan, pre-deploy-gates, build-push, apply-icra-capability-migration, apply-django-migrations]
     name: Deploy UnionEyes (env-scoped, digest-pinned)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -1261,60 +1384,14 @@ jobs:
             PGPASSWORD_SECRET="db-password"
           fi
 
-          DJANGO_MIGRATE_EXTRA_ARGS=""
-          DJANGO_SKIP_MIGRATIONS="false"
-          if [ "${{ needs.plan.outputs.environment }}" = "demo" ]; then
-            DJANGO_MIGRATE_EXTRA_ARGS="--fake-initial"
-            DJANGO_SKIP_MIGRATIONS="true"
-          fi
-
-          # ROUND 59B FOLLOW-UP FIX: PGUSER/PGPASSWORD above are now the
-          # least-privilege union_eyes_runtime role (correct — this is the
-          # credential the app uses for every request). But the Dockerfile
-          # CMD also runs `python manage.py migrate` on every container
-          # startup, and Django migrations require DDL/table-owner
-          # privileges the runtime role must NOT have. Deploying the
-          # runtime-role fix alone (5ecb1710f) caused django-backend to
-          # crash-loop on startup with "permission denied for table
-          # django_migrations", because migrate was now running as the
-          # restricted role instead of the old nzilaadmin bypass.
-          #
-          # Fix: wire a SEPARATE migration-admin credential onto the
-          # container (same Key Vault secret already used by the mandatory
-          # "Apply ICRA Capability Migration" pre-deploy gate and the RLS
-          # foundation migration job). The Dockerfile CMD uses this only for
-          # the transient startup migrate step, in a subshell, and starts
-          # gunicorn with the normal runtime PG* env — so ongoing app
-          # traffic is never touched by the elevated credential.
-          MIGRATION_ADMIN_URL=$(az keyvault secret show \
-            --vault-name "$KEY_VAULT_NAME" \
-            --name "union-eyes-migration-admin-database-url" \
-            --query value -o tsv)
-
-          if [ -z "$MIGRATION_ADMIN_URL" ]; then
-            echo "::error::Key Vault secret 'union-eyes-migration-admin-database-url' not found in '$KEY_VAULT_NAME'. django-backend cannot safely run startup migrations without a dedicated migration-admin credential (the runtime role must not have DDL/migration-table privileges). Refusing to deploy the backend container."
-            exit 1
-          fi
-
-          # urldecode() may already be defined if the DATABASE_URL branch
-          # above ran; redefine unconditionally here so this parsing works
-          # even when that branch was skipped (frontend has no DATABASE_URL
-          # secret and we fell through to the discrete-PG*-values fallback).
-          urldecode() { local d="${1//+/ }"; printf '%b' "${d//%/\\x}"; }
-          UE_ADMIN_REST="${MIGRATION_ADMIN_URL#*://}"
-          UE_ADMIN_CREDS="${UE_ADMIN_REST%%@*}"
-          ADMIN_PGUSER=$(urldecode "${UE_ADMIN_CREDS%%:*}")
-          ADMIN_PGPASSWORD=$(urldecode "${UE_ADMIN_CREDS#*:}")
-
-          az containerapp secret set \
-            --name "$TARGET_APP" \
-            --resource-group "$TARGET_RG" \
-            --secrets "db-admin-password=$ADMIN_PGPASSWORD" >/dev/null
-
-          # Backend runs migrations automatically on startup (Dockerfile CMD),
-          # using PGADMIN_USER/PGADMIN_PASSWORD (migration-admin), while
-          # ongoing app traffic uses PGUSER/PGPASSWORD (least-privilege
-          # runtime role).
+          # Round 59C: django-backend never receives a migration-admin
+          # credential (env var, secretRef, or otherwise) — migrations run
+          # in the dedicated apply-django-migrations job (see below) before
+          # this step, using the migration-admin Key Vault secret directly
+          # in that ephemeral job's process only. This container only ever
+          # authenticates as the least-privilege runtime role, so an RCE/
+          # dependency compromise here cannot recover DB migration/admin
+          # authority from its own environment.
           az containerapp update \
             --name "$TARGET_APP" \
             --resource-group "$TARGET_RG" \
@@ -1330,10 +1407,6 @@ jobs:
               "PGPORT=$PGPORT_VAL" \
               "PGSSLMODE=$PGSSLMODE_VAL" \
               "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
-              "PGADMIN_USER=$ADMIN_PGUSER" \
-              "PGADMIN_PASSWORD=secretref:db-admin-password" \
-              "DJANGO_MIGRATE_EXTRA_ARGS=$DJANGO_MIGRATE_EXTRA_ARGS" \
-              "DJANGO_SKIP_MIGRATIONS=$DJANGO_SKIP_MIGRATIONS" \
             --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
 
       - name: RLS foundation preflight (fail-closed)
