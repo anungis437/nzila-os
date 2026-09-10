@@ -1392,6 +1392,15 @@ jobs:
           # authenticates as the least-privilege runtime role, so an RCE/
           # dependency compromise here cannot recover DB migration/admin
           # authority from its own environment.
+          # `--set-env-vars` only sets/overwrites the listed names — it does
+          # NOT clear env vars from a prior revision that aren't mentioned.
+          # The Round 59B revision left PGADMIN_USER/PGADMIN_PASSWORD/
+          # DJANGO_SKIP_MIGRATIONS/DJANGO_MIGRATE_EXTRA_ARGS resident on this
+          # container; without an explicit removal they carry forward
+          # indefinitely across every future deploy. Strip them every run
+          # (idempotent no-op once actually gone) in the same update so this
+          # container can never again silently retain a migration-admin
+          # credential.
           az containerapp update \
             --name "$TARGET_APP" \
             --resource-group "$TARGET_RG" \
@@ -1407,7 +1416,19 @@ jobs:
               "PGPORT=$PGPORT_VAL" \
               "PGSSLMODE=$PGSSLMODE_VAL" \
               "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
+            --remove-env-vars PGADMIN_USER PGADMIN_PASSWORD DJANGO_SKIP_MIGRATIONS DJANGO_MIGRATE_EXTRA_ARGS \
             --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
+
+          # Remove the now-unused migration-admin secret from the Container
+          # App's own secret surface (Round 59C — it must only ever exist in
+          # Key Vault for the ephemeral apply-django-migrations job).
+          if az containerapp secret list --name "$TARGET_APP" --resource-group "$TARGET_RG" --query "[].name" -o tsv | grep -qx "db-admin-password"; then
+            az containerapp secret remove \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --secret-names "db-admin-password" >/dev/null
+            echo "::notice::Removed leftover db-admin-password secret from $TARGET_APP (Round 59C — migration-admin credential must never live in the application secret surface)."
+          fi
 
       - name: RLS foundation preflight (fail-closed)
         # This proves the Key-Vault-sourced runtime/system credentials are

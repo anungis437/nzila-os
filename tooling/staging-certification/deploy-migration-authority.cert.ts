@@ -59,9 +59,8 @@ describe('CERT — Migration Authority Separation (Round 59C)', () => {
     expect(stepStart).toBeGreaterThan(-1)
     const nextStepStart = deployWf.indexOf('\n      - name:', stepStart + 1)
     const stepBody = deployWf.slice(stepStart, nextStepStart === -1 ? undefined : nextStepStart)
-    expect(stepBody).not.toContain('PGADMIN_USER')
-    expect(stepBody).not.toContain('PGADMIN_PASSWORD')
-    expect(stepBody).not.toContain('db-admin-password')
+    expect(stepBody).not.toContain('"PGADMIN_USER=')
+    expect(stepBody).not.toContain('"PGADMIN_PASSWORD=')
     expect(stepBody).not.toContain('MIGRATION_ADMIN_URL')
     // The runtime credential must still be wired (regression guard for the
     // underlying Round 59B fix — django-backend must keep using PGUSER/
@@ -70,8 +69,28 @@ describe('CERT — Migration Authority Separation (Round 59C)', () => {
     expect(stepBody).toContain('"PGPASSWORD=secretref:$PGPASSWORD_SECRET"')
   })
 
-  it('the workflow never creates a db-admin-password Container App secret', () => {
-    expect(deployWf).not.toContain('db-admin-password')
+  it('the step explicitly strips any leftover migration-admin env vars from a prior revision', () => {
+    const stepStart = deployWf.indexOf('- name: Update Container App (frontend + backend sidecar)')
+    const nextStepStart = deployWf.indexOf('\n      - name:', stepStart + 1)
+    const stepBody = deployWf.slice(stepStart, nextStepStart === -1 ? undefined : nextStepStart)
+    // `az containerapp update --set-env-vars` only sets/overwrites listed
+    // names — it does NOT clear unrelated env vars carried over from a
+    // prior revision. Without an explicit --remove-env-vars, a
+    // previously-deployed PGADMIN_USER/PGADMIN_PASSWORD would persist on
+    // every future revision indefinitely.
+    expect(stepBody).toContain('--remove-env-vars')
+    expect(stepBody).toContain('PGADMIN_USER')
+    expect(stepBody).toContain('PGADMIN_PASSWORD')
+    expect(stepBody).toContain('DJANGO_SKIP_MIGRATIONS')
+    expect(stepBody).toContain('DJANGO_MIGRATE_EXTRA_ARGS')
+  })
+
+  it('the step removes the leftover db-admin-password Container App secret if present', () => {
+    const stepStart = deployWf.indexOf('- name: Update Container App (frontend + backend sidecar)')
+    const nextStepStart = deployWf.indexOf('\n      - name:', stepStart + 1)
+    const stepBody = deployWf.slice(stepStart, nextStepStart === -1 ? undefined : nextStepStart)
+    expect(stepBody).toContain('az containerapp secret remove')
+    expect(stepBody).toContain('db-admin-password')
   })
 
   it('the Dockerfile CMD does not invoke manage.py migrate on ordinary container startup', () => {
