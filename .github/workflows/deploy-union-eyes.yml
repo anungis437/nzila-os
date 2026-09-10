@@ -52,6 +52,26 @@ on:
         required: false
         type: boolean
         default: false
+      apply_round58_grant_fix_migration:
+        description: >-
+          Round 59 — one-time corrective rollout. Set true to re-apply
+          ONLY "PART C" (the exact per-table GRANTs) from db/migrations/
+          20260910_rls_enforcement_expansion_round58.sql to the target
+          environment. Required after apply_authority_enforcement_migration
+          because that migration's own PART E ("blanket grant removal")
+          runs AFTER PART C and unconditionally revokes ALL table grants
+          in schema public from union_eyes_runtime/union_eyes_system —
+          silently wiping out every one of PART C's 795 exact grants. This
+          was discovered via the first live RLS preflight run against
+          staging (rls-verify.ts failing with "permission denied for table
+          organization_members" as union_eyes_runtime even though PART C
+          explicitly grants it). See scripts/apply-round58-grant-order-
+          fix.ts for the full root-cause writeup. Only meaningful after
+          apply_authority_enforcement_migration has already been run once.
+          Leave false for ordinary deploys.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -425,6 +445,72 @@ jobs:
             exit 1
           fi
           echo "::notice::Round 58 enforcement migration applied for ${{ needs.plan.outputs.environment }}."
+
+  # Round 59 corrective rollout — see the apply_round58_grant_fix_migration
+  # input description and scripts/apply-round58-grant-order-fix.ts for the
+  # full root-cause writeup: round58's own PART E runs after PART C and
+  # unconditionally revokes every one of PART C's 795 exact per-table
+  # grants. Only meaningful after apply-authority-enforcement-migration has
+  # already run at least once against this environment.
+  apply-round58-grant-fix-migration:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round58_grant_fix_migration == 'true' }}
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply Round 58 Grant-Order Fix (round 59, one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Re-apply round 58 PART C exact grants (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          set +e
+          pnpm --filter @nzila/union-eyes run rls:apply-round58-grant-order-fix
+          FIX_STATUS=$?
+          set -e
+
+          unset RLS_ENFORCEMENT_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$FIX_STATUS" -ne 0 ]; then
+            echo "::error::Round 58 grant-order fix apply failed for ${{ needs.plan.outputs.environment }}."
+            exit 1
+          fi
+          echo "::notice::Round 58 grant-order fix applied for ${{ needs.plan.outputs.environment }} — union_eyes_runtime/union_eyes_system per-table grants restored."
 
   # Mandatory, always-on pre-deploy gate — NOT an optional operator command
   # like apply-rls-foundation-migration above. Application code on this
