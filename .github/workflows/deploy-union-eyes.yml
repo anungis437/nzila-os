@@ -407,8 +407,16 @@ jobs:
           set +x  # never trace this — the export line contains a secret
           export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
 
-          psql "$RLS_ENFORCEMENT_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f db/migrations/20260910_rls_enforcement_expansion_round58.sql
+          # Round 59 fix: `psql -f` sends each top-level statement as its own
+          # implicit transaction, so a mid-file failure would leave PART A-E
+          # partially applied. rls:apply-enforcement-migration sends the whole
+          # file as one simple-query-protocol message (postgres.js sql.unsafe),
+          # which Postgres itself treats as a single all-or-nothing transaction
+          # — matching what full-migration-transactional-proof.ts validated.
+          set +e
+          pnpm --filter @nzila/union-eyes run rls:apply-enforcement-migration
           MIGRATION_STATUS=$?
+          set -e
 
           unset RLS_ENFORCEMENT_ADMIN_DATABASE_URL ADMIN_URL
 
