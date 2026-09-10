@@ -100,8 +100,14 @@ async function main() {
       }
 
       const password = generatePassword()
-      // Parameterized — the password value never appears in a logged SQL string.
-      await sql.unsafe(`ALTER ROLE ${role.roleName} WITH LOGIN PASSWORD $1`, [password])
+      // ALTER ROLE ... PASSWORD is DDL and does not accept a bind parameter
+      // (Postgres requires a string literal there, not $1) — round 59 found
+      // this the hard way: `sql.unsafe(..., [password])` fails with a plain
+      // "syntax error at or near $1" because it never worked against a real
+      // server before this round. generatePassword() only emits
+      // [A-Za-z0-9_-] (base64url with +/=/ stripped/remapped), so dollar
+      // quoting is safe from injection and never needs escaping.
+      await sql.unsafe(`ALTER ROLE ${role.roleName} WITH LOGIN PASSWORD $pw$${password}$pw$`)
 
       const connectionString = buildConnectionString(parsedAdminUrl, role.roleName, password)
       const secretName = process.env[role.secretEnvVar] || role.defaultSecretName
