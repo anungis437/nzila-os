@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   values: vi.fn(),
   returning: vi.fn(),
   eq: vi.fn((col: unknown, val: unknown) => ({ op: 'eq', col, val })),
+  encryptSecret: vi.fn(async (plaintext: string) => `encrypted(${plaintext})`),
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest } }));
@@ -17,6 +18,7 @@ vi.mock('@/db/schema/sso-scim-schema', () => ({
   ssoProviders: { id: 'sp.id', organizationId: 'sp.organizationId' },
 }));
 vi.mock('drizzle-orm', () => ({ eq: m.eq }));
+vi.mock('@/lib/encryption', () => ({ encryptSecret: m.encryptSecret }));
 vi.mock('@/db/db', () => ({
   db: {
     select: (...args: unknown[]) => { m.select(...args); return { from: m.from }; },
@@ -120,5 +122,41 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
     expect(m.values).toHaveBeenCalledWith(
       expect.objectContaining({ organizationId: 'org-real', createdBy: 'admin-user' }),
     );
+  });
+
+  it('POST encrypts oidcClientSecret before persisting (Round 59B — credential-storage-hygiene fix)', async () => {
+    m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real' }]);
+
+    const request = {
+      json: async () => ({
+        name: 'New IdP',
+        providerType: 'oidc',
+        attributeMapping: { email: 'email' },
+        oidcClientSecret: 'raw-oidc-secret',
+      }),
+    };
+    await capturedPostHandler!({ request, organizationId: 'org-real', userId: 'admin-user' });
+
+    expect(m.encryptSecret).toHaveBeenCalledWith('raw-oidc-secret');
+    expect(m.values).toHaveBeenCalledWith(
+      expect.objectContaining({ oidcClientSecret: 'encrypted(raw-oidc-secret)' }),
+    );
+    const insertedArgs = m.values.mock.calls[0][0];
+    expect(insertedArgs.oidcClientSecret).not.toBe('raw-oidc-secret');
+  });
+
+  it('POST does not call encryptSecret when oidcClientSecret is omitted', async () => {
+    m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real' }]);
+
+    const request = {
+      json: async () => ({
+        name: 'New IdP',
+        providerType: 'saml',
+        attributeMapping: { email: 'email' },
+      }),
+    };
+    await capturedPostHandler!({ request, organizationId: 'org-real', userId: 'admin-user' });
+
+    expect(m.encryptSecret).not.toHaveBeenCalled();
   });
 });
