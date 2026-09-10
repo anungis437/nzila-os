@@ -47,8 +47,15 @@ class FailedTasksViewDisclosureTest(TestCase):
         mock_objects.filter.return_value = mock_qs
 
         view = FailedTasksView()
+        raw_request = self._make_admin_request()
+        # DRF views normally see request.query_params via dispatch()'s
+        # initialize_request() wrapping — calling view.get() directly (as
+        # this test does, to avoid exercising unrelated URL routing/auth
+        # middleware) must replicate that same wrapping, or the raw
+        # WSGIRequest has no .query_params attribute.
+        drf_request = view.initialize_request(raw_request)
         with patch("services.api.task_enqueue_views._require_admin", return_value=True):
-            response = view.get(self._make_admin_request(), queue_name="billing")
+            response = view.get(drf_request, queue_name="billing")
 
         body = response.data
         serialized = str(body)

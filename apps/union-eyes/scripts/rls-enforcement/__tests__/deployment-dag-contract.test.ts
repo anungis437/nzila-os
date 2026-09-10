@@ -57,9 +57,29 @@ describe("Round 58 deployment DAG contract (static, no dispatch)", () => {
     }
   });
 
-  it("references the exact committed migration file path", () => {
+  it("resolves the full indirection chain to the exact committed migration file path", () => {
+    // Round 59D fix: the workflow step never contained the migration
+    // filename literally — it invokes the package script
+    // 'rls:apply-enforcement-migration', which resolves to
+    // apply-authority-enforcement-migration.ts, which itself pins the
+    // exact SQL path via its own MIGRATION_PATH constant. Asserting the
+    // literal filename in the YAML (as this test previously did) was
+    // stale from the moment the workflow was written this way — it
+    // never could have passed by construction, and the indirection is
+    // the stronger, more maintainable contract (the workflow doesn't
+    // need to change if the migration script is ever renamed/relocated).
     const job = doc.jobs["apply-authority-enforcement-migration"];
     const stepsText = JSON.stringify(job.steps);
-    expect(stepsText).toContain("db/migrations/20260910_rls_enforcement_expansion_round58.sql");
+    expect(stepsText).toContain("rls:apply-enforcement-migration");
+
+    const packageJsonPath = path.resolve(__dirname, "../../../package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    const script = packageJson.scripts?.["rls:apply-enforcement-migration"];
+    expect(script).toBeTruthy();
+    expect(script).toContain("apply-authority-enforcement-migration.ts");
+
+    const scriptPath = path.resolve(__dirname, "../../apply-authority-enforcement-migration.ts");
+    const scriptSource = fs.readFileSync(scriptPath, "utf8");
+    expect(scriptSource).toContain("db/migrations/20260910_rls_enforcement_expansion_round58.sql");
   });
 });

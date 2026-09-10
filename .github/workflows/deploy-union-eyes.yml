@@ -72,6 +72,21 @@ on:
         required: false
         type: boolean
         default: false
+      apply_round59_congress_memberships_grant_fix:
+        description: >-
+          Round 59D — one-time corrective rollout. Set true to GRANT SELECT
+          on congress_memberships to union_eyes_runtime. Discovered via
+          direct staging exercise of lib/clause-library/sharing-authority.ts
+          (a real, wired caller for congress/federation-level shared-clause
+          visibility checks) that the round58 manifest classified this
+          table as LATENT_UNREACHABLE (no runtime privileges), which was
+          stale — this raised a raw "permission denied for table
+          congress_memberships" error in a real code path. See
+          scripts/apply-round59-congress-memberships-grant-fix.ts for the
+          full writeup. Leave false for ordinary deploys.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -511,6 +526,74 @@ jobs:
             exit 1
           fi
           echo "::notice::Round 58 grant-order fix applied for ${{ needs.plan.outputs.environment }} — union_eyes_runtime/union_eyes_system per-table grants restored."
+
+  # Round 59D corrective rollout — see the apply_round59_congress_memberships
+  # _grant_fix input description and scripts/apply-round59-congress-
+  # memberships-grant-fix.ts for the full root-cause writeup: the round58
+  # manifest classified congress_memberships as LATENT_UNREACHABLE (no
+  # runtime privileges) which was stale — lib/clause-library/sharing-
+  # authority.ts is a real, wired caller. Only meaningful after
+  # apply-authority-enforcement-migration has already run at least once
+  # against this environment.
+  apply-round59-congress-memberships-grant-fix:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round59_congress_memberships_grant_fix == 'true' }}
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply Round 59D Congress-Memberships Grant Fix (one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Grant SELECT on congress_memberships to union_eyes_runtime (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          set +e
+          pnpm --filter @nzila/union-eyes run rls:apply-round59-congress-memberships-grant-fix
+          FIX_STATUS=$?
+          set -e
+
+          unset RLS_ENFORCEMENT_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$FIX_STATUS" -ne 0 ]; then
+            echo "::error::Round 59D congress_memberships grant fix apply failed for ${{ needs.plan.outputs.environment }}."
+            exit 1
+          fi
+          echo "::notice::Round 59D congress_memberships grant fix applied for ${{ needs.plan.outputs.environment }} — union_eyes_runtime SELECT restored."
 
   # Mandatory, always-on pre-deploy gate — NOT an optional operator command
   # like apply-rls-foundation-migration above. Application code on this
