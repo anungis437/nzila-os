@@ -698,13 +698,22 @@ function main() {
         }
       }
     } else if (entry.classification === "SYSTEM_ONLY") {
+      // Round 59 staging proof fix: guard on table existence, same as every
+      // other classification's emission below — 795 manifest entries include
+      // many not yet physically deployed to every environment (financial-
+      // service LATENT_UNREACHABLE tables, feature-gated CBA-intelligence/
+      // payroll/voting tables not yet migrated to a given target, etc). A
+      // fixed SQL statement referencing a table that doesn't exist in THIS
+      // environment must not hard-fail the whole migration.
       policyStatements.push(
-        `ALTER TABLE ${quoteIdent(entry.table)} ENABLE ROW LEVEL SECURITY;\n` +
-          `ALTER TABLE ${quoteIdent(entry.table)} FORCE ROW LEVEL SECURITY;\n` +
-          `DROP POLICY IF EXISTS ue_system_full_access ON ${quoteIdent(entry.table)};\n` +
-          `CREATE POLICY ue_system_full_access ON ${quoteIdent(
-            entry.table
-          )} FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);`
+        `DO $$ BEGIN\n` +
+          `  IF to_regclass('public.' || ${sqlQuoteLiteral(entry.table)}) IS NOT NULL THEN\n` +
+          `    EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', ${sqlQuoteLiteral(entry.table)});\n` +
+          `    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', ${sqlQuoteLiteral(entry.table)});\n` +
+          `    EXECUTE format('DROP POLICY IF EXISTS ue_system_full_access ON %I', ${sqlQuoteLiteral(entry.table)});\n` +
+          `    EXECUTE format('CREATE POLICY ue_system_full_access ON %I FOR ALL TO union_eyes_system USING (true) WITH CHECK (true)', ${sqlQuoteLiteral(entry.table)});\n` +
+          `  END IF;\n` +
+          `END $$;`
       );
       policiesGenerated++;
     }
@@ -719,17 +728,37 @@ function main() {
     // never guessing an un-finalized authority decision.
     const runtimePrivs = entry.requiredRuntimePrivileges === "TBD" ? [] : entry.requiredRuntimePrivileges ?? [];
     const systemPrivs = entry.requiredSystemPrivileges === "TBD" ? [] : entry.requiredSystemPrivileges ?? [];
+    // Round 59 staging proof fix: guard the whole per-table GRANT/REVOKE
+    // block on table existence (to_regclass), same rationale as the
+    // SYSTEM_ONLY policy guard above — discovered live against staging
+    // (171 of 795 manifest tables not physically present there; a fixed
+    // REVOKE/GRANT on a nonexistent relation previously hard-failed the
+    // entire atomic migration instead of being a no-op for that table).
     const lines: string[] = [];
-    lines.push(`REVOKE ALL ON TABLE ${quoteIdent(entry.table)} FROM union_eyes_runtime;`);
-    lines.push(`REVOKE ALL ON TABLE ${quoteIdent(entry.table)} FROM union_eyes_system;`);
+    lines.push(`DO $$ BEGIN`);
+    lines.push(`  IF to_regclass('public.' || ${sqlQuoteLiteral(entry.table)}) IS NOT NULL THEN`);
+    lines.push(
+      `    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', ${sqlQuoteLiteral(entry.table)});`
+    );
+    lines.push(
+      `    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', ${sqlQuoteLiteral(entry.table)});`
+    );
     if (runtimePrivs.length > 0) {
       lines.push(
-        `GRANT ${runtimePrivs.join(", ")} ON TABLE ${quoteIdent(entry.table)} TO union_eyes_runtime;`
+        `    EXECUTE format('GRANT ${runtimePrivs.join(
+          ", "
+        )} ON TABLE %I TO union_eyes_runtime', ${sqlQuoteLiteral(entry.table)});`
       );
     }
     if (systemPrivs.length > 0) {
-      lines.push(`GRANT ${systemPrivs.join(", ")} ON TABLE ${quoteIdent(entry.table)} TO union_eyes_system;`);
+      lines.push(
+        `    EXECUTE format('GRANT ${systemPrivs.join(
+          ", "
+        )} ON TABLE %I TO union_eyes_system', ${sqlQuoteLiteral(entry.table)});`
+      );
     }
+    lines.push(`  END IF;`);
+    lines.push(`END $$;`);
     grantStatements.push(lines.join("\n"));
     grantsGenerated++;
   }
@@ -793,6 +822,34 @@ END $$;
         "-- 0108's blanket table/sequence grants are deliberately LEFT IN PLACE.",
       ].join("\n");
 
+  // Round 59 staging proof fix: every `SELECT ue_create_*_rls_policy(table, ...)`
+  // call generated above assumes the table physically exists in the target
+  // environment. 795 manifest entries span many environments/feature areas
+  // that are not all deployed everywhere at once (financial-service
+  // LATENT_UNREACHABLE tables, feature-gated CBA-intelligence/payroll/
+  // voting/pension surfaces not yet migrated to a given target, etc) —
+  // discovered live against staging (171 of 795 referenced tables absent).
+  // Wrap each such call in an existence guard so a table missing from THIS
+  // environment is a no-op for that table, not a hard failure for the
+  // entire atomic migration. The table name is the call's first argument
+  // and is always the literal produced by sqlQuoteLiteral(entry.table)
+  // above, so it can be extracted directly from the generated SQL text
+  // without threading a parallel table-tracking array through every call
+  // site. Statements that don't match this shape (the SYSTEM_ONLY DO block,
+  // already self-guarded above) pass through unchanged.
+  const guardedPolicyStatements = policyStatements.map((stmt) => {
+    const match = stmt.match(/^SELECT (ue_create_\w+)\('((?:[^'\\]|\\.)*)'(.*)\);$/);
+    if (!match) return stmt;
+    const [, fnName, tableName, restArgs] = match;
+    return (
+      `DO $$ BEGIN\n` +
+      `  IF to_regclass('public.' || '${tableName}') IS NOT NULL THEN\n` +
+      `    PERFORM ${fnName}('${tableName}'${restArgs});\n` +
+      `  END IF;\n` +
+      `END $$;`
+    );
+  });
+
   const migrationSql = [
     "-- =============================================================================",
     "-- 20260910_rls_enforcement_expansion_round58.sql",
@@ -828,7 +885,7 @@ END $$;
     "-- PART B — policy application (one call per resolved manifest entry)",
     "-- =============================================================================",
     "",
-    policyStatements.join("\n"),
+    guardedPolicyStatements.join("\n"),
     "",
     "-- =============================================================================",
     "-- PART C — exact GRANT compiler (every manifest entry, all 700 tables)",
@@ -872,10 +929,6 @@ END $$;
     );
     process.exitCode = 1;
   }
-}
-
-function quoteIdent(name: string): string {
-  return `"${name.replace(/"/g, '""')}"`;
 }
 
 if (require.main === module) {
