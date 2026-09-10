@@ -107,27 +107,117 @@ structure only) against `nzila-os-union-eyes-prod`:
   from a snapshot that carries the same admin password, and whether it also needs
   rotation.
 
-### 1.3 Rotation plan (prepared, NOT executed — requires explicit operator authorization)
+### 1.3 Rotation sequencing principle
+
+Two candidate sequences exist; the choice matters because rotating the password alone,
+without addressing *who uses it*, simply re-arms the same exposure surface with a new
+value indefinitely:
 
 ```
-1. Confirm current consumers (table above) — re-verify immediately before rotating,
-   in case the Container App configuration has changed since this plan was written.
-2. Generate a new strong password for nzilaadmin (never displayed in any tool output
-   this session touches; generate and apply directly via `az postgres flexible-server
-   update --admin-password` from a secure operator session, not this agent session).
-3. Update the production Container App's `db-password` secret to the new value
-   (`az containerapp secret set --secrets db-password=<new-value>` — again, run by
-   the operator directly, not relayed through this session).
-4. Restart/re-provision both containers (`nzila-os-union-eyes-prod` frontend +
-   `django-backend`) to pick up the new secret — Container Apps secrets require an
-   explicit revision update to propagate to running replicas.
-5. Verify application health (`/api/health`, `/api/health/liveness`, `/api/ready`)
-   after the restart, before considering rotation complete.
-6. Do NOT rotate and simultaneously start the least-privilege cutover (§2) in the
-   same change window — rotate first, confirm stable, THEN plan the separate
-   role-provisioning cutover. Coordinating both at once multiplies the blast radius
-   of any single mistake.
+PREFERRED (default — coordinated least-privilege cutover):
+  provision union_eyes_runtime / union_eyes_system (§2 in the main plan / §6)
+  → validate the new Key-Vault-backed secret references resolve correctly
+  → move the application off nzilaadmin onto the new roles (§7 cutover sequence)
+  → THEN rotate/invalidate the exposed nzilaadmin password (it is no longer the
+    runtime credential at that point — rotating it is a clean invalidation, not a
+    live-traffic-affecting change)
+
+ALTERNATE (only if exposure severity requires immediate invalidation before the
+above can be completed):
+  rotate nzilaadmin now, while both application containers still depend on it
+  → accept a brief availability risk during the rotation window (§1.4 below)
+  → the role-provisioning/least-privilege cutover proceeds afterward, unchanged,
+    just against the NEW admin password in the interim
 ```
+
+**Do not simply rotate the admin password and leave the admin-as-runtime pattern in
+place indefinitely** — that re-arms the exact same exposure surface (a plaintext-
+retrievable Container Apps secret backing the sole runtime credential) with a new
+value. The preferred sequence closes both the credential exposure AND the underlying
+architectural gap in one coordinated change window; the alternate sequence only
+becomes necessary if the exposed value must be invalidated faster than the
+role-provisioning work can be completed.
+
+### 1.4 Rotation atomicity (prepared procedure, NOT executed)
+
+The plan must prevent a "DB password changed while every production app instance still
+depends on the old value" outage. Exact sequence, whichever of §1.3's two orderings is
+chosen for the *admin* password specifically:
+
+```
+1. SECRET UPDATE POINT: generate the new password; write it to the production
+   Container App's `db-password` secret via `az containerapp secret set` — this does
+   NOT yet change the live Postgres role's password, so existing connections/replicas
+   are unaffected at this instant.
+2. DB ROLE/PASSWORD UPDATE POINT: `az postgres flexible-server update
+   --admin-password <new>` (or `ALTER ROLE nzilaadmin PASSWORD ...` via a controlled
+   session) — this DOES immediately invalidate the old password for new connections;
+   existing open connections in the running containers may continue until they
+   naturally cycle, depending on Postgres connection-pool behavior.
+3. APPLICATION REVISION UPDATE: trigger a new Container App revision (even a no-op
+   env-var touch is sufficient) so both `nzila-os-union-eyes-prod` containers restart
+   and re-establish connections using the just-updated secret — do not assume the
+   running containers will pick up the new secret value without a revision change.
+4. HEALTH CHECK: verify `/api/health`, `/api/health/liveness`, `/api/ready` all return
+   healthy on the new revision before considering the step complete.
+5. ROLLBACK WINDOW: if step 3's new revision fails health checks, the previous
+   revision/secret combination is no longer valid (the DB password already changed in
+   step 2) — the only rollback path at that point is to immediately redo step 1 with
+   the OLD password value restored to the DB role (effectively rolling back step 2),
+   not a Container App revision rollback alone. This is why steps 1-2 should happen in
+   immediate succession, minimizing the window where secret and role are out of sync.
+```
+
+No step above prints, stores, or logs the plaintext value anywhere this session can
+persist it — the operator executes this directly.
+
+### 1.5 Long-term secret-storage correction
+
+Production currently uses native Container App secrets for the DB credential(s)
+(`db-password`, `database-url`) — retrievable in plaintext by any principal with
+`listSecrets` authority (§1.6). Target state, matching the pattern staging already uses
+successfully: Container App secrets should reference Azure Key Vault
+(`keyvaultref:https://<vault>.vault.azure.net/secrets/<name>,identityref:system`) rather
+than storing values natively, for both the new `union_eyes_runtime`/`union_eyes_system`
+credentials (already planned this way — see §6/§7) and, opportunistically, the
+migration-admin credential's ephemeral usage. **No mass migration of existing
+production secrets is proposed or performed here** — this is a target-state note for
+the operator to weigh once the least-privilege cutover is underway.
+
+### 1.6 RBAC review plan for `Microsoft.App/containerApps/listSecrets/action` (plan only, not executed)
+
+`az containerapp secret show` returns Container App secret VALUES in plaintext to any
+identity holding this permission on the resource (confirmed the hard way during this
+preflight — see §1). This is a genuine, separate finding from the credential exposure
+itself: **any future holder of this permission can reproduce the same exposure**,
+regardless of whether `nzilaadmin` is rotated. Recommended read-only review, to be
+performed by the operator (not this session, and not by enumerating specific human
+identities without cause):
+
+```
+1. Enumerate role assignments scoped to nzila-os-union-eyes-prod (and its resource
+   group / subscription, since a broader-scoped role also grants this action):
+     az role assignment list --scope <containerapp-resource-id> --all
+     az role assignment list --resource-group nzila-canada-prod-rg --all
+2. For each assigned role, check whether its permissions include
+   Microsoft.App/containerApps/listSecrets/action — built-in roles that do:
+   Owner, Contributor, and any custom role explicitly granting it (Reader does NOT).
+     az role definition list --name "<role name>" --query "[].permissions"
+3. Cross-reference the resulting principal list against who/what actually NEEDS this
+   permission (CI/CD service principals performing legitimate secret rotation via
+   deploy-union-eyes.yml, versus human operators who could instead use narrower,
+   read-only roles for day-to-day access).
+4. Record findings; do not revoke or modify any role assignment as part of this
+   review without separate operator authorization — this is a visibility exercise,
+   not a remediation, and revoking a CI/CD service principal's access without
+   verifying it isn't required by an active deploy workflow could break deployments.
+```
+
+This session did not enumerate specific identities (only the class of permission and
+the review methodology), consistent with not naming individuals without operational
+need.
+
+
 
 ### 1.4 Why the production DB catalog census was not performed
 
@@ -234,29 +324,46 @@ H. verify merge did NOT trigger production deployment
 I. separately authorize production cutover (§5 onward)
 ```
 
-### 2.1 Pre-existing main-level CI state (not introduced by PR #760)
+### 2.1 Pre-existing main-level CI state (not introduced by PR #760) — Release Gate A verified
 
-At the time PR #760 was opened, `main`'s own HEAD (`09063f97258c576f55a61269ae2d6bf69d6da118`)
-already fails its scheduled `Dependency Audit` workflow (`pnpm audit` — confirmed via
-`gh api .../commits/<sha>/check-runs`, and via 5 consecutive daily failed runs of that
-workflow on `main` prior to this PR). GitHub itself reports 70 known vulnerabilities
-(27 high, 36 moderate, 7 low) on the default branch. `Trivy Container Scan` and `Ops
-Documentation Pack` failures on PR #760 are consistent with this same pre-existing
-condition. These are **not** new failures caused by the two-workflow-file change or the
-new contract test, and fixing repository-wide dependency vulnerabilities is
-intentionally out of scope for this narrow safety PR.
+**`PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES`**, established with
+exact-command, base-vs-head reproduction (not narrative assertion):
 
-### 2.2 Consequence for #752 if #760 merges first
+| Check | Failing step | PR #760 head | `main` baseline | Attribution |
+|---|---|---|---|---|
+| `Nzila Governance Gate / Dependency Audit` | `Enforce vulnerability waiver policy` | fails: 40 vulns, 11 unwaived (IDs 1158520/1158523/1158526/1158529/1193676/1193725/1193732/1193790/1193791/1193793/1193945) | fails, **byte-identical** vulnerability IDs (verified directly against `main`'s own scheduled Dependency Audit run) | BASELINE_INHERITED |
+| `Nzila GA Gate / Governance Baseline / Dependency Audit` | same | same | same underlying job (reused via `nzila-governance.yml`) | BASELINE_INHERITED |
+| `Nzila GA Gate / Governance Baseline / Trivy Container Scan` | `Run Trivy (filesystem mode) [BLOCKING]` | fails: known CVEs in `next`/`sharp`/`@tiptap/core`/`toml` | PR #760's diff touches **zero** dependency manifests (verified via `git diff origin/main..HEAD --name-only`) — Trivy's scan input is byte-identical to `main`, so its output must be identical | BASELINE_INHERITED |
+| `CI / Ops Documentation Pack` | `Validate ops pack completeness` | fails: `reports/ops/snapshot.json is stale (15.1 days old; max 7)` | time-based staleness on a file this PR doesn't touch — fails identically regardless of branch | BASELINE_INHERITED |
+| `Nzila Governance Gate / Governance Gate` | `Check all governance jobs passed` | fails | workflow source confirms `needs: [..., dependency-audit, ...]` + explicit `if needs.dependency-audit.result == 'failure': exit 1` | AGGREGATE_DOWNSTREAM_OF_BASELINE |
+| `Nzila GA Gate / Governance Baseline / Governance Gate` | same | fails | same dependency chain, reused workflow | AGGREGATE_DOWNSTREAM_OF_BASELINE |
 
-Once #760 merges into `main`, PR #752 may become behind its base. Before final #752
-merge: `git fetch origin main`, compare `main` vs `#752`'s branch, determine whether a
-merge/rebase is required, resolve only genuine conflicts (expected: none, since #760
-touches only `.github/workflows/auto-promote-union-eyes.yml`,
-`.github/workflows/deploy-union-eyes.yml`'s `plan` job, and a new contract test file —
-none of which #752 has modified), and rerun affected CI. **Do not assume the old final
-SHA (`f09b610a5...`) can merge unchanged without this check.** Preserve Round-59
-security semantics — do not let a mechanical rebase silently alter any RLS/authority
-code.
+Zero checks are `PR_ATTRIBUTABLE`, `FLAKY/INFRASTRUCTURE`, or `UNKNOWN`. GitHub itself
+reports 70 known vulnerabilities (27 high, 36 moderate, 7 low) on the default branch —
+consistent with the Dependency Audit/Trivy findings above. These are **not** new
+failures caused by the two-workflow-file change or the new contract test, and fixing
+repository-wide dependency vulnerabilities is intentionally out of scope for this narrow
+safety PR. Full evidence posted to PR #760 itself.
+
+### 2.2 Consequence for #752 if #760 merges first — empirically verified
+
+Once #760 merges into `main`, PR #752 may become behind its base. **Verified via
+`git merge-tree` (no branches mutated) rather than assumed:** both
+`.github/workflows/auto-promote-union-eyes.yml` and
+`.github/workflows/deploy-union-eyes.yml` merge **cleanly, with zero conflicts** —
+the two PRs' changed regions in `deploy-union-eyes.yml` are non-overlapping (#760
+touches only the `plan` job's `DEPLOY_ENV` `if/elif/else`, lines ~62-70 of the base
+file; #752's diff hunks in that file start at lines 20, 54, 179, 199, 215, ... none
+inside that range). The **only** merge conflicts found are in the 4 generated
+`tooling/repo-inventory/output/*` files (differing `tsTestFileCount`/
+`pythonTestFileCount` between the two branches, since each independently regenerated
+the inventory) — a trivial, mechanical conflict resolved by re-running
+`pnpm inventory:generate` after integration, not a semantic conflict requiring manual
+resolution. **Do not assume the old final SHA (`f09b610a5...`) can merge unchanged
+without re-running this check** if either branch moves before the actual merge —
+this verification is only valid as of the exact SHAs recorded in this document.
+Preserve Round-59 security semantics regardless — do not let a mechanical rebase
+silently alter any RLS/authority code.
 
 ---
 
@@ -581,29 +688,55 @@ backlog, tracked here for visibility.
 ```
 POST_ROUND59_TRANSITION = PARTIAL
 
+RELEASE_GATE_A = COMPLETE
+
+PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES
+PR760_HUMAN_REVIEW = REQUIRED (no review, human or otherwise, exists on #760;
+                      CODEOWNERS: /.github/** and /tooling/contract-tests/** are
+                      owned by @nzila/platform @nzila/security)
+
 PR752_OPERATOR_MERGE_GATE = BLOCKED
   BLOCKER_1 = human security review not yet approved
   BLOCKER_2 = merge currently auto-dispatches production (fix in PR #760, pending
               merge + verification)
+PR752_HUMAN_SECURITY_REVIEW = REQUIRED (labels predate the bulk of the reviewed
+                      work; no human-authored APPROVED review exists; CODEOWNERS:
+                      /apps/union-eyes/** owned by @nzila/eng @nzila/ue, and
+                      /.github/** owned by @nzila/platform @nzila/security since
+                      #752 also modifies deploy-union-eyes.yml/nzila-governance.yml/
+                      trivy.yml)
 
 SECURITY_INCIDENT = production admin credential exposed; rotation required (operator
                      action, not yet performed)
 
 PRODUCTION_PREFLIGHT = PARTIAL
 PRODUCTION_DB_CATALOG_PREFLIGHT = NOT PERFORMED
+PRODUCTION_DB_CONNECTION_PERFORMED = NO
 PRODUCTION_MUTATION_PERFORMED = NO
 ```
 
 **Next operator decisions, in order:**
 
 ```
-A. approve production credential rotation (§1.3)
-B. approve/merge PR #760 (production-promotion safety gate)
-C. complete human security review of #752 (§4)
-D. only then approve merge of #752
-E. separately authorize production cutover (§7), starting from step 1
+A. review/merge PR #760 (technical gate is CLEAN_WITH_PROVEN_BASELINE_FAILURES —
+   all 6 red checks traced to exact failing substeps with reproducible base-vs-head
+   evidence in PR #760 itself and §2.1 above; none PR-attributable; human review
+   from @nzila/platform / @nzila/security still required per CODEOWNERS)
+B. verify main no longer auto-dispatches production for union-eyes changes
+C. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
+D. complete human security approval of #752 (from @nzila/eng, @nzila/ue, and
+   @nzila/platform/@nzila/security given its .github/ changes), covering the final
+   mergeable diff
+E. rebase/update #752 against post-#760 main if required — predicted clean per §2.2's
+   empirical merge-tree proof (only trivial inventory-file regeneration expected)
+F. rerun materially affected #752 CI
+G. merge #752
+H. verify the merge did NOT trigger a production deployment
+I. separately authorize production cutover (§7), starting from step 1
 ```
 
 No automatic actions were taken beyond what is documented in this report and in PR
-#760. This session did not and will not merge PR #752, merge PR #760, rotate any
-credential, dispatch any production workflow, or modify production DB roles/RLS/grants.
+#760 (including its updated description with the full CI attribution table and
+conflict assessment). This session did not and will not merge PR #752, merge PR #760,
+rotate any credential, connect to production PostgreSQL, or dispatch any production
+workflow.
