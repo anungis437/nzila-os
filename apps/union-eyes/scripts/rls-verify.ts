@@ -52,6 +52,22 @@ import {
   ALL_0108_PROTECTED_TABLES as ALL_PROTECTED_TABLES,
   PROTECTED_NO_TENANT_ACCESS_TABLES,
 } from '../db/rls-0108-protected-tables'
+import { storageAuthorityManifest } from '../db/rls-storage-authority/index'
+
+// Tables the canonical storageAuthorityManifest (db/rls-storage-authority)
+// dispositions with an EMPTY requiredRuntimePrivileges array — i.e.
+// LATENT_UNREACHABLE / SYSTEM_ONLY entries where union_eyes_runtime is
+// deliberately granted ZERO table-level privileges because no application
+// code path queries the table today. For these tables, a live
+// `permission denied` error on a direct SELECT is the CORRECT and expected
+// outcome (a stronger guarantee than RLS returning zero rows) — not a
+// failure. Derived from the manifest (not hand-maintained) so this set
+// can never silently drift from the actual GRANT-compiler input.
+const ZERO_RUNTIME_PRIVILEGE_TABLES = new Set(
+  storageAuthorityManifest
+    .filter((e) => Array.isArray(e.requiredRuntimePrivileges) && e.requiredRuntimePrivileges.length === 0)
+    .map((e) => e.table),
+)
 
 interface CheckResult {
   name: string
@@ -410,12 +426,33 @@ async function checkNoContextFailsClosed(sql: postgres.Sql, results: CheckResult
     await tx.unsafe(`SELECT set_config('app.current_org_id', '', true)`)
     for (const { table } of PROTECTED_DIRECT_TABLES) {
       if (table === 'organizations') continue // every tenant may see its own org row; not a useful no-context probe
-      const rows = await tx.unsafe(`SELECT 1 FROM ${table} LIMIT 1`)
-      results.push({
-        name: `no-context probe: ${table} returns zero rows`,
-        pass: rows.length === 0,
-        detail: rows.length === 0 ? 'ok' : `returned ${rows.length} row(s) with no org context set`,
-      })
+      const zeroPrivilegeTable = ZERO_RUNTIME_PRIVILEGE_TABLES.has(table)
+      // Each probe runs inside its own SAVEPOINT: a `permission denied`
+      // error aborts the enclosing Postgres transaction until rolled back,
+      // and without a savepoint here every subsequent table in this loop
+      // would spuriously fail with "current transaction is aborted" once
+      // one zero-privilege table's SELECT throws.
+      try {
+        await tx.savepoint(async (sp) => {
+          const rows = await sp.unsafe(`SELECT 1 FROM ${table} LIMIT 1`)
+          results.push({
+            name: `no-context probe: ${table} returns zero rows`,
+            pass: rows.length === 0,
+            detail: rows.length === 0 ? 'ok' : `returned ${rows.length} row(s) with no org context set`,
+          })
+        })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        const isPermissionDenied = /permission denied/i.test(message)
+        results.push({
+          name: `no-context probe: ${table} returns zero rows`,
+          pass: isPermissionDenied && zeroPrivilegeTable,
+          detail:
+            isPermissionDenied && zeroPrivilegeTable
+              ? 'ok (permission denied — union_eyes_runtime has zero required runtime privileges on this LATENT_UNREACHABLE table per the storage authority manifest, which is a stronger guarantee than RLS alone)'
+              : `unexpected error: ${message}`,
+        })
+      }
     }
   })
 }
