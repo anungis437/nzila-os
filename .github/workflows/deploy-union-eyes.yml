@@ -1218,7 +1218,7 @@ jobs:
 
           cleanup() {
             az postgres flexible-server firewall-rule delete \
-              --name "$POSTGRES_SERVER_NAME" \
+              --server-name "$POSTGRES_SERVER_NAME" \
               --resource-group "$POSTGRES_RG" \
               --rule-name "$RULE_NAME" \
               --yes >/dev/null 2>&1 || true
@@ -1226,7 +1226,7 @@ jobs:
           trap cleanup EXIT
 
           az postgres flexible-server firewall-rule create \
-            --name "$POSTGRES_SERVER_NAME" \
+            --server-name "$POSTGRES_SERVER_NAME" \
             --resource-group "$POSTGRES_RG" \
             --rule-name "$RULE_NAME" \
             --start-ip-address "$RUNNER_IP" \
