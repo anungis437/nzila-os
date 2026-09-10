@@ -79,25 +79,31 @@ BEGIN
   EXECUTE format('DROP POLICY IF EXISTS ue_user_isolation_delete ON %I', p_table_name);
   EXECUTE format('DROP POLICY IF EXISTS ue_system_full_access ON %I', p_table_name);
 
+  -- Round 59 staging proof fix: ai_copilot_sessions.user_id is UUID (not
+  -- every user_id column in this codebase is TEXT like the Clerk-to-Entra
+  -- id columns), and Postgres has no uuid = text operator. Cast the column
+  -- to text unconditionally (a no-op for columns already TEXT) — same
+  -- defensive pattern every other policy-helper function in this file
+  -- already uses for its org_id comparisons.
   EXECUTE format(
     'CREATE POLICY ue_user_isolation_select ON %I FOR SELECT TO union_eyes_runtime ' ||
-    'USING (%I = current_setting(''app.current_user_id'', true))',
+    'USING (%I::text = current_setting(''app.current_user_id'', true))',
     p_table_name, p_user_column
   );
   EXECUTE format(
     'CREATE POLICY ue_user_isolation_insert ON %I FOR INSERT TO union_eyes_runtime ' ||
-    'WITH CHECK (%I = current_setting(''app.current_user_id'', true))',
+    'WITH CHECK (%I::text = current_setting(''app.current_user_id'', true))',
     p_table_name, p_user_column
   );
   EXECUTE format(
     'CREATE POLICY ue_user_isolation_update ON %I FOR UPDATE TO union_eyes_runtime ' ||
-    'USING (%I = current_setting(''app.current_user_id'', true)) ' ||
-    'WITH CHECK (%I = current_setting(''app.current_user_id'', true))',
+    'USING (%I::text = current_setting(''app.current_user_id'', true)) ' ||
+    'WITH CHECK (%I::text = current_setting(''app.current_user_id'', true))',
     p_table_name, p_user_column, p_user_column
   );
   EXECUTE format(
     'CREATE POLICY ue_user_isolation_delete ON %I FOR DELETE TO union_eyes_runtime ' ||
-    'USING (%I = current_setting(''app.current_user_id'', true))',
+    'USING (%I::text = current_setting(''app.current_user_id'', true))',
     p_table_name, p_user_column
   );
   EXECUTE format(
@@ -203,12 +209,14 @@ BEGIN
   -- own authority column is a USER identity (app.current_user_id), not an
   -- organization (e.g. workbooks' claimed_by_user_id) — used for tables
   -- whose USER_RLS_REQUIRED authority is only reachable through a parent.
+  -- Round 59 staging proof fix: cast the parent's user column to text
+  -- unconditionally (no-op if already TEXT) — see ue_create_user_rls_policy.
   EXECUTE format(
     'CREATE POLICY ue_parent_user_isolation_v2 ON %I FOR ALL TO union_eyes_runtime ' ||
     'USING (EXISTS (SELECT 1 FROM %I parent WHERE parent.id = %I.%I ' ||
-    '  AND parent.%I = current_setting(''app.current_user_id'', true))) ' ||
+    '  AND parent.%I::text = current_setting(''app.current_user_id'', true))) ' ||
     'WITH CHECK (EXISTS (SELECT 1 FROM %I parent WHERE parent.id = %I.%I ' ||
-    '  AND parent.%I = current_setting(''app.current_user_id'', true)))',
+    '  AND parent.%I::text = current_setting(''app.current_user_id'', true)))',
     p_table_name, p_parent_table, p_table_name, p_fk_column, p_parent_user_column,
     p_parent_table, p_table_name, p_fk_column, p_parent_user_column
   );
