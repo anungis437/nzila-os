@@ -1220,7 +1220,7 @@ jobs:
             az postgres flexible-server firewall-rule delete \
               --server-name "$POSTGRES_SERVER_NAME" \
               --resource-group "$POSTGRES_RG" \
-              --rule-name "$RULE_NAME" \
+              --name "$RULE_NAME" \
               --yes >/dev/null 2>&1 || true
           }
           trap cleanup EXIT
@@ -1228,7 +1228,7 @@ jobs:
           az postgres flexible-server firewall-rule create \
             --server-name "$POSTGRES_SERVER_NAME" \
             --resource-group "$POSTGRES_RG" \
-            --rule-name "$RULE_NAME" \
+            --name "$RULE_NAME" \
             --start-ip-address "$RUNNER_IP" \
             --end-ip-address "$RUNNER_IP" >/dev/null
 
