@@ -1325,20 +1325,6 @@ jobs:
           export RLS_VERIFY_DATABASE_URL="$RUNTIME_URL"
           export RLS_VERIFY_SYSTEM_DATABASE_URL="$SYSTEM_URL"
 
-          # Temporary diagnostic (read-only, non-fatal): dump the live
-          # role/grant state for a representative protected table so a
-          # rls-verify.ts permission-denied failure is actionable from CI
-          # logs alone, without needing a separate psql session against
-          # staging. Remove once the round-58 GRANT drift finding this is
-          # investigating is root-caused and resolved.
-          echo "::group::RLS diagnostic — organization_members role/grant state"
-          psql "$RUNTIME_URL" -X -q \
-            -c "SELECT current_user AS connected_as;" \
-            -c "SELECT grantee, privilege_type FROM information_schema.role_table_grants WHERE table_name = 'organization_members' ORDER BY grantee, privilege_type;" \
-            -c "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname = 'organization_members';" \
-            2>&1 || true
-          echo "::endgroup::"
-
           pnpm --filter @nzila/union-eyes exec tsx scripts/rls-verify.ts --mode=preflight
           PREFLIGHT_STATUS=$?
 
