@@ -1268,7 +1268,53 @@ jobs:
             DJANGO_SKIP_MIGRATIONS="true"
           fi
 
-          # Backend runs migrations automatically on startup (Dockerfile CMD)
+          # ROUND 59B FOLLOW-UP FIX: PGUSER/PGPASSWORD above are now the
+          # least-privilege union_eyes_runtime role (correct — this is the
+          # credential the app uses for every request). But the Dockerfile
+          # CMD also runs `python manage.py migrate` on every container
+          # startup, and Django migrations require DDL/table-owner
+          # privileges the runtime role must NOT have. Deploying the
+          # runtime-role fix alone (5ecb1710f) caused django-backend to
+          # crash-loop on startup with "permission denied for table
+          # django_migrations", because migrate was now running as the
+          # restricted role instead of the old nzilaadmin bypass.
+          #
+          # Fix: wire a SEPARATE migration-admin credential onto the
+          # container (same Key Vault secret already used by the mandatory
+          # "Apply ICRA Capability Migration" pre-deploy gate and the RLS
+          # foundation migration job). The Dockerfile CMD uses this only for
+          # the transient startup migrate step, in a subshell, and starts
+          # gunicorn with the normal runtime PG* env — so ongoing app
+          # traffic is never touched by the elevated credential.
+          MIGRATION_ADMIN_URL=$(az keyvault secret show \
+            --vault-name "$KEY_VAULT_NAME" \
+            --name "union-eyes-migration-admin-database-url" \
+            --query value -o tsv)
+
+          if [ -z "$MIGRATION_ADMIN_URL" ]; then
+            echo "::error::Key Vault secret 'union-eyes-migration-admin-database-url' not found in '$KEY_VAULT_NAME'. django-backend cannot safely run startup migrations without a dedicated migration-admin credential (the runtime role must not have DDL/migration-table privileges). Refusing to deploy the backend container."
+            exit 1
+          fi
+
+          # urldecode() may already be defined if the DATABASE_URL branch
+          # above ran; redefine unconditionally here so this parsing works
+          # even when that branch was skipped (frontend has no DATABASE_URL
+          # secret and we fell through to the discrete-PG*-values fallback).
+          urldecode() { local d="${1//+/ }"; printf '%b' "${d//%/\\x}"; }
+          UE_ADMIN_REST="${MIGRATION_ADMIN_URL#*://}"
+          UE_ADMIN_CREDS="${UE_ADMIN_REST%%@*}"
+          ADMIN_PGUSER=$(urldecode "${UE_ADMIN_CREDS%%:*}")
+          ADMIN_PGPASSWORD=$(urldecode "${UE_ADMIN_CREDS#*:}")
+
+          az containerapp secret set \
+            --name "$TARGET_APP" \
+            --resource-group "$TARGET_RG" \
+            --secrets "db-admin-password=$ADMIN_PGPASSWORD" >/dev/null
+
+          # Backend runs migrations automatically on startup (Dockerfile CMD),
+          # using PGADMIN_USER/PGADMIN_PASSWORD (migration-admin), while
+          # ongoing app traffic uses PGUSER/PGPASSWORD (least-privilege
+          # runtime role).
           az containerapp update \
             --name "$TARGET_APP" \
             --resource-group "$TARGET_RG" \
@@ -1284,6 +1330,8 @@ jobs:
               "PGPORT=$PGPORT_VAL" \
               "PGSSLMODE=$PGSSLMODE_VAL" \
               "PGPASSWORD=secretref:$PGPASSWORD_SECRET" \
+              "PGADMIN_USER=$ADMIN_PGUSER" \
+              "PGADMIN_PASSWORD=secretref:db-admin-password" \
               "DJANGO_MIGRATE_EXTRA_ARGS=$DJANGO_MIGRATE_EXTRA_ARGS" \
               "DJANGO_SKIP_MIGRATIONS=$DJANGO_SKIP_MIGRATIONS" \
             --image ${{ env.BACKEND_IMAGE }}@${{ needs.build-push.outputs.backend_digest }}
