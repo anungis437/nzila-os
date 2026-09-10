@@ -9,6 +9,16 @@
  * 
  * SECURITY: Uses safeIdentifier functions for all dynamic SQL identifiers
  * Updated: February 11, 2026 - P2 Security Enhancement
+ *
+ * Round 59B hardening: the SELECT clause has always resolved fieldId ->
+ * fieldMeta.column through the DATA_SOURCES registry (a hard allowlist).
+ * filters/having/groupBy/sortBy/join-on-fields instead passed the caller's
+ * raw string straight to safeColumnName(), which blocks true SQL injection
+ * syntax (quotes, comments, statement stacking) via strict identifier-regex
+ * validation but did NOT restrict *which* real column/table could be
+ * referenced. isKnownColumnReference() below closes that gap by requiring
+ * every such reference to resolve to a real (table, column) pair that is
+ * actually part of the reporting data model.
  */
 
 import { sql, SQL } from 'drizzle-orm';
@@ -177,6 +187,30 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
 // Report Executor Class
 // ============================================================================
 
+/**
+ * Hard allowlist check for a filter/groupBy/sortBy/join-on column reference.
+ *
+ * Accepts either a bare column name ('status') or a table-qualified name
+ * ('claims.status'), and requires it to match a real (table, column) pair
+ * declared in DATA_SOURCES — never an arbitrary identifier that merely
+ * happens to be syntactically valid. Schema-qualified references
+ * ('public.claims.status') are rejected outright; the reporting model has
+ * no legitimate use for them.
+ */
+function isKnownColumnReference(ref: string): boolean {
+  const parts = ref.split('.');
+  if (parts.length === 1) {
+    const [column] = parts;
+    return DATA_SOURCES.some((ds) => ds.fields.some((f) => f.column === column));
+  }
+  if (parts.length === 2) {
+    const [table, column] = parts;
+    const ds = DATA_SOURCES.find((d) => d.table === table);
+    return Boolean(ds && ds.fields.some((f) => f.column === column));
+  }
+  return false;
+}
+
 export class ReportExecutor {
   private organizationId: string;
 
@@ -246,6 +280,36 @@ return {
       const fieldExists = dataSource.fields.some(f => f.id === field.fieldId);
       if (!fieldExists) {
         throw new Error(`Invalid field: ${field.fieldId}`);
+      }
+    }
+
+    // SECURITY: hard-allowlist every dynamic column reference outside the
+    // SELECT list (filters/having/groupBy/sortBy/join-on fields) against
+    // DATA_SOURCES — see isKnownColumnReference() doc comment. These paths
+    // previously relied only on safeColumnName()'s identifier-syntax
+    // validation, which blocks injection syntax but not arbitrary real
+    // column/table references outside the reporting data model.
+    // Join type/operator/table/field validation happens in buildJoinClause
+    // (after this method), preserving that a bad type/operator/table is
+    // reported before a bad field reference for the same malformed join.
+    for (const filter of [...(config.filters ?? []), ...(config.having ?? [])]) {
+      const ref = filter.fieldName || filter.fieldId;
+      if (!isKnownColumnReference(ref)) {
+        throw new Error(`Invalid filter field: ${ref}`);
+      }
+    }
+    if (config.groupBy) {
+      for (const ref of config.groupBy) {
+        if (!isKnownColumnReference(ref)) {
+          throw new Error(`Invalid groupBy field: ${ref}`);
+        }
+      }
+    }
+    if (config.sortBy) {
+      for (const sort of config.sortBy) {
+        if (!isKnownColumnReference(sort.fieldId)) {
+          throw new Error(`Invalid sortBy field: ${sort.fieldId}`);
+        }
       }
     }
   }
@@ -429,6 +493,15 @@ return {
       const tableExists = DATA_SOURCES.some(ds => ds.table === join.table);
       if (!tableExists) {
         throw new Error(`Invalid join table: ${join.table}`);
+      }
+
+      // SECURITY (Round 59B): hard-allowlist the join's on-fields against
+      // DATA_SOURCES — see isKnownColumnReference() doc comment above.
+      if (!isKnownColumnReference(join.on.leftField)) {
+        throw new Error(`Invalid join field: ${join.on.leftField}`);
+      }
+      if (!isKnownColumnReference(join.on.rightField)) {
+        throw new Error(`Invalid join field: ${join.on.rightField}`);
       }
 
       result = sql`${result} ${sql.raw(joinType)} JOIN ${safeTableName(join.table)} ON ${safeColumnName(join.on.leftField)} ${sql.raw(operator)} ${safeColumnName(join.on.rightField)}`;
