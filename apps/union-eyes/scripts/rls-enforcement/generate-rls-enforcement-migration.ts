@@ -837,14 +837,34 @@ END $$;
   // without threading a parallel table-tracking array through every call
   // site. Statements that don't match this shape (the SYSTEM_ONLY DO block,
   // already self-guarded above) pass through unchanged.
+  //
+  // Also guard on the 2nd argument, when present as a string literal: in
+  // every ue_create_*_rls_policy signature this generator emits, the 2nd
+  // positional argument is always a column that must exist ON THIS TABLE
+  // (org_column / user_column / fk_column) — never a different table's
+  // column. Discovered live against staging: strike_fund_disbursements
+  // exists but its own migration (20260909_strike_fund_disbursements_
+  // organization_id.sql) had never been applied there either, and 2 real
+  // rows fail that migration's own fail-closed backfill (ambiguous/zero
+  // historically-valid owning organization at their payment_date) — a
+  // genuine data-provenance gap requiring a human business decision on
+  // those 2 rows, not something this generator should paper over by
+  // guessing. Skipping enforcement for a table missing its expected column
+  // (same as skipping a missing table entirely) is the correct fail-closed
+  // response until that column exists.
   const guardedPolicyStatements = policyStatements.map((stmt) => {
-    const match = stmt.match(/^SELECT (ue_create_\w+)\('((?:[^'\\]|\\.)*)'(.*)\);$/);
+    const match = stmt.match(/^SELECT (ue_create_\w+)\('((?:[^'\\]|\\.)*)'(?:, '((?:[^'\\]|\\.)*)')?(.*)\);$/);
     if (!match) return stmt;
-    const [, fnName, tableName, restArgs] = match;
+    const [, fnName, tableName, columnName, restArgs] = match;
+    const callArgs = columnName !== undefined ? `'${tableName}', '${columnName}'${restArgs}` : `'${tableName}'${restArgs}`;
+    const columnCheck =
+      columnName !== undefined
+        ? ` AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${tableName}' AND column_name = '${columnName}')`
+        : "";
     return (
       `DO $$ BEGIN\n` +
-      `  IF to_regclass('public.' || '${tableName}') IS NOT NULL THEN\n` +
-      `    PERFORM ${fnName}('${tableName}'${restArgs});\n` +
+      `  IF to_regclass('public.' || '${tableName}') IS NOT NULL${columnCheck} THEN\n` +
+      `    PERFORM ${fnName}(${callArgs});\n` +
       `  END IF;\n` +
       `END $$;`
     );

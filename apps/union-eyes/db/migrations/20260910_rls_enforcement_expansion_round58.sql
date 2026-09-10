@@ -326,27 +326,27 @@ $$ LANGUAGE plpgsql;
 -- =============================================================================
 
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ai_clause_reasonings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ai_clause_reasonings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ai_clause_reasonings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('ai_clause_reasonings', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ai_copilot_sessions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ai_copilot_sessions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ai_copilot_sessions' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('ai_copilot_sessions', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ai_insight_reports') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ai_insight_reports') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ai_insight_reports' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('ai_insight_reports', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ai_usage_metrics') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ai_usage_metrics') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ai_usage_metrics' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('ai_usage_metrics', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'analytics_metrics') IS NOT NULL THEN
+  IF to_regclass('public.' || 'analytics_metrics') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'analytics_metrics' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('analytics_metrics', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -359,7 +359,7 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_risk_scores') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_risk_scores') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_risk_scores' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_risk_scores', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -380,352 +380,352 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'insight_recommendations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'insight_recommendations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'insight_recommendations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('insight_recommendations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ml_predictions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ml_predictions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ml_predictions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('ml_predictions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'model_metadata') IS NOT NULL THEN
+  IF to_regclass('public.' || 'model_metadata') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'model_metadata' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('model_metadata', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_metrics') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_metrics') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_metrics' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_metrics', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'social_analytics') IS NOT NULL THEN
+  IF to_regclass('public.' || 'social_analytics') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'social_analytics' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('social_analytics', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'claim_deadlines') IS NOT NULL THEN
+  IF to_regclass('public.' || 'claim_deadlines') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'claim_deadlines' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('claim_deadlines', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'deadline_reminders') IS NOT NULL THEN
+  IF to_regclass('public.' || 'deadline_reminders') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'deadline_reminders' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('deadline_reminders', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_case_access_assignments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_case_access_assignments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_case_access_assignments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('grievance_case_access_assignments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ai_grievance_triages') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ai_grievance_triages') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ai_grievance_triages' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('ai_grievance_triages', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'arbitrations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'arbitrations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'arbitrations' AND column_name = 'grievance_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('arbitrations', 'grievance_id', 'grievances', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'bargaining_notes') IS NOT NULL THEN
+  IF to_regclass('public.' || 'bargaining_notes') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bargaining_notes' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('bargaining_notes', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'bargaining_units') IS NOT NULL THEN
+  IF to_regclass('public.' || 'bargaining_units') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bargaining_units' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('bargaining_units', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'case_documents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'case_documents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'case_documents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('case_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cba_clauses') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cba_clauses') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cba_clauses' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cba_clauses', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cba_rule_set_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cba_rule_set_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cba_rule_set_items' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cba_rule_set_items', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cba_rule_versions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cba_rule_versions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cba_rule_versions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cba_rule_versions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'collective_agreements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'collective_agreements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'collective_agreements' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('collective_agreements', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_insurance_claims') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_insurance_claims') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_insurance_claims' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_insurance_claims', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_documents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_documents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_documents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('grievance_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_settlements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_settlements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_settlements' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('grievance_settlements', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_timeline_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_timeline_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_timeline_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('grievance_timeline_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_transitions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_transitions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_transitions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('grievance_transitions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_benefit_claims') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_benefit_claims') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_benefit_claims' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_benefit_claims', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'settlements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'settlements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'settlements' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('settlements', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'wcb_claims') IS NOT NULL THEN
+  IF to_regclass('public.' || 'wcb_claims') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'wcb_claims' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('wcb_claims', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'arbitration_precedents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'arbitration_precedents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'arbitration_precedents' AND column_name = 'source_organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('arbitration_precedents', 'source_organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'bargaining_proposals') IS NOT NULL THEN
+  IF to_regclass('public.' || 'bargaining_proposals') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bargaining_proposals' AND column_name = 'negotiation_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('bargaining_proposals', 'negotiation_id', 'negotiations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'claim_updates') IS NOT NULL THEN
+  IF to_regclass('public.' || 'claim_updates') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'claim_updates' AND column_name = 'claim_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('claim_updates', 'claim_id', 'claims', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_events' AND column_name = 'grievance_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('grievance_events', 'grievance_id', 'grievances', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'grievance_timeline') IS NOT NULL THEN
+  IF to_regclass('public.' || 'grievance_timeline') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'grievance_timeline' AND column_name = 'grievance_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('grievance_timeline', 'grievance_id', 'grievances', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'campaigns') IS NOT NULL THEN
+  IF to_regclass('public.' || 'campaigns') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'chat_sessions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'chat_sessions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chat_sessions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('chat_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'communication_preferences') IS NOT NULL THEN
+  IF to_regclass('public.' || 'communication_preferences') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'communication_preferences' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('communication_preferences', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'consent_records') IS NOT NULL THEN
+  IF to_regclass('public.' || 'consent_records') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'consent_records' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('consent_records', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cookie_consents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cookie_consents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cookie_consents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cookie_consents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'data_aggregation_consent') IS NOT NULL THEN
+  IF to_regclass('public.' || 'data_aggregation_consent') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'data_aggregation_consent' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('data_aggregation_consent', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'donation_campaigns') IS NOT NULL THEN
+  IF to_regclass('public.' || 'donation_campaigns') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'donation_campaigns' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('donation_campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_communications') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_communications') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_communications' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_communications', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_communication_channels') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_communication_channels') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_communication_channels' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_communication_channels', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_communication_messages') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_communication_messages') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_communication_messages' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_communication_messages', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_communication_users') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_communication_users') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_communication_users' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_communication_users', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'in_app_notifications') IS NOT NULL THEN
+  IF to_regclass('public.' || 'in_app_notifications') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'in_app_notifications' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('in_app_notifications', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'message_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'message_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'message_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('message_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'newsletter_campaigns') IS NOT NULL THEN
+  IF to_regclass('public.' || 'newsletter_campaigns') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'newsletter_campaigns' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('newsletter_campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'newsletter_distribution_lists') IS NOT NULL THEN
+  IF to_regclass('public.' || 'newsletter_distribution_lists') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'newsletter_distribution_lists' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('newsletter_distribution_lists', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'notification_delivery_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'notification_delivery_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'notification_delivery_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('notification_delivery_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'notification_queue') IS NOT NULL THEN
+  IF to_regclass('public.' || 'notification_queue') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'notification_queue' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('notification_queue', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'notification_tracking') IS NOT NULL THEN
+  IF to_regclass('public.' || 'notification_tracking') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'notification_tracking' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('notification_tracking', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'notifications') IS NOT NULL THEN
+  IF to_regclass('public.' || 'notifications') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'notifications' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('notifications', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'organizing_campaigns') IS NOT NULL THEN
+  IF to_regclass('public.' || 'organizing_campaigns') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'organizing_campaigns' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('organizing_campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'push_notifications') IS NOT NULL THEN
+  IF to_regclass('public.' || 'push_notifications') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'push_notifications' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('push_notifications', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'sms_campaigns') IS NOT NULL THEN
+  IF to_regclass('public.' || 'sms_campaigns') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'sms_campaigns' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('sms_campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'sms_conversations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'sms_conversations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'sms_conversations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('sms_conversations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'sms_messages') IS NOT NULL THEN
+  IF to_regclass('public.' || 'sms_messages') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'sms_messages' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('sms_messages', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'social_campaigns') IS NOT NULL THEN
+  IF to_regclass('public.' || 'social_campaigns') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'social_campaigns' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('social_campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'user_consents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'user_consents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'user_consents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('user_consents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'user_notification_preferences') IS NOT NULL THEN
+  IF to_regclass('public.' || 'user_notification_preferences') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'user_notification_preferences' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('user_notification_preferences', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'chat_messages') IS NOT NULL THEN
+  IF to_regclass('public.' || 'chat_messages') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chat_messages' AND column_name = 'session_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('chat_messages', 'session_id', 'chat_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'newsletter_list_subscribers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'newsletter_list_subscribers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'newsletter_list_subscribers' AND column_name = 'list_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('newsletter_list_subscribers', 'list_id', 'newsletter_distribution_lists', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'newsletter_recipients') IS NOT NULL THEN
+  IF to_regclass('public.' || 'newsletter_recipients') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'newsletter_recipients' AND column_name = 'campaign_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('newsletter_recipients', 'campaign_id', 'newsletter_campaigns', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'provincial_consent') IS NOT NULL THEN
+  IF to_regclass('public.' || 'provincial_consent') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'provincial_consent' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('provincial_consent', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cms_media_library') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cms_media_library') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cms_media_library' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cms_media_library', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'document_access_grants') IS NOT NULL THEN
+  IF to_regclass('public.' || 'document_access_grants') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'document_access_grants' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('document_access_grants', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'document_folders') IS NOT NULL THEN
+  IF to_regclass('public.' || 'document_folders') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'document_folders' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('document_folders', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'document_links') IS NOT NULL THEN
+  IF to_regclass('public.' || 'document_links') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'document_links' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('document_links', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'document_versions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'document_versions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'document_versions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('document_versions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_execution_evidence_links') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_execution_evidence_links') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_execution_evidence_links' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_execution_evidence_links', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_execution_profiles') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_execution_profiles') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_execution_profiles' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_execution_profiles', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'exit_interview_documents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'exit_interview_documents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'exit_interview_documents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('exit_interview_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_communication_files') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_communication_files') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_communication_files' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_communication_files', 'org_id', FALSE);
   END IF;
 END $$;
@@ -738,282 +738,282 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'message_templates') IS NOT NULL THEN
+  IF to_regclass('public.' || 'message_templates') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'message_templates' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('message_templates', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'notification_templates') IS NOT NULL THEN
+  IF to_regclass('public.' || 'notification_templates') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'notification_templates' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('notification_templates', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'signature_documents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'signature_documents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'signature_documents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('signature_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'document_signers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'document_signers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'document_signers' AND column_name = 'document_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('document_signers', 'document_id', 'signature_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'profiles') IS NOT NULL THEN
+  IF to_regclass('public.' || 'profiles') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('profiles', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'account_mappings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'account_mappings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'account_mappings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_mixed_global_tenant_rls_policy('account_mappings', 'organization_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'bank_accounts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'bank_accounts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bank_accounts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('bank_accounts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'bank_reconciliation') IS NOT NULL THEN
+  IF to_regclass('public.' || 'bank_reconciliation') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bank_reconciliation' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('bank_reconciliation', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'bank_reconciliations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'bank_reconciliations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bank_reconciliations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('bank_reconciliations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'billing_accounts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'billing_accounts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'billing_accounts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('billing_accounts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'billing_periods') IS NOT NULL THEN
+  IF to_regclass('public.' || 'billing_periods') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'billing_periods' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('billing_periods', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'billing_subscriptions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'billing_subscriptions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'billing_subscriptions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('billing_subscriptions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'budget_pool') IS NOT NULL THEN
+  IF to_regclass('public.' || 'budget_pool') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'budget_pool' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('budget_pool', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'chart_of_accounts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'chart_of_accounts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chart_of_accounts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('chart_of_accounts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'clc_remittance_mapping') IS NOT NULL THEN
+  IF to_regclass('public.' || 'clc_remittance_mapping') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'clc_remittance_mapping' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('clc_remittance_mapping', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cost_centers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cost_centers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cost_centers' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cost_centers', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'dues_assignments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'dues_assignments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dues_assignments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('dues_assignments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'dues_rates') IS NOT NULL THEN
+  IF to_regclass('public.' || 'dues_rates') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dues_rates' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('dues_rates', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'dues_transactions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'dues_transactions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dues_transactions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('dues_transactions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_payroll_run_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_payroll_run_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_payroll_run_items' AND column_name = 'payroll_run_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('employer_payroll_run_items', 'payroll_run_id', 'employer_payroll_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_payroll_runs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_payroll_runs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_payroll_runs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_payroll_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_remittance_run_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_remittance_run_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_remittance_run_items' AND column_name = 'remittance_run_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('employer_remittance_run_items', 'remittance_run_id', 'employer_remittance_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_remittance_runs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_remittance_runs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_remittance_runs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_remittance_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_remittances') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_remittances') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_remittances' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_remittances', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'entitlement_usage_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'entitlement_usage_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'entitlement_usage_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('entitlement_usage_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'erp_invoices') IS NOT NULL THEN
+  IF to_regclass('public.' || 'erp_invoices') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'erp_invoices' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('erp_invoices', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'financial_periods') IS NOT NULL THEN
+  IF to_regclass('public.' || 'financial_periods') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'financial_periods' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('financial_periods', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'gl_account_mappings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'gl_account_mappings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'gl_account_mappings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('gl_account_mappings', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'gl_transaction_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'gl_transaction_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'gl_transaction_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('gl_transaction_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'gl_trial_balance') IS NOT NULL THEN
+  IF to_regclass('public.' || 'gl_trial_balance') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'gl_trial_balance' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('gl_trial_balance', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payment_cycles') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payment_cycles') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_cycles' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('payment_cycles', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payment_disputes') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payment_disputes') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_disputes' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('payment_disputes', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payment_methods') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payment_methods') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_methods' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('payment_methods', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payment_plans') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payment_plans') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_plans' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('payment_plans', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('payments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payroll_deductions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payroll_deductions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payroll_deductions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('payroll_deductions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_contributions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_contributions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_contributions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_contributions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_plans') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_plans') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_plans' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_plans', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_t4a_records') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_t4a_records') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_t4a_records' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_t4a_records', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_trustee_meetings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_trustee_meetings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_trustee_meetings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_trustee_meetings', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_trustees') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_trustees') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_trustees' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_trustees', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'per_capita_remittances') IS NOT NULL THEN
+  IF to_regclass('public.' || 'per_capita_remittances') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'per_capita_remittances' AND column_name = 'from_organization_id') THEN
     PERFORM ue_create_multi_party_rls_policy('per_capita_remittances', 'from_organization_id', 'to_organization_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'platform_cost_ledger_entries') IS NOT NULL THEN
+  IF to_regclass('public.' || 'platform_cost_ledger_entries') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'platform_cost_ledger_entries' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('platform_cost_ledger_entries', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'platform_invoices') IS NOT NULL THEN
+  IF to_regclass('public.' || 'platform_invoices') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'platform_invoices' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('platform_invoices', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'platform_payments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'platform_payments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'platform_payments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('platform_payments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reconciliation_exceptions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reconciliation_exceptions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reconciliation_exceptions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('reconciliation_exceptions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reconciliation_runs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reconciliation_runs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reconciliation_runs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('reconciliation_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'remittance_exceptions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'remittance_exceptions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'remittance_exceptions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('remittance_exceptions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'remittance_line_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'remittance_line_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'remittance_line_items' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('remittance_line_items', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reward_budget_envelopes') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reward_budget_envelopes') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reward_budget_envelopes' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('reward_budget_envelopes', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reward_wallet_ledger') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reward_wallet_ledger') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reward_wallet_ledger' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('reward_wallet_ledger', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'social_accounts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'social_accounts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'social_accounts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('social_accounts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'subscription_events_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'subscription_events_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'subscription_events_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('subscription_events_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'payment_allocations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'payment_allocations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_allocations' AND column_name = 'payment_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('payment_allocations', 'payment_id', 'platform_payments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'platform_invoice_line_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'platform_invoice_line_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'platform_invoice_line_items' AND column_name = 'invoice_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('platform_invoice_line_items', 'invoice_id', 'platform_invoices', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reconciliation_matches') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reconciliation_matches') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reconciliation_matches' AND column_name = 'run_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('reconciliation_matches', 'run_id', 'reconciliation_runs', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1026,42 +1026,42 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'strike_fund_disbursements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'strike_fund_disbursements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'strike_fund_disbursements' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('strike_fund_disbursements', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'board_packets') IS NOT NULL THEN
+  IF to_regclass('public.' || 'board_packets') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'board_packets' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('board_packets', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'committee_action_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'committee_action_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committee_action_items' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('committee_action_items', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'committee_documents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'committee_documents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committee_documents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('committee_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'committee_intelligence_snapshots') IS NOT NULL THEN
+  IF to_regclass('public.' || 'committee_intelligence_snapshots') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committee_intelligence_snapshots' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('committee_intelligence_snapshots', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'committee_meetings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'committee_meetings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committee_meetings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('committee_meetings', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'committees') IS NOT NULL THEN
+  IF to_regclass('public.' || 'committees') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committees' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('committees', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'governance_policies') IS NOT NULL THEN
+  IF to_regclass('public.' || 'governance_policies') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'governance_policies' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('governance_policies', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1074,17 +1074,17 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'joint_hs_committees') IS NOT NULL THEN
+  IF to_regclass('public.' || 'joint_hs_committees') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'joint_hs_committees' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('joint_hs_committees', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'board_packet_distributions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'board_packet_distributions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'board_packet_distributions' AND column_name = 'packet_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('board_packet_distributions', 'packet_id', 'board_packets', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'committee_meeting_attendees') IS NOT NULL THEN
+  IF to_regclass('public.' || 'committee_meeting_attendees') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committee_meeting_attendees' AND column_name = 'meeting_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('committee_meeting_attendees', 'meeting_id', 'committee_meetings', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1129,182 +1129,182 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'workbook_governance_lineage_entries') IS NOT NULL THEN
+  IF to_regclass('public.' || 'workbook_governance_lineage_entries') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'workbook_governance_lineage_entries' AND column_name = 'workbook_id') THEN
     PERFORM ue_create_parent_owned_via_user_rls_policy_v2('workbook_governance_lineage_entries', 'workbook_id', 'workbooks', 'claimed_by_user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'deadline_audit_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'deadline_audit_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'deadline_audit_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('deadline_audit_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ai_safety_filters') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ai_safety_filters') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ai_safety_filters' AND column_name = 'session_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('ai_safety_filters', 'session_id', 'chat_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'correspondence_audit_trail') IS NOT NULL THEN
+  IF to_regclass('public.' || 'correspondence_audit_trail') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'correspondence_audit_trail' AND column_name = 'correspondence_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('correspondence_audit_trail', 'correspondence_id', 'correspondence', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'location_tracking_audit') IS NOT NULL THEN
+  IF to_regclass('public.' || 'location_tracking_audit') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'location_tracking_audit' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('location_tracking_audit', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'signature_audit_trail') IS NOT NULL THEN
+  IF to_regclass('public.' || 'signature_audit_trail') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'signature_audit_trail' AND column_name = 'document_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('signature_audit_trail', 'document_id', 'signature_documents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'api_integrations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'api_integrations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'api_integrations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('api_integrations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'clc_sync_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'clc_sync_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'clc_sync_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('clc_sync_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_timesheet_batches') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_timesheet_batches') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_timesheet_batches' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_timesheet_batches', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_accounts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_accounts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_accounts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_accounts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_benefit_coverage') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_benefit_coverage') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_benefit_coverage' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_benefit_coverage', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_benefit_dependents') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_benefit_dependents') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_benefit_dependents' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_benefit_dependents', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_benefit_enrollments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_benefit_enrollments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_benefit_enrollments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_benefit_enrollments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_benefit_plans') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_benefit_plans') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_benefit_plans' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_benefit_plans', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_benefit_utilization') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_benefit_utilization') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_benefit_utilization' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_benefit_utilization', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_calendar_connections') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_calendar_connections') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_calendar_connections' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_calendar_connections', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_customers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_customers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_customers' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_customers', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_departments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_departments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_departments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_departments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_employees') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_employees') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_employees' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_employees', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_insurance_beneficiaries') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_insurance_beneficiaries') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_insurance_beneficiaries' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_insurance_beneficiaries', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_insurance_policies') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_insurance_policies') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_insurance_policies' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_insurance_policies', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_invoices') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_invoices') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_invoices' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_invoices', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_lms_completions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_lms_completions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_lms_completions' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_lms_completions', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_lms_courses') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_lms_courses') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_lms_courses' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_lms_courses', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_lms_enrollments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_lms_enrollments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_lms_enrollments' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_lms_enrollments', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_lms_learners') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_lms_learners') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_lms_learners' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_lms_learners', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_lms_progress') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_lms_progress') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_lms_progress' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_lms_progress', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_payments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_payments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_payments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_payments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'external_positions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'external_positions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'external_positions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('external_positions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ingestion_batches') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ingestion_batches') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ingestion_batches' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('ingestion_batches', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'integration_api_keys') IS NOT NULL THEN
+  IF to_regclass('public.' || 'integration_api_keys') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'integration_api_keys' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('integration_api_keys', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'integration_configs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'integration_configs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'integration_configs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('integration_configs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'integration_partners') IS NOT NULL THEN
+  IF to_regclass('public.' || 'integration_partners') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'integration_partners' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('integration_partners', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'integration_sync_log') IS NOT NULL THEN
+  IF to_regclass('public.' || 'integration_sync_log') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'integration_sync_log' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('integration_sync_log', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'integration_webhooks') IS NOT NULL THEN
+  IF to_regclass('public.' || 'integration_webhooks') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'integration_webhooks' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('integration_webhooks', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'ingestion_records') IS NOT NULL THEN
+  IF to_regclass('public.' || 'ingestion_records') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'ingestion_records' AND column_name = 'batch_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('ingestion_records', 'batch_id', 'ingestion_batches', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1333,57 +1333,57 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_arrears') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_arrears') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_arrears' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_arrears', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_breaks') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_breaks') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_breaks' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_breaks', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_certifications') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_certifications') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_certifications' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_certifications', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_dues_issues') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_dues_issues') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_dues_issues' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_dues_issues', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_dues_ledger') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_dues_ledger') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_dues_ledger' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_dues_ledger', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_employment') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_employment') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_employment' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_employment', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_history_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_history_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_history_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_history_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_jurisdiction_preferences') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_jurisdiction_preferences') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_jurisdiction_preferences' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_jurisdiction_preferences', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_segments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_segments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_segments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('member_segments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'org_entitlements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'org_entitlements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'org_entitlements' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('org_entitlements', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'org_subscriptions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'org_subscriptions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'org_subscriptions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('org_subscriptions', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1396,27 +1396,27 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pension_members') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pension_members') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pension_members' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pension_members', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'duplicate_group_members') IS NOT NULL THEN
+  IF to_regclass('public.' || 'duplicate_group_members') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'duplicate_group_members' AND column_name = 'group_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('duplicate_group_members', 'group_id', 'duplicate_groups', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'member_location_consent') IS NOT NULL THEN
+  IF to_regclass('public.' || 'member_location_consent') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'member_location_consent' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('member_location_consent', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_applications') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_applications') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_applications' AND column_name = 'verified_organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_applications', 'verified_organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'org_configurations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'org_configurations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'org_configurations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('org_configurations', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1429,82 +1429,82 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'alert_rules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'alert_rules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'alert_rules' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('alert_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'allocation_rules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'allocation_rules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'allocation_rules' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('allocation_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'anti_scab_violations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'anti_scab_violations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'anti_scab_violations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('anti_scab_violations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'automation_rules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'automation_rules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'automation_rules' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('automation_rules', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'break_policies') IS NOT NULL THEN
+  IF to_regclass('public.' || 'break_policies') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'break_policies' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('break_policies', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'calendar_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'calendar_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'calendar_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('calendar_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'calendars') IS NOT NULL THEN
+  IF to_regclass('public.' || 'calendars') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'calendars' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('calendars', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'chargeback_statements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'chargeback_statements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chargeback_statements' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('chargeback_statements', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'clause_comparisons') IS NOT NULL THEN
+  IF to_regclass('public.' || 'clause_comparisons') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'clause_comparisons' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('clause_comparisons', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cms_pages') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cms_pages') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cms_pages' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cms_pages', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'cnesst_filings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'cnesst_filings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'cnesst_filings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('cnesst_filings', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'compliance_alerts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'compliance_alerts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'compliance_alerts' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('compliance_alerts', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'contract_covered_orgs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'contract_covered_orgs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'contract_covered_orgs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('contract_covered_orgs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'correspondence') IS NOT NULL THEN
+  IF to_regclass('public.' || 'correspondence') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'correspondence' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('correspondence', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'course_registrations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'course_registrations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'course_registrations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('course_registrations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'course_sessions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'course_sessions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'course_sessions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('course_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1517,87 +1517,87 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'data_quality_warnings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'data_quality_warnings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'data_quality_warnings' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('data_quality_warnings', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'defensibility_packs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'defensibility_packs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'defensibility_packs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('defensibility_packs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'dispatch_requests') IS NOT NULL THEN
+  IF to_regclass('public.' || 'dispatch_requests') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dispatch_requests' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('dispatch_requests', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'dispatch_rules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'dispatch_rules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dispatch_rules' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('dispatch_rules', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'duplicate_groups') IS NOT NULL THEN
+  IF to_regclass('public.' || 'duplicate_groups') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'duplicate_groups' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('duplicate_groups', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_contacts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_contacts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_contacts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_contacts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_execution_artifacts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_execution_artifacts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_execution_artifacts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_execution_artifacts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_execution_compliance_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_execution_compliance_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_execution_compliance_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_execution_compliance_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_execution_replays') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_execution_replays') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_execution_replays' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_execution_replays', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_timesheet_entries') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_timesheet_entries') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_timesheet_entries' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employer_timesheet_entries', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employers' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('employers', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'exit_interview_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'exit_interview_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'exit_interview_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('exit_interview_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'exit_interviews') IS NOT NULL THEN
+  IF to_regclass('public.' || 'exit_interviews') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'exit_interviews' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('exit_interviews', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'federations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'federations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'federations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('federations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'fee_adjustments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'fee_adjustments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'fee_adjustments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('fee_adjustments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'gdpr_data_requests') IS NOT NULL THEN
+  IF to_regclass('public.' || 'gdpr_data_requests') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'gdpr_data_requests' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('gdpr_data_requests', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'holidays') IS NOT NULL THEN
+  IF to_regclass('public.' || 'holidays') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'holidays' AND column_name = 'organization_id') THEN
     PERFORM ue_create_mixed_global_tenant_rls_policy('holidays', 'organization_id');
   END IF;
 END $$;
@@ -1618,162 +1618,162 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'knowledge_base') IS NOT NULL THEN
+  IF to_regclass('public.' || 'knowledge_base') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'knowledge_base' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('knowledge_base', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'kpi_configurations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'kpi_configurations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'kpi_configurations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('kpi_configurations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'meeting_rooms') IS NOT NULL THEN
+  IF to_regclass('public.' || 'meeting_rooms') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'meeting_rooms' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('meeting_rooms', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'mobile_devices') IS NOT NULL THEN
+  IF to_regclass('public.' || 'mobile_devices') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'mobile_devices' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('mobile_devices', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'negotiations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'negotiations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'negotiations' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('negotiations', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'organizer_tasks') IS NOT NULL THEN
+  IF to_regclass('public.' || 'organizer_tasks') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'organizer_tasks' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('organizer_tasks', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pay_equity_exercises') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pay_equity_exercises') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pay_equity_exercises' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pay_equity_exercises', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_checklist_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_checklist_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_checklist_items' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_checklist_items', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_demo_seeds') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_demo_seeds') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_demo_seeds' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_demo_seeds', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_enrollments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_enrollments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_enrollments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_mixed_global_tenant_rls_policy('pilot_enrollments', 'organization_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_feedback') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_feedback') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_feedback' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_feedback', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'pilot_milestones') IS NOT NULL THEN
+  IF to_regclass('public.' || 'pilot_milestones') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'pilot_milestones' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('pilot_milestones', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'policy_rules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'policy_rules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'policy_rules' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('policy_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'poll_votes') IS NOT NULL THEN
+  IF to_regclass('public.' || 'poll_votes') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'poll_votes' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('poll_votes', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'polls') IS NOT NULL THEN
+  IF to_regclass('public.' || 'polls') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'polls' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('polls', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'preventive_withdrawals') IS NOT NULL THEN
+  IF to_regclass('public.' || 'preventive_withdrawals') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'preventive_withdrawals' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('preventive_withdrawals', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'push_devices') IS NOT NULL THEN
+  IF to_regclass('public.' || 'push_devices') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'push_devices' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('push_devices', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'recognition_award_types') IS NOT NULL THEN
+  IF to_regclass('public.' || 'recognition_award_types') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'recognition_award_types' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('recognition_award_types', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'recognition_awards') IS NOT NULL THEN
+  IF to_regclass('public.' || 'recognition_awards') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'recognition_awards' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('recognition_awards', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'recognition_programs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'recognition_programs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'recognition_programs' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('recognition_programs', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reports') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reports') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reports' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('reports', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'reward_redemptions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'reward_redemptions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reward_redemptions' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('reward_redemptions', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'right_of_refusal_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'right_of_refusal_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'right_of_refusal_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('right_of_refusal_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'satisfaction_surveys') IS NOT NULL THEN
+  IF to_regclass('public.' || 'satisfaction_surveys') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'satisfaction_surveys' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('satisfaction_surveys', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'security_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'security_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'security_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('security_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'security_posture_checks') IS NOT NULL THEN
+  IF to_regclass('public.' || 'security_posture_checks') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'security_posture_checks' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('security_posture_checks', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'social_posts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'social_posts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'social_posts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('social_posts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'sso_providers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'sso_providers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'sso_providers' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('sso_providers', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'steward_assignments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'steward_assignments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'steward_assignments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('steward_assignments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'stewards') IS NOT NULL THEN
+  IF to_regclass('public.' || 'stewards') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'stewards' AND column_name = 'org_id') THEN
     PERFORM ue_create_direct_org_rls_policy('stewards', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'strategic_goals') IS NOT NULL THEN
+  IF to_regclass('public.' || 'strategic_goals') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'strategic_goals' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('strategic_goals', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1786,172 +1786,172 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'survey_answers') IS NOT NULL THEN
+  IF to_regclass('public.' || 'survey_answers') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'survey_answers' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('survey_answers', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'survey_questions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'survey_questions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'survey_questions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('survey_questions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'survey_responses') IS NOT NULL THEN
+  IF to_regclass('public.' || 'survey_responses') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'survey_responses' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('survey_responses', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'surveys') IS NOT NULL THEN
+  IF to_regclass('public.' || 'surveys') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'surveys' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('surveys', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'training_courses') IS NOT NULL THEN
+  IF to_regclass('public.' || 'training_courses') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'training_courses' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('training_courses', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'training_programs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'training_programs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'training_programs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('training_programs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'transaction_fee_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'transaction_fee_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'transaction_fee_events' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('transaction_fee_events', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'transaction_fee_rules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'transaction_fee_rules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'transaction_fee_rules' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('transaction_fee_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'trend_analyses') IS NOT NULL THEN
+  IF to_regclass('public.' || 'trend_analyses') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'trend_analyses' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('trend_analyses', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'user_signatures') IS NOT NULL THEN
+  IF to_regclass('public.' || 'user_signatures') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'user_signatures' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('user_signatures', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'voting_sessions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'voting_sessions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'voting_sessions' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('voting_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'wcb_employer_assessments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'wcb_employer_assessments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'wcb_employer_assessments' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('wcb_employer_assessments', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'worksites') IS NOT NULL THEN
+  IF to_regclass('public.' || 'worksites') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'worksites' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('worksites', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'alert_executions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'alert_executions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'alert_executions' AND column_name = 'alert_rule_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('alert_executions', 'alert_rule_id', 'alert_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'allocation_runs') IS NOT NULL THEN
+  IF to_regclass('public.' || 'allocation_runs') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'allocation_runs' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('allocation_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'allocation_basis_snapshots') IS NOT NULL THEN
+  IF to_regclass('public.' || 'allocation_basis_snapshots') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'allocation_basis_snapshots' AND column_name = 'run_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('allocation_basis_snapshots', 'run_id', 'allocation_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'allocation_rule_versions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'allocation_rule_versions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'allocation_rule_versions' AND column_name = 'rule_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('allocation_rule_versions', 'rule_id', 'allocation_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'allocation_run_lines') IS NOT NULL THEN
+  IF to_regclass('public.' || 'allocation_run_lines') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'allocation_run_lines' AND column_name = 'run_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('allocation_run_lines', 'run_id', 'allocation_runs', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'clause_embeddings') IS NOT NULL THEN
+  IF to_regclass('public.' || 'clause_embeddings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'clause_embeddings' AND column_name = 'clause_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('clause_embeddings', 'clause_id', 'cba_clauses', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'clause_library_tags') IS NOT NULL THEN
+  IF to_regclass('public.' || 'clause_library_tags') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'clause_library_tags' AND column_name = 'clause_id') THEN
     PERFORM ue_create_shared_library_child_rls_policy('clause_library_tags', 'clause_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'commercial_contracts') IS NOT NULL THEN
+  IF to_regclass('public.' || 'commercial_contracts') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'commercial_contracts' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('commercial_contracts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'contract_line_items') IS NOT NULL THEN
+  IF to_regclass('public.' || 'contract_line_items') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'contract_line_items' AND column_name = 'contract_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('contract_line_items', 'contract_id', 'commercial_contracts', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'correspondence_recipients') IS NOT NULL THEN
+  IF to_regclass('public.' || 'correspondence_recipients') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'correspondence_recipients' AND column_name = 'correspondence_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('correspondence_recipients', 'correspondence_id', 'correspondence', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'data_subject_access_requests') IS NOT NULL THEN
+  IF to_regclass('public.' || 'data_subject_access_requests') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'data_subject_access_requests' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('data_subject_access_requests', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'dispatch_assignments') IS NOT NULL THEN
+  IF to_regclass('public.' || 'dispatch_assignments') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'dispatch_assignments' AND column_name = 'request_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('dispatch_assignments', 'request_id', 'dispatch_requests', 'org_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'employer_reports') IS NOT NULL THEN
+  IF to_regclass('public.' || 'employer_reports') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employer_reports' AND column_name = 'employer_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('employer_reports', 'employer_id', 'employers', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'geofence_events') IS NOT NULL THEN
+  IF to_regclass('public.' || 'geofence_events') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'geofence_events' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('geofence_events', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'geofences') IS NOT NULL THEN
+  IF to_regclass('public.' || 'geofences') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'geofences' AND column_name = 'union_local_id') THEN
     PERFORM ue_create_direct_org_rls_policy('geofences', 'union_local_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'location_tracking') IS NOT NULL THEN
+  IF to_regclass('public.' || 'location_tracking') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'location_tracking' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('location_tracking', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'policy_evaluations') IS NOT NULL THEN
+  IF to_regclass('public.' || 'policy_evaluations') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'policy_evaluations' AND column_name = 'rule_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('policy_evaluations', 'rule_id', 'policy_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'policy_exceptions') IS NOT NULL THEN
+  IF to_regclass('public.' || 'policy_exceptions') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'policy_exceptions' AND column_name = 'rule_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('policy_exceptions', 'rule_id', 'policy_rules', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'provincial_data_handling') IS NOT NULL THEN
+  IF to_regclass('public.' || 'provincial_data_handling') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'provincial_data_handling' AND column_name = 'user_id') THEN
     PERFORM ue_create_user_rls_policy('provincial_data_handling', 'user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'shared_clause_library') IS NOT NULL THEN
+  IF to_regclass('public.' || 'shared_clause_library') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'shared_clause_library' AND column_name = 'source_organization_id') THEN
     PERFORM ue_create_shared_library_rls_policy('shared_clause_library', 'source_organization_id', 'sharing_level', 'shared_with_org_ids');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'tentative_agreements') IS NOT NULL THEN
+  IF to_regclass('public.' || 'tentative_agreements') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'tentative_agreements' AND column_name = 'negotiation_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('tentative_agreements', 'negotiation_id', 'negotiations', 'organization_id', FALSE);
   END IF;
 END $$;
@@ -1964,37 +1964,37 @@ DO $$ BEGIN
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'voter_eligibility') IS NOT NULL THEN
+  IF to_regclass('public.' || 'voter_eligibility') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'voter_eligibility' AND column_name = 'session_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('voter_eligibility', 'session_id', 'voting_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'votes') IS NOT NULL THEN
+  IF to_regclass('public.' || 'votes') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'votes' AND column_name = 'session_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('votes', 'session_id', 'voting_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'voting_options') IS NOT NULL THEN
+  IF to_regclass('public.' || 'voting_options') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'voting_options' AND column_name = 'session_id') THEN
     PERFORM ue_create_parent_owned_rls_policy_v2('voting_options', 'session_id', 'voting_sessions', 'organization_id', FALSE);
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'workbook_memory_holders') IS NOT NULL THEN
+  IF to_regclass('public.' || 'workbook_memory_holders') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'workbook_memory_holders' AND column_name = 'workbook_id') THEN
     PERFORM ue_create_parent_owned_via_user_rls_policy_v2('workbook_memory_holders', 'workbook_id', 'workbooks', 'claimed_by_user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'workbook_modules') IS NOT NULL THEN
+  IF to_regclass('public.' || 'workbook_modules') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'workbook_modules' AND column_name = 'workbook_id') THEN
     PERFORM ue_create_parent_owned_via_user_rls_policy_v2('workbook_modules', 'workbook_id', 'workbooks', 'claimed_by_user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'workbook_purchases') IS NOT NULL THEN
+  IF to_regclass('public.' || 'workbook_purchases') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'workbook_purchases' AND column_name = 'workbook_id') THEN
     PERFORM ue_create_parent_owned_via_user_rls_policy_v2('workbook_purchases', 'workbook_id', 'workbooks', 'claimed_by_user_id');
   END IF;
 END $$;
 DO $$ BEGIN
-  IF to_regclass('public.' || 'workbooks') IS NOT NULL THEN
+  IF to_regclass('public.' || 'workbooks') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'workbooks' AND column_name = 'claimed_by_user_id') THEN
     PERFORM ue_create_user_rls_policy('workbooks', 'claimed_by_user_id');
   END IF;
 END $$;
