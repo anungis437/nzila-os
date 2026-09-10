@@ -242,7 +242,9 @@ class FailedTasksView(APIView):
     Query params:
       limit (int, default 20)
 
-    Response:
+    Response (SECURITY, Round 59D: bounded/sanitized only — the raw
+    exception message and full traceback are never returned to an API
+    caller, even an admin-gated one; they are logged server-side instead):
     {
         "queue": "email",
         "failed": [
@@ -250,9 +252,8 @@ class FailedTasksView(APIView):
                 "task_id": "...",
                 "task_name": "...",
                 "status": "FAILURE",
-                "result": "...",
                 "date_done": "...",
-                "traceback": "..."
+                "error_summary": "Task execution failed. See server logs for details."
             }
         ]
     }
@@ -297,24 +298,31 @@ class FailedTasksView(APIView):
 
             qs = qs.order_by("-date_done")[:limit]
 
-            failed = [
-                {
-                    "task_id":   r.task_id,
-                    "task_name": r.task_name,
-                    "status":    r.status,
-                    "result":    str(r.result)[:500],
-                    "date_done": r.date_done.isoformat() if r.date_done else None,
-                    "traceback": (r.traceback or "")[:2000],
-                }
-                for r in qs
-            ]
+            failed = []
+            for r in qs:
+                # SECURITY (Round 59D): the raw result/traceback can contain
+                # file paths, SQL fragments, and other internal detail — log
+                # it in full server-side only; the API response never
+                # includes it, admin-gated or not (CodeQL stack-trace
+                # exposure finding).
+                logger.error(
+                    "Failed task detail (internal only): task_id=%s task_name=%s result=%s traceback=%s",
+                    r.task_id, r.task_name, r.result, r.traceback,
+                )
+                failed.append({
+                    "task_id":       r.task_id,
+                    "task_name":     r.task_name,
+                    "status":        r.status,
+                    "date_done":     r.date_done.isoformat() if r.date_done else None,
+                    "error_summary": "Task execution failed. See server logs for details.",
+                })
 
             return Response({"queue": queue_name, "failed": failed})
 
         except Exception as exc:  # noqa: BLE001
             logger.error("Could not retrieve failed tasks for queue %s: %s", queue_name, exc)
             return Response(
-                {"queue": queue_name, "failed": [], "warning": str(exc)},
+                {"queue": queue_name, "failed": [], "warning": "An error occurred"},
                 status=status.HTTP_200_OK,
             )
 
