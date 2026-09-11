@@ -74,6 +74,7 @@
     "rls:apply-foundation-migration": "tsx scripts/apply-rls-foundation-migration.ts",
     "rls:apply-enforcement-migration": "tsx scripts/apply-authority-enforcement-migration.ts",
     "rls:apply-round58-grant-order-fix": "tsx scripts/apply-round58-grant-order-fix.ts",
+    "rls:apply-round59-geometry-gap-closure": "tsx scripts/apply-round59-rls-geometry-gap-closure.ts",
     "rls:apply-round59-congress-memberships-grant-fix": "tsx scripts/apply-round59-congress-memberships-grant-fix.ts",
     "rls:apply-congress-memberships-multi-party-rls-fix": "tsx scripts/apply-congress-memberships-multi-party-rls-fix.ts",
     "rls:verify-strike-fund-backfill": "tsx scripts/verify-strike-fund-org-backfill.ts",

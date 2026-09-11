@@ -126,7 +126,7 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     {
     table: "automation_rules",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "CLOSED round 57: organization_id (aliased orgId in Drizzle) column present (nullable at the DB level, but every reachable query filters on it). Genuinely reachable: app/api/rewards/cron/route.ts (CRON_SECRET-authenticated system job) calls processScheduledAwards(orgId)/processAnniversaryAwards(orgId) in lib/services/rewards/automation-service.ts, which SELECTs `eq(automationRules.orgId, orgId) AND eq(automationRules.isActive, true)`. SECURITY DEFECT FOUND AND FIXED THIS ROUND (sibling cleanup): core.AutomationRulesViewSet was IsAuthenticated-only with no scoping at all — contained via DenyAllPermission (the cron path remains the sole legitimate consumer).",
+    reason: "CLOSED round 57/P3.2: varchar(255) organization_id (aliased orgId in the rewards Drizzle surface) is required by the forward-only core migration, which refuses to add or constrain ownership when existing rows need an unproven backfill. Genuinely reachable: app/api/rewards/cron/route.ts (CRON_SECRET-authenticated system job) calls processScheduledAwards(orgId)/processAnniversaryAwards(orgId) in lib/services/rewards/automation-service.ts, which SELECTs `eq(automationRules.orgId, orgId) AND eq(automationRules.isActive, true)`. core.AutomationRulesViewSet remains contained via DenyAllPermission (the cron path remains the sole legitimate consumer).",
     supportingCapability: ["app/api/rewards/cron/route.ts","lib/services/rewards/automation-service.ts","backend/core/views.py"],
     requiredRuntimePrivileges: [],
     requiredSystemPrivileges: ["SELECT"],

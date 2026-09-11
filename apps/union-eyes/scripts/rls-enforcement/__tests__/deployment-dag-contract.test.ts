@@ -12,10 +12,8 @@
  *   - the job is gated on workflow_dispatch + an explicit boolean input
  *     (apply_authority_enforcement_migration), so it can NEVER fire as
  *     part of the ordinary push-triggered deploy path;
- *   - the job is NOT listed in any other job's `needs` (i.e. nothing is
- *     unconditionally blocked on it yet — Round 58C deliberately did not
- *     promote it to a mandatory pre-deploy gate, unlike apply-icra-
- *     capability-migration, because of the unresolved 111-table finding);
+ *   - only later, explicitly selected corrective-rollout jobs may list it in
+ *     `needs`; ordinary build/deploy jobs remain independent of it;
  *   - the corresponding workflow_dispatch input exists and defaults to
  *     false.
  */
@@ -49,11 +47,15 @@ describe("Round 58 deployment DAG contract (static, no dispatch)", () => {
     expect(input.default).toBe(false);
   });
 
-  it("is NOT (yet) a mandatory dependency of any other job — deliberately not promoted to a hard gate", () => {
+  it("is only a dependency of the explicit corrective rollout chain", () => {
+    const allowedDependents = new Set(["apply-round58-grant-fix-migration"]);
+
     for (const [jobName, job] of Object.entries<any>(doc.jobs)) {
       if (jobName === "apply-authority-enforcement-migration") continue;
       const needs = job.needs ? (Array.isArray(job.needs) ? job.needs : [job.needs]) : [];
-      expect(needs).not.toContain("apply-authority-enforcement-migration");
+      if (needs.includes("apply-authority-enforcement-migration")) {
+        expect(allowedDependents.has(jobName)).toBe(true);
+      }
     }
   });
 

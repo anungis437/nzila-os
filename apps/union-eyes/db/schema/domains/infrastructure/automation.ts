@@ -91,7 +91,7 @@ export const automationRules = pgTable("automation_rules", {
   timezone: varchar("timezone", { length: 50 }).default('UTC'),
   
   // Organization
-  organizationId: varchar("organization_id", { length: 255 }),
+  organizationId: varchar("organization_id", { length: 255 }).notNull(),
   
   // Metadata
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -20,6 +20,16 @@ on:
           - demo
           - pilot
         default: staging
+      apply_automation_rules_ownership_migration:
+        description: >-
+          P3.2 one-time rollout only. Applies Django core migration 0003,
+          which adds varchar(255) automation_rules.organization_id and its
+          canonical index only when no existing rows require an ownership
+          backfill. Leave false for ordinary deploys. Must precede 0108,
+          Round 58, and the Round 59 geometry correction.
+        required: false
+        type: boolean
+        default: false
       apply_rls_foundation_migration:
         description: >-
           One-time rollout step only. Set true to apply
@@ -68,6 +78,15 @@ on:
           explicitly grants it). See scripts/apply-round58-grant-order-
           fix.ts for the full root-cause writeup. Only meaningful after
           apply_authority_enforcement_migration has already been run once.
+          Leave false for ordinary deploys.
+        required: false
+        type: boolean
+        default: false
+      apply_round59_geometry_gap_closure:
+        description: >-
+          Round 59B one-time corrective rollout. Applies RLS geometry to
+          pilot_applications and automation_rules after schema prerequisites,
+          0108, Round 58, and the Round 58 grant-order correction are present.
           Leave false for ordinary deploys.
         required: false
         type: boolean
@@ -338,6 +357,74 @@ jobs:
             echo "- Note: production runs in dedicated infrastructure (nzila-canada-prod-rg / nzila-canada-prod-env) on a dedicated production database; the hard guard above fails the deploy if prod ever resolves to staging/demo/pilot infra. (Live-verified 2026-06-28, Runtime Separation Wave Phase A.1.)" >> "$GITHUB_STEP_SUMMARY"
           fi
 
+  apply-automation-rules-ownership-migration:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_automation_rules_ownership_migration == 'true' }}
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply Automation-Rules Ownership Migration (P3.2, one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4)."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply core migration 0003 (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+          set +x
+          export ADMIN_URL
+          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          python - <<'PY'
+          import os
+          import sys
+          from urllib.parse import unquote, urlparse
+
+          parsed = urlparse(os.environ.pop("ADMIN_URL"))
+          if parsed.scheme not in {"postgres", "postgresql"} or not all(
+              [parsed.hostname, parsed.path, parsed.username, parsed.password]
+          ):
+              raise SystemExit("Migration-admin database URL is malformed")
+
+          os.environ.update(
+              DJANGO_SETTINGS_MODULE="config.settings",
+              PGDATABASE=unquote(parsed.path.lstrip("/")),
+              PGUSER=unquote(parsed.username),
+              PGPASSWORD=unquote(parsed.password),
+              PGHOST=parsed.hostname,
+              PGPORT=str(parsed.port or 5432),
+          )
+          sys.path.insert(0, "apps/union-eyes/backend")
+          from django.core.management import execute_from_command_line
+
+          execute_from_command_line(["manage.py", "migrate", "core", "0003", "--noinput"])
+          PY
+          unset ADMIN_URL
+
   # One-time rollout step, never part of the ordinary push/deploy path (see
   # the `apply_rls_foundation_migration` input's description on the
   # workflow_dispatch trigger above). This is the deterministic,
@@ -354,9 +441,9 @@ jobs:
   # existing "RLS foundation preflight (fail-closed)" step then proves the
   # provisioned credentials are live and RLS is enforced).
   apply-rls-foundation-migration:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_rls_foundation_migration == 'true' }}
+    if: ${{ always() && needs.plan.result == 'success' && (needs.apply-automation-rules-ownership-migration.result == 'success' || needs.apply-automation-rules-ownership-migration.result == 'skipped') && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_rls_foundation_migration == 'true' }}
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, apply-automation-rules-ownership-migration]
     name: Apply RLS Foundation Migration (0108, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -433,9 +520,9 @@ jobs:
   # real environment. Round 59 owns the controlled staging proof and the
   # decision of when/whether to promote this to a mandatory gate.
   apply-authority-enforcement-migration:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_enforcement_migration == 'true' }}
+    if: ${{ always() && needs.plan.result == 'success' && (needs.apply-rls-foundation-migration.result == 'success' || needs.apply-rls-foundation-migration.result == 'skipped') && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_enforcement_migration == 'true' }}
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, apply-rls-foundation-migration]
     name: Apply Authority Enforcement Migration (round 58, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -514,9 +601,9 @@ jobs:
   # grants. Only meaningful after apply-authority-enforcement-migration has
   # already run at least once against this environment.
   apply-round58-grant-fix-migration:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round58_grant_fix_migration == 'true' }}
+    if: ${{ always() && needs.plan.result == 'success' && (needs.apply-authority-enforcement-migration.result == 'success' || needs.apply-authority-enforcement-migration.result == 'skipped') && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round58_grant_fix_migration == 'true' }}
     runs-on: ubuntu-latest
-    needs: plan
+    needs: [plan, apply-authority-enforcement-migration]
     name: Apply Round 58 Grant-Order Fix (round 59, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -581,6 +668,44 @@ jobs:
             exit 1
           fi
           echo "::notice::Round 58 grant-order fix applied for ${{ needs.plan.outputs.environment }} — union_eyes_runtime/union_eyes_system per-table grants restored."
+
+  apply-round59-geometry-gap-closure:
+    if: ${{ always() && needs.plan.result == 'success' && needs.apply-round58-grant-fix-migration.result == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round59_geometry_gap_closure == 'true' }}
+    runs-on: ubuntu-latest
+    needs: [plan, apply-round58-grant-fix-migration]
+    name: Apply Round 59B RLS Geometry Gap Closure (one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply Round 59B geometry correction (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+          set +e
+          pnpm --filter @nzila/union-eyes run rls:apply-round59-geometry-gap-closure
+          FIX_STATUS=$?
+          set -e
+          unset RLS_ENFORCEMENT_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$FIX_STATUS" -ne 0 ]; then
+            echo "::error::Round 59B geometry correction failed for ${{ needs.plan.outputs.environment }}."
+            exit 1
+          fi
 
   # Round 59D corrective rollout — see the apply_round59_congress_memberships
   # _grant_fix input description and scripts/apply-round59-congress-
@@ -1244,7 +1369,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [plan, pre-deploy-gates, build-push, apply-icra-capability-migration, apply-django-migrations]
+    needs:
+      [plan, pre-deploy-gates, build-push, apply-icra-capability-migration, apply-django-migrations]
     name: Deploy UnionEyes (env-scoped, digest-pinned)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
