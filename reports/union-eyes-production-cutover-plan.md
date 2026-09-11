@@ -1092,22 +1092,180 @@ authorization ("merge #760" or equivalent).
   guard is still present, and the non-dispatch fallback is still `staging` — the
   integration must not accidentally reintroduce the old production fanout.
 
-## 11. Final status
+## 11. Release Gate D — PR #760 Merge Executed & Zero-Production-Dispatch Proof
+
+### 11.1 Explicit operator authorization
+
+The operator explicitly authorized, and only authorized, merging PR #760 at its
+approved head using the SQUASH strategy. No other action (merging #752, production
+deployment, credential rotation, Key Vault/Container App mutation, RLS/grant changes
+in production, or GitHub production Environment settings changes) was authorized or
+performed.
+
+### 11.2 Final expected-head guard (immediately before merge)
+
+```
+head   = 0c960b74504d5a1ddf6caa92053afb1a0d08c66a  (exact match)
+state  = OPEN
+mergeable = MERGEABLE
+```
+
+Unchanged from Release Gate C — merge proceeded.
+
+### 11.3 Merge executed
+
+```
+gh pr merge 760 --squash --match-head-commit 0c960b74504d5a1ddf6caa92053afb1a0d08c66a
+```
+
+Result: squashed and merged successfully.
+
+```
+PR760_MERGE_SHA        = 008a65bf6ab292745de04b94184e0ee027cbe0dd
+MAIN_SHA_AFTER_PR760   = 008a65bf6ab292745de04b94184e0ee027cbe0dd
+PR #760 state           = MERGED (mergedAt 2026-09-11T12:20:27Z)
+```
+
+### 11.4 Code-level production gate reverified on merged `main`
+
+Inspected `origin/main` at the merge SHA directly (`git show origin/main:<path>`):
+
+```
+auto-promote-union-eyes.yml: matrix.environment = [demo, pilot, staging]
+  (production absent); runtime guard (exit 1 if matrix.environment == "production")
+  present.
+deploy-union-eyes.yml: non-workflow_dispatch trigger -> DEPLOY_ENV = "staging";
+  no ref_name==main -> production fallback present anywhere in the file.
+```
+
+Focused contract test re-run against the merged `main` HEAD (local `main` branch
+fast-forwarded to `origin/main`, then restored to `fix/ue-runtime-rls-foundation`
+afterward — no branch content mutated):
+
+```
+tooling/contract-tests/union-eyes-production-promotion-gate.test.ts
+Test Files  1 passed (1)
+     Tests  5 passed (5)
+```
+
+```
+MAIN_PRODUCTION_AUTOPROMOTION = DISABLED / PROVEN
+```
+
+### 11.5 Auto-promote run triggered by the merge
+
+```
+Workflow   : Auto-promote Union Eyes
+Run ID     : 34598417174
+Trigger    : push, headSha = 008a65bf6ab292745de04b94184e0ee027cbe0dd
+Conclusion : success
+Jobs       : "Dispatch deploy-union-eyes for pilot"   -> success
+             "Dispatch deploy-union-eyes for staging" -> success
+             "Dispatch deploy-union-eyes for demo"    -> success
+```
+
+Exactly 3 matrix jobs ran (pilot, staging, demo) — **no `production` job exists or
+could exist**, since the matrix literal itself no longer contains `production`
+(§11.4). No manual dispatch was performed.
+
+### 11.6 Downstream `deploy-union-eyes.yml` runs
+
+Confirmed via each run's own job logs (`DEPLOY_ENV="..."` resolution line, sourced
+from the `workflow_dispatch` `environment` input):
+
+| Run ID | Source SHA | Environment |
+| --- | --- | --- |
+| 34598426199 | 008a65bf6ab292745de04b94184e0ee027cbe0dd | pilot |
+| 34598427843 | 008a65bf6ab292745de04b94184e0ee027cbe0dd | demo |
+| 34598428712 | 008a65bf6ab292745de04b94184e0ee027cbe0dd | staging |
+
+No `environment=production` run exists for this SHA. Hard blocker condition (any
+production dispatch) was **not** triggered.
+
+### 11.7 Read-only production revision check
+
+```
+az containerapp revision list -g nzila-canada-prod-rg -n nzila-os-union-eyes-prod \
+  --query "[].{name:name, createdTime:properties.createdTime, active:properties.active}" -o table
+
+Name                               CreatedTime                Active
+nzila-os-union-eyes-prod--0000241  2026-08-31T22:21:19+00:00  True
+```
+
+Only one revision exists, created **2026-09-11T12:20:27Z minus ~10 days earlier**
+(2026-08-31), i.e. well before the merge (2026-09-11T12:20:27Z). No new revision was
+created for `nzila-os-union-eyes-prod` (the only union-eyes Container App in
+`nzila-canada-prod-rg`) as a consequence of the merge. No secret values, DB
+credentials, or connection strings were read for this check.
+
+```
+PR760_POSTMERGE_PRODUCTION_REVISION = NONE
+```
+
+### 11.8 Production zero-mutation verdict
+
+Both GitHub Actions evidence (§11.5-§11.6) and Azure evidence (§11.7) agree:
+
+```
+PR760_POSTMERGE_PRODUCTION_DISPATCH  = NONE
+PR760_POSTMERGE_PRODUCTION_REVISION  = NONE
+MERGE_TO_MAIN != PRODUCTION_ROLLOUT   (proven)
+```
+
+This is the actual acceptance test for PR #760, and it holds.
+
+### 11.9 Non-production deployment health (secondary evidence)
+
+At the time of this report, the 3 downstream demo/pilot/staging deploy runs
+(34598426199, 34598427843, 34598428712) were still `in_progress` (normal — these are
+multi-stage build/push/deploy workflows). This is operational evidence only and is
+explicitly not the primary Gate D criterion; their eventual pass/fail does not change
+the zero-production-dispatch verdict above, which is already conclusively established
+by the matrix contents and the confirmed environment inputs.
+
+### 11.10 Retained non-actions
+
+```
+PRODUCTION_CREDENTIAL_ROTATION = REQUIRED / NOT PERFORMED
+PRODUCTION_ENVIRONMENT_APPROVAL_GATE = NOT_CONFIGURED
+```
+
+No production PostgreSQL connection, no credential retrieval/use, no Key Vault
+mutation, no Container App secret mutation, and no GitHub production Environment
+settings change occurred in this gate. PR #760 prevents *unattended* production
+deployment; it does not yet protect an explicitly initiated production
+`workflow_dispatch` with required human reviewers — that gap must close before any
+production rollout.
+
+### 11.11 Explicit next step (not started in this gate)
+
+Per operator instruction, #752 is not merged next. The required sequence is:
+integrate the new `main` (containing #760's fix) into `fix/ue-runtime-rls-foundation`,
+resolve only the mechanical `tooling/repo-inventory/output/*` conflicts via
+`pnpm inventory:generate`, re-prove #760's production-gate invariant survived the
+integration, rerun materially affected #752 CI, then obtain/freeze final human
+security approval on the integrated #752 head — only then does #752 reach its own
+operator merge gate.
+
+## 12. Final status
 
 ```
 RELEASE_GATE_A = COMPLETE
 RELEASE_GATE_B = COMPLETE
 RELEASE_GATE_C = COMPLETE
+RELEASE_GATE_D = COMPLETE
 PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES
 PR760_HUMAN_REVIEW = APPROVED_BY_OPERATOR
-PR760_OPERATOR_MERGE_GATE = READY
-PR760_MERGE_PERFORMED = NO
+PR760_MERGE_PERFORMED = YES
+PR760_MERGE_SHA = 008a65bf6ab292745de04b94184e0ee027cbe0dd
+MAIN_PRODUCTION_AUTOPROMOTION = DISABLED_PROVEN
+PR760_POSTMERGE_PRODUCTION_DISPATCH = NONE
+PR760_POSTMERGE_PRODUCTION_REVISION = NONE
 PR752_HUMAN_SECURITY_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
-PR752_OPERATOR_MERGE_GATE = BLOCKED (pending human security review; see §4 and the
-  containment notice in the PR body)
+PR752_OPERATOR_MERGE_GATE = BLOCKED_PENDING_MAIN_INTEGRATION
 PR752_FINAL_HUMAN_SECURITY_REVIEW = REQUIRED_POST_760_INTEGRATION
 PRODUCTION_ENVIRONMENT_APPROVAL_GATE = NOT_CONFIGURED (protection_rules: [] —
-  confirmed three times, Gate A, Gate B, and Gate C)
+  confirmed across Gate A, B, C, and D)
 PRODUCTION_CREDENTIAL_ROTATION = REQUIRED / NOT PERFORMED
 PRODUCTION_CUTOVER_AUTHORIZED = NO
 PRODUCTION_DB_CONNECTION_PERFORMED = NO
@@ -1117,27 +1275,24 @@ PRODUCTION_MUTATION_PERFORMED = NO
 **Next operator decisions, in order:**
 
 ```
-1. MERGE PR #760 (technical gate CLEAN_WITH_PROVEN_BASELINE_FAILURES, human review
-   APPROVED_BY_OPERATOR — the only remaining action is the merge itself; prepared
-   command in §10.7, not yet executed)
-2. verify main no longer auto-dispatches production for union-eyes changes (§10.8
-   post-merge verification plan)
-3. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
-4. integrate main into fix/ue-runtime-rls-foundation post-#760-merge (predicted clean
-   per §2.2's empirical merge-tree proof; only trivial inventory-file regeneration
-   expected) and re-verify #760's invariant survives the integration (§10.9)
-5. complete final human security approval of #752 (from @nzila/eng, @nzila/ue, and
-   @nzila/platform/@nzila/security given its .github/ changes), covering the
-   post-integration mergeable diff
-6. rerun materially affected #752 CI
-7. merge #752
-8. verify the merge did NOT trigger a production deployment
-9. configure required reviewers on the production GitHub Environment
-10. separately authorize production cutover (§7), starting from step 1
+1. integrate new main (containing #760) into fix/ue-runtime-rls-foundation;
+   resolve only mechanical tooling/repo-inventory/output/* conflicts via
+   pnpm inventory:generate
+2. re-verify #760's production-gate invariant survives the integration (§11.4
+   checks, re-applied to the integrated branch)
+3. rerun materially affected #752 CI on the integrated head
+4. obtain/freeze final human security approval of #752 on the integrated head
+   (from @nzila/eng, @nzila/ue, and @nzila/platform/@nzila/security given its
+   .github/ changes)
+5. merge #752 once approved
+6. verify the #752 merge did NOT trigger a production deployment (same method
+   as §11.5-§11.7)
+7. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
+8. configure required reviewers on the production GitHub Environment
+9. separately authorize production cutover (§7), starting from step 1
 ```
 
 No automatic actions were taken beyond what is documented in this report and in PR
-#760 (including its updated description). This session did not and will not merge PR
-#752, merge PR #760, rotate any credential, connect to production PostgreSQL, or
-dispatch any production workflow. #760's own merge remains a separate, explicit
-operator action.
+#760. This session merged PR #760 (explicitly authorized) and proved zero production
+dispatch resulted. It did not merge PR #752, did not rotate any credential, did not
+connect to production PostgreSQL, and did not dispatch any production workflow.
