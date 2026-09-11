@@ -1,14 +1,24 @@
 ##
-# Auto-promote Union Eyes to all real environments on push to main.
+# Auto-promote Union Eyes to the non-production real environments on push to main.
 #
 # Closes the gap where `gitops-deploy.yml` only updates the legacy
-# `nzila-os-union-eyes` CA in staging-rg, leaving the four real
-# environments (`-prod`, `-demo`, `-pilot`, `-staging`) drifting
-# until someone manually dispatches `deploy-union-eyes.yml`.
+# `nzila-os-union-eyes` CA in staging-rg, leaving the non-production real
+# environments (`-demo`, `-pilot`, `-staging`) drifting until someone
+# manually dispatches `deploy-union-eyes.yml`.
 #
-# This workflow fans out to all four environments by calling the
-# canonical deploy workflow once per environment. Each downstream
-# run carries its own plan + smoke gates.
+# PRODUCTION IS DELIBERATELY EXCLUDED from this automatic fanout.
+# `merge to main` must never be equivalent to `production rollout
+# authorization` — a merge-to-main-triggered workflow dispatching straight
+# to production, with no human production-approval step in between,
+# collapses that boundary. Production deployment is a separate, explicit
+# `workflow_dispatch` of deploy-union-eyes.yml with `environment: production`,
+# gated by the repository's `production` GitHub Environment.
+# See tooling/contract-tests/union-eyes-production-promotion-gate.test.ts,
+# which fails CI if `production` is ever re-added to the matrix below.
+#
+# This workflow fans out to the non-production environments by calling the
+# canonical deploy workflow once per environment. Each downstream run
+# carries its own plan + smoke gates.
 ##
 
 name: Auto-promote Union Eyes
@@ -37,15 +47,25 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 3
       matrix:
-        environment: [production, demo, pilot, staging]
+        # PRODUCTION MUST NEVER APPEAR IN THIS LIST — see the header comment
+        # and tooling/contract-tests/union-eyes-production-promotion-gate.test.ts.
+        environment: [demo, pilot, staging]
     steps:
       - name: Dispatch deploy-union-eyes (${{ matrix.environment }})
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          # Defense-in-depth: refuse to dispatch production even if the
+          # matrix literal above is ever edited to include it again. This
+          # workflow must never be the thing that authorizes a production
+          # rollout — see the header comment.
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            echo "::error::Automatic push-triggered promotion to production is prohibited. Production deploys require an explicit, separate workflow_dispatch of deploy-union-eyes.yml with environment=production, gated by the production GitHub Environment." >&2
+            exit 1
+          fi
           echo "Promoting commit ${GITHUB_SHA} to ${{ matrix.environment }} via deploy-union-eyes.yml"
           gh workflow run deploy-union-eyes.yml \
             --repo "${GITHUB_REPOSITORY}" \
