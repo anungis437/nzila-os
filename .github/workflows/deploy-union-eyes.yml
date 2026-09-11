@@ -390,8 +390,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run — it deliberately does not fall back to any application runtime credential. Create the secret (scoped to a role that can CREATE ROLE / ALTER TABLE / CREATE POLICY on this database) and re-run."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run — it deliberately does not fall back to any application runtime credential. Create the secret (scoped to a role that can CREATE ROLE / ALTER TABLE / CREATE POLICY on this database) and re-run."
+            fi
             exit 1
           fi
 
@@ -460,8 +469,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            fi
             exit 1
           fi
 
@@ -532,8 +550,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            fi
             exit 1
           fi
 
@@ -600,8 +627,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            fi
             exit 1
           fi
 
@@ -674,8 +710,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            fi
             exit 1
           fi
 
@@ -744,8 +789,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. Capability-dependent application code cannot deploy without the migration-admin credential to confirm/apply the 0005 scoped migration. Refusing to proceed to build/deploy — this must never be left as an optional operator step."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. Capability-dependent application code cannot deploy without the migration-admin credential to confirm/apply the 0005 scoped migration. Refusing to proceed to build/deploy — this must never be left as an optional operator step."
+            fi
             exit 1
           fi
 
@@ -1132,8 +1186,17 @@ jobs:
           KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
           SECRET_NAME="union-eyes-migration-admin-database-url"
 
-          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
-            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. django-backend migrations require a dedicated migration-admin connection string — this job deliberately does not fall back to any application runtime credential. Refusing to deploy the backend container."
+          if SECRET_CHECK_ERR=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv 2>&1 1>/dev/null); then
+            SECRET_CHECK_STATUS=0
+          else
+            SECRET_CHECK_STATUS=$?
+          fi
+          if [ "$SECRET_CHECK_STATUS" -ne 0 ]; then
+            if echo "$SECRET_CHECK_ERR" | grep -qiE "Forbidden|AuthorizationFailed|does not have (secrets|permission)"; then
+              echo "::error::Key Vault ACCESS DENIED for secret '$SECRET_NAME' in '$KEY_VAULT_NAME' — this is an RBAC/authorization failure, not a missing secret. Grant this job's deployment identity a least-privilege 'Key Vault Secrets User' role (ideally condition-scoped to just this secret name) on '$KEY_VAULT_NAME'. Raw Azure CLI error: $SECRET_CHECK_ERR"
+            else
+              echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. django-backend migrations require a dedicated migration-admin connection string — this job deliberately does not fall back to any application runtime credential. Refusing to deploy the backend container."
+            fi
             exit 1
           fi
 
