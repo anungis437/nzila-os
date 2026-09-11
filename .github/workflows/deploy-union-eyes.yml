@@ -87,6 +87,29 @@ on:
         required: false
         type: boolean
         default: false
+      apply_congress_memberships_multi_party_rls_fix:
+        description: >-
+          Release Gate E.1/E.2 — one-time forward corrective rollout.
+          Required for environments that already received the Round-58
+          enforcement migration BEFORE Gate E.1/E.2 (i.e. any environment
+          where apply_authority_enforcement_migration was already run at
+          least once) — those environments will not automatically pick up
+          the corrected congress_memberships classification
+          (MULTI_PARTY_RLS_REQUIRED, reclassified from TENANT_RLS_REQUIRED
+          because the table has two org-typed FK columns, organization_id
+          and congress_id, not one). Set true to apply a SELECT-only
+          multi-party RLS policy to congress_memberships (current_org_id
+          matches EITHER organization_id OR congress_id), re-asserting the
+          existing SELECT grant. Requires congress_memberships and
+          ue_create_multi_party_rls_policy() to already exist in the target
+          environment (i.e. apply_authority_enforcement_migration must have
+          already run there at least once) — do not run this before that.
+          See scripts/apply-congress-memberships-multi-party-rls-fix.ts for
+          the full writeup. Leave false for ordinary deploys — this does
+          NOT run as part of the normal push/deploy path.
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -599,6 +622,80 @@ jobs:
             exit 1
           fi
           echo "::notice::Round 59D congress_memberships grant fix applied for ${{ needs.plan.outputs.environment }} — union_eyes_runtime SELECT restored."
+
+  # Release Gate E.1/E.2 corrective rollout — see the
+  # apply_congress_memberships_multi_party_rls_fix input description and
+  # scripts/apply-congress-memberships-multi-party-rls-fix.ts for the full
+  # root-cause writeup: congress_memberships was reclassified from
+  # TENANT_RLS_REQUIRED to MULTI_PARTY_RLS_REQUIRED because it has two
+  # org-typed FK columns (organization_id, congress_id), not one — the
+  # committed enforcement migration was regenerated to include this table's
+  # policy, but that regeneration does not retroactively apply itself to an
+  # environment that already ran apply-authority-enforcement-migration
+  # (one-time rollout, does not replay). Only meaningful after
+  # apply-authority-enforcement-migration has already run at least once
+  # against this environment. Staging-proven (Gate E.2): RLS enabled+forced,
+  # SELECT-only policy present, 3-party fixture + tenant-write-denial +
+  # application-path proofs all passed, rls-verify.ts preflight 989/989.
+  apply-congress-memberships-multi-party-rls-fix:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_congress_memberships_multi_party_rls_fix == 'true' }}
+    runs-on: ubuntu-latest
+    needs: plan
+    name: Apply Congress-Memberships Multi-Party RLS Fix (Gate E.1/E.2, one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4). Refusing to fall back to a shared credential."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply multi-party RLS policy to congress_memberships (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+            echo "::error::Key Vault secret '$SECRET_NAME' not found in '$KEY_VAULT_NAME'. This job requires a dedicated migration/admin connection string to be provisioned in Key Vault before it can run."
+            exit 1
+          fi
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+
+          set +x  # never trace this — the export line contains a secret
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+
+          set +e
+          pnpm --filter @nzila/union-eyes run rls:apply-congress-memberships-multi-party-rls-fix
+          FIX_STATUS=$?
+          set -e
+
+          unset RLS_ENFORCEMENT_ADMIN_DATABASE_URL ADMIN_URL
+
+          if [ "$FIX_STATUS" -ne 0 ]; then
+            echo "::error::Congress-memberships multi-party RLS fix apply failed for ${{ needs.plan.outputs.environment }}."
+            exit 1
+          fi
+          echo "::notice::Congress-memberships multi-party RLS fix applied for ${{ needs.plan.outputs.environment }} — RLS enabled+forced, SELECT-only multi-party policy in effect."
 
   # Mandatory, always-on pre-deploy gate — NOT an optional operator command
   # like apply-rls-foundation-migration above. Application code on this
