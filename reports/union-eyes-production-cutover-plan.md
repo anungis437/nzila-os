@@ -941,22 +941,173 @@ standing Owner/Contributor access") appears to have a legitimate operational nee
 Detailed identity-level remediation (narrowing specific human access) is a separate,
 operator-authorized action, not performed here.
 
-## 10. Final status
+## 10. Release Gate C — Operator Approval Confirmed & Merge Execution Readiness
+
+### 10.1 Operator governance decision
+
+The operator explicitly reviewed and approved PR #760 in the controlling session
+(2026-09-11). This is treated as authoritative programme governance evidence:
+
+```
+PR760_HUMAN_REVIEW = APPROVED_BY_OPERATOR
+PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES
+PR760_OPERATOR_MERGE_GATE = READY
+```
+
+No separate GitHub `APPROVED` review object, reviewer request, CODEOWNERS approval
+metadata, bot review, or `reviewDecision` value is required to re-prove this approval.
+GitHub's lack of mechanical review enforcement on this repository was already
+established in Release Gate B (§9.1 / see the ruleset and branch-protection findings
+above): no active branch protection, one disabled ruleset (id 12952284), no required
+status checks. Requiring a second approval mechanism for the same operator decision
+would be governance theatre, not additional safety.
+
+This does **not** extend to PR #752 — the operator's statement was scoped to #760 in
+context. `PR752_FINAL_HUMAN_SECURITY_REVIEW` remains `REQUIRED_POST_760_INTEGRATION`
+(§10.8).
+
+### 10.2 Exact-head and base reconfirmation
+
+```
+PR #760: state=OPEN, mergeable=MERGEABLE, mergeStateStatus=UNSTABLE (expected —
+  its own known baseline-failure checks, unchanged from Gate A/B)
+head = 0c960b74504d5a1ddf6caa92053afb1a0d08c66a  (matches the reviewed/approved SHA)
+base = 09063f97258c576f55a61269ae2d6bf69d6da118  == current origin/main
+```
+
+`origin/main` has **not** advanced since Release Gate A — no base-movement
+materiality assessment is required. The approval was granted against the exact head
+above; if that head changes before merge, this approval must be re-confirmed against
+the new diff (do not carry approval across new functional commits).
+
+### 10.3 Invariant reconfirmed (diff inspection at current head)
+
+Diff footprint unchanged: 7 files (`auto-promote-union-eyes.yml`,
+`deploy-union-eyes.yml`, the new contract test, and 4 generated repo-inventory
+output files).
+
+```
+auto-promote-union-eyes.yml:
+  matrix.environment = [demo, pilot, staging]  (production absent)
+  runtime guard: exit 1 if matrix.environment == "production"
+
+deploy-union-eyes.yml:
+  workflow_dispatch -> DEPLOY_ENV = requested input (may be production)
+  any other trigger  -> DEPLOY_ENV = "staging"  (no ref_name==main -> production
+    fallback; that branch was removed by this PR)
+```
+
+Explicit `workflow_dispatch` remains the only code path capable of selecting
+`production`. No architectural expansion beyond what Gate A/B already reviewed.
+
+### 10.4 Focused contract test (re-run at exact head)
+
+```
+tooling/contract-tests/union-eyes-production-promotion-gate.test.ts
+Test Files  1 passed (1)
+     Tests  5 passed (5)
+```
+
+Run directly on `fix/ue-production-promotion-gate` at head
+`0c960b74504d5a1ddf6caa92053afb1a0d08c66a` (checked out, verified, and returned to
+`fix/ue-runtime-rls-foundation` afterward — no branch content mutated).
+
+### 10.5 Current CI surface (reconfirmed, not re-attributed)
+
+Identical failing checks, identical job run IDs, to Gate A and Gate B — no new CI
+execution has occurred on this PR since Gate A:
+
+```
+Dependency Audit                        job 102974873900  BASELINE_INHERITED
+Governance Baseline / Dependency Audit  job 102974874184  BASELINE_INHERITED
+Governance Baseline / Trivy Container Scan  job 102974874006  BASELINE_INHERITED
+Ops Documentation Pack                  job 102974871869  BASELINE_INHERITED
+Governance Gate                         job 102975674625  AGGREGATE_DOWNSTREAM_OF_BASELINE
+Governance Baseline / Governance Gate   job 102975451727  AGGREGATE_DOWNSTREAM_OF_BASELINE
+```
+
+Zero `PR_ATTRIBUTABLE`, zero `UNKNOWN`. No re-attribution work required.
+
+### 10.6 Merge method
+
+Repository allows all three merge methods (`allow_merge_commit`,
+`allow_squash_merge`, `allow_rebase_merge` all `true`; `delete_branch_on_merge` is
+`false`). Empirical convention check of the 10 most recent commits reachable from
+`origin/main` (`git log origin/main --oneline -10`): 9 of 10 are single-parent
+squash-style commits carrying a trailing `(#NNN)`; only older history uses explicit
+`Merge pull request #NNN` merge commits. **Current convention = squash.**
+
+Chosen method for #760: **SQUASH** — matches current convention, and this is a
+small, single-commit, narrow safety PR.
+
+### 10.7 Prepared merge command — NOT EXECUTED
+
+```bash
+gh pr merge 760 --squash --match-head-commit 0c960b74504d5a1ddf6caa92053afb1a0d08c66a
+```
+
+`--match-head-commit` is a real `gh` CLI flag (confirmed via `gh pr merge --help`):
+the merge aborts if #760's head has moved since this gate. This command is prepared
+only; it is not executed by this gate. It requires a separate, explicit merge
+authorization ("merge #760" or equivalent).
+
+### 10.8 Mandatory post-merge verification plan (prepared, not executed)
+
+1. Capture the resulting merge SHA on `main`.
+2. `gh run list --workflow=auto-promote-union-eyes.yml --branch main --limit 5` —
+   locate the run triggered by the merge SHA; confirm its per-environment jobs cover
+   exactly `{demo, pilot, staging}` and none for `production`.
+3. For each downstream `deploy-union-eyes.yml` run dispatched by that run:
+   `gh run list --workflow=deploy-union-eyes.yml --limit 10` then
+   `gh run view <id> --json name,headSha,event,displayTitle` — confirm the
+   environment inputs are `demo`/`pilot`/`staging` only.
+4. Read-only Azure check (no secrets read):
+   `az containerapp revision list -g nzila-canada-prod-rg -n nzila-os-union-eyes-prod
+   --query "[].{name:name, createdTime:properties.createdTime}" -o table` — confirm
+   no new revision was created at/after the merge timestamp for the production
+   Container App.
+5. On `main`: re-run the focused contract test; confirm the merged
+   `auto-promote-union-eyes.yml` / `deploy-union-eyes.yml` content matches #760's
+   reviewed diff (no drift introduced by the merge itself).
+6. Record `PR760_POSTMERGE_PRODUCTION_DISPATCH = NONE` (or flag immediately if
+   otherwise) and `MAIN_PRODUCTION_AUTOPROMOTION = DISABLED / PROVEN`.
+
+### 10.9 Explicit non-actions preserved after #760 merges
+
+- `PR752_OPERATOR_MERGE_GATE` remains `BLOCKED`.
+- `PR752_FINAL_HUMAN_SECURITY_REVIEW` remains `REQUIRED_POST_760_INTEGRATION` — the
+  operator's #760 approval is not read as #752 approval.
+- `PRODUCTION_ENVIRONMENT_APPROVAL_GATE` remains `NOT_CONFIGURED` — #760 prevents
+  *automatic* dispatch; it does not itself constitute a human-approval gate for a
+  future *explicit* production dispatch. Required reviewers must still be configured
+  on the `production` GitHub Environment before any production rollout.
+- `PRODUCTION_CREDENTIAL_ROTATION` remains `REQUIRED / NOT PERFORMED` — no production
+  DB connection, password retrieval, Key Vault mutation, or Container App secret
+  mutation performed or planned in this gate.
+- The `#752` integration procedure (post-#760-merge) is unchanged from the empirical
+  merge-tree proof in §2.2: expected clean workflow-file merge, with only the 4
+  generated `tooling/repo-inventory/output/*` files conflicting (mechanical, resolved
+  by `pnpm inventory:generate`). After integrating, re-verify on the integrated
+  branch that `production` is still absent from the auto-promote matrix, the runtime
+  guard is still present, and the non-dispatch fallback is still `staging` — the
+  integration must not accidentally reintroduce the old production fanout.
+
+## 11. Final status
 
 ```
 RELEASE_GATE_A = COMPLETE
 RELEASE_GATE_B = COMPLETE
+RELEASE_GATE_C = COMPLETE
 PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES
-PR760_HUMAN_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
-PR760_OPERATOR_MERGE_GATE = READY_PENDING_HUMAN_REVIEW
-  (GitHub does not mechanically block this merge: no active branch protection,
-  one disabled ruleset (id 12952284), no required status checks configured.
-  Only human/CODEOWNERS review is the enforced gate, and only by convention.)
+PR760_HUMAN_REVIEW = APPROVED_BY_OPERATOR
+PR760_OPERATOR_MERGE_GATE = READY
+PR760_MERGE_PERFORMED = NO
 PR752_HUMAN_SECURITY_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
 PR752_OPERATOR_MERGE_GATE = BLOCKED (pending human security review; see §4 and the
   containment notice in the PR body)
+PR752_FINAL_HUMAN_SECURITY_REVIEW = REQUIRED_POST_760_INTEGRATION
 PRODUCTION_ENVIRONMENT_APPROVAL_GATE = NOT_CONFIGURED (protection_rules: [] —
-  confirmed twice, Gate A and Gate B)
+  confirmed three times, Gate A, Gate B, and Gate C)
 PRODUCTION_CREDENTIAL_ROTATION = REQUIRED / NOT PERFORMED
 PRODUCTION_CUTOVER_AUTHORIZED = NO
 PRODUCTION_DB_CONNECTION_PERFORMED = NO
@@ -966,25 +1117,27 @@ PRODUCTION_MUTATION_PERFORMED = NO
 **Next operator decisions, in order:**
 
 ```
-A. review/merge PR #760 (technical gate is CLEAN_WITH_PROVEN_BASELINE_FAILURES —
-   all 6 red checks traced to exact failing substeps with reproducible base-vs-head
-   evidence in PR #760 itself and §2.1 above; none PR-attributable; human review
-   from @nzila/platform / @nzila/security still required per CODEOWNERS)
-B. verify main no longer auto-dispatches production for union-eyes changes
-C. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
-D. complete human security approval of #752 (from @nzila/eng, @nzila/ue, and
-   @nzila/platform/@nzila/security given its .github/ changes), covering the final
-   mergeable diff
-E. rebase/update #752 against post-#760 main if required — predicted clean per §2.2's
-   empirical merge-tree proof (only trivial inventory-file regeneration expected)
-F. rerun materially affected #752 CI
-G. merge #752
-H. verify the merge did NOT trigger a production deployment
-I. separately authorize production cutover (§7), starting from step 1
+1. MERGE PR #760 (technical gate CLEAN_WITH_PROVEN_BASELINE_FAILURES, human review
+   APPROVED_BY_OPERATOR — the only remaining action is the merge itself; prepared
+   command in §10.7, not yet executed)
+2. verify main no longer auto-dispatches production for union-eyes changes (§10.8
+   post-merge verification plan)
+3. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
+4. integrate main into fix/ue-runtime-rls-foundation post-#760-merge (predicted clean
+   per §2.2's empirical merge-tree proof; only trivial inventory-file regeneration
+   expected) and re-verify #760's invariant survives the integration (§10.9)
+5. complete final human security approval of #752 (from @nzila/eng, @nzila/ue, and
+   @nzila/platform/@nzila/security given its .github/ changes), covering the
+   post-integration mergeable diff
+6. rerun materially affected #752 CI
+7. merge #752
+8. verify the merge did NOT trigger a production deployment
+9. configure required reviewers on the production GitHub Environment
+10. separately authorize production cutover (§7), starting from step 1
 ```
 
 No automatic actions were taken beyond what is documented in this report and in PR
-#760 (including its updated description with the full CI attribution table and
-conflict assessment). This session did not and will not merge PR #752, merge PR #760,
-rotate any credential, connect to production PostgreSQL, or dispatch any production
-workflow.
+#760 (including its updated description). This session did not and will not merge PR
+#752, merge PR #760, rotate any credential, connect to production PostgreSQL, or
+dispatch any production workflow. #760's own merge remains a separate, explicit
+operator action.
