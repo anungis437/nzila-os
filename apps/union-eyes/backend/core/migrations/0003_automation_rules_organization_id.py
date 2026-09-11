@@ -8,6 +8,11 @@ DECLARE
     existing_max_length integer;
     existing_nullable text;
 BEGIN
+    IF to_regclass('public.automation_rules') IS NULL THEN
+        RAISE EXCEPTION
+            'public.automation_rules does not exist; apply the owning schema migration before core.0003';
+    END IF;
+
     SELECT data_type, character_maximum_length, is_nullable
       INTO existing_data_type, existing_max_length, existing_nullable
       FROM information_schema.columns
@@ -16,6 +21,17 @@ BEGIN
        AND column_name = 'organization_id';
 
     IF existing_data_type IS NULL THEN
+        IF EXISTS (
+            SELECT 1
+              FROM information_schema.columns
+             WHERE table_schema = 'public'
+               AND table_name = 'automation_rules'
+               AND column_name = 'org_id'
+        ) THEN
+            RAISE EXCEPTION
+                'automation_rules has legacy org_id-only ownership geometry; refusing to create a competing organization_id column without a separately proven migration';
+        END IF;
+
         IF EXISTS (SELECT 1 FROM public.automation_rules LIMIT 1) THEN
             RAISE EXCEPTION
                 'automation_rules.organization_id correction requires an empty table or a separately reviewed deterministic backfill';

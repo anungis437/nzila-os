@@ -20,6 +20,15 @@ on:
           - demo
           - pilot
         default: staging
+      apply_authority_schema_prerequisites:
+        description: >-
+          P3.2 one-time rollout only. Applies the known pending auth_core.0003,
+          content.0002, and content.0003 Django schema prerequisites and proves
+          pilot_applications.verified_organization_id exists before any
+          authority correction runs. Leave false for ordinary deploys.
+        required: false
+        type: boolean
+        default: false
       apply_automation_rules_ownership_migration:
         description: >-
           P3.2 one-time rollout only. Applies Django core migration 0003,
@@ -357,10 +366,117 @@ jobs:
             echo "- Note: production runs in dedicated infrastructure (nzila-canada-prod-rg / nzila-canada-prod-env) on a dedicated production database; the hard guard above fails the deploy if prod ever resolves to staging/demo/pilot infra. (Live-verified 2026-06-28, Runtime Separation Wave Phase A.1.)" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-  apply-automation-rules-ownership-migration:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_automation_rules_ownership_migration == 'true' }}
+  apply-authority-schema-prerequisites:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_schema_prerequisites == 'true' }}
     runs-on: ubuntu-latest
     needs: plan
+    name: Apply Authority Schema Prerequisites (P3.2, one-time rollout)
+    environment: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Assert environment deployment identity is configured (fail-closed)
+        env:
+          ENV_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ENV_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ENV_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ENV_CLIENT_ID}" ] || [ -z "${ENV_TENANT_ID}" ] || [ -z "${ENV_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No environment-scoped deployment identity for '${{ needs.plan.outputs.environment }}' (BR-4)."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, environment-scoped)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply and verify required Django schema prerequisites (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEY_VAULT_NAME="${{ needs.plan.outputs.key_vault_name }}"
+          SECRET_NAME="union-eyes-migration-admin-database-url"
+
+          ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
+          set +x
+          export ADMIN_URL
+          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          python - <<'PY'
+          import os
+          import sys
+          from urllib.parse import unquote, urlparse
+
+          parsed = urlparse(os.environ.pop("ADMIN_URL"))
+          if parsed.scheme not in {"postgres", "postgresql"} or not all(
+              [parsed.hostname, parsed.path, parsed.username, parsed.password]
+          ):
+              raise SystemExit("Migration-admin database URL is malformed")
+
+          os.environ.update(
+              DJANGO_SETTINGS_MODULE="config.settings",
+              PGDATABASE=unquote(parsed.path.lstrip("/")),
+              PGUSER=unquote(parsed.username),
+              PGPASSWORD=unquote(parsed.password),
+              PGHOST=parsed.hostname,
+              PGPORT=str(parsed.port or 5432),
+          )
+          sys.path.insert(0, "apps/union-eyes/backend")
+
+          import django
+          django.setup()
+          from django.core.management import call_command
+          from django.db import connection
+          from django.db.migrations.recorder import MigrationRecorder
+
+            call_command(
+              "migrate",
+              "auth_core",
+              "0003_rename_clerk_organization_id",
+              interactive=False,
+            )
+            call_command(
+              "migrate",
+              "content",
+              "0003_pilotapplications_commercial_terms",
+              interactive=False,
+            )
+
+          applied = set(MigrationRecorder(connection).applied_migrations())
+          required = {
+              ("auth_core", "0003_rename_clerk_organization_id"),
+              ("content", "0002_pilotapplications_verified_organization"),
+              ("content", "0003_pilotapplications_commercial_terms"),
+          }
+          missing = sorted(required - applied)
+          if missing:
+              raise SystemExit(f"Required Django migrations are not recorded as applied: {missing}")
+
+          with connection.cursor() as cursor:
+              cursor.execute("""
+                  SELECT count(*)
+                  FROM information_schema.columns
+                  WHERE table_schema = 'public'
+                    AND table_name = 'pilot_applications'
+                    AND column_name = 'verified_organization_id'
+              """)
+              if cursor.fetchone()[0] != 1:
+                  raise SystemExit(
+                      "content.0002 is recorded but pilot_applications.verified_organization_id is absent"
+                  )
+          PY
+          unset ADMIN_URL
+
+  apply-automation-rules-ownership-migration:
+    if: ${{ always() && needs.plan.result == 'success' && needs.apply-authority-schema-prerequisites.result == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_automation_rules_ownership_migration == 'true' }}
+    runs-on: ubuntu-latest
+    needs: [plan, apply-authority-schema-prerequisites]
     name: Apply Automation-Rules Ownership Migration (P3.2, one-time rollout)
     environment: ${{ needs.plan.outputs.environment }}
     steps:
@@ -441,7 +557,7 @@ jobs:
   # existing "RLS foundation preflight (fail-closed)" step then proves the
   # provisioned credentials are live and RLS is enforced).
   apply-rls-foundation-migration:
-    if: ${{ always() && needs.plan.result == 'success' && (needs.apply-automation-rules-ownership-migration.result == 'success' || needs.apply-automation-rules-ownership-migration.result == 'skipped') && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_rls_foundation_migration == 'true' }}
+    if: ${{ always() && needs.plan.result == 'success' && needs.apply-automation-rules-ownership-migration.result == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_rls_foundation_migration == 'true' }}
     runs-on: ubuntu-latest
     needs: [plan, apply-automation-rules-ownership-migration]
     name: Apply RLS Foundation Migration (0108, one-time rollout)
@@ -520,7 +636,7 @@ jobs:
   # real environment. Round 59 owns the controlled staging proof and the
   # decision of when/whether to promote this to a mandatory gate.
   apply-authority-enforcement-migration:
-    if: ${{ always() && needs.plan.result == 'success' && (needs.apply-rls-foundation-migration.result == 'success' || needs.apply-rls-foundation-migration.result == 'skipped') && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_enforcement_migration == 'true' }}
+    if: ${{ always() && needs.plan.result == 'success' && needs.apply-rls-foundation-migration.result == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_authority_enforcement_migration == 'true' }}
     runs-on: ubuntu-latest
     needs: [plan, apply-rls-foundation-migration]
     name: Apply Authority Enforcement Migration (round 58, one-time rollout)
@@ -601,7 +717,7 @@ jobs:
   # grants. Only meaningful after apply-authority-enforcement-migration has
   # already run at least once against this environment.
   apply-round58-grant-fix-migration:
-    if: ${{ always() && needs.plan.result == 'success' && (needs.apply-authority-enforcement-migration.result == 'success' || needs.apply-authority-enforcement-migration.result == 'skipped') && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round58_grant_fix_migration == 'true' }}
+    if: ${{ always() && needs.plan.result == 'success' && needs.apply-authority-enforcement-migration.result == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.apply_round58_grant_fix_migration == 'true' }}
     runs-on: ubuntu-latest
     needs: [plan, apply-authority-enforcement-migration]
     name: Apply Round 58 Grant-Order Fix (round 59, one-time rollout)
