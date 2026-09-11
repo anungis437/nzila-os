@@ -1,10 +1,17 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { spawnSync } from 'node:child_process'
 import { load } from 'js-yaml'
 import { describe, expect, it } from 'vitest'
 
 const root = resolve(import.meta.dirname, '../..')
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8')
+
+const extractPythonHeredoc = (run: string, stepName: string) => {
+  const match = run.match(/python - <<'PY'\n([\s\S]*?)\nPY(?:\n|$)/)
+  expect(match, `${stepName} Python heredoc`).not.toBeNull()
+  return match![1]
+}
 
 describe('Union Eyes automation_rules ownership correction', () => {
   it('fails closed instead of inventing ownership for existing rows', () => {
@@ -46,6 +53,33 @@ describe('Union Eyes automation_rules ownership correction', () => {
     const round59 = read('apps/union-eyes/scripts/apply-round59-rls-geometry-gap-closure.ts')
 
     expect(round59).toContain("table: 'automation_rules', column: 'organization_id', isText: true")
+  })
+
+  it('compiles both production-only Python heredocs extracted from the workflow', () => {
+    const workflow = load(read('.github/workflows/deploy-union-eyes.yml')) as any
+    const steps = [
+      [
+        'apply-authority-schema-prerequisites',
+        'Apply and verify required Django schema prerequisites (fail-closed)',
+      ],
+      ['apply-automation-rules-ownership-migration', 'Apply core migration 0003 (fail-closed)'],
+    ] as const
+
+    for (const [jobName, stepName] of steps) {
+      const step = workflow.jobs[jobName].steps.find(
+        (candidate: { name?: string }) => candidate.name === stepName,
+      )
+      expect(step, stepName).toBeDefined()
+
+      const python = extractPythonHeredoc(step.run, stepName)
+      const result = spawnSync(
+        'python3',
+        ['-c', 'import sys; compile(sys.stdin.read(), "<workflow-heredoc>", "exec")'],
+        { input: python, encoding: 'utf8' },
+      )
+      expect(result.error, `${stepName} compiler launch`).toBeUndefined()
+      expect(result.status, `${stepName}\n${result.stderr}`).toBe(0)
+    }
   })
 
   it('proves the complete success-only authority rollout DAG structurally', () => {

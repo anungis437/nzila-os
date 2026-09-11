@@ -435,18 +435,18 @@ jobs:
           from django.db import connection
           from django.db.migrations.recorder import MigrationRecorder
 
-            call_command(
+          call_command(
               "migrate",
               "auth_core",
               "0003_rename_clerk_organization_id",
               interactive=False,
-            )
-            call_command(
+          )
+          call_command(
               "migrate",
               "content",
               "0003_pilotapplications_commercial_terms",
               interactive=False,
-            )
+          )
 
           applied = set(MigrationRecorder(connection).applied_migrations())
           required = {
