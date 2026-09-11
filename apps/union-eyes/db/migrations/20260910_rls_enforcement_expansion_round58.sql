@@ -15,7 +15,7 @@
 --
 -- COVERAGE (see reports/union-eyes-rls-enforcement-blockers.json for the
 -- full list of tables this generation run could NOT confidently resolve):
---   Policies generated this run: 322
+--   Policies generated this run: 323
 --   Tables blocked (geometry unresolved / ambiguous): 0
 --   GRANT blocks generated (covers all 795 manifest entries): 795
 --
@@ -1058,6 +1058,11 @@ END $$;
 DO $$ BEGIN
   IF to_regclass('public.' || 'committees') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'committees' AND column_name = 'organization_id') THEN
     PERFORM ue_create_direct_org_rls_policy('committees', 'organization_id', FALSE);
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF to_regclass('public.' || 'congress_memberships') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'congress_memberships' AND column_name = 'organization_id') THEN
+    PERFORM ue_create_multi_party_rls_policy('congress_memberships', 'organization_id', 'congress_id');
   END IF;
 END $$;
 DO $$ BEGIN
@@ -4784,6 +4789,7 @@ DO $$ BEGIN
   IF to_regclass('public.' || 'congress_memberships') IS NOT NULL THEN
     EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'congress_memberships');
     EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'congress_memberships');
+    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'congress_memberships');
   END IF;
 END $$;
 
