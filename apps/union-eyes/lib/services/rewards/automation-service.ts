@@ -92,9 +92,15 @@ export async function processAnniversaryAwards(orgId: string) {
     const result = await db.execute(query);
     const anniversaries = result as unknown as AnniversaryRow[];
     // Get anniversary award type (should be configured in settings)
+    // ROUND 50 SECURITY FIX: previously matched by name+kind alone with no
+    // org filter, so a cron run for one organization could pick up ANOTHER
+    // organization's "Work Anniversary" award type (cross-tenant data
+    // confusion in a system-invoked job) and issue awards using its
+    // programId/credit rules/approval settings.
     const anniversaryAwardType = await db.query.recognitionAwardTypes.findFirst({
       where: (types, { eq, and }) =>
         and(
+          eq(types.orgId, orgId),
           eq(types.name, 'Work Anniversary'),
           eq(types.kind, 'automated')
         ),

@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-09-09T18:30:00.000Z",
+  "round": "58D",
+  "architecturalDecision": {
+    "presumption": "ONE canonical Union Eyes Azure PostgreSQL data plane; service/role isolation for finance, not a separate physical database, unless concrete deployed-infrastructure evidence proves one is required.",
+    "sameCanonicalDatabase": "YES (by architectural decision; financial-service is currently undeployed, so there is no live physical database to compare — see evidence below).",
+    "concreteReasonIfNo": null
+  },
+  "components": [
+    {
+      "component": "main Union Eyes application (apps/union-eyes)",
+      "process": "Next.js app, deployed via .github/workflows/deploy-union-eyes.yml to Azure Container Apps",
+      "dbConnectionFactory": "db/index.ts (drizzle-orm/postgres-js + postgres package)",
+      "environmentVariable": "DATABASE_URL (+ RLS_MIGRATION_ADMIN_DATABASE_URL / RLS_ENFORCEMENT_ADMIN_DATABASE_URL for one-time migration jobs, via Key Vault secret union-eyes-migration-admin-database-url)",
+      "expectedPhysicalDatabase": "canonical Union Eyes Azure PostgreSQL",
+      "expectedPostgresRole": "union_eyes_runtime (ordinary requests), union_eyes_system (withSystemContext paths)",
+      "schemaRootsOwnedOrRead": "db/schema/**, db/schema-organizations.ts, db/schema-applications.ts, db/data/communication.ts",
+      "migrationOwner": "db/migrations/** (0001 through 20260910_rls_enforcement_expansion_round58.sql)",
+      "deploymentPath": ".github/workflows/deploy-union-eyes.yml (push-triggered + workflow_dispatch)"
+    },
+    {
+      "component": "services/financial-service",
+      "process": "Standalone Express/tsx microservice (src/index.ts), workspace package \"financial-service\"",
+      "dbConnectionFactory": "services/financial-service/src/db/index.ts (drizzle-orm/postgres-js + postgres package — a fully generic Postgres connection string, zero Supabase SDK usage at runtime)",
+      "environmentVariable": "DATABASE_URL (services/financial-service/.env.example — rewritten this round to a canonical-Postgres example, previously a hardcoded Supabase project connection string)",
+      "expectedPhysicalDatabase": "canonical Union Eyes Azure PostgreSQL (architectural decision; NOT currently deployed anywhere, so no live physical database exists to verify against)",
+      "expectedPostgresRole": "no dedicated role created this round — see financeRoleDecision below",
+      "schemaRootsOwnedOrRead": "services/financial-service/src/db/schema.ts, services/financial-service/drizzle/schema.ts (95 physical relation names with no manifest entry prior to this round — see reconciliation95 below)",
+      "migrationOwner": "services/financial-service/drizzle/0000_lucky_mole_man.sql (175-table introspected snapshot) + several ad-hoc *.sql files (add-is-active-column.sql, add-missing-tables.sql, add-gate13-job-cancellation-tables.sql, seed-test-data.sql) — none of these are wired into any current automated deployment path",
+      "deploymentPath": "NONE FOUND: no Dockerfile, no docker-compose service entry, no Azure deploy workflow, no infrastructure/** Bicep/Terraform resource. Sole CI presence is .github/workflows/cupe-pilot-readiness.yml's \"financial-service-health\" job, which runs only typecheck/lint/test (scripts/financial-service-health.ts) — never a real migration apply or deployment."
+    }
+  ],
+  "supabasePurge": {
+    "before": {
+      "runtimeImportsOfSupabaseSdk": 2,
+      "runtimeImportSites": ["lib/services/pci-compliance-service.ts", "lib/services/__tests__/pci-compliance-service.test.ts"],
+      "productionPackageDependencies": 2,
+      "productionPackageSites": ["apps/union-eyes/package.json (@supabase/supabase-js ^2.87.1)", "apps/union-eyes/services/financial-service/package.json (@supabase/supabase-js ^2.39.0)"],
+      "runtimeEnvRequirements": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY (all optional in lib/config/env-validation.ts, but validated as if potentially real)"],
+      "deploymentDependency": ["services/financial-service/.env.example hardcoded a real Supabase project connection string (db.<project>.supabase.co)", "next.config.ts CSP connect-src allowlisted https://*.supabase.co"],
+      "deadFictitiousArchitectureCode": ["lib/db-adapter.ts (doc comment: \"UnionEyes uses Supabase + internal packages for DB\" — zero real production importers, only its own test)"]
+    },
+    "after": {
+      "runtimeImportsOfSupabaseSdk": 0,
+      "productionPackageDependencies": 0,
+      "runtimeEnvRequirements": 0,
+      "deploymentDependency": 0,
+      "deadFictitiousArchitectureCode": 0
+    },
+    "actions": [
+      "lib/services/pci-compliance-service.ts: removed @supabase/supabase-js import entirely; converted its 3 client calls (SAQ-A template requirements, organizations list, encryption-key rotation list) to Drizzle/raw-SQL against the existing canonical `db` connection. Manifest classification for the underlying pci_dss_* tables unchanged (CONTAINED_NO_AUTHORITY, zero production importers — still true).",
+      "lib/services/__tests__/pci-compliance-service.test.ts: rewritten (20/20 passing) to mock the Drizzle `db` client instead of the Supabase client.",
+      "lib/db-adapter.ts + lib/__tests__/db-adapter.test.ts: deleted (dead code, fictitious Supabase architecture claims).",
+      "lib/config/env-validation.ts: removed the 3 optional SUPABASE_* zod schema entries (confirmed zero remaining runtime reads).",
+      "next.config.ts: removed https://*.supabase.co from the CSP connect-src allowlist (redundant with the existing blanket https: entry).",
+      "apps/union-eyes/package.json + services/financial-service/package.json: removed the @supabase/supabase-js dependency; ran `pnpm install` at the repo root to regenerate pnpm-lock.yaml (0 supabase references remain in the lockfile).",
+      "services/financial-service/.env.example: replaced the Supabase DATABASE_URL example + SUPABASE_URL/ANON_KEY/SERVICE_ROLE_KEY with a canonical Azure PostgreSQL connection string example.",
+      "services/financial-service/IMPLEMENTATION_COMPLETE.md: updated \"DATABASE_URL (Supabase)\" to \"(canonical Union Eyes Azure PostgreSQL)\".",
+      "New scripts/rls-enforcement/__tests__/supabase-purge-ratchet.test.ts (3/3 passing): fails CI on any new Supabase runtime/deployment pattern under apps/union-eyes/**, with an explicit, individually-reviewed allowlist for the 8 remaining accurate historical/comparative/negative-test references."
+    ]
+  },
+  "reconciliation95": {
+    "totalOutsideManifestBeforeRound58D": 95,
+    "duplicateAcrossBothRoots": 0,
+    "financialServiceOnlyDeclarations": 95,
+    "presentInIntrospectedMigrationSnapshot": 84,
+    "notPresentInMigrationSnapshot": 11,
+    "notPresentInMigrationSnapshotTables": ["accounts_payable", "budget_line_items", "budgets", "customer_acquisition", "expense_approvals", "expense_requests", "mrr_snapshots", "revenue_cohorts", "subscription_events", "vendor_invoices", "vendors"],
+    "viewNamingConventionCount": 19,
+    "viewNamingConventionResolvedAs": "ordinary base tables (confirmed literal CREATE TABLE IF NOT EXISTS statements in the introspected snapshot), NOT actual PostgreSQL view objects — no VIEW_AUTHORITY_REGISTRY entry needed",
+    "falsePositiveRegexMatches": 3,
+    "falsePositiveNames": ["name", "physical", "physical_name"],
+    "falsePositiveExplanation": "matched doc-comment example code inside scripts/rls-enforcement/derive-table-geometry.ts and scripts/schema-duplicate-table-scan.ts, not real pgTable declarations",
+    "finalDisposition": "all 95 added to db/rls-storage-authority/financial-service-latent.ts as LATENT_UNREACHABLE, zero runtime/system privileges, scopeDisposition: DECLARATION_STALE_OR_NONCANONICAL. Manifest total: 700 -> 795. UNKNOWN = 0."
+  },
+  "financeRoleDecision": {
+    "decision": "NO dedicated finance-specific PostgreSQL roles (union_eyes_finance_runtime / union_eyes_finance_system) created this round.",
+    "rationale": "Every financial-service-owned relation is currently classified LATENT_UNREACHABLE with zero required runtime/system privileges — there is no current privilege-separation problem to solve, since financial-service itself has no live deployment path at all.",
+    "requiredFollowUp": "If/when financial-service is actually deployed, this decision MUST be revisited against its then-real, evidenced privilege requirements before that deployment ships — re-open every entry in db/rls-storage-authority/financial-service-latent.ts at that time."
+  },
+  "arbitrationDecisionsDefect": {
+    "status": "FIXED (round 58D)",
+    "before": "writeRole: 'steward' on all 5 arbitration/precedents routes — an ordinary per-tenant role (ROLE_HIERARCHY level 50) gating writes to shared, cross-tenant reference data with no organizationId column (orgScoped: true was a no-op).",
+    "after": "writeRole: 'content_manager' (ROLE_HIERARCHY level 208, a genuine PLATFORM_ELEVATED_ROLES member) on all 5 routes. Verified no ordinary tenant role (member 20, steward 50, chief_steward 90, admin 140) can exceed level 208.",
+    "regressionTest": "app/api/arbitration/precedents/__tests__/arbitration-decisions-writerole.test.ts (5/5 passing)"
+  },
+  "blanketGrantRemoval": {
+    "gateConditionsChecked": [
+      "Supabase runtime dependency count = 0 (verified)",
+      "physical-relation census UNKNOWN count = 0 (95/95 dispositioned)",
+      "geometry blockers = 0 (verified)",
+      "TBD privilege entries = 0 (verified)",
+      "arbitration_decisions global-write defect closed (verified)"
+    ],
+    "generatorSelfCheck": "generate-rls-enforcement-migration.ts computes blanketGrantRemovalGateOk = (blockers.length === 0 && every manifest entry has non-TBD privileges) fresh on every run — a future un-classified table addition automatically re-widens back to the safe blanket-grant-retained state.",
+    "gateResult": true,
+    "action": "PART E added to the migration: REVOKE SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public + REVOKE USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system. Schema USAGE and database CONNECT grants retained (baseline connection-level access, not per-table data access).",
+    "sequenceAudit": "0 PostgreSQL sequences exist anywhere in the canonical schema (every table uses a UUID default, not serial/bigserial) — the sequence REVOKE requires no replacement grant.",
+    "noEquivalentWildcardGrant": "Verified via grep: 0108 contains no GRANT ... TO PUBLIC and no role-membership grants beyond the removed table/sequence grants plus the retained schema USAGE / database CONNECT."
+  },
+  "finalCounts": {
+    "manifestEntries": 795,
+    "policiesGenerated": 322,
+    "grantBlocksGenerated": 795,
+    "geometryBlockers": 0
+  }
+}

@@ -280,7 +280,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
 
       // Delete post using social media service
       const socialMediaService = createSocialMediaService();
-      await socialMediaService.deletePost(postId);
+      await socialMediaService.deletePost(postId, organizationId);
 
       return NextResponse.json({
         message: 'Post deleted successfully',

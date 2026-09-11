@@ -8,7 +8,6 @@ import { NextRequest as _NextRequest, NextResponse as _NextResponse } from "next
 import { db } from "@/db/db";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
-import { grievanceDocuments } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { grievanceCaseAccessAssignments } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { documents, documentAccessGrants, documentLinks } from "@/db/schema/documents-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
@@ -77,12 +76,6 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       .where(eq(grievanceEvents.grievanceId, params.id))
       .orderBy(desc(grievanceEvents.createdAt));
 
-    // Legacy grievance documents (kept for backward compatibility).
-    const legacyDocuments = await db
-      .select()
-      .from(grievanceDocuments)
-      .where(eq(grievanceDocuments.grievanceId, params.id));
-
     // Governed repository documents linked to this case/grievance.
     const linkedDocuments = await db
       .select({
@@ -137,7 +130,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       }),
     );
 
-    if (governedDocuments.length > 0 || legacyDocuments.length > 0) {
+    if (governedDocuments.length > 0) {
       await trackPilotEvent({
         userId,
         organizationId,
@@ -146,7 +139,6 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
         metadata: {
           grievanceId: params.id,
           governedCount: governedDocuments.length,
-          legacyCount: legacyDocuments.length,
         },
       });
     }
@@ -165,7 +157,7 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
     return standardSuccessResponse({
       ...grievance,
       events,
-      documents: legacyDocuments,
+      documents: governedDocuments,
       governedDocuments,
       primaryLroId: grievance.unionRepId,
       collaborators,

@@ -11,7 +11,7 @@
  */
 
 import { db } from '@/db';
-import { grievances } from '@/db/schema/grievance-schema';
+import { grievances } from '@/db/schema/domains/claims/grievances';
 import { eq } from 'drizzle-orm';
 import { generateStatusUpdateMessage } from '@/lib/member-experience/timeline-builder';
 import type { ClaimStatus } from '@/lib/workflow-engine';

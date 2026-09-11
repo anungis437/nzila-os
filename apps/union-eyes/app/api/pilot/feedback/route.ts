@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { withRoleAuth } from "@/lib/api-auth-guard";
+import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { logger } from "@/lib/logger";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
@@ -10,16 +10,20 @@ import { eq, sql } from "drizzle-orm";
 /**
  * POST /api/pilot/feedback — submit in-app feedback.
  *
- * Body: { userId, organizationId, easeRating (1-5), category?, comment?, trigger }
+ * Body: { easeRating (1-5), category?, comment?, trigger }
+ * userId/organizationId are derived from the authenticated caller, never
+ * accepted from the client — see round 56 fix (was spoofable via body).
  */
-export const POST = withRoleAuth('member', async (req) => {
+export const POST = withRoleAuth('member', async (req, context: BaseAuthContext) => {
   try {
     const body = await req.json();
-    const { userId, organizationId, easeRating, category, comment, trigger } = body;
+    const { easeRating, category, comment, trigger } = body;
+    const userId = context.userId;
+    const organizationId = context.organizationId;
 
     if (!userId || !organizationId || !easeRating || !trigger) {
       return NextResponse.json(
-        { error: "Missing required: userId, organizationId, easeRating, trigger" },
+        { error: "Missing required: easeRating, trigger" },
         { status: 400 },
       );
     }
@@ -86,15 +90,18 @@ export const POST = withRoleAuth('member', async (req) => {
 });
 
 /**
- * GET /api/pilot/feedback?organizationId=...
+ * GET /api/pilot/feedback
  *
- * Returns feedback summary for admin view.
+ * Returns feedback summary for admin view, scoped to the caller's own
+ * organization — organizationId is derived from the authenticated caller,
+ * never accepted from the client (round 56 fix: was a cross-org IDOR via
+ * an arbitrary ?organizationId= query param).
  */
-export const GET = withRoleAuth('admin', async (req) => {
+export const GET = withRoleAuth('admin', async (req, context: BaseAuthContext) => {
   try {
-    const orgId = req.nextUrl.searchParams.get("organizationId");
+    const orgId = context.organizationId;
     if (!orgId) {
-      return NextResponse.json({ error: "Missing organizationId" }, { status: 400 });
+      return NextResponse.json({ error: "Missing organization context" }, { status: 400 });
     }
 
     const summary = await withRLSContext(async () => db.execute(sql`

@@ -1,0 +1,1070 @@
+{
+  "generatedAt": "2026-09-09T22:11:41.693Z",
+  "total": 98,
+  "declarations": [
+    {
+      "physicalName": "accounts_payable",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_chunks",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_documents",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_feedback",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_feedback_summary",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_queries",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_query_logs",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "ai_usage_by_tenant",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "arrears",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "arrears_cases",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "attestation_templates",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "blockchain_audit_anchors",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "budget_line_items",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "budgets",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "case_summaries",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "certification_applications",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "compliance_validations",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "cope_contributions",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "cra_xml_batches",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "customer_acquisition",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema-platform-economics.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "digital_signatures",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "dues_rules",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "elected_officials",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "encryption_keys",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "equity_snapshots",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "expense_approvals",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "expense_requests",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "fund_eligibility",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "hardship_applications",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "hw_benefit_claims",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "hw_benefit_enrollments",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "hw_benefit_plans",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "jurisdiction_rules",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "jurisdiction_rules_summary",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "jurisdiction_templates",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "legislation_tracking",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "member_demographics",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "member_dues_assignments",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "member_political_participation",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "members",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "members_with_pii",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "mrr_snapshots",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema-platform-economics.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "name",
+      "declarationPaths": [
+        "scripts/schema-duplicate-table-scan.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": false,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "organization_hierarchy_audit",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "organization_tree",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "organizing_activities",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "organizing_volunteers",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "pay_equity_complaints",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "pension_actuarial_valuations",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "pension_hours_banks",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "pension_trustee_boards",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "physical",
+      "declarationPaths": [
+        "scripts/rls-enforcement/derive-table-geometry.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": false,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "physical_name",
+      "declarationPaths": [
+        "scripts/rls-enforcement/derive-table-geometry.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": false,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "picket_attendance",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "picket_tracking",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "pii_access_log",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "political_activities",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "political_campaigns",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "public_donations",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "revenue_cohorts",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema-platform-economics.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "statcan_submissions",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "statutory_holidays",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "stipend_disbursements",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "strike_funds",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "subscription_events",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema-platform-economics.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "tax_slips",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "tax_year_configurations",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "tenant_management_view",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "tenants",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "transaction_clc_mappings",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "trust_compliance_reports",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "trusted_certificate_authorities",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "v_annual_remittance_summary",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_certification_expiry_tracking",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_cope_member_summary",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_course_session_dashboard",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_critical_deadlines",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_elected_official_engagement",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_equity_statistics_anonymized",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_hw_claims_aging",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_legislative_priorities",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_member_benefit_eligibility",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_member_training_transcript",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_organizing_campaign_dashboard",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_pay_equity_pipeline",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_pending_remittances",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_pension_funding_summary",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_political_campaign_dashboard",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_tax_slip_summary",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_training_program_progress",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "v_workplace_contact_map",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": true
+    },
+    {
+      "physicalName": "vendor_invoices",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "vendors",
+      "declarationPaths": [
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "vote_merkle_tree",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "voting_auditors",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "voting_key_access_log",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "voting_session_auditors",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    },
+    {
+      "physicalName": "voting_session_keys",
+      "declarationPaths": [
+        "services/financial-service/drizzle/schema.ts",
+        "services/financial-service/src/db/schema.ts"
+      ],
+      "canonicalMainAppDeclaration": false,
+      "financialServiceOnlyDeclaration": true,
+      "duplicateAcrossBothRoots": false,
+      "likelyView": false
+    }
+  ]
+}

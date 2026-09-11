@@ -24,10 +24,10 @@ function daysAgo(n: number): Date {
 
 export function generateDemoEmployers(organizationId: string) {
   return [
-    { id: uuidv4(), orgId: organizationId, name: 'Treasury Board Secretariat', industry: 'Federal Government', contactEmail: 'lr-demo@tbs-sct.gc.ca' },
-    { id: uuidv4(), orgId: organizationId, name: 'Canada Revenue Agency', industry: 'Federal Government', contactEmail: 'lr-demo@cra-arc.gc.ca' },
-    { id: uuidv4(), orgId: organizationId, name: 'Public Services and Procurement Canada', industry: 'Federal Government', contactEmail: 'lr-demo@pspc.gc.ca' },
-    { id: uuidv4(), orgId: organizationId, name: 'Statistics Canada', industry: 'Federal Government', contactEmail: 'lr-demo@statcan.gc.ca' },
+    { id: uuidv4(), organizationId, name: 'Treasury Board Secretariat', employerType: 'federal' as const, email: 'lr-demo@tbs-sct.gc.ca' },
+    { id: uuidv4(), organizationId, name: 'Canada Revenue Agency', employerType: 'federal' as const, email: 'lr-demo@cra-arc.gc.ca' },
+    { id: uuidv4(), organizationId, name: 'Public Services and Procurement Canada', employerType: 'federal' as const, email: 'lr-demo@pspc.gc.ca' },
+    { id: uuidv4(), organizationId, name: 'Statistics Canada', employerType: 'federal' as const, email: 'lr-demo@statcan.gc.ca' },
   ];
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/api-auth-guard';
+import { hasInstitutionalTopologyAccess } from '@/lib/organizational-topology/access';
 import { getInstitutionalObservabilityView } from '@/lib/organizational-observability/source';
 
 export const dynamic = 'force-dynamic';
@@ -25,10 +26,19 @@ function fmt(iso: string | undefined | null): string {
   return d.toISOString().replace('T', ' ').replace(/\.\d+Z$/, 'Z');
 }
 
+// PR #752 round 8: this reads the same cross-org institutional graph as
+// the topology dashboard (no per-org filter) — gate it the same way, see
+// lib/organizational-topology/access.ts.
 export default async function InstitutionalObservabilityPage() {
   const user = await requireUser();
   if (!user) {
     redirect('/sign-in');
+  }
+
+  const orgId = user.organizationId;
+  const hasAccess = orgId ? await hasInstitutionalTopologyAccess(user.userId, orgId) : false;
+  if (!hasAccess) {
+    redirect('/dashboard');
   }
 
   const view = await getInstitutionalObservabilityView();

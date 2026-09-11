@@ -26,19 +26,29 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
     
     const userId = user.id;
+    // organizationId is derived from the authenticated user, never the
+    // request body — a client-supplied value here would let any signed-in
+    // user create a signature workflow/signers under another organization.
+    const organizationId = user.organizationId;
+    if (!organizationId) {
+      return standardErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      'Organization context required'
+    );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const documentType = formData.get("documentType") as string;
-    const organizationId = formData.get("organizationId") as string;
     const signersJson = formData.get("signers") as string;
     const provider = formData.get("provider") as string | null;
     const expirationDays = formData.get("expirationDays") as string;
     const requireAuthentication = formData.get("requireAuthentication") as string;
     const sequentialSigning = formData.get("sequentialSigning") as string;
 
-    if (!file || !title || !organizationId || !signersJson) {
+    if (!file || !title || !signersJson) {
       return standardErrorResponse(
       ErrorCode.VALIDATION_ERROR,
       'Missing required fields'
@@ -96,7 +106,7 @@ return standardErrorResponse(
 /**
  * Get user's documents
  */
-export const GET = withApiAuth(async (request: NextRequest) => {
+export const GET = withApiAuth(async (_request: NextRequest) => {
   try {
     const user = await getCurrentUser();
     if (!user || !user.id) {
@@ -107,13 +117,15 @@ export const GET = withApiAuth(async (request: NextRequest) => {
     }
     
     const userId = user.id;
-    const { searchParams } = new URL(request.url);
-    const organizationId = searchParams.get("organizationId");
+    // organizationId is derived from the authenticated user, never the
+    // query string — a client-supplied value here would let any signed-in
+    // user read another organization's signature documents.
+    const organizationId = user.organizationId;
 
     if (!organizationId) {
       return standardErrorResponse(
       ErrorCode.MISSING_REQUIRED_FIELD,
-      'Organization ID required'
+      'Organization context required'
     );
     }
 

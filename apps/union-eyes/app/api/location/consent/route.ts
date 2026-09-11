@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { GeofencePrivacyService } from "@/services/geofence-privacy-service";
-import { withApiAuth } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
@@ -13,11 +13,13 @@ import {
  * POST: Request location tracking consent
  * GET: Check consent status
  * DELETE: Revoke consent
+ *
+ * Consent is strictly self-service: userId is always the authenticated
+ * caller's own id, never a client-supplied body/query value (PR #752 round 17).
  */
 
 
 const _locationConsentSchema = z.object({
-  userId: z.string().uuid('Invalid userId'),
   purpose: z.unknown().optional(),
   purposeDescription: z.string().optional(),
   consentText: z.unknown().optional(),
@@ -28,13 +30,19 @@ const _locationConsentSchema = z.object({
 
 export const POST = withApiAuth(async (req: NextRequest) => {
   try {
-    const body = await req.json();
-    const { userId, purpose, purposeDescription, consentText, allowedDuringStrike, allowedDuringEvents } = body;
+    const user = await getCurrentUser();
+    if (!user) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    }
+    const userId = user.id;
 
-    if (!userId || !purpose || !purposeDescription || !consentText) {
+    const body = await req.json();
+    const { purpose, purposeDescription, consentText, allowedDuringStrike, allowedDuringEvents } = body;
+
+    if (!purpose || !purposeDescription || !consentText) {
       return standardErrorResponse(
       ErrorCode.VALIDATION_ERROR,
-      'Missing required fields: userId, purpose, purposeDescription, consentText'
+      'Missing required fields: purpose, purposeDescription, consentText'
     );
     }
 
@@ -67,16 +75,14 @@ export const POST = withApiAuth(async (req: NextRequest) => {
 
 export const GET = withApiAuth(async (req: NextRequest) => {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const context = searchParams.get("context") as "strike" | "event" | undefined;
-
-    if (!userId) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing userId parameter'
-    );
+    const user = await getCurrentUser();
+    if (!user) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
+    const userId = user.id;
+
+    const { searchParams } = new URL(req.url);
+    const context = searchParams.get("context") as "strike" | "event" | undefined;
 
     const hasConsent = await GeofencePrivacyService.hasValidConsent(userId, context);
 
@@ -95,16 +101,14 @@ export const GET = withApiAuth(async (req: NextRequest) => {
 
 export const DELETE = withApiAuth(async (req: NextRequest) => {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const reason = searchParams.get("reason");
-
-    if (!userId) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing userId parameter'
-    );
+    const user = await getCurrentUser();
+    if (!user) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
+    const userId = user.id;
+
+    const { searchParams } = new URL(req.url);
+    const reason = searchParams.get("reason");
 
     await GeofencePrivacyService.revokeLocationConsent(userId, reason || undefined);
 

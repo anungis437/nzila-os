@@ -30,6 +30,7 @@ import {
 } from '@nzila/organizational-governance-graph'
 
 import { db } from '@/db/db'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 import { organizations, organizationRelationships } from '@/db/schema-organizations'
 import { logger } from '@/lib/logger'
 
@@ -125,10 +126,16 @@ function normalizeStatus(status: string | null | undefined): string {
  */
 export async function getInstitutionalGraph(): Promise<InstitutionalTimelineGraph> {
   try {
-    const [orgRows, relationshipRows] = await Promise.all([
-      db.select().from(organizations),
-      db.select().from(organizationRelationships),
-    ])
+    // PR #752 round 8: this deliberately reads across ALL organizations
+    // (no per-org filter) for the national/cross-affiliate topology view —
+    // app-level access is now restricted to clc_staff/clc_executive/
+    // system_admin (see lib/organizational-topology/access.ts). Execute
+    // under withSystemContext so the DB-level boundary matches that
+    // app-level authority instead of relying on ordinary tenant-RLS
+    // routing to happen to allow a cross-org read.
+    const [orgRows, relationshipRows] = await withSystemContext(async (_tx) =>
+      Promise.all([db.select().from(organizations), db.select().from(organizationRelationships)]),
+    )
 
     const nodes: InstitutionalTimelineGraph['nodes'] = orgRows.map((org) => ({
       entityType: 'Organization',

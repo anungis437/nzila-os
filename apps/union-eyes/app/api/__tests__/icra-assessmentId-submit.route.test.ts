@@ -1,4 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHash } from 'crypto';
+
+const TOKEN = 'test-capability-token';
+const TOKEN_HASH = createHash('sha256').update(TOKEN, 'utf8').digest('hex');
+const FUTURE = new Date(Date.now() + 60_000);
 
 const m = vi.hoisted(() => ({
   withSystemContext: vi.fn(),
@@ -17,11 +22,17 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 vi.mock('@/db/schema/icra-schema', () => ({
   icraAssessments: { id: 'id' },
   icraAssessmentAnswers: { assessmentId: 'assessmentId' },
-  icraMaturityProfiles: { assessmentId: 'assessmentId' },
+  icraMaturityProfiles: { assessmentId: 'assessmentId', generatedAt: 'generatedAt' },
   icraContinuityScores: { assessmentId: 'assessmentId' },
   icraGovernanceFlags: { assessmentId: 'assessmentId' },
   icraFollowupRecommendations: { assessmentId: 'assessmentId' },
 }));
+
+function req(authorized = true) {
+  const headers: Record<string, string> = {};
+  if (authorized) headers.authorization = `Bearer ${TOKEN}`;
+  return new Request('http://localhost', { headers });
+}
 
 async function loadRoute() {
   return import('../icra/[assessmentId]/submit/route');
@@ -44,23 +55,39 @@ describe('icra/[assessmentId]/submit route', () => {
   it('returns 404 when assessment is missing', async () => {
     const { POST } = await loadRoute();
     m.withSystemContext.mockImplementationOnce(async (fn: (tx: any) => Promise<unknown>) => {
-      let selectCall = 0;
       const tx = {
         select: vi.fn(() => ({
           from: vi.fn(() => ({
-            where: vi.fn(() => {
-              selectCall += 1;
-              if (selectCall === 1) return { limit: vi.fn(async () => []) };
-              return Promise.resolve([]);
-            }),
+            where: vi.fn(() => ({ limit: vi.fn(async () => []), orderBy: vi.fn(() => ({ limit: vi.fn(async () => []) })) })),
           })),
         })),
       };
       return fn(tx);
     });
 
-    const response = await POST(new Request('http://localhost'), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
     expect(response.status).toBe(404);
+  });
+
+  it('returns 401 when no capability token is presented', async () => {
+    const { POST } = await loadRoute();
+    m.withSystemContext.mockImplementationOnce(async (fn: (tx: any) => Promise<unknown>) => {
+      const tx = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(() => ({
+              limit: vi.fn(async () => [
+                { id: 'a1', status: 'in_progress', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+              ]),
+            })),
+          })),
+        })),
+      };
+      return fn(tx);
+    });
+
+    const response = await POST(req(false), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    expect(response.status).toBe(401);
   });
 
   it('returns 400 when no answers are recorded', async () => {
@@ -72,7 +99,13 @@ describe('icra/[assessmentId]/submit route', () => {
           from: vi.fn(() => ({
             where: vi.fn(() => {
               selectCall += 1;
-              if (selectCall === 1) return { limit: vi.fn(async () => [{ id: 'a1' }]) };
+              if (selectCall === 1) {
+                return {
+                  limit: vi.fn(async () => [
+                    { id: 'a1', status: 'in_progress', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+                  ]),
+                };
+              }
               return Promise.resolve([]);
             }),
           })),
@@ -81,7 +114,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(new Request('http://localhost'), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
     expect(response.status).toBe(400);
   });
 
@@ -94,7 +127,13 @@ describe('icra/[assessmentId]/submit route', () => {
           from: vi.fn(() => ({
             where: vi.fn(() => {
               selectCall += 1;
-              if (selectCall === 1) return { limit: vi.fn(async () => [{ id: 'a1' }]) };
+              if (selectCall === 1) {
+                return {
+                  limit: vi.fn(async () => [
+                    { id: 'a1', status: 'in_progress', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+                  ]),
+                };
+              }
               return Promise.resolve([
                 {
                   questionId: 'q1',
@@ -117,7 +156,7 @@ describe('icra/[assessmentId]/submit route', () => {
       return fn(tx);
     });
 
-    const response = await POST(new Request('http://localhost'), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -125,11 +164,64 @@ describe('icra/[assessmentId]/submit route', () => {
     expect(m.logger.info).toHaveBeenCalled();
   });
 
+  it('is idempotent: a repeat submit after already-submitted returns the existing profile without rebuilding', async () => {
+    const { POST } = await loadRoute();
+    m.withSystemContext.mockImplementationOnce(async (fn: (tx: any) => Promise<unknown>) => {
+      const tx = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(() => ({
+              limit: vi.fn(async () => [
+                { id: 'a1', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+              ]),
+              orderBy: vi.fn(() => ({
+                limit: vi.fn(async () => [{ profilePayload: { maturityBand: { id: 'developing' } } }]),
+              })),
+            })),
+          })),
+        })),
+        delete: vi.fn(() => ({ where: vi.fn(async () => ({})) })),
+        insert: vi.fn(() => ({ values: vi.fn(async () => ({})) })),
+      };
+      return fn(tx);
+    });
+
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.profile.maturityBand.id).toBe('developing');
+    // Idempotent path must not touch delete/insert (no rebuild)
+    expect(m.computeProfile).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 when already submitted but no profile exists yet', async () => {
+    const { POST } = await loadRoute();
+    m.withSystemContext.mockImplementationOnce(async (fn: (tx: any) => Promise<unknown>) => {
+      const tx = {
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(() => ({
+              limit: vi.fn(async () => [
+                { id: 'a1', status: 'submitted', capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE },
+              ]),
+              orderBy: vi.fn(() => ({ limit: vi.fn(async () => []) })),
+            })),
+          })),
+        })),
+      };
+      return fn(tx);
+    });
+
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    expect(response.status).toBe(409);
+  });
+
   it('returns 500 when submit transaction fails', async () => {
     const { POST } = await loadRoute();
     m.withSystemContext.mockRejectedValueOnce(new Error('db down'));
 
-    const response = await POST(new Request('http://localhost'), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await POST(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
     expect(response.status).toBe(500);
   });
 });

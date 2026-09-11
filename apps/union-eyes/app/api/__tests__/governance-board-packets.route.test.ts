@@ -10,11 +10,11 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
-vi.mock('@/db/schema/board-packet-schema', () => ({ boardPackets: { createdAt: 'createdAt' } }));
+vi.mock('@/db/schema/board-packet-schema', () => ({ boardPackets: { createdAt: 'createdAt', organizationId: 'organizationId' } }));
 vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, desc: vi.fn(() => 'desc'), count: vi.fn(() => 'count'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
+  return { ...actual, desc: vi.fn(() => 'desc'), count: vi.fn(() => 'count'), eq: vi.fn(() => 'eq'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
 });
 
 async function loadRoute() {
@@ -25,17 +25,19 @@ describe('governance/board-packets route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    // Routes now use the tx parameter explicitly (PR #752 round 16) — pass
+    // the mocked db object as tx so tx.insert/tx.update resolve.
+    m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db));
     m.auditDataMutation.mockResolvedValue(undefined);
     m.db.select
-      .mockImplementationOnce(() => ({ from: vi.fn(async () => [{ total: 1 }]) }))
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(() => ({ offset: vi.fn(async () => [{ id: 'bp_1' }]) })) })) })) }));
+      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ total: 1 }]) })) }))
+      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(() => ({ offset: vi.fn(async () => [{ id: 'bp_1' }]) })) })) })) })) }));
     m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'bp_2', title: 'Packet' }]) })) });
   });
 
   it('lists board packets', async () => {
     const { GET } = await loadRoute();
-    const result = await GET({ request: new Request('http://localhost/api/governance/board-packets?page=2&limit=5') });
+    const result = await GET({ request: new Request('http://localhost/api/governance/board-packets?page=2&limit=5'), organizationId: 'org_1' });
 
     expect(result).toEqual([{ id: 'bp_1' }]);
   });
@@ -46,7 +48,6 @@ describe('governance/board-packets route', () => {
       body: {
         title: 'Board Packet',
         packetType: 'quarterly',
-        organizationId: '550e8400-e29b-41d4-a716-446655440000',
         periodStart: '2026-01-01',
         periodEnd: '2026-03-31',
         fiscalYear: 2026,

@@ -136,13 +136,17 @@ export async function POST(request: NextRequest) {
             }
 
             const grossAmount = String((pi.amount ?? 0) / 100);
-            const feeResult = await evaluateFee({
+            // transaction-fee-engine.ts's functions use the plain tenant `db`
+            // import internally; wrap the webhook-invoked call in
+            // withSystemContext so writes execute under the system principal,
+            // not whatever tenant context happens to be ambient.
+            const feeResult = await withSystemContext(() => evaluateFee({
               organizationId: orgId,
               flowType: 'payment',
               grossAmountCad: grossAmount,
-            });
+            }));
             if (feeResult) {
-              await captureTransactionFee({
+              await withSystemContext(() => captureTransactionFee({
                 organizationId: orgId,
                 ruleId: feeResult.ruleId,
                 idempotencyKey: `fee-${eventId}`,
@@ -154,7 +158,7 @@ export async function POST(request: NextRequest) {
                 feeModel: feeResult.feeModel as 'flat' | 'percentage' | 'hybrid' | 'waived' | 'subsidized',
                 percentageRateApplied: feeResult.percentageRateApplied,
                 flatFeeApplied: feeResult.flatFeeApplied,
-              });
+              }));
             }
           } else {
             logger.warn(`[stripe-webhook] Cannot resolve org/billing for event ${eventId}`);
@@ -202,13 +206,13 @@ export async function POST(request: NextRequest) {
             }
 
             const grossAmount = String((inv.amount_paid ?? 0) / 100);
-            const feeResult = await evaluateFee({
+            const feeResult = await withSystemContext(() => evaluateFee({
               organizationId: orgId,
               flowType: 'invoice',
               grossAmountCad: grossAmount,
-            });
+            }));
             if (feeResult) {
-              await captureTransactionFee({
+              await withSystemContext(() => captureTransactionFee({
                 organizationId: orgId,
                 ruleId: feeResult.ruleId,
                 idempotencyKey: `fee-${eventId}`,
@@ -220,7 +224,7 @@ export async function POST(request: NextRequest) {
                 feeModel: feeResult.feeModel as 'flat' | 'percentage' | 'hybrid' | 'waived' | 'subsidized',
                 percentageRateApplied: feeResult.percentageRateApplied,
                 flatFeeApplied: feeResult.flatFeeApplied,
-              });
+              }));
             }
           } else {
             logger.warn(`[stripe-webhook] Cannot resolve org/billing for event ${eventId}`);
@@ -278,17 +282,19 @@ export async function POST(request: NextRequest) {
             // Reverse any captured fee for the original payment
             const originalPaymentId = ch.payment_intent as string | undefined;
             if (originalPaymentId) {
-              const [feeEvent] = await db
-                .select()
-                .from(transactionFeeEvents)
-                .where(eq(transactionFeeEvents.sourceTransactionId, originalPaymentId))
-                .limit(1);
+              const [feeEvent] = await withSystemContext(() =>
+                db
+                  .select()
+                  .from(transactionFeeEvents)
+                  .where(eq(transactionFeeEvents.sourceTransactionId, originalPaymentId))
+                  .limit(1)
+              );
               if (feeEvent) {
-                await reverseTransactionFee(
+                await withSystemContext(() => reverseTransactionFee(
                   feeEvent.id,
                   ch.id,
                   `Stripe refund ${ch.id}`,
-                ).catch(() => { /* already reversed — OK */ });
+                )).catch(() => { /* already reversed — OK */ });
               }
             }
           } else {
@@ -311,11 +317,14 @@ export async function POST(request: NextRequest) {
         if (isIcraReport && icraAssessmentId && icraTierId) {
           // ── ICRA report tier fulfillment ──
           try {
-            const [existing] = await db
-              .select({ reportTierId: icraAssessments.reportTierId })
-              .from(icraAssessments)
-              .where(eq(icraAssessments.id, icraAssessmentId))
-              .limit(1);
+            const existing = await withSystemContext(async (tx) => {
+              const [row] = await tx
+                .select({ reportTierId: icraAssessments.reportTierId })
+                .from(icraAssessments)
+                .where(eq(icraAssessments.id, icraAssessmentId))
+                .limit(1);
+              return row;
+            });
 
             if (!existing) {
               logger.warn('[stripe-webhook] ICRA assessment not found', { icraAssessmentId });
@@ -340,29 +349,32 @@ export async function POST(request: NextRequest) {
               break;
             }
 
-            // Upgrade the assessment tier
-            await db
-              .update(icraAssessments)
-              .set({ reportTierId: icraTierId })
-              .where(eq(icraAssessments.id, icraAssessmentId));
+            // Upgrade the assessment tier and patch the stored profile payload
+            // (SYSTEM_ONLY table — bounded system execution, not ordinary db) so
+            // the results page reflects the new tier.
+            await withSystemContext(async (tx) => {
+              await tx
+                .update(icraAssessments)
+                .set({ reportTierId: icraTierId })
+                .where(eq(icraAssessments.id, icraAssessmentId));
 
-            // Patch the stored profile payload so the results page reflects the new tier
-            const [profileRow] = await db
-              .select({ profilePayload: icraMaturityProfiles.profilePayload })
-              .from(icraMaturityProfiles)
-              .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
-              .limit(1);
+              const [profileRow] = await tx
+                .select({ profilePayload: icraMaturityProfiles.profilePayload })
+                .from(icraMaturityProfiles)
+                .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
+                .limit(1);
 
-            if (profileRow?.profilePayload) {
-              const updated: InstitutionalContinuityProfile = {
-                ...(profileRow.profilePayload as InstitutionalContinuityProfile),
-                reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
-              };
-              await db
-                .update(icraMaturityProfiles)
-                .set({ profilePayload: updated })
-                .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId));
-            }
+              if (profileRow?.profilePayload) {
+                const updated: InstitutionalContinuityProfile = {
+                  ...(profileRow.profilePayload as InstitutionalContinuityProfile),
+                  reportTierId: icraTierId as InstitutionalContinuityProfile['reportTierId'],
+                };
+                await tx
+                  .update(icraMaturityProfiles)
+                  .set({ profilePayload: updated })
+                  .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId));
+              }
+            });
 
             logger.info('[stripe-webhook] ICRA tier upgraded', {
               icraAssessmentId,

@@ -79,10 +79,23 @@ eventBus.on(AppEvents.USER_LOGGED_IN, (event) => {
 });
 
 // ── Member Status Changed (Phase 2 Domain 5) ──────────────────
-// Event-driven enforcement: when a member becomes inactive/offboarded,
-// revoke all their sessions and case access (fail-fast on any errors
-// but continue processing to maximize access-denial coverage)
-eventBus.on('member.status_changed', async (event) => {
+// PR #752 round 12: this handler is now OBSERVABILITY-ONLY. Real
+// enforcement (session revocation, authOrganizationUsers disable,
+// case-access revocation, local status persistence) lives in
+// lib/services/member-access-revocation-service.ts's revokeMemberAccess(),
+// called SYNCHRONOUSLY and fail-closed from
+// app/api/admin/users/[userId]/route.ts — the only caller that emits
+// this event. An emitted event is not proof that security-critical side
+// effects succeeded: this handler used to perform that enforcement itself,
+// asynchronously, with every failure caught and swallowed (logged, but
+// the emitting route always returned 200 regardless), and it was only
+// ever registered as a side effect of importing this module from two
+// unrelated routes (app/api/cases/intake/route.ts,
+// app/api/workflow/transition/route.ts) — so it could silently never run
+// at all depending on which routes had been loaded. Do not reintroduce
+// security enforcement here; add it to revokeMemberAccess() instead so
+// the caller can observe and fail on the result.
+eventBus.on('member.status_changed', (event) => {
   const { userId, organizationId, oldStatus, newStatus } = event.data as {
     userId: string;
     organizationId: string;
@@ -90,82 +103,12 @@ eventBus.on('member.status_changed', async (event) => {
     newStatus: string;
   };
 
-  // Only enforce access revocation for status changes away from 'active'
-  if (newStatus === 'active' || oldStatus === newStatus) {
-    return;
-  }
-
   logger.info('member_lifecycle:status_changed', {
     userId,
     organizationId,
     oldStatus,
     newStatus,
   });
-
-  // Phase 2 Domain 5: Enforce access revocation when member becomes inactive
-  // This handler runs async; errors are logged but do not block the event
-  try {
-    // Revoke all sessions for this user (fail-fast, but continue on error)
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { revokeAllUserSessions } = await import('@nzila/platform-auth/password');
-      await revokeAllUserSessions(userId);
-      logger.info('member_lifecycle:sessions_revoked', { userId });
-    } catch (sessionError) {
-      logger.error('member_lifecycle:session_revocation_failed', {
-        userId,
-        error: sessionError,
-      });
-      // Continue with case access revocation even if session revocation fails
-    }
-
-    // Revoke all case access assignments (fail-fast, but continue on error)
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { db } = await import('@/db/db');
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { grievanceCaseAccessAssignments } = await import('@/db/schema/domains/claims/grievance-lifecycle');
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { eq, and } = await import('drizzle-orm');
-
-      const accessAssignments = await db
-        .select()
-        .from(grievanceCaseAccessAssignments)
-        .where(
-          and(
-            eq(grievanceCaseAccessAssignments.userId, userId),
-            eq(grievanceCaseAccessAssignments.organizationId, organizationId),
-            eq(grievanceCaseAccessAssignments.status, 'active'),
-          ),
-        );
-
-      for (const assignment of accessAssignments) {
-        await db
-          .update(grievanceCaseAccessAssignments)
-          .set({
-            status: 'revoked',
-            updatedAt: new Date(),
-          })
-          .where(eq(grievanceCaseAccessAssignments.id, assignment.id));
-      }
-
-      logger.info('member_lifecycle:case_access_revoked', {
-        userId,
-        organizationId,
-        count: accessAssignments.length,
-      });
-    } catch (accessError) {
-      logger.error('member_lifecycle:case_access_revocation_failed', {
-        userId,
-        organizationId,
-        error: accessError,
-      });
-    }
-  } catch (error) {
-    logger.error('member_lifecycle:unexpected_error', {
-      userId,
-      error,
-    });
-  }
 });
+
 

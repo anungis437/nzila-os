@@ -10,19 +10,23 @@ import { councilElections } from '@/db/schema/governance-schema';
 import { eq } from 'drizzle-orm';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     openapi: { tags: ['Governance'], summary: 'Get a council election by ID' },
   },
   async ({ params }) => {
-    const [election] = await db
-      .select()
-      .from(councilElections)
-      .where(eq(councilElections.id, params.id));
+    const [election] = await withSystemContext(async (_tx) =>
+      db
+        .select()
+        .from(councilElections)
+        .where(eq(councilElections.id, params.id))
+    );
 
     if (!election) throw ApiError.notFound('Election not found');
     return { data: election };
@@ -31,7 +35,7 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     openapi: { tags: ['Governance'], summary: 'Update a council election' },
   },
   async ({ request, params, organizationId, userId }) => {
@@ -64,11 +68,13 @@ export const PATCH = withApi(
 
     updates.updatedAt = new Date();
 
-    const [updated] = await db
-      .update(councilElections)
-      .set(updates)
-      .where(eq(councilElections.id, params.id))
-      .returning();
+    const [updated] = await withSystemContext(async (_tx) =>
+      db
+        .update(councilElections)
+        .set(updates)
+        .where(eq(councilElections.id, params.id))
+        .returning()
+    );
 
     if (!updated) throw ApiError.notFound('Election not found');
 

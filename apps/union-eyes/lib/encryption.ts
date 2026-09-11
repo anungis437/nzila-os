@@ -788,6 +788,34 @@ class EncryptionService {
 export const encryptionService = new EncryptionService();
 
 /**
+ * Encrypt an arbitrary sensitive credential value (e.g. an OIDC client
+ * secret, API key, or webhook signing secret) for storage in a database
+ * TEXT column. Unlike encryptSIN(), this performs no format-specific
+ * validation — it is the generic counterpart for non-PII secret material
+ * that must never be persisted in plaintext.
+ *
+ * @param plaintext - Secret value to encrypt
+ * @returns Base64-encoded encrypted string, safe to store directly in a
+ *          TEXT column
+ */
+export async function encryptSecret(plaintext: string): Promise<string> {
+  return encryptionService.encryptToString(plaintext);
+}
+
+/**
+ * Decrypt a value previously encrypted with encryptSecret().
+ *
+ * CRITICAL: Only call when absolutely necessary (e.g. making an actual
+ * OIDC token-exchange call). Never log the returned value.
+ *
+ * @param encryptedSecret - Base64-encoded encrypted string from the database
+ * @returns Decrypted plaintext secret
+ */
+export async function decryptSecret(encryptedSecret: string): Promise<string> {
+  return encryptionService.decryptFromString(encryptedSecret);
+}
+
+/**
  * Encrypt SIN (Social Insurance Number)
  * 
  * Special handling for SIN encryption with validation

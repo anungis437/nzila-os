@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const m = vi.hoisted(() => ({
   execute: vi.fn(),
@@ -73,5 +75,11 @@ describe('finance/summary route', () => {
     });
     expect(payload.budgets).toHaveLength(1);
     expect(payload.perCapitaInbound.childCount).toBe(1);
+  });
+
+  it('Round 58 Phase 0: strike fund query filters directly on organization_id, not a user_id join (multi-org fan-out fix)', async () => {
+    const src = readFileSync(resolve(__dirname, '../finance/summary/route.ts'), 'utf8');
+    expect(src).toMatch(/FROM strike_fund_disbursements sfd\s*\n\s*WHERE sfd\.organization_id = \$\{orgIdCast\}/);
+    expect(src).not.toMatch(/JOIN organization_members om ON om\.user_id = sfd\.user_id/);
   });
 });

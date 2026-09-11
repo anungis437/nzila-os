@@ -15,6 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   mockSessionsFindFirst: vi.fn(),
   mockVotesFindFirst: vi.fn(),
+  mockOptionsFindFirst: vi.fn(),
   mockEligibilityFindFirst: vi.fn(),
   mockInsertReturning: vi.fn(),
   mockUpdateReturning: vi.fn(),
@@ -40,6 +41,7 @@ vi.mock('@/db/db', () => ({
     query: {
       votingSessions: { findFirst: mocks.mockSessionsFindFirst },
       votes: { findFirst: mocks.mockVotesFindFirst },
+      votingOptions: { findFirst: mocks.mockOptionsFindFirst },
       voterEligibility: { findFirst: mocks.mockEligibilityFindFirst },
     },
     insert: vi.fn(() => ({
@@ -163,6 +165,7 @@ describe('VotingService', () => {
     mocks.mockSelect.mockReset();
     mocks.mockSessionsFindFirst.mockResolvedValue(baseSession);
     mocks.mockVotesFindFirst.mockResolvedValue(null);
+    mocks.mockOptionsFindFirst.mockResolvedValue({ id: 'opt-1', sessionId: 'session-1' });
     mocks.mockEligibilityFindFirst.mockResolvedValue(baseEligibility);
     mocks.mockInsertReturning.mockResolvedValue([{ id: 'new-1' }]);
     mocks.mockUpdateReturning.mockResolvedValue([baseSession]);
@@ -413,6 +416,13 @@ describe('VotingService', () => {
       await expect(castVote('s', 'o', 'm')).rejects.toThrow('not eligible');
     });
 
+    it('throws when option does not belong to the session', async () => {
+      mocks.mockOptionsFindFirst.mockResolvedValue(null);
+      await expect(castVote('session-1', 'opt-from-another-session', 'member-1')).rejects.toThrow(
+        'does not belong to this voting session',
+      );
+    });
+
     it('throws when already voted', async () => {
       mocks.mockVotesFindFirst.mockResolvedValue({ id: 'existing' });
       await expect(castVote('session-1', 'opt-1', 'member-1')).rejects.toThrow('already cast');
@@ -446,6 +456,55 @@ describe('VotingService', () => {
     it('throws generic failure when non-Error is thrown internally', async () => {
       mocks.mockInsertReturning.mockRejectedValue('boom');
       await expect(castVote('session-1', 'opt-1', 'member-1')).rejects.toThrow('Failed to cast vote');
+    });
+
+    it('Round 57 regression: derives a deterministic voterId for the same session+member (no Date.now() in the hash) so double-vote detection actually works', async () => {
+      // Uses real crypto (unmocked) to prove the derivation is stable across
+      // separate calls — previously it embedded Date.now(), so every call
+      // produced a different voterId and "already voted" never matched.
+      vi.doUnmock('crypto');
+      vi.resetModules();
+      vi.doMock('@/lib/config/env-validation', () => ({
+        env: { VOTING_SECRET: 'a]b(c)D4E5F6G7H8I9J0K1L2M3N4O5P6Q' },
+      }));
+      const insertedVoterIds: string[] = [];
+      vi.doMock('@/db/db', () => ({
+        db: {
+          query: {
+            votingSessions: { findFirst: vi.fn() },
+            votes: { findFirst: vi.fn(async () => null) },
+            votingOptions: { findFirst: vi.fn(async () => ({ id: 'opt-1', sessionId: 'session-1' })) },
+            voterEligibility: { findFirst: vi.fn(async () => ({ isEligible: true })) },
+          },
+          insert: vi.fn(() => ({
+            values: vi.fn((v: any) => {
+              insertedVoterIds.push(v.voterId);
+              return { returning: vi.fn(async () => [{ id: 'vote-1', voterId: v.voterId }]) };
+            }),
+          })),
+        },
+      }));
+      const { castVote: freshCastVote } = await import('../voting-service');
+
+      await freshCastVote('session-1', 'opt-1', 'member-1', true);
+      await freshCastVote('session-1', 'opt-1', 'member-1', true);
+
+      expect(insertedVoterIds).toHaveLength(2);
+      expect(insertedVoterIds[0]).toBe(insertedVoterIds[1]);
+
+      vi.doUnmock('@/db/db');
+      vi.doUnmock('@/lib/config/env-validation');
+      vi.doMock('crypto', () => ({
+        createHash: vi.fn(() => ({
+          update: vi.fn().mockReturnThis(),
+          digest: vi.fn(() => 'mock-hash-hex'),
+        })),
+        createHmac: vi.fn(() => ({
+          update: vi.fn().mockReturnThis(),
+          digest: vi.fn(() => 'mock-hmac-hex-at-least-16-chars'),
+        })),
+      }));
+      vi.resetModules();
     });
   });
 

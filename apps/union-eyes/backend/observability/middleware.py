@@ -40,7 +40,7 @@ class ObservabilityMiddleware:
             or str(uuid4())
         )
         org_id = str(getattr(request, "organization_id", "") or "")
-        user_id = str(getattr(request, "clerk_user_id", "") or "")
+        user_id = str(getattr(request, "user_id", "") or "")
 
         set_request_context(
             request_id=request_id,

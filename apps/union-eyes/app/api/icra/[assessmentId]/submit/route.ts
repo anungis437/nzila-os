@@ -12,12 +12,17 @@ import { logger } from '@/lib/logger'
 import { computeProfile } from '@/lib/icra/scoring'
 import type { Answer } from '@/lib/icra/types'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import {
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+} from '@/lib/icra/assessment-capability'
 
 interface RouteContext {
   params: Promise<{ assessmentId: string }>
 }
 
-export async function POST(_request: Request, { params }: RouteContext) {
+export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params
   try {
     return await withSystemContext(async (tx) => {
@@ -29,6 +34,31 @@ export async function POST(_request: Request, { params }: RouteContext) {
       const assessment = assessments[0]
       if (!assessment) {
         return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
+      }
+
+      const presented = extractCapabilityToken(request, assessmentId)
+      const capCheck = checkCapability(presented, assessment)
+      if (!capCheck.ok) {
+        return NextResponse.json(
+          { error: 'Not authorized to submit this assessment' },
+          { status: capabilityDenialStatus(capCheck.reason) },
+        )
+      }
+
+      // Idempotent state transition: an assessment that has already left
+      // in_progress must never have its profile/scores/flags/recommendations
+      // deleted and rebuilt by a repeat submit from an old capability holder.
+      if (assessment.status !== 'in_progress') {
+        const [existingProfile] = await tx
+          .select({ profilePayload: icraMaturityProfiles.profilePayload })
+          .from(icraMaturityProfiles)
+          .where(eq(icraMaturityProfiles.assessmentId, assessmentId))
+          .orderBy(icraMaturityProfiles.generatedAt)
+          .limit(1)
+        if (existingProfile) {
+          return NextResponse.json({ profile: existingProfile.profilePayload })
+        }
+        return NextResponse.json({ error: 'Assessment already submitted' }, { status: 409 })
       }
 
       const answerRows = await tx

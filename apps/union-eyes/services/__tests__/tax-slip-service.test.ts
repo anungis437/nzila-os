@@ -68,7 +68,7 @@ beforeEach(() => {
 describe('tax-slip-service', () => {
   describe('recordDisbursement', () => {
     const base = {
-      userId: 'u1', strikeId: 's1', strikeName: 'Strike', paymentDate: new Date('2026-03-10'),
+      userId: 'u1', organizationId: 'org1', strikeId: 's1', strikeName: 'Strike', paymentDate: new Date('2026-03-10'),
       paymentMethod: 'eft', province: 'ON',
     };
 

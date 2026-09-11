@@ -8,10 +8,7 @@ import { z } from "zod";
 import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
-import {
-  grievanceDocuments,
-  grievanceEvents,
-} from "@/db/schema/domains/claims/grievance-lifecycle";
+import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import {
   documents,
   documentVersions,
@@ -112,16 +109,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     }
 
     const result = await withRLSContext(async () => {
-      const [legacyDoc] = await db
-        .insert(grievanceDocuments)
-        .values({
-          grievanceId: params.id,
-          fileUrl: parsed.data.fileUrl,
-          documentType: parsed.data.documentType,
-          uploadedBy: userId,
-        })
-        .returning();
-
       const [governedDoc] = await db
         .insert(documents)
         .values({
@@ -170,7 +157,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
         notes: `Document uploaded: ${parsed.data.documentType}`,
       });
 
-      return { legacyDoc, governedDoc };
+      return { governedDoc };
     });
 
     // Audit
@@ -248,7 +235,6 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
 
     return standardSuccessResponse({
       ...result.governedDoc,
-      legacyDocumentId: result.legacyDoc.id,
     });
   } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to upload document");

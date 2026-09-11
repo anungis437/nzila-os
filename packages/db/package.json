@@ -9,6 +9,8 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
     "./client": "./src/client.ts",
+    "./system-client": "./src/system-client.ts",
+    "./auth-storage-authority": "./src/auth-storage-authority/index.ts",
     "./raw": "./src/raw.ts",
     "./scoped": "./src/scoped.ts",
     "./audit": "./src/audit.ts",

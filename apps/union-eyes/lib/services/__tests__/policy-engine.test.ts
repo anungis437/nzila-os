@@ -40,6 +40,7 @@ vi.mock('@/db', () => ({
 
 vi.mock('@/db/schema/policy-engine-schema', () => ({
   policyRules: {
+    organizationId: 'organizationId',
     ruleType: 'ruleType',
     category: 'category',
     status: 'status',
@@ -85,7 +86,7 @@ describe('PolicyEngine', () => {
   it('returns allow when no rules match', async () => {
     mockSelectWhere.mockResolvedValue([]); // no rules
 
-    const result = await engine.evaluate('access_control', 'member_data', {
+    const result = await engine.evaluate('org-1', 'access_control', 'member_data', {
       subjectType: 'member',
       subjectId: 'member-1',
       inputData: { action: 'read' },
@@ -94,6 +95,19 @@ describe('PolicyEngine', () => {
     expect(result.passed).toBe(true);
     expect(result.actionTaken).toBe('allowed');
     expect(result.applicableRules).toEqual([]);
+  });
+
+  it('scopes the rule lookup to the caller\'s organizationId', async () => {
+    mockSelectWhere.mockResolvedValue([]);
+
+    await engine.evaluate('org-1', 'access_control', 'member_data', {
+      subjectType: 'member',
+      subjectId: 'member-1',
+      inputData: {},
+    });
+
+    const whereArg = mockSelectWhere.mock.calls[0][0] as { queryChunks?: unknown[] };
+    expect(JSON.stringify(whereArg)).toContain('org-1');
   });
 
   it('enforces active rules — denies when condition fails', async () => {
@@ -113,7 +127,7 @@ describe('PolicyEngine', () => {
       ])
       .mockResolvedValueOnce([]); // no exceptions
 
-    const result = await engine.evaluate('access_control', 'member_data', {
+    const result = await engine.evaluate('org-1', 'access_control', 'member_data', {
       subjectType: 'user',
       subjectId: 'user-1',
       inputData: { role: 'viewer' }, // does NOT match 'admin'
@@ -138,7 +152,7 @@ describe('PolicyEngine', () => {
       ])
       .mockResolvedValueOnce([]); // no exceptions
 
-    const result = await engine.evaluate('access_control', 'member_data', {
+    const result = await engine.evaluate('org-1', 'access_control', 'member_data', {
       subjectType: 'user',
       subjectId: 'user-1',
       inputData: { role: 'admin' }, // matches
@@ -165,7 +179,7 @@ describe('PolicyEngine', () => {
       ])
       .mockResolvedValueOnce([]);
 
-    const result = await engine.evaluate('risk', 'screening', {
+    const result = await engine.evaluate('org-1', 'risk', 'screening', {
       subjectType: 'member',
       subjectId: 'member-2',
       inputData: { score: 85, tier: 'm' },

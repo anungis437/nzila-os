@@ -25,6 +25,9 @@ const h = vi.hoisted(() => {
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) => fn(h.db)),
+}));
 vi.mock('@/db/schema', () =>
   new Proxy({}, { has: () => true, get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })) }),
 );

@@ -8,11 +8,21 @@ from .models import (CertificationTypes, StaffCertifications, ContinuingEducatio
 from .serializers import (CertificationTypesSerializer, StaffCertificationsSerializer, ContinuingEducationSerializer, LicenseRenewalsSerializer, CertificationAlertsSerializer, CertificationComplianceReportsSerializer, CertificationAuditLogSerializer, DsrRequestsSerializer, DsrActivityLogSerializer, DataResidencyConfigsSerializer, ConsentRecordsSerializer, DataClassificationPolicySerializer, DataClassificationRegistrySerializer, FirewallAccessRulesSerializer, EmployerAccessAttemptsSerializer, AccessJustificationRequestsSerializer, UnionOnlyDataTagsSerializer, FirewallViolationsSerializer, FirewallComplianceAuditSerializer, SwissColdStorageSerializer, BreakGlassSystemSerializer, DisasterRecoveryDrillsSerializer, KeyHolderRegistrySerializer, RecoveryTimeObjectivesSerializer, EmergencyDeclarationsSerializer, BreakGlassActivationsSerializer, UserConsentsSerializer, CookieConsentsSerializer, GdprDataRequestsSerializer, DataProcessingRecordsSerializer, DataRetentionPoliciesSerializer, DataAnonymizationLogSerializer, LocationTrackingSerializer, GeofencesSerializer, GeofenceEventsSerializer, LocationTrackingAuditSerializer, LocationDeletionLogSerializer, LocationTrackingConfigSerializer, ForeignWorkersSerializer, LmbpLettersSerializer, GssApplicationsSerializer, MentorshipsSerializer, LmbpComplianceAlertsSerializer, LmbpComplianceReportsSerializer, BandCouncilsSerializer, BandCouncilConsentSerializer, IndigenousMemberDataSerializer, IndigenousDataAccessLogSerializer, IndigenousDataSharingAgreementsSerializer, TraditionalKnowledgeRegistrySerializer, PciDssSaqAssessmentsSerializer, PciDssRequirementsSerializer, PciDssQuarterlyScansSerializer, PciDssCardholderDataFlowSerializer, PciDssEncryptionKeysSerializer, ProvincialPrivacyConfigSerializer, ProvincialConsentSerializer, PrivacyBreachesSerializer, ProvincialDataHandlingSerializer, DataSubjectAccessRequestsSerializer, LrbAgreementsSerializer, LrbEmployersSerializer, LrbUnionsSerializer, LrbSyncLogSerializer, ConflictOfInterestPolicySerializer, BlindTrustRegistrySerializer, ConflictDisclosuresSerializer, ArmsLengthVerificationSerializer, RecusalTrackingSerializer, ConflictReviewCommitteeSerializer, ConflictTrainingSerializer, ConflictAuditLogSerializer, GoldenSharesSerializer, ReservedMatterVotesSerializer, MissionAuditsSerializer, GovernanceEventsSerializer, CouncilElectionsSerializer, WorkplaceIncidentsSerializer, SafetyInspectionsSerializer, HazardReportsSerializer, SafetyCommitteeMeetingsSerializer, SafetyTrainingRecordsSerializer, PpeEquipmentSerializer, SafetyAuditsSerializer, InjuryLogsSerializer, SafetyPoliciesSerializer, CorrectiveActionsSerializer, SafetyCertificationsSerializer, PolicyRulesSerializer, PolicyEvaluationsSerializer, RetentionPoliciesSerializer, LegalHoldsSerializer, PolicyExceptionsSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 40: no legitimate Django consumer exists for contained generated ViewSets."""
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class CertificationTypesViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationTypes operations."""
     queryset = CertificationTypes.objects.all()
     serializer_class = CertificationTypesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['certification_code']
     search_fields = ['certification_name', 'certification_code']
@@ -24,7 +34,7 @@ class StaffCertificationsViewSet(viewsets.ModelViewSet):
     """API endpoint for StaffCertifications operations."""
     queryset = StaffCertifications.objects.all()
     serializer_class = StaffCertificationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -36,7 +46,7 @@ class ContinuingEducationViewSet(viewsets.ModelViewSet):
     """API endpoint for ContinuingEducation operations."""
     queryset = ContinuingEducation.objects.all()
     serializer_class = ContinuingEducationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -48,7 +58,7 @@ class LicenseRenewalsViewSet(viewsets.ModelViewSet):
     """API endpoint for LicenseRenewals operations."""
     queryset = LicenseRenewals.objects.all()
     serializer_class = LicenseRenewalsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['renewal_year']
     search_fields = ['renewal_year']
@@ -60,7 +70,7 @@ class CertificationAlertsViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationAlerts operations."""
     queryset = CertificationAlerts.objects.all()
     serializer_class = CertificationAlertsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -72,7 +82,7 @@ class CertificationComplianceReportsViewSet(viewsets.ModelViewSet):
     """API endpoint for CertificationComplianceReports operations."""
     queryset = CertificationComplianceReports.objects.all()
     serializer_class = CertificationComplianceReportsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['report_period']
     search_fields = ['report_period']
@@ -81,10 +91,24 @@ class CertificationComplianceReportsViewSet(viewsets.ModelViewSet):
 
 
 class CertificationAuditLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for CertificationAuditLog operations."""
+    """API endpoint for CertificationAuditLog operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): the TS side (services/certification-management-service.ts)
+    has zero live callers anywhere (the only apparent caller,
+    lib/api/certification-management-service-api.ts, is an unused generated
+    Django-HTTP-client wrapper with zero callers of its own). The real
+    Django surface, services/api/certification_management_service_views.py's
+    CertificationManagementServiceViewSet, applies NO organization_id
+    filtering on any of its 7 models (including this one) and has zero
+    frontend consumers — contained separately in that file. This generated
+    ModelViewSet is likewise unscoped (queryset=CertificationAuditLog.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found on
+    either side.
+    """
     queryset = CertificationAuditLog.objects.all()
     serializer_class = CertificationAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']
@@ -139,10 +163,17 @@ class ConsentRecordsViewSet(viewsets.ModelViewSet):
 
 
 class DataClassificationPolicyViewSet(viewsets.ModelViewSet):
+    """round 52: the legitimate path for this platform-wide policy table is
+    app/api/privacy/{breach,dsar,provincial}/route.ts's crudRoutes (readRole
+    'member', writeRole 'compliance_manager' — a genuine platform-elevated
+    role, fixed this round from 'admin'). This generated Django ViewSet is a
+    separate, unscoped duplicate surface with no legitimate consumer of its
+    own. Contained via DenyAllPermission.
+    """
     """API endpoint for DataClassificationPolicy operations."""
     queryset = DataClassificationPolicy.objects.all()
     serializer_class = DataClassificationPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['enforce_strict_separation', 'allow_bargaining_unit_roster', 'allow_greivance_participation', 'block_strike_plans', 'block_membership_lists', 'block_internal_discussions']
     search_fields = ['id', 'policy_name', 'policy_description', 'approved_by']
@@ -154,7 +185,7 @@ class DataClassificationRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for DataClassificationRegistry operations."""
     queryset = DataClassificationRegistry.objects.all()
     serializer_class = DataClassificationRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['accessible_by_employer', 'accessible_by_union', 'requires_justification']
     search_fields = ['id', 'data_type', 'classification_level', 'data_description', 'legal_basis']
@@ -163,10 +194,18 @@ class DataClassificationRegistryViewSet(viewsets.ModelViewSet):
 
 
 class FirewallAccessRulesViewSet(viewsets.ModelViewSet):
-    """API endpoint for FirewallAccessRules operations."""
+    """API endpoint for FirewallAccessRules operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): the real reachable path is EmployerNonInterferenceServiceViewSet's
+    check_access action (services/api/employer_non_interference_service_views.py,
+    already DenyAllPermission since round 49). This separate generated
+    ModelViewSet is unscoped (IsAuthenticated-only, .objects.all()). No
+    legitimate consumer found.
+    """
     queryset = FirewallAccessRules.objects.all()
     serializer_class = FirewallAccessRulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id', 'access_permitted', 'justification_required', 'requires_approval']
     search_fields = ['id', 'rule_name', 'user_role', 'access_level', 'approver_role']
@@ -175,10 +214,23 @@ class FirewallAccessRulesViewSet(viewsets.ModelViewSet):
 
 
 class EmployerAccessAttemptsViewSet(viewsets.ModelViewSet):
-    """API endpoint for EmployerAccessAttempts operations."""
+    """API endpoint for EmployerAccessAttempts operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): db/schema/employer-non-interference-schema.ts has
+    NO organization_id column on this table at all, and its sole TS
+    consumer (services/employer-non-interference-service.ts's
+    EmployerNonInterferenceService) has zero callers anywhere. The real
+    Django surface, services/api/employer_non_interference_service_views.py's
+    EmployerNonInterferenceServiceViewSet, correctly org-scopes reads/writes
+    via request.user.organization_id but has zero frontend consumers
+    either — contained separately in that file. This generated ModelViewSet
+    is unscoped (queryset=EmployerAccessAttempts.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found.
+    """
     queryset = EmployerAccessAttempts.objects.all()
     serializer_class = EmployerAccessAttemptsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id', 'access_granted', 'flagged_for_review']
     search_fields = ['id', 'user_id', 'user_email', 'user_role', 'data_type_requested']
@@ -187,10 +239,16 @@ class EmployerAccessAttemptsViewSet(viewsets.ModelViewSet):
 
 
 class AccessJustificationRequestsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AccessJustificationRequests operations."""
+    """API endpoint for AccessJustificationRequests operations.
+
+    CONTAINED (PR #752 round 49 — same finding as EmployerAccessAttempts
+    above): no organization_id column in the TS schema, TS consumer fully
+    dead, and the properly org-scoped Django services/api ViewSet has zero
+    frontend consumers either. This generated ModelViewSet is unscoped.
+    """
     queryset = AccessJustificationRequests.objects.all()
     serializer_class = AccessJustificationRequestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id']
     search_fields = ['id', 'requested_by', 'requested_by_email', 'requested_by_role', 'data_type_requested']
@@ -202,7 +260,7 @@ class UnionOnlyDataTagsViewSet(viewsets.ModelViewSet):
     """API endpoint for UnionOnlyDataTags operations."""
     queryset = UnionOnlyDataTags.objects.all()
     serializer_class = UnionOnlyDataTagsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['union_only_flag', 'employer_access_blocked']
     search_fields = ['id', 'resource_type', 'resource_id', 'resource_name', 'classification_level']
@@ -211,10 +269,19 @@ class UnionOnlyDataTagsViewSet(viewsets.ModelViewSet):
 
 
 class FirewallViolationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for FirewallViolations operations."""
+    """API endpoint for FirewallViolations operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): the real reachable path is EmployerNonInterferenceServiceViewSet's
+    report_violation action (services/api/employer_non_interference_service_views.py,
+    already DenyAllPermission since round 49). This separate generated
+    ModelViewSet is unscoped (IsAuthenticated-only, .objects.all()) and would
+    expose every organization's security violation records (user emails, IPs,
+    descriptions). No legitimate consumer found.
+    """
     queryset = FirewallViolations.objects.all()
     serializer_class = FirewallViolationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['data_type_id', 'system_detected']
     search_fields = ['id', 'violation_type', 'severity', 'user_id', 'user_email']
@@ -223,10 +290,16 @@ class FirewallViolationsViewSet(viewsets.ModelViewSet):
 
 
 class FirewallComplianceAuditViewSet(viewsets.ModelViewSet):
-    """API endpoint for FirewallComplianceAudit operations."""
+    """API endpoint for FirewallComplianceAudit operations.
+
+    CONTAINED (PR #752 round 49 — same finding as EmployerAccessAttempts/
+    AccessJustificationRequests above): no organization_id column in the
+    TS schema, TS consumer fully dead, Django services/api ViewSet has
+    zero frontend consumers. This generated ModelViewSet is unscoped.
+    """
     queryset = FirewallComplianceAudit.objects.all()
     serializer_class = FirewallComplianceAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['id', 'audit_period', 'total_access_attempts', 'total_employer_attempts', 'total_denied_access']
     ordering_fields = ['created_at', 'updated_at']
@@ -237,7 +310,7 @@ class SwissColdStorageViewSet(viewsets.ModelViewSet):
     """API endpoint for SwissColdStorage operations."""
     queryset = SwissColdStorage.objects.all()
     serializer_class = SwissColdStorageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['vault_provider']
     search_fields = ['vault_provider']
@@ -249,7 +322,7 @@ class BreakGlassSystemViewSet(viewsets.ModelViewSet):
     """API endpoint for BreakGlassSystem operations."""
     queryset = BreakGlassSystem.objects.all()
     serializer_class = BreakGlassSystemSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['scenario_type']
     search_fields = ['scenario_type']
@@ -261,7 +334,7 @@ class DisasterRecoveryDrillsViewSet(viewsets.ModelViewSet):
     """API endpoint for DisasterRecoveryDrills operations."""
     queryset = DisasterRecoveryDrills.objects.all()
     serializer_class = DisasterRecoveryDrillsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['drill_type']
     search_fields = ['drill_name', 'drill_type']
@@ -273,7 +346,7 @@ class KeyHolderRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for KeyHolderRegistry operations."""
     queryset = KeyHolderRegistry.objects.all()
     serializer_class = KeyHolderRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -285,7 +358,7 @@ class RecoveryTimeObjectivesViewSet(viewsets.ModelViewSet):
     """API endpoint for RecoveryTimeObjectives operations."""
     queryset = RecoveryTimeObjectives.objects.all()
     serializer_class = RecoveryTimeObjectivesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['system_component']
     search_fields = ['system_component']
@@ -297,7 +370,7 @@ class EmergencyDeclarationsViewSet(viewsets.ModelViewSet):
     """API endpoint for EmergencyDeclarations operations."""
     queryset = EmergencyDeclarations.objects.all()
     serializer_class = EmergencyDeclarationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['emergency_type']
     search_fields = ['emergency_type']
@@ -306,10 +379,23 @@ class EmergencyDeclarationsViewSet(viewsets.ModelViewSet):
 
 
 class BreakGlassActivationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for BreakGlassActivations operations."""
+    """API endpoint for BreakGlassActivations operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): services/break-glass-service.ts's BreakGlassService
+    (and services/force-majeure-integration.ts) have zero callers anywhere
+    in app/, actions/, or lib/ — fully dead TS code. The real Django
+    surface, services/api/break_glass_service_views.py's
+    BreakGlassServiceViewSet, correctly org-scopes reads/writes via
+    request.user.organization_id but has zero frontend consumers either —
+    contained separately in that file. This generated ModelViewSet is
+    unscoped (queryset=BreakGlassActivations.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found on
+    either side for a table this sensitive.
+    """
     queryset = BreakGlassActivations.objects.all()
     serializer_class = BreakGlassActivationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['emergency_id', 'signature1_user_id']
     search_fields = ['activation_reason', 'signature1_user_id']
@@ -318,10 +404,21 @@ class BreakGlassActivationsViewSet(viewsets.ModelViewSet):
 
 
 class UserConsentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for UserConsents operations."""
+    """API endpoint for UserConsents operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): user_consents is TENANT_RLS_REQUIRED with an
+    additional per-subject (user_id) scope; its real Next.js consumer
+    (app/api/members/[id]/consents/route.ts) was fixed this round to
+    restrict both reads and mutations to the record's own subject, not
+    just the organization. This generated ModelViewSet has neither scope
+    (IsAuthenticated only) — any authenticated user could read or rewrite
+    any other member's consent record across every organization. No real
+    Django consumer found.
+    """
     queryset = UserConsents.objects.all()
     serializer_class = UserConsentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -329,10 +426,22 @@ class UserConsentsViewSet(viewsets.ModelViewSet):
 
 
 class CookieConsentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for CookieConsents operations."""
+    """API endpoint for CookieConsents operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): cookie_consents is TENANT_RLS_REQUIRED with a
+    nullable user_id (anonymous/pre-login rows are legitimate by design;
+    the real ownership key for those rows is the browser-generated
+    consent_id, not user_id). Its real Next.js consumer
+    (app/api/gdpr/cookie-consent/route.ts) is an intentionally public,
+    unauthenticated endpoint scoped by consent_id. This generated
+    ModelViewSet has no scoping at all (IsAuthenticated only) and would let
+    any authenticated user read/reassign/delete any organization's cookie
+    consent rows. No real Django consumer found.
+    """
     queryset = CookieConsents.objects.all()
     serializer_class = CookieConsentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -343,7 +452,7 @@ class GdprDataRequestsViewSet(viewsets.ModelViewSet):
     """API endpoint for GdprDataRequests operations."""
     queryset = GdprDataRequests.objects.all()
     serializer_class = GdprDataRequestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -394,10 +503,19 @@ class LocationTrackingViewSet(viewsets.ModelViewSet):
 
 
 class GeofencesViewSet(viewsets.ModelViewSet):
-    """API endpoint for Geofences operations."""
+    """API endpoint for Geofences operations.
+
+    round 52: geofences is tenant-scoped by unionLocalId on the TypeScript
+    side (services/geofence-privacy-service.ts, app/api/location/geofence),
+    but the Next.js frontend never calls this Django backend at all
+    (git-grep confirmed — no legitimate consumer). This generated ViewSet
+    was IsAuthenticated-only with NO organization/union-local filter,
+    exposing every tenant's geofences to any authenticated Django user.
+    Contained via DenyAllPermission.
+    """
     queryset = Geofences.objects.all()
     serializer_class = GeofencesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['geofence_type']
     search_fields = ['name', 'description', 'geofence_type']
@@ -418,10 +536,25 @@ class GeofenceEventsViewSet(viewsets.ModelViewSet):
 
 
 class LocationTrackingAuditViewSet(viewsets.ModelViewSet):
-    """API endpoint for LocationTrackingAudit operations."""
+    """API endpoint for LocationTrackingAudit operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): db/schema/domains/compliance/geofence.ts declares no
+    organization_id column (subject-scoped by user_id — real-time strike/
+    picket location tracking is an individual-consent construct). The
+    real writer, services/geofence-privacy-service.ts's
+    GeofencePrivacyService.logAuditAction() (called only for
+    consent_granted/consent_revoked), has NO reader anywhere in app code —
+    this generated ModelViewSet would be the ONLY reader, and it applies
+    no scoping at all (queryset=LocationTrackingAudit.objects.all(),
+    permission_classes=[IsAuthenticated], filterable by ?user_id= to
+    browse ANY user's location-tracking consent history). No legitimate
+    Django consumer found; contained to prevent a same-org/cross-user
+    privacy leak on inherently sensitive location data.
+    """
     queryset = LocationTrackingAudit.objects.all()
     serializer_class = LocationTrackingAuditSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -430,10 +563,16 @@ class LocationTrackingAuditViewSet(viewsets.ModelViewSet):
 
 
 class LocationDeletionLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for LocationDeletionLog operations."""
+    """API endpoint for LocationDeletionLog operations.
+
+    round 52: this table has no organization/user column and no legitimate
+    TypeScript reader anywhere (write-only compliance evidence). This
+    generated ViewSet was IsAuthenticated-only with no legitimate consumer
+    on either side. Contained via DenyAllPermission.
+    """
     queryset = LocationDeletionLog.objects.all()
     serializer_class = LocationDeletionLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['deletion_type']
     search_fields = ['deletion_type']
@@ -442,10 +581,18 @@ class LocationDeletionLogViewSet(viewsets.ModelViewSet):
 
 
 class LocationTrackingConfigViewSet(viewsets.ModelViewSet):
-    """API endpoint for LocationTrackingConfig operations."""
+    """API endpoint for LocationTrackingConfig operations.
+
+    round 52: this is a platform-wide singleton config (see
+    db/schema/domains/compliance/geofence.ts) with no legitimate
+    TypeScript-side mutation route and no Django consumer. This generated
+    ViewSet was IsAuthenticated-only, letting any authenticated Django user
+    mutate the platform-wide location-tracking safety configuration
+    (e.g. backgroundTrackingAllowed). Contained via DenyAllPermission.
+    """
     queryset = LocationTrackingConfig.objects.all()
     serializer_class = LocationTrackingConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['location_tracking_enabled', 'max_retention_hours']
     search_fields = ['max_retention_hours']
@@ -457,7 +604,7 @@ class ForeignWorkersViewSet(viewsets.ModelViewSet):
     """API endpoint for ForeignWorkers operations."""
     queryset = ForeignWorkers.objects.all()
     serializer_class = ForeignWorkersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['requires_lmbp', 'lmbp_letter_generated', 'created_by']
     search_fields = ['first_name', 'last_name', 'email', 'phone_number', 'work_permit_number']
@@ -469,7 +616,7 @@ class LmbpLettersViewSet(viewsets.ModelViewSet):
     """API endpoint for LmbpLetters operations."""
     queryset = LmbpLetters.objects.all()
     serializer_class = LmbpLettersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['created_by']
     search_fields = ['employer_name', 'letter_number', 'compliance_status', 'letter_pdf_url', 'letter_pdf_hash']
@@ -493,7 +640,7 @@ class MentorshipsViewSet(viewsets.ModelViewSet):
     """API endpoint for Mentorships operations."""
     queryset = Mentorships.objects.all()
     serializer_class = MentorshipsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['canadian_worker_trained', 'knowledge_transfer_documented']
     search_fields = ['mentee_name', 'mentor_name', 'meeting_frequency', 'status', 'status_reason']
@@ -505,7 +652,7 @@ class LmbpComplianceAlertsViewSet(viewsets.ModelViewSet):
     """API endpoint for LmbpComplianceAlerts operations."""
     queryset = LmbpComplianceAlerts.objects.all()
     serializer_class = LmbpComplianceAlertsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['resolved_by']
     search_fields = ['alert_type', 'severity', 'title', 'description', 'recommended_action']
@@ -517,7 +664,7 @@ class LmbpComplianceReportsViewSet(viewsets.ModelViewSet):
     """API endpoint for LmbpComplianceReports operations."""
     queryset = LmbpComplianceReports.objects.all()
     serializer_class = LmbpComplianceReportsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['submitted_to_ircc']
     search_fields = ['ircc_confirmation_number']
@@ -529,7 +676,7 @@ class BandCouncilsViewSet(viewsets.ModelViewSet):
     """API endpoint for BandCouncils operations."""
     queryset = BandCouncils.objects.all()
     serializer_class = BandCouncilsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['band_number']
     search_fields = ['band_name', 'band_number']
@@ -541,7 +688,7 @@ class BandCouncilConsentViewSet(viewsets.ModelViewSet):
     """API endpoint for BandCouncilConsent operations."""
     queryset = BandCouncilConsent.objects.all()
     serializer_class = BandCouncilConsentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['consent_type']
     search_fields = ['consent_type']
@@ -565,7 +712,7 @@ class IndigenousDataAccessLogViewSet(viewsets.ModelViewSet):
     """API endpoint for IndigenousDataAccessLog operations."""
     queryset = IndigenousDataAccessLog.objects.all()
     serializer_class = IndigenousDataAccessLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -577,7 +724,7 @@ class IndigenousDataSharingAgreementsViewSet(viewsets.ModelViewSet):
     """API endpoint for IndigenousDataSharingAgreements operations."""
     queryset = IndigenousDataSharingAgreements.objects.all()
     serializer_class = IndigenousDataSharingAgreementsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['partner_type']
     search_fields = ['partner_name', 'partner_type']
@@ -589,7 +736,7 @@ class TraditionalKnowledgeRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for TraditionalKnowledgeRegistry operations."""
     queryset = TraditionalKnowledgeRegistry.objects.all()
     serializer_class = TraditionalKnowledgeRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['knowledge_type']
     search_fields = ['knowledge_type']
@@ -601,7 +748,7 @@ class PciDssSaqAssessmentsViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssSaqAssessments operations."""
     queryset = PciDssSaqAssessments.objects.all()
     serializer_class = PciDssSaqAssessmentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -611,7 +758,7 @@ class PciDssRequirementsViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssRequirements operations."""
     queryset = PciDssRequirements.objects.all()
     serializer_class = PciDssRequirementsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -621,7 +768,7 @@ class PciDssQuarterlyScansViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssQuarterlyScans operations."""
     queryset = PciDssQuarterlyScans.objects.all()
     serializer_class = PciDssQuarterlyScansSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -641,17 +788,24 @@ class PciDssEncryptionKeysViewSet(viewsets.ModelViewSet):
     """API endpoint for PciDssEncryptionKeys operations."""
     queryset = PciDssEncryptionKeys.objects.all()
     serializer_class = PciDssEncryptionKeysSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class ProvincialPrivacyConfigViewSet(viewsets.ModelViewSet):
+    """round 52: the legitimate path for this global per-province reference
+    table is services/provincial-privacy-service.ts's getProvinceConfig
+    (read-only, called internally by recordConsent via POST /api/privacy/
+    consent). No production code ever writes this table. This generated
+    Django ViewSet is a separate, unscoped read+write duplicate surface with
+    no legitimate consumer of its own. Contained via DenyAllPermission.
+    """
     """API endpoint for ProvincialPrivacyConfig operations."""
     queryset = ProvincialPrivacyConfig.objects.all()
     serializer_class = ProvincialPrivacyConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['province']
     search_fields = ['province']
@@ -672,10 +826,16 @@ class ProvincialConsentViewSet(viewsets.ModelViewSet):
 
 
 class PrivacyBreachesViewSet(viewsets.ModelViewSet):
+    """round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, PRIVACY_AND_JURISDICTION
+    family): services/provincial-privacy-service.ts's reportBreach/
+    markBreachNotificationSent/getBreachesApproachingDeadline (the only TS
+    code touching this table) have zero production callers anywhere
+    (git-grep confirmed) — dead TS code. Contained via DenyAllPermission.
+    """
     """API endpoint for PrivacyBreaches operations."""
     queryset = PrivacyBreaches.objects.all()
     serializer_class = PrivacyBreachesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['breach_type']
     search_fields = ['breach_type']
@@ -711,7 +871,7 @@ class LrbAgreementsViewSet(viewsets.ModelViewSet):
     """API endpoint for LrbAgreements operations."""
     queryset = LrbAgreements.objects.all()
     serializer_class = LrbAgreementsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source']
     search_fields = ['source']
@@ -747,7 +907,7 @@ class LrbSyncLogViewSet(viewsets.ModelViewSet):
     """API endpoint for LrbSyncLog operations."""
     queryset = LrbSyncLog.objects.all()
     serializer_class = LrbSyncLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source']
     search_fields = ['source']
@@ -759,7 +919,7 @@ class ConflictOfInterestPolicyViewSet(viewsets.ModelViewSet):
     """API endpoint for ConflictOfInterestPolicy operations."""
     queryset = ConflictOfInterestPolicy.objects.all()
     serializer_class = ConflictOfInterestPolicySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['policy_enabled', 'blind_trust_required', 'annual_disclosure_required', 'disclosure_deadline']
     search_fields = ['disclosure_deadline']
@@ -771,7 +931,7 @@ class BlindTrustRegistryViewSet(viewsets.ModelViewSet):
     """API endpoint for BlindTrustRegistry operations."""
     queryset = BlindTrustRegistry.objects.all()
     serializer_class = BlindTrustRegistrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -783,7 +943,7 @@ class ConflictDisclosuresViewSet(viewsets.ModelViewSet):
     """API endpoint for ConflictDisclosures operations."""
     queryset = ConflictDisclosures.objects.all()
     serializer_class = ConflictDisclosuresSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -795,7 +955,7 @@ class ArmsLengthVerificationViewSet(viewsets.ModelViewSet):
     """API endpoint for ArmsLengthVerification operations."""
     queryset = ArmsLengthVerification.objects.all()
     serializer_class = ArmsLengthVerificationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['transaction_type']
     search_fields = ['transaction_type']
@@ -807,7 +967,7 @@ class RecusalTrackingViewSet(viewsets.ModelViewSet):
     """API endpoint for RecusalTracking operations."""
     queryset = RecusalTracking.objects.all()
     serializer_class = RecusalTrackingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -840,10 +1000,22 @@ class ConflictTrainingViewSet(viewsets.ModelViewSet):
 
 
 class ConflictAuditLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for ConflictAuditLog operations."""
+    """API endpoint for ConflictAuditLog operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): services/founder-conflict-service.ts has zero
+    callers anywhere. The real Django surface,
+    services/api/founder_conflict_service_views.py's
+    FounderConflictServiceViewSet, correctly org-scopes its read-only
+    audit_log action via request.user.organization_id but has zero
+    frontend consumers either — contained separately in that file (no
+    write action exists there for this table). This generated
+    ModelViewSet is unscoped (queryset=ConflictAuditLog.objects.all(),
+    permission_classes=[IsAuthenticated]). No legitimate consumer found.
+    """
     queryset = ConflictAuditLog.objects.all()
     serializer_class = ConflictAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['action_type']
     search_fields = ['action_type']
@@ -1047,7 +1219,7 @@ class PolicyRulesViewSet(viewsets.ModelViewSet):
     """API endpoint for PolicyRules operations."""
     queryset = PolicyRules.objects.all()
     serializer_class = PolicyRulesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -1057,9 +1229,12 @@ class PolicyRulesViewSet(viewsets.ModelViewSet):
 
 class PolicyEvaluationsViewSet(viewsets.ModelViewSet):
     """API endpoint for PolicyEvaluations operations."""
+    # Round 44: no legitimate Django consumer; real TS paths are the
+    # org-scoped policy-engine.ts insert path and the now-platform-admin-
+    # gated /api/governance/telemetry aggregate read.
     queryset = PolicyEvaluations.objects.all()
     serializer_class = PolicyEvaluationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['rule_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -1070,7 +1245,7 @@ class RetentionPoliciesViewSet(viewsets.ModelViewSet):
     """API endpoint for RetentionPolicies operations."""
     queryset = RetentionPolicies.objects.all()
     serializer_class = RetentionPoliciesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -1082,7 +1257,7 @@ class LegalHoldsViewSet(viewsets.ModelViewSet):
     """API endpoint for LegalHolds operations."""
     queryset = LegalHolds.objects.all()
     serializer_class = LegalHoldsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -1092,9 +1267,12 @@ class LegalHoldsViewSet(viewsets.ModelViewSet):
 
 class PolicyExceptionsViewSet(viewsets.ModelViewSet):
     """API endpoint for PolicyExceptions operations."""
+    # Round 44: no legitimate Django consumer; the real TS path
+    # (policy-engine.ts's checkException) is transitively org-scoped
+    # through the caller's own already-filtered rule ids.
     queryset = PolicyExceptions.objects.all()
     serializer_class = PolicyExceptionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['rule_id']
     ordering_fields = ['created_at', 'updated_at']

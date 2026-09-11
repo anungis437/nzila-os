@@ -178,9 +178,12 @@ export async function issueAward(
       memo: `Award: ${awardType.name}`,
     });
 
-    // Apply budget usage with limit enforcement
+    // Apply budget usage with limit enforcement (same transaction as the
+    // ledger entry and award update, scoped to this award's own org).
     const budgetApplied = await applyBudgetUsageChecked(
+      tx,
       award.programId,
+      award.orgId,
       creditAmount
     );
 
@@ -253,8 +256,8 @@ export async function revokeAward(
       memo: `Award revoked: ${reason}`,
     });
 
-    // Refund budget (negative usage)
-    await applyBudgetUsage(award.programId, -creditAmount);
+    // Refund budget (negative usage), same transaction, scoped to this award's own org.
+    await applyBudgetUsage(tx, award.programId, award.orgId, -creditAmount);
 
     // Update award status
     const [updatedAward] = await tx

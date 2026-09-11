@@ -1,14 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => {
-  // Set env vars early so the singleton constructor doesn't throw
-  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
-
   return {
     mockInsert: vi.fn(),
     mockSelect: vi.fn(),
     mockUpdate: vi.fn(),
+    mockExecute: vi.fn(),
     mockValues: vi.fn(),
     mockReturning: vi.fn(),
     mockFrom: vi.fn(),
@@ -16,17 +13,31 @@ const mocks = vi.hoisted(() => {
     mockOrderBy: vi.fn(),
     mockLimit: vi.fn(),
     mockSet: vi.fn(),
-    mockSupabaseFrom: vi.fn(),
-    mockSupabaseSelect: vi.fn(),
-    mockCreateClient: vi.fn(),
   };
 });
+
+/**
+ * A thenable Drizzle query-builder stand-in: awaiting it directly resolves
+ * to `rows` (matching `db.select(...).from(...)` with no further filter),
+ * while `.where()`/`.orderBy()`/`.limit()` continue the chain and
+ * eventually resolve to the same `rows`.
+ */
+function chainable(rows: unknown[]) {
+  const node: any = {
+    then: (resolve: (v: unknown[]) => void) => resolve(rows),
+    where: vi.fn(() => chainable(rows)),
+    orderBy: vi.fn(() => chainable(rows)),
+    limit: vi.fn(() => Promise.resolve(rows)),
+  };
+  return node;
+}
 
 vi.mock('@/db', () => ({
   db: {
     insert: mocks.mockInsert,
     select: mocks.mockSelect,
     update: mocks.mockUpdate,
+    execute: mocks.mockExecute,
   },
 }));
 
@@ -34,14 +45,18 @@ vi.mock('@/db/schema/domains/compliance/pci-dss', () => ({
   pciDssSaqAssessments: { id: 'id', organizationId: 'organization_id', assessmentDate: 'assessment_date', overallStatus: 'overall_status' },
   pciDssRequirements: { id: 'id', assessmentId: 'assessment_id', complianceStatus: 'compliance_status', requirementNumber: 'requirement_number', requirementDescription: 'requirement_description' },
   pciDssQuarterlyScans: { id: 'id', organizationId: 'organization_id', scanDate: 'scan_date', vulnerabilitiesFound: 'vulnerabilities_found', criticalIssues: 'critical_issues', vendorName: 'vendor_name', scanStatus: 'scan_status', reportUrl: 'report_url' },
-  pciDssEncryptionKeys: { id: 'id' },
+  pciDssEncryptionKeys: { id: 'id', organizationId: 'organization_id', keyType: 'key_type', rotatedAt: 'rotated_at' },
+}));
+
+vi.mock('@/db/schema-organizations', () => ({
+  organizations: { id: 'id' },
 }));
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((a, b) => ({ field: a, value: b })),
   desc: vi.fn((col) => ({ column: col, direction: 'desc' })),
   asc: vi.fn((col) => ({ column: col, direction: 'asc' })),
-  sql: vi.fn(),
+  sql: vi.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values })),
   and: vi.fn((...args: any[]) => args),
   or: vi.fn((...args: any[]) => args),
   gt: vi.fn((a, b) => ({ field: a, value: b })),
@@ -63,12 +78,6 @@ vi.mock('drizzle-orm', () => ({
   relations: vi.fn(() => ({})),
 }));
 
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: mocks.mockCreateClient,
-}));
-
-// Env vars are set in vi.hoisted() above
-
 import { PCIComplianceService } from '../pci-compliance-service';
 
 describe('PCIComplianceService', () => {
@@ -77,14 +86,7 @@ describe('PCIComplianceService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
-
-    // Supabase mock: from().select().order() → { data, error }
-    const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
-    mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-    mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-    mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+    mocks.mockExecute.mockResolvedValue([]);
 
     // Chain: select().from().where().orderBy().limit()
     mocks.mockLimit.mockResolvedValue([]);
@@ -106,14 +108,6 @@ describe('PCIComplianceService', () => {
     });
 
     service = new PCIComplianceService();
-  });
-
-  describe('constructor', () => {
-    it('throws if env vars missing', () => {
-      delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-      delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-      expect(() => new PCIComplianceService()).toThrow('Missing required environment variables');
-    });
   });
 
   describe('generatePCIAssessmentReport', () => {
@@ -158,26 +152,17 @@ describe('PCIComplianceService', () => {
     });
 
     it('returns assessment id even when the template has no requirements', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({ data: [{ id: 'org-1' }], error: null });
-      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      mocks.mockExecute.mockResolvedValue([]);
 
       const id = await service.createAssessment('org-1');
       expect(id).toBe('assessment-1');
     });
 
     it('filters invalid template rows before inserting requirements', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({
-        data: [
-          { requirement_number: '1.1', requirement_description: 'Valid requirement' },
-          { requirement_number: '1.2' },
-        ],
-        error: null,
-      });
-      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      mocks.mockExecute.mockResolvedValue([
+        { requirement_number: '1.1', requirement_description: 'Valid requirement' },
+        { requirement_number: '1.2' },
+      ]);
 
       const id = await service.createAssessment('org-1');
       expect(id).toBe('assessment-1');
@@ -186,11 +171,8 @@ describe('PCIComplianceService', () => {
       ]));
     });
 
-    it('handles non-array template data', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({ data: null, error: null });
-      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+    it('handles a non-array template execute result', async () => {
+      mocks.mockExecute.mockResolvedValue({ rows: null });
 
       const id = await service.createAssessment('org-1');
       expect(id).toBe('assessment-1');
@@ -293,19 +275,15 @@ describe('PCIComplianceService', () => {
 
   describe('getOverdueScans', () => {
     it('returns empty when no organizations exist', async () => {
-      mocks.mockSupabaseSelect.mockResolvedValue({ data: [], error: null });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      mocks.mockFrom.mockReturnValueOnce(chainable([]));
 
       const result = await service.getOverdueScans();
       expect(result).toEqual([]);
     });
 
     it('returns overdue organizations when scans are stale', async () => {
-      const staleScanDate = new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString();
-      mocks.mockSupabaseSelect.mockResolvedValue({ data: [{ id: 'org-1' }, { id: 'invalid' }], error: null });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      const staleScanDate = new Date(Date.now() - 120 * 24 * 60 * 60 * 1000);
+      mocks.mockFrom.mockReturnValueOnce(chainable([{ id: 'org-1' }]));
 
       const originalGetLatest = service.getLatestQuarterlyScan.bind(service);
       service.getLatestQuarterlyScan = vi.fn(async (orgId: string) => {
@@ -313,7 +291,7 @@ describe('PCIComplianceService', () => {
           return {
             id: 'scan-1',
             organizationId: 'org-1',
-            scanDate: new Date(staleScanDate),
+            scanDate: staleScanDate,
             vendorName: 'Qualys',
             scanStatus: 'pass',
             vulnerabilitiesFound: 0,
@@ -328,9 +306,7 @@ describe('PCIComplianceService', () => {
     });
 
     it('skips organizations with recent scans', async () => {
-      mocks.mockSupabaseSelect.mockResolvedValue({ data: [{ id: 'org-2' }], error: null });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      mocks.mockFrom.mockReturnValueOnce(chainable([{ id: 'org-2' }]));
 
       service.getLatestQuarterlyScan = vi.fn(async () => ({
         id: 'scan-2',
@@ -345,54 +321,26 @@ describe('PCIComplianceService', () => {
       const result = await service.getOverdueScans();
       expect(result).toEqual([]);
     });
-
-    it('handles non-array organization data', async () => {
-      mocks.mockSupabaseSelect.mockResolvedValue({ data: null, error: null });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
-
-      const result = await service.getOverdueScans();
-      expect(result).toEqual([]);
-    });
   });
 
   describe('getKeysNeedingRotation', () => {
     it('returns empty when no keys exist', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
-      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      mocks.mockFrom.mockReturnValueOnce(chainable([]));
 
       const result = await service.getKeysNeedingRotation();
       expect(result).toEqual([]);
     });
 
     it('returns keys that are older than 90 days', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({
-        data: [
-          { organization_id: 'org-1', key_type: 'stripe_secret_key', rotated_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString() },
-          { organization_id: 'org-2', key_type: 'database_encryption', rotated_at: new Date().toISOString() },
-        ],
-        error: null,
-      });
-      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
+      mocks.mockFrom.mockReturnValueOnce(chainable([
+        { organizationId: 'org-1', keyType: 'stripe_secret_key', rotatedAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString() },
+        { organizationId: 'org-2', keyType: 'database_encryption', rotatedAt: new Date().toISOString() },
+      ]));
 
       const result = await service.getKeysNeedingRotation();
       expect(result).toEqual([
         expect.objectContaining({ organizationId: 'org-1', keyType: 'stripe_secret_key' }),
       ]);
-    });
-
-    it('returns empty for non-array responses', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({ data: null, error: null });
-      mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
-      mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
-      mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
-
-      const result = await service.getKeysNeedingRotation();
-      expect(result).toEqual([]);
     });
   });
 

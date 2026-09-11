@@ -124,8 +124,7 @@ export const GET = withApi(
         COUNT(*) FILTER (WHERE requires_tax_slip)::int             AS "requiresT4a",
         COUNT(*) FILTER (WHERE t4a_generated)::int                 AS "t4aGenerated"
       FROM strike_fund_disbursements sfd
-      JOIN organization_members om ON om.user_id = sfd.user_id
-      WHERE om.organization_id = ${organizationId}
+      WHERE sfd.organization_id = ${orgIdCast}
     `);
 
     // ── Per-capita tax obligations ───────────────────────────────────

@@ -10,7 +10,6 @@ import {
   pgTable,
   pgEnum,
   uuid,
-  varchar,
   text,
   timestamp,
   index,
@@ -49,19 +48,6 @@ export const grievanceEventTypeEnum = pgEnum("grievance_event_type", [
   "converted_to_case",
   "priority_overridden",
   "intake_submitted",
-]);
-
-export const grievanceDocumentTypeEnum = pgEnum("grievance_document_type", [
-  "intake_form",
-  "evidence",
-  "witness_statement",
-  "employer_response",
-  "union_brief",
-  "arbitration_submission",
-  "settlement_agreement",
-  "correspondence",
-  "photo",
-  "other",
 ]);
 
 export const caseAccessRoleEnum = pgEnum("case_access_role", [
@@ -105,31 +91,6 @@ export const grievanceEvents = pgTable(
 );
 
 /**
- * Documents attached to a grievance case.
- * Supports categorized file storage for evidence, briefs, etc.
- */
-export const grievanceDocuments = pgTable(
-  "grievance_documents",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    grievanceId: uuid("grievance_id")
-      .notNull()
-      .references(() => grievances.id, { onDelete: "cascade" }),
-    fileUrl: varchar("file_url", { length: 2048 }).notNull(),
-    documentType: grievanceDocumentTypeEnum("document_type").notNull(),
-    uploadedBy: uuid("uploaded_by").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (table) => [
-    index("idx_grievance_documents_grievance").on(table.grievanceId),
-    index("idx_grievance_documents_type").on(table.documentType),
-    index("idx_grievance_documents_uploader").on(table.uploadedBy),
-  ],
-);
-
-/**
  * Secondary case access assignments.
  * Primary LRO ownership remains on grievances.unionRepId and is never replaced by this table.
  */
@@ -169,15 +130,11 @@ export type GrievanceLifecycleStatus =
   (typeof grievanceLifecycleStatusEnum.enumValues)[number];
 export type GrievanceEventType =
   (typeof grievanceEventTypeEnum.enumValues)[number];
-export type GrievanceDocumentType =
-  (typeof grievanceDocumentTypeEnum.enumValues)[number];
 export type CaseAccessRole = (typeof caseAccessRoleEnum.enumValues)[number];
 export type CaseAccessStatus = (typeof caseAccessStatusEnum.enumValues)[number];
 
 export type GrievanceEvent = typeof grievanceEvents.$inferSelect;
 export type GrievanceEventInsert = typeof grievanceEvents.$inferInsert;
-export type GrievanceDocument = typeof grievanceDocuments.$inferSelect;
-export type GrievanceDocumentInsert = typeof grievanceDocuments.$inferInsert;
 export type GrievanceCaseAccessAssignment =
   typeof grievanceCaseAccessAssignments.$inferSelect;
 export type GrievanceCaseAccessAssignmentInsert =

@@ -3,17 +3,18 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
-  withSystemContext: vi.fn(),
+  getOrganizationIdForUser: vi.fn(),
+  withRLSContext: vi.fn(),
   executeQueue: [] as unknown[][],
 }));
 
-const mockDb = {
+const mockTx = {
   execute: vi.fn(async () => (m.executeQueue.shift() ?? []) as unknown[]),
 };
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
-vi.mock('@/db', () => ({ db: mockDb }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 
 async function loadRoute() {
   return import('../rewards/export/route');
@@ -24,7 +25,10 @@ describe('rewards/export route', () => {
     vi.clearAllMocks();
     m.executeQueue = [];
     m.auth.mockResolvedValue({ userId: 'u1', orgId: 'org_1' });
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.withRLSContext.mockImplementation(
+      async (_ctx: unknown, fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx),
+    );
   });
 
   it('GET returns 401 when unauthenticated', async () => {

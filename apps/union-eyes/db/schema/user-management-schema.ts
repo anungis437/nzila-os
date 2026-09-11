@@ -1,4 +1,4 @@
-import { uuid, varchar, boolean, timestamp, text, jsonb, integer, pgSchema, check } from "drizzle-orm/pg-core";
+import { uuid, varchar, boolean, timestamp, text, jsonb, integer, pgSchema, pgTable, check } from "drizzle-orm/pg-core";
 import { sql, relations } from "drizzle-orm";
 import { organizations } from "../schema-organizations";
 
@@ -66,16 +66,23 @@ export const organizationUsers = userManagementSchema.table("organization_users"
 });
 
 // User sessions table - authentication session management
-export const userSessions = userManagementSchema.table("user_sessions", {
+// user_sessions was dropped from the user_management schema by migration
+// 0019 (`DROP TABLE "user_management"."user_sessions" CASCADE`) and
+// recreated in the default (public) schema by migrations 0055/0058/0081 —
+// 0058 already enables RLS with per-user (`_own`) policies. The
+// pgSchema-qualified declaration below was stale (live-DB-verified
+// 2026-09-01: table lives in `public`, 12 columns, 3 fields relaxed to
+// nullable) — corrected here, PR #752 review round 3.
+export const userSessions = pgTable("user_sessions", {
   sessionId: uuid("session_id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.userId, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).references(() => users.userId, { onDelete: "cascade" }),
   organizationId: uuid("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
-  sessionToken: text("session_token").notNull().unique(),
+  sessionToken: text("session_token").unique(),
   refreshToken: text("refresh_token").unique(),
   deviceInfo: jsonb("device_info").default(sql`'{}'::jsonb`),
   ipAddress: varchar("ip_address", { length: 45 }), // IPv6 support
   userAgent: text("user_agent"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }).defaultNow(),

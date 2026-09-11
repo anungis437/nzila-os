@@ -7,7 +7,7 @@ Auto-generated: 2026-02-18 09:08
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.pagination import CursorPagination
 from django.db import transaction
 from django.utils import timezone
@@ -17,6 +17,29 @@ import logging
 logger = logging.getLogger(__name__)
 from compliance.models import FirewallAccessRules, EmployerAccessAttempts, AccessJustificationRequests, UnionOnlyDataTags, FirewallViolations, FirewallComplianceAudit
 from core.models import AuditLogs
+
+
+class DenyAllPermission(BasePermission):
+    """CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): no legitimate frontend consumer of this ViewSet
+    exists anywhere (verified by exhaustive grep across app/, actions/,
+    lib/ for every action name and the 'employer-non-interference-service'
+    URL segment). Its writes are correctly org-scoped
+    (request.user.organization_id, client-supplied organization_id
+    stripped) but several actions (check_access, report_violation) accept
+    fully client-controlled outcome/actor fields (e.g. accessGranted,
+    flaggedForReview) with no server-side firewall-rule evaluation — a
+    self-authored security-evidence defect that would need real firewall
+    logic to fix properly, not merely tenant scoping. Deny unconditionally
+    until a real consumer and correct server-side evaluation exist.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
 
 class EmployerNonInterferenceServicePagination(CursorPagination):
     page_size = 50
@@ -41,7 +64,7 @@ class EmployerNonInterferenceServiceViewSet(viewsets.ViewSet):
 - POST /api/services/employer-non-interference-service/tag_data/ — Tag data as union-only
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     pagination_class = EmployerNonInterferenceServicePagination
 
     def paginate_queryset(self, queryset):

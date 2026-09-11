@@ -201,6 +201,7 @@ describe('award-service', () => {
       };
       const ledgerEntry = { balanceAfter: 200 };
 
+      let capturedTx: unknown;
       mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const txUpdateWhere = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...award, status: 'issued' }]) });
         const txSet = vi.fn().mockReturnValue({ where: txUpdateWhere });
@@ -210,6 +211,7 @@ describe('award-service', () => {
           },
           update: vi.fn().mockReturnValue({ set: txSet }),
         };
+        capturedTx = tx;
         return cb(tx);
       });
       mocks.mockApplyLedgerEntry.mockResolvedValue(ledgerEntry);
@@ -219,6 +221,15 @@ describe('award-service', () => {
 
       expect(result.award.status).toBe('issued');
       expect(result.newBalance).toBe(200);
+      // Round 36: budget mutation must run in the SAME transaction as the
+      // ledger entry/award update, and must be scoped to the award's own org.
+      expect(mocks.mockApplyBudgetUsageChecked).toHaveBeenCalledWith(
+        capturedTx,
+        award.programId,
+        award.orgId,
+        100
+      );
+      expect(mocks.mockApplyLedgerEntry.mock.calls[0][0]).toBe(capturedTx);
     });
 
     it('throws when award not found in transaction', async () => {
@@ -293,6 +304,7 @@ describe('award-service', () => {
         awardType: { name: 'X', defaultCreditAmount: 100 },
       };
 
+      let capturedTx: unknown;
       mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
         const txUpdateWhere = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...award, status: 'revoked' }]) });
         const txSet = vi.fn().mockReturnValue({ where: txUpdateWhere });
@@ -300,6 +312,7 @@ describe('award-service', () => {
           query: { recognitionAwards: { findFirst: vi.fn().mockResolvedValue(award) } },
           update: vi.fn().mockReturnValue({ set: txSet }),
         };
+        capturedTx = tx;
         return cb(tx);
       });
       mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 0 });
@@ -308,7 +321,13 @@ describe('award-service', () => {
       const result = await revokeAward({ awardId: 'a', orgId: 'org-1', revokedByUserId: 'admin', reason: 'Mistake' });
 
       expect(result.award.status).toBe('revoked');
-      expect(mocks.mockApplyBudgetUsage).toHaveBeenCalled();
+      expect(mocks.mockApplyBudgetUsage).toHaveBeenCalledWith(
+        capturedTx,
+        award.programId,
+        award.orgId,
+        -100
+      );
+      expect(mocks.mockApplyLedgerEntry.mock.calls[0][0]).toBe(capturedTx);
     });
 
     it('throws when award not found for revocation', async () => {

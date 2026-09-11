@@ -906,4 +906,116 @@ describe('report-executor', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  // ── Adversarial injection attempts (Round 59B hardening) ────────────
+  // filters/groupBy/sortBy/join-on-fields previously passed the caller's
+  // raw string straight to safeColumnName(), which blocks true injection
+  // syntax via identifier-regex validation but did not restrict *which*
+  // real column could be referenced. These tests confirm both layers:
+  // classic injection payloads are rejected (would already fail the
+  // identifier regex), and syntactically-valid-but-unknown column/table
+  // references are now also rejected by the new DATA_SOURCES allowlist.
+  describe('ReportExecutor - adversarial injection attempts', () => {
+    const injectionPayloads = [
+      "status; DROP TABLE claims;--",
+      "status' OR '1'='1",
+      "status) UNION SELECT password FROM users--",
+      "status/*",
+      "status -- comment",
+      "id, (SELECT 1)",
+    ];
+
+    it.each(injectionPayloads)('rejects filter fieldName injection payload: %s', async (payload) => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: payload, fieldName: payload, operator: 'eq', value: 'x' }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it.each(injectionPayloads)('rejects groupBy injection payload: %s', async (payload) => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        groupBy: [payload],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it.each(injectionPayloads)('rejects sortBy injection payload: %s', async (payload) => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        sortBy: [{ fieldId: payload, direction: 'asc' }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it.each(injectionPayloads)('rejects join on-field injection payload: %s', async (payload) => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        joins: [{
+          table: 'claim_deadlines',
+          type: 'inner',
+          on: { leftField: payload, rightField: 'claim_deadlines.claim_id' },
+        }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a syntactically valid but unknown filter column (not in any data source)', async () => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'stripe_secret_key', fieldName: 'stripe_secret_key', operator: 'eq', value: 'x' }],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Invalid filter field');
+    });
+
+    it('rejects a syntactically valid but unknown table-qualified column reference', async () => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'x', fieldName: 'sso_providers.oidc_client_secret', operator: 'eq', value: 'x' }],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Invalid filter field');
+    });
+
+    it('rejects a schema-qualified column reference outright', async () => {
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'x', fieldName: 'public.claims.status', operator: 'eq', value: 'open' }],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Invalid filter field');
+    });
+
+    it('accepts a legitimate table-qualified column reference from a joined table', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        joins: [{
+          table: 'claim_deadlines',
+          type: 'left',
+          on: { leftField: 'claims.id', rightField: 'claim_deadlines.claim_id' },
+        }],
+        filters: [{ fieldId: 'x', fieldName: 'claim_deadlines.status', operator: 'eq', value: 'pending' }],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
 });

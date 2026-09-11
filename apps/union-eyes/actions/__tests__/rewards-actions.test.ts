@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   loggerError: vi.fn(),
   createDiscountCode: vi.fn(),
   createCheckoutSession: vi.fn(),
+  getOrganizationIdForUser: vi.fn(),
   svc: {
     createProgram: vi.fn(),
     updateProgram: vi.fn(),
@@ -79,6 +80,7 @@ vi.mock('@/lib/validation/rewards-schemas', () => {
 });
 
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: mocks.getOrganizationIdForUser }));
 
 import * as actions from '../rewards-actions';
 
@@ -86,6 +88,7 @@ describe('rewards-actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ userId: 'user-1', orgId: 'org-1' });
+    mocks.getOrganizationIdForUser.mockResolvedValue('org-1');
     mocks.findFirst.mockReturnValue({ organizationId: 'org-1', role: 'admin' });
     for (const fn of Object.values(mocks.svc)) fn.mockResolvedValue({ id: 'x' });
     mocks.svc.listPrograms.mockResolvedValue([{ status: 'active' }, { status: 'inactive' }]);
@@ -248,10 +251,18 @@ describe('rewards-actions', () => {
       expect((await actions.listRecognitionPrograms()).success).toBe(true);
     });
 
-    it('fails when the user has no organization membership', async () => {
+    it('fails when the org id cannot be resolved', async () => {
+      mocks.auth.mockResolvedValue({ userId: 'user-1', orgId: undefined });
+      mocks.getOrganizationIdForUser.mockRejectedValueOnce(new Error('User not associated with any organization'));
+      const r = await actions.listRecognitionPrograms();
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('not associated');
+    });
+
+    it('fails admin-gated actions when the user has no organization membership', async () => {
       mocks.auth.mockResolvedValue({ userId: 'user-1', orgId: undefined });
       mocks.findFirst.mockReturnValue(undefined);
-      const r = await actions.listRecognitionPrograms();
+      const r = await actions.createRecognitionProgram({});
       expect(r.success).toBe(false);
       expect(r.error).toContain('not associated');
     });

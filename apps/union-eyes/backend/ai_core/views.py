@@ -8,11 +8,44 @@ from .models import (AbTests, AbTestVariants, AbTestAssignments, AbTestEvents, A
 from .serializers import (AbTestsSerializer, AbTestVariantsSerializer, AbTestAssignmentsSerializer, AbTestEventsSerializer, AccessibilityAuditsSerializer, AccessibilityIssuesSerializer, WcagSuccessCriteriaSerializer, AccessibilityTestSuitesSerializer, AccessibilityUserTestingSerializer, ChatSessionsSerializer, ChatMessagesSerializer, KnowledgeBaseSerializer, ChatbotSuggestionsSerializer, ChatbotAnalyticsSerializer, AiSafetyFiltersSerializer, AiUsageMetricsSerializer, AiRateLimitsSerializer, AiBudgetsSerializer, MlPredictionsSerializer, ModelMetadataSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment: unconditionally denies every request.
+
+    Used for models with no proven legitimate consumer and no tenant
+    isolation mechanism (PR #752 round 35 — AiBudgets: the Django model
+    only maps `organization_id`, omitting the real physical table's NOT
+    NULL monthly_limit_usd/billing_period_start/billing_period_end columns
+    (db/migrations/0079_ai_cost_tracking_phase1.sql), so create() would
+    violate DB constraints; the generated ModelViewSet(queryset=Model.
+    objects.all(), permission_classes=[IsAuthenticated]) pattern otherwise
+    exposes every organization's budget existence/id to any authenticated
+    user and allows unscoped organization_id reassignment + delete. No
+    real TS or Django consumer of this endpoint was found. Remove only
+    once a proven legitimate consumer and organization-bound isolation
+    mechanism exist for this table.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class AbTestsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTests operations."""
+    """API endpoint for AbTests operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): lib/ab-testing/ab-test-engine.ts (the TS side) has zero
+    real callers anywhere under app/, actions/, lib/, services/ — this
+    generated ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) otherwise exposes every
+    organization's AB test data to any authenticated user with no
+    org scoping. No legitimate consumer found on either side.
+    """
     queryset = AbTests.objects.all()
     serializer_class = AbTestsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     search_fields = ['name', 'description', 'type', 'status']
@@ -21,30 +54,42 @@ class AbTestsViewSet(viewsets.ModelViewSet):
 
 
 class AbTestVariantsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTestVariants operations."""
+    """API endpoint for AbTestVariants operations.
+
+    CONTAINED (PR #752 round 50): see AbTestsViewSet — same dead TS engine,
+    same no-consumer finding.
+    """
     queryset = AbTestVariants.objects.all()
     serializer_class = AbTestVariantsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class AbTestAssignmentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTestAssignments operations."""
+    """API endpoint for AbTestAssignments operations.
+
+    CONTAINED (PR #752 round 50): see AbTestsViewSet — same dead TS engine,
+    same no-consumer finding.
+    """
     queryset = AbTestAssignments.objects.all()
     serializer_class = AbTestAssignmentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class AbTestEventsViewSet(viewsets.ModelViewSet):
-    """API endpoint for AbTestEvents operations."""
+    """API endpoint for AbTestEvents operations.
+
+    CONTAINED (PR #752 round 50): see AbTestsViewSet — same dead TS engine,
+    same no-consumer finding.
+    """
     queryset = AbTestEvents.objects.all()
     serializer_class = AbTestEventsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -103,10 +148,23 @@ class AccessibilityUserTestingViewSet(viewsets.ModelViewSet):
 
 
 class ChatSessionsViewSet(viewsets.ModelViewSet):
-    """API endpoint for ChatSessions operations."""
+    """API endpoint for ChatSessions operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    chat_sessions is a TENANT_RLS_REQUIRED table (organization_id + user_id
+    both NOT NULL) whose real Next.js consumer (lib/ai/chatbot-service.ts)
+    required a security fix this round after an IDOR was found allowing
+    reads/writes across other users'/orgs' sessions. This generated
+    ModelViewSet(queryset=ChatSessions.objects.all(),
+    permission_classes=[IsAuthenticated]) has no organization_id/user_id
+    scoping at all and would reintroduce the same class of cross-tenant
+    IDOR via a second, unrelated API surface. No real Django consumer of
+    this endpoint was found. Remove only once org+user-scoped queryset
+    filtering is implemented.
+    """
     queryset = ChatSessions.objects.all()
     serializer_class = ChatSessionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -114,10 +172,19 @@ class ChatSessionsViewSet(viewsets.ModelViewSet):
 
 
 class ChatMessagesViewSet(viewsets.ModelViewSet):
-    """API endpoint for ChatMessages operations."""
+    """API endpoint for ChatMessages operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    chat_messages is PARENT_OWNED_RLS_REQUIRED via chat_sessions, which
+    itself required an IDOR fix this round. This generated ModelViewSet
+    has no ownership scoping and would let any authenticated user read or
+    write any session's message history/AI responses across organizations.
+    No real Django consumer of this endpoint was found. Remove only once
+    parent-session-ownership-scoped queryset filtering is implemented.
+    """
     queryset = ChatMessages.objects.all()
     serializer_class = ChatMessagesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -154,10 +221,19 @@ class ChatbotAnalyticsViewSet(viewsets.ModelViewSet):
 
 
 class AiSafetyFiltersViewSet(viewsets.ModelViewSet):
-    """API endpoint for AiSafetyFilters operations."""
+    """API endpoint for AiSafetyFilters operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): sole writer lib/ai/chatbot-service.ts's checkContentSafety()
+    is only ever reached via the org/session-verified sendMessage() flow, but
+    this generated ModelViewSet is a separate unscoped surface (IsAuthenticated
+    -only, .objects.all()) that would let any authenticated platform user
+    read/write/delete any organization's flagged chat content. No legitimate
+    frontend consumer found for this endpoint.
+    """
     queryset = AiSafetyFilters.objects.all()
     serializer_class = AiSafetyFiltersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['flagged', 'session_id', 'message_id']
     search_fields = ['input', 'output', 'action', 'reason']
@@ -189,7 +265,7 @@ class AiBudgetsViewSet(viewsets.ModelViewSet):
     """API endpoint for AiBudgets operations."""
     queryset = AiBudgets.objects.all()
     serializer_class = AiBudgetsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

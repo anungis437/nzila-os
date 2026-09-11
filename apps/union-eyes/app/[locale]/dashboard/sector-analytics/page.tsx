@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, isSystemAdmin } from '@/lib/api-auth-guard';
 import { getLocale, getTranslations } from 'next-intl/server';
 
 /* ── Types ── */
@@ -240,7 +240,9 @@ export default async function SectorAnalyticsPage(props: {
   const locale = await getLocale();
   const t = await getTranslations('sectorAnalyticsPage');
   await requireUser();
-  const hasAccess = await hasMinRole('platform_lead');
+  // Cross-organization data (every tenant's sector metrics) requires
+  // genuine platform-staff authority, not an ordinary per-org role name.
+  const hasAccess = await isSystemAdmin();
   if (!hasAccess) redirect(`/${locale}/dashboard`);
 
   const searchParams = await props.searchParams;

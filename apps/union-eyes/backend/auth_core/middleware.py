@@ -10,7 +10,6 @@ Production middleware with:
 import logging
 from typing import List, Optional
 
-from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger(__name__)
@@ -41,21 +40,21 @@ class OIDCJWTMiddleware(MiddlewareMixin):
         """Process incoming request to attach org context.
 
         OIDCAuthentication sets these attributes on request:
-        - clerk_user_id: Auth provider user ID (sub claim)
-        - clerk_org_id: Organization ID (org_id claim)
-        - clerk_org_role: User's role in org (org_role claim)
+        - user_id: Auth provider user ID (sub claim)
+        - org_id: Organization ID (org_id claim)
+        - org_role: User's role in org (org_role claim)
         """
         # Skip exempt paths
         if self._is_exempt_path(request.path):
             return None
 
         # Attach default values if not set by auth backend
-        if not hasattr(request, "clerk_user_id"):
-            request.clerk_user_id = None
-        if not hasattr(request, "clerk_org_id"):
-            request.clerk_org_id = None
-        if not hasattr(request, "clerk_org_role"):
-            request.clerk_org_role = None
+        if not hasattr(request, "user_id"):
+            request.user_id = None
+        if not hasattr(request, "org_id"):
+            request.org_id = None
+        if not hasattr(request, "org_role"):
+            request.org_role = None
 
         return None
 
@@ -80,75 +79,32 @@ class OIDCJWTMiddleware(MiddlewareMixin):
         return any(path.startswith(p) for p in self.EXEMPT_PATHS)
 
 
-# Backward compat alias
-ClerkJWTMiddleware = OIDCJWTMiddleware
-
-
 class OrganizationIsolationMiddleware(MiddlewareMixin):
-    """Enforces organization-level data isolation for multi-org apps.
+    """Attaches safe default organization attributes to request.organization
+    / request.organization_id when nothing else has set them yet.
 
-    This middleware ensures:
-    1. All database queries are scoped to user's organization
-    2. Cross-organization data access is blocked
-    3. Organization context is available in views via request.organization
-
-    The organization instance is cached in Redis (5-min TTL) to avoid a DB
-    query on every single request — critical for 10K+ concurrent connections.
+    PR #752 round-32 correction: this middleware previously attempted to
+    resolve request.org_id (Redis cache + Organizations DB lookup) here and
+    fail closed with a 403 on an unknown org. That resolution has moved to
+    auth_core.authentication.resolve_organization_context(), called
+    directly from OIDCAuthentication.authenticate() — the actual point in
+    the request lifecycle where the verified org claim first exists. Django
+    middleware's process_request() runs BEFORE the view (and therefore
+    before DRF's authentication classes execute inside dispatch()), so this
+    middleware could never see a populated request.org_id for a real
+    bearer-token request; the Redis/DB lookup here was unreachable in
+    practice for the actual production auth flow. Kept as a harmless
+    default-attribute setter (same pattern as OIDCJWTMiddleware above) for
+    any code path that reads request.organization_id before authentication
+    has run (e.g. exempt/anonymous paths), not as an isolation mechanism.
     """
 
-    ORG_CACHE_TTL = 300  # 5 minutes
-
     def process_request(self, request):
-        """Attach organization object to request for multi-org scoping."""
-        # Skip if no org_id (anonymous or service account)
-        org_id = getattr(request, "clerk_org_id", None)
-        if not org_id:
+        """Attach default organization attributes if not already set."""
+        if not hasattr(request, "organization"):
             request.organization = None
-            return None
-
-        # Try Redis cache first (avoids DB hit on every request)
-        from django.core.cache import cache
-
-        cache_key = f"org:ctx:{org_id}"
-        organization = cache.get(cache_key)
-
-        if organization is not None:
-            request.organization = organization
-            request.organization_id = organization.id
-            return None
-
-        # Cache miss — query DB and populate cache
-        try:
-            from auth_core.models import Organizations
-
-            organization = Organizations.objects.filter(
-                clerk_organization_id=org_id
-            ).first()
-
-            if not organization:
-                logger.warning(
-                    f"Unknown organization {org_id} for user {request.clerk_user_id}"
-                )
-                return JsonResponse(
-                    {"error": "Organization not found. Contact support."}, status=403
-                )
-
-            # Cache for subsequent requests (graceful if Redis is down)
-            cache.set(cache_key, organization, self.ORG_CACHE_TTL)
-
-            request.organization = organization
-            request.organization_id = organization.id
-
-        except ImportError:
-            # Organization model not available (single-org app)
-            request.organization = None
-            request.organization_id = org_id
-
-        except Exception as e:
-            logger.error(f"Failed to load organization {org_id}: {e}")
-            return JsonResponse(
-                {"error": "Failed to load organization context"}, status=500
-            )
+        if not hasattr(request, "organization_id"):
+            request.organization_id = None
 
         return None
 
@@ -193,13 +149,13 @@ class AuditLogMiddleware(MiddlewareMixin):
             duration_ms = int((time.time() - request._audit_start_time) * 1000)
 
         # Dispatch to Celery (fire-and-forget) for authenticated requests
-        if hasattr(request, "clerk_user_id") and request.clerk_user_id:
+        if hasattr(request, "user_id") and request.user_id:
             try:
                 from auth_core.tasks import log_audit_event
 
                 log_audit_event.delay(
-                    user_id=request.clerk_user_id,
-                    org_id=getattr(request, "clerk_org_id", "none"),
+                    user_id=request.user_id,
+                    org_id=getattr(request, "org_id", "none"),
                     method=request.method,
                     path=request.path,
                     status_code=response.status_code,
@@ -212,8 +168,8 @@ class AuditLogMiddleware(MiddlewareMixin):
                 logger.info(
                     "AUTH_REQUEST user=%s org=%s method=%s path=%s "
                     "status=%s duration_ms=%s ip=%s",
-                    request.clerk_user_id,
-                    getattr(request, "clerk_org_id", "none"),
+                    request.user_id,
+                    getattr(request, "org_id", "none"),
                     request.method,
                     request.path,
                     response.status_code,

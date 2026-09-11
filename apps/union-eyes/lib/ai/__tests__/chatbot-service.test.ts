@@ -295,7 +295,21 @@ describe("ChatbotService", () => {
   it("sendMessage throws if session not found", async () => {
     mocks.mockSelectLimit.mockResolvedValueOnce([]); // getSession returns null
     await expect(
-      bot.sendMessage({ sessionId: "bad", userId: "u-1", content: "hi" }),
+      bot.sendMessage({ sessionId: "bad", userId: "u-1", organizationId: "org-1", content: "hi" }),
+    ).rejects.toThrow("Session not found");
+  });
+
+  it("sendMessage throws when the session belongs to a different user", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]); // getSession
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "other-user", organizationId: "org-1", content: "hi" }),
+    ).rejects.toThrow("Session not found");
+  });
+
+  it("sendMessage throws when the session belongs to a different organization", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]); // getSession
+    await expect(
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-2", content: "hi" }),
     ).rejects.toThrow("Session not found");
   });
 
@@ -307,6 +321,7 @@ describe("ChatbotService", () => {
     const msg = await bot.sendMessage({
       sessionId: "sess-1",
       userId: "user-1",
+      organizationId: "org-1",
       content: "What are my rights?",
     });
     expect(msg.role).toBe("assistant");
@@ -330,6 +345,7 @@ describe("ChatbotService", () => {
     const msg = await bot.sendMessage({
       sessionId: "sess-1",
       userId: "user-1",
+      organizationId: "org-1",
       content: "Hello",
       useRAG: false,
     });
@@ -354,8 +370,12 @@ describe("ChatbotService", () => {
     );
     mocks.mockSelectLimit.mockResolvedValueOnce([session]);
     await expect(
-      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", content: "bad content" }),
+      bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "bad content" }),
     ).rejects.toThrow("Message flagged by content safety filter");
+    // round 54: flagged rows must retain sessionId so they're traceable to a tenant/session
+    expect(mocks.mockInsertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionId: "sess-1" }),
+    );
     vi.unstubAllGlobals();
     delete process.env.OPENAI_API_KEY;
   });
@@ -365,9 +385,17 @@ describe("ChatbotService", () => {
       { id: "m-2", role: "assistant", content: "reply" },
       { id: "m-1", role: "user", content: "hello" },
     ];
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]); // getSession (ownership check)
     mocks.mockSelectOffset.mockResolvedValueOnce(msgs);
-    const result = await bot.getMessages("sess-1");
+    const result = await bot.getMessages("sess-1", { userId: "user-1", organizationId: "org-1" });
     // reverse() is called, so first should be m-1
     expect(result[0].id).toBe("m-1");
+  });
+
+  it("getMessages throws when the caller does not own the session", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]); // getSession
+    await expect(
+      bot.getMessages("sess-1", { userId: "other-user", organizationId: "org-1" }),
+    ).rejects.toThrow("Session not found");
   });
 });

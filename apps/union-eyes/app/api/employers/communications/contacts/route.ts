@@ -8,6 +8,7 @@
 import { z } from "zod";
 import { db } from "@/db/db";
 import { employerContacts } from "@/db/schema/domains/communications/employer-communications";
+import { employers } from "@/db/schema/union-structure-schema";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation } from "@/lib/audit-logger";
@@ -61,6 +62,23 @@ export const POST = withOrganizationAuth(async (request, context) => {
     }
 
     const data = parsed.data;
+
+    // Verify the referenced employer belongs to this organization before
+    // attaching a contact to it — employerId is client-supplied and has no
+    // DB-level FK, so an unverified value could attach this org's contact
+    // record to another organization's employer.
+    const [employer] = await db
+      .select({ id: employers.id })
+      .from(employers)
+      .where(
+        and(eq(employers.id, data.employerId), eq(employers.organizationId, organizationId)),
+      );
+    if (!employer) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        "Employer not found for this organization"
+      );
+    }
 
     const [contact] = await db
       .insert(employerContacts)

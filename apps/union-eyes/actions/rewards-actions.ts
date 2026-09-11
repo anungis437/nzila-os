@@ -7,6 +7,7 @@
 
 import { auth } from '@nzila/platform-auth/entra/server';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { logger } from '@/lib/logger';
 import * as rewardsService from '@/lib/services/rewards';
 import {
@@ -30,31 +31,22 @@ import { revalidatePath } from 'next/cache';
 // Helper: Get Current User's Organization ID
 // =====================================================
 
+// IMPORTANT: does NOT trust auth()'s `orgId` — for Entra-backed sessions
+// that value is the Azure AD security-group GUID (activeOrgId), not the
+// app-level organizations.id UUID. getOrganizationIdForUser() always
+// resolves via a verified organization_members row instead.
 async function getCurrentUserOrgId(): Promise<string> {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
   if (!userId) throw new Error('Unauthorized');
 
-  // Prefer Clerk's active org context (avoids raw DB lookup)
-  if (orgId) return orgId;
-
-  // Fallback: resolve via org membership with system RLS context
-  const result = await withRLSContext({ organizationId: 'system' }, async (rlsDb) =>
-    rlsDb.query.organizationMembers.findFirst({
-      where: (members, { eq }) => eq(members.userId, userId),
-    })
-  );
-
-  if (!result) throw new Error('User not associated with any organization');
-
-  return result.organizationId;
+  return getOrganizationIdForUser(userId);
 }
 
 async function checkAdminRole(): Promise<{ userId: string; orgId: string }> {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
   if (!userId) throw new Error('Unauthorized');
 
-  // Prefer Clerk's active org context and verify role via RLS
-  const resolvedOrgId = orgId ?? (await getCurrentUserOrgId());
+  const resolvedOrgId = await getCurrentUserOrgId();
 
   const member = await withRLSContext({ organizationId: resolvedOrgId }, async (rlsDb) =>
     rlsDb.query.organizationMembers.findFirst({

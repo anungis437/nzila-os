@@ -26,7 +26,7 @@ import {
 import { WorkdayClient, type WorkdayConfig } from './workday-client';
 import { db } from '@/db';
 import { externalEmployees, externalPositions, externalDepartments } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 // ============================================================================
 // Workday Adapter
@@ -223,9 +223,14 @@ export class WorkdayAdapter extends BaseIntegration {
 
       for (const workdayEmployee of response.data) {
         try {
-          // Check if employee exists
+          // Check if employee exists (scoped to this org + provider to prevent
+          // cross-tenant row collisions on externalId)
           const existing = await db.query.externalEmployees.findFirst({
-            where: eq(externalEmployees.externalId, workdayEmployee.id),
+            where: and(
+              eq(externalEmployees.externalId, workdayEmployee.id),
+              eq(externalEmployees.organizationId, this.config!.organizationId),
+              eq(externalEmployees.externalProvider, 'WORKDAY'),
+            ),
           });
 
           if (existing) {
@@ -320,7 +325,11 @@ export class WorkdayAdapter extends BaseIntegration {
       for (const workdayPosition of response.data) {
         try {
           const existing = await db.query.externalPositions.findFirst({
-            where: eq(externalPositions.externalId, workdayPosition.id),
+            where: and(
+              eq(externalPositions.externalId, workdayPosition.id),
+              eq(externalPositions.organizationId, this.config!.organizationId),
+              eq(externalPositions.externalProvider, 'WORKDAY'),
+            ),
           });
 
           if (existing) {
@@ -393,7 +402,11 @@ export class WorkdayAdapter extends BaseIntegration {
       for (const workdayDept of response.data) {
         try {
           const existing = await db.query.externalDepartments.findFirst({
-            where: eq(externalDepartments.externalId, workdayDept.id),
+            where: and(
+              eq(externalDepartments.externalId, workdayDept.id),
+              eq(externalDepartments.organizationId, this.config!.organizationId),
+              eq(externalDepartments.externalProvider, 'WORKDAY'),
+            ),
           });
 
           if (existing) {

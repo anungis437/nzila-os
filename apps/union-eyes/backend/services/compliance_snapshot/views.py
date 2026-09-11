@@ -29,7 +29,7 @@ class ComplianceSnapshotViewSet(viewsets.ReadOnlyModelViewSet):
     def capture(self, request):
         """Capture an on-demand compliance snapshot."""
         org_id = getattr(request, "organization_id", None)
-        actor_id = str(getattr(request, "clerk_user_id", "system"))
+        actor_id = str(getattr(request, "user_id", "system"))
 
         if not org_id:
             return Response(

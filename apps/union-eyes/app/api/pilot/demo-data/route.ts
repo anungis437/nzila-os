@@ -25,7 +25,7 @@ import { assertPilotDemoMutationRuntime } from "@/lib/config/pilot-demo-runtime"
 import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
-import { employers } from "@/db/schema/domains/compliance/employer-compliance";
+import { employers } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { eq, and, like } from "drizzle-orm";
 
@@ -197,8 +197,8 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
         .delete(employers)
         .where(
           and(
-            eq(employers.orgId, organizationId),
-            like(employers.contactEmail, "lr-demo@%"),
+            eq(employers.organizationId, organizationId),
+            like(employers.email, "lr-demo@%"),
           ),
         );
 

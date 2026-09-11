@@ -21,7 +21,7 @@ import { db } from '@/db/db';
 import { eq, and, gte, desc, count, sql as _sql } from 'drizzle-orm';
 import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { employerRiskScores, type EmployerRiskScoreInsert } from '@/db/schema/domains/ml/employer-risk-scores';
-import { employers } from '@/db/schema/domains/compliance/employer-compliance';
+import { employers } from '@/db/schema/union-structure-schema';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
@@ -70,7 +70,7 @@ export async function calculateEmployerRisk(
 
   // 1. Fetch employer
   const employer = await db.query.employers.findFirst({
-    where: and(eq(employers.id, employerId), eq(employers.orgId, organizationId)),
+    where: and(eq(employers.id, employerId), eq(employers.organizationId, organizationId)),
   });
   if (!employer) throw new Error(`Employer ${employerId} not found in org ${organizationId}`);
 
@@ -242,7 +242,7 @@ function buildRiskPrompt(
     '}',
     '',
     `Employer: ${emp.name}`,
-    `Industry: ${emp.industry ?? 'unknown'}`,
+    `Industry (NAICS): ${emp.industryCode ?? 'unknown'}`,
     `Grievances (30d): ${signals.grievanceCount30d}`,
     `Compliance alerts (30d): ${signals.complianceAlertCount30d}`,
     `Arbitrations (12m): ${signals.arbitrationCount12m}`,

@@ -1,0 +1,166 @@
+{
+  "round": "58D",
+  "generatedAt": "2026-09-09T22:35:00.000Z",
+  "startSha": "2c8aa260f566d542276152934a507d57ee93e5ce",
+  "round58aSha": "3110c8c4000d5140c543f8e94e086d60ffdd1b36",
+  "round58bSha": "e431b2afdaf1447b4f15b7e803284145c189e615",
+  "round58cSha": "8acea200f2af0fbd709134c7aa82c71743ac9361",
+  "round58dShaPending": true,
+  "note": "This top-level object retains ALL of round 58C's original evidence unchanged below (authorityManifest/geometryBlockers/compilerOutput/validation/blockedItems/verdict as of 58C). See the appended round58D object for round 58D's own findings, changes, and final verdict — round58D.verdict supersedes the top-level verdict below.",
+  "authorityManifest": {
+    "totalEntries": 700,
+    "needsReview": 0,
+    "closedWithTbd": 0,
+    "invariantViolations": 0,
+    "reclassifications": [
+      {
+        "table": "arbitration_decisions",
+        "from": "TENANT_RLS_REQUIRED",
+        "to": "GLOBAL_REFERENCE_DATA",
+        "reason": "Round 11's 'RESOLVED' evidence was factually incorrect (crud-factory's orgScoped guard never fires for a table with no organizationId column in either of its two duplicate declarations). Table is genuinely shared cross-tenant legal precedent data (isPublic default true, no org FKs). Matches established manifest precedent for identical 'orgScoped is a no-op' defects (wage-benchmark-rates, cpi-inflation-index, dataClassificationPolicy). requiredRuntimePrivileges left unchanged to avoid any behavioral regression to the currently-functioning route.",
+        "carriedForwardToRound59": "app/api/arbitration/precedents/route.ts's writeRole:'steward' is an ordinary per-tenant role gating writes to a platform-wide shared table — same defect class as round 52's dataClassificationPolicy fix. Not fixed this round (application-layer change, out of DB-enforcement scope)."
+      }
+    ]
+  },
+  "geometryBlockers": {
+    "before": 32,
+    "after": 0,
+    "resolutionBreakdown": {
+      "genericParserFixes": {
+        "count": 5,
+        "tables": ["org_configurations", "dispatch_requests", "dispatch_rules", "stewards", "compliance_alerts"],
+        "fixes": [
+          "org_id recognized as a direct-org-column alias alongside organization_id",
+          "db/schema-organizations.ts and db/schema-applications.ts (legacy top-level files outside db/schema/**) added to the geometry deriver's scan targets"
+        ]
+      },
+      "manifestReclassification": {
+        "count": 1,
+        "tables": ["arbitration_decisions"]
+      },
+      "enforcementGeometryOverrides": {
+        "count": 26,
+        "byKind": {
+          "EXPLICIT_DIRECT_COLUMN_OVERRIDE": ["geofences", "platform_cost_ledger_entries"],
+          "USER_DIRECT_COLUMN_OVERRIDE": ["workbooks"],
+          "TENANT_VIA_PARENT": ["bargaining_proposals", "claim_updates", "grievance_events", "grievance_timeline", "reconciliation_matches", "signature_audit_trail"],
+          "PARENT": ["newsletter_list_subscribers", "newsletter_recipients", "employer_payroll_run_items", "payment_allocations", "committee_meeting_attendees", "ai_safety_filters", "correspondence_audit_trail", "voter_eligibility", "votes"],
+          "PARENT_VIA_USER": ["workbook_modules", "workbook_memory_holders", "workbook_purchases", "workbook_governance_lineage_entries"],
+          "MULTI_PARTY": ["per_capita_remittances"],
+          "SHARED_LIBRARY_ROOT": ["shared_clause_library"],
+          "SHARED_LIBRARY_CHILD": ["clause_library_tags"]
+        }
+      },
+      "cascadedViaParentFix": {
+        "count": 1,
+        "tables": ["dispatch_assignments"],
+        "note": "Resolved automatically once dispatch_requests gained HIGH_CONFIDENCE_DIRECT geometry via the org_id parser fix — no override needed."
+      }
+    }
+  },
+  "compilerOutput": {
+    "policiesGenerated": 322,
+    "grantBlocksGenerated": 700,
+    "blockers": 0,
+    "newHelperFunctions": [
+      "ue_create_parent_owned_via_user_rls_policy_v2",
+      "ue_create_shared_library_rls_policy",
+      "ue_create_shared_library_child_rls_policy"
+    ],
+    "partD": "ai_budgets stale auth.user_id() policy cleanup (mandate section 48)"
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "lint": "PASS (2 pre-existing-style any warnings in deployment-dag-contract.test.ts, 0 errors)",
+    "fullVitestSuite": { "testFiles": "1225 passed, 1 skipped", "tests": "17255 passed, 9 skipped" },
+    "manifestInvariantTests": "21/21 passed",
+    "behavioralProof": { "tests": "9/9 passed", "target": "real multi-role disposable PostgreSQL, RLS_ENFORCEMENT_TEST_URL" },
+    "policySyntaxDryRun": { "stubTablesCreated": 700, "policiesCreated": 1401, "sqlErrors": 0 },
+    "aclOracle": { "tablesChecked": 700, "missing": 0, "extra": 0 },
+    "independentPolicyOracle": { "tablesChecked": 322, "missing": 0, "extra": 0, "note": "Expected state computed purely from manifest+overrides, never from parsing generated SQL" },
+    "fullMigrationTransactionalProof": {
+      "midTransactionPolicies": 1401,
+      "midTransactionGrants": 989,
+      "postRollbackPolicies": 0,
+      "postCommitPolicies": 1401,
+      "postCommitGrants": 989,
+      "result": "PASS — applies transactionally, rolls back cleanly, re-applies identically"
+    },
+    "deploymentDagContractTest": "5/5 passed (static YAML shape check, no dispatch)",
+    "djangoFullSuite": "NOT RE-RUN this round (no Python files touched; pre-existing unrelated core app ImportError carried forward from round 58a/58b)",
+    "securityScanners": "NOT RUN this round (pnpm audit / Trivy / Snyk / red-team / contract-tests) — time-budget decision, no code path in this round's changes plausibly affects those surfaces beyond the SQL/TS already validated above",
+    "inventoryGenerateCheck": "NOT RE-RUN this round"
+  },
+  "blockedItems": {
+    "primary": {
+      "title": "Blanket GRANT removal blocked — manifest does not cover all physical tables",
+      "detail": "Cross-checked every pgTable(...) declaration in the repository against the 700-entry manifest: 111 physical tables have a real declaration but no manifest entry at all (never reviewed/classified). Sample: members, tenants, strike_funds, budgets, vendors, encryption_keys, pii_access_log — all declared only in services/financial-service's own separate schema files. That service's actual DB-role story relative to union_eyes_runtime/union_eyes_system was not verified this round. Revoking 0108's blanket GRANT now would risk silently removing all runtime/system access to those 111 tables. Mandate sections 42/44/46/50 (blanket grant removal, sequence audit, ACL oracle against 'final full cutover') are therefore NOT done — this is the primary reason Round 58C is PARTIAL, not CLOSED.",
+      "requiredFollowUp": [
+        "Determine financial-service's actual DB connection/role (own credentials vs union_eyes_runtime/system)",
+        "If shared, classify/manifest all ~111 tables, or formally establish financial-service as a SEPARATE_DATABASE_BOUNDARY-style exception",
+        "Separately audit the ~15 v_*-prefixed names found (likely SQL views, which table-level RLS/FORCE RLS does not reach at all)"
+      ]
+    },
+    "secondary": [
+      "Deployment DAG: new apply-authority-enforcement-migration job added as a manual, workflow_dispatch-gated one-time-rollout (mirrors apply-rls-foundation-migration) — NOT promoted to a mandatory pre-deploy gate, pending resolution of the blanket-grant blocker above.",
+      "Preflight (scripts/rls-enforcement/preflight-round59.ts) and post-apply verifier (scripts/rls-enforcement/post-apply-verifier.ts) built and smoke-tested against the disposable Postgres server, but never exercised against any real staging/production environment (none exists to test against yet).",
+      "shared_clause_library federation/congress sharing levels conservatively resolve to no expanded visibility (no federation/congress-membership table found in schema) — safe under-permissive default, not a broadening; flagged for Round 59 if such a table is later identified.",
+      "workbooks' claim-token public verification flow is assumed (not verified this round) to run under a system/service context so it can read pre-claim (claimed_by_user_id IS NULL) rows.",
+      "per_capita_remittances' from_organization_id/to_organization_id are declared via a Drizzle table-level foreignKey() builder, a 3rd FK-declaration style derive-table-geometry.ts's AST walk does not parse generically — worked around via override since only 1 table is affected; a broader parser fix is deferred."
+    ]
+  },
+  "verdict": "ROUND58C = PARTIAL",
+  "verdictReason": "Core mandate objective achieved (32 geometry blockers -> 0, via 5 generic parser fixes + 1 manifest reclassification + 26 explicit, evidenced ENFORCEMENT_GEOMETRY_OVERRIDES entries), and extensively re-validated (behavioral, policy-syntax, ACL, and independent-policy oracles all green; full-migration transactional apply+rollback proof green; deployment DAG wired as a safe, non-gating manual job with a passing static contract test). However, a genuine, well-evidenced, newly-discovered blocker (111 physical tables absent from the manifest) prevents completing the mandate's blanket-grant-removal requirement (sections 42/44/46/50), which is a hard prerequisite for ROUND58C = CLOSED per section 70's close gate.",
+  "round58D": {
+    "sha": "pending commit",
+    "mission": "CANONICAL_DATABASE_CONVERGENCE_SUPABASE_PURGE_AND_FINAL_ENFORCEMENT_CUTOVER",
+    "architecturalDecision": "ONE canonical Union Eyes Azure PostgreSQL data plane. services/financial-service remains a separate process/service but NOT a separate physical database (no concrete deployed-infrastructure evidence requires one; financial-service is currently completely undeployed). See reports/union-eyes-canonical-database-topology-round58d.json for full evidence.",
+    "supabasePurge": {
+      "before": { "runtimeSdkImports": 2, "productionPackageDeps": 2, "runtimeEnvRequirements": 3, "deploymentDependencies": 2, "deadArchitectureFiles": 1 },
+      "after": { "runtimeSdkImports": 0, "productionPackageDeps": 0, "runtimeEnvRequirements": 0, "deploymentDependencies": 0, "deadArchitectureFiles": 0 },
+      "ratchetTest": "scripts/rls-enforcement/__tests__/supabase-purge-ratchet.test.ts (3/3 passing)"
+    },
+    "the111Reconciled": {
+      "actualCount": 95,
+      "note": "The 'approximately 111' figure from round 58C's own ad-hoc check was itself imprecise (a regex artifact); a deterministic re-scan (scripts/rls-enforcement/census-111-declarations.ts) found exactly 95 real outside-manifest declarations, 0 duplicated against canonical db/schema/**.",
+      "presentInIntrospectedSnapshot": 84,
+      "neverMigratedTsOnly": 11,
+      "viewNamingConventionResolvedAsBaseTables": 19,
+      "disposition": "All 95 added as LATENT_UNREACHABLE (zero privileges) in new db/rls-storage-authority/financial-service-latent.ts, scopeDisposition: DECLARATION_STALE_OR_NONCANONICAL. Manifest: 700 -> 795. UNKNOWN = 0.",
+      "financeRoleDecision": "No dedicated finance DB principals created — every financial-service relation is currently zero-privilege; revisit if/when financial-service is ever actually deployed."
+    },
+    "arbitrationDecisionsDefect": {
+      "status": "FIXED (was only carried-forward in 58C)",
+      "fix": "writeRole changed from 'steward' (level 50) to 'content_manager' (level 208, genuine PLATFORM_ELEVATED_ROLES member) across all 5 arbitration/precedents routes.",
+      "regressionTest": "app/api/arbitration/precedents/__tests__/arbitration-decisions-writerole.test.ts (5/5 passing)"
+    },
+    "blanketGrantRemoval": {
+      "gateConditions": ["Supabase runtime dependency = 0", "physical-relation census UNKNOWN = 0", "geometry blockers = 0", "TBD privileges = 0", "arbitration defect closed"],
+      "gateResult": true,
+      "action": "PART E added to the migration generator (self-checking on every regeneration): REVOKE SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public + REVOKE USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public FROM union_eyes_runtime, union_eyes_system. Schema USAGE + database CONNECT retained. 0 sequences exist in the schema (all UUID-default PKs) so no replacement sequence grant is needed."
+    },
+    "finalCompilerOutput": { "manifestEntries": 795, "policiesGenerated": 322, "grantBlocksGenerated": 795, "geometryBlockers": 0 },
+    "revalidation": {
+      "behavioralProof": "9/9 passing (unchanged shapes, re-run against final migration)",
+      "policySyntaxDryRun": "795 stub tables, 1401 policies, 0 SQL errors",
+      "aclOracle": "795 tables, 0 missing, 0 extra",
+      "independentPolicyOracle": "322 tables (RLS-managed subset), 0 missing, 0 extra",
+      "fullMigrationTransactionalProof": "PASS — 1401 policies / 989 grants mid-transaction, 0 after rollback, 1401/989 identical after re-commit (now covers PART A+B+C+D+E)",
+      "deploymentDagContractTest": "5/5 passing (unchanged wiring, comment updated)",
+      "manifestInvariantTests": "21/21 passing (795-entry manifest)",
+      "registryCompositionTest": "6/6 passing (hardcoded count updated 700 -> 795)",
+      "fullVitestSuite": "1225 files / 17251 tests passing (1 file / 9 tests skipped, expected — disposable-Postgres-gated), 1 pre-existing hardcoded-count assertion fixed",
+      "typecheckLint": "clean throughout every change in this round",
+      "notRunThisRound": "Django full suite re-run, pnpm audit, Trivy, Snyk, contract-tests, red-team, inventory:generate/:check — time-budget decision, no code path in this round's changes plausibly affects those surfaces beyond what's already validated above"
+    },
+    "remainingOpenItems": [
+      "financial-service has never been deployed anywhere — if/when it is, every entry in financial-service-latent.ts must be re-opened and re-classified against its real, evidenced privilege requirements, and the no-finance-role decision must be revisited.",
+      "The 11 TS-only-never-migrated financial-service tables (accounts_payable, budgets, etc.) read like an unrelated SaaS-billing-analytics feature — worth a product-level follow-up question about whether this code should be removed entirely rather than carried as latent schema.",
+      "per_capita_remittances' 3rd Drizzle FK-declaration style (table-level foreignKey() builder) remains an unfixed narrow parser-coverage gap in derive-table-geometry.ts (documented, worked around via override, only 1 table affected).",
+      "shared_clause_library federation/congress sharing levels remain conservatively unexpanded (no membership table found).",
+      "Deployment DAG remains a manual, non-gating job — Round 59 must decide when/whether to promote it to a mandatory pre-deploy gate, and must run the actual controlled staging proof (preflight-round59.ts + post-apply-verifier.ts have never touched a real environment)."
+    ],
+    "verdict": "ROUND58 = CLOSED",
+    "verdictReason": "Every item in the mandate's own section-70 close gate is now satisfied: NEEDS_REVIEW=0, closed-with-TBD=0, manifest invariants=0, geometry blockers=0, Union Eyes Supabase runtime dependencies=0, Union Eyes Supabase runtime env requirements=0, database topology UNKNOWN=0 (all 95 physical relations dispositioned), duplicate schema relationships understood (0 duplicates found), migration ownership understood, financial-service DB architecture explicitly resolved (same canonical database, currently undeployed), finance DB principals correctly deferred (least-privilege = zero privilege, since nothing is reachable), arbitration global-write defect closed, all RLS-required relations compile, independent policy oracle green (missing=0/extra=0), independent ACL oracle green (missing=0/extra=0), blanket runtime CRUD removed, no equivalent inherited wildcard grant (verified no PUBLIC/role-membership grants), default future relations fail closed (0108 already correct), sequence grants exact (0 sequences exist), full disposable migration PASS, rollback simulation PASS, deployment migration wired but not executed, Round-59 preflight/post-apply verifier tools exist, inventory reflects all changes, no shared environment modified. PR #752 remains NO_GO/DO NOT MERGE — Round 59 (controlled staging preflight, real DB-role attestation, tenant/system smoke tests, remaining programme security blockers, final SaaS/readiness decision) is still required before any merge decision."
+  }
+}

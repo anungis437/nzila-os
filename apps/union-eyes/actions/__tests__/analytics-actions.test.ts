@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => {
     detectTrend: vi.fn(),
     revalidatePath: vi.fn(),
     loggerError: vi.fn(),
+    getOrganizationIdForUser: vi.fn(),
   };
   const q = (resultFn: () => unknown) => (opts: { where?: unknown; orderBy?: unknown }) => {
     if (opts && typeof opts.where === 'function') (opts.where as (...a: unknown[]) => unknown)(stub, helpers);
@@ -65,6 +66,7 @@ vi.mock('drizzle-orm', () => ({
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: mocks.auth }));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock('@/lib/logger', () => ({ logger: { error: mocks.loggerError } }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: mocks.getOrganizationIdForUser }));
 
 import {
   calculateMetrics,
@@ -84,6 +86,7 @@ describe('analytics-actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.auth.mockResolvedValue({ userId: 'user-1', orgId: 'org-1' });
+    mocks.getOrganizationIdForUser.mockResolvedValue('org-1');
     mocks.claimsFindMany.mockReturnValue([]);
     mocks.membersFindMany.mockReturnValue([]);
     mocks.membersFindFirst.mockReturnValue(undefined);
@@ -147,9 +150,9 @@ describe('analytics-actions', () => {
       expect(result).toMatchObject({ success: false });
     });
 
-    it('resolves the org id via RLS when no active org is present', async () => {
+    it('resolves the org id via getOrganizationIdForUser when no active org is present on the session', async () => {
       mocks.auth.mockResolvedValue({ userId: 'user-1', orgId: undefined });
-      mocks.membersFindFirst.mockReturnValue({ organizationId: 'org-resolved' });
+      mocks.getOrganizationIdForUser.mockResolvedValueOnce('org-resolved');
       mocks.claimsFindMany.mockReturnValue([{ claimId: 'c1', createdAt: new Date() }]);
       const result = await calculateMetrics(params);
       expect(result.success).toBe(true);
@@ -161,9 +164,9 @@ describe('analytics-actions', () => {
       expect(result.success).toBe(false);
     });
 
-    it('returns an error when the user has no organization', async () => {
+    it('returns an error when the org id cannot be resolved', async () => {
       mocks.auth.mockResolvedValue({ userId: 'user-1', orgId: undefined });
-      mocks.membersFindFirst.mockReturnValue(undefined);
+      mocks.getOrganizationIdForUser.mockRejectedValueOnce(new Error('no verified organization'));
       const result = await calculateMetrics(params);
       expect(result.success).toBe(false);
     });

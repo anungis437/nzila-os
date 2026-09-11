@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   mockCurrentUser: vi.fn(),
   mockTxExecute: vi.fn(),
   mockDbExecute: vi.fn(),
+  mockSystemTxExecute: vi.fn(),
 }));
 
 vi.mock("@/lib/api-auth-guard", () => ({
@@ -27,6 +28,14 @@ vi.mock("@/db/db", () => ({
       return fn({ execute: mocks.mockTxExecute });
     }),
     execute: mocks.mockDbExecute,
+  },
+}));
+
+vi.mock("@/db/system-db", () => ({
+  systemDb: {
+    transaction: vi.fn(async (fn: (tx: any) => Promise<any>) => {
+      return fn({ execute: mocks.mockSystemTxExecute });
+    }),
   },
 }));
 
@@ -57,6 +66,7 @@ import {
   withSystemRLSContext,
   withPlatformAdminRLSContext,
 } from "../with-rls-context";
+import { tenantContextStorage } from "@/db/tenant-context-storage";
 
 /* ── tests ──────────────────────────────────────────────────────────── */
 
@@ -104,6 +114,21 @@ describe("with-rls-context", () => {
       expect(result).toBe("ok");
       // 2 execute calls: set user_id + set org_id
       expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+    });
+
+    it("scopes the module-level db import to the tenant transaction for the duration of a no-arg callback (PR #752 round 16)", async () => {
+      let observedDuringCallback: unknown;
+      await withRLSContext(async () => {
+        // A no-argument callback that never touches its `tx` parameter —
+        // exactly the pattern several real callers use. getActiveTenantDb()
+        // must resolve to the SAME tx object db.transaction() handed back,
+        // proving db.ts's proxy would route a plain `db.foo` call here to
+        // this transaction, not the ordinary pooled connection.
+        observedDuringCallback = tenantContextStorage.getStore();
+      });
+      expect(observedDuringCallback).toEqual({ execute: mocks.mockTxExecute });
+      // No lingering context after the callback/transaction completes.
+      expect(tenantContextStorage.getStore()).toBeUndefined();
     });
 
     it("throws when orgId is missing — fails closed for org isolation", async () => {
@@ -267,14 +292,24 @@ describe("with-rls-context", () => {
       await withExplicitUserContext("u-2", async () => "done", "org-2");
       expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
     });
+
+    it("scopes the module-level db import to the tenant transaction for the duration of the callback (PR #752 round 16)", async () => {
+      let observedDuringCallback: unknown;
+      await withExplicitUserContext("u-2", async () => {
+        observedDuringCallback = tenantContextStorage.getStore();
+      }, "org-2");
+      expect(observedDuringCallback).toEqual({ execute: mocks.mockTxExecute });
+      expect(tenantContextStorage.getStore()).toBeUndefined();
+    });
   });
 
   // ── withSystemContext ─────────────────────────────────────────────
   describe("withSystemContext", () => {
-    it("clears user and org context", async () => {
+    it("clears user and org context on the separate system connection", async () => {
       const result = await withSystemContext(async () => "sys");
       expect(result).toBe("sys");
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockTxExecute).not.toHaveBeenCalled();
     });
   });
 
@@ -350,11 +385,11 @@ describe("with-rls-context", () => {
 
   // ── withSystemRLSContext ──────────────────────────────────────────
   describe("withSystemRLSContext", () => {
-    it("executes and clears user + org context", async () => {
+    it("executes and clears user + org context on the system connection", async () => {
       const result = await withSystemRLSContext("test: seed user creation", async () => "done");
       expect(result).toBe("done");
       // withSystemContext sets '' for both user_id and org_id → 2 execute calls
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2);
     });
 
     it("requires a reason string", async () => {
@@ -373,15 +408,16 @@ describe("with-rls-context", () => {
       ).rejects.toThrow("Platform admin ID is required");
     });
 
-    it("executes with explicit user context for a valid admin", async () => {
+    it("executes on the system connection for a valid admin", async () => {
       const result = await withPlatformAdminRLSContext(
         "admin-123",
         "compliance-export",
         async () => "exported",
       );
       expect(result).toBe("exported");
-      // withExplicitUserContext sets user_id → at least 1 execute call
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1);
+      // sets app.current_user_id (audit) + clears app.current_org_id → 2 execute calls
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2);
+      expect(mocks.mockTxExecute).not.toHaveBeenCalled();
     });
   });
 });

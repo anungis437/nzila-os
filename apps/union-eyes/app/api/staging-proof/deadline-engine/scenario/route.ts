@@ -49,7 +49,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db';
-import { grievances, grievanceDeadlines } from '@/db/schema/grievance-schema';
+import { grievances } from '@/db/schema/domains/claims/grievances';
+import { grievanceDeadlines } from '@/db/schema/domains/claims/workflows';
 import { organizations } from '@/db/schema-organizations';
 import {
   scheduleGrievanceDeadlineReminders,

@@ -31,7 +31,7 @@ const mockDb: any = {
   })),
 };
 
-vi.mock('@/db/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) => Promise<unknown>) => fn(mockDb) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/icra/questions', () => ({ ALL_QUESTIONS: [] }));
 vi.mock('@/lib/icra/adaptation', () => ({

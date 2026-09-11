@@ -64,21 +64,37 @@ describe('billing/subscriptions route', () => {
     expect(result).toMatchObject({ subscriptions: [{ id: 'sub_1' }] });
   });
 
-  it('POST pauses subscription when action is pause', async () => {
+  it('POST throws when organization context is missing', async () => {
     const { POST } = await loadRoute();
 
-    const result = await POST({ body: { subscriptionId: '11111111-1111-1111-1111-111111111111', action: 'pause', reason: 'maintenance' }, userId: 'u1' });
-
-    expect(result).toMatchObject({ ok: true, status: 'paused' });
-    expect(m.pauseSubscription).toHaveBeenCalled();
+    await expect(
+      POST({ body: { subscriptionId: '11111111-1111-1111-1111-111111111111', action: 'pause' }, userId: 'u1' }),
+    ).rejects.toThrow('Organization context required');
   });
 
-  it('POST resumes subscription when action is resume', async () => {
+  it('POST pauses subscription when action is pause, scoped to the callers organization (PR #752 IDOR fix)', async () => {
     const { POST } = await loadRoute();
 
-    const result = await POST({ body: { subscriptionId: '11111111-1111-1111-1111-111111111111', action: 'resume' }, userId: 'u1' });
+    const result = await POST({
+      body: { subscriptionId: '11111111-1111-1111-1111-111111111111', action: 'pause', reason: 'maintenance' },
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+
+    expect(result).toMatchObject({ ok: true, status: 'paused' });
+    expect(m.pauseSubscription).toHaveBeenCalledWith('org_1', '11111111-1111-1111-1111-111111111111', 'u1', 'maintenance');
+  });
+
+  it('POST resumes subscription when action is resume, scoped to the callers organization (PR #752 IDOR fix)', async () => {
+    const { POST } = await loadRoute();
+
+    const result = await POST({
+      body: { subscriptionId: '11111111-1111-1111-1111-111111111111', action: 'resume' },
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
 
     expect(result).toMatchObject({ ok: true, status: 'active' });
-    expect(m.resumeSubscription).toHaveBeenCalled();
+    expect(m.resumeSubscription).toHaveBeenCalledWith('org_1', '11111111-1111-1111-1111-111111111111', 'u1');
   });
 });

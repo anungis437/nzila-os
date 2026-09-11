@@ -27,7 +27,7 @@
     "@nzila/platform-integrations-control-plane": "workspace:*",
     "@nzila/platform-observability": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
-    "fflate": "^0.8.2",
+    "fflate": "^0.8.3",
     "zod": "^3.25.0"
   },
   "devDependencies": {

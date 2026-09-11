@@ -102,7 +102,7 @@ class Claims(BaseModel):
 
     # Ownership
     organization_id = models.UUIDField(null=True, blank=True)
-    member_id = models.TextField(null=True, blank=True)  # Clerk user ID
+    member_id = models.TextField(null=True, blank=True)  # Auth provider user ID
     is_anonymous = models.BooleanField(default=True)
 
     # Type & State

@@ -24,6 +24,9 @@
 
 import { auth, currentUser } from '@/lib/api-auth-guard'
 import { db } from '@/db/db'
+import { systemDb } from '@/db/system-db'
+import { systemContextStorage } from '@/db/system-context-storage'
+import { tenantContextStorage } from '@/db/tenant-context-storage'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 
@@ -184,8 +187,15 @@ export async function withRLSContext<T>(
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`)
     }
 
-    // Execute the operation with user + org context set
-    const result = await operation(tx as any as RLSTx)
+    // Execute the operation with user + org context set. Scope the
+    // module-level `db` import to this transaction for the duration of the
+    // callback (see db/tenant-context-storage.ts) — a no-argument callback
+    // that queries through `db` directly instead of the supplied `tx` would
+    // otherwise silently run on the ordinary pooled connection, never on
+    // the transaction set_config() was just applied to.
+    const result = await tenantContextStorage.run(tx as any, () =>
+      operation(tx as any as RLSTx),
+    )
 
     // Transaction commit automatically clears local config variables
     return result
@@ -234,7 +244,9 @@ export async function withExplicitUserContext<T>(
     if (orgId) {
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`)
     }
-    const result = await operation()
+    // Scope the module-level `db` import to this transaction — see
+    // db/tenant-context-storage.ts.
+    const result = await tenantContextStorage.run(tx as any, () => operation())
     return result
   })
 }
@@ -272,15 +284,24 @@ export async function withSystemContext<T>(operation: () => Promise<T>): Promise
 export async function withSystemContext<T>(
   operation: (() => Promise<T>) | ((tx: RLSTx) => Promise<T>),
 ): Promise<T> {
-  // System operations don&apos;t set user context
-  // RLS policies should handle this with service role checks
-  return await db.transaction(async (tx) => {
-    // Explicitly clear any existing user context
+  // System operations run on a SEPARATE connection, authenticated as the
+  // union_eyes_system role. Authority comes from that role's explicit,
+  // named RLS policies (`TO union_eyes_system`) — not from clearing context
+  // variables on the tenant runtime connection. See
+  // db/migrations/0108_rls_tenant_isolation_foundation.sql.
+  return await systemDb.transaction(async (tx) => {
+    // Context vars are still cleared for audit/logging consistency, but no
+    // policy on this connection depends on them being empty.
     await tx.execute(sql`SELECT set_config('app.current_user_id', '', true)`)
-    // NzilaOS PR-UE-02: Explicitly clear org context for system operations
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
-    const result = await (operation as (tx: RLSTx) => Promise<T>)(
-      tx as any as RLSTx,
+    // Scope the module-level `db` import (from @/db/db) to this transaction
+    // for the duration of the callback. Dozens of existing callers use the
+    // no-argument form and query through `db` directly rather than the
+    // supplied `tx` — without this, those queries would silently run on the
+    // tenant connection (union_eyes_runtime) despite appearing
+    // system-authorized. See db/system-context-storage.ts.
+    const result = await systemContextStorage.run(tx as any, () =>
+      (operation as (tx: RLSTx) => Promise<T>)(tx as any as RLSTx),
     )
     return result
   })
@@ -499,5 +520,14 @@ export async function withPlatformAdminRLSContext<T>(
     adminId,
     operation,
   })
-  return withExplicitUserContext(adminId, fn)
+  // Cross-org by design — runs on the union_eyes_system connection (same
+  // rationale as withSystemContext above). app.current_user_id is set to
+  // adminId for audit/logging only; it is not what grants access.
+  return await systemDb.transaction(async (tx) => {
+    await tx.execute(sql`SELECT set_config('app.current_user_id', ${adminId}, true)`)
+    await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
+    // Same ALS scoping as withSystemContext — fn() may query through the
+    // module-level `db` import rather than an explicit tx.
+    return await systemContextStorage.run(tx as any, fn)
+  })
 }

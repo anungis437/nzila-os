@@ -6,7 +6,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 const updateBoardPacketSchema = z.object({
@@ -34,10 +34,13 @@ export const GET = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get board packet by ID' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await db.select().from(boardPackets).where(eq(boardPackets.id, id));
+    const [packet] = await db
+      .select()
+      .from(boardPackets)
+      .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)));
     if (!packet) throw ApiError.notFound('Board packet not found');
     return packet;
   },
@@ -49,12 +52,16 @@ export const PATCH = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Update board packet' },
   },
-  async ({ request, body }) => {
+  async ({ request, body, organizationId }) => {
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
     const parsed = updateBoardPacketSchema.parse(body);
-    const [packet] = await withRLSContext(async () =>
-      db.update(boardPackets).set({ ...parsed, updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning()
+    const [packet] = await withRLSContext(async (tx) =>
+      tx
+        .update(boardPackets)
+        .set({ ...parsed, updatedAt: new Date() })
+        .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))
+        .returning()
     );
     if (!packet) throw ApiError.notFound('Board packet not found');
     return packet;
@@ -67,11 +74,15 @@ export const DELETE = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Delete board packet' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await withRLSContext(async () =>
-      db.update(boardPackets).set({ status: 'archived', updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning()
+    const [packet] = await withRLSContext(async (tx) =>
+      tx
+        .update(boardPackets)
+        .set({ status: 'archived', updatedAt: new Date() })
+        .where(and(eq(boardPackets.id, id), eq(boardPackets.organizationId, organizationId!)))
+        .returning()
     );
     if (!packet) throw ApiError.notFound('Board packet not found');
     return packet;

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, isSystemAdmin } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -300,7 +300,9 @@ export default async function SupportDashboard({
   const t = await getTranslations('supportPage');
   await requireUser();
 
-  const hasAccess = await hasMinRole('support_agent');
+  // Cross-organization data (every tenant's tickets/grievances) requires
+  // genuine platform-staff authority, not an ordinary per-org role name.
+  const hasAccess = await isSystemAdmin();
   if (!hasAccess) {
     redirect(`/${routeLocale}/dashboard`);
   }

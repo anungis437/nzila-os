@@ -35,7 +35,7 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
         ser.is_valid(raise_exception=True)
 
         org_id = getattr(request, "organization_id", None)
-        actor_id = getattr(request, "clerk_user_id", "unknown")
+        actor_id = getattr(request, "user_id", "unknown")
 
         if not org_id:
             return Response(

@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   mockDeleteWhere: vi.fn(),
   mockQueryRewardBudgetEnvelopes: { findFirst: vi.fn(), findMany: vi.fn() },
   mockQueryBudgetReservations: { findFirst: vi.fn(), findMany: vi.fn() },
+  mockQueryRecognitionPrograms: { findFirst: vi.fn(), findMany: vi.fn() },
+  mockSelectOrderByLimit: vi.fn().mockResolvedValue([]),
   mockLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
@@ -56,7 +58,10 @@ vi.mock('@/db', () => {
   mocks.mockDelete.mockReturnValue({ where: mocks.mockDeleteWhere });
 
   const mockSelectWhere = vi.fn().mockReturnValue({
-    orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockReturnValue({ offset: vi.fn().mockResolvedValue([]) }) }),
+    orderBy: vi.fn().mockReturnValue({
+      limit: mocks.mockSelectOrderByLimit,
+      offset: vi.fn().mockResolvedValue([]),
+    }),
     limit: vi.fn().mockResolvedValue([]),
   });
   const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
@@ -72,6 +77,7 @@ vi.mock('@/db', () => {
       query: {
         rewardBudgetEnvelopes: mocks.mockQueryRewardBudgetEnvelopes,
         budgetReservations: mocks.mockQueryBudgetReservations,
+        recognitionPrograms: mocks.mockQueryRecognitionPrograms,
       },
     },
   };
@@ -97,10 +103,15 @@ vi.mock('@/db/schema', () => ({
     referenceId: 'referenceId',
     expiresAt: 'expiresAt',
   },
+  recognitionPrograms: {
+    id: 'id',
+    orgId: 'orgId',
+  },
 }));
 
 vi.mock('@/lib/logger', () => ({ logger: mocks.mockLogger }));
 
+import { db } from '@/db';
 import {
   createBudgetEnvelope,
   getBudgetEnvelopeById,
@@ -125,14 +136,33 @@ describe('budget-service', () => {
 
   /* ============================= createBudgetEnvelope ============================= */
   describe('createBudgetEnvelope', () => {
-    it('inserts envelope and returns it', async () => {
-      const envelope = { id: 'env-1', orgId: 'org-1', amountLimit: 1000, amountUsed: 0 };
+    it('inserts envelope and returns it when the program belongs to the same org', async () => {
+      const envelope = { id: 'env-1', orgId: 'org-1', programId: 'prog-1', amountLimit: 1000, amountUsed: 0 };
+      mocks.mockQueryRecognitionPrograms.findFirst.mockResolvedValue({ id: 'prog-1', orgId: 'org-1' });
       mocks.mockReturning.mockResolvedValueOnce([envelope]);
 
-      const result = await createBudgetEnvelope({ orgId: 'org-1', amountLimit: 1000 } as any as Parameters<typeof createBudgetEnvelope>[0]);
+      const result = await createBudgetEnvelope({ orgId: 'org-1', programId: 'prog-1', amountLimit: 1000 } as any as Parameters<typeof createBudgetEnvelope>[0]);
 
       expect(result).toEqual(envelope);
       expect(mocks.mockInsert).toHaveBeenCalled();
+    });
+
+    it('rejects when the referenced program belongs to a different org', async () => {
+      mocks.mockQueryRecognitionPrograms.findFirst.mockResolvedValue({ id: 'prog-1', orgId: 'org-B' });
+
+      await expect(
+        createBudgetEnvelope({ orgId: 'org-A', programId: 'prog-1', amountLimit: 1000 } as any as Parameters<typeof createBudgetEnvelope>[0])
+      ).rejects.toThrow('Recognition program not found for this organization');
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the referenced program does not exist', async () => {
+      mocks.mockQueryRecognitionPrograms.findFirst.mockResolvedValue(null);
+
+      await expect(
+        createBudgetEnvelope({ orgId: 'org-A', programId: 'nope', amountLimit: 1000 } as any as Parameters<typeof createBudgetEnvelope>[0])
+      ).rejects.toThrow('Recognition program not found for this organization');
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
     });
   });
 
@@ -194,7 +224,7 @@ describe('budget-service', () => {
     it('returns true when no envelope exists', async () => {
       mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue(null);
 
-      const result = await checkBudgetAvailability('prog-1', 100);
+      const result = await checkBudgetAvailability('prog-1', 'org-1', 100);
 
       expect(result).toBe(true);
     });
@@ -205,7 +235,7 @@ describe('budget-service', () => {
         amountUsed: 200,
       });
 
-      const result = await checkBudgetAvailability('prog-1', 500);
+      const result = await checkBudgetAvailability('prog-1', 'org-1', 500);
 
       expect(result).toBe(true);
     });
@@ -216,7 +246,7 @@ describe('budget-service', () => {
         amountUsed: 900,
       });
 
-      const result = await checkBudgetAvailability('prog-1', 200);
+      const result = await checkBudgetAvailability('prog-1', 'org-1', 200);
 
       expect(result).toBe(false);
     });
@@ -225,17 +255,17 @@ describe('budget-service', () => {
   /* ============================= applyBudgetUsage ============================= */
   describe('applyBudgetUsage', () => {
     it('does nothing when no active envelope found', async () => {
-      mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue(null);
+      mocks.mockSelectOrderByLimit.mockResolvedValueOnce([]);
 
-      await applyBudgetUsage('prog-1', 50);
+      await applyBudgetUsage(db, 'prog-1', 'org-1', 50);
 
       expect(mocks.mockUpdate).not.toHaveBeenCalled();
     });
 
     it('updates usage when envelope found', async () => {
-      mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue({ id: 'e-1' });
+      mocks.mockSelectOrderByLimit.mockResolvedValueOnce([{ id: 'e-1' }]);
 
-      await applyBudgetUsage('prog-1', 50);
+      await applyBudgetUsage(db, 'prog-1', 'org-1', 50);
 
       expect(mocks.mockUpdate).toHaveBeenCalled();
     });
@@ -244,35 +274,35 @@ describe('budget-service', () => {
   /* ============================= applyBudgetUsageChecked ============================= */
   describe('applyBudgetUsageChecked', () => {
     it('returns true for negative amounts (refunds)', async () => {
-      mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue(null);
+      mocks.mockSelectOrderByLimit.mockResolvedValueOnce([]);
 
-      const result = await applyBudgetUsageChecked('prog-1', -50);
+      const result = await applyBudgetUsageChecked(db, 'prog-1', 'org-1', -50);
 
       expect(result).toBe(true);
     });
 
     it('returns true when no envelope exists', async () => {
-      mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue(null);
+      mocks.mockSelectOrderByLimit.mockResolvedValueOnce([]);
 
-      const result = await applyBudgetUsageChecked('prog-1', 100);
+      const result = await applyBudgetUsageChecked(db, 'prog-1', 'org-1', 100);
 
       expect(result).toBe(true);
     });
 
     it('returns true when update succeeds (within limit)', async () => {
-      mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue({ id: 'e-1' });
+      mocks.mockSelectOrderByLimit.mockResolvedValueOnce([{ id: 'e-1' }]);
       mocks.mockReturning.mockResolvedValueOnce([{ id: 'e-1' }]);
 
-      const result = await applyBudgetUsageChecked('prog-1', 100);
+      const result = await applyBudgetUsageChecked(db, 'prog-1', 'org-1', 100);
 
       expect(result).toBe(true);
     });
 
     it('returns false when update returns empty (exceeds limit)', async () => {
-      mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue({ id: 'e-1' });
+      mocks.mockSelectOrderByLimit.mockResolvedValueOnce([{ id: 'e-1' }]);
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
 
-      const result = await applyBudgetUsageChecked('prog-1', 100);
+      const result = await applyBudgetUsageChecked(db, 'prog-1', 'org-1', 100);
 
       expect(result).toBe(false);
     });
@@ -306,7 +336,7 @@ describe('budget-service', () => {
     it('returns success when no envelope exists', async () => {
       mocks.mockQueryRewardBudgetEnvelopes.findFirst.mockResolvedValue(null);
 
-      const result = await reserveBudget('prog-1', 100, 'award', 'ref-1');
+      const result = await reserveBudget('prog-1', 'org-1', 100, 'award', 'ref-1');
 
       expect(result.success).toBe(true);
     });
@@ -321,7 +351,7 @@ describe('budget-service', () => {
         { reservedAmount: 90 },
       ]);
 
-      const result = await reserveBudget('prog-1', 100, 'award', 'ref-1');
+      const result = await reserveBudget('prog-1', 'org-1', 100, 'award', 'ref-1');
 
       expect(result.success).toBe(false);
     });
@@ -335,7 +365,7 @@ describe('budget-service', () => {
       mocks.mockQueryBudgetReservations.findMany.mockResolvedValue([]);
       mocks.mockValues.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
 
-      const result = await reserveBudget('prog-1', 100, 'award', 'ref-1');
+      const result = await reserveBudget('prog-1', 'org-1', 100, 'award', 'ref-1');
 
       expect(result.success).toBe(true);
       expect(mocks.mockInsert).toHaveBeenCalled();

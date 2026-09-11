@@ -7,6 +7,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { ssoProviders } from '@/db/schema/sso-scim-schema';
 import { eq } from 'drizzle-orm';
+import { encryptSecret } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,12 @@ export const GET = withApi(
       .from(ssoProviders)
       .where(eq(ssoProviders.organizationId, organizationId));
 
-    return providers;
+    // Never echo raw credential material back to the client.
+    return providers.map(({ samlCertificate, oidcClientSecret, ...safe }) => ({
+      ...safe,
+      samlCertificate: samlCertificate ? true : null,
+      oidcClientSecret: oidcClientSecret ? true : null,
+    }));
   },
 );
 
@@ -75,6 +81,16 @@ export const POST = withApi(
       throw ApiError.badRequest('name, providerType, and attributeMapping are required');
     }
 
+    // SECURITY (Round 59B): oidcClientSecret must never be persisted in
+    // plaintext — the schema column's "// Encrypted" comment previously
+    // did not match reality (no encrypt/decrypt call existed anywhere for
+    // this field). Reuses the existing Key-Vault-backed encryption
+    // service (lib/encryption.ts, already used for SIN encryption) rather
+    // than inventing new cryptography.
+    const encryptedOidcClientSecret = oidcClientSecret
+      ? await encryptSecret(oidcClientSecret)
+      : oidcClientSecret;
+
     const [created] = await db
       .insert(ssoProviders)
       .values({
@@ -87,7 +103,7 @@ export const POST = withApi(
         samlCertificate,
         oidcIssuer,
         oidcClientId,
-        oidcClientSecret,
+        oidcClientSecret: encryptedOidcClientSecret,
         attributeMapping,
         roleMapping,
         autoProvision: autoProvision ?? true,
@@ -95,6 +111,14 @@ export const POST = withApi(
       })
       .returning();
 
-    return created;
+    // Never echo raw credential material back to the client (same
+    // redaction as GET — round 53: the create response previously
+    // returned samlCertificate/oidcClientSecret in the clear).
+    const { samlCertificate: _cert, oidcClientSecret: _secret, ...safe } = created;
+    return {
+      ...safe,
+      samlCertificate: _cert ? true : null,
+      oidcClientSecret: _secret ? true : null,
+    };
   },
 );

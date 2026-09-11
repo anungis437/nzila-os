@@ -272,6 +272,54 @@ function deterministicChecksum(input: string): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+export interface CommercialTermsSnapshot {
+  verifiedOrganizationId: string;
+  verifiedMemberCount: number;
+  verifiedPilotAmount: string;
+  verifiedSubscriptionPlanId: string | null;
+  commercialTermsApprovedBy: string;
+  commercialTermsApprovedAt: string;
+}
+
+/**
+ * Immutable record of the approved commercial terms that produced a given
+ * financial artifact (PR #752 round 27). Stamped into the `metadata` of
+ * every `commercialContracts`/`platformInvoices`/`orgSubscriptions` row
+ * CREATED by commercial-transition, so that if a later organization
+ * correction clears the pilot row's own approved terms (round 26's
+ * `rebindPilotOrganization`), the artifact itself still carries proof of
+ * exactly which approval produced it — the pilot row's terms are the
+ * CURRENT authoritative snapshot; this is the HISTORICAL snapshot in
+ * effect at the moment a specific artifact was created, and the two are
+ * expected to diverge over time (that divergence is exactly what this
+ * exists to make provable). `deterministicChecksum` is the SAME
+ * non-cryptographic DJB2-style hash already used for artifact/reference
+ * version checksums elsewhere in this module — a cheap fingerprint, not a
+ * security control.
+ */
+export function buildCommercialTermsSnapshot(input: {
+  verifiedOrganizationId: string;
+  verifiedMemberCount: number;
+  verifiedPilotAmount: string;
+  verifiedSubscriptionPlanId: string | null;
+  commercialTermsApprovedBy: string;
+  commercialTermsApprovedAt: Date | string;
+}): { snapshot: CommercialTermsSnapshot; fingerprint: string } {
+  const snapshot: CommercialTermsSnapshot = {
+    verifiedOrganizationId: input.verifiedOrganizationId,
+    verifiedMemberCount: input.verifiedMemberCount,
+    verifiedPilotAmount: input.verifiedPilotAmount,
+    verifiedSubscriptionPlanId: input.verifiedSubscriptionPlanId,
+    commercialTermsApprovedBy: input.commercialTermsApprovedBy,
+    commercialTermsApprovedAt:
+      input.commercialTermsApprovedAt instanceof Date
+        ? input.commercialTermsApprovedAt.toISOString()
+        : input.commercialTermsApprovedAt,
+  };
+  const fingerprint = deterministicChecksum(stableStringify(snapshot));
+  return { snapshot, fingerprint };
+}
+
 export function buildPilotArtifactVersionRecord(input: {
   generatedAt: string;
   source: string;
@@ -546,6 +594,23 @@ export function getRecommendedEconomicsTier(memberCount: number): PilotEconomics
   return PILOT_ECONOMICS_LADDER[PILOT_ECONOMICS_LADDER.length - 1];
 }
 
+/**
+ * Converts a `PilotEconomicsTier.targetPriceRange` band (e.g. `"$25K-$75K"`)
+ * into its lower-bound dollar amount as a fixed-point string (PR #752
+ * round 25: moved here from a private copy in commercial-transition/route.ts
+ * so `lib/pilot/commercial-terms-authority.ts` can derive the SAME
+ * deterministic amount an approver sees when confirming commercial terms —
+ * a single shared implementation, not two copies that could drift.
+ */
+export function parsePriceBandLowerBound(amountBand: string): string {
+  const firstSegment = amountBand.split('-')[0]?.trim() ?? '0';
+  const raw = firstSegment.replace(/[$,]/g, '').toUpperCase();
+  const multiplier = raw.endsWith('K') ? 1000 : 1;
+  const numeric = Number(raw.replace('K', ''));
+  if (!Number.isFinite(numeric) || numeric <= 0) return '5000.00';
+  return (numeric * multiplier).toFixed(2);
+}
+
 export function normalizeCommercialState(value: any): CommercialState {
   if (typeof value === 'string' && COMMERCIAL_STATE_ORDER.includes(value as CommercialState)) {
     return value as CommercialState;
@@ -583,6 +648,19 @@ export function inferPilotStatusFromCommercialState(state: CommercialState): Com
   }
   if (state === 'pilot_active') return 'active';
   return 'completed';
+}
+
+/**
+ * Deterministic contract-number key for a pilot application (PR #752 round
+ * 21). Shared between commercial-transition (which creates the
+ * `commercialContracts` row under this number) and pilot-ownership's
+ * rebind-organization correction flow (which checks for this row's
+ * existence to decide whether a rebind would misattribute real financial
+ * artifacts). Keep these two call sites using the SAME function rather than
+ * two independently-maintained string templates.
+ */
+export function buildPilotContractNumber(pilotApplicationId: string): string {
+  return `PILOT-${pilotApplicationId.slice(0, 8).toUpperCase()}`;
 }
 
 export function getQualification(readinessScore: number | null, memberCount: number): 'qualified' | 'review-required' | 'defer' {

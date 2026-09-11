@@ -6,7 +6,7 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { eq, and, isNull, or, ilike } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,18 +19,21 @@ export const GET = withApi(
       description: 'Search members by name or email within an organization',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const url = new URL(request.url);
-    const orgId = url.searchParams.get('organization');
     const q = url.searchParams.get('q') || '';
 
-    if (!orgId) {
+    // Org scope comes from the authenticated session (resolved + enforced by
+    // withApi), never from a client-suppliable value — a prior version of
+    // this route trusted an `?organization=` query parameter directly,
+    // which let any authenticated steward+ search any other org's roster.
+    if (!organizationId) {
       return { members: [] };
     }
 
-    return withSystemContext(async () => {
+    return withRLSContext(async () => {
       const conditions = [
-        eq(organizationMembers.organizationId, orgId),
+        eq(organizationMembers.organizationId, organizationId),
         isNull(organizationMembers.deletedAt),
       ];
 

@@ -9,7 +9,10 @@ const m = vi.hoisted(() => {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
-      limit: vi.fn(() => chain),
+      limit: vi.fn((_n?: number) => ({
+        for: vi.fn((_mode: string) => nextSelect()),
+        then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
+      })),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -35,6 +38,9 @@ const mockDb = {
 };
 
 vi.mock('@/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(mockDb),
+}));
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
   return {
@@ -52,8 +58,9 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   // Access granted in unit tests; ownership is exercised by pilot-ownership.test.ts.
   enforcePilotOwnership: vi.fn(async () => null),
   wrapPilotItemRoute: <T,>(handler: T) => handler,
-  authorizePilotAccess: vi.fn(async () => ({ ok: true })),
-  getPilotOwnerOrganizationId: vi.fn(() => 'test-org'),
+  authorizePilotAccess: vi.fn(async () => ({ ok: true, reason: 'platform', actorOrganizationId: null })),
+  getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
+  getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
@@ -106,9 +113,11 @@ describe('pilot/apply/[id]/reference-profile route', () => {
 
   it('POST skips persist when identical checksum already exists', async () => {
     const { POST } = await loadRoute();
+    // Round 25: loadLatestPilotMetric() runs BEFORE withLockedPilotMutation's
+    // own locked application read — metric row is queued first.
     m.queueSelect(
-      [{ id: 'p1', organizationName: 'Org One', organizationType: 'local', contactName: 'Casey', contactEmail: 'c@example.com', memberCount: 100, jurisdictions: [], sectors: [], currentSystem: 'legacy', challenges: [], goals: [], readinessScore: 70, responses: { pilotReferenceVersions: [{ checksum: 'chk_1', versionId: 'ref_old' }] } }],
       [{ pilotId: 'p1', lastCalculated: new Date() }],
+      [{ id: 'p1', organizationName: 'Org One', organizationType: 'local', contactName: 'Casey', contactEmail: 'c@example.com', memberCount: 100, jurisdictions: [], sectors: [], currentSystem: 'legacy', challenges: [], goals: [], readinessScore: 70, responses: { pilotReferenceVersions: [{ checksum: 'chk_1', versionId: 'ref_old' }] } }],
     );
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply/p1/reference-profile', {
@@ -123,8 +132,8 @@ describe('pilot/apply/[id]/reference-profile route', () => {
   it('POST persists new reference snapshot when checksum is new', async () => {
     const { POST } = await loadRoute();
     m.queueSelect(
-      [{ id: 'p1', organizationName: 'Org One', organizationType: 'local', contactName: 'Casey', contactEmail: 'c@example.com', memberCount: 100, jurisdictions: [], sectors: [], currentSystem: 'legacy', challenges: [], goals: [], readinessScore: 70, responses: {} }],
       [{ pilotId: 'p1', lastCalculated: new Date() }],
+      [{ id: 'p1', organizationName: 'Org One', organizationType: 'local', contactName: 'Casey', contactEmail: 'c@example.com', memberCount: 100, jurisdictions: [], sectors: [], currentSystem: 'legacy', challenges: [], goals: [], readinessScore: 70, responses: {} }],
     );
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply/p1/reference-profile', {

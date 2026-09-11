@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { enforceCreateSecurityInvariants } from '../crud-factory';
+import { SQL } from 'drizzle-orm';
+import type { PgTable } from 'drizzle-orm/pg-core';
+import { enforceCreateSecurityInvariants, stripBlockedPatchFields, buildMergeSetValues, validateMergeJsonColumnValues } from '../crud-factory';
 
 describe('crud-factory enforceCreateSecurityInvariants', () => {
   it('applies organizationId/createdBy when a hook returns a clean object without them', () => {
@@ -104,5 +106,132 @@ describe('crud-factory enforceCreateSecurityInvariants', () => {
       { organizationId: 'org-real', userId: undefined, hasOrgColumn: true, hasCreatedByColumn: true },
     );
     expect(result.createdBy).toBe('client-supplied-value');
+  });
+});
+
+describe('crud-factory stripBlockedPatchFields (PR #752 round 21)', () => {
+  it('strips the primary key so it can never be reassigned via PATCH', () => {
+    const result = stripBlockedPatchFields(
+      { id: 'attacker-controlled-id', name: 'ok' },
+      { pk: 'id', orgScoped: false, blockedPatchFields: [] },
+    );
+    expect(result.id).toBeUndefined();
+    expect(result.name).toBe('ok');
+  });
+
+  it('strips organizationId when the table is org-scoped', () => {
+    const result = stripBlockedPatchFields(
+      { organizationId: 'attacker-org', name: 'ok' },
+      { pk: 'id', orgScoped: true, blockedPatchFields: [] },
+    );
+    expect(result.organizationId).toBeUndefined();
+  });
+
+  it('leaves organizationId untouched when the table is not org-scoped', () => {
+    const result = stripBlockedPatchFields(
+      { organizationId: 'some-value' },
+      { pk: 'id', orgScoped: false, blockedPatchFields: [] },
+    );
+    expect(result.organizationId).toBe('some-value');
+  });
+
+  it('strips every field listed in blockedPatchFields, e.g. server-controlled verified-org columns', () => {
+    const result = stripBlockedPatchFields(
+      {
+        notes: 'legitimate steward note',
+        verifiedOrganizationId: 'attacker-org',
+        verifiedBy: 'attacker-controlled-actor',
+        verifiedAt: '2020-01-01T00:00:00.000Z',
+        status: 'approved',
+        reviewedAt: '2020-01-01T00:00:00.000Z',
+        approvedAt: '2020-01-01T00:00:00.000Z',
+      },
+      {
+        pk: 'id',
+        orgScoped: false,
+        blockedPatchFields: ['verifiedOrganizationId', 'verifiedBy', 'verifiedAt', 'status', 'reviewedAt', 'approvedAt'],
+      },
+    );
+    expect(result).toEqual({ notes: 'legitimate steward note' });
+  });
+
+  it('returns an empty object for a non-object body instead of throwing', () => {
+    expect(stripBlockedPatchFields(null, { pk: 'id', orgScoped: false, blockedPatchFields: [] })).toEqual({});
+    expect(stripBlockedPatchFields('a string', { pk: 'id', orgScoped: false, blockedPatchFields: [] })).toEqual({});
+    expect(stripBlockedPatchFields(['array', 'body'], { pk: 'id', orgScoped: false, blockedPatchFields: [] })).toEqual({});
+  });
+
+  it('does not mutate the original body object', () => {
+    const body = { id: 'x', verifiedOrganizationId: 'y', name: 'z' };
+    const result = stripBlockedPatchFields(body, { pk: 'id', orgScoped: false, blockedPatchFields: ['verifiedOrganizationId'] });
+    expect(body.id).toBe('x');
+    expect(body.verifiedOrganizationId).toBe('y');
+    expect(result.id).toBeUndefined();
+    expect(result.verifiedOrganizationId).toBeUndefined();
+  });
+});
+
+describe('crud-factory buildMergeSetValues (PR #752 round 24)', () => {
+  const fakeTable = { responses: {}, notes: {} } as unknown as PgTable;
+
+  it('converts a plain-object value for a merge column into a SQL fragment', () => {
+    const result = buildMergeSetValues({ responses: { readinessNotes: 'ok' } }, fakeTable, ['responses']);
+    expect(result.responses).toBeInstanceOf(SQL);
+  });
+
+  it('leaves non-merge columns as plain values', () => {
+    const result = buildMergeSetValues(
+      { responses: { readinessNotes: 'ok' }, notes: 'plain text' },
+      fakeTable,
+      ['responses'],
+    );
+    expect(result.notes).toBe('plain text');
+  });
+
+  it('leaves a merge column absent when the PATCH does not include it', () => {
+    const result = buildMergeSetValues({ notes: 'plain text' }, fakeTable, ['responses']);
+    expect(result.responses).toBeUndefined();
+  });
+
+  it('leaves a merge column as a plain value when it is not a plain object (null, array)', () => {
+    expect(buildMergeSetValues({ responses: null }, fakeTable, ['responses']).responses).toBeNull();
+    expect(buildMergeSetValues({ responses: ['x'] }, fakeTable, ['responses']).responses).toEqual(['x']);
+  });
+
+  it('does not mutate the input updates object', () => {
+    const updates = { responses: { readinessNotes: 'ok' } };
+    buildMergeSetValues(updates, fakeTable, ['responses']);
+    expect(updates.responses).toEqual({ readinessNotes: 'ok' });
+  });
+});
+
+describe('crud-factory validateMergeJsonColumnValues (PR #752 round 25)', () => {
+  it('passes for a plain-object merge column value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: { note: 'ok' } }, ['responses'])).not.toThrow();
+  });
+
+  it('passes when the merge column is absent from the PATCH body entirely', () => {
+    expect(() => validateMergeJsonColumnValues({ notes: 'unrelated' }, ['responses'])).not.toThrow();
+  });
+
+  it('rejects an array value — the direct reserved-state destruction bypass this closes', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: [] }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('rejects a non-empty array value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: ['x', 'y'] }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('rejects an explicit null value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: null }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('rejects a scalar (string/number) value', () => {
+    expect(() => validateMergeJsonColumnValues({ responses: 'not-an-object' }, ['responses'])).toThrow(/must be a JSON object/);
+    expect(() => validateMergeJsonColumnValues({ responses: 42 }, ['responses'])).toThrow(/must be a JSON object/);
+  });
+
+  it('only validates columns actually listed in mergeJsonColumns', () => {
+    expect(() => validateMergeJsonColumnValues({ notes: [] }, ['responses'])).not.toThrow();
   });
 });

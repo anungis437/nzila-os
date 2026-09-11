@@ -232,11 +232,12 @@ router.post('/stipends/payout/batch', async (req: Request, res: Response) => {
  */
 router.post('/donations/intent', async (req: Request, res: Response) => {
   try {
-    const organizationId = getAuthUser(req).organizationId || req.body.organizationId;
+    // Public donation flow — no authenticated organization context is
+    // required or trusted here. createDonationPaymentIntent() derives the
+    // owning organization from strikeFundId server-side.
     const validatedData = CreateDonationSchema.parse(req.body);
 
     const paymentIntent = await PaymentService.createDonationPaymentIntent({
-      organizationId,
       strikeFundId: validatedData.strikeFundId,
       amount: validatedData.amount,
       currency: validatedData.currency,
@@ -266,11 +267,11 @@ router.post('/donations/intent', async (req: Request, res: Response) => {
  */
 router.post('/donations/confirm', async (req: Request, res: Response) => {
   try {
-    const organizationId = getAuthUser(req).organizationId || req.body.organizationId;
+    // organizationId is derived from the payment intent's own metadata
+    // inside confirmDonationPayment() — never trusted from the client.
     const validatedData = ConfirmDonationSchema.parse(req.body);
 
     const donationId = await PaymentService.confirmDonationPayment({
-      organizationId,
       paymentIntentId: validatedData.paymentIntentId,
     });
 

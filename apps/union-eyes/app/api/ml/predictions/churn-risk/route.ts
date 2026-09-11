@@ -73,11 +73,22 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
       dataClass: 'confidential',
     });
 
+    if (!organizationId) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Organization context required'
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const riskLevel = searchParams.get('riskLevel'); // 'low', 'medium', 'high'
     const limit = parseInt(searchParams.get('limit') || '50');
-    const organizationScopeId = organizationId || userId;
-    const organizationIdParam = (searchParams.get('organizationId') ?? searchParams.get('orgId') ?? searchParams.get('organization_id') ?? searchParams.get('org_id')) || organizationScopeId;
+
+    // ROUND 48 SECURITY FIX: organizationId must ALWAYS come from the
+    // caller's own authenticated session, never from a client-supplied
+    // query parameter. Honoring a caller-supplied organizationId/orgId
+    // here previously allowed any 'officer' of one organization to read
+    // another organization's churn-risk predictions (cross-tenant IDOR).
 
     // SECURITY FIX: Validate riskLevel against allowlist to prevent SQL injection
     const ALLOWED_RISK_LEVELS = ['low', 'medium', 'high'];
@@ -85,7 +96,7 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
 
     // Build base query
     const baseConditions = [
-      sql`p.organization_id = ${organizationIdParam}`,
+      sql`p.organization_id = ${organizationId}`,
       sql`p.model_type = 'churn_risk'`,
       sql`p.predicted_at > NOW() - INTERVAL '7 days'`
     ];
@@ -183,7 +194,6 @@ export const GET = withRoleAuth('officer', async (request, _context) => {
 
 const mlPredictionsChurnRiskSchema = z.object({
   memberId: z.string().uuid('Invalid memberId'),
-  organizationId: z.string().uuid('Invalid organizationId'),
 });
 
 export const POST = withRoleAuth('officer', async (request, _context) => {
@@ -221,8 +231,20 @@ export const POST = withRoleAuth('officer', async (request, _context) => {
       );
     }
     
-    const { memberId, organizationId: organizationIdFromBody } = validation.data;
-    const organizationScopeId = organizationIdFromBody ?? organizationId ?? userId;
+    const { memberId } = validation.data;
+
+    // ROUND 48 SECURITY FIX: organizationId must ALWAYS come from the
+    // caller's own authenticated session, never from the request body.
+    // Honoring a client-supplied organizationId here previously allowed
+    // any 'officer' of one organization to generate (and persist) churn
+    // predictions for members of another organization (cross-tenant IDOR).
+    if (!organizationId) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Organization context required'
+      );
+    }
+    const organizationScopeId = organizationId;
 
     if (!memberId) {
       return standardErrorResponse(

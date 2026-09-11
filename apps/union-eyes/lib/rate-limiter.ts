@@ -1240,6 +1240,19 @@ export const RATE_LIMITS_PER_IP = {
     window: 3600, // 1 hour
     identifier: 'general-api-per-ip',
   },
+
+  /**
+   * Pilot program public lead-intake form per IP (PR #752 round 20)
+   * Unauthenticated by design — prospective unions apply before any
+   * account/org exists. Fail-closed (no failOpen) since this endpoint has
+   * no other abuse control.
+   * 5 applications per hour per IP
+   */
+  PILOT_APPLY: {
+    limit: 5,
+    window: 3600, // 1 hour
+    identifier: 'pilot-apply-per-ip',
+  },
 } as const;
 
 /**

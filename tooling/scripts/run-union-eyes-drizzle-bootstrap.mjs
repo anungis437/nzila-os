@@ -33,6 +33,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
+import { applyScopedMigrations as applyScopedMigrationsShared } from './lib/union-eyes-scoped-migrations.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -158,64 +159,15 @@ async function maybeRestoreSnapshot() {
 }
 
 async function applyScopedMigrations(client) {
-  if (!fs.existsSync(SCOPED_JOURNAL)) {
-    fail(
-      `Scoped Drizzle journal missing at ${SCOPED_JOURNAL}. Refusing to proceed.`,
-    );
+  try {
+    return await applyScopedMigrationsShared(client, {
+      journalPath: SCOPED_JOURNAL,
+      migrationsDir: SCOPED_MIGRATIONS_DIR,
+      log: info,
+    });
+  } catch (err) {
+    fail(err.message);
   }
-  const journal = JSON.parse(fs.readFileSync(SCOPED_JOURNAL, 'utf8'));
-  const entries = journal.entries ?? [];
-
-  await client.query('CREATE SCHEMA IF NOT EXISTS drizzle');
-  await client.query(`
-    CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
-      id SERIAL PRIMARY KEY,
-      hash text NOT NULL,
-      created_at bigint
-    )
-  `);
-
-  if (entries.length === 0) {
-    info('Scoped Drizzle root has zero entries — nothing to migrate. (This is expected immediately after reconciliation.)');
-    return { applied: 0 };
-  }
-
-  const applied = await client.query(
-    'SELECT hash FROM drizzle.__drizzle_migrations ORDER BY id',
-  );
-  const appliedHashes = new Set(applied.rows.map((r) => r.hash));
-
-  let count = 0;
-  for (const entry of entries) {
-    const sqlPath = path.join(SCOPED_MIGRATIONS_DIR, `${entry.tag}.sql`);
-    if (!fs.existsSync(sqlPath)) {
-      fail(`Scoped migration file missing: ${sqlPath}`);
-    }
-    const sql = fs.readFileSync(sqlPath, 'utf8');
-    const hash = crypto.createHash('sha256').update(sql).digest('hex');
-    if (appliedHashes.has(hash)) {
-      info(`scoped migration already applied: ${entry.tag}`);
-      continue;
-    }
-    info(`applying scoped migration: ${entry.tag}`);
-    await client.query('BEGIN');
-    try {
-      const statements = sql.split('--> statement-breakpoint').map((s) => s.trim()).filter(Boolean);
-      for (const stmt of statements) {
-        await client.query(stmt);
-      }
-      await client.query(
-        'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
-        [hash, entry.when ?? Date.now()],
-      );
-      await client.query('COMMIT');
-      count += 1;
-    } catch (err) {
-      await client.query('ROLLBACK');
-      fail(`Scoped migration ${entry.tag} failed: ${err.message}`);
-    }
-  }
-  return { applied: count };
 }
 
 async function applySqlFile(client, sqlFilePath, label) {

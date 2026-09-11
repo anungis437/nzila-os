@@ -76,6 +76,15 @@ jobs:
       - name: Audit (fail on critical)
         run: node tooling/security/npm-bulk-audit.mjs --audit-level=critical --output=audit-report.json || true
 
+      # Fallback report so the waiver-policy step never hits ENOENT if the
+      # critical-only audit above fails before writing its output (e.g. a
+      # transient npm advisory-endpoint error) — mirrors dependency-audit.yml.
+      - name: Capture high-severity audit report
+        if: always()
+        run: |
+          set +e; node tooling/security/npm-bulk-audit.mjs --audit-level=high --output=audit-report-high.json; set -e
+          echo "High/critical audit report written to audit-report-high.json"
+
       - name: Enforce vulnerability waiver policy
         run: |
           REPORT=audit-report.json

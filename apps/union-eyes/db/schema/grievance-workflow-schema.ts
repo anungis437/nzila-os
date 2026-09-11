@@ -22,8 +22,16 @@ import {
   index
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { claims, visibilityScopeEnum } from "./claims-schema";
+import { claims } from "./claims-schema";
 import { grievances } from "./grievance-schema";
+
+// Canonical `grievanceTransitions` declaration lives in
+// ./domains/claims/workflows (live-DB-verified 2026-09-01: 18 columns).
+// This file previously re-declared it locally with an extra, physically
+// nonexistent `version` column; re-exported here instead of re-declared so
+// this file's other tables' `.references(() => grievanceTransitions.id)`
+// point at the one real physical relation.
+import { grievanceTransitions } from "./domains/claims/workflows";
 
 // ============================================================================
 // ENUMS
@@ -229,50 +237,7 @@ export const grievanceStages = pgTable("grievance_stages", {
 // GRIEVANCE TRANSITIONS TABLE
 // ============================================================================
 
-export const grievanceTransitions = pgTable("grievance_transitions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
-  
-  // Transition details
-  fromStageId: uuid("from_stage_id").references(() => grievanceStages.id),
-  toStageId: uuid("to_stage_id").notNull().references(() => grievanceStages.id),
-  triggerType: transitionTriggerTypeEnum("trigger_type").notNull(),
-  
-  // Transition metadata
-  reason: text("reason"),
-  notes: text("notes"),
-  transitionedBy: varchar("transitioned_by", { length: 255 }),
-  transitionedAt: timestamp("transitioned_at", { withTimezone: true }).defaultNow(),
-  
-  // Approval tracking
-  requiresApproval: boolean("requires_approval").default(false),
-  approvedBy: varchar("approved_by", { length: 255 }),
-  approvedAt: timestamp("approved_at", { withTimezone: true }),
-  
-  // Duration tracking
-  stageDurationDays: integer("stage_duration_days"),
-  
-  // Visibility scope (PR-4: dual-surface enforcement)
-  visibilityScope: visibilityScopeEnum("visibility_scope").default("staff").notNull(),
-  
-  // Metadata
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
-  
-  // Optimistic locking — prevents race conditions on concurrent transitions
-  version: integer("version").notNull().default(1),
-  
-  // BaseModel timestamps
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  organizationIdx: index("idx_grievance_transitions_organization").on(table.organizationId),
-  claimIdx: index("idx_grievance_transitions_claim").on(table.claimId),
-  fromStageIdx: index("idx_grievance_transitions_from_stage").on(table.fromStageId),
-  toStageIdx: index("idx_grievance_transitions_to_stage").on(table.toStageId),
-  dateIdx: index("idx_grievance_transitions_date").on(table.transitionedAt),
-}));
+export { grievanceTransitions };
 
 // ============================================================================
 // GRIEVANCE ASSIGNMENTS TABLE

@@ -9,7 +9,8 @@
  */
 
 import { db } from "@/db/db";
-import { stewards, stewardAssignments } from "@/db/schema/domains/member/stewards";
+import { stewards } from "@/db/schema/domains/member/stewards";
+import { stewardAssignments } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { eq, and, asc } from "drizzle-orm";
 
@@ -172,13 +173,20 @@ export async function recommendSteward(
  * and bumps the steward's currentCaseload.
  */
 export async function assignSteward(
+  organizationId: string,
   grievanceId: string,
   stewardId: string,
 ) {
   // Insert assignment
   const [assignment] = await db
     .insert(stewardAssignments)
-    .values({ grievanceId, stewardId })
+    .values({
+      organizationId,
+      grievanceId,
+      stewardId,
+      stewardType: 'steward',
+      startDate: new Date().toISOString().slice(0, 10),
+    })
     .returning();
 
   // Increment caseload

@@ -5,6 +5,7 @@
  */
 
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   organizations,
   organizationMembers,
@@ -273,6 +274,20 @@ return calculations;
 
 /**
  * Save per-capita calculations to database
+ *
+ * PR #752 round 33 correction: this writes across EVERY remitting
+ * organization in one monthly batch (fromOrganizationId varies per row) —
+ * a cross-tenant system operation, never an ordinary tenant request (see
+ * processMonthlyPerCapita's sole caller: app/api/cron/monthly-per-capita/
+ * route.ts's `auth: { cron: true }` handler). Each iteration's write runs
+ * inside withSystemContext() so it executes as union_eyes_system, not the
+ * tenant-scoped union_eyes_runtime connection — matching per_capita_
+ * remittances' MULTI_PARTY_RLS_REQUIRED disposition (tenant reads scoped
+ * to remitter/receiver; system writes separately authorized). Wrapped
+ * PER-ITERATION (not the whole loop in one transaction) to preserve the
+ * existing per-org try/catch independence — one org's failure must not
+ * abort/rollback every other org's already-saved remittance in the same
+ * monthly run.
  */
 export async function savePerCapitaRemittances(
   calculations: PerCapitaCalculation[]
@@ -282,24 +297,44 @@ export async function savePerCapitaRemittances(
 
   for (const calc of calculations) {
     try {
-      // Check if remittance already exists for this period
-      const [existing] = await db
-        .select()
-        .from(perCapitaRemittances)
-        .where(
-          and(
-            eq(perCapitaRemittances.fromOrganizationId, calc.fromOrganizationId),
-            eq(perCapitaRemittances.toOrganizationId, calc.toOrganizationId),
-            eq(perCapitaRemittances.remittanceMonth, calc.remittanceMonth),
-            eq(perCapitaRemittances.remittanceYear, calc.remittanceYear)
-          )
-        );
+      await withSystemContext(async (_tx) => {
+        // Check if remittance already exists for this period
+        const [existing] = await db
+          .select()
+          .from(perCapitaRemittances)
+          .where(
+            and(
+              eq(perCapitaRemittances.fromOrganizationId, calc.fromOrganizationId),
+              eq(perCapitaRemittances.toOrganizationId, calc.toOrganizationId),
+              eq(perCapitaRemittances.remittanceMonth, calc.remittanceMonth),
+              eq(perCapitaRemittances.remittanceYear, calc.remittanceYear)
+            )
+          );
 
-      if (existing) {
-        // Update existing remittance
-        await db
-          .update(perCapitaRemittances)
-          .set({
+        if (existing) {
+          // Update existing remittance
+          await db
+            .update(perCapitaRemittances)
+            .set({
+              totalMembers: calc.totalMembers,
+              goodStandingMembers: calc.goodStandingMembers,
+              remittableMembers: calc.remittableMembers,
+              perCapitaRate: calc.perCapitaRate.toString(),
+              totalAmount: calc.totalAmount.toString(),
+              dueDate: calc.dueDate.toISOString().split('T')[0],
+              clcAccountCode: calc.clcAccountCode,
+              glAccount: calc.glAccount,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(perCapitaRemittances.id, existing.id));
+        } else {
+          // Insert new remittance
+          await db.insert(perCapitaRemittances).values({
+            organizationId: calc.fromOrganizationId, // Submitting organization
+            fromOrganizationId: calc.fromOrganizationId,
+            toOrganizationId: calc.toOrganizationId,
+            remittanceMonth: calc.remittanceMonth,
+            remittanceYear: calc.remittanceYear,
             totalMembers: calc.totalMembers,
             goodStandingMembers: calc.goodStandingMembers,
             remittableMembers: calc.remittableMembers,
@@ -308,28 +343,10 @@ export async function savePerCapitaRemittances(
             dueDate: calc.dueDate.toISOString().split('T')[0],
             clcAccountCode: calc.clcAccountCode,
             glAccount: calc.glAccount,
-            updatedAt: new Date().toISOString(),
-          })
-          .where(eq(perCapitaRemittances.id, existing.id));
-      } else {
-        // Insert new remittance
-        await db.insert(perCapitaRemittances).values({
-          organizationId: calc.fromOrganizationId, // Submitting organization
-          fromOrganizationId: calc.fromOrganizationId,
-          toOrganizationId: calc.toOrganizationId,
-          remittanceMonth: calc.remittanceMonth,
-          remittanceYear: calc.remittanceYear,
-          totalMembers: calc.totalMembers,
-          goodStandingMembers: calc.goodStandingMembers,
-          remittableMembers: calc.remittableMembers,
-          perCapitaRate: calc.perCapitaRate.toString(),
-          totalAmount: calc.totalAmount.toString(),
-          dueDate: calc.dueDate.toISOString().split('T')[0],
-          clcAccountCode: calc.clcAccountCode,
-          glAccount: calc.glAccount,
-          status: 'pending',
-        });
-      }
+            status: 'pending',
+          });
+        }
+      });
 
       saved++;
     } catch (_error) {
@@ -408,6 +425,11 @@ export async function getOverdueRemittances(): Promise<any[]> {
 
 /**
  * Mark overdue remittances (run daily via cron)
+ *
+ * PR #752 round 33 correction: cross-organization write (no organization_id
+ * filter — every remitting org's rows are eligible), only ever invoked by
+ * app/api/cron/monthly-per-capita/route.ts's system-triggered handler.
+ * Runs inside withSystemContext() to execute as union_eyes_system.
  */
 export async function markOverdueRemittances(): Promise<number> {
   const _today = new Date();
@@ -415,7 +437,7 @@ export async function markOverdueRemittances(): Promise<number> {
   gracePeriodEnd.setDate(gracePeriodEnd.getDate() - GRACE_PERIOD_DAYS);
   const gracePeriodEndStr = gracePeriodEnd.toISOString().split('T')[0];
 
-  const result = await db
+  const result = await withSystemContext(async (_tx) => db
     .update(perCapitaRemittances)
     .set({ 
       status: 'overdue',
@@ -426,7 +448,7 @@ export async function markOverdueRemittances(): Promise<number> {
         eq(perCapitaRemittances.status, 'pending'),
         lte(perCapitaRemittances.dueDate, gracePeriodEndStr)
       )
-    );
+    ));
 
   return result.length || 0;
 }

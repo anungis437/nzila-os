@@ -19,7 +19,7 @@ export const POST = withApi(
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     // expireTrials requires a payment-method checker callback
-    const actions = await expireTrials(async (_orgId: string) => {
+    const actions = await expireTrials(organizationId, async (_orgId: string) => {
       // Default: assume no payment method on file — trials expire to cancelled
       return false;
     });

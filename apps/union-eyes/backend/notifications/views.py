@@ -137,21 +137,51 @@ class NewsletterTemplatesViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment (PR #752 round 45 — dependency-frontier root
+    authority batch): no legitimate Django consumer exists for the generated
+    ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) pattern on newsletter_distribution_lists
+    / newsletter_campaigns. Both tables carry their own NOT NULL
+    organization_id and are properly org-scoped by their real Next.js
+    consumers (crudRoutes({orgScoped: true}) for distribution lists; a
+    read-only org-verified route for campaigns), but this generated
+    ViewSet applies no such scoping — any authenticated user could
+    read/reassign/delete any organization's newsletter lists or campaigns.
+    Remove only once a proven legitimate consumer and org-scoped queryset
+    filtering exist for this table.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class NewsletterDistributionListsViewSet(viewsets.ModelViewSet):
     """API endpoint for NewsletterDistributionLists operations."""
     queryset = NewsletterDistributionLists.objects.all()
     serializer_class = NewsletterDistributionListsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class NewsletterListSubscribersViewSet(viewsets.ModelViewSet):
-    """API endpoint for NewsletterListSubscribers operations."""
+    """API endpoint for NewsletterListSubscribers operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): newsletter_list_subscribers' TS-side route shape is
+    an unresolved product-decision exception (see manifest reason), but
+    Django containment is independent of that question — this generated
+    ModelViewSet was IsAuthenticated-only with no organization/subject
+    scoping at all. No real Django consumer found.
+    """
     queryset = NewsletterListSubscribers.objects.all()
     serializer_class = NewsletterListSubscribersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -161,7 +191,7 @@ class NewsletterCampaignsViewSet(viewsets.ModelViewSet):
     """API endpoint for NewsletterCampaigns operations."""
     queryset = NewsletterCampaigns.objects.all()
     serializer_class = NewsletterCampaignsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -178,10 +208,17 @@ class NewsletterRecipientsViewSet(viewsets.ModelViewSet):
 
 
 class NewsletterEngagementViewSet(viewsets.ModelViewSet):
-    """API endpoint for NewsletterEngagement operations."""
+    """API endpoint for NewsletterEngagement operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): newsletter_engagement is LATENT_UNREACHABLE — its
+    only TS reference (lib/engagement-scoring.ts) has zero real callers
+    anywhere. This generated ModelViewSet has no scoping (IsAuthenticated
+    only). No real Django consumer found.
+    """
     queryset = NewsletterEngagement.objects.all()
     serializer_class = NewsletterEngagementSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -191,7 +228,7 @@ class UserNotificationPreferencesViewSet(viewsets.ModelViewSet):
     """API endpoint for UserNotificationPreferences operations."""
     queryset = UserNotificationPreferences.objects.all()
     serializer_class = UserNotificationPreferencesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -283,10 +320,20 @@ class NotificationBouncesViewSet(viewsets.ModelViewSet):
 
 
 class PushDevicesViewSet(viewsets.ModelViewSet):
-    """API endpoint for PushDevices operations."""
+    """API endpoint for PushDevices operations.
+
+    CONTAINED (PR #752 round 46 — system and mixed execution authority
+    cohort): push_devices is TENANT_RLS_REQUIRED (organization_id + profile_id
+    both NOT NULL); its real Next.js consumer (app/api/mobile/devices/route.ts)
+    was fixed this round to scope both reads (ownerColumn) and writes
+    (beforeCreate) to the caller's own profileId, not just organization_id.
+    This generated ModelViewSet has neither scoping — any authenticated user
+    could list/reassign/delete any other member's registered device. No real
+    Django consumer found.
+    """
     queryset = PushDevices.objects.all()
     serializer_class = PushDevicesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -313,10 +360,20 @@ class PushNotificationsViewSet(viewsets.ModelViewSet):
 
 
 class PushDeliveriesViewSet(viewsets.ModelViewSet):
-    """API endpoint for PushDeliveries operations."""
+    """API endpoint for PushDeliveries operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): both TS-side supportingCapability files are dead code —
+    lib/engagement-scoring.ts has zero real callers (same finding as
+    newsletter_engagement above), and services/fcm-service.ts is only
+    imported by lib/workers/notification-worker.ts, which itself has zero
+    bootstrap/instantiation callers anywhere (same dead-worker finding as
+    push_devices, round 46). This generated ModelViewSet is unscoped
+    (IsAuthenticated-only). No legitimate consumer found on either side.
+    """
     queryset = PushDeliveries.objects.all()
     serializer_class = PushDeliveriesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -326,17 +383,24 @@ class SmsTemplatesViewSet(viewsets.ModelViewSet):
     """API endpoint for SmsTemplates operations."""
     queryset = SmsTemplates.objects.all()
     serializer_class = SmsTemplatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SmsCampaignsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SmsCampaigns operations."""
+    """API endpoint for SmsCampaigns operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): sms_campaigns is TENANT_RLS_REQUIRED; its real
+    Next.js consumer (app/api/communications/sms/campaigns/route.ts) is
+    org-scoped via crudRoutes. This generated ModelViewSet has no scoping
+    (IsAuthenticated only). No real Django consumer found.
+    """
     queryset = SmsCampaigns.objects.all()
     serializer_class = SmsCampaignsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -353,30 +417,53 @@ class SmsMessagesViewSet(viewsets.ModelViewSet):
 
 
 class SmsConversationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SmsConversations operations."""
+    """API endpoint for SmsConversations operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): sms_conversations is TENANT_RLS_REQUIRED; its real
+    Next.js consumer (app/api/communications/sms/conversations/route.ts) is
+    org-scoped via crudRoutes. This generated ModelViewSet has no scoping
+    (IsAuthenticated only). No real Django consumer found.
+    """
     queryset = SmsConversations.objects.all()
     serializer_class = SmsConversationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SmsCampaignRecipientsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SmsCampaignRecipients operations."""
+    """API endpoint for SmsCampaignRecipients operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): sms_campaign_recipients is LATENT_UNREACHABLE — its
+    only TS reference (lib/gdpr/consent-manager.ts's DataErasureService) has
+    zero real callers anywhere. This generated ModelViewSet has no scoping
+    (IsAuthenticated only). No real Django consumer found.
+    """
     queryset = SmsCampaignRecipients.objects.all()
     serializer_class = SmsCampaignRecipientsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SmsOptOutsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SmsOptOuts operations."""
+    """API endpoint for SmsOptOuts operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): sms_opt_outs is LATENT_UNREACHABLE — its only TS
+    reader/writer (services/twilio-sms-service.ts's isPhoneOptedOut/
+    handleOptOut) has zero real callers; the whole Twilio webhook/opt-out
+    flow in that file is dead code (no app/api/**/twilio route exists).
+    This generated ModelViewSet has no scoping (IsAuthenticated only). No
+    real Django consumer found.
+    """
     queryset = SmsOptOuts.objects.all()
     serializer_class = SmsOptOutsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -393,10 +480,20 @@ class SmsRateLimitsViewSet(viewsets.ModelViewSet):
 
 
 class MobileDevicesViewSet(viewsets.ModelViewSet):
-    """API endpoint for MobileDevices operations."""
+    """API endpoint for MobileDevices operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): the real, live TS consumer is app/api/mobile/sync/route.ts
+    (auth-gated, scoped to the caller's own userId+organizationId on read,
+    and ownership-checked on write as of this round). This generated
+    ModelViewSet(queryset=Model.objects.all(), permission_classes=
+    [IsAuthenticated]) has no legitimate Django consumer and no
+    organization/user scoping of its own — contained via the existing
+    DenyAllPermission in this file.
+    """
     queryset = MobileDevices.objects.all()
     serializer_class = MobileDevicesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['device_token']
     search_fields = ['device_token']
@@ -416,10 +513,19 @@ class MobileNotificationsViewSet(viewsets.ModelViewSet):
 
 
 class MobileSyncQueueViewSet(viewsets.ModelViewSet):
-    """API endpoint for MobileSyncQueue operations."""
+    """API endpoint for MobileSyncQueue operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): lib/mobile/mobile-engine.ts's MobileOfflineSyncEngine (the
+    sole writer/reader of this table) has zero production importers anywhere
+    in app/, actions/ — fully dead TS code. This generated ModelViewSet is
+    unscoped (IsAuthenticated-only, .objects.all(), no org_id filter despite
+    the table having a real org_id column). No legitimate consumer found on
+    either side.
+    """
     queryset = MobileSyncQueue.objects.all()
     serializer_class = MobileSyncQueueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['device_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -427,10 +533,24 @@ class MobileSyncQueueViewSet(viewsets.ModelViewSet):
 
 
 class MobileAnalyticsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MobileAnalytics operations."""
+    """API endpoint for MobileAnalytics operations.
+
+    CONTAINED (PR #752 round 48 — derived analytics and AI telemetry
+    authority cohort): mobile_analytics carries a NULLABLE organization_id
+    (anonymous/pre-login mobile events are a legitimate design). No real
+    Django consumer found: the only application-side writer/reader is
+    lib/mobile/mobile-engine.ts's MobileAnalyticsService.flushEvents(),
+    which has zero callers anywhere in app/, actions/, or lib/ outside its
+    own file and tests — fully dead code. This generated ViewSet
+    (queryset=MobileAnalytics.objects.all(), permission_classes=[IsAuthenticated])
+    applies no tenant scoping — any authenticated user of any organization
+    could list/retrieve/mutate every organization's (and every anonymous
+    session's) mobile analytics events. Remove only once a proven
+    legitimate consumer and org-scoped queryset filtering exist.
+    """
     queryset = MobileAnalytics.objects.all()
     serializer_class = MobileAnalyticsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     search_fields = ['session_id']
@@ -450,10 +570,20 @@ class MobileAppConfigViewSet(viewsets.ModelViewSet):
 
 
 class CommunicationPreferencesPhase4ViewSet(viewsets.ModelViewSet):
-    """API endpoint for CommunicationPreferencesPhase4 operations."""
+    """API endpoint for CommunicationPreferencesPhase4 operations.
+
+    CONTAINED (PR #752 round 47 — communications/consent user-subject
+    authority cohort): communication_preferences_phase4 has NO canonical
+    Drizzle/TypeScript declaration anywhere in this app (its only prior
+    TS-side mirror, db/schema/phase-4-messaging-schema.ts's
+    communicationPreferences export, was deleted in an earlier round as
+    dead code) — this Django ViewSet is the table's ONLY reachable surface,
+    and it was IsAuthenticated-only with no organization/user scoping at
+    all. No real Django consumer found.
+    """
     queryset = CommunicationPreferencesPhase4.objects.all()
     serializer_class = CommunicationPreferencesPhase4Serializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id', 'email_opt_in', 'sms_opt_in', 'quiet_hours_start', 'quiet_hours_end']
     ordering_fields = ['created_at', 'updated_at']

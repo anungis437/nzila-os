@@ -16,7 +16,6 @@
     "test:coverage": "vitest run --coverage src/tests"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
     "@union-claims/financial": "workspace:*",
     "cors": "^2.8.5",
     "date-fns": "^3.0.0",

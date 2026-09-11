@@ -374,15 +374,36 @@ return false;
 
   /**
    * Record signature
+   *
+   * SECURITY FIX: previously updated documentSigners by id alone, with no
+   * verification that the authenticated caller was the actual signer —
+   * any authenticated platform user could "sign" on behalf of any other
+   * signer by supplying their signerId. Now requires the signer row's own
+   * userId to match the authenticated caller. External (non-platform)
+   * signers — identified by a null userId — are rejected here pending a
+   * dedicated token/link-based authentication flow; this endpoint only
+   * ever authenticated via platform session, so it could never have
+   * legitimately verified an external signer's identity anyway.
    */
   static async recordSignature(data: {
     signerId: string;
+    actorUserId: string;
     signatureImageUrl: string;
     signatureType: "electronic" | "digital" | "wet";
     ipAddress?: string;
     userAgent?: string;
     geolocation?: any;
   }) {
+    const existingSigner = await db.query.documentSigners.findFirst({
+      where: eq(documentSigners.id, data.signerId),
+    });
+    if (!existingSigner) {
+      throw new Error("Signer not found");
+    }
+    if (existingSigner.userId === null || existingSigner.userId !== data.actorUserId) {
+      throw new Error("You are not authorized to sign as this signer");
+    }
+
     const [updated] = await db
       .update(documentSigners)
       .set({

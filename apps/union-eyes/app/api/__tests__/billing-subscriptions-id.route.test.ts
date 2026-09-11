@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => {
-  const state = { selectRows: [] as unknown[][], updateRows: [] as unknown[][] };
+  const state = { selectRows: [] as unknown[][], updateRows: [] as unknown[][], setCalls: [] as Array<Record<string, unknown>> };
   const createSelectChain = () => {
     const chain = {
       from: vi.fn(() => chain),
@@ -16,11 +16,14 @@ const m = vi.hoisted(() => {
     db: {
       select: vi.fn(() => createSelectChain()),
       update: vi.fn(() => ({
-        set: vi.fn(() => ({
-          where: vi.fn(() => ({
-            returning: vi.fn(async () => (state.updateRows.shift() ?? []) as unknown[]),
-          })),
-        })),
+        set: vi.fn((values: Record<string, unknown>) => {
+          state.setCalls.push(values);
+          return {
+            where: vi.fn(() => ({
+              returning: vi.fn(async () => (state.updateRows.shift() ?? []) as unknown[]),
+            })),
+          };
+        }),
       })),
     },
   };
@@ -51,6 +54,7 @@ describe('billing/subscriptions/[id] route', () => {
     vi.clearAllMocks();
     m.state.selectRows = [];
     m.state.updateRows = [];
+    m.state.setCalls = [];
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
   });
 
@@ -98,5 +102,118 @@ describe('billing/subscriptions/[id] route', () => {
     const result = await DELETE({ organizationId: 'org_1', params: { id: 'sub_1' } });
 
     expect(result).toMatchObject({ data: { id: 'sub_1', status: 'cancelled' } });
+  });
+
+  it('round 28: a steward PATCH cannot erase the commercial-terms provenance keys by replacing metadata wholesale', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.selectRows.push([
+      {
+        id: 'sub_1',
+        metadata: {
+          source: 'pilot-commercial-transition',
+          commercialTermsSnapshot: { verifiedMemberCount: 250 },
+          commercialTermsFingerprint: 'real-fingerprint',
+        },
+      },
+    ]);
+    m.state.updateRows.push([{ id: 'sub_1' }]);
+
+    await PATCH({
+      organizationId: 'org_1',
+      params: { id: 'sub_1' },
+      request: { json: async () => ({ metadata: {} }) },
+    });
+
+    expect(m.state.setCalls).toHaveLength(1);
+    expect(m.state.setCalls[0].metadata).toEqual({
+      commercialTermsSnapshot: { verifiedMemberCount: 250 },
+      commercialTermsFingerprint: 'real-fingerprint',
+    });
+  });
+
+  it('round 28: a steward PATCH cannot forge the commercial-terms provenance keys with fabricated values', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.selectRows.push([
+      {
+        id: 'sub_1',
+        metadata: {
+          commercialTermsSnapshot: { verifiedMemberCount: 250 },
+          commercialTermsFingerprint: 'real-fingerprint',
+        },
+      },
+    ]);
+    m.state.updateRows.push([{ id: 'sub_1' }]);
+
+    await PATCH({
+      organizationId: 'org_1',
+      params: { id: 'sub_1' },
+      request: {
+        json: async () => ({
+          metadata: {
+            commercialTermsSnapshot: { verifiedMemberCount: 999999 },
+            commercialTermsFingerprint: 'attacker-forged-fingerprint',
+          },
+        }),
+      },
+    });
+
+    expect(m.state.setCalls[0].metadata).toEqual({
+      commercialTermsSnapshot: { verifiedMemberCount: 250 },
+      commercialTermsFingerprint: 'real-fingerprint',
+    });
+  });
+
+  it('round 28: still allows editing ordinary (non-reserved) metadata keys', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.selectRows.push([
+      {
+        id: 'sub_1',
+        metadata: {
+          commercialTermsSnapshot: { verifiedMemberCount: 250 },
+          commercialTermsFingerprint: 'real-fingerprint',
+        },
+      },
+    ]);
+    m.state.updateRows.push([{ id: 'sub_1' }]);
+
+    await PATCH({
+      organizationId: 'org_1',
+      params: { id: 'sub_1' },
+      request: { json: async () => ({ metadata: { steward_note: 'renewed manually' } }) },
+    });
+
+    expect(m.state.setCalls[0].metadata).toEqual({
+      steward_note: 'renewed manually',
+      commercialTermsSnapshot: { verifiedMemberCount: 250 },
+      commercialTermsFingerprint: 'real-fingerprint',
+    });
+  });
+
+  it('round 28: a subscription with no existing provenance keys is unaffected (nothing fabricated)', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.selectRows.push([{ id: 'sub_1', metadata: { note: 'manual entry' } }]);
+    m.state.updateRows.push([{ id: 'sub_1' }]);
+
+    await PATCH({
+      organizationId: 'org_1',
+      params: { id: 'sub_1' },
+      request: { json: async () => ({ metadata: { note: 'updated' } }) },
+    });
+
+    expect(m.state.setCalls[0].metadata).toEqual({ note: 'updated' });
+  });
+
+  it('PATCH without a metadata field never touches the metadata column at all', async () => {
+    const { PATCH } = await loadRoute();
+    m.state.selectRows.push([{ id: 'sub_1', metadata: { commercialTermsFingerprint: 'real-fingerprint' } }]);
+    m.state.updateRows.push([{ id: 'sub_1', status: 'paused' }]);
+
+    await PATCH({
+      organizationId: 'org_1',
+      params: { id: 'sub_1' },
+      request: { json: async () => ({ status: 'paused' }) },
+    });
+
+    expect(m.state.setCalls[0]).not.toHaveProperty('metadata');
   });
 });

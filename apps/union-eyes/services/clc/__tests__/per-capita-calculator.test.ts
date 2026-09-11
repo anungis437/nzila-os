@@ -21,10 +21,14 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     execute,
   };
-  return { queue, db, execute };
+  const withSystemContext = vi.fn(async (fn: (tx?: unknown) => unknown) => fn({}));
+  return { queue, db, execute, withSystemContext };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: h.withSystemContext,
+}));
 vi.mock('@/db/schema', () => new Proxy({}, {
   has: () => true,
   get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })),
@@ -45,6 +49,7 @@ const pushSel = (...items: unknown[]) => h.queue.push(...items);
 beforeEach(() => {
   h.queue.length = 0;
   h.execute.mockReset();
+  h.withSystemContext.mockClear();
 });
 
 describe('getMemberStanding', () => {
@@ -160,6 +165,13 @@ describe('savePerCapitaRemittances', () => {
     expect(r.errors).toBe(1);
     expect(r.saved).toBe(0);
   });
+
+  it('PR #752 round 33 correction: writes execute inside withSystemContext (cross-org batch, never ordinary tenant runtime)', async () => {
+    pushSel([{ id: 'ex1' }]);
+    pushSel([]);
+    await calc.savePerCapitaRemittances([baseCalc]);
+    expect(h.withSystemContext).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('getRemittanceStatusForParent', () => {
@@ -199,6 +211,12 @@ describe('markOverdueRemittances', () => {
   it('returns zero when no rows are affected', async () => {
     pushSel([]);
     expect(await calc.markOverdueRemittances()).toBe(0);
+  });
+
+  it('PR #752 round 33 correction: the cross-org UPDATE executes inside withSystemContext', async () => {
+    pushSel([{ id: 'r1' }]);
+    await calc.markOverdueRemittances();
+    expect(h.withSystemContext).toHaveBeenCalledTimes(1);
   });
 });
 

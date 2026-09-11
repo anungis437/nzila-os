@@ -33,8 +33,23 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
+
+
+class DenyAllPermission(BasePermission):
+    """CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): no legitimate frontend consumer of this ViewSet exists
+    anywhere — lib/api/signature-service-api.ts (a generated fetch-client
+    wrapper for this exact endpoint) has zero callers of its own. Deny
+    unconditionally until a real consumer exists.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
 
 
 class SignatureServiceViewSet(viewsets.ViewSet):
@@ -45,7 +60,7 @@ class SignatureServiceViewSet(viewsets.ViewSet):
     workflows, and audit-trail queries.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [DenyAllPermission]
 
     # ------------------------------------------------------------------
     # List

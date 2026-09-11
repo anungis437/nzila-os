@@ -175,7 +175,8 @@ toast({
         throw new Error('Failed to fetch subscribers');
       }
 
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       setSubscribers(data.subscribers || []);
     } catch (_error) {
 toast({

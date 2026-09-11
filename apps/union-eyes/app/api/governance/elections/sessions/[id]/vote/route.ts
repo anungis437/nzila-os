@@ -6,19 +6,13 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { castVote } from '@/lib/services/voting-service';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const castVoteSchema = z.object({
   optionId: z.string().uuid(),
-  voterId: z.string().min(1).max(100),
-  voterHash: z.string().max(100).optional(),
-  signature: z.string().max(5000).optional(),
-  receiptId: z.string().max(255).optional(),
-  verificationCode: z.string().max(100).optional(),
-  auditHash: z.string().max(255).optional(),
   isAnonymous: z.boolean().default(true),
-  voterType: z.enum(['member', 'delegate', 'proxy', 'observer']).default('member'),
 });
 
 export const dynamic = 'force-dynamic';
@@ -29,11 +23,15 @@ export const GET = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get votes for session' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const id = request.url.split('/sessions/')[1]?.split('/vote')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    const [session] = await db.select().from(votingSessions).where(eq(votingSessions.id, id));
+    const [session] = await db
+      .select()
+      .from(votingSessions)
+      .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
     if (!session) throw ApiError.notFound('Voting session not found');
 
     const options = await db.select().from(votingOptions).where(eq(votingOptions.sessionId, id));
@@ -49,14 +47,30 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Cast vote' },
   },
-  async ({ request, body }) => {
+  async ({ request, body, organizationId, userId }) => {
     const id = request.url.split('/sessions/')[1]?.split('/vote')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!userId) throw ApiError.unauthorized('Authenticated user required');
 
     const parsed = castVoteSchema.parse(body);
-    const [vote] = await withRLSContext(async () =>
-      db.insert(votes).values({ ...parsed, sessionId: id }).returning()
-    );
+
+    // Voter identity and eligibility are derived server-side from the
+    // authenticated user via castVote() — never trust a client-supplied
+    // voterId, which would let a caller impersonate/duplicate ballots.
+    const vote = await withRLSContext({ organizationId }, async () => {
+      const [session] = await db
+        .select()
+        .from(votingSessions)
+        .where(and(eq(votingSessions.id, id), eq(votingSessions.organizationId, organizationId)));
+      if (!session) throw ApiError.notFound('Voting session not found');
+
+      try {
+        return await castVote(id, parsed.optionId, userId, parsed.isAnonymous);
+      } catch (error) {
+        throw ApiError.badRequest(error instanceof Error ? error.message : 'Failed to cast vote');
+      }
+    });
     return vote;
   },
 );

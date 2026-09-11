@@ -141,31 +141,36 @@ describe('geofence-privacy-service', () => {
     });
   });
 
-  it('createGeofence inserts and returns the fence', async () => {
+  it('createGeofence inserts and returns the fence scoped to the trusted union local', async () => {
     pushSel([{ id: 'g1' }]);
-    const r = await S.createGeofence({ name: 'Hall', geofenceType: 'union_hall', centerLatitude: 45.5, centerLongitude: -73.5, radiusMeters: 100 });
+    const r = await S.createGeofence({ name: 'Hall', geofenceType: 'union_hall', centerLatitude: 45.5, centerLongitude: -73.5, radiusMeters: 100 }, 'org-1');
     expect(r).toEqual({ id: 'g1' });
   });
 
   describe('checkGeofenceEntry', () => {
     it('throws when the geofence is not found', async () => {
       pushSel([]);
-      await expect(S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1')).rejects.toThrow('Geofence not found');
+      await expect(S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1')).rejects.toThrow('Geofence not found');
+    });
+
+    it('throws when the geofence belongs to a different union local (cross-tenant probe)', async () => {
+      pushSel([{ id: 'g1', unionLocalId: 'org-2', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }]);
+      await expect(S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1')).rejects.toThrow('Geofence not found');
     });
 
     it('reports inside and logs an entry event', async () => {
       pushSel(
-        [{ id: 'g1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }],
+        [{ id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }],
         [], // logGeofenceEvent insert
       );
-      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1');
+      const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.inside).toBe(true);
       expect(r.distance).toBeLessThan(1);
     });
 
     it('reports outside for a distant point', async () => {
-      pushSel([{ id: 'g1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }]);
-      const r = await S.checkGeofenceEntry('u1', 46.5, -74.5, 'g1');
+      pushSel([{ id: 'g1', unionLocalId: 'org-1', centerLatitude: '45.50000000', centerLongitude: '-73.50000000', radiusMeters: '100' }]);
+      const r = await S.checkGeofenceEntry('u1', 46.5, -74.5, 'g1', 'org-1');
       expect(r.inside).toBe(false);
       expect(r.distance).toBeGreaterThan(100);
     });

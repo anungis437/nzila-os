@@ -12,16 +12,12 @@ import {
   pciDssQuarterlyScans,
   pciDssEncryptionKeys,
 } from '@/db/schema/domains/compliance/pci-dss';
-import { eq, desc } from 'drizzle-orm';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { organizations } from '@/db/schema-organizations';
+import { eq, desc, sql } from 'drizzle-orm';
 
 interface TemplateRequirementRow {
   requirement_number: string;
   requirement_description: string;
-}
-
-interface SupabaseOrganizationRow {
-  id: string;
 }
 
 interface EncryptionKeyRow {
@@ -35,12 +31,6 @@ function isTemplateRequirementRow(value: unknown): value is TemplateRequirementR
     && value !== null
     && typeof (value as { requirement_number?: unknown }).requirement_number === 'string'
     && typeof (value as { requirement_description?: unknown }).requirement_description === 'string';
-}
-
-function isOrganizationRow(value: unknown): value is SupabaseOrganizationRow {
-  return typeof value === 'object'
-    && value !== null
-    && typeof (value as { id?: unknown }).id === 'string';
 }
 
 function isEncryptionKeyRow(value: unknown): value is EncryptionKeyRow {
@@ -84,17 +74,6 @@ export interface QuarterlyScanResult {
 }
 
 export class PCIComplianceService {
-  private supabase: SupabaseClient;
-
-  constructor() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
-    }
-    this.supabase = createClient(supabaseUrl, supabaseKey);
-  }
-
   /**
    * Generate PCI-DSS SAQ-A compliance report
    */
@@ -174,15 +153,18 @@ export class PCIComplianceService {
     assessmentId: string,
     organizationId: string
   ): Promise<void> {
-    // Get template requirements
-    const templateResponse = await this.supabase
-      .from('pci_dss_saq_a_requirements_template')
-      .select('*')
-      .order('requirement_number');
+    // Get template requirements — no Drizzle table exists for this
+    // reference/template relation yet, so query it directly by name.
+    const templateResponse = await db.execute(
+      sql`SELECT requirement_number, requirement_description FROM pci_dss_saq_a_requirements_template ORDER BY requirement_number`
+    );
 
-    const templateRequirements = Array.isArray(templateResponse.data)
-      ? templateResponse.data.filter(isTemplateRequirementRow)
-      : [];
+    const templateRows: unknown[] = Array.isArray(templateResponse)
+      ? templateResponse
+      : Array.isArray((templateResponse as { rows?: unknown[] }).rows)
+        ? (templateResponse as { rows: unknown[] }).rows
+        : [];
+    const templateRequirements = templateRows.filter(isTemplateRequirementRow);
 
     if (templateRequirements.length === 0) return;
 
@@ -292,13 +274,7 @@ export class PCIComplianceService {
    * Get all overdue quarterly scans
    */
   async getOverdueScans(): Promise<Array<{ organizationId: string; daysSinceLastScan: number }>> {
-    const orgResponse = await this.supabase
-      .from('organizations')
-      .select('id');
-
-    const orgs = Array.isArray(orgResponse.data)
-      ? orgResponse.data.filter(isOrganizationRow)
-      : [];
+    const orgs = await db.select({ id: organizations.id }).from(organizations);
 
     if (orgs.length === 0) return [];
 
@@ -350,14 +326,18 @@ export class PCIComplianceService {
     keyType: string;
     daysSinceRotation: number;
   }>> {
-    const keyResponse = await this.supabase
-      .from('pci_dss_encryption_keys')
-      .select('*')
-      .order('rotated_at', { ascending: false });
+    const keyResponse = await db
+      .select()
+      .from(pciDssEncryptionKeys)
+      .orderBy(desc(pciDssEncryptionKeys.rotatedAt));
 
-    const keys = Array.isArray(keyResponse.data)
-      ? keyResponse.data.filter(isEncryptionKeyRow)
-      : [];
+    const keys = keyResponse
+      .map((row) => ({
+        organization_id: row.organizationId,
+        key_type: row.keyType,
+        rotated_at: String(row.rotatedAt),
+      }))
+      .filter(isEncryptionKeyRow);
 
     if (keys.length === 0) return [];
 

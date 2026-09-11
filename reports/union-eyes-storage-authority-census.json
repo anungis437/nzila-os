@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-09-09T16:01:21.317Z",
+  "totalNeedsReview": 0,
+  "candidateCounts": {
+    "LATENT_UNREACHABLE": 0,
+    "CONTAINED_NO_AUTHORITY": 0,
+    "NEEDS_REVIEW": 0
+  },
+  "cohortCounts": {},
+  "rows": []
+}

@@ -12,7 +12,7 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, isSystemAdmin } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -325,7 +325,9 @@ export default async function CustomerSuccessDashboard({
   const t = await getTranslations('customerSuccessPage');
   await requireUser();
 
-  const hasAccess = await hasMinRole('customer_success_director');
+  // Cross-organization data (every tenant's success metrics) requires
+  // genuine platform-staff authority, not an ordinary per-org role name.
+  const hasAccess = await isSystemAdmin();
   if (!hasAccess) {
     redirect(`/${routeLocale}/dashboard`);
   }

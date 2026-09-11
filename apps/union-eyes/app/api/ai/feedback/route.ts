@@ -131,8 +131,20 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
   }
 });
 
-export const GET = withRoleAuth('member', async (request: NextRequest, _context: BaseAuthContext) => {
+export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
+    // ROUND 48 SECURITY FIX: this endpoint previously had zero tenant
+    // scoping — any authenticated member of ANY organization could read
+    // another organization's AI feedback rows (rating/comment/userId) by
+    // guessing/enumerating a query_id. Feedback must be scoped to the
+    // caller's own organization.
+    if (!context.organizationId) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'No active organization',
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const queryId = searchParams.get('query_id');
 
@@ -156,6 +168,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, _context:
         and(
           eq(aiUsageMetrics.requestId, queryId),
           eq(aiUsageMetrics.operation, 'feedback'),
+          eq(aiUsageMetrics.organizationId, context.organizationId),
         ),
       );
 

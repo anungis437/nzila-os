@@ -435,8 +435,11 @@ function generateAnonymousVoterId(
       votingSecret
     );
 
-    // Create voter hash from memberId+sessionId using HMAC
-    const voterIdContent = `voter:${memberId}:${sessionId}:${Date.now()}`;
+    // Deterministic per (member, session) — required so the "already voted"
+    // lookup below can find a prior vote by the same member. Including a
+    // timestamp here would make every call produce a different voterId,
+    // silently defeating double-vote prevention.
+    const voterIdContent = `voter:${memberId}:${sessionId}`;
     const voterId = createHmac("sha256", sessionKey)
       .update(voterIdContent)
       .digest("hex")
@@ -468,6 +471,19 @@ export async function castVote(
     const eligibility = await checkVoterEligibility(sessionId, memberId);
     if (!eligibility || !eligibility.isEligible) {
       throw new Error("Voter is not eligible");
+    }
+
+    // Verify the option actually belongs to this session — prevents a vote
+    // being recorded against an option from a different (possibly
+    // cross-organization) voting session.
+    const option = await db.query.votingOptions.findFirst({
+      where: and(
+        eq(votingOptions.id, optionId),
+        eq(votingOptions.sessionId, sessionId),
+      ),
+    });
+    if (!option) {
+      throw new Error("Option does not belong to this voting session");
     }
 
     // Check if already voted

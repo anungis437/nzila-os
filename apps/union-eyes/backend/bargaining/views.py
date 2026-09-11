@@ -8,6 +8,16 @@ from .models import (ArbitrationPrecedents, PrecedentTags, PrecedentCitations, N
 from .serializers import (ArbitrationPrecedentsSerializer, PrecedentTagsSerializer, PrecedentCitationsSerializer, NegotiationsSerializer, BargainingProposalsSerializer, TentativeAgreementsSerializer, NegotiationSessionsSerializer, BargainingTeamMembersSerializer, CbaClausesSerializer, ClauseComparisonsSerializer, WageProgressionsSerializer, BenefitComparisonsSerializer, ArbitrationDecisionsSerializer, ArbitratorProfilesSerializer, BargainingNotesSerializer, CbaFootnotesSerializer, CollectiveAgreementsSerializer, CbaVersionHistorySerializer, CbaContactsSerializer, SharedClauseLibrarySerializer, ClauseLibraryTagsSerializer, ClauseComparisonsHistorySerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 40: no legitimate Django consumer exists for contained generated ViewSets."""
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class ArbitrationPrecedentsViewSet(viewsets.ModelViewSet):
     """API endpoint for ArbitrationPrecedents operations."""
     queryset = ArbitrationPrecedents.objects.all()
@@ -20,9 +30,10 @@ class ArbitrationPrecedentsViewSet(viewsets.ModelViewSet):
 
 class PrecedentTagsViewSet(viewsets.ModelViewSet):
     """API endpoint for PrecedentTags operations."""
+    # Round 44: no TS reference beyond schema/financial-service dual-schema.
     queryset = PrecedentTags.objects.all()
     serializer_class = PrecedentTagsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -32,7 +43,7 @@ class PrecedentCitationsViewSet(viewsets.ModelViewSet):
     """API endpoint for PrecedentCitations operations."""
     queryset = PrecedentCitations.objects.all()
     serializer_class = PrecedentCitationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -73,9 +84,11 @@ class TentativeAgreementsViewSet(viewsets.ModelViewSet):
 
 class NegotiationSessionsViewSet(viewsets.ModelViewSet):
     """API endpoint for NegotiationSessions operations."""
+    # Round 44: lib/services/negotiations-service.ts's listSessions has zero
+    # real callers (the whole service module is dead).
     queryset = NegotiationSessions.objects.all()
     serializer_class = NegotiationSessionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['negotiation_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -84,9 +97,11 @@ class NegotiationSessionsViewSet(viewsets.ModelViewSet):
 
 class BargainingTeamMembersViewSet(viewsets.ModelViewSet):
     """API endpoint for BargainingTeamMembers operations."""
+    # Round 44: lib/services/negotiations-service.ts's listTeamMembers has
+    # zero real callers (the whole service module is dead).
     queryset = BargainingTeamMembers.objects.all()
     serializer_class = BargainingTeamMembersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['negotiation_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -108,7 +123,7 @@ class ClauseComparisonsViewSet(viewsets.ModelViewSet):
     """API endpoint for ClauseComparisons operations."""
     queryset = ClauseComparisons.objects.all()
     serializer_class = ClauseComparisonsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['comparison_name']
     search_fields = ['comparison_name']
@@ -118,9 +133,11 @@ class ClauseComparisonsViewSet(viewsets.ModelViewSet):
 
 class WageProgressionsViewSet(viewsets.ModelViewSet):
     """API endpoint for WageProgressions operations."""
+    # Round 44: lib/services/clause-service.ts's getWageProgressions/
+    # createWageProgression have zero real callers.
     queryset = WageProgressions.objects.all()
     serializer_class = WageProgressionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -129,9 +146,11 @@ class WageProgressionsViewSet(viewsets.ModelViewSet):
 
 class BenefitComparisonsViewSet(viewsets.ModelViewSet):
     """API endpoint for BenefitComparisons operations."""
+    # Round 44: benefitComparisons is never queried anywhere in the TS app
+    # (type-only import in lib/services/clause-service.ts).
     queryset = BenefitComparisons.objects.all()
     serializer_class = BenefitComparisonsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -151,10 +170,20 @@ class ArbitrationDecisionsViewSet(viewsets.ModelViewSet):
 
 
 class ArbitratorProfilesViewSet(viewsets.ModelViewSet):
-    """API endpoint for ArbitratorProfiles operations."""
+    """API endpoint for ArbitratorProfiles operations.
+
+    round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, DIRECTORY_PROFILE
+    family): lib/services/precedent-service.ts's getArbitratorProfile/
+    updateArbitratorStats/getTopArbitrators (the only TS code touching this
+    table) have zero production callers anywhere (git-grep confirmed) — dead
+    TS code; the real routes (app/api/precedents, app/api/precedents/search)
+    only import listPrecedents/searchPrecedents/createPrecedent/etc., which
+    touch arbitrationDecisions, never arbitratorProfiles. Contained via
+    DenyAllPermission.
+    """
     queryset = ArbitratorProfiles.objects.all()
     serializer_class = ArbitratorProfilesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -175,9 +204,12 @@ class BargainingNotesViewSet(viewsets.ModelViewSet):
 
 class CbaFootnotesViewSet(viewsets.ModelViewSet):
     """API endpoint for CbaFootnotes operations."""
+    # Round 43: no legitimate consumer (no organization filter possible via
+    # the generated queryset; contained pending a real parent-owned isolation
+    # design through source_clause -> cba_clauses -> collective_agreements).
     queryset = CbaFootnotes.objects.all()
     serializer_class = CbaFootnotesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['source_clause_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -198,9 +230,11 @@ class CollectiveAgreementsViewSet(viewsets.ModelViewSet):
 
 class CbaVersionHistoryViewSet(viewsets.ModelViewSet):
     """API endpoint for CbaVersionHistory operations."""
+    # Round 43: no legitimate consumer; contained pending a real parent-owned
+    # isolation design through cba -> collective_agreements.
     queryset = CbaVersionHistory.objects.all()
     serializer_class = CbaVersionHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -209,9 +243,11 @@ class CbaVersionHistoryViewSet(viewsets.ModelViewSet):
 
 class CbaContactsViewSet(viewsets.ModelViewSet):
     """API endpoint for CbaContacts operations."""
+    # Round 43: no legitimate consumer; contained pending a real parent-owned
+    # isolation design through cba -> collective_agreements.
     queryset = CbaContacts.objects.all()
     serializer_class = CbaContactsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['cba_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -219,20 +255,38 @@ class CbaContactsViewSet(viewsets.ModelViewSet):
 
 
 class SharedClauseLibraryViewSet(viewsets.ModelViewSet):
-    """API endpoint for SharedClauseLibrary operations."""
+    """API endpoint for SharedClauseLibrary operations.
+
+    CONTAINED (PR #752 round 55 — final non-voting parent architecture
+    exceptions): this generated ModelViewSet is IsAuthenticated-only with
+    queryset=Model.objects.all() — no organization/sharing-level scoping
+    whatsoever. The real TS-side authority model (owner + sharingLevel:
+    private/federation/congress/public, see
+    lib/clause-library/sharing-authority.ts) is Next.js-only; reproducing
+    cross-union sharing authorization in Django is out of scope. No
+    legitimate Django consumer found (only a feature-name string literal in
+    lib/utils/smart-onboarding.ts references the URL slug, not an actual
+    caller).
+    """
     queryset = SharedClauseLibrary.objects.all()
     serializer_class = SharedClauseLibrarySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class ClauseLibraryTagsViewSet(viewsets.ModelViewSet):
-    """API endpoint for ClauseLibraryTags operations."""
+    """API endpoint for ClauseLibraryTags operations.
+
+    CONTAINED (PR #752 round 55 — same cohort as SharedClauseLibraryViewSet
+    above): IsAuthenticated-only, queryset=Model.objects.all(), no
+    inheritance of parent-clause read/write authority whatsoever. No
+    legitimate Django consumer found.
+    """
     queryset = ClauseLibraryTags.objects.all()
     serializer_class = ClauseLibraryTagsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

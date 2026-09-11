@@ -124,7 +124,7 @@ export default function DistributionListDetailPage() {
       if (response.ok) {
         const json = await response.json();
         const data = json.data ?? json;
-        setSubscribers(Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : []);
+        setSubscribers(Array.isArray(data.subscribers) ? data.subscribers : Array.isArray(data) ? data : []);
       }
     } catch {
       // Subscribers fetch is non-critical

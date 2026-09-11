@@ -2,6 +2,15 @@ import { uuid, varchar, boolean, timestamp, text, jsonb, integer, pgSchema, chec
 import { sql, relations } from "drizzle-orm";
 import { organizations } from "../../../schema-organizations";
 
+// Canonical `userSessions` declaration lives in ../../user-management-schema
+// (live-DB-verified 2026-09-01: table lives in the `public` schema, not
+// `user_management` — migration 0019 dropped the schema-qualified table,
+// migrations 0055/0058/0081 recreated it in `public` with RLS already
+// enabled). This file's copy also had a phantom `session_token_hash` column
+// that never physically existed; re-exported here instead of re-declared
+// (PR #752 review round 3).
+import { userSessions } from "../../user-management-schema";
+
 // Create user_management schema
 export const userManagementSchema = pgSchema("user_management");
 
@@ -65,25 +74,7 @@ export const organizationUsers = userManagementSchema.table("organization_users"
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
-// User sessions table - authentication session management
-export const userSessions = userManagementSchema.table("user_sessions", {
-  sessionId: uuid("session_id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.userId, { onDelete: "cascade" }),
-  organizationId: uuid("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
-  sessionToken: text("session_token").notNull().unique(),
-  refreshToken: text("refresh_token").unique(),
-  deviceInfo: jsonb("device_info").default(sql`'{}'::jsonb`),
-  ipAddress: varchar("ip_address", { length: 45 }), // IPv6 support
-  userAgent: text("user_agent"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  isActive: boolean("is_active").default(true),
-  sessionTokenHash: text("session_token_hash"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  lastUsedAt: timestamp("last_used_at", { withTimezone: true }).defaultNow(),
-}, (table) => ({
-  checkExpiry: check("valid_expiry", 
-    sql`${table.expiresAt} > ${table.createdAt}`),
-}));
+export { userSessions };
 
 // Password reset tokens - secure token-based password recovery
 export const passwordResetTokens = userManagementSchema.table("password_reset_tokens", {

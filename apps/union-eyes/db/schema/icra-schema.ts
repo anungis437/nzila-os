@@ -67,11 +67,16 @@ export const icraAssessments = pgTable(
     utmSource: varchar('utm_source', { length: 128 }),
     utmMedium: varchar('utm_medium', { length: 128 }),
     utmCampaign: varchar('utm_campaign', { length: 128 }),
+    // Bearer capability for the pseudonymous questionnaire/results flow —
+    // only a hash is ever persisted here. See lib/icra/assessment-capability.ts.
+    capabilityTokenHash: varchar('capability_token_hash', { length: 128 }),
+    capabilityTokenExpiresAt: timestamp('capability_token_expires_at', { withTimezone: true }),
   },
   (t) => ({
     statusIdx: index('icra_assessments_status_idx').on(t.status),
     createdIdx: index('icra_assessments_created_idx').on(t.createdAt),
     claimTokenIdx: index('icra_assessments_claim_token_idx').on(t.claimToken),
+    capabilityTokenHashIdx: index('icra_assessments_capability_token_hash_idx').on(t.capabilityTokenHash),
   }),
 );
 

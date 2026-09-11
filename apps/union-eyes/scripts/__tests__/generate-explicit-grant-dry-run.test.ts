@@ -1,0 +1,57 @@
+import { describe, expect, it } from 'vitest'
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { execFileSync } from 'node:child_process'
+
+const APP_ROOT = resolve(__dirname, '..', '..')
+const REPO_ROOT = resolve(APP_ROOT, '..', '..')
+const TSX_CLI = resolve(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs')
+const REPORT_JSON = resolve(REPO_ROOT, 'reports', 'union-eyes-explicit-grant-dry-run.json')
+const REPORT_MD = resolve(REPO_ROOT, 'reports', 'union-eyes-explicit-grant-dry-run.md')
+
+describe('generate-explicit-grant-dry-run', () => {
+  it('runs without throwing and produces an internally consistent plan', () => {
+    expect(existsSync(TSX_CLI), 'tsx CLI entrypoint must exist so the generator is actually executed').toBe(true)
+
+    execFileSync(process.execPath, [TSX_CLI, 'scripts/generate-explicit-grant-dry-run.ts'], {
+      cwd: APP_ROOT,
+      stdio: 'pipe',
+    })
+
+    expect(existsSync(REPORT_JSON)).toBe(true)
+    expect(existsSync(REPORT_MD)).toBe(true)
+
+    const report = JSON.parse(readFileSync(REPORT_JSON, 'utf8'))
+    expect(report.readyForExplicitGrantCount).toBeGreaterThan(0)
+    expect(report.readyForExplicitGrantCount + report.pendingReviewCount).toBe(report.totalManifestEntries)
+    // PR #752 round 11, item 10: convergence signals beyond ready/pending.
+    expect(report.tenantGrantedTableCount).toBeGreaterThan(0)
+    expect(report.systemGrantedTableCount).toBeGreaterThan(0)
+    for (const op of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) {
+      expect(typeof report.tenantOperationTotals[op]).toBe('number')
+      expect(typeof report.systemOperationTotals[op]).toBe('number')
+    }
+    expect(Array.isArray(report.riskSignals.tenantDeleteGrants)).toBe(true)
+    expect(Array.isArray(report.riskSignals.mixedPrincipalTables)).toBe(true)
+    expect(Array.isArray(report.riskSignals.systemOnlyBroadSystemDml)).toBe(true)
+    expect(Array.isArray(report.riskSignals.globalReferenceDataWithMutations)).toBe(true)
+    // Every ready entry must have fully resolved (non-TBD, array) privileges —
+    // the generator itself throws before writing the report if this is
+    // violated, so a successful run already proves this, but assert it
+    // explicitly too so a future refactor can't silently swallow the throw.
+    for (const row of report.readyForExplicitGrant) {
+      expect(Array.isArray(row.tenantPrivileges)).toBe(true)
+      expect(Array.isArray(row.systemPrivileges)).toBe(true)
+      if (row.classification === 'SYSTEM_ONLY') {
+        expect(row.tenantPrivileges).toEqual([])
+      }
+      if (row.classification === 'LATENT_UNREACHABLE') {
+        expect(row.tenantPrivileges).toEqual([])
+        expect(row.systemPrivileges).toEqual([])
+      }
+    }
+
+    const md = readFileSync(REPORT_MD, 'utf8')
+    expect(md).toContain('Explicit Grant Dry-Run Plan')
+  })
+})

@@ -17,9 +17,9 @@
  *   abr-insights  — RED-TEAM-ABR-001 through RED-TEAM-ABR-003
  *   all           — every profile (default)
  */
-import { execSync } from 'node:child_process'
-import { writeFileSync, mkdirSync } from 'node:fs'
-import { join } from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { basename, join } from 'node:path'
 import {
   getRunEnvironment,
   getDefaultSeed,
@@ -88,32 +88,42 @@ function runProfile(profileName: string, files: string[], seed: number): Profile
   const scenarios: ScenarioResult[] = []
   const startTime = Date.now()
 
-  const fileArgs = files.map((f) => join(__dirname, f)).join(' ')
-  const cmd = `npx vitest run ${fileArgs} --reporter=json --no-color`
+  const vitestCli = join(__dirname, '..', '..', 'node_modules', 'vitest', 'vitest.mjs')
+  const configPath = join(__dirname, 'vitest.config.ts')
+  const vitestJsonPath = join(__dirname, 'redteam-results.json')
+  const fileArgs = files
 
   let rawOutput = ''
   let exitCode = 0
 
   try {
-    rawOutput = execSync(cmd, {
-      encoding: 'utf-8',
-      cwd: __dirname,
-      env: { ...process.env, REDTEAM_SEED: String(seed) },
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 120_000,
-    })
+    rawOutput = execFileSync(
+      process.execPath,
+      [vitestCli, 'run', ...fileArgs, '--config', configPath, '--reporter=json', '--no-color'],
+      {
+        encoding: 'utf-8',
+        cwd: __dirname,
+        env: { ...process.env, REDTEAM_SEED: String(seed) },
+        stdio: ['pipe', 'pipe', 'pipe'],
+        timeout: 120_000,
+      },
+    )
   } catch (err: unknown) {
-    exitCode = err.status ?? 1
-    rawOutput = err.stdout ?? ''
+    const e = err as { status?: number; stdout?: string | Buffer }
+    exitCode = e.status ?? 1
+    rawOutput = Buffer.isBuffer(e.stdout) ? e.stdout.toString('utf8') : e.stdout ?? ''
   }
 
   // Parse vitest JSON output
   try {
     // Vitest JSON output may be preceded by console output; find last { ... }
-    const jsonStart = rawOutput.lastIndexOf('{"numTotalTestSuites"')
+    const jsonSource = existsSync(vitestJsonPath) ? readFileSync(vitestJsonPath, 'utf8') : rawOutput
+    const jsonStart = jsonSource.lastIndexOf('{"numTotalTestSuites"')
     if (jsonStart >= 0) {
-      const json = JSON.parse(rawOutput.slice(jsonStart))
+      const json = JSON.parse(jsonSource.slice(jsonStart))
+      const profileFiles = new Set(files)
       for (const suite of json.testResults ?? []) {
+        if (!profileFiles.has(basename(suite.name ?? ''))) continue
         for (const t of suite.assertionResults ?? []) {
           const id = t.ancestorTitles?.[0]?.match(/RED-TEAM-(?:ABR-)?\d+/)?.[0] ?? 'UNKNOWN'
           scenarios.push({

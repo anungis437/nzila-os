@@ -243,7 +243,8 @@ describe("batchProcessStipendPayouts", () => {
 });
 
 describe("createDonationPaymentIntent", () => {
-  it("creates a donation payment intent", async () => {
+  it("creates a donation payment intent, deriving organizationId from the strike fund's tenant", async () => {
+    enqueue([{ tenantId: "org-1" }]); // strike fund lookup
     h.stripe.paymentIntents.create.mockResolvedValue({
       id: "pi_don",
       client_secret: "cs_don",
@@ -251,37 +252,59 @@ describe("createDonationPaymentIntent", () => {
       status: "requires_payment_method",
     });
     const result = await createDonationPaymentIntent({
-      organizationId: "org-1",
       strikeFundId: "f1",
       amount: 50,
       donorEmail: "d@x.com",
     });
     expect(result.id).toBe("pi_don");
+    expect(h.stripe.paymentIntents.create).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ organizationId: "org-1" }) }),
+    );
+  });
+
+  it("throws when the strike fund does not exist (never trusts a client-supplied organizationId)", async () => {
+    enqueue([]); // strike fund lookup returns nothing
+    await expect(
+      createDonationPaymentIntent({ strikeFundId: "missing", amount: 50 }),
+    ).rejects.toThrow("Strike fund not found");
   });
 
   it("rejects donations below $1", async () => {
+    enqueue([{ tenantId: "org-1" }]); // strike fund lookup
     await expect(
-      createDonationPaymentIntent({ organizationId: "org-1", strikeFundId: "f1", amount: 0.5 }),
+      createDonationPaymentIntent({ strikeFundId: "f1", amount: 0.5 }),
     ).rejects.toThrow("at least $1.00");
   });
 });
 
 describe("confirmDonationPayment", () => {
-  it("creates a donation record and returns its id", async () => {
+  it("creates a donation record using the organizationId from the payment intent's own metadata", async () => {
     h.stripe.paymentIntents.retrieve.mockResolvedValue({
       status: "succeeded",
       amount: 5000,
-      metadata: { strikeFundId: "f1", donorName: "Jane", isAnonymous: "false" },
+      metadata: { organizationId: "org-1", strikeFundId: "f1", donorName: "Jane", isAnonymous: "false" },
     });
     enqueue([{ id: "don_1" }]); // insert returning
-    const id = await confirmDonationPayment({ organizationId: "org-1", paymentIntentId: "pi_1" });
+    const id = await confirmDonationPayment({ paymentIntentId: "pi_1" });
     expect(id).toBe("don_1");
+    expect(h.db.insert).toHaveBeenCalled();
+  });
+
+  it("throws when the payment intent metadata is missing organizationId (never falls back to a client value)", async () => {
+    h.stripe.paymentIntents.retrieve.mockResolvedValue({
+      status: "succeeded",
+      amount: 5000,
+      metadata: { strikeFundId: "f1" },
+    });
+    await expect(
+      confirmDonationPayment({ paymentIntentId: "pi_1" }),
+    ).rejects.toThrow("missing organization metadata");
   });
 
   it("throws when the intent did not succeed", async () => {
     h.stripe.paymentIntents.retrieve.mockResolvedValue({ status: "processing" });
     await expect(
-      confirmDonationPayment({ organizationId: "org-1", paymentIntentId: "pi_1" }),
+      confirmDonationPayment({ paymentIntentId: "pi_1" }),
     ).rejects.toThrow("Payment not successful");
   });
 });

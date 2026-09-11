@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { pilotApplications } from '@/db/schema';
 import { withApiAuth, hasMinRole } from '@/lib/api-auth-guard';
 import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { buildProposalPackage, normalizeCommercialState } from '@/lib/pilot/commercialization-wave1';
 import { logger } from '@/lib/logger';
 
@@ -23,10 +24,12 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
       return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
     }
 
-    const [application] = await db
-      .select()
-      .from(pilotApplications)
-      .where(and(eq(pilotApplications.id, id)));
+    const [application] = await withSystemContext((_tx) =>
+      db
+        .select()
+        .from(pilotApplications)
+        .where(and(eq(pilotApplications.id, id))),
+    );
 
     if (!application) {
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });

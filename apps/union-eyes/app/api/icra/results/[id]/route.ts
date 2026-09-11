@@ -10,10 +10,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
-import { icraMaturityProfiles } from '@/db/schema/icra-schema';
+import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
 import { rateLimit } from '@/lib/rate-limit';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import {
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+} from '@/lib/icra/assessment-capability';
 import { logger } from '@/lib/logger';
 
 interface Params {
@@ -35,19 +40,39 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
   }
 
   try {
-    const rows = await db
-      .select({ profilePayload: icraMaturityProfiles.profilePayload })
-      .from(icraMaturityProfiles)
-      .where(eq(icraMaturityProfiles.assessmentId, id))
-      .limit(1);
+    return await withSystemContext(async (tx) => {
+      const [assessment] = await tx
+        .select({
+          capabilityTokenHash: icraAssessments.capabilityTokenHash,
+          capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+        })
+        .from(icraAssessments)
+        .where(eq(icraAssessments.id, id))
+        .limit(1);
 
-    const row = rows[0];
-    if (!row) {
-      return NextResponse.json({ error: 'Assessment not found.' }, { status: 404 });
-    }
+      const presented = extractCapabilityToken(req, id);
+      const capCheck = checkCapability(presented, assessment);
+      if (!capCheck.ok) {
+        return NextResponse.json(
+          { error: 'Not authorized to view these results' },
+          { status: capabilityDenialStatus(capCheck.reason) },
+        );
+      }
 
-    const profile = row.profilePayload as OrganizationalContinuityProfile;
-    return NextResponse.json(profile, { status: 200 });
+      const rows = await tx
+        .select({ profilePayload: icraMaturityProfiles.profilePayload })
+        .from(icraMaturityProfiles)
+        .where(eq(icraMaturityProfiles.assessmentId, id))
+        .limit(1);
+
+      const row = rows[0];
+      if (!row) {
+        return NextResponse.json({ error: 'Assessment not found.' }, { status: 404 });
+      }
+
+      const profile = row.profilePayload as OrganizationalContinuityProfile;
+      return NextResponse.json(profile, { status: 200 });
+    });
   } catch (err) {
     logger.error('icra.results.fetch_failed', { id, error: (err as Error).message });
     return NextResponse.json({ error: 'Failed to fetch results.' }, { status: 500 });

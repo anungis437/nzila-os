@@ -167,11 +167,25 @@ export async function rankCandidates(
  * Assign top-ranked workers to a dispatch request.
  *
  * Inserts assignment rows and updates request status.
+ *
+ * ROUND 50 SECURITY FIX: previously took no orgId and performed no check
+ * that requestId belonged to the caller's organization, letting one
+ * organization inject assignment rows into another organization's
+ * dispatch request (cross-tenant IDOR). Mirrors the ownership check
+ * already used in rankCandidates() above.
  */
 export async function assignWorkersToDispatch(
+  orgId: string,
   requestId: string,
   memberIds: string[],
 ) {
+  const [request] = await db
+    .select()
+    .from(dispatchRequests)
+    .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, orgId)));
+
+  if (!request) throw new Error("Dispatch request not found.");
+
   const assignments = await db
     .insert(dispatchAssignments)
     .values(
@@ -183,22 +197,14 @@ export async function assignWorkersToDispatch(
     )
     .returning();
 
-  // Fetch request to check if fully filled
-  const [request] = await db
-    .select()
-    .from(dispatchRequests)
+  const filled = memberIds.length >= request.requestedWorkers;
+  await db
+    .update(dispatchRequests)
+    .set({
+      status: filled ? "filled" : "partially_filled",
+      updatedAt: new Date(),
+    })
     .where(eq(dispatchRequests.id, requestId));
-
-  if (request) {
-    const filled = memberIds.length >= request.requestedWorkers;
-    await db
-      .update(dispatchRequests)
-      .set({
-        status: filled ? "filled" : "partially_filled",
-        updatedAt: new Date(),
-      })
-      .where(eq(dispatchRequests.id, requestId));
-  }
 
   return assignments;
 }

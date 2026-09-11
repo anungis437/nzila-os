@@ -28,6 +28,7 @@ import { logger } from "@/lib/logger";
 
 export interface StrikeDisbursement {
   userId: string;
+  organizationId: string;
   strikeId?: string;
   strikeName?: string;
   paymentDate: Date;
@@ -74,6 +75,7 @@ export class TaxSlipService {
       .insert(strikeFundDisbursements)
       .values({
         userId: disbursement.userId,
+        organizationId: disbursement.organizationId,
         strikeId: disbursement.strikeId,
         strikeName: disbursement.strikeName,
         paymentDate: disbursement.paymentDate,

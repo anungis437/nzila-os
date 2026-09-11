@@ -252,7 +252,7 @@ pnpm install
 cp .env.example .env
 
 # Required variables:
-# - DATABASE_URL (Supabase)
+# - DATABASE_URL (canonical Union Eyes Azure PostgreSQL)
 # - STRIPE_SECRET_KEY (test key)
 # - STRIPE_WEBHOOK_SECRET (from Stripe CLI)
 # - CLERK_SECRET_KEY (authentication)

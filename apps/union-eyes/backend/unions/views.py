@@ -8,11 +8,41 @@ from .models import (AwardTemplates, AwardHistory, RewardWalletLedger, BudgetPoo
 from .serializers import (AwardTemplatesSerializer, AwardHistorySerializer, RewardWalletLedgerSerializer, BudgetPoolSerializer, BudgetReservationsSerializer, CalendarsSerializer, CalendarEventsSerializer, EventAttendeesSerializer, MeetingRoomsSerializer, RoomBookingsSerializer, CalendarSharingSerializer, ExternalCalendarConnectionsSerializer, EventRemindersSerializer, CongressMembershipsSerializer, HolidaysSerializer, StewardAssignmentsSerializer, OutreachSequencesSerializer, OutreachEnrollmentsSerializer, OutreachStepsLogSerializer, FieldNotesSerializer, OrganizerTasksSerializer, TaskCommentsSerializer, MemberRelationshipScoresSerializer, SurveysSerializer, SurveyQuestionsSerializer, SurveyResponsesSerializer, SurveyAnswersSerializer, PollsSerializer, PollVotesSerializer, MemberLocationConsentSerializer, FederationsSerializer, FederationMembershipsSerializer, FederationExecutivesSerializer, FederationMeetingsSerializer, FederationRemittancesSerializer, FederationCampaignsSerializer, FederationCommunicationsSerializer, FederationResourcesSerializer, VotingSessionsSerializer, VotingOptionsSerializer, VoterEligibilitySerializer, VotesSerializer, VotingNotificationsSerializer, VotingAuditLogSerializer, OrganizingCampaignsSerializer, OrganizingContactsSerializer, CardSigningEventsSerializer, NlrbClrbFilingsSerializer, UnionRepresentationVotesSerializer, FieldOrganizerActivitiesSerializer, EmployerResponsesSerializer, OrganizingCampaignMilestonesSerializer, RecognitionProgramsSerializer, RecognitionAwardTypesSerializer, RecognitionAwardsSerializer, RewardBudgetEnvelopesSerializer, RewardRedemptionsSerializer, MemberAddressesSerializer, MemberEmploymentSerializer, EmploymentHistorySerializer, MemberLeavesSerializer, JobClassificationsSerializer, MemberSegmentsSerializer, SegmentExecutionsSerializer, SegmentExportsSerializer, TrainingCoursesSerializer, CourseSessionsSerializer, CourseRegistrationsSerializer, MemberCertificationsSerializer, TrainingProgramsSerializer, ProgramEnrollmentsSerializer, EmployersSerializer, WorksitesSerializer, BargainingUnitsSerializer, CommitteesSerializer, CommitteeMembershipsSerializer, RoleTenureHistorySerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Fail-closed containment: unconditionally denies every request.
+
+    Used for models with no proven legitimate Django consumer and no
+    tenant isolation mechanism (PR #752 round 36):
+    - RewardWalletLedger: the Django model maps only user_id — it does
+      not even model org_id, let alone the ledger's financial fields
+      (event_type/amount_credits/balance_after/source_type). The real
+      TS ledger surface is append-only (SELECT/INSERT only); nothing
+      justifies a Django ModelViewSet exposing full CRUD.
+    - RewardBudgetEnvelopes: the Django model maps only a nullable
+      org_id, omitting program_id/name/scope/period/limit/usage/dates.
+      No real TS or Django consumer of either REST endpoint was found
+      anywhere in the app.
+    - AwardTemplates/AwardHistory (round 54): lib/services/rewards/
+      template-service.ts has zero production callers anywhere.
+    Remove only once a proven legitimate consumer and organization-bound
+    isolation mechanism exist for the relevant table.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class AwardTemplatesViewSet(viewsets.ModelViewSet):
+    """round 54: dead-TS finding (template-service.ts has zero production
+    importers). Contained via DenyAllPermission.
+    """
     """API endpoint for AwardTemplates operations."""
     queryset = AwardTemplates.objects.all()
     serializer_class = AwardTemplatesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -21,10 +51,14 @@ class AwardTemplatesViewSet(viewsets.ModelViewSet):
 
 
 class AwardHistoryViewSet(viewsets.ModelViewSet):
+    """round 54: dead-TS finding (template-service.ts's recordTemplateUsage/
+    getTemplateHistory have zero production callers). Contained via
+    DenyAllPermission.
+    """
     """API endpoint for AwardHistory operations."""
     queryset = AwardHistory.objects.all()
     serializer_class = AwardHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['template_id', 'recipient_id']
     search_fields = ['recipient_id']
@@ -36,7 +70,7 @@ class RewardWalletLedgerViewSet(viewsets.ModelViewSet):
     """API endpoint for RewardWalletLedger operations."""
     queryset = RewardWalletLedger.objects.all()
     serializer_class = RewardWalletLedgerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_id']
     search_fields = ['user_id']
@@ -45,10 +79,19 @@ class RewardWalletLedgerViewSet(viewsets.ModelViewSet):
 
 
 class BudgetPoolViewSet(viewsets.ModelViewSet):
-    """API endpoint for BudgetPool operations."""
+    """API endpoint for BudgetPool operations.
+
+    Round 56: was IsAuthenticated + objects.all() with no org filter — a
+    cross-tenant financial data leak (any authenticated user could read/
+    write any organization's budget pool). Zero legitimate consumer exists
+    (the real app reads budget_pool via tenant-scoped raw SQL in
+    app/api/finance/summary and lib/ai/financial-insights.ts, never this
+    Django REST path); the sibling BudgetReservationsViewSet already got
+    DenyAllPermission in round 42 — this was the missed counterpart.
+    """
     queryset = BudgetPool.objects.all()
     serializer_class = BudgetPoolSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['name']
     search_fields = ['name']
@@ -60,7 +103,7 @@ class BudgetReservationsViewSet(viewsets.ModelViewSet):
     """API endpoint for BudgetReservations operations."""
     queryset = BudgetReservations.objects.all()
     serializer_class = BudgetReservationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['pool_id', 'status']
     search_fields = ['status']
@@ -69,10 +112,17 @@ class BudgetReservationsViewSet(viewsets.ModelViewSet):
 
 
 class CalendarsViewSet(viewsets.ModelViewSet):
-    """API endpoint for Calendars operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, CALENDAR_AND_SCHEDULING
+    family): the real, live authority surface for calendars is the Next.js
+    crudRoutes-based app/api/calendars/route.ts and [id]/route.ts (org- and
+    owner-scoped). This generated Django ViewSet had no organization_id
+    filter at all and no legitimate TS/frontend consumer of the Django REST
+    path was found anywhere (git-grep confirmed). Contained via
+    DenyAllPermission.
+    """
     queryset = Calendars.objects.all()
     serializer_class = CalendarsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -93,7 +143,7 @@ class EventAttendeesViewSet(viewsets.ModelViewSet):
     """API endpoint for EventAttendees operations."""
     queryset = EventAttendees.objects.all()
     serializer_class = EventAttendeesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['event_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -101,20 +151,31 @@ class EventAttendeesViewSet(viewsets.ModelViewSet):
 
 
 class MeetingRoomsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MeetingRooms operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, CALENDAR_AND_SCHEDULING
+    family): the real, live authority surface for meeting_rooms is the
+    Next.js crudRoutes-based app/api/meeting-rooms/route.ts (org-scoped).
+    This generated Django ViewSet had no organization_id filter at all and
+    no legitimate TS/frontend consumer of the Django REST path was found
+    anywhere (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = MeetingRooms.objects.all()
     serializer_class = MeetingRoomsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class RoomBookingsViewSet(viewsets.ModelViewSet):
-    """API endpoint for RoomBookings operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, CALENDAR_AND_SCHEDULING
+    family, adjacent table): room_bookings.roomId FKs to meeting_rooms; git-grep
+    confirms ZERO production TS callers of roomBookings anywhere in this app
+    (dead code) and no Django consumer either. This ViewSet had no
+    organization_id filter at all. Contained via DenyAllPermission.
+    """
     queryset = RoomBookings.objects.all()
     serializer_class = RoomBookingsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['room_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -229,7 +290,7 @@ class OrganizerTasksViewSet(viewsets.ModelViewSet):
     """API endpoint for OrganizerTasks operations."""
     queryset = OrganizerTasks.objects.all()
     serializer_class = OrganizerTasksSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -376,10 +437,17 @@ class FederationMeetingsViewSet(viewsets.ModelViewSet):
 
 
 class FederationRemittancesViewSet(viewsets.ModelViewSet):
-    """API endpoint for FederationRemittances operations."""
+    """API endpoint for FederationRemittances operations.
+
+    round 51: FederationRemittances has ZERO TypeScript consumer anywhere
+    (no Drizzle export references this table at all, per the round-51 census) —
+    dead on the TS side, and this generated Django ViewSet exposed
+    queryset=Model.objects.all() + IsAuthenticated-only with NO organization
+    filter of any kind. Contained via DenyAllPermission.
+    """
     queryset = FederationRemittances.objects.all()
     serializer_class = FederationRemittancesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -435,9 +503,12 @@ class VotingSessionsViewSet(viewsets.ModelViewSet):
 
 class VotingOptionsViewSet(viewsets.ModelViewSet):
     """API endpoint for VotingOptions operations."""
+    # Round 44: full CRUD with no organization filter; no legitimate Django
+    # consumer (voting_options TS status remains a round-42 dual-schema
+    # exception, unaffected by this independent Django containment).
     queryset = VotingOptions.objects.all()
     serializer_class = VotingOptionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -446,9 +517,12 @@ class VotingOptionsViewSet(viewsets.ModelViewSet):
 
 class VoterEligibilityViewSet(viewsets.ModelViewSet):
     """API endpoint for VoterEligibility operations."""
+    # Round 44: full CRUD with no organization filter; the real TS path
+    # (voting-service.ts's checkVoterEligibility) only ever does a narrow
+    # point-lookup, never list/create/update/delete via this surface.
     queryset = VoterEligibility.objects.all()
     serializer_class = VoterEligibilitySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -457,9 +531,13 @@ class VoterEligibilityViewSet(viewsets.ModelViewSet):
 
 class VotesViewSet(viewsets.ModelViewSet):
     """API endpoint for Votes operations."""
+    # Round 44: full CRUD with no organization filter, exposing individual
+    # ballots across every organization; no legitimate Django consumer
+    # (votes TS status remains a round-42 dual-schema exception, unaffected
+    # by this independent Django containment).
     queryset = Votes.objects.all()
     serializer_class = VotesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -468,9 +546,10 @@ class VotesViewSet(viewsets.ModelViewSet):
 
 class VotingNotificationsViewSet(viewsets.ModelViewSet):
     """API endpoint for VotingNotifications operations."""
+    # Round 44: no real TS consumer beyond schema/financial-service dual-schema.
     queryset = VotingNotifications.objects.all()
     serializer_class = VotingNotificationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -479,9 +558,11 @@ class VotingNotificationsViewSet(viewsets.ModelViewSet):
 
 class VotingAuditLogViewSet(viewsets.ModelViewSet):
     """API endpoint for VotingAuditLog operations."""
+    # Round 44: voting-crypto-service.ts's createVotingAuditLog/
+    # verifyElectionIntegrity have zero real callers.
     queryset = VotingAuditLog.objects.all()
     serializer_class = VotingAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['session_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -580,27 +661,41 @@ class RecognitionProgramsViewSet(viewsets.ModelViewSet):
     """API endpoint for RecognitionPrograms operations."""
     queryset = RecognitionPrograms.objects.all()
     serializer_class = RecognitionProgramsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class RecognitionAwardTypesViewSet(viewsets.ModelViewSet):
-    """API endpoint for RecognitionAwardTypes operations."""
+    """API endpoint for RecognitionAwardTypes operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): the real TS consumers (lib/services/rewards/*-service.ts,
+    reached via app/[locale]/dashboard/admin/rewards/analytics/page.tsx and
+    app/api/rewards/cron/route.ts) already enforce org scoping in Next.js;
+    this generated ModelViewSet(queryset=Model.objects.all(),
+    permission_classes=[IsAuthenticated]) has no legitimate Django consumer
+    and no organization scoping of its own — contained via the existing
+    DenyAllPermission used above for RecognitionProgramsViewSet.
+    """
     queryset = RecognitionAwardTypes.objects.all()
     serializer_class = RecognitionAwardTypesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class RecognitionAwardsViewSet(viewsets.ModelViewSet):
-    """API endpoint for RecognitionAwards operations."""
+    """API endpoint for RecognitionAwards operations.
+
+    CONTAINED (PR #752 round 50): see RecognitionAwardTypesViewSet — same
+    no-Django-consumer finding.
+    """
     queryset = RecognitionAwards.objects.all()
     serializer_class = RecognitionAwardsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -610,7 +705,7 @@ class RewardBudgetEnvelopesViewSet(viewsets.ModelViewSet):
     """API endpoint for RewardBudgetEnvelopes operations."""
     queryset = RewardBudgetEnvelopes.objects.all()
     serializer_class = RewardBudgetEnvelopesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -620,7 +715,7 @@ class RewardRedemptionsViewSet(viewsets.ModelViewSet):
     """API endpoint for RewardRedemptions operations."""
     queryset = RewardRedemptions.objects.all()
     serializer_class = RewardRedemptionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -721,10 +816,16 @@ class SegmentExportsViewSet(viewsets.ModelViewSet):
 
 
 class TrainingCoursesViewSet(viewsets.ModelViewSet):
-    """API endpoint for TrainingCourses operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, TRAINING_AND_REGISTRATION
+    family): real, live authority surface is the Next.js crudRoutes-based
+    app/api/education/courses/route.ts (org-scoped). This generated Django
+    ViewSet had no organization_id filter at all and no legitimate TS/
+    frontend consumer of the Django REST path was found anywhere
+    (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = TrainingCourses.objects.all()
     serializer_class = TrainingCoursesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['course_code']
     search_fields = ['course_code']
@@ -745,10 +846,19 @@ class CourseSessionsViewSet(viewsets.ModelViewSet):
 
 
 class CourseRegistrationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for CourseRegistrations operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, TRAINING_AND_REGISTRATION
+    family): real, live authority surface is the Next.js crudRoutes-based
+    app/api/education/registrations/route.ts (org- and member-scoped). This
+    generated Django ViewSet had no organization_id filter at all (only a
+    member_id filterset field with no ownership check), exposing every
+    organization's registrations — including test scores, attendance, and
+    certification status — to any authenticated user. No legitimate TS/
+    frontend consumer of the Django REST path was found anywhere (git-grep
+    confirmed). Contained via DenyAllPermission.
+    """
     queryset = CourseRegistrations.objects.all()
     serializer_class = CourseRegistrationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['member_id']
     search_fields = ['member_id']
@@ -769,10 +879,16 @@ class MemberCertificationsViewSet(viewsets.ModelViewSet):
 
 
 class TrainingProgramsViewSet(viewsets.ModelViewSet):
-    """API endpoint for TrainingPrograms operations."""
+    """round 53 (FINAL_SIMPLE_TENANT_EXCEPTION_CLOSURE, TRAINING_AND_REGISTRATION
+    family): real, live authority surface is the Next.js crudRoutes-based
+    app/api/education/programs/route.ts (org-scoped). This generated Django
+    ViewSet had no organization_id filter at all and no legitimate TS/
+    frontend consumer of the Django REST path was found anywhere
+    (git-grep confirmed). Contained via DenyAllPermission.
+    """
     queryset = TrainingPrograms.objects.all()
     serializer_class = TrainingProgramsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['program_name']
     search_fields = ['program_name']

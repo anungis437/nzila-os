@@ -21,7 +21,7 @@ import {
   dataQualityWarnings,
   ingestionRecords,
 } from '@/db/schema/ingestion-schema';
-import { grievances } from '@/db/schema/grievance-schema';
+import { grievances } from '@/db/schema/domains/claims/grievances';
 import { logger } from '@/lib/logger';
 
 // ─── Types ───────────────────────────────────────────────────────────────────

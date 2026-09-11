@@ -19,7 +19,7 @@ describe('continuity inheritance route', () => {
     expect(source).toContain('crudRoutes({');
     expect(source).toContain('table: pendingProfilesTable');
     expect(source).toContain('orgScoped: true');
-    expect(source).toContain("readRole: 'member'");
+    expect(source).toContain("readRole: 'support_agent'");
     expect(source).toContain("writeRole: 'steward'");
     expect(source).toContain("export const dynamic = 'force-dynamic'");
     expect(source).toContain('export { GET, POST }');

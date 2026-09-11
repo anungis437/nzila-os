@@ -26,8 +26,31 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
+
+
+class DenyAllPermission(BasePermission):
+    """CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): no legitimate frontend consumer of this ViewSet
+    exists anywhere (verified by exhaustive grep across app/, actions/,
+    lib/ for every action name and the 'certification-management-service'
+    URL segment — the only apparent caller, lib/api/certification-management-service-api.ts,
+    is itself an unused generated fetch-client wrapper). Every read action
+    here also applies ZERO organization_id filtering
+    (CertificationTypes/StaffCertifications/ContinuingEducation/
+    LicenseRenewals/CertificationAlerts/CertificationComplianceReports/
+    CertificationAuditLog `.objects.all()`), and CertificationAuditLog
+    rows are created with only action_type set (no actor/subject/tenant
+    attribution at all). Deny unconditionally until a real consumer and
+    correct org scoping + audit attribution exist.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
 
 
 class CertificationManagementServiceViewSet(viewsets.ViewSet):
@@ -38,7 +61,7 @@ class CertificationManagementServiceViewSet(viewsets.ViewSet):
     education tracking, license renewals, and compliance reporting.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [DenyAllPermission]
 
     # ------------------------------------------------------------------
     # Certification Types

@@ -1,13 +1,20 @@
 /**
  * GET POST /api/clause-library
  * Direct DB — replaces Django proxy
+ *
+ * Round 55 (OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY): LIST results are
+ * filtered to only clauses the caller's organization is authorized to read
+ * (owner, or a sharingLevel that grants it — see lib/clause-library/sharing-authority.ts).
+ * CREATE always stamps sourceOrganizationId from the authenticated caller's
+ * organization, never from the request body (prevents ownership spoofing).
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { organizations } from '@/db/schema-organizations';
+import { organizations, congressMemberships } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { buildClauseVisibilityCondition } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +26,9 @@ export const GET = withApi(
       summary: 'List shared clauses with filters and pagination',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+
     const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')));
@@ -31,7 +40,8 @@ export const GET = withApi(
     const includeExpired = url.searchParams.get('includeExpired') === 'true';
 
     return await withSystemContext(async () => {
-      const conditions: ReturnType<typeof eq>[] = [];
+      const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
+      const conditions: ReturnType<typeof eq>[] = [visibilityCondition];
 
       if (search) {
         conditions.push(
@@ -62,7 +72,7 @@ export const GET = withApi(
         );
       }
 
-      const where = conditions.length > 0 ? and(...conditions) : undefined;
+      const where = and(...conditions);
 
       const [rows, countResult] = await Promise.all([
         db
@@ -84,11 +94,29 @@ export const GET = withApi(
           })
           .from(sharedClauseLibrary)
           .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
+          .leftJoin(
+            congressMemberships,
+            and(
+              eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
+              eq(congressMemberships.status, 'active'),
+            ),
+          )
           .where(where)
           .orderBy(sharedClauseLibrary.createdAt)
           .limit(limit)
           .offset((page - 1) * limit),
-        db.select({ count: sql<number>`count(*)::int` }).from(sharedClauseLibrary).where(where),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(sharedClauseLibrary)
+          .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
+          .leftJoin(
+            congressMemberships,
+            and(
+              eq(congressMemberships.organizationId, sharedClauseLibrary.sourceOrganizationId),
+              eq(congressMemberships.status, 'active'),
+            ),
+          )
+          .where(where),
       ]);
 
       const total = countResult[0]?.count ?? 0;
@@ -130,14 +158,19 @@ export const POST = withApi(
       summary: 'Create a new shared clause',
     },
   },
-  async ({ request, userId }) => {
+  async ({ request, userId, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
     const body = await request.json();
 
     return await withSystemContext(async () => {
       const [created] = await db
         .insert(sharedClauseLibrary)
         .values({
-          sourceOrganizationId: body.sourceOrganizationId,
+          // sourceOrganizationId is ALWAYS the authenticated caller's own
+          // organization — never taken from the request body (round 55
+          // fix: the prior code trusted body.sourceOrganizationId, letting
+          // any steward create a clause "owned" by an arbitrary org).
+          sourceOrganizationId: organizationId,
           sourceCbaId: body.sourceCbaId ?? null,
           originalClauseId: body.originalClauseId ?? null,
           clauseNumber: body.clauseNumber ?? null,

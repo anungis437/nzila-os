@@ -19,8 +19,13 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { db } from '@/db/db';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import {
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+} from '@/lib/icra/assessment-capability';
 import type { InstitutionalContinuityProfile, OrganizationContext } from '@/lib/icra/types';
 import { mapCtxToOrganizationContext } from '@/lib/icra/org-context-mapper';
 import { mapToPdfReportData } from '@/lib/icra-pdf/reportDataMapper';
@@ -36,7 +41,7 @@ interface RouteContext {
   params: Promise<{ assessmentId: string }>;
 }
 
-export async function GET(_request: Request, { params }: RouteContext) {
+export async function GET(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params;
 
   if (!assessmentId || typeof assessmentId !== 'string') {
@@ -50,13 +55,16 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   try {
+    return await withSystemContext(async (tx) => {
     // Fetch assessment (tier gate + org context)
-    const [assessment] = await db
+    const [assessment] = await tx
       .select({
         id: icraAssessments.id,
         status: icraAssessments.status,
         reportTierId: icraAssessments.reportTierId,
         organizationContext: icraAssessments.organizationContext,
+        capabilityTokenHash: icraAssessments.capabilityTokenHash,
+        capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
@@ -64,6 +72,15 @@ export async function GET(_request: Request, { params }: RouteContext) {
 
     if (!assessment) {
       return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
+    }
+
+    const presented = extractCapabilityToken(request, assessmentId);
+    const capCheck = checkCapability(presented, assessment);
+    if (!capCheck.ok) {
+      return NextResponse.json(
+        { error: 'Not authorized to download this report' },
+        { status: capabilityDenialStatus(capCheck.reason) },
+      );
     }
 
     if (assessment.status !== 'completed') {
@@ -81,7 +98,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     }
 
     // Fetch profile payload
-    const [profileRow] = await db
+    const [profileRow] = await tx
       .select({ profilePayload: icraMaturityProfiles.profilePayload })
       .from(icraMaturityProfiles)
       .where(eq(icraMaturityProfiles.assessmentId, assessmentId))
@@ -121,6 +138,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
         'X-Content-Type-Options': 'nosniff',
         'X-Robots-Tag': 'noindex, nofollow',
       },
+    });
     });
   } catch (error) {
     // Log server-side; do not leak stack or internal details to client.

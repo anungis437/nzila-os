@@ -10,6 +10,23 @@ import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * ROUND 50 SECURITY FIX: deviceId is globally unique, but the previous
+ * onConflictDoUpdate() target only matched on deviceId, with no check
+ * that any pre-existing row for that deviceId belonged to the caller.
+ * Any authenticated user who knew (or guessed) another user's deviceId
+ * could silently overwrite that row's deviceToken, hijacking their push
+ * notification channel.
+ */
+export function assertDeviceNotOwnedByAnotherUser(
+  existingOwnerUserId: string | undefined,
+  callerUserId: string,
+): void {
+  if (existingOwnerUserId && existingOwnerUserId !== callerUserId) {
+    throw ApiError.conflict('This device is already registered to another account');
+  }
+}
+
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
@@ -68,6 +85,13 @@ export const POST = withApi(
     if (!deviceToken || !deviceId || !platform) {
       throw ApiError.badRequest('deviceToken, deviceId, and platform are required');
     }
+
+    const [existing] = await db
+      .select({ userId: mobileDevices.userId })
+      .from(mobileDevices)
+      .where(eq(mobileDevices.deviceId, deviceId))
+      .limit(1);
+    assertDeviceNotOwnedByAnotherUser(existing?.userId, userId);
 
     const [created] = await db
       .insert(mobileDevices)

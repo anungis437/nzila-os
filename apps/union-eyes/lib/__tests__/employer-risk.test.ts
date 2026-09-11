@@ -41,14 +41,18 @@ vi.mock("drizzle-orm", () => ({
   desc: vi.fn((x: any) => x),
   count: vi.fn(() => "count"),
   sql: vi.fn(),
+  relations: vi.fn(() => ({})),
 }));
 
 vi.mock("@/db/schema/domains/ml/employer-risk-scores", () => ({
   employerRiskScores: { id: "id", employerId: "employerId", organizationId: "organizationId" },
 }));
 
+vi.mock("@/db/schema/union-structure-schema", () => ({
+  employers: { id: "id", organizationId: "organizationId", name: "name", industryCode: "industryCode" },
+}));
+
 vi.mock("@/db/schema/domains/compliance/employer-compliance", () => ({
-  employers: { id: "id", orgId: "orgId", name: "name", industry: "industry" },
   complianceAlerts: { id: "id", employerId: "employerId", orgId: "orgId", createdAt: "createdAt" },
 }));
 

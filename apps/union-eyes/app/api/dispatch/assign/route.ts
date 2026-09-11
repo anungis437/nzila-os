@@ -36,6 +36,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
     }
 
     const assignments = await assignWorkersToDispatch(
+      organizationId,
       parsed.data.requestId,
       parsed.data.memberIds,
     );
@@ -50,7 +51,10 @@ export const POST = withOrganizationAuth(async (request, context) => {
     });
 
     return standardSuccessResponse(assignments);
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof Error && error.message === "Dispatch request not found.") {
+      return standardErrorResponse(ErrorCode.NOT_FOUND, "Dispatch request not found");
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to assign dispatch workers");
   }
 });

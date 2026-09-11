@@ -85,4 +85,24 @@ describe('deadline-engine audit writer', () => {
     mocks.execute.mockRejectedValueOnce(new Error('DB down'));
     await expect(writeDeadlineAuditEvent(baseInput)).rejects.toThrow(/DB down/);
   });
+
+  // ROUND 49: writeDeadlineAuditEvent must execute on an explicitly-passed
+  // system transaction when one is supplied (e.g. by a cron job running
+  // under withSystemContext), rather than always falling back to the
+  // ambient `db` import — a prior system-job-writes-via-tenant-runtime
+  // mismatch this closes for the deadline-overdue cron caller.
+  it('executes on the supplied tx instead of the ambient db import when tx is provided', async () => {
+    const txExecute = vi.fn().mockResolvedValue([]);
+    const tx = { execute: txExecute };
+
+    await writeDeadlineAuditEvent(baseInput, tx);
+
+    expect(txExecute).toHaveBeenCalledTimes(1);
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the ambient db import when no tx is supplied', async () => {
+    await writeDeadlineAuditEvent(baseInput);
+    expect(mocks.execute).toHaveBeenCalledTimes(1);
+  });
 });

@@ -8,6 +8,25 @@ from .models import (BoardPackets, BoardPacketSections, BoardPacketDistributions
 from .serializers import (BoardPacketsSerializer, BoardPacketSectionsSerializer, BoardPacketDistributionsSerializer, BoardPacketTemplatesSerializer, CmsTemplatesSerializer, CmsPagesSerializer, CmsBlocksSerializer, CmsNavigationMenusSerializer, CmsMediaLibrarySerializer, PublicEventsSerializer, EventRegistrationsSerializer, EventCheckInsSerializer, JobPostingsSerializer, JobApplicationsSerializer, JobSavedSerializer, WebsiteSettingsSerializer, DocumentFoldersSerializer, DocumentsSerializer, PublicContentSerializer, MemberDocumentsSerializer, SignatureDocumentsSerializer, DocumentSignersSerializer, SignatureAuditTrailSerializer, SignatureTemplatesSerializer, SignatureWebhooksLogSerializer, SignatureWorkflowsSerializer, SignersSerializer, SignatureAuditLogSerializer, SignatureVerificationSerializer, ShopifyConfigSerializer, WebhookReceiptsSerializer, SocialAccountsSerializer, SocialPostsSerializer, SocialCampaignsSerializer, SocialAnalyticsSerializer, SocialFeedsSerializer, SocialEngagementSerializer, ImpactMetricsSerializer, CaseStudiesSerializer, TestimonialsSerializer, PilotApplicationsSerializer, PilotMetricsSerializer, OrganizerImpactsSerializer, DataAggregationConsentSerializer, MovementTrendsSerializer)
 
 
+class DenyAllPermission(permissions.BasePermission):
+    """Round 37: no legitimate Django consumer of SocialAccountsViewSet exists.
+
+    The generated model only maps `organization` (not the canonical access_token/
+    refresh_token/platform fields), but Django DELETE/UPDATE still operate on the
+    real physical `social_accounts` row — an authenticated user of any org could
+    reassign `organization_id` (org-takeover of another org's OAuth-connected
+    account) or delete it, with no queryset scoping (`IsAuthenticated` only,
+    `organization_id` merely query-filterable). Deny unconditionally until a real
+    consumer with proven tenant isolation exists.
+    """
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class BoardPacketsViewSet(viewsets.ModelViewSet):
     """API endpoint for BoardPackets operations."""
     queryset = BoardPackets.objects.all()
@@ -186,11 +205,21 @@ class WebsiteSettingsViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
 
+class Round40DenyAllPermission(permissions.BasePermission):
+    """Round 40: no legitimate Django consumer exists for contained generated ViewSets."""
+
+    def has_permission(self, request, view):
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return False
+
+
 class DocumentFoldersViewSet(viewsets.ModelViewSet):
     """API endpoint for DocumentFolders operations."""
     queryset = DocumentFolders.objects.all()
     serializer_class = DocumentFoldersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -210,7 +239,7 @@ class PublicContentViewSet(viewsets.ModelViewSet):
     """API endpoint for PublicContent operations."""
     queryset = PublicContent.objects.all()
     serializer_class = PublicContentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -229,30 +258,64 @@ class MemberDocumentsViewSet(viewsets.ModelViewSet):
 
 
 class SignatureDocumentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureDocuments operations."""
+    """API endpoint for SignatureDocuments operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    signature_documents is TENANT_RLS_REQUIRED; its real Next.js consumer
+    (lib/signature/signature-service.ts + app/api/signatures/**) enforces
+    org/sender/signer access via SignatureService.verifyDocumentAccess().
+    This generated ModelViewSet has no such scoping (IsAuthenticated only)
+    and would let any authenticated user read/reassign/delete any
+    organization's signature documents. No real Django consumer found.
+    """
     queryset = SignatureDocuments.objects.all()
     serializer_class = SignatureDocumentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class DocumentSignersViewSet(viewsets.ModelViewSet):
-    """API endpoint for DocumentSigners operations."""
+    """API endpoint for DocumentSigners operations.
+
+    CONTAINED (PR #752 round 45 — dependency-frontier root authority batch):
+    document_signers rows are mutated only via SignatureService.recordSignature(),
+    which this round was fixed to require the signer's own user_id match the
+    authenticated caller (a signature-forgery IDOR otherwise). This generated
+    ModelViewSet has no such check and would let any authenticated user update
+    any signer's status/signature fields directly. No real Django consumer found.
+    """
     queryset = DocumentSigners.objects.all()
     serializer_class = DocumentSignersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SignatureAuditTrailViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureAuditTrail operations."""
+    """API endpoint for SignatureAuditTrail operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): the real, legitimate consumer is
+    lib/signature/signature-service.ts's AuditTrailService, reached via
+    app/api/signatures/audit/[documentId]/route.ts,
+    app/api/signatures/documents/route.ts,
+    app/api/signatures/documents/[id]/route.ts, and
+    app/api/signatures/sign/route.ts — all of which now verify document
+    access via SignatureService.verifyDocumentAccess() (the audit route's
+    check was added this round to close a cross-tenant IDOR). This
+    generated ModelViewSet applies no such scoping at all
+    (queryset=SignatureAuditTrail.objects.all(),
+    permission_classes=[IsAuthenticated]) and would let any authenticated
+    user of any organization read every document's signer identities, IPs,
+    and timestamps. No legitimate Django consumer found; contained since
+    the real TS surface already covers this table correctly.
+    """
     queryset = SignatureAuditTrail.objects.all()
     serializer_class = SignatureAuditTrailSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -281,60 +344,134 @@ class SignatureWebhooksLogViewSet(viewsets.ModelViewSet):
 
 
 class SignatureWorkflowsViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureWorkflows operations."""
+    """API endpoint for SignatureWorkflows operations.
+
+    CONTAINED (PR #752 round 50 — state-machine root and fan-out cascade
+    authority): signature_workflows' ONLY writer, services/pki/workflow-engine.ts's
+    createWorkflow(), which persists to the DB, has zero callers anywhere
+    — the admin routes that DO call this file's other exports
+    (recordSignature/advanceWorkflow/cancelWorkflow/getWorkflow) all read
+    from an in-memory workflowStore Map that is NEVER populated (since
+    createWorkflow is unreachable), so those calls always fail with
+    'Workflow not found' against real data — functionally dead despite
+    superficially live-looking admin routes. The REAL, live signature
+    subsystem (lib/signature/signature-service.ts, reached via
+    app/api/signatures/**) operates on the entirely separate
+    signature_documents table, not this one. This generated ModelViewSet
+    is unscoped (permission_classes=[IsAuthenticated]). No legitimate
+    consumer found on either side.
+    """
     queryset = SignatureWorkflows.objects.all()
     serializer_class = SignatureWorkflowsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SignersViewSet(viewsets.ModelViewSet):
-    """API endpoint for Signers operations."""
+    """API endpoint for Signers operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): the ONLY code paths that write/read the real `signers`
+    Drizzle table (services/pki/signature-service.ts's createSignatureRequest/
+    getUserSignatureRequests/completeSignatureRequestStep/cancelSignatureRequest/
+    expireOverdueSignatureRequests/rejectSignature/getDocumentSignatures, and
+    lib/services/signature-workflow-service.ts's createSignatureWorkflow) have
+    zero real callers anywhere in app/, actions/, lib/, services/ (the sole
+    reachable route, app/api/admin/pki/signatures/[id]/sign/route.ts, only
+    calls signDocument()/recordSignature(), neither of which touches this
+    table). This generated ModelViewSet is unscoped (IsAuthenticated-only). No
+    legitimate consumer found on either side.
+    """
     queryset = Signers.objects.all()
     serializer_class = SignersSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SignatureAuditLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureAuditLog operations."""
+    """API endpoint for SignatureAuditLog operations.
+
+    CONTAINED (PR #752 round 49 — immutable security and audit evidence
+    authority cohort): lib/services/signature-workflow-service.ts's
+    SignatureWorkflowService (the sole writer of this table) has zero
+    callers anywhere in app/, actions/, or lib/ — fully dead code
+    (lib/services/index.ts explicitly does not re-export it: "import
+    directly from file" — confirmed no direct importer exists either).
+    This generated ModelViewSet is unscoped (permission_classes=
+    [IsAuthenticated]). No legitimate consumer found on either side.
+    """
     queryset = SignatureAuditLog.objects.all()
     serializer_class = SignatureAuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class SignatureVerificationViewSet(viewsets.ModelViewSet):
-    """API endpoint for SignatureVerification operations."""
+    """API endpoint for SignatureVerification operations.
+
+    CONTAINED (PR #752 round 54 — final non-voting parent-owned authority
+    convergence): sole writer lib/services/signature-workflow-service.ts's
+    handleSignerCompleted() has zero real callers anywhere (the file is not
+    re-exported from lib/services/index.ts and has no direct importer) —
+    fully dead TS code. This generated ModelViewSet is unscoped
+    (IsAuthenticated-only). No legitimate consumer found on either side.
+    """
     queryset = SignatureVerification.objects.all()
     serializer_class = SignatureVerificationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class ShopifyConfigViewSet(viewsets.ModelViewSet):
-    """API endpoint for ShopifyConfig operations."""
+    """API endpoint for ShopifyConfig operations.
+
+    CONTAINED (PR #752 round 46 — system and mixed execution authority
+    cohort, credential-sensitive): shopify_config stores secret REFERENCES
+    (storefront_token_secret_ref, admin_token_secret_ref, webhook_secret_ref
+    — not raw secret values) per organization. The only TS reader
+    (lib/services/rewards/shopify-service.ts's fetchCuratedCollections, which
+    only touches allowedCollections, never the secret ref columns) has ZERO
+    callers anywhere outside its own test file — confirmed dead code. No
+    insert/update path exists anywhere. This generated ModelViewSet was
+    IsAuthenticated-only with no scoping and a default serializer that would
+    have exposed every organization's secret-ref columns to any
+    authenticated user — a credential-adjacent leak even though the values
+    are references rather than raw secrets. No real Django consumer found.
+    """
     queryset = ShopifyConfig.objects.all()
     serializer_class = ShopifyConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class WebhookReceiptsViewSet(viewsets.ModelViewSet):
-    """API endpoint for WebhookReceipts operations."""
+    """API endpoint for WebhookReceipts operations.
+
+    CONTAINED (PR #752 round 46 — system and mixed execution authority
+    cohort): webhook_receipts has no organization_id column at all — it is
+    genuinely global, webhook-invoked (SYSTEM) replay-protection
+    infrastructure shared across all Shopify/PayPal integrations
+    (lib/services/rewards/webhook-service.ts), written only from
+    app/api/integrations/shopify/webhooks/route.ts and
+    app/api/payments/webhooks/paypal/route.ts after HMAC/provider signature
+    verification. This generated ModelViewSet has no scoping at all and
+    would let any authenticated user read/reassign/delete replay-protection
+    receipts (potential replay-attack enablement) via a second API surface.
+    No real Django consumer found.
+    """
     queryset = WebhookReceipts.objects.all()
     serializer_class = WebhookReceiptsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['webhook_id']
     search_fields = ['provider', 'webhook_id']
@@ -346,7 +483,7 @@ class SocialAccountsViewSet(viewsets.ModelViewSet):
     """API endpoint for SocialAccounts operations."""
     queryset = SocialAccounts.objects.all()
     serializer_class = SocialAccountsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['organization_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -477,17 +614,30 @@ class DataAggregationConsentViewSet(viewsets.ModelViewSet):
     """API endpoint for DataAggregationConsent operations."""
     queryset = DataAggregationConsent.objects.all()
     serializer_class = DataAggregationConsentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Round40DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class MovementTrendsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MovementTrends operations."""
+    """API endpoint for MovementTrends operations.
+
+    round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, DERIVED_MOVEMENT_INSIGHT
+    family): movement_trends is a genuine cross-organization aggregate (no
+    organizationId column by design — organizationsContributing is a count,
+    not an FK). The legitimate path is exclusively the two read-only,
+    officer-role-gated Next.js pages (app/[locale]/dashboard/
+    movement-insights/{page,export/page}.tsx via requireUser() +
+    MOVEMENT_INSIGHTS_ROLES); no application code anywhere ever writes this
+    table (git-grep confirmed zero insert/update/delete callers). This
+    generated Django ViewSet allowed full CRUD to ANY authenticated user of
+    ANY organization with no officer-role gate at all — contained via
+    DenyAllPermission.
+    """
     queryset = MovementTrends.objects.all()
     serializer_class = MovementTrendsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['legislative_brief_relevance', 'emerging_pattern']
     search_fields = ['category', 'dimension', 'timeframe', 'insights', 'confidence_level']

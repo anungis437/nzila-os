@@ -13,12 +13,23 @@ import { db } from '@/db';
 import {
   rewardBudgetEnvelopes,
   budgetReservations,
+  recognitionPrograms,
   type NewRewardBudgetEnvelope,
   type RewardBudgetEnvelope,
 } from '@/db/schema';
 import { eq, and, sql, lte, gte, desc, asc, ne, type SQL } from 'drizzle-orm';
+import { type PgTransaction } from 'drizzle-orm/pg-core';
+import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
+
+type DbTransaction = PgTransaction<
+  PostgresJsQueryResultHKT,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+>;
 
 export interface BudgetCheckResult {
   hasEnoughBudget: boolean;
@@ -30,10 +41,22 @@ export interface BudgetCheckResult {
 
 /**
  * Create a budget envelope
+ *
+ * Proves the referenced recognition program belongs to the same org before
+ * inserting — the program_id FK only proves the program exists, not that
+ * its owner equals the envelope's org_id (round 36).
  */
 export async function createBudgetEnvelope(
   data: NewRewardBudgetEnvelope
 ): Promise<RewardBudgetEnvelope> {
+  const program = await db.query.recognitionPrograms.findFirst({
+    where: eq(recognitionPrograms.id, data.programId),
+  });
+
+  if (!program || program.orgId !== data.orgId) {
+    throw new Error('Recognition program not found for this organization');
+  }
+
   const [envelope] = await db
     .insert(rewardBudgetEnvelopes)
     .values({
@@ -126,6 +149,7 @@ export async function updateBudgetEnvelope(
  */
 export async function checkBudgetAvailability(
   programId: string,
+  orgId: string,
   creditsNeeded: number
 ): Promise<boolean> {
   const now = new Date();
@@ -133,6 +157,7 @@ export async function checkBudgetAvailability(
   const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
     where: and(
       eq(rewardBudgetEnvelopes.programId, programId),
+      eq(rewardBudgetEnvelopes.orgId, orgId),
       eq(rewardBudgetEnvelopes.scopeType, 'org'),
       lte(rewardBudgetEnvelopes.startsAt, now),
       gte(rewardBudgetEnvelopes.endsAt, now)
@@ -150,66 +175,39 @@ export async function checkBudgetAvailability(
 
 /**
  * Apply budget usage
+ * @param tx Active transaction (or the module db) — pass the caller's
+ *   transaction so this participates in the same atomic unit as the award
+ *   state update and ledger entry, matching applyLedgerEntry() (round 36).
  * @param amount Can be positive (usage) or negative (refund/revoke)
  */
 export async function applyBudgetUsage(
+  tx: DbTransaction | typeof db,
   programId: string,
+  orgId: string,
   amount: number
 ): Promise<void> {
   const now = new Date();
 
-  const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
-    where: and(
-      eq(rewardBudgetEnvelopes.programId, programId),
-      eq(rewardBudgetEnvelopes.scopeType, 'org'),
-      lte(rewardBudgetEnvelopes.startsAt, now),
-      gte(rewardBudgetEnvelopes.endsAt, now)
-    ),
-    orderBy: [desc(rewardBudgetEnvelopes.createdAt)],
-  });
+  const [envelope] = await tx
+    .select()
+    .from(rewardBudgetEnvelopes)
+    .where(
+      and(
+        eq(rewardBudgetEnvelopes.programId, programId),
+        eq(rewardBudgetEnvelopes.orgId, orgId),
+        eq(rewardBudgetEnvelopes.scopeType, 'org'),
+        lte(rewardBudgetEnvelopes.startsAt, now),
+        gte(rewardBudgetEnvelopes.endsAt, now)
+      )
+    )
+    .orderBy(desc(rewardBudgetEnvelopes.createdAt))
+    .limit(1);
 
   if (!envelope) {
     return;
   }
 
-  await db
-    .update(rewardBudgetEnvelopes)
-    .set({
-      amountUsed: sql`${rewardBudgetEnvelopes.amountUsed} + ${amount}`,
-      updatedAt: new Date(),
-    })
-    .where(eq(rewardBudgetEnvelopes.id, envelope.id));
-}
-
-/**
- * Apply budget usage with limit enforcement
- */
-export async function applyBudgetUsageChecked(
-  programId: string,
-  amount: number
-): Promise<boolean> {
-  if (amount <= 0) {
-    await applyBudgetUsage(programId, amount);
-    return true;
-  }
-
-  const now = new Date();
-
-  const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
-    where: and(
-      eq(rewardBudgetEnvelopes.programId, programId),
-      eq(rewardBudgetEnvelopes.scopeType, 'org'),
-      lte(rewardBudgetEnvelopes.startsAt, now),
-      gte(rewardBudgetEnvelopes.endsAt, now)
-    ),
-    orderBy: [desc(rewardBudgetEnvelopes.createdAt)],
-  });
-
-  if (!envelope) {
-    return true;
-  }
-
-  const [updated] = await db
+  await tx
     .update(rewardBudgetEnvelopes)
     .set({
       amountUsed: sql`${rewardBudgetEnvelopes.amountUsed} + ${amount}`,
@@ -218,6 +216,57 @@ export async function applyBudgetUsageChecked(
     .where(
       and(
         eq(rewardBudgetEnvelopes.id, envelope.id),
+        eq(rewardBudgetEnvelopes.orgId, orgId)
+      )
+    );
+}
+
+/**
+ * Apply budget usage with limit enforcement
+ * @param tx Active transaction (or the module db) — see applyBudgetUsage.
+ */
+export async function applyBudgetUsageChecked(
+  tx: DbTransaction | typeof db,
+  programId: string,
+  orgId: string,
+  amount: number
+): Promise<boolean> {
+  if (amount <= 0) {
+    await applyBudgetUsage(tx, programId, orgId, amount);
+    return true;
+  }
+
+  const now = new Date();
+
+  const [envelope] = await tx
+    .select()
+    .from(rewardBudgetEnvelopes)
+    .where(
+      and(
+        eq(rewardBudgetEnvelopes.programId, programId),
+        eq(rewardBudgetEnvelopes.orgId, orgId),
+        eq(rewardBudgetEnvelopes.scopeType, 'org'),
+        lte(rewardBudgetEnvelopes.startsAt, now),
+        gte(rewardBudgetEnvelopes.endsAt, now)
+      )
+    )
+    .orderBy(desc(rewardBudgetEnvelopes.createdAt))
+    .limit(1);
+
+  if (!envelope) {
+    return true;
+  }
+
+  const [updated] = await tx
+    .update(rewardBudgetEnvelopes)
+    .set({
+      amountUsed: sql`${rewardBudgetEnvelopes.amountUsed} + ${amount}`,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(rewardBudgetEnvelopes.id, envelope.id),
+        eq(rewardBudgetEnvelopes.orgId, orgId),
         sql`${rewardBudgetEnvelopes.amountUsed} + ${amount} <= ${rewardBudgetEnvelopes.amountLimit}`
       )
     )
@@ -274,6 +323,7 @@ export async function getBudgetUsageSummary(
  */
 export async function reserveBudget(
   programId: string,
+  orgId: string,
   amount: number,
   referenceType: string,
   referenceId: string,
@@ -286,6 +336,7 @@ export async function reserveBudget(
     const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
       where: and(
         eq(rewardBudgetEnvelopes.programId, programId),
+        eq(rewardBudgetEnvelopes.orgId, orgId),
         eq(rewardBudgetEnvelopes.scopeType, 'org'),
         lte(rewardBudgetEnvelopes.startsAt, now),
         gte(rewardBudgetEnvelopes.endsAt, now)

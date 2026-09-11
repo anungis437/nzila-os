@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation';
 import { db } from '@/db';
 import { workbookMemoryHolders, workbooks } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
+import { verifyClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { isFrench } from '@/lib/workbook/copy';
 import MemoryHoldersClient from './MemoryHoldersClient';
 
@@ -21,6 +22,15 @@ export default async function MemoryHoldersPage({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id } = await params;
+
+  // ROUND 50 SECURITY FIX: this server component previously queried
+  // workbookMemoryHolders (including free-text `notes`) directly, bypassing
+  // the ownership check already required once a workbook is claimed — see
+  // lib/workbook/access-control.ts. Renders a generic not-found rather than
+  // a distinguishable "forbidden" response, matching this page's existing
+  // anti-surveillance posture (never reveal existence via response shape).
+  const access = await verifyClaimedWorkbookAccess(id);
+  if (!access.ok) notFound();
 
   const [wb] = await db
     .select({ id: workbooks.id })

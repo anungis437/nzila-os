@@ -6,7 +6,7 @@ import { withApi } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
-import { desc, count } from 'drizzle-orm';
+import { desc, count, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { auditDataMutation } from '@/lib/audit-logger';
 
@@ -14,7 +14,6 @@ const createBoardPacketSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().max(5000).optional(),
   packetType: z.string().min(1).max(50),
-  organizationId: z.string().uuid(),
   periodStart: z.string().min(1),
   periodEnd: z.string().min(1),
   fiscalYear: z.number().int().min(1900).max(2100),
@@ -42,15 +41,21 @@ export const GET = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'List board packets' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')));
     const offset = (page - 1) * limit;
 
     const [_totalResult, packets] = await Promise.all([
-      db.select({ total: count() }).from(boardPackets),
-      db.select().from(boardPackets).orderBy(desc(boardPackets.createdAt)).limit(limit).offset(offset),
+      db.select({ total: count() }).from(boardPackets).where(eq(boardPackets.organizationId, organizationId!)),
+      db
+        .select()
+        .from(boardPackets)
+        .where(eq(boardPackets.organizationId, organizationId!))
+        .orderBy(desc(boardPackets.createdAt))
+        .limit(limit)
+        .offset(offset),
     ]);
 
     return packets;
@@ -65,12 +70,15 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId }) => {
     const parsed = createBoardPacketSchema.parse(body);
-    const [packet] = await withRLSContext(async () =>
-      db.insert(boardPackets).values(parsed).returning()
+    // organizationId always comes from the resolved caller context, never
+    // client input — a create request cannot mint a board packet for a
+    // different organization.
+    const [packet] = await withRLSContext(async (tx) =>
+      tx.insert(boardPackets).values({ ...parsed, organizationId: organizationId! }).returning()
     );
     await auditDataMutation({
       userId: userId!,
-      organizationId: organizationId || parsed.organizationId,
+      organizationId: organizationId!,
       resource: 'board_packets',
       resourceId: packet.id,
       action: 'create',

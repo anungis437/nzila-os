@@ -17,12 +17,17 @@ import { pendingProfilesTable } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
+// round 52: see app/api/onboarding/route.ts for the full rationale — this
+// table has no organizationId column (orgScoped is a no-op) and readRole
+// was 'member', letting any authenticated user of ANY org list every
+// pre-signup user's email/payment data. Fixed: readRole raised to
+// 'support_agent' (a genuine PLATFORM_ELEVATED_ROLES member).
 const { GET, POST } = crudRoutes({
   table: pendingProfilesTable,
   pk: 'id',
   tags: ['Auth'],
   orgScoped: true,
-  readRole: 'member',
+  readRole: 'support_agent',
   writeRole: 'steward',
 });
 

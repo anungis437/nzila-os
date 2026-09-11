@@ -150,6 +150,28 @@ export async function getAllocationRules(organizationId: string) {
     .orderBy(desc(allocationRules.createdAt));
 }
 
+/**
+ * ROUND 50 SECURITY FIX: getActiveRuleVersion() resolves a rule version by
+ * ruleId alone, with no tenant scoping (allocation_rule_versions has no
+ * organization_id column of its own — ownership lives on the parent
+ * allocation_rules row). runAllocation() previously passed a client-supplied
+ * ruleId straight through, letting an authenticated admin from one
+ * organization execute an allocation run using ANOTHER organization's
+ * private allocation rule (cross-tenant IDOR). This guard verifies the rule
+ * belongs to the caller's organization before it is ever resolved/applied.
+ */
+async function verifyAllocationRuleOwnership(
+  ruleId: string,
+  organizationId: string,
+): Promise<boolean> {
+  const [rule] = await db
+    .select({ id: allocationRules.id })
+    .from(allocationRules)
+    .where(and(eq(allocationRules.id, ruleId), eq(allocationRules.organizationId, organizationId)))
+    .limit(1);
+  return !!rule;
+}
+
 // ============================================================================
 // Allocation Execution
 // ============================================================================
@@ -173,6 +195,13 @@ export async function runAllocation(
 
     if (!period) throw new Error(`Billing period ${input.billingPeriodId} not found`);
     if (period.isClosed) throw new Error(`Billing period ${period.label} is closed`);
+  }
+
+  // ROUND 50 SECURITY FIX: reject rules that don't belong to the caller's org
+  // before resolving/applying them — see verifyAllocationRuleOwnership above.
+  const ownsRule = await verifyAllocationRuleOwnership(input.ruleId, input.organizationId);
+  if (!ownsRule) {
+    throw new Error(`Allocation rule ${input.ruleId} not found for this organization`);
   }
 
   // Get effective rule version

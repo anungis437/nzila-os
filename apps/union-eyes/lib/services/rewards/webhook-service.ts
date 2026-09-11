@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   webhookReceipts,
   type NewWebhookReceipt,
@@ -56,14 +56,19 @@ export async function isWebhookProcessed(
   provider: 'shopify' | 'paypal',
   webhookId: string
 ): Promise<boolean> {
-  const existing = await db.query.webhookReceipts.findFirst({
-    where: and(
-      eq(webhookReceipts.provider, provider),
-      eq(webhookReceipts.webhookId, webhookId)
-    ),
-  });
+  // webhook_receipts has no organization_id column — it is genuinely global,
+  // webhook-invoked (SYSTEM) infrastructure, so this must run on the system
+  // connection rather than the plain tenant db import (round 46 fix).
+  return withSystemContext(async (tx) => {
+    const existing = await tx.query.webhookReceipts.findFirst({
+      where: and(
+        eq(webhookReceipts.provider, provider),
+        eq(webhookReceipts.webhookId, webhookId)
+      ),
+    });
 
-  return !!existing;
+    return !!existing;
+  });
 }
 
 /**
@@ -75,15 +80,17 @@ export async function isWebhookProcessed(
 export async function recordWebhookProcessed(
   data: NewWebhookReceipt
 ): Promise<WebhookReceipt> {
-  const [receipt] = await db
-    .insert(webhookReceipts)
-    .values({
-      ...data,
-      processedAt: new Date(),
-    })
-    .returning();
+  return withSystemContext(async (tx) => {
+    const [receipt] = await tx
+      .insert(webhookReceipts)
+      .values({
+        ...data,
+        processedAt: new Date(),
+      })
+      .returning();
 
-  return receipt;
+    return receipt;
+  });
 }
 
 /**

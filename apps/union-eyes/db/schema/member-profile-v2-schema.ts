@@ -176,47 +176,59 @@ export const memberConsents = pgTable('member_consents', {
 });
 
 // Member Documents
+// Member Documents
+// Canonical shape verified 2026-09-01 against live staging DB
+// (information_schema.columns, 27 columns) — PR #752 review. Previously
+// this declaration had 3 genuine mismatches against the real table
+// (user_id is TEXT not uuid; organization_id is NULLABLE not notNull;
+// file_size is NOT NULL not nullable) and was missing 3 real columns
+// (file_type, category, uploaded_at). Fixed to match live truth; the
+// separate 10-column declaration in member-documents-schema.ts (a correct
+// but incomplete subset) now re-exports this one instead of re-declaring.
 export const memberDocuments = pgTable('member_documents', {
   id: uuid('id').primaryKey().defaultRandom(),
-  
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+
   // Member Reference
-  userId: uuid('user_id').notNull(),
-  organizationId: uuid('organization_id').notNull(),
-  
-  // Document Details
-  documentType: text('document_type').notNull(), // certification, license, medical, identification, training, contract
-  documentName: text('document_name').notNull(),
-  documentNumber: text('document_number'),
-  
+  userId: text('user_id').notNull(),
+  organizationId: uuid('organization_id'),
+
   // File Information
-  fileUrl: text('file_url').notNull(),
   fileName: text('file_name').notNull(),
-  fileSize: integer('file_size'),
+  fileUrl: text('file_url').notNull(),
+  fileSize: integer('file_size').notNull(),
+  fileType: text('file_type').notNull(),
+  category: text('category'),
+  uploadedAt: timestamp('uploaded_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+
+  // Document Details
+  documentType: text('document_type'),
+  documentName: text('document_name'),
+  documentNumber: text('document_number'),
   mimeType: text('mime_type'),
   fileHash: text('file_hash'), // SHA-256
-  
+
   // Validity
   issueDate: timestamp('issue_date'),
   expiryDate: timestamp('expiry_date'),
   isExpired: boolean('is_expired').default(false),
-  
+
   // Verification
   verified: boolean('verified').default(false),
   verifiedBy: text('verified_by'),
   verifiedAt: timestamp('verified_at'),
   verificationNotes: text('verification_notes'),
-  
+
   // Classification
-  confidentialityLevel: text('confidentiality_level').default('internal'), // public, internal, confidential, restricted
+  confidentialityLevel: text('confidentiality_level'),
   tags: jsonb('tags').$type<string[]>(),
-  
+
   // Metadata
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
-  
+
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
   uploadedBy: text('uploaded_by'),
 });
 

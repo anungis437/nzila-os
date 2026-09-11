@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, timestamp, varchar, boolean, decimal } from "drizzle-orm/pg-core";
+import { organizations } from "../../../schema-organizations";
 
 /**
  * Strike Fund Tax Compliance Schema
@@ -11,7 +12,14 @@ import { pgTable, uuid, text, timestamp, varchar, boolean, decimal } from "drizz
 export const strikeFundDisbursements = pgTable("strike_fund_disbursements", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: varchar("user_id", { length: 255 }).notNull(),
-  
+
+  // Round 58 Phase 0: the economically-owning organization. Not derivable
+  // from user_id alone (a member's organization_members row can change
+  // over time) — must be stamped server-side at insert time from the
+  // trusted request context, never backfilled from present-day membership
+  // for historical rows without an explicit, audited mapping.
+  organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+
   // Strike details
   strikeId: uuid("strike_id"),
   strikeName: text("strike_name"),

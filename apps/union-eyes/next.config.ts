@@ -97,7 +97,7 @@ const ContentSecurityPolicy = [
   
   // Connections: SECURITY TRADEOFF - Permissive for dynamic integrations
   // Core domains whitelisted; https:/wss: required for user-configured webhooks
-  "connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io",
+  "connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://api.stripe.com https://*.upstash.io",
   
   // Iframes: Allow Entra login flows, Cloudflare challenges, and Stripe Elements
   "frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com",

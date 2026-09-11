@@ -41,7 +41,7 @@ app_name = "auth_core"
 
 urlpatterns = [
     path("", include(router.urls)),
-    # Clerk authentication endpoints
+    # Auth provider authentication endpoints
     path("me/", views.me, name="me"),
     path("profile/", views.member_profile, name="member_profile"),
     path("webhooks/auth/", views.auth_webhook, name="auth_webhook"),

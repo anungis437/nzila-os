@@ -6,6 +6,12 @@ import { logger } from '@/lib/logger'
 import { questionById, QUESTION_BANK_VERSION } from '@/lib/icra/questions'
 import { buildAnswer } from '@/lib/icra/scoring'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { rateLimit } from '@/lib/rate-limit'
+import {
+  extractCapabilityToken,
+  checkCapability,
+  capabilityDenialStatus,
+} from '@/lib/icra/assessment-capability'
 
 const answerSchema = z.object({
   questionId: z.string().min(1).max(64),
@@ -19,6 +25,20 @@ interface RouteContext {
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params
+
+  // Up to ~64 answers per assessment plus retries/edits — bounded per
+  // assessment+IP so one capability holder can't be used to hammer the DB.
+  const rl = rateLimit(request, {
+    maxRequests: 240,
+    windowSeconds: 60 * 60,
+    keyGenerator: (req) => {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+      return `icra-answer:${assessmentId}:${ip}`
+    },
+  })
+  if (!rl.success) {
+    return NextResponse.json({ error: 'Too many answer submissions. Please slow down.' }, { status: 429 })
+  }
 
   let payload: z.infer<typeof answerSchema>
   try {
@@ -46,6 +66,16 @@ export async function POST(request: Request, { params }: RouteContext) {
       if (!assessment) {
         return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
       }
+
+      const presented = extractCapabilityToken(request, assessmentId)
+      const capCheck = checkCapability(presented, assessment)
+      if (!capCheck.ok) {
+        return NextResponse.json(
+          { error: 'Not authorized to modify this assessment' },
+          { status: capabilityDenialStatus(capCheck.reason) },
+        )
+      }
+
       if (assessment.status !== 'in_progress') {
         return NextResponse.json({ error: 'Assessment is not accepting answers' }, { status: 409 })
       }

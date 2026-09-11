@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, boolean, timestamp, text, jsonb, integer, decimal, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, boolean, timestamp, text, jsonb, integer, decimal, check, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { organizations } from "../../../schema-organizations";
 import { organizationMembers } from "../../organization-members-schema";
@@ -89,6 +89,9 @@ export const votes = pgTable("votes", {
 }, (table) => ({
   checkVoterType: check("valid_voter_type", 
     sql`${table.voterType} IN ('member', 'delegate', 'officer', 'guest')`),
+  // Enforces one-vote-per-voter-per-session at the DB level — application-level
+  // SELECT-then-INSERT duplicate checks alone cannot prevent a concurrent race.
+  uniqueVoterPerSession: uniqueIndex("votes_session_voter_unique").on(table.sessionId, table.voterId),
 }));
 
 // Voting notifications table - alerts for voting events

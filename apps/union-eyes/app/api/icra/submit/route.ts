@@ -40,6 +40,12 @@ import {
   embedPersistedAdaptiveContext,
   type RoutableQuestion,
 } from '@/lib/icra/adaptation'
+import {
+  generateCapabilityToken,
+  hashCapabilityToken,
+  computeCapabilityExpiry,
+  setCapabilityCookie,
+} from '@/lib/icra/assessment-capability'
 
 interface SubmitBody {
   consent: ConsentRecord
@@ -139,6 +145,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     return await withSystemContext(async (tx) => {
+      const capabilityToken = generateCapabilityToken()
+      const capabilityTokenExpiresAt = computeCapabilityExpiry()
+
       // Derive adaptive context from declared org context (pure, deterministic).
       // Persisted under the reserved `_adaptive` namespace inside the existing
       // organizationContext jsonb so the result page + PDF can read it back
@@ -179,6 +188,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           organizationContext: organizationContextForInsert,
           locale,
           submittedAt: new Date(),
+          capabilityTokenHash: hashCapabilityToken(capabilityToken),
+          capabilityTokenExpiresAt,
         })
         .returning({ id: icraAssessments.id })
 
@@ -280,7 +291,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         answeredQuestionCount: profile.answeredQuestionCount,
       })
 
-      return NextResponse.json({ assessmentId }, { status: 201 })
+      const response = NextResponse.json({ assessmentId, capabilityToken }, { status: 201 })
+      setCapabilityCookie(response, assessmentId, capabilityToken)
+      return response
     })
   } catch (err) {
     const e = err as Error & { cause?: unknown; code?: string }

@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
-  withSystemContext: vi.fn(),
+  withRLSContext: vi.fn(),
   db: { select: vi.fn() },
   organizationMembers: { organizationId: 'organizationId', deletedAt: 'deletedAt' },
   eq: vi.fn(),
@@ -12,7 +12,7 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/db/schema-organizations', () => ({ organizationMembers: m.organizationMembers }));
 vi.mock('drizzle-orm', () => ({ eq: m.eq, and: m.and, isNull: m.isNull }));
@@ -24,20 +24,42 @@ async function loadRoute() {
 describe('organization/members route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: any) => (request: NextRequest) => handler({ request }));
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withApi.mockImplementation(
+      (_cfg: unknown, handler: any) => (request: NextRequest) =>
+        handler({ request, organizationId: new URL(request.url).searchParams.get('__test_org_id') }),
+    );
+    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.eq.mockImplementation((a: unknown, b: unknown) => ({ a, b }));
     m.isNull.mockImplementation((a: unknown) => ({ isNull: a }));
     m.and.mockImplementation((...args: unknown[]) => args);
   });
 
-  it('returns empty result when organization param is missing', async () => {
+  it('returns empty result when the session has no resolved organization', async () => {
     const { GET } = await loadRoute();
 
     const result = await GET(new NextRequest('http://localhost/api/organization/members'));
 
     expect(result).toEqual({ members: [], stats: { total: 0, active: 0 } });
-    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
+  it('ignores a client-supplied ?organization= query parameter (IDOR regression guard)', async () => {
+    // Even if a caller appends ?organization=some-other-org, the route must
+    // scope strictly by the framework-resolved organizationId (__test_org_id
+    // here), never by a client-suppliable query parameter.
+    const where = vi.fn().mockResolvedValue([]);
+    const from = vi.fn().mockReturnValue({ where });
+    m.db.select.mockReturnValue({ from });
+
+    const { GET } = await loadRoute();
+    await GET(
+      new NextRequest(
+        'http://localhost/api/organization/members?organization=attacker-org&__test_org_id=session-org',
+      ),
+    );
+
+    expect(m.eq).toHaveBeenCalledWith(m.organizationMembers.organizationId, 'session-org');
+    expect(m.eq).not.toHaveBeenCalledWith(m.organizationMembers.organizationId, 'attacker-org');
   });
 
   it('returns mapped members and stats for valid organization', async () => {
@@ -85,7 +107,7 @@ describe('organization/members route', () => {
     m.db.select.mockReturnValue({ from });
 
     const { GET } = await loadRoute();
-    const result = await GET(new NextRequest('http://localhost/api/organization/members?organization=org_1'));
+    const result = await GET(new NextRequest('http://localhost/api/organization/members?__test_org_id=org_1'));
 
     expect(result).toMatchObject({ stats: { total: 2, active: 1 } });
     expect(result.members[0]).toMatchObject({

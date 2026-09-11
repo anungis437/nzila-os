@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildCommercialTermsSnapshot,
   buildPilotArtifactDiffSummary,
   buildPilotArtifactVersionRecord,
   buildPilotReferenceVersionRecord,
@@ -166,6 +167,55 @@ describe('lib/pilot/commercialization-wave1', () => {
       });
       const diff = buildPilotArtifactDiffSummary(older, newer);
       expect(Array.isArray(diff.changedArtifactKeys)).toBe(true);
+    });
+  });
+
+  describe('buildCommercialTermsSnapshot (PR #752 round 27)', () => {
+    const baseInput = {
+      verifiedOrganizationId: 'org-1',
+      verifiedMemberCount: 250,
+      verifiedPilotAmount: '5000.00',
+      verifiedSubscriptionPlanId: null,
+      commercialTermsApprovedBy: 'admin-1',
+      commercialTermsApprovedAt: '2026-01-01T00:00:00.000Z',
+    };
+
+    it('returns a snapshot containing every field verbatim', () => {
+      const { snapshot } = buildCommercialTermsSnapshot(baseInput);
+      expect(snapshot).toEqual(baseInput);
+    });
+
+    it('normalizes a Date commercialTermsApprovedAt to an ISO string', () => {
+      const { snapshot } = buildCommercialTermsSnapshot({
+        ...baseInput,
+        commercialTermsApprovedAt: new Date('2026-01-01T00:00:00.000Z'),
+      });
+      expect(snapshot.commercialTermsApprovedAt).toBe('2026-01-01T00:00:00.000Z');
+    });
+
+    it('produces a deterministic fingerprint for identical input', () => {
+      const first = buildCommercialTermsSnapshot(baseInput);
+      const second = buildCommercialTermsSnapshot({ ...baseInput });
+      expect(first.fingerprint).toBe(second.fingerprint);
+    });
+
+    it('produces a different fingerprint when any field differs', () => {
+      const first = buildCommercialTermsSnapshot(baseInput);
+      const second = buildCommercialTermsSnapshot({ ...baseInput, verifiedPilotAmount: '9999.00' });
+      expect(first.fingerprint).not.toBe(second.fingerprint);
+    });
+
+    it('is insensitive to key order (stable stringify)', () => {
+      const { fingerprint } = buildCommercialTermsSnapshot(baseInput);
+      const reordered = buildCommercialTermsSnapshot({
+        commercialTermsApprovedAt: baseInput.commercialTermsApprovedAt,
+        commercialTermsApprovedBy: baseInput.commercialTermsApprovedBy,
+        verifiedSubscriptionPlanId: baseInput.verifiedSubscriptionPlanId,
+        verifiedPilotAmount: baseInput.verifiedPilotAmount,
+        verifiedMemberCount: baseInput.verifiedMemberCount,
+        verifiedOrganizationId: baseInput.verifiedOrganizationId,
+      });
+      expect(reordered.fingerprint).toBe(fingerprint);
     });
   });
 });

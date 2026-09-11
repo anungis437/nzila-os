@@ -11,19 +11,23 @@ import { desc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { GOVERNANCE_SYSTEM_ROLES } from '@/lib/api-auth-guard';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     openapi: { tags: ['Governance'], summary: 'List council elections' },
   },
   async () => {
-    const elections = await db
-      .select()
-      .from(councilElections)
-      .orderBy(desc(councilElections.electionYear), desc(councilElections.electionDate));
+    const elections = await withSystemContext(async (_tx) =>
+      db
+        .select()
+        .from(councilElections)
+        .orderBy(desc(councilElections.electionYear), desc(councilElections.electionDate))
+    );
 
     return { data: elections };
   },
@@ -31,7 +35,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { required: true, roles: [...GOVERNANCE_SYSTEM_ROLES] },
     openapi: { tags: ['Governance'], summary: 'Create a council election record' },
   },
   async ({ request, organizationId, userId }) => {
@@ -64,21 +68,23 @@ export const POST = withApi(
       throw ApiError.badRequest('electionYear, electionDate, and positionsAvailable are required');
     }
 
-    const [election] = await db
-      .insert(councilElections)
-      .values({
-        electionYear,
-        electionDate,
-        positionsAvailable,
-        candidates,
-        winners,
-        totalVotes,
-        participationRate,
-        verifiedBy,
-        verificationDate,
-        contestedResults,
-      })
-      .returning();
+    const [election] = await withSystemContext(async (_tx) =>
+      db
+        .insert(councilElections)
+        .values({
+          electionYear,
+          electionDate,
+          positionsAvailable,
+          candidates,
+          winners,
+          totalVotes,
+          participationRate,
+          verifiedBy,
+          verificationDate,
+          contestedResults,
+        })
+        .returning()
+    );
 
     // Evidence: election record creation audit trail
     buildUnionEvidencePack({

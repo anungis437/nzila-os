@@ -61,7 +61,7 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    const assignment = await assignSteward(params.id, parsed.data.stewardId);
+    const assignment = await assignSteward(organizationId, params.id, parsed.data.stewardId);
     const previousUnionRepId = grievance.unionRepId ?? null;
     const continuityCorrelationId = randomUUID();
 

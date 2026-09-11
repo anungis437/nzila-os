@@ -9,12 +9,20 @@ import {
   pgTable,
   pgEnum,
   uuid,
-  varchar,
   text,
   timestamp,
   jsonb,
   index,
 } from "drizzle-orm/pg-core";
+
+// Canonical `employers` declaration lives in ../../union-structure-schema
+// (live-DB-verified 2026-09-01: 33 columns). This file's own 8-column
+// declaration used org_id/industry/contactEmail/contactPhone field names
+// that do not physically exist at all — re-exported here instead of
+// re-declared (PR #752 review round 3), keeping complianceAlerts/
+// employerReports' `.references(() => employers.id)` pointed at the one
+// real physical relation.
+import { employers } from "../../union-structure-schema";
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
@@ -43,31 +51,7 @@ export const complianceReportTypeEnum = pgEnum("compliance_report_type", [
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
-/**
- * Employer profiles within an organization's scope.
- */
-export const employers = pgTable(
-  "employers",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    orgId: uuid("org_id").notNull(),
-    name: varchar("name", { length: 500 }).notNull(),
-    industry: varchar("industry", { length: 255 }),
-    contactEmail: varchar("contact_email", { length: 320 }),
-    contactPhone: varchar("contact_phone", { length: 30 }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (table) => [
-    index("idx_employers_org").on(table.orgId),
-    index("idx_employers_name").on(table.name),
-    index("idx_employers_industry").on(table.industry),
-  ],
-);
+export { employers };
 
 /**
  * Periodic compliance reports for an employer.

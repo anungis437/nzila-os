@@ -1,0 +1,260 @@
+{
+  "generatedAt": "2026-09-08T14:41:42.546Z",
+  "round": 52,
+  "mission": "NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION",
+  "startSha": "2984cc9a035c6cac970a0d836cb7182149f6945b",
+  "upstreamReport": "reports/union-eyes-scope-discriminator-round51.json (historical, unmodified this round)",
+  "totalTablesRemediated": 13,
+  "familyCounts": {
+    "LOCATION_AND_GEOFENCE": 3,
+    "PRIVACY_AND_JURISDICTION": 3,
+    "EXTERNAL_REFERENCE_AND_SYNC": 3,
+    "DIRECTORY_PROFILE": 1,
+    "DERIVED_MOVEMENT_INSIGHT": 1,
+    "PRE_AUTH_IDENTITY": 1,
+    "CROSS_SERVICE_IDENTITY_MAPPING": 1
+  },
+  "financeFrozenExceptions": [
+    "contribution_rates",
+    "currency_enforcement_audit",
+    "fx_rate_audit_log",
+    "t106_filing_tracking",
+    "bank_of_canada_rates",
+    "currency_enforcement_policy",
+    "currency_enforcement_violations",
+    "transaction_currency_conversions",
+    "transfer_pricing_documentation",
+    "fee_settlement_batches"
+  ],
+  "financeFreezeStatus": "PRESERVED — none of these 10 tables, their manifest classifications, or their runtime principal architecture were touched this round",
+  "concreteDefectsFixedCount": 5,
+  "tables": [
+    {
+      "table": "geofences",
+      "round51Partition": "TENANT_SCOPE_MISSING",
+      "family": "LOCATION_AND_GEOFENCE",
+      "finalScope": "TENANT",
+      "finalManifestClassification": "TENANT_RLS_REQUIRED",
+      "trustedRoot": "unionLocalId (server-derived via getOrganizationIdForUser(caller), never client-supplied)",
+      "tenantRuntimePrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "TENANT_USER",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "GeofencesViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": "POST /api/location/geofence trusted client-supplied body.unionLocalId (cross-tenant geofence creation IDOR); GET checkGeofenceEntry accepted arbitrary userId query param (fabricated attendance); no cross-tenant read guard on entry-check",
+      "status": "CLOSED"
+    },
+    {
+      "table": "location_deletion_log",
+      "round51Partition": "SYSTEM_INTERNAL",
+      "family": "LOCATION_AND_GEOFENCE",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "INSERT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "TENANT_USER",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "LocationDeletionLogViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "location_tracking_config",
+      "round51Partition": "TENANT_SCOPE_MISSING",
+      "family": "LOCATION_AND_GEOFENCE",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "TENANT_USER",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "LocationTrackingConfigViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "privacy_breaches",
+      "round51Partition": "TENANT_SCOPE_MISSING",
+      "family": "PRIVACY_AND_JURISDICTION",
+      "finalScope": "CONTAINED",
+      "finalManifestClassification": "CONTAINED_NO_AUTHORITY",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "NONE",
+      "dbExecutionPrincipal": "NONE",
+      "djangoDisposition": "PrivacyBreachesViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "provincial_privacy_config",
+      "round51Partition": "PRIVACY_OR_SOVEREIGNTY_SENSITIVE",
+      "family": "PRIVACY_AND_JURISDICTION",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "SELECT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "TENANT_USER",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "ProvincialPrivacyConfigViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "data_classification_policy",
+      "round51Partition": "PLATFORM_SHARED_CONFIGURATION",
+      "family": "PRIVACY_AND_JURISDICTION",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "DataClassificationPolicyViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": "app/api/privacy/{breach,dsar,provincial}/route.ts used writeRole:'admin' (ordinary per-org role) to gate platform-wide compliance-doctrine mutation (no organizationId column at all) -> fixed to 'compliance_manager' (platform-elevated role)",
+      "status": "CLOSED"
+    },
+    {
+      "table": "external_data_sync_log",
+      "round51Partition": "SYSTEM_INTERNAL",
+      "family": "EXTERNAL_REFERENCE_AND_SYNC",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
+      "systemRuntimePrivileges": [
+        "INSERT",
+        "UPDATE"
+      ],
+      "invocationAuthority": "SYSTEM_SCHEDULE",
+      "dbExecutionPrincipal": "MIXED (SYSTEM_RUNTIME via the 2 fixed sync paths; still TENANT_RUNTIME via the frozen finance syncContributionRates path)",
+      "djangoDisposition": "ExternalDataSyncLogViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "cost_of_living_data",
+      "round51Partition": "TRUE_GLOBAL_REFERENCE",
+      "family": "EXTERNAL_REFERENCE_AND_SYNC",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [],
+      "systemRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "invocationAuthority": "SYSTEM_SCHEDULE",
+      "dbExecutionPrincipal": "SYSTEM_RUNTIME",
+      "djangoDisposition": "CostOfLivingDataViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": "syncCOLAData ran on the plain tenant db despite SYSTEM_SCHEDULE cron invocation (round-46-class principal mismatch) -> wrapped in withSystemContext",
+      "status": "CLOSED"
+    },
+    {
+      "table": "wage_benchmarks",
+      "round51Partition": "TRUE_GLOBAL_REFERENCE",
+      "family": "EXTERNAL_REFERENCE_AND_SYNC",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [],
+      "systemRuntimePrivileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "invocationAuthority": "SYSTEM_SCHEDULE",
+      "dbExecutionPrincipal": "SYSTEM_RUNTIME",
+      "djangoDisposition": "WageBenchmarksViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": "syncWageData ran on the plain tenant db despite SYSTEM_SCHEDULE cron invocation (round-46-class principal mismatch) -> wrapped in withSystemContext",
+      "status": "CLOSED"
+    },
+    {
+      "table": "arbitrator_profiles",
+      "round51Partition": "UNKNOWN",
+      "family": "DIRECTORY_PROFILE",
+      "finalScope": "CONTAINED",
+      "finalManifestClassification": "CONTAINED_NO_AUTHORITY",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "NONE",
+      "dbExecutionPrincipal": "NONE",
+      "djangoDisposition": "ArbitratorProfilesViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "movement_trends",
+      "round51Partition": "TENANT_SCOPE_MISSING",
+      "family": "DERIVED_MOVEMENT_INSIGHT",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "SELECT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "TENANT_USER",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "MovementTrendsViewSet allowed full CRUD to any authenticated user of any org with no officer-role gate at all -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    },
+    {
+      "table": "pending_profiles",
+      "round51Partition": "USER_SCOPE_MISSING",
+      "family": "PRE_AUTH_IDENTITY",
+      "finalScope": "GLOBAL_REFERENCE",
+      "finalManifestClassification": "GLOBAL_REFERENCE_DATA",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "MIXED",
+      "dbExecutionPrincipal": "TENANT_RUNTIME",
+      "djangoDisposition": "PendingProfilesViewSet was IsAuthenticated-only -> contained DenyAllPermission",
+      "concreteDefectFixed": "app/api/onboarding/route.ts and its alias app/api/continuity/inheritance/route.ts used readRole:'member' (no organizationId column on this pre-signup table) -> any authenticated member of any org could list every pre-signup user's email/Whop-membership/billing data -> fixed to readRole:'support_agent' (platform-elevated)",
+      "status": "CLOSED"
+    },
+    {
+      "table": "user_uuid_mapping",
+      "round51Partition": "SEPARATE_DATABASE_BOUNDARY",
+      "family": "CROSS_SERVICE_IDENTITY_MAPPING",
+      "finalScope": "CONTAINED",
+      "finalManifestClassification": "CONTAINED_NO_AUTHORITY",
+      "trustedRoot": null,
+      "tenantRuntimePrivileges": [],
+      "systemRuntimePrivileges": [],
+      "invocationAuthority": "NONE",
+      "dbExecutionPrincipal": "NONE",
+      "djangoDisposition": "UserUuidMappingViewSet allowed full CRUD (incl. UPDATE, an identity-reassignment/account-takeover-equivalent op) to any authenticated user -> contained DenyAllPermission",
+      "concreteDefectFixed": null,
+      "status": "CLOSED"
+    }
+  ]
+}

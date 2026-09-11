@@ -317,6 +317,7 @@ export class ChatbotService {
   async sendMessage(data: {
     sessionId: string;
     userId: string;
+    organizationId: string;
     content: string;
     useRAG?: boolean;
   }): Promise<ChatMessage> {
@@ -335,9 +336,14 @@ export class ChatbotService {
     if (!session) {
       throw new Error("Session not found");
     }
+    // A chat session belongs to exactly one user within one organization —
+    // never trust a client-supplied sessionId without verifying both.
+    if (session.userId !== data.userId || session.organizationId !== data.organizationId) {
+      throw new Error("Session not found");
+    }
     
     // Safety filter on input
-    const safetyCheck = await this.checkContentSafety(data.content);
+    const safetyCheck = await this.checkContentSafety(data.content, data.sessionId);
     if (safetyCheck.flagged) {
       // If the safety system itself is unavailable, skip blocking (fail-open for availability)
       // Only block when the moderation API explicitly flags the content
@@ -466,8 +472,16 @@ export class ChatbotService {
    */
   async getMessages(
     sessionId: string,
+    owner: { userId: string; organizationId: string },
     options: { limit?: number; offset?: number } = {}
   ): Promise<ChatMessage[]> {
+    // A chat session belongs to exactly one user within one organization —
+    // never trust a client-supplied sessionId without verifying both.
+    const session = await this.sessionManager.getSession(sessionId);
+    if (!session || session.userId !== owner.userId || session.organizationId !== owner.organizationId) {
+      throw new Error("Session not found");
+    }
+
     const messages = await db
       .select()
       .from(chatMessages)
@@ -482,7 +496,7 @@ export class ChatbotService {
   /**
    * Content safety check
    */
-  private async checkContentSafety(content: string): Promise<{
+  private async checkContentSafety(content: string, sessionId?: string): Promise<{
     flagged: boolean;
     categories?: string[];
     reason?: string;
@@ -518,6 +532,8 @@ export class ChatbotService {
           confidenceScores: result.category_scores,
           action: "block",
           reason: "Content policy violation",
+          // round 54: preserve session linkage so flagged rows are traceable to a tenant/session
+          sessionId,
         });
         
         return { flagged: true, categories: flaggedCategories };

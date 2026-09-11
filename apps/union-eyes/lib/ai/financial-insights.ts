@@ -214,8 +214,7 @@ async function gatherFinancialContext(organizationId: string): Promise<Financial
         COALESCE(SUM(payment_amount), 0) AS "totalDisbursed",
         COUNT(*) FILTER (WHERE exceeds_threshold)::int AS "craThresholdBreaches"
       FROM strike_fund_disbursements sfd
-      JOIN organization_members om ON om.user_id = sfd.user_id
-      WHERE om.organization_id = ${organizationId}
+      WHERE sfd.organization_id = ${orgIdCast}
     `),
     db.execute(sql`
       SELECT

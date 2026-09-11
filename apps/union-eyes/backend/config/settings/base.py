@@ -71,7 +71,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 25,
 }
 
-# Auth - Clerk
+# Auth
 CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY", "")
 CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
 

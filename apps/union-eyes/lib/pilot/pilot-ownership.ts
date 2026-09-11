@@ -7,28 +7,39 @@
  *   application belongs to their organization OR the actor holds an explicit
  *   platform-level role.
  *
- * Ownership signal:
- *   The `pilot_applications` table has no `organization_id` column. The
- *   canonical owning organization is carried in `responses.organizationId`
- *   (the same field the commercial-transition route already uses to resolve
- *   the billing account). This module reads ONLY that field.
+ * Ownership signal (PR #752 round 23):
+ *   Application-layer authorization uses the EFFECTIVE owner —
+ *   `getPilotEffectiveOrganizationId()`, defined as
+ *   `verifiedOrganizationId ?? claimedOrganizationId` — never the claim
+ *   alone. Before any platform-tier verification exists, the claim
+ *   (`responses.organizationId`, an unauthenticated intake-form assertion)
+ *   is the only signal available and is used as a low-stakes same-org
+ *   self-service gate. Once `bindPilotOrganization()`/
+ *   `rebindPilotOrganization()` establish a verified owner, THAT becomes
+ *   authoritative everywhere — including after a rebind changes it — so the
+ *   original claim can never keep granting (or keep denying) access once a
+ *   platform-tier decision has superseded it. The eventual tenant RLS
+ *   policy for this table must encode the SAME rule, not a claim-only
+ *   JSONB policy (see `loadPilotApplicationForOwnershipCheck`'s doc
+ *   comment).
  *
  * Platform-level actors:
  *   App-operations / system roles (level >= `system_admin`, i.e. 200) and
  *   users in `PLATFORM_ADMIN_USER_IDS` (resolved by `getCurrentUser()` to
  *   `app_owner`) may act across organizations by design. Organization-level
  *   roles (steward, officer, admin, president, …) remain org-scoped and must
- *   match the pilot's owning organization.
+ *   match the pilot's effective owning organization.
  *
  * This module intentionally does NOT change the existing role gate
  * (`hasMinRole('steward')`) on each route — it adds the org-ownership gate
  * that was previously missing. Fail closed: any missing org context is denied.
  */
 import { NextResponse, type NextRequest } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { pilotApplications } from '@/db/schema';
-import { getCurrentUser, normalizeRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations } from '@/db/schema';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
 
 /**
@@ -44,15 +55,367 @@ export type PilotAccessDecision =
   | { ok: false; status: 401 | 403; reason: 'unauthenticated' | 'actor-missing-org-context' | 'pilot-missing-org-context' | 'cross-org' };
 
 /**
- * Extract the owning organization id from a loaded pilot application.
- * Returns null when no usable owner organization is present (fail closed).
+ * Extract the CLAIMED owning organization id from a loaded pilot
+ * application (PR #752 round 19: renamed from `getPilotOwnerOrganizationId`
+ * to make the provenance explicit).
+ *
+ * This value comes straight from `responses.organizationId` — a field
+ * submitted wholesale, unauthenticated, by the public `/api/pilot/apply`
+ * intake form (see that route's own POST handler). It is a CLIENT
+ * ASSERTION, never server-attested identity. It is safe to use ONLY for the
+ * same-org self-service access-control gate below (low stakes: a submitter
+ * who claims org X can only ever see/edit the row they themselves claimed —
+ * no cross-tenant read is possible since a REAL member of org X must ALSO
+ * independently match that same claim to pass `authorizePilotAccess`).
+ * It must NEVER be trusted as verified ownership for financial operations —
+ * see app/api/pilot/apply/[id]/commercial-transition/route.ts, which
+ * requires platform-tier authorization (not same-org self-service) before
+ * using this value to resolve or create real billing/contract records,
+ * precisely because this field cannot be trusted for that purpose.
+ * Returns null when no usable claim is present (fail closed).
  */
-export function getPilotOwnerOrganizationId(
+export function getPilotClaimedOrganizationId(
   application: { responses?: Record<string, unknown> | null } | null | undefined,
 ): string | null {
   const responses = (application?.responses ?? {}) as Record<string, unknown>;
   const raw = responses.organizationId;
   return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
+}
+
+/**
+ * Extract the VERIFIED owning organization id from a loaded pilot
+ * application (PR #752 round 20).
+ *
+ * Unlike `getPilotClaimedOrganizationId()`, this reads the server-controlled
+ * `verified_organization_id` COLUMN — null until an explicit platform-tier
+ * "verify organization" action (`bindPilotOrganization()` below) has
+ * independently confirmed the claim. This is the ONLY value that may be used
+ * for financial operations (billing account resolution, contract/invoice/
+ * subscription creation) or any future RLS policy — never the client-
+ * supplied claim.
+ */
+export function getPilotVerifiedOrganizationId(
+  application: { verifiedOrganizationId?: string | null } | null | undefined,
+): string | null {
+  const raw = application?.verifiedOrganizationId;
+  return typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : null;
+}
+
+/**
+ * The single ownership fact application-layer authorization must use (PR
+ * #752 round 23).
+ *
+ * Before a platform-tier verification exists, the claim is the only signal
+ * available. Once `bindPilotOrganization()`/`rebindPilotOrganization()`
+ * establish a verified owner, it is authoritative — using the claim after
+ * that point would let the ORIGINAL claimed organization keep passing
+ * same-org access checks even after a rebind moves the real, verified
+ * organization elsewhere (and would let the NEW verified organization's own
+ * stewards be denied access to a pilot that is, in fact, now theirs). This
+ * is the ownership rule every application-layer check — and the eventual
+ * tenant RLS policy — must use, not the claim alone.
+ */
+export function getPilotEffectiveOrganizationId(
+  application:
+    | { responses?: Record<string, unknown> | null; verifiedOrganizationId?: string | null }
+    | null
+    | undefined,
+): string | null {
+  return getPilotVerifiedOrganizationId(application) ?? getPilotClaimedOrganizationId(application);
+}
+
+export type BindPilotOrganizationResult =
+  | { ok: true; organizationId: string }
+  | { ok: false; status: 404 | 409; error: string };
+
+/**
+ * True if `pilotId` has ANY real financial artifact — a commercial
+ * contract, platform invoice, or org subscription — created by the
+ * commercial-transition FSM (PR #752 round 22).
+ *
+ * Round 21's rebind guard only checked `commercialContracts` (via the
+ * deterministic `buildPilotContractNumber` key), but commercial-transition's
+ * `invoice_issued` and `subscription_active` branches can each create a
+ * real `platformInvoices`/`orgSubscriptions` row independently of the
+ * `contract_sent` branch (e.g. via `allowSkip`) — so a pilot could carry a
+ * real invoice or subscription with no contract at all, and the old check
+ * would let a rebind proceed without requiring
+ * `acknowledgeFinancialArtifacts`. All three tables are written with the
+ * SAME `metadata: { source: 'pilot-commercial-transition', pilotApplicationId }`
+ * shape by that route, so this checks all three by that shared marker
+ * rather than a table-specific key.
+ *
+ * Exported (PR #752 round 26) so `lib/pilot/commercial-terms-authority.ts`'s
+ * `approveCommercialTerms()` can reuse the SAME census to refuse an
+ * ordinary re-approval once a real financial artifact already exists —
+ * without it, a pilot could be approved at $10,000, invoiced at $10,000,
+ * then re-approved at $25,000 with no versioning tying the new approved
+ * amount to which artifact was actually produced under which approval.
+ */
+export async function pilotHasFinancialArtifacts(pilotId: string): Promise<boolean> {
+  const pilotApplicationIdMatch = (column: unknown) => sql`${column}->>'pilotApplicationId' = ${pilotId}`;
+
+  const [contract] = await db
+    .select({ id: commercialContracts.id })
+    .from(commercialContracts)
+    .where(pilotApplicationIdMatch(commercialContracts.metadata));
+  if (contract) return true;
+
+  const [invoice] = await db
+    .select({ id: platformInvoices.id })
+    .from(platformInvoices)
+    .where(pilotApplicationIdMatch(platformInvoices.metadata));
+  if (invoice) return true;
+
+  const [subscription] = await db
+    .select({ id: orgSubscriptions.id })
+    .from(orgSubscriptions)
+    .where(pilotApplicationIdMatch(orgSubscriptions.metadata));
+  if (subscription) return true;
+
+  return false;
+}
+
+/**
+ * Platform-only binding of a pilot application to a verified organization
+ * (PR #752 round 20; made immutable-by-default in round 21). This is the
+ * ONLY function that may write `verified_organization_id`/`verified_by`/
+ * `verified_at` — callers must already have confirmed platform-tier
+ * authority (`hasMinRole('system_admin')`) before calling this; it does not
+ * itself perform that check.
+ *
+ * Fails closed if the target organization does not exist (a claimed id that
+ * was never a real organization must never become "verified"). Runs under
+ * `withSystemContext()`: both the existence check and the write need to
+ * operate cross-org, independent of any RLS policy on either table.
+ *
+ * Immutability (round 21): a pilot application's verified organization is a
+ * financial-identity fact, not a freely-editable field. Once bound:
+ *   - Re-binding to the SAME organization is a no-op success (idempotent —
+ *     a platform admin re-running the same verify call, e.g. after a
+ *     timeout, must not error or re-stamp verifiedAt for no reason).
+ *   - Re-binding to a DIFFERENT organization is rejected with 409. Changing
+ *     which organization a pilot's billing/contracts belong to is a
+ *     deliberate correction, not an ordinary verification step — see
+ *     `rebindPilotOrganization()` below.
+ *
+ * Concurrency (round 22): the pilot row is read with `FOR UPDATE` inside
+ * `withSystemContext`'s real transaction, so two concurrent binds for the
+ * SAME pilot (e.g. racing verify-organization calls for two different
+ * target orgs) serialize instead of both observing
+ * `verifiedOrganizationId = NULL` and racing to write — the second
+ * transaction blocks until the first commits, then correctly sees the
+ * now-set value and returns idempotent-success or 409 rather than
+ * silently overwriting it. The same lock also serializes against
+ * commercial-transition's monetization transaction, which takes the same
+ * `FOR UPDATE` lock on this row before creating any financial artifact.
+ */
+export async function bindPilotOrganization(params: {
+  pilotId: string;
+  organizationId: string;
+  verifiedBy: string;
+}): Promise<BindPilotOrganizationResult> {
+  const { pilotId, organizationId, verifiedBy } = params;
+
+  return withSystemContext(async (_tx) => {
+    const [org] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.id, organizationId));
+
+    if (!org) {
+      return { ok: false, status: 404, error: 'Organization not found' };
+    }
+
+    const [pilot] = await db
+      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .from(pilotApplications)
+      .where(eq(pilotApplications.id, pilotId))
+      .limit(1)
+      .for('update');
+
+    if (!pilot) {
+      return { ok: false, status: 409, error: 'Pilot application not found' };
+    }
+
+    if (pilot.verifiedOrganizationId) {
+      if (pilot.verifiedOrganizationId === organizationId) {
+        return { ok: true, organizationId };
+      }
+      return {
+        ok: false,
+        status: 409,
+        error:
+          'This pilot application is already bound to a different verified organization. ' +
+          'Use the platform rebind-organization correction flow to change it.',
+      };
+    }
+
+    const [updated] = await db
+      .update(pilotApplications)
+      .set({
+        verifiedOrganizationId: organizationId,
+        verifiedBy,
+        verifiedAt: new Date(),
+      })
+      .where(eq(pilotApplications.id, pilotId))
+      .returning({ id: pilotApplications.id });
+
+    if (!updated) {
+      return { ok: false, status: 409, error: 'Pilot application not found' };
+    }
+
+    return { ok: true, organizationId };
+  });
+}
+
+export type RebindPilotOrganizationResult =
+  | { ok: true; organizationId: string; previousOrganizationId: string }
+  | { ok: false; status: 404 | 409; error: string };
+
+/**
+ * Platform-only CORRECTION of an already-bound pilot application's verified
+ * organization (PR #752 round 21). Deliberately separate from
+ * `bindPilotOrganization()` — that function is the ordinary, immutable
+ * verification step and now refuses to change an existing binding; this
+ * function exists specifically for the rare case where an initial
+ * verification was wrong and must be corrected.
+ *
+ * Guardrails:
+ *   - Requires a non-empty `reason` — enforced by the caller's zod schema;
+ *     this function also fails closed if `reason` is blank, in case a
+ *     future caller skips that validation.
+ *   - Fails closed (404) if the target organization does not exist.
+ *   - Fails closed (409) if the pilot is not yet bound at all — a rebind
+ *     presupposes an existing binding; use `bindPilotOrganization()` first.
+ *   - Fails closed (409), with NO override, if this pilot has any real
+ *     financial artifact (see `pilotHasFinancialArtifacts` — commercial
+ *     contract, platform invoice, OR org subscription, not just a
+ *     contract). PR #752 round 27 REMOVED the prior
+ *     `acknowledgeFinancialArtifacts` escape hatch: round 26 made
+ *     `approveCommercialTerms()` refuse EVERY further approval once any
+ *     financial artifact exists, and this function unconditionally clears
+ *     commercial terms on every organization change — the two rules
+ *     combined created a permanent dead end (acknowledged rebind clears
+ *     terms, but the pre-existing artifact then makes fresh terms
+ *     approval impossible forever, since the artifact is never deleted).
+ *     A post-artifact organization correction now requires a dedicated
+ *     financial-correction workflow that does not exist yet, not this
+ *     function with an acknowledgement flag.
+ *   - The pilot row is locked with `FOR UPDATE` for the same concurrency
+ *     reason described on `bindPilotOrganization()` — this also closes the
+ *     TOCTOU window between this function's own artifact check and a
+ *     concurrent commercial-transition creating one, since both now
+ *     contend for the same row lock before proceeding.
+ *   - Clears any previously approved commercial terms (PR #752 round 26:
+ *     `verifiedMemberCount`/`verifiedPilotAmount`/`verifiedSubscriptionPlanId`/
+ *     `commercialTermsApprovedBy`/`commercialTermsApprovedAt`) whenever the
+ *     verified organization actually changes. Without this, terms approved
+ *     for the PREVIOUS organization's context would remain authoritative
+ *     after the rebind, and commercial-transition could create the NEW
+ *     organization's financial artifacts from an approval made before that
+ *     organization was even the verified owner. Forces a fresh
+ *     `approveCommercialTerms()` call before any further
+ *     financial-artifact-creating transition. Reachable only when NO
+ *     financial artifact exists yet (round 27), so this clear can never
+ *     itself create the dead end described above.
+ *   - Logs a structured warning (`logger.warn`) with the full
+ *     before/after/reason/actor for traceability. This is NOT currently a
+ *     durable, queryable audit-event row (no `audit_logs` write) — treat it
+ *     as "logged for traceability," not "audited," until that gap is
+ *     closed.
+ */
+export async function rebindPilotOrganization(params: {
+  pilotId: string;
+  organizationId: string;
+  verifiedBy: string;
+  reason: string;
+}): Promise<RebindPilotOrganizationResult> {
+  const { pilotId, organizationId, verifiedBy } = params;
+  const reason = params.reason?.trim() ?? '';
+
+  if (!reason) {
+    return { ok: false, status: 409, error: 'A non-empty reason is required to rebind a pilot application\'s verified organization.' };
+  }
+
+  return withSystemContext(async (_tx) => {
+    const [org] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.id, organizationId));
+
+    if (!org) {
+      return { ok: false, status: 404, error: 'Organization not found' };
+    }
+
+    const [pilot] = await db
+      .select({ verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .from(pilotApplications)
+      .where(eq(pilotApplications.id, pilotId))
+      .limit(1)
+      .for('update');
+
+    if (!pilot) {
+      return { ok: false, status: 409, error: 'Pilot application not found' };
+    }
+
+    if (!pilot.verifiedOrganizationId) {
+      return {
+        ok: false,
+        status: 409,
+        error: 'This pilot application is not yet bound to any organization; use bindPilotOrganization (verify-organization) instead of rebind.',
+      };
+    }
+
+    const previousOrganizationId = pilot.verifiedOrganizationId;
+
+    if (previousOrganizationId === organizationId) {
+      return { ok: true, organizationId, previousOrganizationId };
+    }
+
+    const hasFinancialArtifacts = await pilotHasFinancialArtifacts(pilotId);
+
+    if (hasFinancialArtifacts) {
+      return {
+        ok: false,
+        status: 409,
+        error:
+          'This pilot already has financial artifacts (a commercial contract, platform invoice, or ' +
+          'org subscription) under its current verified organization. Rebinding is not permitted once ' +
+          'real financial artifacts exist — a post-artifact organization correction requires a dedicated ' +
+          'financial-correction workflow, not this endpoint.',
+      };
+    }
+
+    await db
+      .update(pilotApplications)
+      .set({
+        verifiedOrganizationId: organizationId,
+        verifiedBy,
+        verifiedAt: new Date(),
+        // Round 26: stale commercial terms approved under the PREVIOUS
+        // verified organization must never remain authoritative for the
+        // new one — force fresh approveCommercialTerms() before any further
+        // financial-artifact-creating transition.
+        verifiedMemberCount: null,
+        verifiedPilotAmount: null,
+        verifiedSubscriptionPlanId: null,
+        commercialTermsApprovedBy: null,
+        commercialTermsApprovedAt: null,
+      })
+      .where(eq(pilotApplications.id, pilotId));
+
+    logger.warn('pilot application verified-organization rebind (correction)', {
+      pilotId,
+      previousOrganizationId,
+      organizationId,
+      verifiedBy,
+      reason,
+      clearedCommercialTerms: true,
+    });
+
+    return { ok: true, organizationId, previousOrganizationId };
+  });
 }
 
 /**
@@ -113,9 +476,9 @@ export async function authorizePilotAccess(
  * ```
  */
 export async function enforcePilotOwnership(
-  application: { responses?: Record<string, unknown> | null },
+  application: { responses?: Record<string, unknown> | null; verifiedOrganizationId?: string | null },
 ): Promise<NextResponse | null> {
-  const decision = await authorizePilotAccess(getPilotOwnerOrganizationId(application));
+  const decision = await authorizePilotAccess(getPilotEffectiveOrganizationId(application));
   if (decision.ok) {
     return null;
   }
@@ -141,8 +504,55 @@ type FactoryRouteHandler = (
  * handler. It does not read the request body, so the factory's own body
  * parsing for PATCH is unaffected.
  */
-export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id'): FactoryRouteHandler {
+/**
+ * Loads a pilot application row by id for the purpose of an ownership
+ * decision (PR #752 round 18; round 23 also loads `verifiedOrganizationId`
+ * so the decision can use the EFFECTIVE owner, not the claim alone).
+ *
+ * The ownership decision itself requires seeing the row regardless of the
+ * caller's own organization — a same-org actor and a cross-org attacker look
+ * identical until the row's owning organization is known. That lookup must
+ * therefore run under `withSystemContext()`, never the ordinary tenant
+ * runtime connection: once a real RLS policy exists for this table (an
+ * effective-owner policy — `verified_organization_id` when set, else the
+ * JSONB claim — per the eventual policy-expansion design), a tenant-runtime
+ * connection would only be able to see rows that ALREADY match the caller's
+ * own org — making the ownership check itself unable to detect (and
+ * therefore reject) a cross-org id.
+ */
+export async function loadPilotApplicationForOwnershipCheck(
+  id: string,
+): Promise<{ responses: Record<string, unknown> | null; verifiedOrganizationId: string | null } | undefined> {
+  return withSystemContext((_tx) =>
+    db
+      .select({ responses: pilotApplications.responses, verifiedOrganizationId: pilotApplications.verifiedOrganizationId })
+      .from(pilotApplications)
+      .where(eq(pilotApplications.id, id))
+      .then(([application]) => application),
+  );
+}
+
+export function withPilotOwnership(
+  handler: FactoryRouteHandler,
+  options: { paramName?: string; minRole?: UserRole } = {},
+): FactoryRouteHandler {
+  const { paramName = 'id', minRole = 'steward' } = options;
   return async (request, nextContext) => {
+    // Authenticate + enforce the base role tier BEFORE touching the database
+    // at all (PR #752 round 19). Previously the ownership pre-check lookup
+    // ran (on the system connection) before any auth check, so an
+    // unauthenticated request with a real pilot id got further (404 -> then
+    // an auth failure downstream) than one with a made-up id (immediate
+    // 404) — a cross-tenant record-existence oracle, plus a system-principal
+    // SELECT triggered by a request that was never going to be allowed to
+    // proceed. `hasMinRole` returns false for both "unauthenticated" and
+    // "authenticated but under-role" (matching every sibling pilot action
+    // route's own `hasMinRole('steward')` gate), so the response here is
+    // uniform regardless of whether `id` exists.
+    if (!(await hasMinRole(minRole))) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const params = nextContext?.params ? await nextContext.params : undefined;
     const id = params?.[paramName];
 
@@ -151,12 +561,9 @@ export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id
       return handler(request, nextContext);
     }
 
-    let application: { responses: Record<string, unknown> | null } | undefined;
+    let application: { responses: Record<string, unknown> | null; verifiedOrganizationId: string | null } | undefined;
     try {
-      [application] = await db
-        .select({ responses: pilotApplications.responses })
-        .from(pilotApplications)
-        .where(eq(pilotApplications.id, id));
+      application = await loadPilotApplicationForOwnershipCheck(id);
     } catch (error) {
       logger.error(
         'pilot ownership pre-check failed to load application',
@@ -170,11 +577,23 @@ export function withPilotOwnership(handler: FactoryRouteHandler, paramName = 'id
       return NextResponse.json({ error: 'Pilot application not found' }, { status: 404 });
     }
 
-    const denied = await enforcePilotOwnership(application);
-    if (denied) {
-      return denied;
+    const decision = await authorizePilotAccess(getPilotEffectiveOrganizationId(application));
+    if (!decision.ok) {
+      return NextResponse.json(
+        { error: decision.status === 401 ? 'Unauthorized' : 'Forbidden' },
+        { status: decision.status },
+      );
     }
 
+    // Platform-tier actors act cross-org by design — the actual CRUD
+    // operation must run on the system connection (union_eyes_system), not
+    // the ordinary tenant runtime pool, so it is never gated by a future
+    // tenant-scoped RLS policy on this table. Same-org actors keep running
+    // on the ordinary runtime connection (app-layer-enforced today; the
+    // eventual effective-owner tenant RLS policy scopes this path).
+    if (decision.reason === 'platform') {
+      return withSystemContext(async (_tx) => handler(request, nextContext));
+    }
     return handler(request, nextContext);
   };
 }
