@@ -683,34 +683,282 @@ backlog, tracked here for visibility.
 
 ---
 
-## 9. Final status
+## 9. Release Gate B — Human-Review Handoff & Merge Sequence Readiness
+
+Prepared 2026-09-11. Confirmed live boundaries: #760 head `0c960b74504d5a1ddf6caa92053afb1a0d08c66a`
+(base `09063f97258c576f55a61269ae2d6bf69d6da118` == current `origin/main`, unchanged since
+Release Gate A); #752 head `2116dadda9bc0a2f716867a3419ac141d4ebb0a8` (same base, unchanged).
+Neither branch moved — all Release Gate A technical evidence (contract test 5/5, full
+suite 278/278 files 9536/9536 tests, the 6-check attribution table, the empirical
+merge-tree conflict proof) is directly reused, not re-derived, and re-confirmed live: the
+6 failing checks on #760 are the exact same job run IDs as Release Gate A (no new CI
+execution occurred). Production environment `protection_rules` reconfirmed still `[]`.
+
+### 9.1 Actual repository merge enforcement (GitHub-mechanical vs. internal governance)
+
+**GitHub does NOT mechanically block merging either PR today.** Checked directly:
 
 ```
-POST_ROUND59_TRANSITION = PARTIAL
+classic branch protection on `main`:  404 Not Found (none configured)
 
+repository rulesets:  exactly one, named "default", targeting ~DEFAULT_BRANCH
+  (main), with enforcement: "disabled" — i.e. inactive. Its (dormant) rule
+  content, if ever enabled, would require:
+    - deletion protection, non-fast-forward (no force-push)
+    - pull_request rule: required_approving_review_count = 1,
+      dismiss_stale_reviews_on_push = true,
+      require_code_owner_review = FALSE (!),
+      required_review_thread_resolution = false,
+      allowed_merge_methods = [merge, squash, rebase]
+  None of this is active. There is also no "required_status_checks" rule
+  present even in the dormant ruleset — no CI job is configured as a required
+  check today, active or dormant.
+```
+
+**Distinction, precisely:**
+- **GitHub mechanically blocks merge:** NO — an authorized human could click "Merge" on
+  either #760 or #752 right now; nothing in repository configuration prevents it, and
+  even the one (disabled) ruleset would not require CODEOWNERS review if it were enabled.
+- **Internal governance says do not merge:** YES — via this document, the PR #752
+  containment notice, and the human-review requirement stated in both PR descriptions.
+  This is a procedural/documentation control, not a platform-enforced one.
+
+This is itself a residual backlog item worth the operator's attention (added to §8) —
+if a mechanically-enforced required-review/required-status-check gate is desired going
+forward, the existing "default" ruleset would need `enforcement` flipped to `"active"`
+and `require_code_owner_review` set `true`, plus required status checks added.
+
+### 9.2 Human review packets (posted to each PR, not duplicated here)
+
+- **PR #760** now opens with a concise "Review Packet (quick reference)" block
+  (purpose, risk, files of interest, core invariant, validation summary, known-red-CI
+  summary, production-mutation statement, CODEOWNERS coverage) above the full
+  Release-Gate-A evidence, so a reviewer is not required to read the whole forensic
+  trail to approve.
+- **PR #752** now opens with a "Human Security Review Packet" (root defects closed,
+  final architecture, live staging proof summary, security-sidecar dispositions, final
+  CI status, residual non-blocking backlog, and an explicit note on what changed since
+  any earlier partial read of the PR) directly above the pre-existing release-governance
+  containment notice — without deleting or duplicating the round-by-round history below
+  it, which remains as audit record.
+
+### 9.3 Reviewer coverage (CODEOWNERS-sourced, no individuals named)
+
+```
+PR #760 changed paths -> CODEOWNERS owners:
+  .github/**                    -> @nzila/platform @nzila/security
+  tooling/contract-tests/**     -> @nzila/platform @nzila/security
+  => PR760_RECOMMENDED_REVIEW_COVERAGE = platform + security
+
+PR #752 changed paths -> CODEOWNERS owners:
+  apps/union-eyes/**             -> @nzila/eng @nzila/ue
+  .github/** (deploy-union-eyes.yml, nzila-governance.yml, trivy.yml)
+                                  -> @nzila/platform @nzila/security
+  security/redteam/**            -> @nzila/security @nzila/platform
+  tooling/contract-tests/**      -> @nzila/platform @nzila/security
+  (apps/union-eyes/middleware.ts is CODEOWNERS-flagged for
+   @nzila/security @nzila/platform, but #752 does NOT touch that file —
+   confirmed absent from its diff)
+  => PR752_RECOMMENDED_REVIEW_COVERAGE = eng + ue (app ownership) AND
+     platform + security (workflow/red-team/contract-test ownership) —
+     both domains apply, not either/or
+```
+
+`REVIEW_REQUEST_READY = YES` for both PRs, with the exact team targets above. No review
+request was submitted (`gh pr edit --add-reviewer` or equivalent) — that requires
+separate operator authorization naming which specific team/human to request, not
+performed here.
+
+### 9.4 Post-#760-merge integration procedure for #752 (prepared, NOT executed)
+
+```bash
+# Only after the operator has merged #760 into main:
+git fetch origin
+git checkout fix/ue-runtime-rls-foundation
+git fetch origin main
+git merge origin/main            # or: git rebase origin/main, per repo convention
+                                  # for this shared branch (prior sessions have used
+                                  # merge/fetch+compare, not rebase, to avoid
+                                  # rewriting shared history — see repo memory)
+
+# Expected: .github/workflows/auto-promote-union-eyes.yml and
+# .github/workflows/deploy-union-eyes.yml merge cleanly (verified via git
+# merge-tree in Release Gate A — the two PRs' changed regions in
+# deploy-union-eyes.yml do not overlap). The ONLY expected conflict is in the
+# 4 generated inventory files:
+#   tooling/repo-inventory/output/{inventory,repo-inventory}.{json,md}
+# Resolve by regenerating, not by hand-editing:
+pnpm inventory:generate
+git add tooling/repo-inventory/output/
+git diff --check                 # confirm no leftover conflict markers anywhere
+git status --short                # confirm only the expected files changed
+```
+
+Must preserve after integration (verify explicitly, not just "no conflict markers"):
+- #760's production-exclusion (matrix `[demo, pilot, staging]`, runtime guard, the
+  hardened `DEPLOY_ENV` fallback) — re-run
+  `tooling/contract-tests/union-eyes-production-promotion-gate.test.ts` post-merge.
+- #752's migration/RLS jobs (`apply-rls-foundation-migration`,
+  `apply-authority-enforcement-migration`, `apply-round58-grant-fix-migration`,
+  `apply-round59-congress-memberships-grant-fix`) still present and still gated behind
+  their respective `workflow_dispatch` boolean inputs.
+- #752's ephemeral migration authority (`apply-django-migrations` job pattern) intact.
+- #752's exact secret handling (`ensure_kv_backed_secret()` conditional wiring) intact.
+
+Then rerun the materially affected #752 CI (at minimum: the full check matrix, since
+the base moved) before requesting final human security sign-off on the resulting diff.
+
+### 9.5 Post-#760-merge verification (prepared query set, NOT executed now)
+
+Run immediately after the operator merges #760, before doing anything else:
+
+```bash
+# 1. Confirm main contains the change
+git fetch origin main && git log --oneline -1 origin/main
+git show origin/main:.github/workflows/auto-promote-union-eyes.yml | grep -A3 "environment:"
+
+# 2. Confirm the production-promotion-gate contract test passes against main directly
+git worktree add /tmp/verify-post-merge origin/main
+cp tooling/contract-tests/union-eyes-production-promotion-gate.test.ts /tmp/verify-post-merge/tooling/contract-tests/ 2>/dev/null || true
+# (the test file itself will already be on main post-merge; the copy above is only
+# a fallback if verifying against a commit before the test file lands)
+cd /tmp/verify-post-merge && npx vitest run tooling/contract-tests/union-eyes-production-promotion-gate.test.ts
+cd - && git worktree remove /tmp/verify-post-merge --force
+
+# 3. Structural re-confirmation (matches Release Gate A's own method)
+python3 -c "
+import yaml
+doc = yaml.safe_load(open('.github/workflows/auto-promote-union-eyes.yml'))
+assert 'production' not in doc['jobs']['fanout']['strategy']['matrix']['environment']
+print('OK: production excluded from auto-promote matrix')
+"
+```
+
+### 9.6 Verifying #760's merge itself did not dispatch production (prepared, NOT executed)
+
+```bash
+# Find the merge commit SHA for #760 on main, then check what it triggered:
+gh api repos/anungis437/nzila-os/commits/<merge-sha>/check-runs --jq '.check_runs[].name'
+
+# Look specifically for Auto-promote Union Eyes and its downstream deploy-union-eyes
+# dispatches:
+gh run list --repo anungis437/nzila-os --workflow=auto-promote-union-eyes.yml --branch main --limit 3 \
+  --json databaseId,headSha,createdAt
+
+# For the run matching the merge SHA, list its dispatched jobs/matrix entries:
+gh run view <run-id> --repo anungis437/nzila-os --json jobs --jq '.jobs[].name'
+# Expected matrix entries: demo, pilot, staging
+# PROHIBITED: production
+```
+
+Expected result to record: `PR760_POSTMERGE_PRODUCTION_DISPATCH = NONE`. This step is
+prepared only — not run, since #760 has not been merged.
+
+### 9.7 Production GitHub Environment required-reviewer change procedure (prepared, NOT executed)
+
+Documented mechanics for the operator (real GitHub features, no invented reviewer IDs):
+
+```bash
+# Via API (reviewer IDs/team slugs must be supplied by the operator — not guessed here):
+gh api --method PUT repos/anungis437/nzila-os/environments/production \
+  -f 'wait_timer=0' \
+  -F 'reviewers[][type]=Team' -F 'reviewers[][id]=<platform-team-id>' \
+  -F 'reviewers[][type]=Team' -F 'reviewers[][id]=<security-team-id>' \
+  -f 'deployment_branch_policy=null'
+
+# Or via the GitHub UI: Settings -> Environments -> production -> "Required reviewers"
+# -> add @nzila/platform and/or @nzila/security (or specific named approvers per
+# organizational policy) -> Save protection rules.
+```
+
+Required reviewers should be selected from real, currently-authorized security/platform
+governance (e.g. the same `@nzila/platform`/`@nzila/security` teams CODEOWNERS already
+designates for `.github/**` and deployment-adjacent paths) — this document does not
+invent or assume specific team/user IDs. **No production deployment should be
+authorized before this protection exists**, independent of and in addition to #760's
+code-level fix (which closes *automatic* dispatch; this closes unprotected *manual*
+dispatch).
+
+### 9.8 Credential-rotation authorization package (decision-ready, NOT executed)
+
+```
+OPTION A — PREFERRED (coordinated least-privilege cutover first)
+  1. Provision union_eyes_runtime / union_eyes_system in production (§6/§7 step 3).
+  2. Validate the new Key-Vault-backed secret references resolve correctly (§7 step 5).
+  3. Cut the application over to the new roles (§7 steps 4-8).
+  4. ONLY THEN rotate/invalidate the exposed nzilaadmin password — at this point it
+     is no longer the runtime credential, so rotating it is a clean invalidation with
+     no live-traffic impact.
+  Tradeoff: the exposed credential remains technically valid (though unused by this
+  session and not connected-to) for the duration of steps 1-3.
+
+OPTION B — EMERGENCY (rotate first, cutover after)
+  1. Rotate nzilaadmin immediately (§1.4's atomicity procedure: secret update point ->
+     DB role/password update point -> forced application revision -> health check ->
+     defined rollback window).
+  2. Complete the least-privilege cutover afterward, unchanged, against the NEW
+     admin password in the interim.
+  Tradeoff: a brief availability risk during the rotation window (§1.4), and the
+  admin-as-runtime pattern still exists immediately after rotation — only the specific
+  exposed value is invalidated, not the underlying architectural exposure.
+
+RECOMMENDATION: Option A, unless the operator's own risk assessment concludes the
+exposed value must be invalidated faster than the role-provisioning work (§7 steps 1-3)
+can safely complete. This document does not make that risk-tolerance decision — it is
+the operator's call, informed by:
+  - credential value appeared in this session's tool output/transcript (confirmed)
+  - no production DB connection was made with it (confirmed)
+  - the temporary firewall rule used during the aborted read-only census was removed
+    (confirmed)
+  - the value was never committed, logged, or persisted to this repository (confirmed)
+  - RESIDUAL RISK: the credential should be assumed compromised until invalidated —
+    this is not downgraded to optional by the mitigating facts above.
+```
+
+### 9.9 RBAC review package (for `Microsoft.App/containerApps/listSecrets/action`)
+
+Command plan only — not executed, no identities enumerated:
+
+```bash
+# Which built-in/custom roles grant this action at all:
+az role definition list --query "[?permissions[0].actions[?contains(@, 'Microsoft.App/containerApps/listSecrets')]].{name:roleName, custom:roleType}" -o table
+
+# How many assignments exist at each scope (counts only, not identity detail,
+# unless the operator specifically requests identity-level detail as a follow-up):
+az role assignment list --scope /subscriptions/<sub-id> --query "length(@)" -o tsv
+az role assignment list --resource-group nzila-canada-prod-rg --query "length(@)" -o tsv
+az role assignment list --scope <containerapp-resource-id> --query "length(@)" -o tsv
+
+# For each assignment, cross-reference role name against the "which roles grant
+# this action" list above to determine which assignments actually carry the
+# capability (Owner and Contributor do; Reader does not; custom roles vary).
+```
+
+Report only: which roles grant the capability, how many relevant assignments exist at
+each scope, and — without naming individuals — whether each assignment *class* (e.g.
+"CI/CD service principal used by deploy-union-eyes.yml" vs. "human operator with
+standing Owner/Contributor access") appears to have a legitimate operational need.
+Detailed identity-level remediation (narrowing specific human access) is a separate,
+operator-authorized action, not performed here.
+
+## 10. Final status
+
+```
 RELEASE_GATE_A = COMPLETE
-
+RELEASE_GATE_B = COMPLETE
 PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES
-PR760_HUMAN_REVIEW = REQUIRED (no review, human or otherwise, exists on #760;
-                      CODEOWNERS: /.github/** and /tooling/contract-tests/** are
-                      owned by @nzila/platform @nzila/security)
-
-PR752_OPERATOR_MERGE_GATE = BLOCKED
-  BLOCKER_1 = human security review not yet approved
-  BLOCKER_2 = merge currently auto-dispatches production (fix in PR #760, pending
-              merge + verification)
-PR752_HUMAN_SECURITY_REVIEW = REQUIRED (labels predate the bulk of the reviewed
-                      work; no human-authored APPROVED review exists; CODEOWNERS:
-                      /apps/union-eyes/** owned by @nzila/eng @nzila/ue, and
-                      /.github/** owned by @nzila/platform @nzila/security since
-                      #752 also modifies deploy-union-eyes.yml/nzila-governance.yml/
-                      trivy.yml)
-
-SECURITY_INCIDENT = production admin credential exposed; rotation required (operator
-                     action, not yet performed)
-
-PRODUCTION_PREFLIGHT = PARTIAL
-PRODUCTION_DB_CATALOG_PREFLIGHT = NOT PERFORMED
+PR760_HUMAN_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
+PR760_OPERATOR_MERGE_GATE = READY_PENDING_HUMAN_REVIEW
+  (GitHub does not mechanically block this merge: no active branch protection,
+  one disabled ruleset (id 12952284), no required status checks configured.
+  Only human/CODEOWNERS review is the enforced gate, and only by convention.)
+PR752_HUMAN_SECURITY_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
+PR752_OPERATOR_MERGE_GATE = BLOCKED (pending human security review; see §4 and the
+  containment notice in the PR body)
+PRODUCTION_ENVIRONMENT_APPROVAL_GATE = NOT_CONFIGURED (protection_rules: [] —
+  confirmed twice, Gate A and Gate B)
+PRODUCTION_CREDENTIAL_ROTATION = REQUIRED / NOT PERFORMED
+PRODUCTION_CUTOVER_AUTHORIZED = NO
 PRODUCTION_DB_CONNECTION_PERFORMED = NO
 PRODUCTION_MUTATION_PERFORMED = NO
 ```
