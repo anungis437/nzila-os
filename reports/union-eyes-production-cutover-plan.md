@@ -1408,13 +1408,21 @@ git push origin fix/ue-runtime-rls-foundation
 ```
 PRE_INTEGRATION_PR752_SHA   = 9e2fd26823e41c5eed0dabb01af709c54660346d
 MAIN_MERGED_INTO_PR752      = 008a65bf6ab292745de04b94184e0ee027cbe0dd
-FINAL_INTEGRATED_PR752_SHA  = 8c7071387ae65d69b7afac58a552c33968f4093d
+MERGE_COMMIT_SHA            = 8c7071387ae65d69b7afac58a552c33968f4093d
+FINAL_INTEGRATED_PR752_SHA  = 32a02cd763f0902377809a6758391b2db3379fd1
 ```
 
+Note: `8c7071387` is the merge commit itself; `32a02cd76` adds one further
+documentation-only commit on top (this §12's own write-up, added and pushed
+after the merge) that touches only `reports/union-eyes-production-cutover-
+plan.md`. The functional delta from pre-integration remains unchanged: #760's
+safety gate + regenerated inventory + documentation only — zero additional
+source changes. `32a02cd76` is the true final frozen head for operator review.
+
 Post-push verification: local HEAD == `origin/fix/ue-runtime-rls-foundation` ==
-PR #752's `headRefOid`, all equal to the integrated SHA above. PR #752's base
-auto-advanced to `008a65bf6ab292745de04b94184e0ee027cbe0dd`. `mergeable` flipped
-from `CONFLICTING` (pre-integration) to `MERGEABLE`.
+PR #752's `headRefOid`, all equal to `32a02cd763f0902377809a6758391b2db3379fd1`.
+PR #752's base auto-advanced to `008a65bf6ab292745de04b94184e0ee027cbe0dd`.
+`mergeable` flipped from `CONFLICTING` (pre-integration) to `MERGEABLE`.
 
 ### 12.13 Documentation reconciliation
 
@@ -1437,7 +1445,7 @@ gate.
 ### 12.15 Stop condition
 
 This gate stops before merging #752. The expected next operator decision is:
-**approve the exact final integrated SHA `8c7071387ae65d69b7afac58a552c33968f4093d`
+**approve the exact final integrated SHA `32a02cd763f0902377809a6758391b2db3379fd1`
 of PR #752 for merge.** Only after that explicit approval should a separate
 Release Gate F execute the #752 merge and re-prove zero production dispatch,
 using the same method as Gate D §11.5-§11.7.
@@ -1459,7 +1467,8 @@ MAIN_PRODUCTION_AUTOPROMOTION = DISABLED_PROVEN
 PR760_POSTMERGE_PRODUCTION_DISPATCH = NONE
 PR760_POSTMERGE_PRODUCTION_REVISION = NONE
 PR752_PRE_INTEGRATION_SHA = 9e2fd26823e41c5eed0dabb01af709c54660346d
-PR752_FINAL_INTEGRATED_SHA = 8c7071387ae65d69b7afac58a552c33968f4093d
+PR752_MERGE_COMMIT_SHA = 8c7071387ae65d69b7afac58a552c33968f4093d
+PR752_FINAL_INTEGRATED_SHA = 32a02cd763f0902377809a6758391b2db3379fd1
 PR760_SAFETY_INVARIANT_ON_PR752 = PROVEN (§12.6)
 ROUND59_STAGING_EVIDENCE = STILL_VALID (§12.9, §12.11)
 PR752_HUMAN_SECURITY_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
@@ -1477,9 +1486,10 @@ PRODUCTION_MUTATION_PERFORMED = NO
 **Next operator decisions, in order:**
 
 ```
-1. review the final integrated SHA 8c7071387ae65d69b7afac58a552c33968f4093d of
+1. review the final integrated SHA 32a02cd763f0902377809a6758391b2db3379fd1 of
    PR #752 (functional delta from pre-integration: #760's production-promotion
-   safety gate + mechanically regenerated inventory + no other source changes)
+   safety gate + mechanically regenerated inventory + documentation only —
+   no other source changes)
 2. confirm remote CI on that SHA has settled with an acceptable disposition
    (0 PR-attributable failures, 0 unknown) — see the live PR for current status
 3. approve #752 for merge (a separate, explicit "merge #752" instruction is
