@@ -63,9 +63,14 @@ jobs:
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DEPLOY_ENV="${{ github.event.inputs.environment }}"
-          elif [ "${{ github.ref_name }}" = "main" ]; then
-            DEPLOY_ENV="production"
           else
+            # Any non-workflow_dispatch trigger (e.g. a raw push event) must
+            # NEVER resolve to production — "merge/push to main" must not be
+            # equivalent to "production rollout authorization". Production is
+            # only reachable via an explicit workflow_dispatch with
+            # environment=production, which is itself gated by the
+            # repository's `production` GitHub Environment. See
+            # tooling/contract-tests/union-eyes-production-promotion-gate.test.ts.
             DEPLOY_ENV="staging"
           fi
 
