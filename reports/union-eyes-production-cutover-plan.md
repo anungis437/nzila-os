@@ -1247,13 +1247,210 @@ integration, rerun materially affected #752 CI, then obtain/freeze final human
 security approval on the integrated #752 head — only then does #752 reach its own
 operator merge gate.
 
-## 12. Final status
+## 12. Release Gate E — Integrate Protected Main into PR #752
+
+### 12.1 Authorization boundary
+
+Authorized: fetch main, merge into `fix/ue-runtime-rls-foundation`, resolve
+mechanical conflicts, regenerate inventory, run affected tests, run full PR CI,
+update documentation, commit and push. **Not** authorized: merge #752, enable
+auto-merge, dispatch production, any production DB/credential/Key
+Vault/Container App/RLS/Environment-settings action. Stopped before #752 merge.
+
+### 12.2 Exact starting boundary (reconfirmed)
+
+```
+PRE_INTEGRATION_PR752_SHA = 9e2fd26823e41c5eed0dabb01af709c54660346d
+  (local == origin/fix/ue-runtime-rls-foundation == PR #752 head, working tree clean)
+MAIN_INTEGRATION_SHA = 008a65bf6ab292745de04b94184e0ee027cbe0dd  (unchanged since Gate D)
+PR #752 pre-integration: mergeable = CONFLICTING (expected — base predates #760)
+```
+
+### 12.3 Merge executed (merge commit, not rebase)
+
+```
+git checkout fix/ue-runtime-rls-foundation
+git merge origin/main --no-edit
+```
+
+Preserves the full Round 40-59E remediation history and the Gate A-D audit trail
+rather than rewriting it.
+
+### 12.4 Conflict profile (actual, not assumed)
+
+Exactly 4 conflicts, **all `GENERATED_INVENTORY`**:
+
+```
+tooling/repo-inventory/output/inventory.json
+tooling/repo-inventory/output/inventory.md
+tooling/repo-inventory/output/repo-inventory.json
+tooling/repo-inventory/output/repo-inventory.md
+```
+
+`.github/workflows/auto-promote-union-eyes.yml` and `.github/workflows/deploy-
+union-eyes.yml` — the files both #760 and #752 modify — merged **cleanly with
+zero conflicts** (non-overlapping hunks, confirmed via `git status`/`git diff
+--diff-filter=U`). Zero `SEMANTIC_WORKFLOW`, `SECURITY_ARCHITECTURE`,
+`DOCUMENTATION`, or `OTHER` conflicts — matching the empirical `git merge-tree`
+prediction from Release Gate A (§2.2).
+
+### 12.5 Generated-inventory resolution
+
+Resolved by regeneration, not manual side-selection:
+
+```
+pnpm inventory:generate   # Contract tests: 278 -> 279 (includes #760's new test)
+                          # TS/JS test files: 2624 -> 2625
+git add tooling/repo-inventory/output
+pnpm inventory:check      # -> "All docs consistent with canonical inventory." 0 drift
+```
+
+### 12.6 #760's production-promotion invariant reverified post-integration
+
+```
+auto-promote-union-eyes.yml: matrix.environment = [demo, pilot, staging]
+  (production absent); runtime guard (exit 1 if production) present.
+deploy-union-eyes.yml: non-workflow_dispatch -> DEPLOY_ENV = "staging";
+  no ref_name==main -> production fallback anywhere in the file.
+```
+
+Focused contract test on the integrated (uncommitted) tree:
+
+```
+tooling/contract-tests/union-eyes-production-promotion-gate.test.ts
+Test Files  1 passed (1)
+     Tests  5 passed (5)
+```
+
+### 12.7 #752's own deployment/security contracts reverified
+
+```
+apps/union-eyes/scripts/rls-enforcement/__tests__/deployment-dag-contract.test.ts
+apps/union-eyes/scripts/rls-enforcement/__tests__/supabase-purge-ratchet.test.ts
+tooling/contract-tests/icra-capability-deploy-gate.test.ts
+apps/union-eyes/db/__tests__/rls-enforcement-helpers-behavioral.test.ts
+
+Test Files  4 passed | 1 skipped (5)
+     Tests  20 passed | 9 skipped (29)
+```
+
+The 1 skipped file (`rls-enforcement-helpers-behavioral.test.ts`, 9 tests) requires
+a live database connection and skips in this local environment by design — not a
+regression (same behavior pre-integration).
+
+### 12.8 Combined workflow contains both PRs' contributions
+
+```
+git diff origin/main...HEAD -- .github/workflows/deploy-union-eyes.yml
+```
+
+confirms the integrated file retains **both**: #760's `DEPLOY_ENV="staging"`
+non-dispatch fallback, and #752's `apply_rls_foundation_migration` /
+`apply_authority_enforcement_migration` inputs and the `rls-verify.ts --mode=
+preflight` deployment step. Neither PR's contribution was overwritten.
+
+### 12.9 Security architecture regression check
+
+```
+git diff origin/fix/ue-runtime-rls-foundation..HEAD --stat -- \
+  apps/union-eyes/db/ apps/union-eyes/scripts/rls-enforcement/ db/
+```
+
+returned **empty** — zero changes to any RLS/authority/principal/migration-
+executor source as a result of this integration. `union_eyes_runtime` /
+`union_eyes_system` separation, `SYSTEM_DATABASE_URL`, the ephemeral-migration
+doctrine, the GRANT compiler, RLS policy geometry, and the Supabase purge are
+all unchanged — this integration is regression-neutral by construction (the
+only inputs were main's non-overlapping workflow/inventory changes).
+
+### 12.10 Manifest/enforcement invariant checks — one disclosed pre-existing finding
+
+```
+pnpm inventory:check                          -> 0 drift (PASS)
+pnpm --filter @nzila/union-eyes rls:derive-geometry  -> 0 diff vs committed (PASS)
+pnpm --filter @nzila/union-eyes rls:policy-oracle    -> skipped (RLS_ENFORCEMENT_TEST_URL
+                                                          not set; requires live DB, not
+                                                          performed in this integration-only gate)
+pnpm --filter @nzila/union-eyes rls:check-enforcement -> FAILS locally: regenerating
+  db/migrations/20260910_rls_enforcement_expansion_round58.sql and
+  reports/union-eyes-rls-enforcement-blockers.json against the current manifest/
+  geometry produces 1 blocker vs. 0 committed.
+```
+
+**Disclosed, not fixed in this gate:** confirmed via `git diff` that both files are
+byte-identical between the pre-integration #752 head and the integrated head —
+this finding **predates Gate E** (last touched in commit `f4ed189e0`, 2026-09-10,
+prior Round 59 remediation work) and is **not wired into any GitHub Actions
+workflow** (`grep -rn "check-enforcement" .github/workflows/` = no matches), so it
+was never part of #752's CI-green determination. Per the instruction not to
+regenerate historical evidence absent an actual source change, this is flagged as
+a residual finding requiring separate operator-authorized follow-up, not corrected
+here (correcting it would mean committing a new migration/blockers file — a
+security-sensitive change outside this integration-only gate's scope).
+
+### 12.11 Round 59 staging evidence validity
+
+Given §12.9's empirical zero-diff proof for all RLS/authority/principal source:
+
+```
+ROUND59_STAGING_EVIDENCE = STILL_VALID
+```
+
+No re-run of the staging programme was performed or required.
+
+### 12.12 Merge commit, push, and head equality
+
+```
+git commit --no-edit   # "Merge remote-tracking branch 'origin/main' into fix/ue-runtime-rls-foundation"
+git push origin fix/ue-runtime-rls-foundation
+```
+
+```
+PRE_INTEGRATION_PR752_SHA   = 9e2fd26823e41c5eed0dabb01af709c54660346d
+MAIN_MERGED_INTO_PR752      = 008a65bf6ab292745de04b94184e0ee027cbe0dd
+FINAL_INTEGRATED_PR752_SHA  = 8c7071387ae65d69b7afac58a552c33968f4093d
+```
+
+Post-push verification: local HEAD == `origin/fix/ue-runtime-rls-foundation` ==
+PR #752's `headRefOid`, all equal to the integrated SHA above. PR #752's base
+auto-advanced to `008a65bf6ab292745de04b94184e0ee027cbe0dd`. `mergeable` flipped
+from `CONFLICTING` (pre-integration) to `MERGEABLE`.
+
+### 12.13 Documentation reconciliation
+
+PR #752's body updated (prepended, historical containment notice preserved) with
+a "Release Governance Update" section stating #760 is merged, its merge SHA, the
+zero-production-dispatch proof, the exact pre/post-integration SHAs, the
+conflict profile, and the disclosed pre-existing finding from §12.10.
+
+### 12.14 Remaining unresolved items (explicitly retained)
+
+```
+PRODUCTION_CREDENTIAL_ROTATION = REQUIRED / NOT PERFORMED
+PRODUCTION_ENVIRONMENT_APPROVAL_GATE = NOT_CONFIGURED
+```
+
+No production DB connection, credential retrieval, Key Vault mutation, Container
+App mutation, or GitHub production Environment settings change occurred in this
+gate.
+
+### 12.15 Stop condition
+
+This gate stops before merging #752. The expected next operator decision is:
+**approve the exact final integrated SHA `8c7071387ae65d69b7afac58a552c33968f4093d`
+of PR #752 for merge.** Only after that explicit approval should a separate
+Release Gate F execute the #752 merge and re-prove zero production dispatch,
+using the same method as Gate D §11.5-§11.7.
+
+## 13. Final status
 
 ```
 RELEASE_GATE_A = COMPLETE
 RELEASE_GATE_B = COMPLETE
 RELEASE_GATE_C = COMPLETE
 RELEASE_GATE_D = COMPLETE
+RELEASE_GATE_E = COMPLETE (integration); remote CI on the integrated head still
+  settling at time of writing — see §12 and the live PR for final disposition
 PR760_TECHNICAL_GATE = CLEAN_WITH_PROVEN_BASELINE_FAILURES
 PR760_HUMAN_REVIEW = APPROVED_BY_OPERATOR
 PR760_MERGE_PERFORMED = YES
@@ -1261,11 +1458,16 @@ PR760_MERGE_SHA = 008a65bf6ab292745de04b94184e0ee027cbe0dd
 MAIN_PRODUCTION_AUTOPROMOTION = DISABLED_PROVEN
 PR760_POSTMERGE_PRODUCTION_DISPATCH = NONE
 PR760_POSTMERGE_PRODUCTION_REVISION = NONE
+PR752_PRE_INTEGRATION_SHA = 9e2fd26823e41c5eed0dabb01af709c54660346d
+PR752_FINAL_INTEGRATED_SHA = 8c7071387ae65d69b7afac58a552c33968f4093d
+PR760_SAFETY_INVARIANT_ON_PR752 = PROVEN (§12.6)
+ROUND59_STAGING_EVIDENCE = STILL_VALID (§12.9, §12.11)
 PR752_HUMAN_SECURITY_REVIEW = REQUIRED (not yet approved — 0 reviews, 0 review requests)
-PR752_OPERATOR_MERGE_GATE = BLOCKED_PENDING_MAIN_INTEGRATION
-PR752_FINAL_HUMAN_SECURITY_REVIEW = REQUIRED_POST_760_INTEGRATION
+PR752_OPERATOR_MERGE_GATE = READY_PENDING_OPERATOR_APPROVAL (technical integration
+  complete; awaiting explicit operator approval of the integrated SHA, then final
+  human security review, before merge)
 PRODUCTION_ENVIRONMENT_APPROVAL_GATE = NOT_CONFIGURED (protection_rules: [] —
-  confirmed across Gate A, B, C, and D)
+  confirmed across Gate A, B, C, D, and E)
 PRODUCTION_CREDENTIAL_ROTATION = REQUIRED / NOT PERFORMED
 PRODUCTION_CUTOVER_AUTHORIZED = NO
 PRODUCTION_DB_CONNECTION_PERFORMED = NO
@@ -1275,21 +1477,18 @@ PRODUCTION_MUTATION_PERFORMED = NO
 **Next operator decisions, in order:**
 
 ```
-1. integrate new main (containing #760) into fix/ue-runtime-rls-foundation;
-   resolve only mechanical tooling/repo-inventory/output/* conflicts via
-   pnpm inventory:generate
-2. re-verify #760's production-gate invariant survives the integration (§11.4
-   checks, re-applied to the integrated branch)
-3. rerun materially affected #752 CI on the integrated head
-4. obtain/freeze final human security approval of #752 on the integrated head
-   (from @nzila/eng, @nzila/ue, and @nzila/platform/@nzila/security given its
-   .github/ changes)
-5. merge #752 once approved
-6. verify the #752 merge did NOT trigger a production deployment (same method
-   as §11.5-§11.7)
-7. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
-8. configure required reviewers on the production GitHub Environment
-9. separately authorize production cutover (§7), starting from step 1
+1. review the final integrated SHA 8c7071387ae65d69b7afac58a552c33968f4093d of
+   PR #752 (functional delta from pre-integration: #760's production-promotion
+   safety gate + mechanically regenerated inventory + no other source changes)
+2. confirm remote CI on that SHA has settled with an acceptable disposition
+   (0 PR-attributable failures, 0 unknown) — see the live PR for current status
+3. approve #752 for merge (a separate, explicit "merge #752" instruction is
+   required — this session did not and will not merge it)
+4. after merge, verify the #752 merge did NOT trigger a production deployment
+   (same method as §11.5-§11.7)
+5. approve and execute production credential rotation (§1.3-§1.4), operator-authorized
+6. configure required reviewers on the production GitHub Environment
+7. separately authorize production cutover (§7), starting from step 1
 ```
 
 No automatic actions were taken beyond what is documented in this report and in PR
