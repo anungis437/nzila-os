@@ -38,6 +38,6 @@
     "eslint": "^10",
     "postgres": "^3.4.8",
     "typescript": "^6",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   }
 }
