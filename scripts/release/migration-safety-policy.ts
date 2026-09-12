@@ -30,7 +30,14 @@ function sleepSync(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 }
 
-export function runWithTransientRetry<T>(fn: () => T, attempts = 3, delayMs = 50): T {
+// Observed in production: a runner under resource contention can keep
+// returning ENOBUFS for longer than a few hundred milliseconds (a single
+// short retry burst was insufficient - see the frozen-main incident this
+// hardened backoff replaced). Attempts/delay are deliberately larger here,
+// with linearly increasing backoff, to give the kernel a realistic window
+// to reclaim exhausted pipe/fd resources, while still remaining bounded so
+// a genuinely broken environment fails within seconds, not indefinitely.
+export function runWithTransientRetry<T>(fn: () => T, attempts = 8, delayMs = 500): T {
   for (let attempt = 0; attempt < attempts; attempt++) {
     try {
       return fn()
@@ -100,14 +107,18 @@ export type ExecFn = (command: string, options?: { cwd?: string }) => string
 const defaultExec: ExecFn = (command, options) =>
   execSync(command, { encoding: 'utf8', ...options }) as unknown as string
 
-export function getChangedFiles(range: string, execImpl: ExecFn = defaultExec): string[] {
+export function getChangedFiles(
+  range: string,
+  execImpl: ExecFn = defaultExec,
+  retry?: { attempts?: number; delayMs?: number },
+): string[] {
   const command = range.includes('..')
     ? `git diff --name-only ${range}`
     : `git show --pretty="" --name-only ${range}`
 
   let output: string
   try {
-    output = runWithTransientRetry(() => execImpl(command))
+    output = runWithTransientRetry(() => execImpl(command), retry?.attempts, retry?.delayMs)
   } catch (error) {
     // A supplied-but-unresolvable comparison range (e.g. a shallow checkout
     // missing the "before" object) must fail closed, never be silently
