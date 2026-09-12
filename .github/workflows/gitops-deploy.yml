@@ -107,6 +107,36 @@ jobs:
           fi
           echo "Configuration validated: $CONFIG"
 
+  # ── Migration safety gate ──────────────────────────────────────────────────
+  # Isolated onto its own fresh runner (not a step inside `validate`) so a
+  # resource-heavy earlier step in that job (e.g. Fast tests, ~5min of heavy
+  # subprocess spawning) cannot leave the shared process tree short on
+  # pipe/fd resources before this check runs. Starts as soon as `plan`
+  # completes, in parallel with the much slower `validate` job, so a
+  # migration-policy decision is available in minutes, not ~26 minutes in.
+  migration-safety:
+    needs: plan
+    runs-on: ubuntu-latest
+    name: Migration Safety Gate
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Explicit push-range resolution below needs both range endpoints
+          # resolvable. A shallow (default depth-1) checkout leaves the
+          # "before" commit missing, which previously made the validator
+          # fall back to diffing bare HEAD against no parent at all -
+          # a full-tree diff whose oversized output overflowed the spawned
+          # git process's stdout pipe (ENOBUFS), not a transient blip.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
+      - name: Migration safety check
+        env:
+          # github.event.before is only present on push events; the script
+          # falls back to HEAD~1..HEAD (workflow_dispatch) when absent.
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: pnpm exec tsx scripts/release/validate-migration-safety.ts
+
   # ── Run pre-deployment checks ─────────────────────────────────────────────
   validate:
     needs: plan
@@ -125,9 +155,6 @@ jobs:
       - name: Fast tests
         run: pnpm test:fast
 
-      - name: Migration safety check
-        run: pnpm exec tsx scripts/release/validate-migration-safety.ts
-
       - name: Run contract tests
         run: pnpm contract-tests
 
@@ -142,7 +169,7 @@ jobs:
 
   # ── Build and push images ─────────────────────────────────────────────────
   build:
-    needs: [plan, validate]
+    needs: [plan, validate, migration-safety]
     runs-on: ubuntu-latest
     name: Build Images
     # BR-5: image BUILD/PUSH authority. Runs under the dedicated `build` GitHub

@@ -100,7 +100,11 @@ export function resolveRange(argv: string[], env: NodeJS.ProcessEnv): string {
   }
 }
 
-export class UnresolvableRangeError extends Error {}
+export class UnresolvableRangeError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options)
+  }
+}
 
 export type ExecFn = (command: string, options?: { cwd?: string }) => string
 
@@ -122,9 +126,12 @@ export function getChangedFiles(
   } catch (error) {
     // A supplied-but-unresolvable comparison range (e.g. a shallow checkout
     // missing the "before" object) must fail closed, never be silently
-    // treated as an empty/migration-free changeset.
+    // treated as an empty/migration-free changeset. Preserve the original
+    // spawn error as `cause` so callers can log safe diagnostic fields
+    // (code/errno/syscall) without this module needing to know about logging.
     throw new UnresolvableRangeError(
       `Unable to resolve changed files for range "${range}": ${(error as Error).message}`,
+      { cause: error },
     )
   }
   return output.split('\n').map((f) => f.trim()).filter(Boolean)
