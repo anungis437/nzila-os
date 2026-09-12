@@ -9,14 +9,6 @@ const MIGRATIONS = [
   ['content', '0003_pilotapplications_commercial_terms'],
   ['core', '0003_automation_rules_organization_id'],
 ] as const
-const EXPECTED_POLICIES = [
-  'ue_org_isolation_delete',
-  'ue_org_isolation_insert',
-  'ue_org_isolation_select',
-  'ue_org_isolation_update',
-  'ue_system_full_access',
-]
-
 type Mode = 'preflight' | 'attest'
 type Column = {
   column_name: string
@@ -24,6 +16,43 @@ type Column = {
   character_maximum_length: number | null
   is_nullable: 'YES' | 'NO'
 }
+type IndexGeometry = {
+  index_name: string
+  access_method: string
+  is_valid: boolean
+  is_ready: boolean
+  is_partial: boolean
+  has_expressions: boolean
+  is_unique: boolean
+  key_count: number
+  attribute_count: number
+  key_columns: string[]
+}
+type ForeignKeyGeometry = {
+  constraint_name: string
+  source_columns: string[]
+  target_schema: string
+  target_table: string
+  target_columns: string[]
+  delete_action: string
+}
+type PolicyGeometry = {
+  policyname: string
+  permissive: string
+  cmd: string
+  roles: string[]
+  using_expression: string | null
+  check_expression: string | null
+}
+
+const TENANT_EXPRESSION = "((organization_id)::text = current_setting('app.current_org_id'::text, true))"
+const EXPECTED_POLICY_GEOMETRY: PolicyGeometry[] = [
+  { policyname: 'ue_org_isolation_delete', permissive: 'PERMISSIVE', cmd: 'DELETE', roles: ['union_eyes_runtime'], using_expression: TENANT_EXPRESSION, check_expression: null },
+  { policyname: 'ue_org_isolation_insert', permissive: 'PERMISSIVE', cmd: 'INSERT', roles: ['union_eyes_runtime'], using_expression: null, check_expression: TENANT_EXPRESSION },
+  { policyname: 'ue_org_isolation_select', permissive: 'PERMISSIVE', cmd: 'SELECT', roles: ['union_eyes_runtime'], using_expression: TENANT_EXPRESSION, check_expression: null },
+  { policyname: 'ue_org_isolation_update', permissive: 'PERMISSIVE', cmd: 'UPDATE', roles: ['union_eyes_runtime'], using_expression: TENANT_EXPRESSION, check_expression: TENANT_EXPRESSION },
+  { policyname: 'ue_system_full_access', permissive: 'PERMISSIVE', cmd: 'ALL', roles: ['union_eyes_system'], using_expression: 'true', check_expression: 'true' },
+]
 
 function requireCondition(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message)
@@ -92,35 +121,100 @@ async function main() {
     const legacy = columns.find(({ column_name }) => column_name === 'org_id')
     requireCondition(!(canonical && legacy), 'Ambiguous dual ownership geometry')
 
-    const indexes = await sql<{ indexname: string; indexdef: string }[]>`
-      SELECT indexname, indexdef
-        FROM pg_indexes
-       WHERE schemaname = 'public'
-         AND tablename = 'automation_rules'
-         AND indexname IN ('idx_automation_rules_org', 'automation_rules_org_idx')
-       ORDER BY indexname
+    const indexes = await sql<IndexGeometry[]>`
+      SELECT
+        index_class.relname AS index_name,
+        access_method.amname AS access_method,
+        index_catalog.indisvalid AS is_valid,
+        index_catalog.indisready AS is_ready,
+        index_catalog.indpred IS NOT NULL AS is_partial,
+        index_catalog.indexprs IS NOT NULL AS has_expressions,
+        index_catalog.indisunique AS is_unique,
+        index_catalog.indnkeyatts::int AS key_count,
+        index_catalog.indnatts::int AS attribute_count,
+        ARRAY(
+          SELECT attribute.attname
+            FROM unnest(index_catalog.indkey::smallint[]) WITH ORDINALITY AS key(attnum, position)
+            JOIN pg_attribute attribute
+              ON attribute.attrelid = table_class.oid AND attribute.attnum = key.attnum
+           WHERE key.position <= index_catalog.indnkeyatts
+           ORDER BY key.position
+        ) AS key_columns
+      FROM pg_index index_catalog
+      JOIN pg_class table_class ON table_class.oid = index_catalog.indrelid
+      JOIN pg_namespace table_namespace ON table_namespace.oid = table_class.relnamespace
+      JOIN pg_class index_class ON index_class.oid = index_catalog.indexrelid
+      JOIN pg_am access_method ON access_method.oid = index_class.relam
+      WHERE table_namespace.nspname = 'public'
+        AND table_class.relname = 'automation_rules'
+        AND index_class.relname IN ('idx_automation_rules_org', 'automation_rules_org_idx')
+      ORDER BY index_class.relname
     `
-    const indexNames = new Set(indexes.map(({ indexname }) => indexname))
-    const [legacyForeignKey] = await sql<{ exists: boolean }[]>`
-      SELECT EXISTS (
-        SELECT 1 FROM pg_constraint
-         WHERE conrelid = 'public.automation_rules'::regclass
-           AND conname = 'automation_rules_org_id_organizations_id_fk'
-      ) AS exists
+    const canonicalIndex = indexes.find(({ index_name }) => index_name === 'idx_automation_rules_org')
+    const legacyIndex = indexes.find(({ index_name }) => index_name === 'automation_rules_org_idx')
+    const indexIsExact = (index: IndexGeometry | undefined, column: string) => Boolean(
+      index?.access_method === 'btree'
+      && index.is_valid
+      && index.is_ready
+      && !index.is_partial
+      && !index.has_expressions
+      && !index.is_unique
+      && index.key_count === 1
+      && index.attribute_count === 1
+      && index.key_columns.length === 1
+      && index.key_columns[0] === column,
+    )
+    const canonicalIndexIsExact = indexIsExact(canonicalIndex, 'organization_id')
+    const legacyIndexIsExact = indexIsExact(legacyIndex, 'org_id')
+
+    const [legacyForeignKey] = await sql<ForeignKeyGeometry[]>`
+      SELECT
+        constraint_catalog.conname AS constraint_name,
+        ARRAY(
+          SELECT attribute.attname
+            FROM unnest(constraint_catalog.conkey) WITH ORDINALITY AS key(attnum, position)
+            JOIN pg_attribute attribute
+              ON attribute.attrelid = constraint_catalog.conrelid AND attribute.attnum = key.attnum
+           ORDER BY key.position
+        ) AS source_columns,
+        target_namespace.nspname AS target_schema,
+        target_table.relname AS target_table,
+        ARRAY(
+          SELECT attribute.attname
+            FROM unnest(constraint_catalog.confkey) WITH ORDINALITY AS key(attnum, position)
+            JOIN pg_attribute attribute
+              ON attribute.attrelid = constraint_catalog.confrelid AND attribute.attnum = key.attnum
+           ORDER BY key.position
+        ) AS target_columns,
+        CASE constraint_catalog.confdeltype
+          WHEN 'a' THEN 'NO ACTION'
+          WHEN 'r' THEN 'RESTRICT'
+          WHEN 'c' THEN 'CASCADE'
+          WHEN 'n' THEN 'SET NULL'
+          WHEN 'd' THEN 'SET DEFAULT'
+        END AS delete_action
+      FROM pg_constraint constraint_catalog
+      JOIN pg_class target_table ON target_table.oid = constraint_catalog.confrelid
+      JOIN pg_namespace target_namespace ON target_namespace.oid = target_table.relnamespace
+      WHERE constraint_catalog.conrelid = 'public.automation_rules'::regclass
+        AND constraint_catalog.contype = 'f'
+        AND constraint_catalog.conname = 'automation_rules_org_id_organizations_id_fk'
     `
+    const legacyForeignKeyIsExact = Boolean(
+      legacyForeignKey
+      && JSON.stringify(legacyForeignKey.source_columns) === JSON.stringify(['org_id'])
+      && legacyForeignKey.target_schema === 'public'
+      && legacyForeignKey.target_table === 'organizations'
+      && JSON.stringify(legacyForeignKey.target_columns) === JSON.stringify(['id'])
+      && legacyForeignKey.delete_action === 'NO ACTION',
+    )
     const [rls] = await sql<{ relrowsecurity: boolean; relforcerowsecurity: boolean }[]>`
       SELECT relrowsecurity, relforcerowsecurity
         FROM pg_class
        WHERE oid = 'public.automation_rules'::regclass
     `
-    const policies = await sql<{
-      policyname: string
-      cmd: string
-      roles: string[]
-      using_expression: string | null
-      check_expression: string | null
-    }[]>`
-      SELECT policyname, cmd, roles, qual::text AS using_expression, with_check::text AS check_expression
+    const policies = await sql<PolicyGeometry[]>`
+      SELECT policyname, permissive, cmd, roles, qual::text AS using_expression, with_check::text AS check_expression
         FROM pg_policies
        WHERE schemaname = 'public' AND tablename = 'automation_rules'
        ORDER BY policyname
@@ -170,7 +264,7 @@ async function main() {
           && canonical.character_maximum_length === 255
           && canonical.is_nullable === 'NO'
           && !legacy
-          && indexNames.has('idx_automation_rules_org'),
+          && canonicalIndexIsExact,
         ),
       },
     ]
@@ -191,16 +285,25 @@ async function main() {
       const canonicalSupported = Boolean(
         canonical?.data_type === 'character varying'
         && canonical.character_maximum_length === 255
-        && (canonical.is_nullable === 'NO' || table.row_count === 0),
+        && (canonical.is_nullable === 'NO' || table.row_count === 0)
+        && (!canonicalIndex || canonicalIndexIsExact)
+        && !legacyIndex
+        && !legacyForeignKey
       )
       const legacySupported = Boolean(
         legacy?.data_type === 'uuid'
         && legacy.is_nullable === 'NO'
         && table.row_count === 0
-        && legacyForeignKey.exists
-        && indexNames.has('automation_rules_org_idx'),
+        && legacyForeignKeyIsExact
+        && legacyIndexIsExact
+        && !canonicalIndex,
       )
-      const absentOwnershipSupported = !canonical && !legacy && table.row_count === 0
+      const absentOwnershipSupported = !canonical
+        && !legacy
+        && table.row_count === 0
+        && !canonicalIndex
+        && !legacyIndex
+        && !legacyForeignKey
       requireCondition(
         canonicalSupported || legacySupported || absentOwnershipSupported,
         'automation_rules geometry is not supported by the reviewed forward migration',
@@ -215,22 +318,14 @@ async function main() {
       requireCondition(canonical.character_maximum_length === 255, 'organization_id length is not 255')
       requireCondition(canonical.is_nullable === 'NO', 'organization_id is nullable')
       requireCondition(!legacy, 'Legacy org_id remains present')
-      requireCondition(indexNames.has('idx_automation_rules_org'), 'Canonical ownership index is absent')
-      requireCondition(!indexNames.has('automation_rules_org_idx'), 'Legacy ownership index remains present')
-      requireCondition(!legacyForeignKey.exists, 'Legacy ownership foreign key remains present')
+      requireCondition(canonicalIndexIsExact, 'Canonical ownership index geometry is not exact')
+      requireCondition(!legacyIndex, 'Legacy ownership index remains present')
+      requireCondition(!legacyForeignKey, 'Legacy ownership foreign key remains present')
       requireCondition(rls.relrowsecurity && rls.relforcerowsecurity, 'RLS and FORCE RLS are not both enabled')
       requireCondition(
-        JSON.stringify(policies.map(({ policyname }) => policyname)) === JSON.stringify(EXPECTED_POLICIES),
-        'automation_rules policy set is not exact',
+        JSON.stringify(policies) === JSON.stringify(EXPECTED_POLICY_GEOMETRY),
+        `automation_rules policy geometry is not exact: ${JSON.stringify(policies)}`,
       )
-      const tenantPolicies = policies.filter(({ policyname }) => policyname.startsWith('ue_org_isolation_'))
-      requireCondition(tenantPolicies.length === 4, 'Expected four tenant isolation policies')
-      for (const policy of tenantPolicies) {
-        const expression = `${policy.using_expression ?? ''} ${policy.check_expression ?? ''}`
-        requireCondition(expression.includes('organization_id'), `${policy.policyname} uses the wrong ownership column`)
-        requireCondition(expression.includes('current_org_id'), `${policy.policyname} lacks tenant context comparison`)
-        requireCondition(/\(organization_id\)::text/.test(expression), `${policy.policyname} does not use text comparison mode`)
-      }
       requireCondition(
         JSON.stringify(grants) === JSON.stringify([{ grantee: 'union_eyes_system', privilege_type: 'SELECT' }]),
         'automation_rules runtime/system grants are not exact',
@@ -243,8 +338,8 @@ async function main() {
       automationRules: {
         rowCount: table.row_count,
         columns,
-        indexes: indexes.map(({ indexname }) => indexname),
-        legacyForeignKey: legacyForeignKey.exists,
+        indexes,
+        legacyForeignKey: legacyForeignKey ?? null,
         rls,
         policies: policies.map(({ policyname, cmd, roles }) => ({ policyname, cmd, roles })),
         grants,

@@ -67,14 +67,14 @@ async function establishFinalAuthorityState(includeCoreLedger = true) {
     CREATE INDEX idx_automation_rules_org ON automation_rules (organization_id);
     ALTER TABLE automation_rules ENABLE ROW LEVEL SECURITY;
     ALTER TABLE automation_rules FORCE ROW LEVEL SECURITY;
-    CREATE POLICY ue_org_isolation_select ON automation_rules FOR SELECT
+    CREATE POLICY ue_org_isolation_select ON automation_rules FOR SELECT TO union_eyes_runtime
       USING (organization_id = current_setting('app.current_org_id', true));
-    CREATE POLICY ue_org_isolation_insert ON automation_rules FOR INSERT
+    CREATE POLICY ue_org_isolation_insert ON automation_rules FOR INSERT TO union_eyes_runtime
       WITH CHECK (organization_id = current_setting('app.current_org_id', true));
-    CREATE POLICY ue_org_isolation_update ON automation_rules FOR UPDATE
+    CREATE POLICY ue_org_isolation_update ON automation_rules FOR UPDATE TO union_eyes_runtime
       USING (organization_id = current_setting('app.current_org_id', true))
       WITH CHECK (organization_id = current_setting('app.current_org_id', true));
-    CREATE POLICY ue_org_isolation_delete ON automation_rules FOR DELETE
+    CREATE POLICY ue_org_isolation_delete ON automation_rules FOR DELETE TO union_eyes_runtime
       USING (organization_id = current_setting('app.current_org_id', true));
     CREATE POLICY ue_system_full_access ON automation_rules FOR ALL TO union_eyes_system
       USING (true) WITH CHECK (true);
@@ -142,6 +142,60 @@ describe.sequential('P4 authority state census on disposable PostgreSQL', () => 
     expect(runState('preflight').status).toBe(0)
   })
 
+  it('rejects the canonical index name on the wrong column before the core ledger row exists', async () => {
+    await establishFinalAuthorityState(false)
+    await sql.unsafe(`
+      DROP INDEX idx_automation_rules_org;
+      CREATE INDEX idx_automation_rules_org ON automation_rules (id);
+    `)
+    expect(runState('preflight').status).not.toBe(0)
+  })
+
+  it('rejects the canonical index name on the wrong column during final attestation', async () => {
+    await establishFinalAuthorityState()
+    await sql.unsafe(`
+      DROP INDEX idx_automation_rules_org;
+      CREATE INDEX idx_automation_rules_org ON automation_rules (id);
+    `)
+    expect(runState('attest').status).not.toBe(0)
+  })
+
+  it('rejects the legacy index name when it indexes the wrong column', async () => {
+    await sql.unsafe(`
+      CREATE TABLE automation_rules (
+        id uuid PRIMARY KEY,
+        org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
+          REFERENCES organizations(id)
+      );
+      CREATE INDEX automation_rules_org_idx ON automation_rules (id);
+    `)
+    expect(runState('preflight').status).not.toBe(0)
+  })
+
+  it('rejects the legacy FK name when it has the wrong delete behavior', async () => {
+    await sql.unsafe(`
+      CREATE TABLE automation_rules (
+        id uuid PRIMARY KEY,
+        org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
+          REFERENCES organizations(id) ON DELETE CASCADE
+      );
+      CREATE INDEX automation_rules_org_idx ON automation_rules (org_id);
+    `)
+    expect(runState('preflight').status).not.toBe(0)
+  })
+
+  it('rejects the legacy FK name when it references the wrong target', async () => {
+    await sql.unsafe(`
+      CREATE TABLE automation_rules (
+        id uuid PRIMARY KEY,
+        org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
+          REFERENCES pilot_applications(id)
+      );
+      CREATE INDEX automation_rules_org_idx ON automation_rules (org_id);
+    `)
+    expect(runState('preflight').status).not.toBe(0)
+  })
+
   it.each([
     ['unknown ownership type', `CREATE TABLE automation_rules (id uuid PRIMARY KEY, organization_id integer)`],
     ['populated nullable canonical ownership', `CREATE TABLE automation_rules (id uuid PRIMARY KEY, organization_id varchar(255)); INSERT INTO automation_rules (id) VALUES (gen_random_uuid())`],
@@ -160,6 +214,37 @@ describe.sequential('P4 authority state census on disposable PostgreSQL', () => 
     await establishFinalAuthorityState()
     const result = runState('attest')
     expect(result.status, result.stderr).toBe(0)
+  })
+
+  it('rejects an expected tenant policy name with the wrong command', async () => {
+    await establishFinalAuthorityState()
+    await sql.unsafe(`
+      DROP POLICY ue_org_isolation_select ON automation_rules;
+      CREATE POLICY ue_org_isolation_select ON automation_rules FOR ALL TO union_eyes_runtime
+        USING (organization_id = current_setting('app.current_org_id', true))
+        WITH CHECK (organization_id = current_setting('app.current_org_id', true));
+    `)
+    expect(runState('attest').status).not.toBe(0)
+  })
+
+  it('rejects an expected tenant policy name with the wrong role', async () => {
+    await establishFinalAuthorityState()
+    await sql.unsafe(`
+      DROP POLICY ue_org_isolation_select ON automation_rules;
+      CREATE POLICY ue_org_isolation_select ON automation_rules FOR SELECT TO union_eyes_system
+        USING (organization_id = current_setting('app.current_org_id', true));
+    `)
+    expect(runState('attest').status).not.toBe(0)
+  })
+
+  it('rejects malformed ue_system_full_access semantics', async () => {
+    await establishFinalAuthorityState()
+    await sql.unsafe(`
+      DROP POLICY ue_system_full_access ON automation_rules;
+      CREATE POLICY ue_system_full_access ON automation_rules FOR ALL TO union_eyes_system
+        USING (false) WITH CHECK (true);
+    `)
+    expect(runState('attest').status).not.toBe(0)
   })
 
   it('rejects a drill host before attempting a connection', () => {

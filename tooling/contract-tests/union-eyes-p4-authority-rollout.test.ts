@@ -106,6 +106,11 @@ describe('Union Eyes P4 authority-only rollout', () => {
       'automation_rules_org_id_organizations_id_fk',
       'automation_rules_org_idx',
       'idx_automation_rules_org',
+      'indisvalid',
+      'indisready',
+      'indpred',
+      'indnkeyatts',
+      'confdeltype',
       'relrowsecurity',
       'relforcerowsecurity',
       'pg_policies',
@@ -125,11 +130,14 @@ describe('Union Eyes P4 authority-only rollout', () => {
     for (const evidence of [
       'organization_id length is not 255',
       'Legacy org_id remains present',
-      'Canonical ownership index is absent',
+      'Canonical ownership index geometry is not exact',
       'Legacy ownership index remains present',
       'Legacy ownership foreign key remains present',
       'RLS and FORCE RLS are not both enabled',
-      'does not use text comparison mode',
+      'automation_rules policy geometry is not exact',
+      'EXPECTED_POLICY_GEOMETRY',
+      "roles: ['union_eyes_runtime']",
+      "roles: ['union_eyes_system']",
       "grantee: 'union_eyes_system', privilege_type: 'SELECT'",
     ]) {
       expect(stateSource).toContain(evidence)
