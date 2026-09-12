@@ -17,6 +17,8 @@ import {
 const root = resolve(import.meta.dirname, '../..')
 const deployStagingPath = resolve(root, '.github/workflows/deploy-staging.yml')
 const deployStagingWorkflow = load(readFileSync(deployStagingPath, 'utf8')) as any
+const gitopsDeployPath = resolve(root, '.github/workflows/gitops-deploy.yml')
+const gitopsDeployWorkflow = load(readFileSync(gitopsDeployPath, 'utf8')) as any
 
 const NESTED_DJANGO_MIGRATION =
   'apps/union-eyes/backend/core/migrations/0003_automation_rules_organization_id.py'
@@ -207,6 +209,23 @@ describe('11: transient OS-level spawn failures retry instead of failing closed 
     expect(result).toBe('ok')
     expect(calls).toBe(7)
   })
+
+  it('preserves the original spawn error as `cause` for safe post-mortem diagnostics', () => {
+    let thrown: UnresolvableRangeError | undefined
+    try {
+      getChangedFiles(
+        'HEAD~1..HEAD',
+        () => {
+          throw transientError('ENOBUFS')
+        },
+        { attempts: 2, delayMs: 1 },
+      )
+    } catch (error) {
+      thrown = error as UnresolvableRangeError
+    }
+    expect(thrown).toBeInstanceOf(UnresolvableRangeError)
+    expect((thrown?.cause as NodeJS.ErrnoException)?.code).toBe('ENOBUFS')
+  })
 })
 
 describe('9: workflow checkout-depth contract', () => {
@@ -215,6 +234,52 @@ describe('9: workflow checkout-depth contract', () => {
     const checkoutStep = steps.find((step: { uses?: string }) => step.uses === 'actions/checkout@v5')
     expect(checkoutStep).toBeDefined()
     expect(checkoutStep.with?.['fetch-depth']).toBe(0)
+  })
+})
+
+describe('12: gitops-deploy.yml migration-safety isolated-job topology', () => {
+  it('migration-safety exists as its own distinct job', () => {
+    expect(gitopsDeployWorkflow.jobs['migration-safety']).toBeDefined()
+  })
+
+  it('migration-safety needs only plan (starts in parallel with validate, not after it)', () => {
+    expect(gitopsDeployWorkflow.jobs['migration-safety'].needs).toBe('plan')
+  })
+
+  it('migration-safety runs on a fresh ubuntu-latest runner', () => {
+    expect(gitopsDeployWorkflow.jobs['migration-safety']['runs-on']).toBe('ubuntu-latest')
+  })
+
+  it('migration-safety checkout sets fetch-depth: 0', () => {
+    const steps = gitopsDeployWorkflow.jobs['migration-safety'].steps
+    const checkoutStep = steps.find((step: { uses?: string }) => step.uses === 'actions/checkout@v5')
+    expect(checkoutStep).toBeDefined()
+    expect(checkoutStep.with?.['fetch-depth']).toBe(0)
+  })
+
+  it('migration-safety wires the push-event before SHA explicitly', () => {
+    const steps = gitopsDeployWorkflow.jobs['migration-safety'].steps
+    const migrationStep = steps.find((step: { name?: string }) => step.name === 'Migration safety check')
+    expect(migrationStep).toBeDefined()
+    expect(migrationStep.env?.GITHUB_EVENT_BEFORE).toBe('${{ github.event.before }}')
+  })
+
+  it('migration-safety job does not run Azure/Docker/build/deploy actions', () => {
+    const steps = gitopsDeployWorkflow.jobs['migration-safety'].steps
+    const serialized = JSON.stringify(steps)
+    expect(serialized).not.toMatch(/azure\/login|docker\/setup-buildx|az acr login|docker build/i)
+  })
+
+  it('the migration safety step no longer runs inside Pre-Deploy Validation', () => {
+    const steps = gitopsDeployWorkflow.jobs['validate'].steps
+    const migrationStep = steps.find((step: { name?: string }) => step.name === 'Migration safety check')
+    expect(migrationStep).toBeUndefined()
+  })
+
+  it('build requires both validate and migration-safety before it can run', () => {
+    const needs = gitopsDeployWorkflow.jobs['build'].needs
+    expect(needs).toContain('validate')
+    expect(needs).toContain('migration-safety')
   })
 })
 
