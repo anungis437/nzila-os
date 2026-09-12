@@ -10,6 +10,7 @@ import {
   isApprovedRunbookUpdate,
   isMigrationFile,
   resolveRange,
+  runWithTransientRetry,
   UnresolvableRangeError,
 } from '../../scripts/release/migration-safety-policy'
 
@@ -135,6 +136,55 @@ describe('migration safety range resolution', () => {
       getChangedFiles(
         '0000000000000000000000000000000000000000..deadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
       ),
+    ).toThrow(UnresolvableRangeError)
+  })
+})
+
+describe('11: transient OS-level spawn failures retry instead of failing closed immediately', () => {
+  function transientError(code: string): NodeJS.ErrnoException {
+    const error = new Error(`spawnSync /bin/sh ${code}`) as NodeJS.ErrnoException
+    error.code = code
+    return error
+  }
+
+  it('retries on ENOBUFS and succeeds once the transient condition clears', () => {
+    let calls = 0
+    const result = runWithTransientRetry(() => {
+      calls += 1
+      if (calls < 3) throw transientError('ENOBUFS')
+      return 'ok'
+    })
+    expect(result).toBe('ok')
+    expect(calls).toBe(3)
+  })
+
+  it('does not retry a non-transient error', () => {
+    let calls = 0
+    expect(() =>
+      runWithTransientRetry(() => {
+        calls += 1
+        throw new Error('fatal: bad revision')
+      }),
+    ).toThrow('bad revision')
+    expect(calls).toBe(1)
+  })
+
+  it('getChangedFiles recovers from a transient exec failure via retry', () => {
+    let calls = 0
+    const changed = getChangedFiles('HEAD~1..HEAD', () => {
+      calls += 1
+      if (calls < 2) throw transientError('ENOBUFS')
+      return 'apps/example/file.ts\n'
+    })
+    expect(changed).toEqual(['apps/example/file.ts'])
+    expect(calls).toBe(2)
+  })
+
+  it('still fails closed if the transient error persists past the retry budget', () => {
+    expect(() =>
+      getChangedFiles('HEAD~1..HEAD', () => {
+        throw transientError('ENOBUFS')
+      }),
     ).toThrow(UnresolvableRangeError)
   })
 })

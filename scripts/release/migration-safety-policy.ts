@@ -17,6 +17,31 @@ const APPROVED_RUNBOOK_PREFIXES = [
 const DJANGO_MIGRATION_PATTERN = /(^|\/)migrations\/([^/]+\.py)$/
 const DJANGO_MIGRATION_INIT_FILENAME = '__init__.py'
 
+// Transient OS-level spawn failures (runner resource contention), distinct
+// from a genuine unresolvable git revision, which must still fail closed.
+const TRANSIENT_SPAWN_ERROR_CODES = new Set(['ENOBUFS', 'EAGAIN', 'EMFILE', 'ENFILE', 'ENOMEM'])
+
+function isTransientSpawnError(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code
+  return typeof code === 'string' && TRANSIENT_SPAWN_ERROR_CODES.has(code)
+}
+
+function sleepSync(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
+export function runWithTransientRetry<T>(fn: () => T, attempts = 3, delayMs = 50): T {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      return fn()
+    } catch (error) {
+      if (!isTransientSpawnError(error) || attempt === attempts - 1) throw error
+      sleepSync(delayMs * (attempt + 1))
+    }
+  }
+  throw new Error('unreachable')
+}
+
 export function isMigrationFile(path: string): boolean {
   if (path.startsWith('migrations/')) return true
   if (path.includes('/migrate-')) return true
@@ -59,7 +84,9 @@ export function resolveRange(argv: string[], env: NodeJS.ProcessEnv): string {
   }
 
   try {
-    execSync('git rev-parse --verify --quiet HEAD~1', { stdio: 'ignore' })
+    runWithTransientRetry(() =>
+      execSync('git rev-parse --verify --quiet HEAD~1', { stdio: 'ignore' }),
+    )
     return 'HEAD~1..HEAD'
   } catch {
     return 'HEAD'
@@ -80,7 +107,7 @@ export function getChangedFiles(range: string, execImpl: ExecFn = defaultExec): 
 
   let output: string
   try {
-    output = execImpl(command)
+    output = runWithTransientRetry(() => execImpl(command))
   } catch (error) {
     // A supplied-but-unresolvable comparison range (e.g. a shallow checkout
     // missing the "before" object) must fail closed, never be silently
