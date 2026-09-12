@@ -130,7 +130,7 @@ describe.sequential('P4 authority state census on disposable PostgreSQL', () => 
       CREATE TABLE automation_rules (
         id uuid PRIMARY KEY,
         org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
-          REFERENCES organizations(id)
+          REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE NO ACTION
       );
       CREATE INDEX automation_rules_org_idx ON automation_rules (org_id);
     `)
@@ -165,7 +165,7 @@ describe.sequential('P4 authority state census on disposable PostgreSQL', () => 
       CREATE TABLE automation_rules (
         id uuid PRIMARY KEY,
         org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
-          REFERENCES organizations(id)
+          REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE NO ACTION
       );
       CREATE INDEX automation_rules_org_idx ON automation_rules (id);
     `)
@@ -177,7 +177,19 @@ describe.sequential('P4 authority state census on disposable PostgreSQL', () => 
       CREATE TABLE automation_rules (
         id uuid PRIMARY KEY,
         org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
-          REFERENCES organizations(id) ON DELETE CASCADE
+          REFERENCES organizations(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+      CREATE INDEX automation_rules_org_idx ON automation_rules (org_id);
+    `)
+    expect(runState('preflight').status).not.toBe(0)
+  })
+
+  it('rejects the legacy FK name when it has the wrong update behavior', async () => {
+    await sql.unsafe(`
+      CREATE TABLE automation_rules (
+        id uuid PRIMARY KEY,
+        org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
+          REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE CASCADE
       );
       CREATE INDEX automation_rules_org_idx ON automation_rules (org_id);
     `)
@@ -189,7 +201,7 @@ describe.sequential('P4 authority state census on disposable PostgreSQL', () => 
       CREATE TABLE automation_rules (
         id uuid PRIMARY KEY,
         org_id uuid NOT NULL CONSTRAINT automation_rules_org_id_organizations_id_fk
-          REFERENCES pilot_applications(id)
+          REFERENCES pilot_applications(id) ON DELETE CASCADE ON UPDATE NO ACTION
       );
       CREATE INDEX automation_rules_org_idx ON automation_rules (org_id);
     `)

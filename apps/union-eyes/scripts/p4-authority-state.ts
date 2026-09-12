@@ -35,6 +35,7 @@ type ForeignKeyGeometry = {
   target_table: string
   target_columns: string[]
   delete_action: string
+  update_action: string
 }
 type PolicyGeometry = {
   policyname: string
@@ -192,7 +193,14 @@ async function main() {
           WHEN 'c' THEN 'CASCADE'
           WHEN 'n' THEN 'SET NULL'
           WHEN 'd' THEN 'SET DEFAULT'
-        END AS delete_action
+        END AS delete_action,
+        CASE constraint_catalog.confupdtype
+          WHEN 'a' THEN 'NO ACTION'
+          WHEN 'r' THEN 'RESTRICT'
+          WHEN 'c' THEN 'CASCADE'
+          WHEN 'n' THEN 'SET NULL'
+          WHEN 'd' THEN 'SET DEFAULT'
+        END AS update_action
       FROM pg_constraint constraint_catalog
       JOIN pg_class target_table ON target_table.oid = constraint_catalog.confrelid
       JOIN pg_namespace target_namespace ON target_namespace.oid = target_table.relnamespace
@@ -206,7 +214,8 @@ async function main() {
       && legacyForeignKey.target_schema === 'public'
       && legacyForeignKey.target_table === 'organizations'
       && JSON.stringify(legacyForeignKey.target_columns) === JSON.stringify(['id'])
-      && legacyForeignKey.delete_action === 'NO ACTION',
+      && legacyForeignKey.delete_action === 'CASCADE'
+      && legacyForeignKey.update_action === 'NO ACTION',
     )
     const [rls] = await sql<{ relrowsecurity: boolean; relforcerowsecurity: boolean }[]>`
       SELECT relrowsecurity, relforcerowsecurity

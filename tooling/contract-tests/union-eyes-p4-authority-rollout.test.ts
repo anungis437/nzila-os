@@ -111,6 +111,8 @@ describe('Union Eyes P4 authority-only rollout', () => {
       'indpred',
       'indnkeyatts',
       'confdeltype',
+      'confupdtype',
+      'update_action',
       'relrowsecurity',
       'relforcerowsecurity',
       'pg_policies',
