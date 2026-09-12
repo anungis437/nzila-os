@@ -153,7 +153,7 @@ describe('11: transient OS-level spawn failures retry instead of failing closed 
       calls += 1
       if (calls < 3) throw transientError('ENOBUFS')
       return 'ok'
-    })
+    }, 6, 1)
     expect(result).toBe('ok')
     expect(calls).toBe(3)
   })
@@ -164,7 +164,7 @@ describe('11: transient OS-level spawn failures retry instead of failing closed 
       runWithTransientRetry(() => {
         calls += 1
         throw new Error('fatal: bad revision')
-      }),
+      }, 6, 1),
     ).toThrow('bad revision')
     expect(calls).toBe(1)
   })
@@ -182,10 +182,30 @@ describe('11: transient OS-level spawn failures retry instead of failing closed 
 
   it('still fails closed if the transient error persists past the retry budget', () => {
     expect(() =>
-      getChangedFiles('HEAD~1..HEAD', () => {
-        throw transientError('ENOBUFS')
-      }),
+      getChangedFiles(
+        'HEAD~1..HEAD',
+        () => {
+          throw transientError('ENOBUFS')
+        },
+        { attempts: 3, delayMs: 1 },
+      ),
     ).toThrow(UnresolvableRangeError)
+  })
+
+  it('default retry budget survives a burst of transient failures longer than the original incident window', () => {
+    // The frozen-main incident (see migration-safety-gate.test.ts history)
+    // reproduced ENOBUFS across every attempt within well under 1 second
+    // with the original 3-attempt/50ms budget. The hardened default must
+    // give many more attempts across a materially longer window before
+    // giving up, without retrying forever.
+    let calls = 0
+    const result = runWithTransientRetry(() => {
+      calls += 1
+      if (calls < 7) throw transientError('ENOBUFS')
+      return 'ok'
+    })
+    expect(result).toBe('ok')
+    expect(calls).toBe(7)
   })
 })
 
