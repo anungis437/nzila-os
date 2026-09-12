@@ -273,6 +273,48 @@ describeOrSkip("P3.2 ownership migration (disposable PostgreSQL)", () => {
     }]);
   });
 
+  it("refuses ambiguous dual ownership geometry without mutation", async () => {
+    await client.query(`
+      CREATE TABLE public.organizations (id uuid PRIMARY KEY);
+      CREATE TABLE public.automation_rules (
+        id uuid PRIMARY KEY,
+        organization_id varchar(255) NOT NULL,
+        org_id uuid NOT NULL,
+        CONSTRAINT automation_rules_org_id_organizations_id_fk
+          FOREIGN KEY (org_id) REFERENCES public.organizations(id) ON DELETE CASCADE
+      );
+      CREATE INDEX automation_rules_org_idx ON public.automation_rules USING btree (org_id);
+      CREATE INDEX idx_automation_rules_org ON public.automation_rules USING btree (organization_id);
+    `);
+
+    const catalogSnapshot = async () => {
+      const columns = await client.query(`
+        SELECT column_name, data_type, character_maximum_length, is_nullable
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'automation_rules'
+          AND column_name IN ('org_id', 'organization_id')
+        ORDER BY column_name
+      `);
+      const constraint = await client.query(`
+        SELECT conname, pg_get_constraintdef(oid) AS definition
+        FROM pg_constraint
+        WHERE conrelid = 'public.automation_rules'::regclass
+          AND conname = 'automation_rules_org_id_organizations_id_fk'
+      `);
+      const indexes = await client.query(`
+        SELECT indexname, indexdef FROM pg_indexes
+        WHERE schemaname = 'public' AND tablename = 'automation_rules'
+          AND indexname IN ('automation_rules_org_idx', 'idx_automation_rules_org')
+        ORDER BY indexname
+      `);
+      return { columns: columns.rows, constraint: constraint.rows, indexes: indexes.rows };
+    };
+
+    const before = await catalogSnapshot();
+    await expect(client.query(forwardSql)).rejects.toThrow(/ambiguous dual ownership geometry/);
+    expect(await catalogSnapshot()).toEqual(before);
+  });
+
   it("refuses Round 59 before prerequisites and succeeds after they exist", async () => {
     await client.query(`
       CREATE TABLE public.automation_rules (

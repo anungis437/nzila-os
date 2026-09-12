@@ -21,6 +21,8 @@ describe('Union Eyes automation_rules ownership correction', () => {
 
     expect(migration).toContain("IF to_regclass('public.automation_rules') IS NULL")
     expect(migration).toContain("column_name = 'org_id'")
+    expect(migration).toContain('existing_data_type IS NOT NULL AND legacy_column_exists')
+    expect(migration).toContain('ambiguous dual ownership geometry')
     expect(migration).toContain('populated legacy org_id-only ownership geometry')
     expect(migration).toContain("legacy_data_type <> 'uuid'")
     expect(migration).toContain("legacy_nullable <> 'NO'")

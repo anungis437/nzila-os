@@ -9,6 +9,7 @@ DECLARE
     existing_nullable text;
     legacy_data_type text;
     legacy_nullable text;
+    legacy_column_exists boolean;
 BEGIN
     IF to_regclass('public.automation_rules') IS NULL THEN
         RAISE EXCEPTION
@@ -22,14 +23,21 @@ BEGIN
        AND table_name = 'automation_rules'
        AND column_name = 'organization_id';
 
+    SELECT EXISTS (
+        SELECT 1
+          FROM information_schema.columns
+         WHERE table_schema = 'public'
+           AND table_name = 'automation_rules'
+           AND column_name = 'org_id'
+    ) INTO legacy_column_exists;
+
+    IF existing_data_type IS NOT NULL AND legacy_column_exists THEN
+        RAISE EXCEPTION
+            'automation_rules has ambiguous dual ownership geometry: both organization_id and org_id exist';
+    END IF;
+
     IF existing_data_type IS NULL THEN
-        IF EXISTS (
-            SELECT 1
-              FROM information_schema.columns
-             WHERE table_schema = 'public'
-               AND table_name = 'automation_rules'
-               AND column_name = 'org_id'
-        ) THEN
+        IF legacy_column_exists THEN
                         SELECT data_type, is_nullable
                             INTO legacy_data_type, legacy_nullable
                             FROM information_schema.columns
