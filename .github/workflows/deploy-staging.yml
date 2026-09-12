@@ -51,6 +51,11 @@ jobs:
     name: Staging Pre-Deploy Gates
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Migration safety gate diffs GITHUB_EVENT_BEFORE..GITHUB_SHA; a
+          # shallow checkout can leave that object unresolvable and fail the
+          # gate closed on a healthy merge.
+          fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
       - name: Emergency acknowledgement gate (manual dispatch only)
         if: github.event_name == 'workflow_dispatch'
