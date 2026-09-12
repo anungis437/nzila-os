@@ -7,6 +7,8 @@ DECLARE
     existing_data_type text;
     existing_max_length integer;
     existing_nullable text;
+    legacy_data_type text;
+    legacy_nullable text;
 BEGIN
     IF to_regclass('public.automation_rules') IS NULL THEN
         RAISE EXCEPTION
@@ -28,17 +30,44 @@ BEGIN
                AND table_name = 'automation_rules'
                AND column_name = 'org_id'
         ) THEN
-            RAISE EXCEPTION
-                'automation_rules has legacy org_id-only ownership geometry; refusing to create a competing organization_id column without a separately proven migration';
-        END IF;
+                        SELECT data_type, is_nullable
+                            INTO legacy_data_type, legacy_nullable
+                            FROM information_schema.columns
+                         WHERE table_schema = 'public'
+                             AND table_name = 'automation_rules'
+                             AND column_name = 'org_id';
 
-        IF EXISTS (SELECT 1 FROM public.automation_rules LIMIT 1) THEN
-            RAISE EXCEPTION
-                'automation_rules.organization_id correction requires an empty table or a separately reviewed deterministic backfill';
-        END IF;
+                        IF legacy_data_type <> 'uuid' OR legacy_nullable <> 'NO' THEN
+                                RAISE EXCEPTION
+                                        'automation_rules.org_id has unexpected legacy geometry: % nullable=%',
+                                        legacy_data_type,
+                                        legacy_nullable;
+                        END IF;
 
-        ALTER TABLE public.automation_rules
-            ADD COLUMN organization_id varchar(255) NOT NULL;
+            IF EXISTS (SELECT 1 FROM public.automation_rules LIMIT 1) THEN
+                RAISE EXCEPTION
+                    'automation_rules has populated legacy org_id-only ownership geometry; a separately reviewed deterministic backfill is required';
+            END IF;
+
+            ALTER TABLE public.automation_rules
+                DROP CONSTRAINT IF EXISTS automation_rules_org_id_organizations_id_fk;
+            DROP INDEX IF EXISTS public.automation_rules_org_idx;
+            ALTER TABLE public.automation_rules
+                RENAME COLUMN org_id TO organization_id;
+            ALTER TABLE public.automation_rules
+                ALTER COLUMN organization_id TYPE varchar(255)
+                USING organization_id::text;
+            ALTER TABLE public.automation_rules
+                ALTER COLUMN organization_id SET NOT NULL;
+        ELSE
+            IF EXISTS (SELECT 1 FROM public.automation_rules LIMIT 1) THEN
+                RAISE EXCEPTION
+                    'automation_rules.organization_id correction requires an empty table or a separately reviewed deterministic backfill';
+            END IF;
+
+            ALTER TABLE public.automation_rules
+                ADD COLUMN organization_id varchar(255) NOT NULL;
+        END IF;
     ELSIF existing_data_type <> 'character varying'
        OR existing_max_length <> 255 THEN
         RAISE EXCEPTION

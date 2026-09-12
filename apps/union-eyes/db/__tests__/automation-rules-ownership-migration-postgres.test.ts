@@ -42,12 +42,14 @@ describeOrSkip("P3.2 ownership migration (disposable PostgreSQL)", () => {
 
   beforeEach(async () => {
     await client.query("DROP TABLE IF EXISTS public.automation_rules CASCADE");
+    await client.query("DROP TABLE IF EXISTS public.organizations CASCADE");
     await client.query("DROP TABLE IF EXISTS public.pilot_applications CASCADE");
     await client.query("DROP FUNCTION IF EXISTS public.ue_create_direct_org_rls_policy(text, text, boolean)");
   });
 
   afterAll(async () => {
     await client.query("DROP TABLE IF EXISTS public.automation_rules CASCADE");
+    await client.query("DROP TABLE IF EXISTS public.organizations CASCADE");
     await client.query("DROP TABLE IF EXISTS public.pilot_applications CASCADE");
     await client.query("DROP FUNCTION IF EXISTS public.ue_create_direct_org_rls_policy(text, text, boolean)");
     await client.end();
@@ -135,20 +137,140 @@ describeOrSkip("P3.2 ownership migration (disposable PostgreSQL)", () => {
     await expect(client.query(forwardSql)).rejects.toThrow(/contains NULL ownership/);
   });
 
-  it("refuses legacy org_id-only geometry", async () => {
+  it("canonicalizes empty tracked-0006 legacy geometry", async () => {
     await client.query(`
+      CREATE TABLE public.organizations (id uuid PRIMARY KEY);
+      CREATE TABLE public.automation_rules (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        org_id uuid NOT NULL,
+        name varchar(255) NOT NULL,
+        description text,
+        trigger_type varchar(50) NOT NULL,
+        conditions jsonb,
+        award_type_id uuid NOT NULL,
+        credit_amount integer DEFAULT 0 NOT NULL,
+        schedule varchar(255),
+        is_active boolean DEFAULT true NOT NULL,
+        last_triggered_at timestamp,
+        trigger_count integer DEFAULT 0 NOT NULL,
+        created_at timestamp DEFAULT now() NOT NULL,
+        updated_at timestamp DEFAULT now() NOT NULL,
+        created_by varchar(255),
+        CONSTRAINT automation_rules_org_id_organizations_id_fk
+          FOREIGN KEY (org_id) REFERENCES public.organizations(id) ON DELETE CASCADE
+      );
+      CREATE INDEX automation_rules_org_idx ON public.automation_rules USING btree (org_id);
+      CREATE INDEX automation_rules_trigger_idx ON public.automation_rules USING btree (trigger_type);
+      CREATE INDEX automation_rules_active_idx ON public.automation_rules USING btree (is_active);
+      CREATE INDEX automation_rules_award_type_idx ON public.automation_rules USING btree (award_type_id);
+    `);
+
+    await client.query(forwardSql);
+    await client.query(forwardSql);
+
+    const columns = await client.query(`
+      SELECT column_name, data_type, character_maximum_length, is_nullable
+      FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'automation_rules'
+        AND column_name IN ('org_id', 'organization_id')
+      ORDER BY column_name
+    `);
+    expect(columns.rows).toEqual([{
+      column_name: "organization_id",
+      data_type: "character varying",
+      character_maximum_length: 255,
+      is_nullable: "NO",
+    }]);
+
+    const legacyObjects = await client.query(`
+      SELECT
+        to_regclass('public.automation_rules_org_idx') AS legacy_index,
+        EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conrelid = 'public.automation_rules'::regclass
+            AND conname = 'automation_rules_org_id_organizations_id_fk'
+        ) AS legacy_constraint
+    `);
+    expect(legacyObjects.rows[0]).toEqual({ legacy_index: null, legacy_constraint: false });
+
+    const canonicalIndex = await client.query(`
+      SELECT indexdef FROM pg_indexes
+      WHERE schemaname = 'public' AND tablename = 'automation_rules'
+        AND indexname = 'idx_automation_rules_org'
+    `);
+    expect(canonicalIndex.rows).toHaveLength(1);
+    expect(canonicalIndex.rows[0].indexdef).toContain("(organization_id)");
+
+    const preservedIndexes = await client.query(`
+      SELECT indexname FROM pg_indexes
+      WHERE schemaname = 'public' AND tablename = 'automation_rules'
+        AND indexname IN (
+          'automation_rules_trigger_idx',
+          'automation_rules_active_idx',
+          'automation_rules_award_type_idx'
+        )
+      ORDER BY indexname
+    `);
+    expect(preservedIndexes.rows.map(({ indexname }) => indexname)).toEqual([
+      "automation_rules_active_idx",
+      "automation_rules_award_type_idx",
+      "automation_rules_trigger_idx",
+    ]);
+  });
+
+  it("refuses populated legacy org_id-only geometry", async () => {
+    await client.query(`
+      CREATE TABLE public.organizations (id uuid PRIMARY KEY);
       CREATE TABLE public.automation_rules (
         id uuid PRIMARY KEY,
-        org_id uuid
-      )
+        org_id uuid NOT NULL,
+        CONSTRAINT automation_rules_org_id_organizations_id_fk
+          FOREIGN KEY (org_id) REFERENCES public.organizations(id) ON DELETE CASCADE
+      );
+      CREATE INDEX automation_rules_org_idx ON public.automation_rules USING btree (org_id);
     `);
-    await expect(client.query(forwardSql)).rejects.toThrow(/legacy org_id-only ownership geometry/);
+    const organizationId = randomUUID();
+    await client.query("INSERT INTO public.organizations (id) VALUES ($1)", [organizationId]);
+    await client.query(
+      "INSERT INTO public.automation_rules (id, org_id) VALUES ($1, $2)",
+      [randomUUID(), organizationId],
+    );
+
+    await expect(client.query(forwardSql)).rejects.toThrow(
+      /populated legacy org_id-only ownership geometry/,
+    );
     const canonical = await client.query(`
       SELECT count(*)::int AS count FROM information_schema.columns
       WHERE table_schema = 'public' AND table_name = 'automation_rules'
         AND column_name = 'organization_id'
     `);
     expect(canonical.rows[0].count).toBe(0);
+    expect(await client.query("SELECT org_id FROM public.automation_rules")).toHaveProperty(
+      "rowCount",
+      1,
+    );
+  });
+
+  it("refuses unexpected empty legacy org_id geometry", async () => {
+    await client.query(`
+      CREATE TABLE public.automation_rules (
+        id uuid PRIMARY KEY,
+        org_id text
+      )
+    `);
+
+    await expect(client.query(forwardSql)).rejects.toThrow(/unexpected legacy geometry/);
+    const columns = await client.query(`
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'automation_rules'
+        AND column_name IN ('org_id', 'organization_id')
+    `);
+    expect(columns.rows).toEqual([{
+      column_name: "org_id",
+      data_type: "text",
+      is_nullable: "YES",
+    }]);
   });
 
   it("refuses Round 59 before prerequisites and succeeds after they exist", async () => {
