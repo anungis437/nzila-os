@@ -247,6 +247,7 @@ class AutomationRules(BaseModel):
     """Migrated from drizzle: automation-rules-schema.ts"""
 
     name = models.CharField(max_length=255, null=True, blank=True)
+    organization_id = models.CharField(max_length=255)
 
     class Meta:
         db_table = "automation_rules"

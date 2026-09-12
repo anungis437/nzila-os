@@ -2,22 +2,17 @@
  * scripts/rls-enforcement/__tests__/deployment-dag-contract.test.ts
  *
  * Round 58C section 58-59 — static contract test for the Round 58
- * enforcement-migration deployment wiring in
- * .github/workflows/deploy-union-eyes.yml.
+ * enforcement-migration deployment wiring in the dedicated
+ * .github/workflows/union-eyes-authority-rollout.yml.
  *
  * This is a STATIC YAML-shape check only. It never runs the workflow, never
  * calls the GitHub API, and never touches any real environment — it only
  * parses the committed YAML and asserts the job exists with the expected
  * safety properties:
- *   - the job is gated on workflow_dispatch + an explicit boolean input
- *     (apply_authority_enforcement_migration), so it can NEVER fire as
- *     part of the ordinary push-triggered deploy path;
- *   - the job is NOT listed in any other job's `needs` (i.e. nothing is
- *     unconditionally blocked on it yet — Round 58C deliberately did not
- *     promote it to a mandatory pre-deploy gate, unlike apply-icra-
- *     capability-migration, because of the unresolved 111-table finding);
- *   - the corresponding workflow_dispatch input exists and defaults to
- *     false.
+ *   - the workflow has no push trigger and accepts only the complete P4
+ *     authority operation plus an independently authorized SHA;
+ *   - Round 58 is predecessor-gated inside the fixed authority chain;
+ *   - ordinary build/deploy jobs do not exist in this workflow.
  */
 import { describe, it, expect } from "vitest";
 import * as fs from "node:fs";
@@ -25,9 +20,13 @@ import * as path from "node:path";
 import * as yaml from "js-yaml";
 
 const WORKFLOW_PATH = path.resolve(__dirname, "../../../../../.github/workflows/deploy-union-eyes.yml");
+const AUTHORITY_WORKFLOW_PATH = path.resolve(
+  __dirname,
+  "../../../../../.github/workflows/union-eyes-authority-rollout.yml",
+);
 
 describe("Round 58 deployment DAG contract (static, no dispatch)", () => {
-  const raw = fs.readFileSync(WORKFLOW_PATH, "utf8");
+  const raw = fs.readFileSync(AUTHORITY_WORKFLOW_PATH, "utf8");
   const doc = yaml.load(raw) as any;
 
   it("workflow file parses as valid YAML with a jobs map", () => {
@@ -35,26 +34,33 @@ describe("Round 58 deployment DAG contract (static, no dispatch)", () => {
     expect(doc.jobs).toBeTruthy();
   });
 
-  it("defines apply-authority-enforcement-migration as a workflow_dispatch-gated job", () => {
+  it("defines apply-authority-enforcement-migration as a predecessor-gated production job", () => {
     const job = doc.jobs["apply-authority-enforcement-migration"];
     expect(job).toBeTruthy();
-    expect(job.if).toContain("github.event_name == 'workflow_dispatch'");
-    expect(job.if).toContain("apply_authority_enforcement_migration == 'true'");
+    expect(job.needs).toBe("apply-rls-foundation-migration");
+    expect(job.if).toContain("needs.apply-rls-foundation-migration.result == 'success'");
+    expect(job.environment).toBe("production");
   });
 
-  it("declares the apply_authority_enforcement_migration workflow_dispatch input, defaulting to false", () => {
-    const input = doc.on?.workflow_dispatch?.inputs?.apply_authority_enforcement_migration;
-    expect(input).toBeTruthy();
-    expect(input.type).toBe("boolean");
-    expect(input.default).toBe(false);
+  it("requires one complete authority operation and an independently authorized SHA", () => {
+    const inputs = doc.on?.workflow_dispatch?.inputs;
+    expect(Object.keys(inputs).sort()).toEqual(["authorized_sha", "operation"]);
+    expect(inputs.operation.required).toBe(true);
+    expect(inputs.authorized_sha.required).toBe(true);
   });
 
-  it("is NOT (yet) a mandatory dependency of any other job — deliberately not promoted to a hard gate", () => {
+  it("is only a dependency of the explicit corrective rollout chain", () => {
+    const allowedDependents = new Set(["apply-round58-grant-fix-migration"]);
+
     for (const [jobName, job] of Object.entries<any>(doc.jobs)) {
       if (jobName === "apply-authority-enforcement-migration") continue;
       const needs = job.needs ? (Array.isArray(job.needs) ? job.needs : [job.needs]) : [];
-      expect(needs).not.toContain("apply-authority-enforcement-migration");
+      if (needs.includes("apply-authority-enforcement-migration")) {
+        expect(allowedDependents.has(jobName)).toBe(true);
+      }
     }
+    expect(doc.jobs["build-push"]).toBeUndefined();
+    expect(doc.jobs.deploy).toBeUndefined();
   });
 
   it("resolves the full indirection chain to the exact committed migration file path", () => {

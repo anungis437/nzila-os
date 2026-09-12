@@ -25,37 +25,18 @@
  *    a migration-ordering/deployment-drift gap, not a logic defect.
  *
  * 2. `automation_rules` — a genuine migration-source column-name defect.
- *    The frozen migration's guard checks for column `org_id`, but TWO
- *    competing Drizzle declarations exist for the same physical table
- *    name "automation_rules":
- *      - db/schema/domains/infrastructure/automation.ts (+ duplicate
- *        db/schema/automation-rules-schema.ts): `organizationId: varchar
- *        ("organization_id", ...)`.
- *      - db/schema/domains/infrastructure/rewards.ts (+ duplicate
- *        db/schema/recognition-rewards-schema.ts): `orgId: uuid('org_id')
- *        ...`.
- *    The REAL physical table in staging (and, per the manifest's own
- *    reachability evidence, in every environment materialized from the
- *    committed migration history) has `organization_id`, NOT `org_id` —
- *    confirmed via information_schema.columns against staging. The
- *    round-58 generator resolved its guard column name from the WRONG
- *    (rewards.ts) declaration, so the guard's EXISTS(column_name='org_id')
- *    check is always false against the real schema and PART B silently
- *    never ran for this table.
+ *    The frozen migration's guard checks for column `org_id`, but the
+ *    canonical ownership column is varchar(255) `organization_id`. P3.2
+ *    reconciled all four competing Drizzle declarations and added the
+ *    forward-only Django core migration that materializes the ownership
+ *    column only when the table is empty. The migration refuses rows that
+ *    would require an unproven ownership backfill.
  *
- *    SEPARATE, NOT FIXED HERE: lib/services/rewards/automation-service.ts
- *    imports `automationRules` from db/schema/recognition-rewards-schema.ts
- *    (the org_id/uuid declaration) and queries
- *    `eq(automationRules.orgId, orgId)` — against the real physical schema
- *    (organization_id, not org_id) this query would fail at runtime with
- *    "column org_id does not exist" if this code path is ever actually
- *    invoked. This is a genuine, pre-existing application/schema-duplication
- *    defect, independent of RLS/authority enforcement, and is NOT
- *    remediated by this script — flagged separately in the Round-59B
- *    blocker register for product/application follow-up. This script only
- *    closes the RLS/GRANT authority gap using the REAL physical column
- *    (organization_id), which is safe and correct regardless of whether
- *    that separate application bug is ever fixed.
+ *    The rewards automation service retains its `orgId` TypeScript property
+ *    alias, but that alias now resolves to physical `organization_id` in both
+ *    rewards schema surfaces. Broader convergence of the two historical
+ *    automation-rule column families remains separate from this ownership
+ *    correction.
  *
  * FIX: re-invoke the already-idempotent, already-proven
  * `ue_create_direct_org_rls_policy(table, column, isText)` function (defined
@@ -84,7 +65,7 @@ import postgres from 'postgres'
 
 const GAPS: Array<{ table: string; column: string; isText: boolean }> = [
   { table: 'pilot_applications', column: 'verified_organization_id', isText: false },
-  { table: 'automation_rules', column: 'organization_id', isText: false },
+  { table: 'automation_rules', column: 'organization_id', isText: true },
 ]
 
 async function main() {

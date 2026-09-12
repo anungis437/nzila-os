@@ -391,9 +391,7 @@ export const automationRules = pgTable(
   'automation_rules',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('org_id')
-      .notNull()
-      .references(() => organizations.id, { onDelete: 'cascade' }),
+    orgId: varchar('organization_id', { length: 255 }).notNull(),
 
     // Rule definition
     name: varchar('name', { length: 255 }).notNull(),
@@ -423,7 +421,7 @@ export const automationRules = pgTable(
     createdBy: varchar('created_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
   },
   (t) => ({
-    orgIdx: index('automation_rules_org_idx').on(t.orgId),
+    orgIdx: index('idx_automation_rules_org').on(t.orgId),
     triggerIdx: index('automation_rules_trigger_idx').on(t.triggerType),
     activeIdx: index('automation_rules_active_idx').on(t.isActive),
     awardTypeIdx: index('automation_rules_award_type_idx').on(t.awardTypeId),
