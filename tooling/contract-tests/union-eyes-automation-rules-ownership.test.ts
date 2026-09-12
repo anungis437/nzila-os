@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 const root = resolve(import.meta.dirname, '../..')
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8')
+const authorityWorkflowPath = '.github/workflows/union-eyes-authority-rollout.yml'
 
 const extractPythonHeredoc = (run: string, stepName: string) => {
   const match = run.match(/python - <<'PY'\n([\s\S]*?)\nPY(?:\n|$)/)
@@ -64,7 +65,7 @@ describe('Union Eyes automation_rules ownership correction', () => {
   })
 
   it('compiles both production-only Python heredocs extracted from the workflow', () => {
-    const workflow = load(read('.github/workflows/deploy-union-eyes.yml')) as any
+    const workflow = load(read(authorityWorkflowPath)) as any
     const steps = [
       [
         'apply-authority-schema-prerequisites',
@@ -91,28 +92,34 @@ describe('Union Eyes automation_rules ownership correction', () => {
   })
 
   it('proves the complete success-only authority rollout DAG structurally', () => {
-    const workflow = load(read('.github/workflows/deploy-union-eyes.yml')) as any
+    const workflow = load(read(authorityWorkflowPath)) as any
     const chain = [
-      ['apply-authority-schema-prerequisites', 'apply_authority_schema_prerequisites'],
-      ['apply-automation-rules-ownership-migration', 'apply_automation_rules_ownership_migration'],
-      ['apply-rls-foundation-migration', 'apply_rls_foundation_migration'],
-      ['apply-authority-enforcement-migration', 'apply_authority_enforcement_migration'],
-      ['apply-round58-grant-fix-migration', 'apply_round58_grant_fix_migration'],
-      ['apply-round59-geometry-gap-closure', 'apply_round59_geometry_gap_closure'],
+      'apply-authority-schema-prerequisites',
+      'apply-automation-rules-ownership-migration',
+      'apply-rls-foundation-migration',
+      'apply-authority-enforcement-migration',
+      'apply-round58-grant-fix-migration',
+      'apply-round59-geometry-gap-closure',
     ] as const
 
-    for (const [index, [jobName, inputName]] of chain.entries()) {
-      const input = workflow.on.workflow_dispatch.inputs[inputName]
+    expect(workflow.on.workflow_dispatch.inputs.operation).toMatchObject({
+      type: 'string',
+      required: true,
+    })
+    expect(workflow.on.workflow_dispatch.inputs.authorized_sha).toMatchObject({
+      type: 'string',
+      required: true,
+    })
+
+    for (const [index, jobName] of chain.entries()) {
       const job = workflow.jobs[jobName]
-      expect(input, `${inputName} input`).toMatchObject({ type: 'boolean', default: false })
-      expect(job.if).toContain("github.event_name == 'workflow_dispatch'")
-      expect(job.if).toContain(`github.event.inputs.${inputName} == 'true'`)
+      expect(job.environment).toBe('production')
 
       if (index === 0) {
-        expect(job.needs).toBe('plan')
+        expect(job.needs).toBe('preflight')
       } else {
-        const previousJob = chain[index - 1][0]
-        expect(job.needs).toEqual(['plan', previousJob])
+        const previousJob = chain[index - 1]
+        expect(job.needs).toBe(previousJob)
         expect(job.if).toContain(`needs.${previousJob}.result == 'success'`)
         expect(job.if).not.toContain(`${previousJob}.result == 'skipped'`)
       }
@@ -126,11 +133,11 @@ describe('Union Eyes automation_rules ownership correction', () => {
     expect(prerequisiteStep.run).toContain('0002_pilotapplications_verified_organization')
     expect(prerequisiteStep.run).toContain('verified_organization_id')
 
-    const oneTimeJobs = new Set(chain.map(([jobName]) => jobName))
-    for (const ordinaryJobName of ['pre-deploy-gates', 'build-push', 'apply-django-migrations', 'deploy']) {
-      const ordinaryNeeds = workflow.jobs[ordinaryJobName].needs
-      const needs = Array.isArray(ordinaryNeeds) ? ordinaryNeeds : [ordinaryNeeds]
-      expect(needs.some((dependency: string) => oneTimeJobs.has(dependency))).toBe(false)
+    expect(workflow.jobs['post-mutation-attestation'].needs).toBe(
+      'apply-round59-geometry-gap-closure',
+    )
+    for (const forbiddenJob of ['build-push', 'apply-django-migrations', 'deploy']) {
+      expect(workflow.jobs[forbiddenJob]).toBeUndefined()
     }
   })
 })

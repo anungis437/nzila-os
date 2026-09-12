@@ -77,6 +77,7 @@
     "rls:apply-round59-geometry-gap-closure": "tsx scripts/apply-round59-rls-geometry-gap-closure.ts",
     "rls:apply-round59-congress-memberships-grant-fix": "tsx scripts/apply-round59-congress-memberships-grant-fix.ts",
     "rls:apply-congress-memberships-multi-party-rls-fix": "tsx scripts/apply-congress-memberships-multi-party-rls-fix.ts",
+    "rls:p4-authority-state": "tsx scripts/p4-authority-state.ts",
     "rls:verify-strike-fund-backfill": "tsx scripts/verify-strike-fund-org-backfill.ts",
     "icra:capability-rollout:check": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --check",
     "icra:capability-rollout:apply": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --apply",

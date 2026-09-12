@@ -1,0 +1,386 @@
+name: Union Eyes Authority-Only Rollout
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Type p4_authority_rollout to execute the complete authority chain
+        required: true
+        type: string
+      authorized_sha:
+        description: Independently reviewed 40-character main SHA authorized for this rollout
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: union-eyes-production-authority-rollout
+  cancel-in-progress: false
+
+env:
+  EXPECTED_SUBSCRIPTION_ID: 5d819f33-d16f-429c-a3c0-5b0e94740ba3
+  EXPECTED_RESOURCE_GROUP: nzila-canada-prod-rg
+  EXPECTED_CONTAINERAPPS_ENVIRONMENT: nzila-canada-prod-env
+  EXPECTED_CONTAINER_APP: nzila-os-union-eyes-prod
+  EXPECTED_POSTGRES_SERVER: nzila-os-union-eyes-prod-db
+  EXPECTED_POSTGRES_HOST: nzila-os-union-eyes-prod-db.postgres.database.azure.com
+  EXPECTED_DATABASE: nzila_os_prod
+  EXPECTED_KEY_VAULT: nzila-canada-prod-kv
+  MIGRATION_SECRET_NAME: union-eyes-migration-admin-database-url
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  preflight:
+    name: P4 production identity and read-only census
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Assert operation, main ref, and independently authorized SHA
+        shell: bash
+        env:
+          AUTHORIZED_SHA: ${{ inputs.authorized_sha }}
+          OPERATION: ${{ inputs.operation }}
+        run: |
+          set -euo pipefail
+          test "$OPERATION" = "p4_authority_rollout" || { echo "::error::Unsupported authority operation."; exit 1; }
+          test "$GITHUB_REF" = "refs/heads/main" || { echo "::error::Production authority rollout must run from refs/heads/main."; exit 1; }
+          [[ "$AUTHORIZED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::authorized_sha must be a full lowercase commit SHA."; exit 1; }
+          test "$GITHUB_SHA" = "$AUTHORIZED_SHA" || { echo "::error::Run SHA does not match the independently authorized SHA."; exit 1; }
+          test "$(git rev-parse HEAD)" = "$AUTHORIZED_SHA" || { echo "::error::Checked-out source does not match authorized_sha."; exit 1; }
+
+      - name: Assert production deployment identity is configured
+        shell: bash
+        env:
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLIENT_ID" && test -n "$TENANT_ID" && test -n "$SUBSCRIPTION_ID" \
+            || { echo "::error::Production OIDC identity is incomplete."; exit 1; }
+          test "$SUBSCRIPTION_ID" = "$EXPECTED_SUBSCRIPTION_ID" \
+            || { echo "::error::Production OIDC subscription does not match the canonical subscription."; exit 1; }
+
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Positively assert canonical production resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(az account show --query id -o tsv)" = "$EXPECTED_SUBSCRIPTION_ID"
+          test "$(az group show --name "$EXPECTED_RESOURCE_GROUP" --query name -o tsv)" = "$EXPECTED_RESOURCE_GROUP"
+          test "$(az containerapp env show --resource-group "$EXPECTED_RESOURCE_GROUP" --name "$EXPECTED_CONTAINERAPPS_ENVIRONMENT" --query name -o tsv)" = "$EXPECTED_CONTAINERAPPS_ENVIRONMENT"
+          test "$(az containerapp show --resource-group "$EXPECTED_RESOURCE_GROUP" --name "$EXPECTED_CONTAINER_APP" --query name -o tsv)" = "$EXPECTED_CONTAINER_APP"
+          test "$(az postgres flexible-server show --resource-group "$EXPECTED_RESOURCE_GROUP" --name "$EXPECTED_POSTGRES_SERVER" --query name -o tsv)" = "$EXPECTED_POSTGRES_SERVER"
+          test "$(az postgres flexible-server show --resource-group "$EXPECTED_RESOURCE_GROUP" --name "$EXPECTED_POSTGRES_SERVER" --query fullyQualifiedDomainName -o tsv)" = "$EXPECTED_POSTGRES_HOST"
+          test "$(az keyvault show --resource-group "$EXPECTED_RESOURCE_GROUP" --name "$EXPECTED_KEY_VAULT" --query name -o tsv)" = "$EXPECTED_KEY_VAULT"
+
+      - name: Verify migration credential metadata and run read-only census
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL UE_P4_MIGRATION_ADMIN_DATABASE_URL' EXIT
+          SECRET_ID="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query id -o tsv)"
+          test -n "$SECRET_ID" || { echo "::error::Canonical migration credential is absent or inaccessible."; exit 1; }
+          unset SECRET_ID
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export UE_P4_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
+          pnpm --filter @nzila/union-eyes run rls:p4-authority-state -- --mode=preflight
+
+      - name: Record secret-safe pre-mutation identity
+        shell: bash
+        run: |
+          {
+            echo '### P4 authority preflight'
+            echo "- Repository: $GITHUB_REPOSITORY"
+            echo "- Ref: $GITHUB_REF"
+            echo "- SHA: $GITHUB_SHA"
+            echo "- Run ID: $GITHUB_RUN_ID"
+            echo "- Actor: $GITHUB_ACTOR"
+            echo '- Environment: production'
+            echo "- Resource group: $EXPECTED_RESOURCE_GROUP"
+            echo "- Container Apps environment: $EXPECTED_CONTAINERAPPS_ENVIRONMENT"
+            echo "- Runtime app (identity assertion only): $EXPECTED_CONTAINER_APP"
+            echo "- PostgreSQL server: $EXPECTED_POSTGRES_SERVER"
+            echo "- Database: $EXPECTED_DATABASE"
+            echo "- Key Vault: $EXPECTED_KEY_VAULT"
+            echo "- Migration secret name: $MIGRATION_SECRET_NAME"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  apply-authority-schema-prerequisites:
+    name: Apply authority schema prerequisites
+    runs-on: ubuntu-latest
+    needs: preflight
+    if: ${{ always() && needs.preflight.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply and verify required Django schema prerequisites (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export ADMIN_URL
+          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          python - <<'PY'
+          import os
+          import sys
+          from urllib.parse import unquote, urlparse
+
+          parsed = urlparse(os.environ.pop("ADMIN_URL"))
+          if parsed.scheme not in {"postgres", "postgresql"} or not all(
+              [parsed.hostname, parsed.path, parsed.username, parsed.password]
+          ):
+              raise SystemExit("Migration-admin database URL is malformed")
+          if parsed.hostname != "nzila-os-union-eyes-prod-db.postgres.database.azure.com":
+              raise SystemExit("Migration-admin host is not the canonical production server")
+          if unquote(parsed.path.lstrip("/")) != "nzila_os_prod":
+              raise SystemExit("Migration-admin database is not the canonical production database")
+
+          os.environ.update(
+              DJANGO_SETTINGS_MODULE="config.settings",
+              PGDATABASE=unquote(parsed.path.lstrip("/")),
+              PGUSER=unquote(parsed.username),
+              PGPASSWORD=unquote(parsed.password),
+              PGHOST=parsed.hostname,
+              PGPORT=str(parsed.port or 5432),
+          )
+          sys.path.insert(0, "apps/union-eyes/backend")
+
+          import django
+          django.setup()
+          from django.core.management import call_command
+          from django.db import connection
+          from django.db.migrations.recorder import MigrationRecorder
+
+          call_command("migrate", "auth_core", "0003_rename_clerk_organization_id", interactive=False)
+          call_command("migrate", "content", "0003_pilotapplications_commercial_terms", interactive=False)
+
+          applied = set(MigrationRecorder(connection).applied_migrations())
+          required = {
+              ("auth_core", "0003_rename_clerk_organization_id"),
+              ("content", "0002_pilotapplications_verified_organization"),
+              ("content", "0003_pilotapplications_commercial_terms"),
+          }
+          if missing := sorted(required - applied):
+              raise SystemExit(f"Required Django migrations are not recorded as applied: {missing}")
+          with connection.cursor() as cursor:
+              cursor.execute("""
+                  SELECT count(*)
+                    FROM information_schema.columns
+                   WHERE table_schema = 'public'
+                     AND table_name = 'pilot_applications'
+                     AND column_name = 'verified_organization_id'
+              """)
+              if cursor.fetchone()[0] != 1:
+                  raise SystemExit(
+                      "content.0002 is recorded but pilot_applications.verified_organization_id is absent"
+                  )
+          PY
+
+  apply-automation-rules-ownership-migration:
+    name: Apply automation-rules ownership migration
+    runs-on: ubuntu-latest
+    needs: apply-authority-schema-prerequisites
+    if: ${{ always() && needs.apply-authority-schema-prerequisites.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply core migration 0003 (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export ADMIN_URL
+          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          python - <<'PY'
+          import os
+          import sys
+          from urllib.parse import unquote, urlparse
+
+          parsed = urlparse(os.environ.pop("ADMIN_URL"))
+          if parsed.hostname != "nzila-os-union-eyes-prod-db.postgres.database.azure.com":
+              raise SystemExit("Migration-admin host is not the canonical production server")
+          if unquote(parsed.path.lstrip("/")) != "nzila_os_prod":
+              raise SystemExit("Migration-admin database is not the canonical production database")
+          os.environ.update(
+              DJANGO_SETTINGS_MODULE="config.settings",
+              PGDATABASE=unquote(parsed.path.lstrip("/")),
+              PGUSER=unquote(parsed.username),
+              PGPASSWORD=unquote(parsed.password),
+              PGHOST=parsed.hostname,
+              PGPORT=str(parsed.port or 5432),
+          )
+          sys.path.insert(0, "apps/union-eyes/backend")
+          from django.core.management import execute_from_command_line
+          execute_from_command_line(["manage.py", "migrate", "core", "0003", "--noinput"])
+          PY
+
+  apply-rls-foundation-migration:
+    name: Apply RLS foundation migration
+    runs-on: ubuntu-latest
+    needs: apply-automation-rules-ownership-migration
+    if: ${{ always() && needs.apply-automation-rules-ownership-migration.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply migration 0108 and verify role attributes (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL RLS_MIGRATION_ADMIN_DATABASE_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
+          pnpm --filter @nzila/union-eyes run rls:apply-foundation-migration -- --expect-pre-provisioning
+
+  apply-authority-enforcement-migration:
+    name: Apply authority enforcement migration
+    runs-on: ubuntu-latest
+    needs: apply-rls-foundation-migration
+    if: ${{ always() && needs.apply-rls-foundation-migration.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply Round 58 enforcement migration (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL RLS_ENFORCEMENT_ADMIN_DATABASE_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+          pnpm --filter @nzila/union-eyes run rls:apply-enforcement-migration
+
+  apply-round58-grant-fix-migration:
+    name: Apply Round 58 grant-order fix
+    runs-on: ubuntu-latest
+    needs: apply-authority-enforcement-migration
+    if: ${{ always() && needs.apply-authority-enforcement-migration.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Re-apply Round 58 exact grants (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL RLS_ENFORCEMENT_ADMIN_DATABASE_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+          pnpm --filter @nzila/union-eyes run rls:apply-round58-grant-order-fix
+
+  apply-round59-geometry-gap-closure:
+    name: Apply Round 59 geometry gap closure
+    runs-on: ubuntu-latest
+    needs: apply-round58-grant-fix-migration
+    if: ${{ always() && needs.apply-round58-grant-fix-migration.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply Round 59 geometry correction (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL RLS_ENFORCEMENT_ADMIN_DATABASE_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export RLS_ENFORCEMENT_ADMIN_DATABASE_URL="$ADMIN_URL"
+          pnpm --filter @nzila/union-eyes run rls:apply-round59-geometry-gap-closure
+
+  post-mutation-attestation:
+    name: Post-mutation authority attestation
+    runs-on: ubuntu-latest
+    needs: apply-round59-geometry-gap-closure
+    if: ${{ always() && needs.apply-round59-geometry-gap-closure.result == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Azure Login (OIDC, production environment)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Independently attest final authority state (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'unset ADMIN_URL UE_P4_MIGRATION_ADMIN_DATABASE_URL RLS_POST_APPLY_TARGET_URL' EXIT
+          set +x
+          ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
+          echo "::add-mask::$ADMIN_URL"
+          export UE_P4_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
+          export RLS_POST_APPLY_TARGET_URL="$ADMIN_URL"
+          pnpm --filter @nzila/union-eyes run rls:p4-authority-state -- --mode=attest
+          pnpm --filter @nzila/union-eyes run rls:post-apply-verifier
