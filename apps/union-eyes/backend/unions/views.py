@@ -216,10 +216,20 @@ class EventRemindersViewSet(viewsets.ModelViewSet):
 
 
 class CongressMembershipsViewSet(viewsets.ModelViewSet):
-    """API endpoint for CongressMemberships operations."""
+    """API endpoint for CongressMemberships operations.
+
+    CONTAINED (Round58 production-geometry remediation): the generated
+    Django model maps only `organization_id` — it has no `congress_id`,
+    which the Round58 prerequisite migration makes NOT NULL on the physical
+    `congress_memberships` table. No legitimate Django consumer exists
+    anywhere in the app; this table's reviewed runtime authority is its
+    multi-party RLS read path, not a generic unscoped Django CRUD endpoint.
+    Deny unconditionally until a real consumer with proven tenant isolation
+    and congress-scoping exists.
+    """
     queryset = CongressMemberships.objects.all()
     serializer_class = CongressMembershipsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -490,10 +500,19 @@ class FederationResourcesViewSet(viewsets.ModelViewSet):
 
 
 class VotingSessionsViewSet(viewsets.ModelViewSet):
-    """API endpoint for VotingSessions operations."""
+    """API endpoint for VotingSessions operations.
+
+    CONTAINED (Round58 production-geometry remediation): the generated
+    Django model only maps `title` — it does not model `organization_id`,
+    which the Round58 prerequisite migration makes NOT NULL on the physical
+    `voting_sessions` table. No legitimate Django consumer exists anywhere
+    in the app; the real voting-session surface is the canonical TS API,
+    which already supplies organizationId on create. Deny unconditionally
+    until a real consumer with proven tenant isolation exists.
+    """
     queryset = VotingSessions.objects.all()
     serializer_class = VotingSessionsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['title']
     search_fields = ['title']
