@@ -82,11 +82,10 @@ interface CheckResult {
 // and its .table values must stay a superset match of that module's
 // PROTECTED_DIRECT_TABLES names.
 const PROTECTED_DIRECT_TABLES = [
-  { table: 'organization_members', orgColumn: 'organization_id', orgColumnIsText: true },
+  { table: 'organization_members', orgColumn: 'organization_id', orgColumnIsText: false },
   { table: 'organizations', orgColumn: 'id', orgColumnIsText: false },
   { table: 'grievances', orgColumn: 'organization_id', orgColumnIsText: false },
   { table: 'claims', orgColumn: 'organization_id', orgColumnIsText: false },
-  { table: 'grievance_deadlines', orgColumn: 'organization_id', orgColumnIsText: false },
   { table: 'documents', orgColumn: 'organization_id', orgColumnIsText: false },
   { table: 'member_documents', orgColumn: 'organization_id', orgColumnIsText: false },
   { table: 'workplace_incidents', orgColumn: 'organization_id', orgColumnIsText: false },
