@@ -139,6 +139,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Apply and verify required Django schema prerequisites (fail-closed)
         shell: bash
+        working-directory: apps/union-eyes/backend
         run: |
           set -euo pipefail
           trap 'unset ADMIN_URL' EXIT
@@ -146,7 +147,7 @@ jobs:
           ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
           echo "::add-mask::$ADMIN_URL"
           export ADMIN_URL
-          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          python -m pip install --disable-pip-version-check -r requirements.txt
           python - <<'PY'
           import os
           import sys
@@ -170,7 +171,6 @@ jobs:
               PGHOST=parsed.hostname,
               PGPORT=str(parsed.port or 5432),
           )
-          sys.path.insert(0, "apps/union-eyes/backend")
 
           import django
           django.setup()
@@ -222,6 +222,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Apply core migration 0003 (fail-closed)
         shell: bash
+        working-directory: apps/union-eyes/backend
         run: |
           set -euo pipefail
           trap 'unset ADMIN_URL' EXIT
@@ -229,7 +230,7 @@ jobs:
           ADMIN_URL="$(az keyvault secret show --vault-name "$EXPECTED_KEY_VAULT" --name "$MIGRATION_SECRET_NAME" --query value -o tsv)"
           echo "::add-mask::$ADMIN_URL"
           export ADMIN_URL
-          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
+          python -m pip install --disable-pip-version-check -r requirements.txt
           python - <<'PY'
           import os
           import sys
@@ -248,7 +249,6 @@ jobs:
               PGHOST=parsed.hostname,
               PGPORT=str(parsed.port or 5432),
           )
-          sys.path.insert(0, "apps/union-eyes/backend")
           from django.core.management import execute_from_command_line
           execute_from_command_line(["manage.py", "migrate", "core", "0003", "--noinput"])
           PY
