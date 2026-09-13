@@ -19,13 +19,29 @@
  * What it does, in order:
  *   1. Connects using ADMIN/migration authority (never the application's
  *      own runtime or system credential).
- *   2. Computes and logs the SHA-256 of the migration file being applied —
- *      exact migration/version evidence in the run log (Round 59 section 4
- *      provenance requirement).
- *   3. Applies db/migrations/20260910_rls_enforcement_expansion_round58.sql
- *      verbatim, atomically. The migration itself is also idempotent
- *      (DROP POLICY IF EXISTS / CREATE OR REPLACE FUNCTION / REVOKE ALL +
- *      explicit GRANT) — safe to re-run.
+ *   2. Computes and logs the SHA-256 of EACH migration file being applied
+ *      separately — exact migration/version evidence in the run log
+ *      (Round 59 section 4 provenance requirement).
+ *   3. Applies, as ONE combined atomic statement batch:
+ *        a. db/migrations/20260913_round58_production_geometry_prerequisites.sql
+ *           (P4 Round58 Production Geometry Compatibility Remediation) —
+ *           establishes the authority columns (chat_sessions.organization_id,
+ *           board_packets.organization_id, policy_rules.organization_id,
+ *           voting_sessions.organization_id, congress_memberships.congress_id,
+ *           shared_clause_library.sharing_level/shared_with_org_ids) that
+ *           Round58's own policy-helper calls assume exist. Forward-only,
+ *           idempotent, fail-closed on non-empty tables lacking a
+ *           deterministic authority source.
+ *        b. db/migrations/20260910_rls_enforcement_expansion_round58.sql
+ *           verbatim.
+ *      The two files' SQL text is concatenated and sent to Postgres as ONE
+ *      simple-query-protocol message, so the prerequisite geometry and the
+ *      Round58 policy/grant application succeed or roll back TOGETHER —
+ *      never leaving Round58 applied against production tables it never
+ *      actually validated column-by-column. The migration text itself is
+ *      also idempotent (DROP POLICY IF EXISTS / CREATE OR REPLACE FUNCTION /
+ *      REVOKE ALL + explicit GRANT / ADD COLUMN IF NOT EXISTS-guarded DO
+ *      blocks) — safe to re-run.
  *   4. Performs a light sanity check: counts policies + PART E's blanket
  *      grant removal took effect (no ALL TABLES wildcard grant remains for
  *      union_eyes_runtime/union_eyes_system in information_schema). The
@@ -40,6 +56,10 @@ import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
 
+const PREREQUISITE_MIGRATION_PATH = resolve(
+  __dirname,
+  '../db/migrations/20260913_round58_production_geometry_prerequisites.sql'
+)
 const MIGRATION_PATH = resolve(__dirname, '../db/migrations/20260910_rls_enforcement_expansion_round58.sql')
 
 async function main() {
@@ -49,16 +69,26 @@ async function main() {
     process.exit(1)
   }
 
+  const prerequisiteSql = readFileSync(PREREQUISITE_MIGRATION_PATH, 'utf8')
+  const prerequisiteHash = createHash('sha256').update(prerequisiteSql).digest('hex')
   const migrationSql = readFileSync(MIGRATION_PATH, 'utf8')
   const migrationHash = createHash('sha256').update(migrationSql).digest('hex')
+  console.log(`[apply-authority-enforcement-migration] Applying ${PREREQUISITE_MIGRATION_PATH}`)
+  console.log(`[apply-authority-enforcement-migration] SHA-256 (prerequisite): ${prerequisiteHash}`)
   console.log(`[apply-authority-enforcement-migration] Applying ${MIGRATION_PATH}`)
-  console.log(`[apply-authority-enforcement-migration] SHA-256: ${migrationHash}`)
+  console.log(`[apply-authority-enforcement-migration] SHA-256 (round58): ${migrationHash}`)
 
   const sql = postgres(adminUrl, { ssl: adminUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
 
+  // Concatenated and sent as ONE sql.unsafe() call so both files execute in
+  // a single implicit transaction (per postgres.js's simple-query-protocol
+  // semantics) — the prerequisite geometry columns and the Round58 policy/
+  // grant application either both succeed or both roll back.
+  const combinedSql = `${prerequisiteSql}\n\n${migrationSql}`
+
   try {
-    await sql.unsafe(migrationSql)
-    console.log('[apply-authority-enforcement-migration] Migration applied without error (single implicit transaction).')
+    await sql.unsafe(combinedSql)
+    console.log('[apply-authority-enforcement-migration] Prerequisite + Round58 migrations applied without error (single implicit transaction).')
 
     const policyCount = await sql<{ n: number }[]>`
       SELECT count(*)::int AS n FROM pg_policies WHERE schemaname = 'public'`
