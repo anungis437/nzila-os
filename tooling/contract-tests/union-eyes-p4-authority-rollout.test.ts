@@ -41,6 +41,17 @@ describe('Union Eyes P4 authority-only rollout', () => {
     expect(authoritySource).not.toMatch(/inputs\.apply_|apply_[a-z0-9_]+:\s*\n/)
   })
 
+  it('runs both Django mutation steps from the backend working directory with no manual sys.path insertion', () => {
+    for (const jobName of ['apply-authority-schema-prerequisites', 'apply-automation-rules-ownership-migration'] as const) {
+      const job = workflow.jobs[jobName]
+      const djangoStep = job.steps.find((step: { run?: string }) => step.run?.includes("python - <<'PY'"))
+      expect(djangoStep['working-directory']).toBe('apps/union-eyes/backend')
+      expect(djangoStep.run).toContain('python -m pip install --disable-pip-version-check -r requirements.txt')
+      expect(djangoStep.run).not.toContain('apps/union-eyes/backend/requirements.txt')
+      expect(djangoStep.run).not.toContain('sys.path.insert(0, "apps/union-eyes/backend")')
+    }
+  })
+
   it('contains no application build, push, migration, or deployment surface', () => {
     for (const job of ['build-push', 'apply-django-migrations', 'deploy']) {
       expect(workflow.jobs[job]).toBeUndefined()
