@@ -25,7 +25,6 @@ export const PROTECTED_DIRECT_TABLES = [
   'organizations',
   'grievances',
   'claims',
-  'grievance_deadlines',
   'documents',
   'member_documents',
   'workplace_incidents',
@@ -42,11 +41,15 @@ export const PROTECTED_DIRECT_TABLES = [
   'message_threads',
 ] as const
 
+// P4 failed-rollout census (2026-09-13) proved grievance_deadlines has no
+// organization_id column of its own — it is parent-owned via grievances.id,
+// not direct-org. Moved here from PROTECTED_DIRECT_TABLES; see 0108 PART 6b.
 export const PROTECTED_PARENT_OWNED_TABLES = [
   'messages',
   'message_participants',
   'message_read_receipts',
   'message_notifications',
+  'grievance_deadlines',
 ] as const
 
 export const PROTECTED_NO_TENANT_ACCESS_TABLES = ['cross_org_access_log'] as const

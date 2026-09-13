@@ -249,7 +249,7 @@ $$;
 CREATE OR REPLACE FUNCTION ue_create_direct_org_rls_policy(
   p_table_name TEXT,
   p_org_column TEXT DEFAULT 'organization_id',
-  p_org_column_is_text BOOLEAN DEFAULT FALSE -- true for organization_members, whose organization_id is TEXT
+  p_org_column_is_text BOOLEAN DEFAULT FALSE -- true only for a genuinely TEXT org column; organization_members.organization_id is UUID (converted by 0002_true_selene.sql), not TEXT
 ) RETURNS VOID AS $$
 DECLARE
   v_cast TEXT := CASE WHEN p_org_column_is_text THEN '' ELSE '::text' END;
@@ -302,13 +302,17 @@ $$ LANGUAGE plpgsql;
 -- =============================================================================
 
 -- Members
-SELECT ue_create_direct_org_rls_policy('organization_members', 'organization_id', TRUE); -- TEXT column, see note above
+SELECT ue_create_direct_org_rls_policy('organization_members', 'organization_id', FALSE); -- UUID column (converted by 0002_true_selene.sql), cast to text for the comparison like every other org column
 SELECT ue_create_direct_org_rls_policy('organizations', 'id', FALSE); -- a tenant sees only its own org row
 
 -- Grievances / claims
 SELECT ue_create_direct_org_rls_policy('grievances');
 SELECT ue_create_direct_org_rls_policy('claims');
-SELECT ue_create_direct_org_rls_policy('grievance_deadlines');
+
+-- grievance_deadlines has no organization_id column of its own (confirmed
+-- live via information_schema, P4 failed-rollout census 2026-09-13) — it is
+-- parent-owned through grievances.id via grievance_deadlines.grievance_id,
+-- not a direct-org table. See PART 6b below for its policy.
 
 -- Documents / evidence
 -- NOTE: `documents` has both `organization_id` and a duplicate legacy
@@ -318,6 +322,62 @@ SELECT ue_create_direct_org_rls_policy('grievance_deadlines');
 -- it is not enforced here so a divergent `org_id` cannot silently EXPAND
 -- visibility, only the authoritative column is policy-relevant.
 SELECT ue_create_direct_org_rls_policy('documents', 'organization_id');
+
+-- member_documents has no organization_id column in production (confirmed
+-- live via information_schema, P4 failed-rollout census 2026-09-13), unlike
+-- the repo's already-authored (but never-applied-to-this-table's-actual-
+-- production-shape) 0099_audit_remediation.sql, which this migration does
+-- NOT import wholesale (it contains unrelated grievance_transitions/
+-- documents/case_documents mutations out of P4's scope). Instead, 0108
+-- establishes only the exact prerequisite it depends on, inside this same
+-- transaction, so a later failure still rolls the entire RLS foundation
+-- back atomically.
+ALTER TABLE member_documents
+  ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES organizations(id);
+
+CREATE INDEX IF NOT EXISTS idx_member_documents_org
+  ON member_documents (organization_id);
+
+CREATE INDEX IF NOT EXISTS idx_member_documents_user
+  ON member_documents (user_id);
+
+-- Fail-closed guarded backfill: only touches rows still missing
+-- organization_id. P4 failed-rollout census (2026-09-13) proved production
+-- member_documents has 0 rows, so this is a no-op today; it exists so a
+-- future non-empty table is never silently mis-assigned or silently
+-- skipped. Aborts the whole 0108 transaction if any row lacks exactly one
+-- unambiguous tenant mapping via organization_members.user_id.
+DO $$
+DECLARE
+  v_zero_match_rows BIGINT;
+  v_multi_match_rows BIGINT;
+BEGIN
+  SELECT
+    count(*) FILTER (WHERE match_counts.distinct_org_count = 0),
+    count(*) FILTER (WHERE match_counts.distinct_org_count > 1)
+  INTO v_zero_match_rows, v_multi_match_rows
+  FROM (
+    SELECT md.id, count(DISTINCT om.organization_id) AS distinct_org_count
+    FROM member_documents md
+    LEFT JOIN organization_members om ON om.user_id = md.user_id
+    WHERE md.organization_id IS NULL
+    GROUP BY md.id
+  ) AS match_counts;
+
+  IF v_zero_match_rows > 0 OR v_multi_match_rows > 0 THEN
+    RAISE EXCEPTION
+      'member_documents backfill invariant violated: % row(s) with zero tenant matches, % row(s) with multiple tenant matches — ambiguous ownership must be resolved outside this migration before 0108 can proceed',
+      v_zero_match_rows, v_multi_match_rows;
+  END IF;
+
+  UPDATE member_documents md
+  SET organization_id = om.organization_id
+  FROM organization_members om
+  WHERE md.organization_id IS NULL
+    AND om.user_id = md.user_id;
+END;
+$$;
+
 SELECT ue_create_direct_org_rls_policy('member_documents');
 
 -- Health & Safety (all 11 tables confirmed to carry a direct organization_id)
@@ -371,7 +431,6 @@ $$ LANGUAGE plpgsql;
 SELECT ue_create_parent_owned_rls_policy('messages', 'thread_id');
 SELECT ue_create_parent_owned_rls_policy('message_participants', 'thread_id');
 SELECT ue_create_parent_owned_rls_policy('message_read_receipts', 'message_id'); -- via messages -> thread_id, handled below
-SELECT ue_create_parent_owned_rls_policy('message_notifications', 'thread_id');
 
 -- message_read_receipts references messages(id), not message_threads(id)
 -- directly — replace its policy with a two-hop join instead of reusing the
@@ -390,6 +449,79 @@ CREATE POLICY ue_parent_org_isolation ON message_read_receipts FOR ALL TO union_
     WHERE m.id = message_read_receipts.message_id
       AND mt.organization_id::text = current_setting('app.current_org_id', true)
   ));
+
+-- =============================================================================
+-- PART 6b — grievance_deadlines (parent-owned via grievances, not direct-org;
+-- confirmed live via information_schema, P4 failed-rollout census
+-- 2026-09-13 — this table has no organization_id column of its own).
+-- =============================================================================
+
+ALTER TABLE grievance_deadlines ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grievance_deadlines FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS ue_org_isolation_select ON grievance_deadlines;
+DROP POLICY IF EXISTS ue_org_isolation_insert ON grievance_deadlines;
+DROP POLICY IF EXISTS ue_org_isolation_update ON grievance_deadlines;
+DROP POLICY IF EXISTS ue_org_isolation_delete ON grievance_deadlines;
+DROP POLICY IF EXISTS ue_system_full_access ON grievance_deadlines;
+
+CREATE POLICY ue_org_isolation_select ON grievance_deadlines FOR SELECT TO union_eyes_runtime
+  USING (EXISTS (
+    SELECT 1 FROM grievances g
+    WHERE g.id = grievance_deadlines.grievance_id
+      AND g.organization_id::text = current_setting('app.current_org_id', true)
+  ));
+CREATE POLICY ue_org_isolation_insert ON grievance_deadlines FOR INSERT TO union_eyes_runtime
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM grievances g
+    WHERE g.id = grievance_deadlines.grievance_id
+      AND g.organization_id::text = current_setting('app.current_org_id', true)
+  ));
+CREATE POLICY ue_org_isolation_update ON grievance_deadlines FOR UPDATE TO union_eyes_runtime
+  USING (EXISTS (
+    SELECT 1 FROM grievances g
+    WHERE g.id = grievance_deadlines.grievance_id
+      AND g.organization_id::text = current_setting('app.current_org_id', true)
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM grievances g
+    WHERE g.id = grievance_deadlines.grievance_id
+      AND g.organization_id::text = current_setting('app.current_org_id', true)
+  ));
+CREATE POLICY ue_org_isolation_delete ON grievance_deadlines FOR DELETE TO union_eyes_runtime
+  USING (EXISTS (
+    SELECT 1 FROM grievances g
+    WHERE g.id = grievance_deadlines.grievance_id
+      AND g.organization_id::text = current_setting('app.current_org_id', true)
+  ));
+CREATE POLICY ue_system_full_access ON grievance_deadlines FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);
+
+-- =============================================================================
+-- PART 6c — message_notifications (parent-owned via messages -> message_threads,
+-- not via a thread_id column of its own; confirmed live via information_schema,
+-- P4 failed-rollout census 2026-09-13 — this table's actual FK is message_id).
+-- =============================================================================
+
+ALTER TABLE message_notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE message_notifications FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS ue_parent_org_isolation ON message_notifications;
+DROP POLICY IF EXISTS ue_system_full_access ON message_notifications;
+
+CREATE POLICY ue_parent_org_isolation ON message_notifications FOR ALL TO union_eyes_runtime
+  USING (EXISTS (
+    SELECT 1 FROM messages m
+    JOIN message_threads mt ON mt.id = m.thread_id
+    WHERE m.id = message_notifications.message_id
+      AND mt.organization_id::text = current_setting('app.current_org_id', true)
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM messages m
+    JOIN message_threads mt ON mt.id = m.thread_id
+    WHERE m.id = message_notifications.message_id
+      AND mt.organization_id::text = current_setting('app.current_org_id', true)
+  ));
+CREATE POLICY ue_system_full_access ON message_notifications FOR ALL TO union_eyes_system USING (true) WITH CHECK (true);
 
 -- =============================================================================
 -- PART 7 — Cross-org audit table

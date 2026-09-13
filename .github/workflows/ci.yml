@@ -79,6 +79,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           P3_2_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
       # Pre-tar keeps the upload to a single file: workspace-wide **/coverage-final.json
