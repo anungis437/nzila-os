@@ -5,8 +5,8 @@
   "workspacePackageCount": 258,
   "workflowCount": 54,
   "contractTestCount": 282,
-  "tsTestFileCount": 2631,
-  "pythonTestFileCount": 34,
+  "tsTestFileCount": 2633,
+  "pythonTestFileCount": 35,
   "apps": [
     {
       "name": "abr",
@@ -688,7 +688,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 5188
+      "codeFileCount": 5193
     },
     {
       "name": "union-eyes-demo",
