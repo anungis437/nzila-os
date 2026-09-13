@@ -125,6 +125,64 @@ type GeometryFile = {
 
 type Blocker = { table: string; classification: string; reason: string };
 
+// Round 58 remediation (P4 Round58 Production Geometry Compatibility
+// Remediation): every `ue_create_*_rls_policy` call site below now records
+// its FULL required dependency geometry (not just the primary table + a
+// single positional column) — including any PARENT table/column the call
+// depends on, and every additional local column a multi-column helper
+// (multi-party, shared-library) requires. This replaces the prior generic
+// regex-based guard, which only ever inspected the primary table and the
+// helper's 2nd positional argument, silently treating every other argument
+// (parent table, parent authority column, 2nd/3rd shared-library columns)
+// as opaque and therefore never validating it — the exact defect that
+// crashed production run 34765974431 (chat_messages -> chat_sessions.
+// organization_id) and was later found to affect 12 total call sites.
+//
+// Guard semantics (per the remediation authorization):
+//   - primaryTable ABSENT in the target environment -> no-op (unchanged
+//     doctrine: this table/feature simply isn't deployed here yet).
+//   - primaryTable PRESENT but ANY requiredCheck (on itself OR on any
+//     parent/related table it depends on) is not satisfied -> HARD FAIL
+//     (RAISE EXCEPTION), aborting the whole atomic migration. A physically
+//     present table classified as requiring RLS may never silently escape
+//     policy installation because one of its required columns is missing.
+export type RequiredColumnCheck = { table: string; column: string };
+export type PolicyCallSpec =
+  | {
+      kind: "call";
+      fn: string;
+      args: string[];
+      primaryTable: string;
+      requiredChecks: RequiredColumnCheck[];
+    }
+  | { kind: "raw"; sql: string };
+
+export function emitGuardedPolicyCall(spec: Extract<PolicyCallSpec, { kind: "call" }>): string {
+  const argsList = spec.args.join(", ");
+  const primaryExistsCheck = `to_regclass(${sqlQuoteLiteral(spec.primaryTable)}) IS NOT NULL`;
+  const columnCheckExprs = spec.requiredChecks.map(
+    (rc) =>
+      `EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = ${sqlQuoteLiteral(
+        rc.table
+      )} AND column_name = ${sqlQuoteLiteral(rc.column)})`
+  );
+  const allChecksOk = columnCheckExprs.length > 0 ? columnCheckExprs.join(" AND ") : "TRUE";
+  const missingDescr = spec.requiredChecks.map((rc) => `${rc.table}.${rc.column}`).join(", ");
+  return (
+    `DO $$ BEGIN\n` +
+    `  IF ${primaryExistsCheck} THEN\n` +
+    `    IF ${allChecksOk} THEN\n` +
+    `      PERFORM ${spec.fn}(${argsList});\n` +
+    `    ELSE\n` +
+    `      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', ${sqlQuoteLiteral(
+      spec.primaryTable
+    )}, ${sqlQuoteLiteral(spec.fn)}, ${sqlQuoteLiteral(missingDescr)};\n` +
+    `    END IF;\n` +
+    `  END IF;\n` +
+    `END $$;`
+  );
+}
+
 const RLS_HELPER_FUNCTIONS_SQL = `
 -- =============================================================================
 -- Round 58 Phase 1+ — generalized policy-helper functions for classification
@@ -482,7 +540,7 @@ function resolveParentGeometry(
 function main() {
   const geometryFile: GeometryFile = JSON.parse(fs.readFileSync(GEOMETRY_PATH, "utf8"));
   const blockers: Blocker[] = [];
-  const policyStatements: string[] = [];
+  const policyStatements: PolicyCallSpec[] = [];
   const grantStatements: string[] = [];
   let policiesGenerated = 0;
   let grantsGenerated = 0;
@@ -534,11 +592,13 @@ function main() {
     } else if (entry.classification === "TENANT_RLS_REQUIRED") {
       const override = overridesByTable.get(entry.table);
       if (override?.kind === "EXPLICIT_DIRECT_COLUMN_OVERRIDE") {
-        policyStatements.push(
-          `SELECT ue_create_direct_org_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-            override.orgColumn
-          )}, FALSE);`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_direct_org_rls_policy",
+          args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(override.orgColumn), "FALSE"],
+          primaryTable: entry.table,
+          requiredChecks: [{ table: entry.table, column: override.orgColumn }],
+        });
         policiesGenerated++;
       } else if (override?.kind === "TENANT_VIA_PARENT") {
         const parentGeom = geometryFile.tables[override.parentTable];
@@ -549,21 +609,34 @@ function main() {
             reason: `OVERRIDE_PARENT_UNRESOLVED: parent=${override.parentTable} confidence=${parentGeom?.confidence ?? "MISSING"}`,
           });
         } else {
-          policyStatements.push(
-            `SELECT ue_create_parent_owned_rls_policy_v2(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-              override.fkColumn
-            )}, ${sqlQuoteLiteral(override.parentTable)}, ${sqlQuoteLiteral(parentGeom.directOrgColumns[0])}, FALSE);`
-          );
+          policyStatements.push({
+            kind: "call",
+            fn: "ue_create_parent_owned_rls_policy_v2",
+            args: [
+              sqlQuoteLiteral(entry.table),
+              sqlQuoteLiteral(override.fkColumn),
+              sqlQuoteLiteral(override.parentTable),
+              sqlQuoteLiteral(parentGeom.directOrgColumns[0]),
+              "FALSE",
+            ],
+            primaryTable: entry.table,
+            requiredChecks: [
+              { table: entry.table, column: override.fkColumn },
+              { table: override.parentTable, column: parentGeom.directOrgColumns[0] },
+            ],
+          });
           policiesGenerated++;
         }
       } else {
         const g = geometryFile.tables[entry.table];
         if (g && g.confidence === "HIGH_CONFIDENCE_DIRECT") {
-          policyStatements.push(
-            `SELECT ue_create_direct_org_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-              g.directOrgColumns[0]
-            )}, FALSE);`
-          );
+          policyStatements.push({
+            kind: "call",
+            fn: "ue_create_direct_org_rls_policy",
+            args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(g.directOrgColumns[0]), "FALSE"],
+            primaryTable: entry.table,
+            requiredChecks: [{ table: entry.table, column: g.directOrgColumns[0] }],
+          });
           policiesGenerated++;
         } else {
           blockers.push({
@@ -584,52 +657,84 @@ function main() {
             reason: `OVERRIDE_PARENT_UNRESOLVED: parent=${override.parentTable} confidence=${parentGeom?.confidence ?? "MISSING"}`,
           });
         } else {
-          policyStatements.push(
-            `SELECT ue_create_parent_owned_rls_policy_v2(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-              override.fkColumn
-            )}, ${sqlQuoteLiteral(override.parentTable)}, ${sqlQuoteLiteral(parentGeom.directOrgColumns[0])}, FALSE);`
-          );
+          policyStatements.push({
+            kind: "call",
+            fn: "ue_create_parent_owned_rls_policy_v2",
+            args: [
+              sqlQuoteLiteral(entry.table),
+              sqlQuoteLiteral(override.fkColumn),
+              sqlQuoteLiteral(override.parentTable),
+              sqlQuoteLiteral(parentGeom.directOrgColumns[0]),
+              "FALSE",
+            ],
+            primaryTable: entry.table,
+            requiredChecks: [
+              { table: entry.table, column: override.fkColumn },
+              { table: override.parentTable, column: parentGeom.directOrgColumns[0] },
+            ],
+          });
           policiesGenerated++;
         }
       } else if (override?.kind === "PARENT_VIA_USER") {
-        policyStatements.push(
-          `SELECT ue_create_parent_owned_via_user_rls_policy_v2(${sqlQuoteLiteral(
-            entry.table
-          )}, ${sqlQuoteLiteral(override.fkColumn)}, ${sqlQuoteLiteral(override.parentTable)}, ${sqlQuoteLiteral(
-            override.parentUserColumn
-          )});`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_parent_owned_via_user_rls_policy_v2",
+          args: [
+            sqlQuoteLiteral(entry.table),
+            sqlQuoteLiteral(override.fkColumn),
+            sqlQuoteLiteral(override.parentTable),
+            sqlQuoteLiteral(override.parentUserColumn),
+          ],
+          primaryTable: entry.table,
+          requiredChecks: [
+            { table: entry.table, column: override.fkColumn },
+            { table: override.parentTable, column: override.parentUserColumn },
+          ],
+        });
         policiesGenerated++;
       } else {
         const parent = resolveParentGeometry(entry, geometryFile, blockers);
         if (parent) {
-          policyStatements.push(
-            `SELECT ue_create_parent_owned_rls_policy_v2(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-              parent.fkColumn
-            )}, ${sqlQuoteLiteral(parent.parentTable)}, ${sqlQuoteLiteral(parent.parentOrgColumn)}, ${
-              parent.parentOrgIsText ? "TRUE" : "FALSE"
-            });`
-          );
+          policyStatements.push({
+            kind: "call",
+            fn: "ue_create_parent_owned_rls_policy_v2",
+            args: [
+              sqlQuoteLiteral(entry.table),
+              sqlQuoteLiteral(parent.fkColumn),
+              sqlQuoteLiteral(parent.parentTable),
+              sqlQuoteLiteral(parent.parentOrgColumn),
+              parent.parentOrgIsText ? "TRUE" : "FALSE",
+            ],
+            primaryTable: entry.table,
+            requiredChecks: [
+              { table: entry.table, column: parent.fkColumn },
+              { table: parent.parentTable, column: parent.parentOrgColumn },
+            ],
+          });
           policiesGenerated++;
         }
       }
     } else if (entry.classification === "USER_RLS_REQUIRED") {
       const override = overridesByTable.get(entry.table);
       if (override?.kind === "USER_DIRECT_COLUMN_OVERRIDE") {
-        policyStatements.push(
-          `SELECT ue_create_user_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-            override.userColumn
-          )});`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_user_rls_policy",
+          args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(override.userColumn)],
+          primaryTable: entry.table,
+          requiredChecks: [{ table: entry.table, column: override.userColumn }],
+        });
         policiesGenerated++;
       } else {
         const g = geometryFile.tables[entry.table];
         if (g && g.userConfidence === "HIGH_CONFIDENCE_USER") {
-          policyStatements.push(
-            `SELECT ue_create_user_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-              g.directUserColumns[0]
-            )});`
-          );
+          policyStatements.push({
+            kind: "call",
+            fn: "ue_create_user_rls_policy",
+            args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(g.directUserColumns[0])],
+            primaryTable: entry.table,
+            requiredChecks: [{ table: entry.table, column: g.directUserColumns[0] }],
+          });
           policiesGenerated++;
         } else {
           blockers.push({
@@ -642,11 +747,13 @@ function main() {
     } else if (entry.classification === "MIXED_GLOBAL_TENANT_RLS_REQUIRED") {
       const g = geometryFile.tables[entry.table];
       if (g && g.confidence === "HIGH_CONFIDENCE_DIRECT") {
-        policyStatements.push(
-          `SELECT ue_create_mixed_global_tenant_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-            g.directOrgColumns[0]
-          )});`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_mixed_global_tenant_rls_policy",
+          args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(g.directOrgColumns[0])],
+          primaryTable: entry.table,
+          requiredChecks: [{ table: entry.table, column: g.directOrgColumns[0] }],
+        });
         policiesGenerated++;
       } else {
         blockers.push({
@@ -658,34 +765,62 @@ function main() {
     } else if (entry.classification === "MULTI_PARTY_RLS_REQUIRED") {
       const override = overridesByTable.get(entry.table);
       if (override?.kind === "MULTI_PARTY") {
-        policyStatements.push(
-          `SELECT ue_create_multi_party_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-            override.orgColumnA
-          )}, ${sqlQuoteLiteral(override.orgColumnB)});`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_multi_party_rls_policy",
+          args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(override.orgColumnA), sqlQuoteLiteral(override.orgColumnB)],
+          primaryTable: entry.table,
+          requiredChecks: [
+            { table: entry.table, column: override.orgColumnA },
+            { table: entry.table, column: override.orgColumnB },
+          ],
+        });
         policiesGenerated++;
       } else if (override?.kind === "SHARED_LIBRARY_ROOT") {
-        policyStatements.push(
-          `SELECT ue_create_shared_library_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-            override.orgColumn
-          )}, ${sqlQuoteLiteral(override.sharingLevelColumn)}, ${sqlQuoteLiteral(override.sharedWithColumn)});`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_shared_library_rls_policy",
+          args: [
+            sqlQuoteLiteral(entry.table),
+            sqlQuoteLiteral(override.orgColumn),
+            sqlQuoteLiteral(override.sharingLevelColumn),
+            sqlQuoteLiteral(override.sharedWithColumn),
+          ],
+          primaryTable: entry.table,
+          requiredChecks: [
+            { table: entry.table, column: override.orgColumn },
+            { table: entry.table, column: override.sharingLevelColumn },
+            { table: entry.table, column: override.sharedWithColumn },
+          ],
+        });
         policiesGenerated++;
       } else if (override?.kind === "SHARED_LIBRARY_CHILD") {
-        policyStatements.push(
-          `SELECT ue_create_shared_library_child_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-            override.fkColumn
-          )});`
-        );
+        policyStatements.push({
+          kind: "call",
+          fn: "ue_create_shared_library_child_rls_policy",
+          args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(override.fkColumn)],
+          primaryTable: entry.table,
+          requiredChecks: [
+            { table: entry.table, column: override.fkColumn },
+            { table: "shared_clause_library", column: "source_organization_id" },
+            { table: "shared_clause_library", column: "shared_with_org_ids" },
+            { table: "shared_clause_library", column: "sharing_level" },
+          ],
+        });
         policiesGenerated++;
       } else {
         const g = geometryFile.tables[entry.table];
         if (g && g.confidence === "CANDIDATE_MULTI_PARTY" && g.directOrgColumns.length === 2) {
-          policyStatements.push(
-            `SELECT ue_create_multi_party_rls_policy(${sqlQuoteLiteral(entry.table)}, ${sqlQuoteLiteral(
-              g.directOrgColumns[0]
-            )}, ${sqlQuoteLiteral(g.directOrgColumns[1])});`
-          );
+          policyStatements.push({
+            kind: "call",
+            fn: "ue_create_multi_party_rls_policy",
+            args: [sqlQuoteLiteral(entry.table), sqlQuoteLiteral(g.directOrgColumns[0]), sqlQuoteLiteral(g.directOrgColumns[1])],
+            primaryTable: entry.table,
+            requiredChecks: [
+              { table: entry.table, column: g.directOrgColumns[0] },
+              { table: entry.table, column: g.directOrgColumns[1] },
+            ],
+          });
           policiesGenerated++;
         } else {
           blockers.push({
@@ -705,16 +840,18 @@ function main() {
       // payroll/voting tables not yet migrated to a given target, etc). A
       // fixed SQL statement referencing a table that doesn't exist in THIS
       // environment must not hard-fail the whole migration.
-      policyStatements.push(
-        `DO $$ BEGIN\n` +
-          `  IF to_regclass('public.' || ${sqlQuoteLiteral(entry.table)}) IS NOT NULL THEN\n` +
+      policyStatements.push({
+        kind: "raw",
+        sql:
+          `DO $$ BEGIN\n` +
+          `  IF to_regclass(${sqlQuoteLiteral(entry.table)}) IS NOT NULL THEN\n` +
           `    EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', ${sqlQuoteLiteral(entry.table)});\n` +
           `    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', ${sqlQuoteLiteral(entry.table)});\n` +
           `    EXECUTE format('DROP POLICY IF EXISTS ue_system_full_access ON %I', ${sqlQuoteLiteral(entry.table)});\n` +
           `    EXECUTE format('CREATE POLICY ue_system_full_access ON %I FOR ALL TO union_eyes_system USING (true) WITH CHECK (true)', ${sqlQuoteLiteral(entry.table)});\n` +
           `  END IF;\n` +
-          `END $$;`
-      );
+          `END $$;`,
+      });
       policiesGenerated++;
     }
     // GLOBAL_REFERENCE_DATA, APP_SCOPED_NON_SENSITIVE, SEPARATE_DATABASE_BOUNDARY,
@@ -736,7 +873,7 @@ function main() {
     // entire atomic migration instead of being a no-op for that table).
     const lines: string[] = [];
     lines.push(`DO $$ BEGIN`);
-    lines.push(`  IF to_regclass('public.' || ${sqlQuoteLiteral(entry.table)}) IS NOT NULL THEN`);
+    lines.push(`  IF to_regclass(${sqlQuoteLiteral(entry.table)}) IS NOT NULL THEN`);
     lines.push(
       `    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', ${sqlQuoteLiteral(entry.table)});`
     );
@@ -822,53 +959,25 @@ END $$;
         "-- 0108's blanket table/sequence grants are deliberately LEFT IN PLACE.",
       ].join("\n");
 
-  // Round 59 staging proof fix: every `SELECT ue_create_*_rls_policy(table, ...)`
-  // call generated above assumes the table physically exists in the target
-  // environment. 795 manifest entries span many environments/feature areas
-  // that are not all deployed everywhere at once (financial-service
-  // LATENT_UNREACHABLE tables, feature-gated CBA-intelligence/payroll/
-  // voting/pension surfaces not yet migrated to a given target, etc) —
-  // discovered live against staging (171 of 795 referenced tables absent).
-  // Wrap each such call in an existence guard so a table missing from THIS
-  // environment is a no-op for that table, not a hard failure for the
-  // entire atomic migration. The table name is the call's first argument
-  // and is always the literal produced by sqlQuoteLiteral(entry.table)
-  // above, so it can be extracted directly from the generated SQL text
-  // without threading a parallel table-tracking array through every call
-  // site. Statements that don't match this shape (the SYSTEM_ONLY DO block,
-  // already self-guarded above) pass through unchanged.
-  //
-  // Also guard on the 2nd argument, when present as a string literal: in
-  // every ue_create_*_rls_policy signature this generator emits, the 2nd
-  // positional argument is always a column that must exist ON THIS TABLE
-  // (org_column / user_column / fk_column) — never a different table's
-  // column. Discovered live against staging: strike_fund_disbursements
-  // exists but its own migration (20260909_strike_fund_disbursements_
-  // organization_id.sql) had never been applied there either, and 2 real
-  // rows fail that migration's own fail-closed backfill (ambiguous/zero
-  // historically-valid owning organization at their payment_date) — a
-  // genuine data-provenance gap requiring a human business decision on
-  // those 2 rows, not something this generator should paper over by
-  // guessing. Skipping enforcement for a table missing its expected column
-  // (same as skipping a missing table entirely) is the correct fail-closed
-  // response until that column exists.
-  const guardedPolicyStatements = policyStatements.map((stmt) => {
-    const match = stmt.match(/^SELECT (ue_create_\w+)\('((?:[^'\\]|\\.)*)'(?:, '((?:[^'\\]|\\.)*)')?(.*)\);$/);
-    if (!match) return stmt;
-    const [, fnName, tableName, columnName, restArgs] = match;
-    const callArgs = columnName !== undefined ? `'${tableName}', '${columnName}'${restArgs}` : `'${tableName}'${restArgs}`;
-    const columnCheck =
-      columnName !== undefined
-        ? ` AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${tableName}' AND column_name = '${columnName}')`
-        : "";
-    return (
-      `DO $$ BEGIN\n` +
-      `  IF to_regclass('public.' || '${tableName}') IS NOT NULL${columnCheck} THEN\n` +
-      `    PERFORM ${fnName}(${callArgs});\n` +
-      `  END IF;\n` +
-      `END $$;`
-    );
-  });
+  // Round 58 remediation (replaces the prior generic regex-based guard,
+  // which only ever validated the primary table + the helper's 2nd
+  // positional argument, silently trusting every other argument — parent
+  // table, parent authority column, 2nd/3rd shared-library columns —
+  // without verification). Every call spec built above already carries its
+  // OWN complete requiredChecks list (see PolicyCallSpec / emitGuardedPolicyCall
+  // near the top of this file), so emission here is now a pure dispatch: raw
+  // specs (the self-guarded SYSTEM_ONLY block) pass through unchanged; call
+  // specs are emitted via emitGuardedPolicyCall, which no-ops when the
+  // primary table is absent from this environment (unchanged doctrine — not
+  // every environment has every table yet) but RAISE EXCEPTIONs — aborting
+  // the whole atomic migration — when the primary table IS present but any
+  // required column (on itself OR on any parent/related table it depends
+  // on) is missing. A physically present table classified as requiring RLS
+  // may never silently escape policy installation because a dependency
+  // (including a PARENT table's authority column) is missing.
+  const guardedPolicyStatements = policyStatements.map((spec) =>
+    spec.kind === "raw" ? spec.sql : emitGuardedPolicyCall(spec)
+  );
 
   const migrationSql = [
     "-- =============================================================================",

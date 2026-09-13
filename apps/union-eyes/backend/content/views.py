@@ -28,10 +28,20 @@ class DenyAllPermission(permissions.BasePermission):
 
 
 class BoardPacketsViewSet(viewsets.ModelViewSet):
-    """API endpoint for BoardPackets operations."""
+    """API endpoint for BoardPackets operations.
+
+    CONTAINED (Round58 production-geometry remediation): the generated Django
+    model only maps `title` — it does not model `organization_id`, which the
+    Round58 prerequisite migration makes NOT NULL on the physical
+    `board_packets` table. No legitimate Django consumer exists anywhere in
+    the app; the canonical writer is app/api/governance/board-packets/route.ts
+    (and lib/services/board-packet-generator.ts), which already derives and
+    writes organizationId. Deny unconditionally until a real consumer with
+    proven tenant isolation exists.
+    """
     queryset = BoardPackets.objects.all()
     serializer_class = BoardPacketsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['title']
     search_fields = ['title']
