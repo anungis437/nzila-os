@@ -105,6 +105,20 @@ export const ENFORCEMENT_GEOMETRY_OVERRIDES: EnforcementGeometryOverride[] = [
       `TENANT_RLS_REQUIRED (not MULTI_PARTY_RLS_REQUIRED), confirming organization_id alone is the ` +
       `intended sole authority column; parent_organization_id is metadata, not a second RLS party.`,
   },
+  {
+    kind: "EXPLICIT_DIRECT_COLUMN_OVERRIDE",
+    table: "automation_rules",
+    orgColumn: "organization_id",
+    provenance:
+      `[${ROUND_REF}] db/rls-storage-authority/reference-latent.ts's CLOSED round 57/P3.2 entry for ` +
+      `automation_rules is authoritative: the forward-only core migration ` +
+      `(backend/core/migrations/0003_automation_rules_organization_id.py) added a varchar(255) ` +
+      `organization_id column — aliased orgId only in the rewards Drizzle surface's TypeScript field ` +
+      `name, never in the physical Postgres column name. Generic AST geometry derivation ` +
+      `(derive-table-geometry.ts) mis-inferred the physical column as "org_id" from that Drizzle alias, ` +
+      `which does not exist in the database and would leave the generated fail-closed gate permanently ` +
+      `unsatisfiable. This override forces the compiler to check for the real physical column name.`,
+  },
 
   // ---- USER_DIRECT_COLUMN_OVERRIDE ----------------------------------------
   {
@@ -132,6 +146,22 @@ export const ENFORCEMENT_GEOMETRY_OVERRIDES: EnforcementGeometryOverride[] = [
       `[${ROUND_REF}] db/schema/bargaining-negotiations-schema.ts: bargaining_proposals has no direct ` +
       `org column; negotiation_id is its sole FK, referencing negotiations (HIGH_CONFIDENCE_DIRECT ` +
       `organization_id, confirmed via reports/union-eyes-rls-geometry.json).`,
+  },
+  {
+    kind: "TENANT_VIA_PARENT",
+    table: "settlements",
+    fkColumn: "grievance_id",
+    parentTable: "grievances",
+    provenance:
+      `[${ROUND_REF}] db/schema/domains/claims/grievances.ts: settlements has no direct organization_id ` +
+      `column (or any other direct org column) anywhere in its canonical Drizzle declaration — only ` +
+      `grievance_id (NOT NULL FK to grievances) and arbitration_id (nullable FK to arbitrations). The ` +
+      `Round58 generator's automatic geometry derivation defaulted to requiring a direct ` +
+      `'settlements.organization_id' column that does not exist and never has, which would make this ` +
+      `table's fail-closed gate permanently unsatisfiable. grievance_id is settlements' sole NOT NULL FK ` +
+      `and grievances itself carries a direct NOT NULL organization_id (db/schema/domains/claims/` +
+      `grievances.ts line 151) — single-hop parent authority, matching the bargaining_proposals/` +
+      `claim_updates precedent below.`,
   },
   {
     kind: "TENANT_VIA_PARENT",

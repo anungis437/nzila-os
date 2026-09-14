@@ -612,10 +612,10 @@ DO $$ BEGIN
 END $$;
 DO $$ BEGIN
   IF to_regclass('settlements') IS NOT NULL THEN
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'settlements' AND column_name = 'organization_id') THEN
-      PERFORM ue_create_direct_org_rls_policy('settlements', 'organization_id', FALSE);
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'settlements' AND column_name = 'grievance_id') AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'grievances' AND column_name = 'organization_id') THEN
+      PERFORM ue_create_parent_owned_rls_policy_v2('settlements', 'grievance_id', 'grievances', 'organization_id', FALSE);
     ELSE
-      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'settlements', 'ue_create_direct_org_rls_policy', 'settlements.organization_id';
+      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'settlements', 'ue_create_parent_owned_rls_policy_v2', 'settlements.grievance_id, grievances.organization_id';
     END IF;
   END IF;
 END $$;
@@ -2246,10 +2246,10 @@ DO $$ BEGIN
 END $$;
 DO $$ BEGIN
   IF to_regclass('automation_rules') IS NOT NULL THEN
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'automation_rules' AND column_name = 'org_id') THEN
-      PERFORM ue_create_direct_org_rls_policy('automation_rules', 'org_id', FALSE);
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'automation_rules' AND column_name = 'organization_id') THEN
+      PERFORM ue_create_direct_org_rls_policy('automation_rules', 'organization_id', FALSE);
     ELSE
-      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'automation_rules', 'ue_create_direct_org_rls_policy', 'automation_rules.org_id';
+      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'automation_rules', 'ue_create_direct_org_rls_policy', 'automation_rules.organization_id';
     END IF;
   END IF;
 END $$;
