@@ -32,7 +32,7 @@
  *           Round58's own policy-helper calls assume exist. Forward-only,
  *           idempotent, fail-closed on non-empty tables lacking a
  *           deterministic authority source.
- *        b. db/migrations/20260915_round58_complete_production_geometry_prerequisites.sql
+ *        b. db/migrations/20260914_round58_complete_production_geometry_prerequisites.sql
  *           (P4_ROUND58_COMPLETE_GEOMETRY_REMEDIATION) — companion
  *           prerequisite covering the remaining 14 tables discovered by a
  *           full production census: bargaining_notes, budget_pool,
@@ -72,7 +72,7 @@ const PREREQUISITE_MIGRATION_PATH = resolve(
 )
 const COMPLETE_GEOMETRY_PREREQUISITE_MIGRATION_PATH = resolve(
   __dirname,
-  '../db/migrations/20260915_round58_complete_production_geometry_prerequisites.sql'
+  '../db/migrations/20260914_round58_complete_production_geometry_prerequisites.sql'
 )
 const MIGRATION_PATH = resolve(__dirname, '../db/migrations/20260910_rls_enforcement_expansion_round58.sql')
 
