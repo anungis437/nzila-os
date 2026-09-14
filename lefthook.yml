@@ -39,6 +39,22 @@ pre-commit:
       run: pnpm exec tsx scripts/link-check.ts {staged_files}
       fail_text: "Broken markdown links detected. Run `pnpm link-check` to see details."
 
+    inventory-sync:
+      glob:
+        - "apps/**/*"
+        - "packages/**/*"
+        - ".github/workflows/**/*"
+        - "governance/exceptions/**/*"
+        - "README.md"
+        - "README.business.md"
+        - "ARCHITECTURE.md"
+      run: node scripts/check-inventory-staging-safety.mjs && pnpm inventory:generate
+      stage_fixed: true
+      fail_text: |
+        Inventory regeneration aborted: unstaged/untracked changes exist under
+        apps/**, packages/**, .github/workflows/**, governance/exceptions/**, or the
+        canonical count docs. Stage or stash them, then retry the commit.
+
 pre-push:
   commands:
     contract-tests:
