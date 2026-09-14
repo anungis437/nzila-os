@@ -48,7 +48,21 @@ pre-commit:
         - "README.md"
         - "README.business.md"
         - "ARCHITECTURE.md"
-      run: node scripts/check-inventory-staging-safety.mjs && pnpm inventory:generate
+      # stage_fixed only restages files matching this hook's own glob above;
+      # the generated output lives under tooling/repo-inventory/output/**, which
+      # is outside that glob, so it must be staged explicitly or it silently
+      # falls out of the commit and trips CI's "Enforce committed inventory
+      # lock" step instead. Stage exactly the four canonical generator outputs
+      # (not the whole directory) so an unrelated/accidental file that happens
+      # to exist under that path is never swept into the commit.
+      run: >
+        node scripts/check-inventory-staging-safety.mjs &&
+        pnpm inventory:generate &&
+        git add --
+        tooling/repo-inventory/output/inventory.json
+        tooling/repo-inventory/output/inventory.md
+        tooling/repo-inventory/output/repo-inventory.json
+        tooling/repo-inventory/output/repo-inventory.md
       stage_fixed: true
       fail_text: |
         Inventory regeneration aborted: unstaged/untracked changes exist under
