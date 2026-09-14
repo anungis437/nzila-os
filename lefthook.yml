@@ -39,6 +39,18 @@ pre-commit:
       run: pnpm exec tsx scripts/link-check.ts {staged_files}
       fail_text: "Broken markdown links detected. Run `pnpm link-check` to see details."
 
+    inventory-sync:
+      glob:
+        - "apps/**/*"
+        - "packages/**/*"
+        - ".github/workflows/**/*"
+        - "governance/exceptions/**/*"
+        - "README.md"
+        - "README.business.md"
+        - "ARCHITECTURE.md"
+      run: pnpm inventory:generate
+      stage_fixed: true
+
 pre-push:
   commands:
     contract-tests:
