@@ -48,8 +48,12 @@ pre-commit:
         - "README.md"
         - "README.business.md"
         - "ARCHITECTURE.md"
-      run: pnpm inventory:generate
+      run: node scripts/check-inventory-staging-safety.mjs && pnpm inventory:generate
       stage_fixed: true
+      fail_text: |
+        Inventory regeneration aborted: unstaged/untracked changes exist under
+        apps/**, packages/**, .github/workflows/**, governance/exceptions/**, or the
+        canonical count docs. Stage or stash them, then retry the commit.
 
 pre-push:
   commands:
