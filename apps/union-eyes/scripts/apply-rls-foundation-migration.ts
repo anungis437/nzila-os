@@ -263,7 +263,14 @@ function expectRuntimeCommandPolicy(
     return
   }
   if (p.cmd !== cmd) mismatches.push(`${table}.${name}: cmd=${p.cmd}, expected ${cmd}`)
-  if (!p.roles.includes('union_eyes_runtime')) mismatches.push(`${table}.${name}: not scoped to union_eyes_runtime`)
+  // Exact singleton role set — `roles.includes(...)` is insufficient: a
+  // policy scoped to union_eyes_runtime PLUS PUBLIC (or plus any other
+  // role) still satisfies `.includes` but is not the least-privilege 0108
+  // grant this policy must have. Require the role array to be exactly
+  // [union_eyes_runtime], nothing more, nothing less.
+  if (!(p.roles.length === 1 && p.roles[0] === 'union_eyes_runtime')) {
+    mismatches.push(`${table}.${name}: role set is [${p.roles.join(', ')}], expected exactly [union_eyes_runtime]`)
+  }
 
   // Exact policy geometry: the USING/WITH CHECK expression must match the
   // canonical 0108 tenant predicate exactly (normalized for whitespace
@@ -293,7 +300,10 @@ function expectSystemFullAccess(mismatches: string[], table: string, policies: P
     return
   }
   if (p.cmd !== 'ALL') mismatches.push(`${table}.ue_system_full_access: cmd=${p.cmd}, expected ALL`)
-  if (!p.roles.includes('union_eyes_system')) mismatches.push(`${table}.ue_system_full_access: not scoped to union_eyes_system`)
+  // Exact singleton role set — see expectRuntimeCommandPolicy for rationale.
+  if (!(p.roles.length === 1 && p.roles[0] === 'union_eyes_system')) {
+    mismatches.push(`${table}.ue_system_full_access: role set is [${p.roles.join(', ')}], expected exactly [union_eyes_system]`)
+  }
   // Require the canonical unconditional system expression exactly — not
   // merely a non-null expression. `USING (true) WITH CHECK (true)` is the
   // only correct predicate for the system principal; anything else (even a
@@ -352,15 +362,20 @@ function helperSignatureMismatches(mismatches: string[], rows: HelperRow[]): voi
   }
 }
 
+// Schema-qualified to `public` — a same-named helper living in another
+// schema (e.g. an operator's personal schema, or a leftover from a
+// different migration) must never satisfy 0108 attestation. Only
+// public.<name> overloads are considered.
 async function queryHelperRows(sql: postgres.Sql): Promise<HelperRow[]> {
   return sql<HelperRow[]>`
     SELECT
-      proname,
+      p.proname,
       (SELECT array_agg(format_type(a, NULL) ORDER BY ord)
-       FROM unnest(proargtypes) WITH ORDINALITY AS x(a, ord)) AS argtypes,
-      prorettype::regtype::text AS rettype
-    FROM pg_proc
-    WHERE proname = ANY(${HELPER_SIGNATURES.map((h) => h.name)})`
+       FROM unnest(p.proargtypes) WITH ORDINALITY AS x(a, ord)) AS argtypes,
+      p.prorettype::regtype::text AS rettype
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = ANY(${HELPER_SIGNATURES.map((h) => h.name)})`
 }
 
 /**
@@ -379,7 +394,9 @@ async function checkForResidualArtifacts(sql: postgres.Sql): Promise<string[]> {
   const residue: string[] = []
 
   const helperRows = await sql<{ proname: string }[]>`
-    SELECT DISTINCT proname FROM pg_proc WHERE proname = ANY(${HELPER_SIGNATURES.map((h) => h.name)})`
+    SELECT DISTINCT p.proname FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = ANY(${HELPER_SIGNATURES.map((h) => h.name)})`
   for (const row of helperRows) {
     residue.push(`Residual 0108 helper function present while both runtime/system roles are absent: ${row.proname}`)
   }
@@ -485,7 +502,45 @@ async function attestFoundationState(sql: postgres.Sql, expectPreProvisioning: b
 
     const [dbConnect] = await sql<{ has: boolean }[]>`SELECT has_database_privilege(${role}, current_database(), 'CONNECT') AS has`
     if (!dbConnect.has) mismatches.push(`${role}: missing CONNECT on database`)
+  }
 
+  // NOTE: blanket per-table/per-sequence DML grants are intentionally NOT
+  // checked here. Round58's grant compiler (see
+  // db/migrations/20260910_rls_enforcement_expansion_round58.sql and its
+  // successors) legitimately REVOKEs 0108's initial blanket table/sequence
+  // privileges and replaces them with exact manifest-derived, narrower
+  // per-table grants. Those ACLs are downstream authority state owned by
+  // Round58, not a durable 0108 foundation invariant — requiring them here
+  // would make a correctly-narrowed post-Round58 environment misclassify
+  // as PARTIAL_OR_DRIFTED and cause this idempotent-reapply script to
+  // reject legitimate least-privilege state. See
+  // verifyInitial0108GrantBaseline for the check that DOES apply, but only
+  // immediately after a first (NOT_APPLIED) apply.
+
+  const defaultAclRows = await sql<{ acl: string | null }[]>`SELECT defaclacl::text AS acl FROM pg_default_acl`
+  for (const row of defaultAclRows) {
+    if (row.acl && EXPECTED_ROLES.some((role) => row.acl!.includes(role))) {
+      mismatches.push(`Forbidden sticky default-ACL grant found referencing a runtime/system role: ${row.acl}`)
+    }
+  }
+
+  return { state: mismatches.length === 0 ? 'ALREADY_APPLIED' : 'PARTIAL_OR_DRIFTED', mismatches }
+}
+
+/**
+ * Verifies the one-time INITIAL grant baseline that a fresh 0108 apply must
+ * produce: full DML on every public table and USAGE/SELECT on every public
+ * sequence for both runtime/system roles. This is an initial-apply
+ * postcondition, not a durable foundation invariant — it is intentionally
+ * called ONLY immediately after a first (NOT_APPLIED) apply, never as part
+ * of the general attestFoundationState reused for idempotent reapply
+ * classification. Round58 is expected to narrow these grants later; that
+ * narrowing must not cause a subsequent 0108 reapply to fail.
+ */
+async function verifyInitial0108GrantBaseline(sql: postgres.Sql): Promise<string[]> {
+  const mismatches: string[] = []
+
+  for (const role of EXPECTED_ROLES) {
     const tableGrants = await sql<{ tablename: string; sel: boolean; ins: boolean; upd: boolean; del: boolean }[]>`
       SELECT
         t.tablename,
@@ -513,14 +568,7 @@ async function attestFoundationState(sql: postgres.Sql, expectPreProvisioning: b
     }
   }
 
-  const defaultAclRows = await sql<{ acl: string | null }[]>`SELECT defaclacl::text AS acl FROM pg_default_acl`
-  for (const row of defaultAclRows) {
-    if (row.acl && EXPECTED_ROLES.some((role) => row.acl!.includes(role))) {
-      mismatches.push(`Forbidden sticky default-ACL grant found referencing a runtime/system role: ${row.acl}`)
-    }
-  }
-
-  return { state: mismatches.length === 0 ? 'ALREADY_APPLIED' : 'PARTIAL_OR_DRIFTED', mismatches }
+  return mismatches
 }
 
 async function main() {
@@ -538,7 +586,7 @@ async function main() {
 
     if (attestation.state === 'ALREADY_APPLIED') {
       console.log(
-        '[apply-rls-foundation-migration] ALREADY_APPLIED_VERIFIED: the complete 0108 foundation (roles, immutable attributes, helper functions, RLS/FORCE RLS, policy geometry, grants) is already correctly established. 0108 SQL was NOT executed; no CREATE ROLE or ALTER ROLE was issued.',
+        '[apply-rls-foundation-migration] ALREADY_APPLIED_VERIFIED: the durable 0108 foundation (roles, immutable attributes, helper functions, RLS/FORCE RLS, exact policy geometry and role sets) is already correctly established. 0108 SQL was NOT executed; no CREATE ROLE or ALTER ROLE was issued. Per-table/per-sequence ACLs are not reattested here — Round58 owns that downstream, exact privilege posture.',
       )
       return
     }
@@ -564,6 +612,16 @@ async function main() {
     if (postApply.state !== 'ALREADY_APPLIED') {
       console.error('[apply-rls-foundation-migration] FAIL: post-apply verification did not confirm a complete foundation state.')
       for (const m of postApply.mismatches) console.error(`  - ${m}`)
+      process.exit(1)
+    }
+
+    // First-application-only: prove 0108 actually established its initial
+    // blanket grant baseline. This must NOT be reused for idempotent
+    // reapply classification (see verifyInitial0108GrantBaseline docstring).
+    const initialGrantMismatches = await verifyInitial0108GrantBaseline(sql)
+    if (initialGrantMismatches.length > 0) {
+      console.error('[apply-rls-foundation-migration] FAIL: post-apply verification did not confirm the expected initial 0108 grant baseline.')
+      for (const m of initialGrantMismatches) console.error(`  - ${m}`)
       process.exit(1)
     }
 

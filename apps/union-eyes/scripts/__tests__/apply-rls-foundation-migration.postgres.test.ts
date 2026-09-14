@@ -383,4 +383,115 @@ describe.sequential('apply-rls-foundation-migration least-privilege idempotent r
     expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
     expect(result.stderr).toContain('rolcanlogin=true (--expect-pre-provisioning asserts NOLOGIN at this stage)')
   })
+
+  it('EXTRA_RUNTIME_POLICY_ROLE: fails closed when a runtime tenant-isolation policy is scoped to union_eyes_runtime plus an additional role', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    // `roles.includes('union_eyes_runtime')` would wrongly accept this —
+    // exact singleton role-set equality must reject it. (PostgreSQL
+    // collapses any role list containing PUBLIC down to just PUBLIC, so a
+    // second real role is used here to get a genuine multi-entry array.)
+    await sql.unsafe('ALTER POLICY ue_org_isolation_select ON organizations TO union_eyes_runtime, union_eyes_system')
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('organizations.ue_org_isolation_select: role set is')
+    expect(result.stderr).toContain('expected exactly [union_eyes_runtime]')
+  })
+
+  it('EXTRA_SYSTEM_POLICY_ROLE: fails closed when ue_system_full_access is scoped to union_eyes_system plus an additional role', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    await sql.unsafe('ALTER POLICY ue_system_full_access ON organizations TO union_eyes_system, union_eyes_runtime')
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('organizations.ue_system_full_access: role set is')
+    expect(result.stderr).toContain('expected exactly [union_eyes_system]')
+  })
+
+  it('PUBLIC_HELPER_MISSING + SAME_NAME_HELPER_IN_OTHER_SCHEMA: fails closed — a same-named helper in a non-public schema does not satisfy attestation', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    // Schema/function creation runs as the disposable-fixture superuser —
+    // only the DROP of the original public helper needs to run as the
+    // grantor whose ownership it holds; the shadow helper's schema/owner
+    // is irrelevant to what this test is proving.
+    await sql.unsafe(`SET ROLE migration_admin_restricted; DROP FUNCTION ue_create_direct_org_rls_policy(text, text, boolean); RESET ROLE;`)
+    await sql.unsafe(`
+      CREATE SCHEMA IF NOT EXISTS other_schema;
+      CREATE FUNCTION other_schema.ue_create_direct_org_rls_policy(text, text, boolean) RETURNS void AS $$ BEGIN END; $$ LANGUAGE plpgsql;
+    `)
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('Missing helper function: ue_create_direct_org_rls_policy')
+
+    await sql.unsafe('DROP SCHEMA other_schema CASCADE')
+  })
+
+  it('FIRST_APPLY_INITIAL_GRANTS: first apply establishes full DML on public tables for both runtime and system roles', async () => {
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status, result.stdout + result.stderr).toBe(0)
+
+    for (const role of ['union_eyes_runtime', 'union_eyes_system']) {
+      const [grant] = await sql`
+        SELECT
+          has_table_privilege(${role}, 'organizations'::regclass, 'SELECT') AS sel,
+          has_table_privilege(${role}, 'organizations'::regclass, 'INSERT') AS ins,
+          has_table_privilege(${role}, 'organizations'::regclass, 'UPDATE') AS upd,
+          has_table_privilege(${role}, 'organizations'::regclass, 'DELETE') AS del
+      `
+      expect(grant, `${role} initial grant baseline`).toEqual({ sel: true, ins: true, upd: true, del: true })
+    }
+  })
+
+  it('POST_ROUND58_NARROWED_GRANTS_REAPPLY: a 0108 rerun after Round58 narrows blanket table grants is a clean no-op, not a rejected reapply', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    const before = await sql`SELECT polname, polrelid, oid FROM pg_policy ORDER BY oid`
+    const rolesBefore = await sql`
+      SELECT rolname, xmin FROM pg_authid WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system') ORDER BY rolname
+    `
+
+    // Simulate Round58's grant compiler: REVOKE ALL then GRANT only the
+    // exact manifest-derived privilege (here, narrowed to read-only) on a
+    // representative table — legitimate least-privilege narrowing that
+    // must not be treated as 0108 drift.
+    await sql.unsafe(`
+      SET ROLE migration_admin_restricted;
+      REVOKE ALL ON organizations FROM union_eyes_runtime;
+      GRANT SELECT ON organizations TO union_eyes_runtime;
+      RESET ROLE;
+    `)
+
+    const second = applyFoundation(['--expect-pre-provisioning'])
+    expect(second.status, second.stdout + second.stderr).toBe(0)
+    expect(second.stdout).toContain('ALREADY_APPLIED_VERIFIED')
+    expect(second.stdout).not.toContain('APPLIED:')
+
+    const after = await sql`SELECT polname, polrelid, oid FROM pg_policy ORDER BY oid`
+    expect(after).toEqual(before)
+    const rolesAfter = await sql`
+      SELECT rolname, xmin FROM pg_authid WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system') ORDER BY rolname
+    `
+    expect(rolesAfter).toEqual(rolesBefore)
+
+    // The narrowed grant must still be narrowed after the rerun — proves
+    // the reapply did not attempt to restore the original blanket grant.
+    const [grant] = await sql`
+      SELECT
+        has_table_privilege('union_eyes_runtime', 'organizations'::regclass, 'SELECT') AS sel,
+        has_table_privilege('union_eyes_runtime', 'organizations'::regclass, 'INSERT') AS ins,
+        has_table_privilege('union_eyes_runtime', 'organizations'::regclass, 'DELETE') AS del
+    `
+    expect(grant).toEqual({ sel: true, ins: false, del: false })
+  })
 })
