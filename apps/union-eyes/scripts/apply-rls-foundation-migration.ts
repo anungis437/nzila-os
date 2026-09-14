@@ -77,7 +77,20 @@ import {
 
 const MIGRATION_PATH = resolve(__dirname, '../db/migrations/0108_rls_tenant_isolation_foundation.sql')
 const EXPECTED_ROLES = ['union_eyes_runtime', 'union_eyes_system'] as const
-const HELPER_FUNCTIONS = ['ue_create_direct_org_rls_policy', 'ue_create_parent_owned_rls_policy'] as const
+
+// Exact expected signature for each 0108 helper function — verified by
+// argument type list AND return type, never by proname alone. A same-named
+// function with a different signature (e.g. an extra/missing/reordered
+// argument, or a non-void return type) must not satisfy attestation.
+interface HelperSignature {
+  name: string
+  argTypes: readonly string[]
+  returnType: string
+}
+const HELPER_SIGNATURES: readonly HelperSignature[] = [
+  { name: 'ue_create_direct_org_rls_policy', argTypes: ['text', 'text', 'boolean'], returnType: 'void' },
+  { name: 'ue_create_parent_owned_rls_policy', argTypes: ['text', 'text'], returnType: 'void' },
+]
 
 // Tables using the 5-policy per-command direct pattern: the 18 direct-org
 // tables plus grievance_deadlines, which is parent-owned via grievances.id
@@ -95,6 +108,103 @@ const TWO_POLICY_PARENT_TABLES: readonly string[] = [
 
 // System-only tables: exactly one policy, no runtime access at all (0108 PART 7).
 const SYSTEM_ONLY_TABLES: readonly string[] = [...PROTECTED_NO_TENANT_ACCESS_TABLES]
+
+// Every 0108-owned policy name, used both for exact-geometry attestation and
+// for the NOT_APPLIED residual-artifact census (see checkForResidualArtifacts).
+const ZERO108_POLICY_NAMES = [
+  'ue_org_isolation_select',
+  'ue_org_isolation_insert',
+  'ue_org_isolation_update',
+  'ue_org_isolation_delete',
+  'ue_parent_org_isolation',
+  'ue_system_full_access',
+] as const
+
+// Exact organization column used by each direct-org table's simple
+// `(<col>)::text = current_setting('app.current_org_id'::text, true)`
+// predicate (0108 PART 4/5). `organizations` uniquely compares its own `id`
+// (a tenant sees only its own org row); every other direct-org table
+// compares `organization_id`.
+const DIRECT_ORG_COLUMN: Readonly<Record<string, string>> = Object.fromEntries(
+  PROTECTED_DIRECT_TABLES.map((t) => [t, t === 'organizations' ? 'id' : 'organization_id']),
+)
+
+// Per-table expected policy-expression shape for the parent-owned/bespoke
+// tables (0108 PART 6/6b/6c) — every one of these compares through a FOREIGN
+// row's organization_id rather than a column on the table itself.
+type PolicyExprSpec =
+  | { kind: 'existsSingle'; fkColumn: string; parentTable: string; parentAlias: string; parentPk: string; parentOrgColumn: string }
+  | { kind: 'existsDouble'; fkColumn: string }
+const PARENT_POLICY_SPEC: Readonly<Record<string, PolicyExprSpec>> = {
+  grievance_deadlines: {
+    kind: 'existsSingle',
+    fkColumn: 'grievance_id',
+    parentTable: 'grievances',
+    parentAlias: 'g',
+    parentPk: 'id',
+    parentOrgColumn: 'organization_id',
+  },
+  messages: {
+    kind: 'existsSingle',
+    fkColumn: 'thread_id',
+    parentTable: 'message_threads',
+    parentAlias: 'mt',
+    parentPk: 'id',
+    parentOrgColumn: 'organization_id',
+  },
+  message_participants: {
+    kind: 'existsSingle',
+    fkColumn: 'thread_id',
+    parentTable: 'message_threads',
+    parentAlias: 'mt',
+    parentPk: 'id',
+    parentOrgColumn: 'organization_id',
+  },
+  message_read_receipts: { kind: 'existsDouble', fkColumn: 'message_id' },
+  message_notifications: { kind: 'existsDouble', fkColumn: 'message_id' },
+}
+
+/**
+ * Normalizes a pg_policies qual/with_check expression string for exact
+ * semantic comparison. PostgreSQL deparses CREATE POLICY expressions into
+ * its own canonical text (consistent whitespace/parenthesization/casts for
+ * a given semantic expression, verified empirically against a real
+ * PostgreSQL 16 instance for every expression shape 0108 produces) — this
+ * only collapses whitespace variation, it does not alter semantics. Two
+ * expressions that normalize to the same string are the same predicate;
+ * two that don't are different predicates, full stop.
+ */
+function normalizeExpr(expr: string | null): string {
+  if (expr === null) return ''
+  return expr.replace(/\s+/g, ' ').trim().toLowerCase()
+}
+
+const TRUE_EXPR = normalizeExpr('true')
+
+function directOrgExpr(orgColumn: string): string {
+  return normalizeExpr(`((${orgColumn})::text = current_setting('app.current_org_id'::text, true))`)
+}
+
+function existsSingleJoinExpr(childTable: string, spec: Extract<PolicyExprSpec, { kind: 'existsSingle' }>): string {
+  return normalizeExpr(
+    `(EXISTS ( SELECT 1 FROM ${spec.parentTable} ${spec.parentAlias} WHERE ((${spec.parentAlias}.${spec.parentPk} = ${childTable}.${spec.fkColumn}) AND ((${spec.parentAlias}.${spec.parentOrgColumn})::text = current_setting('app.current_org_id'::text, true)))))`,
+  )
+}
+
+function existsDoubleJoinExpr(childTable: string, fkColumn: string): string {
+  return normalizeExpr(
+    `(EXISTS ( SELECT 1 FROM (messages m JOIN message_threads mt ON ((mt.id = m.thread_id))) WHERE ((m.id = ${childTable}.${fkColumn}) AND ((mt.organization_id)::text = current_setting('app.current_org_id'::text, true)))))`,
+  )
+}
+
+/** Returns the exact expected USING/WITH CHECK expression for a table's runtime-scoped tenant-isolation policy (never `ue_system_full_access`, see expectedSystemExpr). */
+function expectedRuntimeExpr(table: string): string {
+  const directCol = DIRECT_ORG_COLUMN[table]
+  if (directCol) return directOrgExpr(directCol)
+  const spec = PARENT_POLICY_SPEC[table]
+  if (!spec) throw new Error(`No expected policy-expression spec registered for table ${table}`)
+  return spec.kind === 'existsSingle' ? existsSingleJoinExpr(table, spec) : existsDoubleJoinExpr(table, spec.fkColumn)
+}
 
 interface RoleAttributes {
   rolname: string
@@ -154,8 +264,26 @@ function expectRuntimeCommandPolicy(
   }
   if (p.cmd !== cmd) mismatches.push(`${table}.${name}: cmd=${p.cmd}, expected ${cmd}`)
   if (!p.roles.includes('union_eyes_runtime')) mismatches.push(`${table}.${name}: not scoped to union_eyes_runtime`)
-  if (requireQual && !p.qual) mismatches.push(`${table}.${name}: missing USING expression`)
-  if (requireWithCheck && !p.with_check) mismatches.push(`${table}.${name}: missing WITH CHECK expression`)
+
+  // Exact policy geometry: the USING/WITH CHECK expression must match the
+  // canonical 0108 tenant predicate exactly (normalized for whitespace
+  // only) — presence of a non-null expression is NOT sufficient. A
+  // structurally-named, correctly-role-scoped policy with a permissive or
+  // otherwise incorrect predicate (e.g. `USING (true)` on a tenant-scoped
+  // runtime policy) must fail closed, not be classified ALREADY_APPLIED.
+  const expected = expectedRuntimeExpr(table)
+  if (requireQual) {
+    if (!p.qual) mismatches.push(`${table}.${name}: missing USING expression`)
+    else if (normalizeExpr(p.qual) !== expected) {
+      mismatches.push(`${table}.${name}: USING expression does not match expected tenant predicate (found: ${normalizeExpr(p.qual)})`)
+    }
+  }
+  if (requireWithCheck) {
+    if (!p.with_check) mismatches.push(`${table}.${name}: missing WITH CHECK expression`)
+    else if (normalizeExpr(p.with_check) !== expected) {
+      mismatches.push(`${table}.${name}: WITH CHECK expression does not match expected tenant predicate (found: ${normalizeExpr(p.with_check)})`)
+    }
+  }
 }
 
 function expectSystemFullAccess(mismatches: string[], table: string, policies: PolicyRow[]): void {
@@ -166,8 +294,104 @@ function expectSystemFullAccess(mismatches: string[], table: string, policies: P
   }
   if (p.cmd !== 'ALL') mismatches.push(`${table}.ue_system_full_access: cmd=${p.cmd}, expected ALL`)
   if (!p.roles.includes('union_eyes_system')) mismatches.push(`${table}.ue_system_full_access: not scoped to union_eyes_system`)
-  if (!p.qual) mismatches.push(`${table}.ue_system_full_access: missing USING expression`)
-  if (!p.with_check) mismatches.push(`${table}.ue_system_full_access: missing WITH CHECK expression`)
+  // Require the canonical unconditional system expression exactly — not
+  // merely a non-null expression. `USING (true) WITH CHECK (true)` is the
+  // only correct predicate for the system principal; anything else (even a
+  // non-null, seemingly-reasonable-looking expression) is drift.
+  if (normalizeExpr(p.qual) !== TRUE_EXPR) {
+    mismatches.push(`${table}.ue_system_full_access: USING expression is not the canonical \`true\` (found: ${normalizeExpr(p.qual)})`)
+  }
+  if (normalizeExpr(p.with_check) !== TRUE_EXPR) {
+    mismatches.push(`${table}.ue_system_full_access: WITH CHECK expression is not the canonical \`true\` (found: ${normalizeExpr(p.with_check)})`)
+  }
+}
+
+interface HelperRow {
+  proname: string
+  argtypes: string[] | null
+  rettype: string
+}
+
+/**
+ * Verifies each 0108 helper function by exact overload/signature (argument
+ * type list, in order, plus return type) — never by `proname` alone. A
+ * same-named function with a different arity, argument types, or return
+ * type is drift, not a satisfied precondition. Exactly one matching
+ * overload is required; zero is `missing`, more than one (an unexpected
+ * shadowing overload) is also drift.
+ */
+function helperSignatureMismatches(mismatches: string[], rows: HelperRow[]): void {
+  const byName = new Map<string, HelperRow[]>()
+  for (const r of rows) {
+    const list = byName.get(r.proname) ?? []
+    list.push(r)
+    byName.set(r.proname, list)
+  }
+  for (const expected of HELPER_SIGNATURES) {
+    const found = byName.get(expected.name) ?? []
+    if (found.length === 0) {
+      mismatches.push(`Missing helper function: ${expected.name}`)
+      continue
+    }
+    if (found.length > 1) {
+      mismatches.push(`${expected.name}: ${found.length} overloads found, expected exactly one`)
+      continue
+    }
+    const actual = found[0]
+    const actualArgs = (actual.argtypes ?? []).map((a) => a.toLowerCase())
+    const expectedArgs = expected.argTypes.map((a) => a.toLowerCase())
+    const argsMatch = actualArgs.length === expectedArgs.length && actualArgs.every((a, i) => a === expectedArgs[i])
+    if (!argsMatch) {
+      mismatches.push(
+        `${expected.name}: signature mismatch — found (${actualArgs.join(', ')}), expected (${expectedArgs.join(', ')})`,
+      )
+    }
+    if (actual.rettype.toLowerCase() !== expected.returnType.toLowerCase()) {
+      mismatches.push(`${expected.name}: return type=${actual.rettype}, expected ${expected.returnType}`)
+    }
+  }
+}
+
+async function queryHelperRows(sql: postgres.Sql): Promise<HelperRow[]> {
+  return sql<HelperRow[]>`
+    SELECT
+      proname,
+      (SELECT array_agg(format_type(a, NULL) ORDER BY ord)
+       FROM unnest(proargtypes) WITH ORDINALITY AS x(a, ord)) AS argtypes,
+      prorettype::regtype::text AS rettype
+    FROM pg_proc
+    WHERE proname = ANY(${HELPER_SIGNATURES.map((h) => h.name)})`
+}
+
+/**
+ * Read-only residual-artifact census, run ONLY when both runtime/system
+ * roles are absent. Both roles being absent is necessary but not
+ * sufficient to declare a clean NOT_APPLIED first-apply state — a damaged
+ * environment where the roles were dropped but 0108-specific helpers or
+ * policies survived must fail closed rather than silently entering the
+ * mutating first-apply path. Checked ONLY by the exact 0108-owned artifact
+ * names (helper function names, `ue_org_isolation_*`/`ue_parent_org_isolation`/
+ * `ue_system_full_access` policy names) — unrelated historical/pre-0108
+ * policies (e.g. the old `msg_notifications_own_only` family 0108 itself
+ * drops) are never treated as evidence of partial application.
+ */
+async function checkForResidualArtifacts(sql: postgres.Sql): Promise<string[]> {
+  const residue: string[] = []
+
+  const helperRows = await sql<{ proname: string }[]>`
+    SELECT DISTINCT proname FROM pg_proc WHERE proname = ANY(${HELPER_SIGNATURES.map((h) => h.name)})`
+  for (const row of helperRows) {
+    residue.push(`Residual 0108 helper function present while both runtime/system roles are absent: ${row.proname}`)
+  }
+
+  const policyRows = await sql<{ tablename: string; policyname: string }[]>`
+    SELECT tablename, policyname FROM pg_policies
+    WHERE schemaname = 'public' AND policyname = ANY(${ZERO108_POLICY_NAMES as unknown as string[]})`
+  for (const row of policyRows) {
+    residue.push(`Residual 0108 policy present while both runtime/system roles are absent: ${row.tablename}.${row.policyname}`)
+  }
+
+  return residue
 }
 
 /**
@@ -182,6 +406,10 @@ async function attestFoundationState(sql: postgres.Sql, expectPreProvisioning: b
   const present = EXPECTED_ROLES.filter((r) => roles.has(r))
 
   if (present.length === 0) {
+    const residue = await checkForResidualArtifacts(sql)
+    if (residue.length > 0) {
+      return { state: 'PARTIAL_OR_DRIFTED', mismatches: residue }
+    }
     return { state: 'NOT_APPLIED', mismatches: [] }
   }
   if (present.length === 1) {
@@ -200,12 +428,8 @@ async function attestFoundationState(sql: postgres.Sql, expectPreProvisioning: b
     mismatches.push(...checkImmutableAttributes(role, expectPreProvisioning))
   }
 
-  const helperRows = await sql<{ proname: string }[]>`
-    SELECT proname FROM pg_proc WHERE proname = ANY(${HELPER_FUNCTIONS as unknown as string[]})`
-  const helperNames = new Set(helperRows.map((r) => r.proname))
-  for (const fn of HELPER_FUNCTIONS) {
-    if (!helperNames.has(fn)) mismatches.push(`Missing helper function: ${fn}`)
-  }
+  const helperRows = await queryHelperRows(sql)
+  helperSignatureMismatches(mismatches, helperRows)
 
   const rlsRows = await sql<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }[]>`
     SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity

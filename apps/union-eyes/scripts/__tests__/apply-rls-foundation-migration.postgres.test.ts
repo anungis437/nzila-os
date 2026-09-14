@@ -100,8 +100,24 @@ async function waitForPostgres(url: string) {
 
 async function resetDatabase() {
   await sql.unsafe(`DROP TABLE IF EXISTS ${ALL_FIXTURE_TABLES.join(', ')} CASCADE`)
-  await sql.unsafe("DROP FUNCTION IF EXISTS ue_create_direct_org_rls_policy(text, text, boolean)")
-  await sql.unsafe("DROP FUNCTION IF EXISTS ue_create_parent_owned_rls_policy(text, text)")
+  // Drop ALL overloads of the two helper functions by exact regprocedure
+  // signature, not a single hardcoded signature — a wrong-signature-helper
+  // regression test (WRONG_HELPER_SIGNATURE) intentionally leaves behind a
+  // helper with a DIFFERENT signature than the original, which a fixed
+  // `DROP FUNCTION IF EXISTS name(text, text, boolean)` would silently fail
+  // to remove, leaking residue into subsequent tests.
+  await sql.unsafe(`
+    DO $$
+    DECLARE r record;
+    BEGIN
+      FOR r IN
+        SELECT oid::regprocedure AS sig FROM pg_proc
+        WHERE proname IN ('ue_create_direct_org_rls_policy', 'ue_create_parent_owned_rls_policy')
+      LOOP
+        EXECUTE format('DROP FUNCTION IF EXISTS %s', r.sig);
+      END LOOP;
+    END $$;
+  `)
   for (const role of ['union_eyes_runtime', 'union_eyes_system']) {
     const exists = await sql`SELECT 1 FROM pg_roles WHERE rolname = ${role}`
     if (exists.length > 0) {
@@ -291,6 +307,66 @@ describe.sequential('apply-rls-foundation-migration least-privilege idempotent r
     const result = applyFoundation()
     expect(result.status, result.stdout + result.stderr).toBe(0)
     expect(result.stdout).toContain('ALREADY_APPLIED_VERIFIED')
+  })
+
+  it('WRONG_RUNTIME_POLICY_EXPRESSION: fails closed when a runtime tenant-isolation policy exists but its predicate does not match the exact expected expression', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    // A structurally-correct, correctly-named, correctly-role-scoped policy
+    // with a permissive `USING (true)` predicate must still fail closed —
+    // presence of a non-null expression is not sufficient attestation.
+    await sql.unsafe('ALTER POLICY ue_org_isolation_select ON organizations USING (true)')
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('organizations.ue_org_isolation_select: USING expression does not match expected tenant predicate')
+  })
+
+  it('WRONG_SYSTEM_POLICY_EXPRESSION: fails closed when ue_system_full_access exists but is not the canonical unconditional `true` predicate', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    await sql.unsafe('ALTER POLICY ue_system_full_access ON organizations USING (false)')
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('organizations.ue_system_full_access: USING expression is not the canonical `true`')
+  })
+
+  it('WRONG_HELPER_SIGNATURE: fails closed when a helper function is replaced by a same-named function with a different signature', async () => {
+    const first = applyFoundation(['--expect-pre-provisioning'])
+    expect(first.status, first.stdout + first.stderr).toBe(0)
+
+    await sql.unsafe(`
+      DROP FUNCTION ue_create_direct_org_rls_policy(text, text, boolean);
+      CREATE FUNCTION ue_create_direct_org_rls_policy(p_table_name text) RETURNS void AS $$ BEGIN END; $$ LANGUAGE plpgsql;
+    `)
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('ue_create_direct_org_rls_policy: signature mismatch')
+  })
+
+  it('ROLES_ABSENT_WITH_0108_RESIDUE: classifies as PARTIAL_OR_DRIFTED (never NOT_APPLIED) when both roles are absent but a 0108 artifact survives', async () => {
+    // beforeEach already reset to a clean, role-absent state. Leave a single
+    // 0108-owned helper function behind without ever creating the roles —
+    // a damaged/partially-torn-down environment, not a genuine first apply.
+    await sql.unsafe(`SET ROLE migration_admin_restricted;
+      CREATE FUNCTION ue_create_direct_org_rls_policy(p_table_name text, p_org_column text DEFAULT 'organization_id', p_org_column_is_text boolean DEFAULT false)
+      RETURNS void AS $$ BEGIN END; $$ LANGUAGE plpgsql;
+      RESET ROLE;`)
+
+    const result = applyFoundation(['--expect-pre-provisioning'])
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain('PARTIAL_OR_DRIFTED')
+    expect(result.stderr).toContain('Residual 0108 helper function present while both runtime/system roles are absent: ue_create_direct_org_rls_policy')
+
+    const roles = await sql`SELECT rolname FROM pg_roles WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system')`
+    expect(roles).toHaveLength(0)
   })
 
   it('POST_PROVISIONING_WITH_FLAG_TEST: fails when --expect-pre-provisioning is asserted against already-provisioned LOGIN roles', async () => {
