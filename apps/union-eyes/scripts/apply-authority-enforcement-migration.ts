@@ -32,11 +32,21 @@
  *           Round58's own policy-helper calls assume exist. Forward-only,
  *           idempotent, fail-closed on non-empty tables lacking a
  *           deterministic authority source.
- *        b. db/migrations/20260910_rls_enforcement_expansion_round58.sql
+ *        b. db/migrations/20260914_round58_complete_production_geometry_prerequisites.sql
+ *           (P4_ROUND58_COMPLETE_GEOMETRY_REMEDIATION) — companion
+ *           prerequisite covering the remaining 14 tables discovered by a
+ *           full production census: bargaining_notes, budget_pool,
+ *           calendar_events, clause_comparisons, clc_sync_log,
+ *           consent_records, cookie_consents, defensibility_packs,
+ *           geofences, mobile_devices, pilot_metrics,
+ *           reward_wallet_ledger, strike_fund_disbursements,
+ *           user_consents. Same forward-only/idempotent/fail-closed
+ *           pattern as (a).
+ *        c. db/migrations/20260910_rls_enforcement_expansion_round58.sql
  *           verbatim.
- *      The two files' SQL text is concatenated and sent to Postgres as ONE
- *      simple-query-protocol message, so the prerequisite geometry and the
- *      Round58 policy/grant application succeed or roll back TOGETHER —
+ *      All three files' SQL text is concatenated and sent to Postgres as
+ *      ONE simple-query-protocol message, so the prerequisite geometry and
+ *      the Round58 policy/grant application succeed or roll back TOGETHER —
  *      never leaving Round58 applied against production tables it never
  *      actually validated column-by-column. The migration text itself is
  *      also idempotent (DROP POLICY IF EXISTS / CREATE OR REPLACE FUNCTION /
@@ -60,6 +70,10 @@ const PREREQUISITE_MIGRATION_PATH = resolve(
   __dirname,
   '../db/migrations/20260913_round58_production_geometry_prerequisites.sql'
 )
+const COMPLETE_GEOMETRY_PREREQUISITE_MIGRATION_PATH = resolve(
+  __dirname,
+  '../db/migrations/20260914_round58_complete_production_geometry_prerequisites.sql'
+)
 const MIGRATION_PATH = resolve(__dirname, '../db/migrations/20260910_rls_enforcement_expansion_round58.sql')
 
 async function main() {
@@ -71,24 +85,29 @@ async function main() {
 
   const prerequisiteSql = readFileSync(PREREQUISITE_MIGRATION_PATH, 'utf8')
   const prerequisiteHash = createHash('sha256').update(prerequisiteSql).digest('hex')
+  const completeGeometryPrerequisiteSql = readFileSync(COMPLETE_GEOMETRY_PREREQUISITE_MIGRATION_PATH, 'utf8')
+  const completeGeometryPrerequisiteHash = createHash('sha256').update(completeGeometryPrerequisiteSql).digest('hex')
   const migrationSql = readFileSync(MIGRATION_PATH, 'utf8')
   const migrationHash = createHash('sha256').update(migrationSql).digest('hex')
   console.log(`[apply-authority-enforcement-migration] Applying ${PREREQUISITE_MIGRATION_PATH}`)
   console.log(`[apply-authority-enforcement-migration] SHA-256 (prerequisite): ${prerequisiteHash}`)
+  console.log(`[apply-authority-enforcement-migration] Applying ${COMPLETE_GEOMETRY_PREREQUISITE_MIGRATION_PATH}`)
+  console.log(`[apply-authority-enforcement-migration] SHA-256 (complete-geometry prerequisite): ${completeGeometryPrerequisiteHash}`)
   console.log(`[apply-authority-enforcement-migration] Applying ${MIGRATION_PATH}`)
   console.log(`[apply-authority-enforcement-migration] SHA-256 (round58): ${migrationHash}`)
 
   const sql = postgres(adminUrl, { ssl: adminUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
 
-  // Concatenated and sent as ONE sql.unsafe() call so both files execute in
-  // a single implicit transaction (per postgres.js's simple-query-protocol
-  // semantics) — the prerequisite geometry columns and the Round58 policy/
-  // grant application either both succeed or both roll back.
-  const combinedSql = `${prerequisiteSql}\n\n${migrationSql}`
+  // Concatenated and sent as ONE sql.unsafe() call so all three files
+  // execute in a single implicit transaction (per postgres.js's
+  // simple-query-protocol semantics) — the prerequisite geometry columns
+  // and the Round58 policy/grant application either all succeed or all
+  // roll back together.
+  const combinedSql = `${prerequisiteSql}\n\n${completeGeometryPrerequisiteSql}\n\n${migrationSql}`
 
   try {
     await sql.unsafe(combinedSql)
-    console.log('[apply-authority-enforcement-migration] Prerequisite + Round58 migrations applied without error (single implicit transaction).')
+    console.log('[apply-authority-enforcement-migration] Prerequisite + complete-geometry prerequisite + Round58 migrations applied without error (single implicit transaction).')
 
     const policyCount = await sql<{ n: number }[]>`
       SELECT count(*)::int AS n FROM pg_policies WHERE schemaname = 'public'`
