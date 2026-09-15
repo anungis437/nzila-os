@@ -39,10 +39,10 @@
  *     actually proven against before shipping.
  *
  * Connection: reads RLS_VERIFY_DATABASE_URL (falling back to DATABASE_URL)
- * for the tenant runtime role, and RLS_VERIFY_SYSTEM_DATABASE_URL (falling
- * back to SYSTEM_DATABASE_URL) for the system role, when --mode=full needs
- * to confirm the system role's separate, unconditional access. Never prints
- * either connection string.
+ * for the tenant runtime role. In --mode=full, reads
+ * RLS_VERIFY_BOOTSTRAP_DATABASE_URL (falling back to the repository's
+ * migration/admin env names) for privileged fixture setup/cleanup only.
+ * Never prints either connection string.
  *
  * Exit code: 0 on all checks passing, 1 on any failure. Intended to gate
  * CI/deployment — see the fix PR description for wiring into the pipeline.
@@ -75,6 +75,13 @@ interface CheckResult {
   detail: string
 }
 
+interface RoleSnapshot {
+  currentUser: string
+  rolsuper: boolean
+  rolbypassrls: boolean
+  rolcanlogin: boolean
+}
+
 interface FixtureOrganization {
   id: string
   name: string
@@ -86,6 +93,19 @@ interface FixtureOrganization {
   settings: Record<string, unknown>
 }
 
+interface FixtureGrievance {
+  id: string
+  grievanceNumber: string
+  type: 'other'
+  title: string
+  description: string
+  organizationId: string
+}
+
+type TenantContextSql = {
+  unsafe: postgres.Sql['unsafe']
+}
+
 export const RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS = [
   'id',
   'name',
@@ -95,6 +115,15 @@ export const RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS = [
   'hierarchy_level',
   'status',
   'settings',
+] as const
+
+export const RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS = [
+  'id',
+  'grievance_number',
+  'type',
+  'title',
+  'description',
+  'organization_id',
 ] as const
 
 export function buildRlsVerifyOrganizationFixture(input: {
@@ -115,8 +144,76 @@ export function buildRlsVerifyOrganizationFixture(input: {
   }
 }
 
+export function buildRlsVerifyGrievanceFixture(input: {
+  id: string
+  organizationId: string
+  runId: string
+  label: string
+}): FixtureGrievance {
+  return {
+    id: input.id,
+    grievanceNumber: `${input.runId}-${input.label}`.slice(0, 50),
+    type: 'other',
+    title: `${input.runId} ${input.label}`,
+    description: `Synthetic RLS verifier grievance fixture for ${input.runId} / ${input.label}.`,
+    organizationId: input.organizationId,
+  }
+}
+
 function isCaughtErrorResult(value: unknown): value is { error: string } {
   return typeof value === 'object' && value !== null && 'error' in value
+}
+
+async function setTenantContext(sql: TenantContextSql, input: { orgId: string; userId: string }) {
+  await sql.unsafe(`SELECT set_config('app.current_user_id', $1, true)`, [input.userId])
+  await sql.unsafe(`SELECT set_config('app.current_org_id', $1, true)`, [input.orgId])
+}
+
+export function resolveRuntimeDatabaseUrl(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  return env.RLS_VERIFY_DATABASE_URL || env.DATABASE_URL
+}
+
+export function resolveBootstrapDatabaseUrl(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  return (
+    env.RLS_VERIFY_BOOTSTRAP_DATABASE_URL ||
+    env.RLS_ENFORCEMENT_ADMIN_DATABASE_URL ||
+    env.RLS_MIGRATION_ADMIN_DATABASE_URL ||
+    env.ADMIN_DATABASE_URL
+  )
+}
+
+export function validateFullModePrincipalModel(input: {
+  runtime: RoleSnapshot
+  bootstrap: RoleSnapshot
+}): CheckResult[] {
+  const { runtime, bootstrap } = input
+  return [
+    {
+      name: 'full-mode principal separation: bootstrap role differs from runtime role',
+      pass: bootstrap.currentUser !== runtime.currentUser,
+      detail: `bootstrap=${bootstrap.currentUser}, runtime=${runtime.currentUser}`,
+    },
+    {
+      name: 'full-mode runtime principal: connected as union_eyes_runtime',
+      pass: runtime.currentUser === 'union_eyes_runtime',
+      detail: `current_user = ${runtime.currentUser}`,
+    },
+    {
+      name: 'full-mode runtime principal: NOSUPERUSER',
+      pass: runtime.rolsuper === false,
+      detail: `rolsuper = ${runtime.rolsuper}`,
+    },
+    {
+      name: 'full-mode runtime principal: NOBYPASSRLS',
+      pass: runtime.rolbypassrls === false,
+      detail: `rolbypassrls = ${runtime.rolbypassrls}`,
+    },
+    {
+      name: 'full-mode bootstrap principal: connected',
+      pass: Boolean(bootstrap.currentUser),
+      detail: `current_user = ${bootstrap.currentUser}; bootstrap is used only for synthetic fixture setup/cleanup`,
+    },
+  ]
 }
 
 // Per-table org-column metadata for the live RLS-state checks below. Table
@@ -157,26 +254,57 @@ function parseArgs() {
 }
 
 async function checkRuntimeRole(sql: postgres.Sql, results: CheckResult[]) {
-  const [identity] = await sql`SELECT current_user`
-  const [attrs] = await sql`
-    SELECT rolname, rolsuper, rolbypassrls
-    FROM pg_roles WHERE rolname = current_user`
+  const attrs = await readCurrentRoleSnapshot(sql)
 
   results.push({
     name: 'runtime-role: connected as union_eyes_runtime',
-    pass: identity.current_user === 'union_eyes_runtime',
-    detail: `current_user = ${identity.current_user}`,
+    pass: attrs.currentUser === 'union_eyes_runtime',
+    detail: `current_user = ${attrs.currentUser}`,
   })
   results.push({
     name: 'runtime-role: NOSUPERUSER',
-    pass: attrs?.rolsuper === false,
-    detail: `rolsuper = ${attrs?.rolsuper}`,
+    pass: attrs.rolsuper === false,
+    detail: `rolsuper = ${attrs.rolsuper}`,
   })
   results.push({
     name: 'runtime-role: NOBYPASSRLS',
-    pass: attrs?.rolbypassrls === false,
-    detail: `rolbypassrls = ${attrs?.rolbypassrls}`,
+    pass: attrs.rolbypassrls === false,
+    detail: `rolbypassrls = ${attrs.rolbypassrls}`,
   })
+}
+
+async function readCurrentRoleSnapshot(sql: postgres.Sql): Promise<RoleSnapshot> {
+  const [identity] = await sql`SELECT current_user`
+  const [attrs] = await sql`
+    SELECT rolname, rolsuper, rolbypassrls, rolcanlogin
+    FROM pg_roles WHERE rolname = current_user`
+  if (!attrs) {
+    throw new Error(`Could not resolve pg_roles row for current_user=${identity.current_user}`)
+  }
+  return {
+    currentUser: identity.current_user,
+    rolsuper: attrs.rolsuper,
+    rolbypassrls: attrs.rolbypassrls,
+    rolcanlogin: attrs.rolcanlogin,
+  }
+}
+
+async function checkFullModePrincipalModel(
+  runtimeSql: postgres.Sql,
+  bootstrapSql: postgres.Sql,
+  results: CheckResult[],
+) {
+  const runtime = await readCurrentRoleSnapshot(runtimeSql)
+  const bootstrap = await readCurrentRoleSnapshot(bootstrapSql)
+  const principalResults = validateFullModePrincipalModel({ runtime, bootstrap })
+  results.push(...principalResults)
+  const failed = principalResults.filter((r) => !r.pass)
+  if (failed.length > 0) {
+    throw new Error(
+      'Full-mode verifier principal validation failed before fixture bootstrap: ' +
+        failed.map((r) => `${r.name} (${r.detail})`).join('; '),
+    )
+  }
 }
 
 async function checkTableRlsState(sql: postgres.Sql, results: CheckResult[]) {
@@ -502,7 +630,7 @@ async function checkNoContextFailsClosed(sql: postgres.Sql, results: CheckResult
 
 async function runFixtureIsolationMatrix(
   runtimeSql: postgres.Sql,
-  systemSql: postgres.Sql,
+  bootstrapSql: postgres.Sql,
   results: CheckResult[],
 ) {
   const runId = `UE_RA_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`
@@ -512,11 +640,10 @@ async function runFixtureIsolationMatrix(
   console.error(`[rls-verify] fixture run: ${runId} (orgA=${orgA.id}, orgB=${orgB.id})`)
 
   try {
-    // Fixture ADMINISTRATION uses the system connection (unconditional access
-    // via ue_system_full_access) — this is bootstrap authority, never used
-    // below to make an isolation assertion. In --mode=full this MUST be a
-    // disposable database, not shared staging.
-    await systemSql.begin(async (tx) => {
+    // Fixture ADMINISTRATION uses the bootstrap connection. Bootstrap
+    // authority is never the security subject being accepted; every
+    // isolation assertion below runs on runtimeSql.
+    await bootstrapSql.begin(async (tx) => {
       const orgAFixture = buildRlsVerifyOrganizationFixture({
         id: orgA.id,
         name: `${runId} Org A`,
@@ -529,10 +656,10 @@ async function runFixtureIsolationMatrix(
         slug: `${runId.toLowerCase()}-org-b`,
         runId,
       })
+      await setTenantContext(tx, { orgId: orgA.id, userId: orgA.userId })
       await tx.unsafe(
         `INSERT INTO organizations (${RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS.join(', ')})
-         VALUES ($1, $2, $3, $4::organization_type, $5::text[], $6, $7, $8::jsonb),
-                ($9, $10, $11, $12::organization_type, $13::text[], $14, $15, $16::jsonb)`,
+         VALUES ($1, $2, $3, $4::organization_type, $5::text[], $6, $7, $8::jsonb)`,
         [
           orgAFixture.id,
           orgAFixture.name,
@@ -542,6 +669,24 @@ async function runFixtureIsolationMatrix(
           orgAFixture.hierarchyLevel,
           orgAFixture.status,
           JSON.stringify(orgAFixture.settings),
+        ],
+      )
+      await tx.unsafe(
+        `INSERT INTO grievances (${RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS.join(', ')})
+         VALUES ($1, $2, $3::grievance_type, $4, $5, $6)`,
+        Object.values(buildRlsVerifyGrievanceFixture({
+          id: crypto.randomUUID(),
+          organizationId: orgA.id,
+          runId,
+          label: 'org-a',
+        })),
+      )
+
+      await setTenantContext(tx, { orgId: orgB.id, userId: orgB.userId })
+      await tx.unsafe(
+        `INSERT INTO organizations (${RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS.join(', ')})
+         VALUES ($1, $2, $3, $4::organization_type, $5::text[], $6, $7, $8::jsonb)`,
+        [
           orgBFixture.id,
           orgBFixture.name,
           orgBFixture.slug,
@@ -553,12 +698,14 @@ async function runFixtureIsolationMatrix(
         ],
       )
       await tx.unsafe(
-        `INSERT INTO grievances (id, organization_id) VALUES ($1, $2)`,
-        [crypto.randomUUID(), orgA.id],
-      )
-      await tx.unsafe(
-        `INSERT INTO grievances (id, organization_id) VALUES ($1, $2)`,
-        [crypto.randomUUID(), orgB.id],
+        `INSERT INTO grievances (${RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS.join(', ')})
+         VALUES ($1, $2, $3::grievance_type, $4, $5, $6)`,
+        Object.values(buildRlsVerifyGrievanceFixture({
+          id: crypto.randomUUID(),
+          organizationId: orgB.id,
+          runId,
+          label: 'org-b',
+        })),
       )
     })
 
@@ -579,10 +726,24 @@ async function runFixtureIsolationMatrix(
         pass: otherRows.length === 0,
         detail: `${otherRows.length} row(s) (expected 0)`,
       })
-      const forged = await tx.unsafe(
-        `INSERT INTO grievances (id, organization_id) VALUES (gen_random_uuid(), $1) RETURNING id`,
-        [orgB.id],
-      ).catch((e: Error) => ({ error: e.message }))
+      const forgedFixture = buildRlsVerifyGrievanceFixture({
+        id: crypto.randomUUID(),
+        organizationId: orgB.id,
+        runId,
+        label: 'forged-org-b',
+      })
+      let forged: unknown
+      try {
+        await tx.savepoint(async (sp) => {
+          forged = await sp.unsafe(
+            `INSERT INTO grievances (${RLS_VERIFY_GRIEVANCE_FIXTURE_COLUMNS.join(', ')})
+             VALUES ($1, $2, $3::grievance_type, $4, $5, $6) RETURNING id`,
+            Object.values(forgedFixture),
+          )
+        })
+      } catch (e) {
+        forged = { error: e instanceof Error ? e.message : String(e) }
+      }
       const forgedRejected = isCaughtErrorResult(forged) || (Array.isArray(forged) && forged.length === 0)
       results.push({
         name: 'fixture matrix: Org A insert forging Org B organization_id is rejected',
@@ -620,11 +781,15 @@ async function runFixtureIsolationMatrix(
       })
     })
   } finally {
-    // Cleanup uses the system connection — exact-id deletes, no reliance on
-    // any tenant context.
-    await systemSql.begin(async (tx) => {
-      await tx.unsafe(`DELETE FROM grievances WHERE organization_id IN ($1, $2)`, [orgA.id, orgB.id])
-      await tx.unsafe(`DELETE FROM organizations WHERE id IN ($1, $2)`, [orgA.id, orgB.id])
+    // Cleanup uses the bootstrap connection — exact-id deletes, no reliance
+    // on ambient tenant context.
+    await bootstrapSql.begin(async (tx) => {
+      await setTenantContext(tx, { orgId: orgA.id, userId: orgA.userId })
+      await tx.unsafe(`DELETE FROM grievances WHERE organization_id = $1`, [orgA.id])
+      await tx.unsafe(`DELETE FROM organizations WHERE id = $1`, [orgA.id])
+      await setTenantContext(tx, { orgId: orgB.id, userId: orgB.userId })
+      await tx.unsafe(`DELETE FROM grievances WHERE organization_id = $1`, [orgB.id])
+      await tx.unsafe(`DELETE FROM organizations WHERE id = $1`, [orgB.id])
     }).catch((e) => {
       console.error(`[rls-verify] WARNING: fixture cleanup for run ${runId} failed: ${(e as Error).message}. Manual cleanup required for org ids ${orgA.id}, ${orgB.id}.`)
     })
@@ -633,14 +798,14 @@ async function runFixtureIsolationMatrix(
 
 async function main() {
   const { mode } = parseArgs()
-  const dbUrl = process.env.RLS_VERIFY_DATABASE_URL || process.env.DATABASE_URL
+  const dbUrl = resolveRuntimeDatabaseUrl()
   if (!dbUrl) {
     console.error('[rls-verify] Missing RLS_VERIFY_DATABASE_URL / DATABASE_URL.')
     process.exit(1)
   }
 
   const sql = postgres(dbUrl, { ssl: dbUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
-  let systemSql: postgres.Sql | undefined
+  let bootstrapSql: postgres.Sql | undefined
   const results: CheckResult[] = []
 
   try {
@@ -650,19 +815,21 @@ async function main() {
     await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)
     if (mode === 'full') {
-      const systemDbUrl = process.env.RLS_VERIFY_SYSTEM_DATABASE_URL || process.env.SYSTEM_DATABASE_URL
-      if (!systemDbUrl) {
+      const bootstrapDbUrl = resolveBootstrapDatabaseUrl()
+      if (!bootstrapDbUrl) {
         throw new Error(
-          '--mode=full requires RLS_VERIFY_SYSTEM_DATABASE_URL / SYSTEM_DATABASE_URL — ' +
-            'fixture bootstrap/cleanup runs as union_eyes_system, never as the runtime role.',
+          '--mode=full requires RLS_VERIFY_BOOTSTRAP_DATABASE_URL ' +
+            '(or RLS_ENFORCEMENT_ADMIN_DATABASE_URL / RLS_MIGRATION_ADMIN_DATABASE_URL / ADMIN_DATABASE_URL) — ' +
+            'fixture bootstrap/cleanup must use a privileged bootstrap principal, never the runtime role under test.',
         )
       }
-      systemSql = postgres(systemDbUrl, { ssl: systemDbUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
-      await runFixtureIsolationMatrix(sql, systemSql, results)
+      bootstrapSql = postgres(bootstrapDbUrl, { ssl: bootstrapDbUrl.includes('localhost') ? false : 'require', max: 1, prepare: false })
+      await checkFullModePrincipalModel(sql, bootstrapSql, results)
+      await runFixtureIsolationMatrix(sql, bootstrapSql, results)
     }
   } finally {
     await sql.end({ timeout: 2 })
-    if (systemSql) await systemSql.end({ timeout: 2 })
+    if (bootstrapSql) await bootstrapSql.end({ timeout: 2 })
   }
 
   const failed = results.filter((r) => !r.pass)
