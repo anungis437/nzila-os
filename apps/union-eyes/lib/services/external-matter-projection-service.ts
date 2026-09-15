@@ -36,6 +36,6 @@ export function toExternalMatterProjection(matter: InternalMatterLike): External
     step: matter.step ?? null,
     filedDate: isoOrNull(matter.filedDate),
     responseDeadline: isoOrNull(matter.responseDeadline),
-    summary: matter.summary ?? matter.description ?? null,
+    summary: matter.summary ?? null,
   };
 }

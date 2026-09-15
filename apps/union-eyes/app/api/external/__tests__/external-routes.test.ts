@@ -53,6 +53,18 @@ describe('external resource routes', () => {
 
   it('returns an external-safe grievance detail projection for an exact grant', async () => {
     const { GET } = await import('@/app/api/external/grievances/[id]/route');
+    const internalSentinels = [
+      'INTERNAL_SECRET_SENTINEL_DESCRIPTION',
+      'INTERNAL_SECRET_SENTINEL_BACKGROUND',
+      'INTERNAL_SECRET_SENTINEL_DESIRED_OUTCOME',
+      'INTERNAL_SECRET_SENTINEL_GRIEVANT_EMAIL',
+      'INTERNAL_SECRET_SENTINEL_UNION_REP',
+      'INTERNAL_SECRET_SENTINEL_EMPLOYER_REP',
+      'INTERNAL_SECRET_SENTINEL_TIMELINE',
+      'INTERNAL_SECRET_SENTINEL_ATTACHMENT',
+      'INTERNAL_SECRET_SENTINEL_CREATED_BY',
+      'INTERNAL_SECRET_SENTINEL_UPDATED_BY',
+    ];
     mocks.selectQueue.push([{
       id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
       grievanceNumber: 'GRV-1',
@@ -67,8 +79,17 @@ describe('external resource routes', () => {
       workplaceName: 'Site A',
       cbaArticle: '12',
       cbaSection: '4',
-      description: 'Internal narrative must not leak',
-      grievantEmail: 'private@example.test',
+      summary: null,
+      description: internalSentinels[0],
+      background: internalSentinels[1],
+      desiredOutcome: internalSentinels[2],
+      grievantEmail: internalSentinels[3],
+      unionRepId: internalSentinels[4],
+      employerRepId: internalSentinels[5],
+      timeline: [{ date: '2026-01-02', action: 'internal', actor: 'staff', notes: internalSentinels[6] }],
+      attachments: [{ id: 'doc-1', name: internalSentinels[7], url: 'https://internal.example/doc', type: 'pdf', uploadedAt: '2026-01-03' }],
+      createdBy: internalSentinels[8],
+      lastUpdatedBy: internalSentinels[9],
     }]);
 
     const response = await GET(
@@ -79,8 +100,13 @@ describe('external resource routes', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.data).toMatchObject({ id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', title: 'External appeal' });
+    expect(body.data.summary).toBeNull();
     expect(body.data.description).toBeUndefined();
     expect(body.data.grievantEmail).toBeUndefined();
+    const serialized = JSON.stringify(body);
+    for (const sentinel of internalSentinels) {
+      expect(serialized).not.toContain(sentinel);
+    }
   });
 
   it('denies exact matter routes when a revoked or otherwise invalid authority is reported', async () => {
@@ -135,4 +161,3 @@ describe('external resource routes', () => {
     expect(mocks.generateSasUrl).not.toHaveBeenCalled();
   });
 });
-
