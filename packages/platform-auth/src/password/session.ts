@@ -14,6 +14,7 @@ import { db } from '@nzila/db/client'
 import { authUserSessions } from '@nzila/db/schema'
 import { eq, and, gt, sql } from 'drizzle-orm'
 import { cookies } from 'next/headers'
+import { authDb } from '../auth-db'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -55,12 +56,13 @@ export interface SessionData {
  */
 export async function createSession(
   options: CreateSessionOptions,
+  dbExecutor: typeof db = authDb,
 ): Promise<{ token: string; session: SessionData }> {
   const token = generateSessionToken()
   const tokenHash = hashToken(token)
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
 
-  const [session] = await db
+  const [session] = await dbExecutor
     .insert(authUserSessions)
     .values({
       userId: options.userId,
@@ -96,10 +98,11 @@ export async function createSession(
  */
 export async function validateSession(
   token: string,
+  dbExecutor: typeof db = authDb,
 ): Promise<SessionData | null> {
   const tokenHash = hashToken(token)
 
-  const [session] = await db
+  const [session] = await dbExecutor
     .select({
       sessionId: authUserSessions.sessionId,
       userId: authUserSessions.userId,
@@ -120,7 +123,7 @@ export async function validateSession(
   if (!session) return null
 
   // Update last_used_at
-  await db
+  await dbExecutor
     .update(authUserSessions)
     .set({ lastUsedAt: new Date() })
     .where(eq(authUserSessions.sessionId, session.sessionId))
@@ -136,8 +139,11 @@ export async function validateSession(
 /**
  * Invalidate (revoke) a specific session.
  */
-export async function revokeSession(sessionId: string): Promise<void> {
-  await db
+export async function revokeSession(
+  sessionId: string,
+  dbExecutor: typeof db = authDb,
+): Promise<void> {
+  await dbExecutor
     .update(authUserSessions)
     .set({ isActive: false })
     .where(eq(authUserSessions.sessionId, sessionId))
@@ -146,17 +152,14 @@ export async function revokeSession(sessionId: string): Promise<void> {
 /**
  * Revoke all sessions for a user (e.g. on password change).
  *
- * PR #752 round 13: accepts an optional db executor override. Ordinary
- * self-service callers (a user revoking their OWN sessions) omit it and
- * get the default ordinary-credential client. Cross-user platform-admin
- * callers (e.g. offboarding another user in another organization) MUST
- * pass @nzila/db/system-client's systemDb explicitly — revoking an
- * arbitrary other user's sessions is a system-authorized operation, not
- * an ordinary-credential one.
+ * Accepts an optional db executor override. The default auth-bootstrap
+ * executor is used because session revocation can run before a normal
+ * tenant/RLS user context exists. Callers that already hold a narrower
+ * transaction-scoped executor may pass it explicitly.
  */
 export async function revokeAllUserSessions(
   userId: string,
-  dbExecutor: typeof db = db,
+  dbExecutor: typeof db = authDb,
 ): Promise<void> {
   await dbExecutor
     .update(authUserSessions)
@@ -176,9 +179,10 @@ export async function revokeAllUserSessions(
 export async function rotateSession(
   oldSessionId: string,
   options: CreateSessionOptions,
+  dbExecutor: typeof db = authDb,
 ): Promise<{ token: string; session: SessionData }> {
-  await revokeSession(oldSessionId)
-  return createSession(options)
+  await revokeSession(oldSessionId, dbExecutor)
+  return createSession(options, dbExecutor)
 }
 
 // ─── Cookie Management ──────────────────────────────────────────────────────
@@ -218,11 +222,13 @@ export async function clearSessionCookie(): Promise<void> {
  * Read the session token from cookies and validate it.
  * Returns the session data if valid, null otherwise.
  */
-export async function getSessionFromCookie(): Promise<SessionData | null> {
+export async function getSessionFromCookie(
+  dbExecutor: typeof db = authDb,
+): Promise<SessionData | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value
   if (!token) return null
-  return validateSession(token)
+  return validateSession(token, dbExecutor)
 }
 
 // ─── Cleanup ────────────────────────────────────────────────────────────────
@@ -233,7 +239,7 @@ export async function getSessionFromCookie(): Promise<SessionData | null> {
  */
 export async function purgeExpiredSessions(): Promise<number> {
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  const result = await db
+  const result = await authDb
     .delete(authUserSessions)
     .where(
       and(

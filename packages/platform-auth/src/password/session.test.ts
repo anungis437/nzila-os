@@ -7,21 +7,23 @@
  * apps/union-eyes's offboarding route) can pass a SYSTEM-privileged
  * client instead of the ordinary DATABASE_URL-bound one. These tests
  * prove:
- *   - the default (no override) still uses the ordinary @nzila/db/client
- *     db, unchanged for every existing self-service caller;
- *   - passing an explicit executor routes the mutation through it
- *     instead of the ordinary client.
+ *   - the default (no override) uses the auth bootstrap executor;
+ *   - passing an explicit executor routes the mutation through it instead.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { ordinaryUpdate, overrideUpdate } = vi.hoisted(() => ({
-  ordinaryUpdate: vi.fn(),
+const { authUpdate, overrideUpdate } = vi.hoisted(() => ({
+  authUpdate: vi.fn(),
   overrideUpdate: vi.fn(),
 }))
 
 vi.mock('@nzila/db/client', () => ({
-  db: {
-    update: () => ({ set: () => ({ where: ordinaryUpdate }) }),
+  db: {},
+}))
+
+vi.mock('../auth-db', () => ({
+  authDb: {
+    update: () => ({ set: () => ({ where: authUpdate }) }),
   },
 }))
 
@@ -43,14 +45,14 @@ import { revokeAllUserSessions } from './session'
 describe('revokeAllUserSessions — db executor override', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    ordinaryUpdate.mockResolvedValue(undefined)
+    authUpdate.mockResolvedValue(undefined)
     overrideUpdate.mockResolvedValue(undefined)
   })
 
-  it('uses the ordinary @nzila/db/client db by default (self-service callers unaffected)', async () => {
+  it('uses the auth bootstrap executor by default', async () => {
     await revokeAllUserSessions('user-1')
 
-    expect(ordinaryUpdate).toHaveBeenCalledTimes(1)
+    expect(authUpdate).toHaveBeenCalledTimes(1)
     expect(overrideUpdate).not.toHaveBeenCalled()
   })
 
@@ -62,6 +64,6 @@ describe('revokeAllUserSessions — db executor override', () => {
     await revokeAllUserSessions('user-1', systemExecutor)
 
     expect(overrideUpdate).toHaveBeenCalledTimes(1)
-    expect(ordinaryUpdate).not.toHaveBeenCalled()
+    expect(authUpdate).not.toHaveBeenCalled()
   })
 })

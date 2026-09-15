@@ -50,6 +50,13 @@
       "when": 1789488000000,
       "tag": "0006_external_specialist_runtime_privilege_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789513920000,
+      "tag": "0007_auth_bootstrap_runtime_remediation",
+      "breakpoints": true
     }
   ]
 }

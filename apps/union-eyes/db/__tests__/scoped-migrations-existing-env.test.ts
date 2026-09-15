@@ -29,6 +29,7 @@ const MIGRATIONS_DIR = path.join(APP_ROOT, 'db', 'migrations-cache');
 const CLI_PATH = path.join(REPO_ROOT, 'tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs');
 const TARGET_TAG = '0005_add_icra_assessment_capability_token';
 const EXTERNAL_PRIVILEGE_TAG = '0006_external_specialist_runtime_privilege_closure';
+const AUTH_BOOTSTRAP_TAG = '0007_auth_bootstrap_runtime_remediation';
 
 class FakeClient {
   ledgerTableExists = false;
@@ -159,6 +160,7 @@ describe('existing-environment scoped migration executor CLI', () => {
       expect(result.appliedTags).toEqual(entries.map((entry) => entry.tag));
       expect(result.appliedTags).toContain(TARGET_TAG);
       expect(result.appliedTags).toContain(EXTERNAL_PRIVILEGE_TAG);
+      expect(result.appliedTags).toContain(AUTH_BOOTSTRAP_TAG);
       expect(result.finalPending).toBe(0);
       expect(client.ledger.size).toBe(entries.length);
     });
@@ -197,9 +199,11 @@ describe('existing-environment scoped migration executor CLI', () => {
       const hash0004 = computeMigrationHash(MIGRATIONS_DIR, '0004_hesitant_chameleon').hash;
       const hash0005 = computeMigrationHash(MIGRATIONS_DIR, TARGET_TAG).hash;
       const hash0006 = computeMigrationHash(MIGRATIONS_DIR, EXTERNAL_PRIVILEGE_TAG).hash;
+      const hash0007 = computeMigrationHash(MIGRATIONS_DIR, AUTH_BOOTSTRAP_TAG).hash;
       expect(client.ledger.has(hash0004)).toBe(false);
       expect(client.ledger.has(hash0005)).toBe(false);
       expect(client.ledger.has(hash0006)).toBe(false);
+      expect(client.ledger.has(hash0007)).toBe(false);
     });
 
     it('post-apply verification fails closed if a journal entry remains pending after applyScopedMigrations returns', async () => {

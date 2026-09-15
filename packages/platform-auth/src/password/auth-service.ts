@@ -33,6 +33,7 @@ import {
 } from './session'
 import { issueMfaChallenge } from '../mfa/service'
 import { assessRisk } from '../risk/assess'
+import { authDb } from '../auth-db'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -135,7 +136,7 @@ async function logAuditEvent(
   } = {},
 ): Promise<void> {
   try {
-    await db.insert(authAuditLog).values({
+    await authDb.insert(authAuditLog).values({
       userId: opts.userId ?? null,
       eventType: event,
       ipAddress: opts.ipAddress ?? null,
@@ -248,7 +249,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   const isPlaywrightE2E = isPlaywrightE2EAuthRequest(input)
 
   // 1. Find user
-  const [user] = await db
+  const [user] = await authDb
     .select({
       userId: authUsers.userId,
       email: authUsers.email,
@@ -333,7 +334,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
         ? new Date(Date.now() + LOCKOUT_DURATION_MS)
         : null
 
-    await db
+    await authDb
       .update(authUsers)
       .set({
         failedLoginAttempts: attempts,
@@ -358,7 +359,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   }
 
   // 5. Reset failed attempts on success
-  await db
+  await authDb
     .update(authUsers)
     .set({
       failedLoginAttempts: 0,
@@ -371,7 +372,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   // 6. Rehash if needed (parameter upgrade)
   if (needsRehash(user.passwordHash)) {
     const newHash = await hashPassword(input.password)
-    await db
+    await authDb
       .update(authUsers)
       .set({ passwordHash: newHash, passwordChangedAt: new Date() })
       .where(eq(authUsers.userId, user.userId))
@@ -380,7 +381,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   // 7. Resolve organization membership (pick primary or first)
   let organizationId: string | null = null
   let userRole: string | null = null
-  const [membership] = await db
+  const [membership] = await authDb
     .select({
       organizationId: authOrganizationUsers.organizationId,
       role: authOrganizationUsers.role,
@@ -435,7 +436,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   }
 
   // 7c. MFA gate — either the user has enrolled, or org policy mandates it for their role.
-  const [mfaRow] = await db
+  const [mfaRow] = await authDb
     .select({
       enabledAt: authMfaTotp.enabledAt,
       disabledAt: authMfaTotp.disabledAt,
@@ -447,7 +448,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
 
   let mfaMandatedByPolicy = false
   if (organizationId && userRole) {
-    const [policy] = await db
+    const [policy] = await authDb
       .select({ mfaRequiredForRoles: authOrgPolicies.mfaRequiredForRoles })
       .from(authOrgPolicies)
       .where(eq(authOrgPolicies.organizationId, organizationId))
@@ -687,7 +688,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   const session = await getSessionFromCookie()
   if (!session) return null
 
-  const [user] = await db
+  const [user] = await authDb
     .select({
       id: authUsers.userId,
       email: authUsers.email,

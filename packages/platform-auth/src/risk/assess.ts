@@ -14,9 +14,9 @@
  * These can be added later as additional signals without changing the public
  * API of `assessRisk`.
  */
-import { db } from '@nzila/db/client'
 import { authAuditLog, authUserSessions } from '@nzila/db/schema'
 import { and, eq, gt, sql } from 'drizzle-orm'
+import { authDb } from '../auth-db'
 
 export type RiskTier = 'low' | 'medium' | 'high'
 
@@ -62,7 +62,7 @@ export async function assessRisk(input: AssessRiskInput): Promise<RiskAssessment
   // Signal 1: recent failed logins from this IP (against any account)
   if (input.ipAddress) {
     const windowStart = new Date(now.getTime() - FAILURE_WINDOW_MS)
-    const [row] = await db
+    const [row] = await authDb
       .select({ count: sql<number>`count(*)::int` })
       .from(authAuditLog)
       .where(
@@ -85,7 +85,7 @@ export async function assessRisk(input: AssessRiskInput): Promise<RiskAssessment
   // Signal 2: first-seen IP for this user (looked at past 90 days of sessions)
   if (input.ipAddress && input.userId) {
     const windowStart = new Date(now.getTime() - FIRST_SEEN_WINDOW_MS)
-    const [row] = await db
+    const [row] = await authDb
       .select({ count: sql<number>`count(*)::int` })
       .from(authUserSessions)
       .where(
