@@ -28,6 +28,7 @@ const JOURNAL_PATH = path.join(APP_ROOT, 'db', 'migrations-cache', 'meta', '_jou
 const MIGRATIONS_DIR = path.join(APP_ROOT, 'db', 'migrations-cache');
 const CLI_PATH = path.join(REPO_ROOT, 'tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs');
 const TARGET_TAG = '0005_add_icra_assessment_capability_token';
+const EXTERNAL_PRIVILEGE_TAG = '0006_external_specialist_runtime_privilege_closure';
 
 class FakeClient {
   ledgerTableExists = false;
@@ -147,34 +148,33 @@ describe('existing-environment scoped migration executor CLI', () => {
   });
 
   describe('--apply (reuses the canonical shared executor)', () => {
-    it('applies 0000 through 0005 in journal order from an empty scoped state', async () => {
+    it('applies the full journal in order from an empty scoped state', async () => {
       const { runApply } = await loadCliModule();
+      const { readJournalEntries } = await loadSharedModule();
       const client = new FakeClient();
+      const entries = readJournalEntries(JOURNAL_PATH);
       const result = await runApply(client, { journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR });
 
-      expect(result.appliedCount).toBe(6);
-      expect(result.appliedTags).toEqual([
-        '0000_outstanding_viper',
-        '0001_lean_iron_man',
-        '0002_certain_juggernaut',
-        '0003_dizzy_alex_wilder',
-        '0004_hesitant_chameleon',
-        TARGET_TAG,
-      ]);
+      expect(result.appliedCount).toBe(entries.length);
+      expect(result.appliedTags).toEqual(entries.map((entry) => entry.tag));
+      expect(result.appliedTags).toContain(TARGET_TAG);
+      expect(result.appliedTags).toContain(EXTERNAL_PRIVILEGE_TAG);
       expect(result.finalPending).toBe(0);
-      expect(client.ledger.size).toBe(6);
+      expect(client.ledger.size).toBe(entries.length);
     });
 
-    it('is idempotent: a second invocation applies nothing new and ledger stays at 6 rows', async () => {
+    it('is idempotent: a second invocation applies nothing new and ledger stays at the journal length', async () => {
       const { runApply } = await loadCliModule();
+      const { readJournalEntries } = await loadSharedModule();
       const client = new FakeClient();
+      const entries = readJournalEntries(JOURNAL_PATH);
       const first = await runApply(client, { journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR });
-      expect(first.appliedCount).toBe(6);
+      expect(first.appliedCount).toBe(entries.length);
 
       const second = await runApply(client, { journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR });
       expect(second.appliedCount).toBe(0);
       expect(second.appliedTags).toEqual([]);
-      expect(client.ledger.size).toBe(6);
+      expect(client.ledger.size).toBe(entries.length);
     });
 
     it('does not restrict via onlyTags — the underlying shared executor call applies the full chain', async () => {
@@ -191,13 +191,15 @@ describe('existing-environment scoped migration executor CLI', () => {
         runApply(client, { journalPath: JOURNAL_PATH, migrationsDir: MIGRATIONS_DIR }),
       ).rejects.toThrow(/0004_hesitant_chameleon failed/);
 
-      // 0000-0003 committed before the failure; 0004/0005 never recorded.
+      // 0000-0003 committed before the failure; 0004+ never recorded.
       expect(client.ledger.size).toBe(4);
       const { computeMigrationHash } = await loadSharedModule();
       const hash0004 = computeMigrationHash(MIGRATIONS_DIR, '0004_hesitant_chameleon').hash;
       const hash0005 = computeMigrationHash(MIGRATIONS_DIR, TARGET_TAG).hash;
+      const hash0006 = computeMigrationHash(MIGRATIONS_DIR, EXTERNAL_PRIVILEGE_TAG).hash;
       expect(client.ledger.has(hash0004)).toBe(false);
       expect(client.ledger.has(hash0005)).toBe(false);
+      expect(client.ledger.has(hash0006)).toBe(false);
     });
 
     it('post-apply verification fails closed if a journal entry remains pending after applyScopedMigrations returns', async () => {

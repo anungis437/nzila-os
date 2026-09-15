@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { jwtVerify, SignJWT } from 'jose'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { db as defaultDb } from '@nzila/db/client'
 import { authOrganizationUsers, authUsers } from '@nzila/db/schema'
 
@@ -42,6 +42,23 @@ type AcceptanceJwtPayload = {
 
 export type AcceptanceDb = {
   select: typeof defaultDb.select
+  transaction?: typeof defaultDb.transaction
+  execute?: typeof defaultDb.execute
+}
+
+async function withAcceptanceAuthDbContext<T>(
+  db: AcceptanceDb,
+  userId: string,
+  operation: (scopedDb: AcceptanceDb) => Promise<T>,
+): Promise<T> {
+  if (typeof db.transaction !== 'function') {
+    return operation(db)
+  }
+
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)
+    return operation(tx as AcceptanceDb)
+  })
 }
 
 function normalize(value: string | undefined): string {
@@ -163,38 +180,40 @@ export async function resolveAcceptanceAuthUser(input: {
   if (!allowedUserIds(env).has(verified.userId)) return null
 
   const db = input.db ?? defaultDb
-  const [authRow] = await db
-    .select({
-      id: authUsers.userId,
-      email: authUsers.email,
-      firstName: authUsers.firstName,
-      lastName: authUsers.lastName,
-    })
-    .from(authUsers)
-    .where(and(
-      eq(authUsers.userId, verified.userId),
-      eq(authUsers.isActive, true),
-      eq(authUsers.lifecycleState, 'active'),
-    ))
-    .limit(1)
+  return withAcceptanceAuthDbContext(db, verified.userId, async (scopedDb) => {
+    const [authRow] = await scopedDb
+      .select({
+        id: authUsers.userId,
+        email: authUsers.email,
+        firstName: authUsers.firstName,
+        lastName: authUsers.lastName,
+      })
+      .from(authUsers)
+      .where(and(
+        eq(authUsers.userId, verified.userId),
+        eq(authUsers.isActive, true),
+        eq(authUsers.lifecycleState, 'active'),
+      ))
+      .limit(1)
 
-  if (!authRow) return null
+    if (!authRow) return null
 
-  const [membership] = await db
-    .select({ organizationId: authOrganizationUsers.organizationId })
-    .from(authOrganizationUsers)
-    .where(and(
-      eq(authOrganizationUsers.userId, verified.userId),
-      eq(authOrganizationUsers.isActive, true),
-    ))
-    .limit(1)
+    const [membership] = await scopedDb
+      .select({ organizationId: authOrganizationUsers.organizationId })
+      .from(authOrganizationUsers)
+      .where(and(
+        eq(authOrganizationUsers.userId, verified.userId),
+        eq(authOrganizationUsers.isActive, true),
+      ))
+      .limit(1)
 
-  if (!membership?.organizationId) return null
+    if (!membership?.organizationId) return null
 
-  return {
-    ...authRow,
-    organizationId: membership.organizationId,
-    sessionId: `acceptance:${verified.jti}`,
-    jti: verified.jti,
-  }
+    return {
+      ...authRow,
+      organizationId: membership.organizationId,
+      sessionId: `acceptance:${verified.jti}`,
+      jti: verified.jti,
+    }
+  })
 }

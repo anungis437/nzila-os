@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   authorizeExternalMatterAccess,
   type ExternalMatterPermission,
@@ -44,26 +45,28 @@ export function withExternalMatterResourceAuth<TParams extends object = External
         representativeOrganizationId: (user as { organizationId?: string }).organizationId,
       };
 
-      const decision = await authorizeExternalMatterAccess({
-        actor,
-        organizationId: resource.organizationId,
-        matterType: resource.matterType,
-        matterId: resource.matterId,
-        requiredPermission: options.requiredPermission,
+      return await withRLSContext({ organizationId: resource.organizationId }, async () => {
+        const decision = await authorizeExternalMatterAccess({
+          actor,
+          organizationId: resource.organizationId,
+          matterType: resource.matterType,
+          matterId: resource.matterId,
+          requiredPermission: options.requiredPermission,
+        });
+
+        if (!decision.allowed || !decision.authorityId || !decision.matterGrantId) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        return handler(request, {
+          actor,
+          organizationId: resource.organizationId,
+          matterType: resource.matterType,
+          matterId: resource.matterId,
+          authorityId: decision.authorityId,
+          matterGrantId: decision.matterGrantId,
+        }, params);
       });
-
-      if (!decision.allowed || !decision.authorityId || !decision.matterGrantId) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
-
-      return handler(request, {
-        actor,
-        organizationId: resource.organizationId,
-        matterType: resource.matterType,
-        matterId: resource.matterId,
-        authorityId: decision.authorityId,
-        matterGrantId: decision.matterGrantId,
-      }, params);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (message === 'Unauthorized') {
