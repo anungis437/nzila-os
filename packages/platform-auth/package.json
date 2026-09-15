@@ -25,6 +25,7 @@
     "./entra/components/org-switcher": "./src/entra/components/org-switcher.tsx",
     "./entra/admin": "./src/entra/admin.ts",
     "./entra/verify": "./src/entra/verify.ts",
+    "./acceptance-auth": "./src/acceptance-auth.ts",
     "./password": "./src/password/index.ts",
     "./password/handlers": "./src/password/handlers.ts",
     "./magic-link": "./src/magic-link/index.ts",

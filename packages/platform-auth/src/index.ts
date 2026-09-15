@@ -75,3 +75,21 @@ export {
   verifyClerkWebhook,
   type SvixHeaders,
 } from './clerk-webhook'
+
+// ── UnionEyes Runtime Acceptance Auth ──────────────────────────────────────
+export {
+  ACCEPTANCE_AUTH_COOKIE,
+  ACCEPTANCE_AUTH_HEADER,
+  ACCEPTANCE_AUTH_VERSION,
+  ACCEPTANCE_AUTH_ISSUER,
+  ACCEPTANCE_AUTH_AUDIENCE,
+  ACCEPTANCE_AUTH_MAX_TTL_SECONDS,
+  ACCEPTANCE_AUTH_MAX_FUTURE_IAT_SECONDS,
+  isAcceptanceAuthRuntimeEnabled,
+  mintAcceptanceAuthToken,
+  verifyAcceptanceAuthToken,
+  resolveAcceptanceAuthUser,
+  type AcceptanceAuthEnv,
+  type AcceptanceAuthUser,
+  type AcceptanceDb,
+} from './acceptance-auth'

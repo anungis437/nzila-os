@@ -20,6 +20,11 @@ import { auth as nextAuthBase } from './config'
 import { resolveIdentityFromEntra } from './adapter'
 import type { AuthResult, AuthenticatedIdentity } from '../identity'
 import type { EntraSession } from './types'
+import {
+  ACCEPTANCE_AUTH_COOKIE,
+  ACCEPTANCE_AUTH_HEADER,
+  resolveAcceptanceAuthUser,
+} from '../acceptance-auth'
 
 /** Session type alias */
 export type Session = EntraSession
@@ -63,6 +68,38 @@ const isE2ETestAuthEnabled = (): boolean =>
   (process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true'
 
 export async function auth(): Promise<AuthSessionResult> {
+  // ── 0. UnionEyes staging acceptance auth ────────────────────────────────
+  // This establishes identity only. Downstream app authorization still runs
+  // through requireUser(), organization context, RepresentationAuthority,
+  // matter/document grants, and database/RLS policies.
+  try {
+    const { cookies, headers } = await import('next/headers')
+    const cookieStore = await cookies()
+    const headerStore = await headers()
+    const token =
+      headerStore.get(ACCEPTANCE_AUTH_HEADER)?.replace(/^Bearer\s+/i, '').trim()
+      || cookieStore.get(ACCEPTANCE_AUTH_COOKIE)?.value
+    const acceptanceUser = await resolveAcceptanceAuthUser({ token })
+    if (acceptanceUser) {
+      return {
+        userId: acceptanceUser.id,
+        orgId: acceptanceUser.organizationId,
+        orgRole: null,
+        sessionId: acceptanceUser.sessionId,
+        sessionClaims: {
+          email: acceptanceUser.email,
+          name: [acceptanceUser.firstName, acceptanceUser.lastName].filter(Boolean).join(' '),
+          authMethod: 'union-eyes-staging-acceptance',
+          jti: acceptanceUser.jti,
+        },
+        getToken: async () => null,
+        has: () => false,
+      }
+    }
+  } catch {
+    // Acceptance auth is fail-closed and optional; continue to standard auth.
+  }
+
   // ── 1. Try PG session-based auth ────────────────────────────────────────
   try {
     if (!isPgFallbackEnabled()) {
@@ -204,6 +241,38 @@ export async function auth(): Promise<AuthSessionResult> {
  * Checks PG session first, then falls back to Entra/NextAuth.
  */
 export async function currentUser() {
+  // ── 0. UnionEyes staging acceptance auth ────────────────────────────────
+  try {
+    const { cookies, headers } = await import('next/headers')
+    const cookieStore = await cookies()
+    const headerStore = await headers()
+    const token =
+      headerStore.get(ACCEPTANCE_AUTH_HEADER)?.replace(/^Bearer\s+/i, '').trim()
+      || cookieStore.get(ACCEPTANCE_AUTH_COOKIE)?.value
+    const acceptanceUser = await resolveAcceptanceAuthUser({ token })
+    if (acceptanceUser) {
+      return {
+        id: acceptanceUser.id,
+        firstName: acceptanceUser.firstName,
+        lastName: acceptanceUser.lastName,
+        fullName: [acceptanceUser.firstName, acceptanceUser.lastName].filter(Boolean).join(' ') || null,
+        emailAddresses: [{ emailAddress: acceptanceUser.email }],
+        primaryEmailAddress: { emailAddress: acceptanceUser.email },
+        username: acceptanceUser.email,
+        primaryPhoneNumber: null as { phoneNumber: string } | null,
+        createdAt: null as Date | null,
+        imageUrl: null as string | null,
+        publicMetadata: {
+          authMethod: 'union-eyes-staging-acceptance',
+        },
+        privateMetadata: {},
+        organizationMemberships: [{ organization: { id: acceptanceUser.organizationId }, role: 'member' }],
+      }
+    }
+  } catch {
+    // Acceptance auth is fail-closed and optional; continue to standard auth.
+  }
+
   // ── 1. Try PG session ───────────────────────────────────────────────────
   try {
     if (!isPgFallbackEnabled()) {

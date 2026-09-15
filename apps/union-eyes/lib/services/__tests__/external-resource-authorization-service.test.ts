@@ -162,6 +162,69 @@ describe('external resource authorization', () => {
     }));
   });
 
+  it('keeps staging acceptance identities bound to normal authority and matter grants', () => {
+    const withoutAuthority = evaluateExternalMatterAccess({
+      actor: { userId: 'p1', representativeOrganizationId: 'specialist-org' },
+      organizationId: 'union-org',
+      matterType: 'grievance',
+      matterId: 'matter-a',
+      requiredPermission: 'view',
+      authority: null,
+      matterGrant: null,
+      now: NOW,
+    });
+
+    const p1MatterA = evaluateExternalMatterAccess({
+      actor: { userId: 'p1', representativeOrganizationId: 'specialist-org' },
+      organizationId: 'union-org',
+      matterType: 'grievance',
+      matterId: 'matter-a',
+      requiredPermission: 'view',
+      authority: authority({ representativeUserId: 'p1' }),
+      matterGrant: matterGrant({ userId: 'p1' }),
+      now: NOW,
+    });
+
+    const p1MatterB = evaluateExternalMatterAccess({
+      actor: { userId: 'p1', representativeOrganizationId: 'specialist-org' },
+      organizationId: 'union-org',
+      matterType: 'grievance',
+      matterId: 'matter-b',
+      requiredPermission: 'view',
+      authority: authority({ representativeUserId: 'p1' }),
+      matterGrant: matterGrant({ userId: 'p1' }),
+      now: NOW,
+    });
+
+    const p2SameOrgMatterA = evaluateExternalMatterAccess({
+      actor: { userId: 'p2', representativeOrganizationId: 'specialist-org' },
+      organizationId: 'union-org',
+      matterType: 'grievance',
+      matterId: 'matter-a',
+      requiredPermission: 'view',
+      authority: authority({ representativeUserId: 'p1' }),
+      matterGrant: matterGrant({ userId: 'p1' }),
+      now: NOW,
+    });
+
+    expect(withoutAuthority).toEqual(expect.objectContaining({
+      allowed: false,
+      reason: 'authority_missing',
+    }));
+    expect(p1MatterA).toEqual(expect.objectContaining({
+      allowed: true,
+      reason: 'allowed',
+    }));
+    expect(p1MatterB).toEqual(expect.objectContaining({
+      allowed: false,
+      reason: 'authority_invalid',
+    }));
+    expect(p2SameOrgMatterA).toEqual(expect.objectContaining({
+      allowed: false,
+      reason: 'authority_invalid',
+    }));
+  });
+
   it('requires document grant to match the same authority, matter grant, matter, document and user', () => {
     const decision = evaluateExternalDocumentAccess({
       actor: { userId: 'professional-a', representativeOrganizationId: 'specialist-org' },
