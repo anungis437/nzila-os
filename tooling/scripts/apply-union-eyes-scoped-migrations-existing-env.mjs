@@ -34,15 +34,19 @@
  *             same read-only check logic afterward and fails (non-zero
  *             exit) if any journal entry remains pending.
  *
- * Required env: RLS_MIGRATION_ADMIN_DATABASE_URL (or ADMIN_DATABASE_URL).
- * Fails closed (non-zero exit, no DB connection attempted) if neither is
- * set. Never prints the connection string or any credential value. Does
- * not retrieve Key Vault credentials itself — credential acquisition is
- * the responsibility of the separately authorized execution environment.
+ * Supplying both --check and --apply is treated as an ambiguous command
+ * and fails closed (non-zero exit, before any DB connection is opened).
+ *
+ * Required env: RLS_MIGRATION_ADMIN_DATABASE_URL (or ADMIN_DATABASE_URL),
+ * which must already be present in the process environment — this CLI
+ * never reads any local credential file of its own. Fails closed
+ * (non-zero exit, no DB connection attempted) if neither is set. Never
+ * prints the connection string or any credential value. Does not
+ * retrieve Key Vault credentials itself — credential acquisition is the
+ * responsibility of the separately authorized execution environment.
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
 import {
   applyScopedMigrations,
@@ -120,22 +124,29 @@ export async function runApply(client, { journalPath = JOURNAL_PATH, migrationsD
 
 function printUsage() {
   console.error(
-    '[scoped-migrate-existing-env] Usage: apply-union-eyes-scoped-migrations-existing-env.mjs --check | --apply',
+    '[scoped-migrate-existing-env] Usage: apply-union-eyes-scoped-migrations-existing-env.mjs --check | --apply (exactly one)',
   );
 }
 
 async function main() {
   const wantsCheck = process.argv.includes('--check');
   const wantsApply = process.argv.includes('--apply');
-  const mode = wantsApply ? 'apply' : wantsCheck ? 'check' : null;
 
+  if (wantsCheck && wantsApply) {
+    console.error(
+      '[scoped-migrate-existing-env] Conflicting flags: --check and --apply both supplied. Refusing (fail closed).',
+    );
+    process.exit(1);
+    return;
+  }
+
+  const mode = wantsApply ? 'apply' : wantsCheck ? 'check' : null;
   if (!mode) {
     printUsage();
     process.exit(1);
     return;
   }
 
-  loadEnv({ path: path.join(appRoot, '.env.local') });
   const adminUrl = process.env.RLS_MIGRATION_ADMIN_DATABASE_URL || process.env.ADMIN_DATABASE_URL;
   if (!adminUrl) {
     console.error(

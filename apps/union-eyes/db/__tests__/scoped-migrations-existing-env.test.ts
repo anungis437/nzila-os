@@ -291,5 +291,48 @@ describe('existing-environment scoped migration executor CLI', () => {
       expect(result.status).not.toBe(0);
       expect(result.stderr).toMatch(/Usage:/);
     });
+
+    it('fails closed with a non-zero exit when both --check and --apply are supplied, before any DB connection is attempted', () => {
+      const env = { ...process.env };
+      delete env.RLS_MIGRATION_ADMIN_DATABASE_URL;
+      delete env.ADMIN_DATABASE_URL;
+      delete env.DATABASE_URL;
+      const result = spawnSync(process.execPath, [CLI_PATH, '--check', '--apply'], { env, encoding: 'utf8' });
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toMatch(/Conflicting flags/);
+      // Proves the conflict is rejected before credential resolution, not
+      // as a side effect of the admin URL also being absent in this invocation.
+      expect(result.stderr).not.toMatch(/Missing RLS_MIGRATION_ADMIN_DATABASE_URL/);
+    });
+
+    it('never imports dotenv or reads a local .env file — required credentials must come from the process environment only', () => {
+      const cliSrc = fs.readFileSync(CLI_PATH, 'utf8');
+      expect(cliSrc).not.toMatch(/from ['"]dotenv['"]/);
+      expect(cliSrc).not.toMatch(/\.env\.local|\.env['"`]/);
+    });
+
+    it('does not pick up a credential from a sibling .env.local file even if one defines it', () => {
+      const envLocalPath = path.join(APP_ROOT, '.env.local');
+      const hadEnvLocal = fs.existsSync(envLocalPath);
+      const originalContents = hadEnvLocal ? fs.readFileSync(envLocalPath, 'utf8') : null;
+      fs.writeFileSync(envLocalPath, 'ADMIN_DATABASE_URL=postgres://should-not-be-used@example.invalid/db\n', {
+        flag: 'a',
+      });
+      try {
+        const env = { ...process.env };
+        delete env.RLS_MIGRATION_ADMIN_DATABASE_URL;
+        delete env.ADMIN_DATABASE_URL;
+        delete env.DATABASE_URL;
+        const result = spawnSync(process.execPath, [CLI_PATH, '--check'], { env, encoding: 'utf8' });
+        expect(result.status).not.toBe(0);
+        expect(result.stderr).toMatch(/Refusing \(fail closed\)/);
+      } finally {
+        if (hadEnvLocal) {
+          fs.writeFileSync(envLocalPath, originalContents);
+        } else {
+          fs.unlinkSync(envLocalPath);
+        }
+      }
+    });
   });
 });
