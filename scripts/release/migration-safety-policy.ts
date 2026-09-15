@@ -109,7 +109,7 @@ export class UnresolvableRangeError extends Error {
 export type ExecFn = (command: string, options?: { cwd?: string }) => string
 
 const defaultExec: ExecFn = (command, options) =>
-  execSync(command, { encoding: 'utf8', ...options }) as unknown as string
+  execSync(command, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, ...options }) as unknown as string
 
 export function getChangedFiles(
   range: string,
