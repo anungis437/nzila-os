@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => {
       select: vi.fn(() => query),
     },
     requireUser: vi.fn(),
+    withRLSContext: vi.fn(),
     authorizeExternalMatterAccess: vi.fn(),
     authorizeExternalDocumentAccess: vi.fn(),
     generateSasUrl: vi.fn(),
@@ -24,6 +25,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@/db/db', () => ({ db: mocks.db }));
 vi.mock('@/lib/api-auth-guard', () => ({ requireUser: mocks.requireUser }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: mocks.withRLSContext }));
 vi.mock('@/lib/services/external-resource-authorization-service', () => ({
   authorizeExternalMatterAccess: mocks.authorizeExternalMatterAccess,
   authorizeExternalDocumentAccess: mocks.authorizeExternalDocumentAccess,
@@ -34,6 +36,7 @@ describe('external resource routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.selectQueue.length = 0;
+    mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: () => Promise<unknown>) => operation());
     mocks.requireUser.mockResolvedValue({ userId: '11111111-1111-1111-1111-111111111111', organizationId: '22222222-2222-2222-2222-222222222222' });
     mocks.authorizeExternalMatterAccess.mockResolvedValue({
       allowed: true,
