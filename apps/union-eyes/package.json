@@ -81,6 +81,7 @@
     "rls:verify-strike-fund-backfill": "tsx scripts/verify-strike-fund-org-backfill.ts",
     "icra:capability-rollout:check": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --check",
     "icra:capability-rollout:apply": "node ../../tooling/scripts/apply-icra-capability-rollout.mjs --apply",
+    "db:scoped-migrate:existing": "node ../../tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs",
     "rls:authority-convergence-report": "tsx scripts/generate-authority-convergence-report.ts"
   },
   "dependencies": {
