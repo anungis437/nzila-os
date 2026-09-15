@@ -1,20 +1,20 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-09T22:29:51.065Z
+Generated: 2026-09-15T11:48:25.555Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 
-- Total manifest entries: 795
-- Ready for explicit GRANT (CLOSED, fully resolved): 795
+- Total manifest entries: 798
+- Ready for explicit GRANT (CLOSED, fully resolved): 798
 - Pending review (NEEDS_REVIEW, excluded from plan): 0
-- Tenant-granted tables (union_eyes_runtime): 335
+- Tenant-granted tables (union_eyes_runtime): 339
 - System-granted tables (union_eyes_system): 64
 
 ## Operation totals (ready set)
 
 | principal | SELECT | INSERT | UPDATE | DELETE |
 | --- | --- | --- | --- | --- |
-| tenant (union_eyes_runtime) | 318 | 280 | 186 | 98 |
+| tenant (union_eyes_runtime) | 322 | 283 | 189 | 98 |
 | system (union_eyes_system) | 55 | 30 | 22 | 0 |
 
 ## Risk signals (review flags, not automatic failures)
@@ -204,7 +204,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | conflict_of_interest_policy | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | conflict_review_committee | LATENT_UNREACHABLE | NONE | NONE |
 | conflict_training | LATENT_UNREACHABLE | NONE | NONE |
-| congress_memberships | LATENT_UNREACHABLE | NONE | NONE |
+| congress_memberships | MULTI_PARTY_RLS_REQUIRED | SELECT | NONE |
 | consent_records | TENANT_RLS_REQUIRED | SELECT, INSERT | INSERT |
 | continuing_education | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | contract_amendments | LATENT_UNREACHABLE | NONE | NONE |
@@ -337,6 +337,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | external_customers | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | external_data_sync_log | GLOBAL_REFERENCE_DATA | INSERT, UPDATE | INSERT, UPDATE |
 | external_departments | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
+| external_document_access_grants | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | external_document_files | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | external_document_libraries | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | external_document_permissions | CONTAINED_NO_AUTHORITY | NONE | NONE |
@@ -351,6 +352,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | external_lms_enrollments | TENANT_RLS_REQUIRED | INSERT, UPDATE | NONE |
 | external_lms_learners | TENANT_RLS_REQUIRED | INSERT, UPDATE | NONE |
 | external_lms_progress | TENANT_RLS_REQUIRED | INSERT, UPDATE | NONE |
+| external_matter_access_grants | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | external_payments | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | external_pension_beneficiaries | LATENT_UNREACHABLE | NONE | NONE |
 | external_pension_contributions | LATENT_UNREACHABLE | NONE | NONE |
@@ -400,7 +402,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | grievance_assignments | LATENT_UNREACHABLE | NONE | NONE |
 | grievance_case_access_assignments | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | grievance_communications | LATENT_UNREACHABLE | NONE | NONE |
-| grievance_deadlines | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT |
+| grievance_deadlines | PARENT_OWNED_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | SELECT |
 | grievance_documents | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
 | grievance_events | TENANT_RLS_REQUIRED | SELECT, INSERT | NONE |
 | grievance_responses | LATENT_UNREACHABLE | NONE | NONE |
@@ -649,6 +651,7 @@ Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant
 | report_shares | LATENT_UNREACHABLE | NONE | NONE |
 | report_templates | LATENT_UNREACHABLE | NONE | NONE |
 | reports | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE, DELETE | NONE |
+| representation_authorities | TENANT_RLS_REQUIRED | SELECT, INSERT, UPDATE | NONE |
 | reserved_matter_votes | SYSTEM_ONLY | NONE | SELECT, INSERT, UPDATE |
 | retention_policies | CONTAINED_NO_AUTHORITY | NONE | NONE |
 | revenue_cohorts | LATENT_UNREACHABLE | NONE | NONE |

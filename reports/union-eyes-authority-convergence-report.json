@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-09T22:57:47.681Z",
-  "totalTables": 795,
+  "generatedAt": "2026-09-15T11:48:04.810Z",
+  "totalTables": 798,
   "byClassification": {
-    "TENANT_RLS_REQUIRED": 260,
+    "TENANT_RLS_REQUIRED": 262,
     "USER_RLS_REQUIRED": 13,
-    "LATENT_UNREACHABLE": 294,
+    "LATENT_UNREACHABLE": 293,
     "SYSTEM_ONLY": 22,
     "CONTAINED_NO_AUTHORITY": 137,
-    "PARENT_OWNED_RLS_REQUIRED": 36,
+    "PARENT_OWNED_RLS_REQUIRED": 37,
     "GLOBAL_REFERENCE_DATA": 25,
     "MIXED_GLOBAL_TENANT_RLS_REQUIRED": 3,
     "SEPARATE_DATABASE_BOUNDARY": 2,
-    "MULTI_PARTY_RLS_REQUIRED": 3
+    "MULTI_PARTY_RLS_REQUIRED": 4
   },
   "needsReview": 0,
   "authorityModel": {
@@ -37,7 +37,7 @@
   },
   "rlsPolicyExpansionRequired": {
     "note": "Tables classified as needing RLS policy treatment (TENANT_RLS_REQUIRED / PARENT_OWNED_RLS_REQUIRED / USER_RLS_REQUIRED / MIXED_GLOBAL_TENANT_RLS_REQUIRED / MULTI_PARTY_RLS_REQUIRED) that are NOT part of the original 24-table 0108 baseline above — i.e. genuinely additional policy debt discovered by this manifest, to be added via a follow-up migration before REVOKE-ing blanket grants. Renamed from the round-4 \"policyGaps\" wording, which conflated this with 0108 losing its own coverage. The two RLS_REQUIRED shapes added in round 33 (mixed global/tenant, multi-party) do not yet have a ue_create_*_rls_policy helper — see billing/isolation.py for their proven application-layer equivalents.",
-    "tenantRlsRequiredExpansionCount": 248,
+    "tenantRlsRequiredExpansionCount": 251,
     "tenantRlsRequiredExpansionTables": [
       "ai_clause_reasonings",
       "ai_insight_reports",
@@ -49,6 +49,8 @@
       "model_metadata",
       "pilot_metrics",
       "social_analytics",
+      "external_matter_access_grants",
+      "representation_authorities",
       "claim_deadlines",
       "deadline_reminders",
       "grievance_case_access_assignments",
@@ -99,6 +101,7 @@
       "sms_messages",
       "social_campaigns",
       "user_consents",
+      "external_document_access_grants",
       "cms_media_library",
       "document_access_grants",
       "document_folders",
@@ -347,13 +350,14 @@
       "holidays",
       "pilot_enrollments"
     ],
-    "multiPartyRlsRequiredExpansionCount": 3,
+    "multiPartyRlsRequiredExpansionCount": 4,
     "multiPartyRlsRequiredExpansionTables": [
       "per_capita_remittances",
+      "congress_memberships",
       "clause_library_tags",
       "shared_clause_library"
     ],
-    "totalExpansionCount": 301
+    "totalExpansionCount": 305
   },
   "blanketGrantBlocker": "REMOVED (as of the current generated migration, db/migrations/20260910_rls_enforcement_expansion_round58.sql PART E): all three gate conditions are satisfied (NEEDS_REVIEW=0, closed-classification TBD authority=0, geometry blockers=0), so the enforcement compiler's own blanketGrantRemovalGateOk check evaluated true and the migration now revokes union_eyes_runtime/union_eyes_system's blanket GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public (0108), replacing it with the exact per-table GRANTs this manifest generates. Re-run scripts/rls-enforcement/generate-rls-enforcement-migration.ts if this repo's state has changed since this report was generated — the gate is recomputed fresh on every run and will re-widen automatically if a regression reintroduces any of the three blocking conditions."
 }

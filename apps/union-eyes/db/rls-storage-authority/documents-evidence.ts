@@ -25,6 +25,17 @@ import type { StorageAuthorityEntry } from './types';
 
 export const documentsEvidenceEntries: StorageAuthorityEntry[] = [
   {
+    table: "external_document_access_grants",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Added 2026-09-15 external representation foundation: direct NOT NULL organization_id with exact authority_id, matter_grant_id, user_id, matter_type/matter_id, and document_id. Runtime use is limited to explicit external document list/detail/download/upload routes and lib/services/external-document-grant-service.ts; document download requires can_download and fails closed for view-only grants.",
+    supportingCapability: ["app/api/external/grievances/[id]/documents/route.ts","app/api/external/grievances/[id]/documents/upload/route.ts","app/api/external/documents/[id]/route.ts","app/api/external/documents/[id]/download/route.ts","lib/services/external-resource-authorization-service.ts","lib/services/external-document-grant-service.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "HIGH",
+  },
+  {
     table: "award_templates",
     classification: "CONTAINED_NO_AUTHORITY",
     reason: "CLOSED round 54 (final non-voting parent-owned authority convergence, BLOCKER_ROOT_MICRO_COHORT \u2014 direct parent of award_history, one-hop): lib/services/rewards/template-service.ts's exported functions (listAwardTemplates/getAwardTemplate/createAwardTemplate/updateAwardTemplate/deleteAwardTemplate/recordTemplateUsage/getTemplateHistory/etc.) have ZERO real callers anywhere in app/, actions/, lib/, services/ (git-grep confirmed \u2014 not even a module-level import outside the file's own test) \u2014 fully dead TS code despite organizationId being nullable/unenforced in the schema. Django AwardTemplatesViewSet (backend/unions/views.py) was IsAuthenticated-only with queryset=Model.objects.all() and no org filter \u2014 contained via DenyAllPermission this round (same pattern as the sibling RewardWalletLedgerViewSet in the same file, round 36). No legitimate consumer found on either side.",

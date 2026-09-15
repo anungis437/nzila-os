@@ -25,6 +25,28 @@ import type { StorageAuthorityEntry } from './types';
 
 export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
+    table: "external_matter_access_grants",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Added 2026-09-15 external representation foundation: direct NOT NULL organization_id plus exact matter_type/matter_id/user_id scope. Runtime paths are app/api/external/grievances/[id]/** routes via lib/external-resource-middleware.ts and lib/services/external-resource-authorization-service.ts; no tenant-wide discovery route consumes this table.",
+    supportingCapability: ["app/api/external/grievances/[id]/route.ts","app/api/external/grievances/[id]/documents/route.ts","app/api/external/grievances/[id]/documents/upload/route.ts","app/api/external/documents/[id]/route.ts","app/api/external/documents/[id]/download/route.ts","lib/external-resource-middleware.ts","lib/services/external-resource-authorization-service.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "HIGH",
+  },
+  {
+    table: "representation_authorities",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Added 2026-09-15 external representation foundation: direct NOT NULL organization_id plus exact representative_user_id and matter scope. Read by external auth middleware/services before any external matter/document row is returned; created/activated/revoked by lib/services/representation-authority-service.ts. No representative organization inheritance is allowed without a matching authority row.",
+    supportingCapability: ["lib/services/representation-authority-service.ts","lib/services/external-resource-authorization-service.ts","lib/external-resource-middleware.ts","app/api/external/grievances/[id]/route.ts","app/api/external/documents/[id]/route.ts","app/api/external/documents/[id]/download/route.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "HIGH",
+  },
+  {
     table: "claim_deadlines",
     classification: "TENANT_RLS_REQUIRED",
     reason: "Manually verified 2026-09-01, corrected 2026-09-02 (round 5): direct NOT NULL organization_id column (db/schema/deadlines-schema.ts, Drizzle export 'deadlines' backing physical table 'claim_deadlines'), reachable via live HTTP routes (app/api/deadlines/route.ts, app/api/deadlines/[id]/complete/route.ts, app/api/deadlines/[id]/extend/route.ts, app/api/deadlines/overdue/route.ts, app/api/deadlines/upcoming/route.ts — all crudRoutes({ readRole: 'member', writeRole: 'steward' })) and core services (lib/deadline-tracking-system.ts, lib/deadline-service.ts), all using the plain `db` import (no withSystemContext). Round-5 correction: the previously-cited app/api/cron/deadline-overdue/route.ts does NOT touch this table — it queries `grievance_deadlines` (an existing 0108-protected table) and `deadline_reminders` only, both inside withSystemContext; that citation was a false evidence match and has been removed. No system-context path touches claim_deadlines today.",

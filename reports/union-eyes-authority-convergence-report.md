@@ -1,21 +1,21 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-09T22:57:47.681Z
+Generated: 2026-09-15T11:48:04.810Z
 
 ## Classification counts
 
 | Classification | Count |
 | --- | --- |
-| TENANT_RLS_REQUIRED | 260 |
+| TENANT_RLS_REQUIRED | 262 |
 | USER_RLS_REQUIRED | 13 |
-| LATENT_UNREACHABLE | 294 |
+| LATENT_UNREACHABLE | 293 |
 | SYSTEM_ONLY | 22 |
 | CONTAINED_NO_AUTHORITY | 137 |
-| PARENT_OWNED_RLS_REQUIRED | 36 |
+| PARENT_OWNED_RLS_REQUIRED | 37 |
 | GLOBAL_REFERENCE_DATA | 25 |
 | MIXED_GLOBAL_TENANT_RLS_REQUIRED | 3 |
 | SEPARATE_DATABASE_BOUNDARY | 2 |
-| MULTI_PARTY_RLS_REQUIRED | 3 |
+| MULTI_PARTY_RLS_REQUIRED | 4 |
 
 ## Authority-model convergence (invocationAuthority / dbExecutionPrincipal / privileges)
 
@@ -39,12 +39,12 @@ Generated: 2026-09-09T22:57:47.681Z
 
 ## RLS policy expansion required (NEW tables beyond the 0108 baseline, NOT evidence 0108 lost coverage)
 
-- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 248
+- TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 251
 - PARENT_OWNED_RLS_REQUIRED tables beyond the 0108 baseline: 34
 - USER_RLS_REQUIRED tables beyond the 0108 baseline: 13
 - MIXED_GLOBAL_TENANT_RLS_REQUIRED tables beyond the 0108 baseline: 3
-- MULTI_PARTY_RLS_REQUIRED tables beyond the 0108 baseline: 3
-- Total additional policy-expansion tables: 301
+- MULTI_PARTY_RLS_REQUIRED tables beyond the 0108 baseline: 4
+- Total additional policy-expansion tables: 305
 
 ## Blanket grant blocker
 
