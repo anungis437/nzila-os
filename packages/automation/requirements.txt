@@ -24,7 +24,7 @@ typer>=0.9.0
 
 # Azure SDK (for resource management)
 azure-identity>=1.16.1
-azure-mgmt-resource>=23.0.0
+azure-mgmt-resource>=26.0.0
 azure-mgmt-containerinstance>=10.1.0
 azure-mgmt-rdbms>=10.0.0
 
