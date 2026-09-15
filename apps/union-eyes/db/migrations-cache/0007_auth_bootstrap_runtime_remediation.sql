@@ -23,6 +23,43 @@ CREATE TABLE IF NOT EXISTS "user_management"."user_sessions" (
   CONSTRAINT "valid_expiry" CHECK ("expires_at" > "created_at")
 );
 
+CREATE TABLE IF NOT EXISTS "user_management"."auth_audit_log" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "user_id" varchar(255),
+  "event_type" varchar(50) NOT NULL,
+  "ip_address" varchar(45),
+  "user_agent" text,
+  "metadata" jsonb DEFAULT '{}'::jsonb,
+  "created_at" timestamp with time zone DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "user_management"."org_auth_policies" (
+  "organization_id" uuid PRIMARY KEY,
+  "allow_local_auth" boolean NOT NULL DEFAULT true,
+  "allow_magic_link" boolean NOT NULL DEFAULT true,
+  "allow_sso" boolean NOT NULL DEFAULT true,
+  "require_sso" boolean NOT NULL DEFAULT false,
+  "require_invite" boolean NOT NULL DEFAULT false,
+  "password_reset_allowed" boolean NOT NULL DEFAULT true,
+  "allowed_email_domains" jsonb DEFAULT '[]'::jsonb,
+  "mfa_required_for_roles" jsonb DEFAULT '[]'::jsonb,
+  "sso_provider_id" uuid,
+  "updated_by" varchar(255),
+  "updated_at" timestamp with time zone DEFAULT now(),
+  "created_at" timestamp with time zone DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "user_management"."mfa_totp" (
+  "user_id" varchar(255) PRIMARY KEY REFERENCES "user_management"."users"("user_id") ON DELETE cascade,
+  "secret_encrypted" text NOT NULL,
+  "recovery_codes_hashed" jsonb DEFAULT '[]'::jsonb,
+  "enabled_at" timestamp with time zone,
+  "disabled_at" timestamp with time zone,
+  "last_used_at" timestamp with time zone,
+  "created_at" timestamp with time zone DEFAULT now(),
+  "updated_at" timestamp with time zone DEFAULT now()
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS "idx_user_management_user_sessions_token_hash"
   ON "user_management"."user_sessions"("session_token_hash")
   WHERE "session_token_hash" IS NOT NULL;
@@ -36,6 +73,12 @@ CREATE INDEX IF NOT EXISTS "idx_user_management_user_sessions_user_active"
 
 ALTER TABLE "user_management"."user_sessions" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "user_management"."user_sessions" FORCE ROW LEVEL SECURITY;
+ALTER TABLE "user_management"."auth_audit_log" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "user_management"."auth_audit_log" FORCE ROW LEVEL SECURITY;
+ALTER TABLE "user_management"."org_auth_policies" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "user_management"."org_auth_policies" FORCE ROW LEVEL SECURITY;
+ALTER TABLE "user_management"."mfa_totp" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "user_management"."mfa_totp" FORCE ROW LEVEL SECURITY;
 
 GRANT USAGE ON SCHEMA "user_management" TO "union_eyes_system";
 
