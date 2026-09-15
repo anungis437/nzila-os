@@ -3,6 +3,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import postgres from 'postgres'
 
 const image = 'postgres:16-alpine'
+const pnpmBin = process.platform === 'win32' ? 'cmd.exe' : 'pnpm'
+const pnpmArgsPrefix = process.platform === 'win32' ? ['/d', '/s', '/c', 'pnpm'] : []
 let containerId = ''
 let databaseUrl = ''
 let sql: postgres.Sql
@@ -12,7 +14,7 @@ function docker(...args: string[]) {
 }
 
 function runState(mode: 'preflight' | 'attest', url = databaseUrl) {
-  return spawnSync('pnpm', ['exec', 'tsx', 'scripts/p4-authority-state.ts', `--mode=${mode}`], {
+  return spawnSync(pnpmBin, [...pnpmArgsPrefix, 'exec', 'tsx', 'scripts/p4-authority-state.ts', `--mode=${mode}`], {
     cwd: new URL('../..', import.meta.url),
     encoding: 'utf8',
     env: {

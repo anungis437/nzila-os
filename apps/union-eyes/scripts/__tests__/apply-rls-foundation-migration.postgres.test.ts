@@ -22,6 +22,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import postgres from 'postgres'
 
 const image = 'postgres:16-alpine'
+const pnpmBin = process.platform === 'win32' ? 'cmd.exe' : 'pnpm'
+const pnpmArgsPrefix = process.platform === 'win32' ? ['/d', '/s', '/c', 'pnpm'] : []
 let containerId = ''
 let superuserUrl = ''
 let restrictedAdminUrl = ''
@@ -73,7 +75,7 @@ function docker(...args: string[]) {
 }
 
 function runApplyScript(extraArgs: string[] = []) {
-  return spawnSync('pnpm', ['exec', 'tsx', 'scripts/apply-rls-foundation-migration.ts', '--', ...extraArgs], {
+  return spawnSync(pnpmBin, [...pnpmArgsPrefix, 'exec', 'tsx', 'scripts/apply-rls-foundation-migration.ts', '--', ...extraArgs], {
     cwd: new URL('../..', import.meta.url),
     encoding: 'utf8',
     env: {
