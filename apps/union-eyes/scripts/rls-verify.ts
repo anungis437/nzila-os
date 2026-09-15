@@ -75,6 +75,50 @@ interface CheckResult {
   detail: string
 }
 
+interface FixtureOrganization {
+  id: string
+  name: string
+  slug: string
+  organizationType: 'union'
+  hierarchyPath: string[]
+  hierarchyLevel: number
+  status: 'active'
+  settings: Record<string, unknown>
+}
+
+export const RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS = [
+  'id',
+  'name',
+  'slug',
+  'organization_type',
+  'hierarchy_path',
+  'hierarchy_level',
+  'status',
+  'settings',
+] as const
+
+export function buildRlsVerifyOrganizationFixture(input: {
+  id: string
+  name: string
+  slug: string
+  runId: string
+}): FixtureOrganization {
+  return {
+    id: input.id,
+    name: input.name,
+    slug: input.slug,
+    organizationType: 'union',
+    hierarchyPath: [input.id],
+    hierarchyLevel: 0,
+    status: 'active',
+    settings: { rls_verify_fixture: true, run_id: input.runId },
+  }
+}
+
+function isCaughtErrorResult(value: unknown): value is { error: string } {
+  return typeof value === 'object' && value !== null && 'error' in value
+}
+
 // Per-table org-column metadata for the live RLS-state checks below. Table
 // MEMBERSHIP in the 0108-protected set is sourced from
 // db/rls-0108-protected-tables.ts (see the import above) — this array adds
@@ -473,11 +517,39 @@ async function runFixtureIsolationMatrix(
     // below to make an isolation assertion. In --mode=full this MUST be a
     // disposable database, not shared staging.
     await systemSql.begin(async (tx) => {
+      const orgAFixture = buildRlsVerifyOrganizationFixture({
+        id: orgA.id,
+        name: `${runId} Org A`,
+        slug: `${runId.toLowerCase()}-org-a`,
+        runId,
+      })
+      const orgBFixture = buildRlsVerifyOrganizationFixture({
+        id: orgB.id,
+        name: `${runId} Org B`,
+        slug: `${runId.toLowerCase()}-org-b`,
+        runId,
+      })
       await tx.unsafe(
-        `INSERT INTO organizations (id, name, slug) VALUES ($1, $2, $3), ($4, $5, $6)`,
+        `INSERT INTO organizations (${RLS_VERIFY_ORGANIZATION_FIXTURE_COLUMNS.join(', ')})
+         VALUES ($1, $2, $3, $4::organization_type, $5::text[], $6, $7, $8::jsonb),
+                ($9, $10, $11, $12::organization_type, $13::text[], $14, $15, $16::jsonb)`,
         [
-          orgA.id, `${runId} Org A`, `${runId.toLowerCase()}-org-a`,
-          orgB.id, `${runId} Org B`, `${runId.toLowerCase()}-org-b`,
+          orgAFixture.id,
+          orgAFixture.name,
+          orgAFixture.slug,
+          orgAFixture.organizationType,
+          orgAFixture.hierarchyPath,
+          orgAFixture.hierarchyLevel,
+          orgAFixture.status,
+          JSON.stringify(orgAFixture.settings),
+          orgBFixture.id,
+          orgBFixture.name,
+          orgBFixture.slug,
+          orgBFixture.organizationType,
+          orgBFixture.hierarchyPath,
+          orgBFixture.hierarchyLevel,
+          orgBFixture.status,
+          JSON.stringify(orgBFixture.settings),
         ],
       )
       await tx.unsafe(
@@ -511,7 +583,7 @@ async function runFixtureIsolationMatrix(
         `INSERT INTO grievances (id, organization_id) VALUES (gen_random_uuid(), $1) RETURNING id`,
         [orgB.id],
       ).catch((e: Error) => ({ error: e.message }))
-      const forgedRejected = 'error' in (forged as any) || (Array.isArray(forged) && forged.length === 0)
+      const forgedRejected = isCaughtErrorResult(forged) || (Array.isArray(forged) && forged.length === 0)
       results.push({
         name: 'fixture matrix: Org A insert forging Org B organization_id is rejected',
         pass: forgedRejected,
@@ -606,7 +678,9 @@ async function main() {
   console.log('\n[rls-verify] PASS — RLS tenant-isolation foundation confirmed in force on this database.')
 }
 
-main().catch((err) => {
-  console.error('[rls-verify] Unhandled error:', err instanceof Error ? err.message : err)
-  process.exit(1)
-})
+if (process.argv[1]?.replace(/\\/g, '/').endsWith('/scripts/rls-verify.ts')) {
+  main().catch((err) => {
+    console.error('[rls-verify] Unhandled error:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  })
+}
