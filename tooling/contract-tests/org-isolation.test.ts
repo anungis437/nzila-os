@@ -53,6 +53,7 @@ const AUTH_CALL_PATTERNS = [
   /getCurrentUser\s*\(/,         // UE auth guard
   /getDbContext\s*\(/,           // Flow DB+org context resolver
   /withOrganizationAuth\s*\(/,   // UE org middleware (grievances, dues)
+  /withExternalMatterResourceAuth\s*\(/, // UE external specialist matter/resource guard
   /withOrgScope\s*\(/,           // Org-scoped composite guard (auth + context + org)
   /crudRoutes\s*\(/,             // UE crud factory (validates auth + org scope internally)
   /requireApiAuth\s*\(/,         // UE API auth guard (checks userId + org)
@@ -165,6 +166,7 @@ describe('PR9: Org isolation — DB queries scoped to org', () => {
           content.includes('getDbContext(') ||
           content.includes('getCurrentUser(') ||
           content.includes('withOrganizationAuth(') ||
+          content.includes('withExternalMatterResourceAuth(') ||
           content.includes('withOrgScope(') ||
           content.includes('crudRoutes(') ||
           content.includes('requireApiAuth(') ||

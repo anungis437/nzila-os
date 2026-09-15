@@ -120,6 +120,7 @@ describe('Org-scope enforcement patterns', () => {
           content.includes('crudRoutes(') ||
           content.includes('requireApiAuth(') ||
           content.includes('withOrganizationAuth(') ||
+          content.includes('withExternalMatterResourceAuth(') ||
           content.includes('getCurrentUser(') ||
           content.includes('withMinRole(') ||
           content.includes('requireUser(') ||

@@ -141,6 +141,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'requireUser(',              // Requires authenticated user
     'getAuth(',                  // Clerk getAuth() direct call
     'withOrganizationAuth(',      // Organization-scoped auth wrapper (union-eyes)
+    'withExternalMatterResourceAuth(', // External specialist matter/resource guard (union-eyes)
     'crudRoutes(',               // crudRoutes() factory — wraps withApi() internally
     'withMinRole(',              // Role-based auth guard with minimum role check
     'withOrgScope(',              // Org-scoped composite guard (auth + context + org validation)
