@@ -389,6 +389,19 @@ export const grievanceDeadlines = pgTable("grievance_deadlines", {
   completedAt: timestamp("completed_at", { withTimezone: true }),
   extensionGranted: boolean("extension_granted").default(false),
   newDeadline: timestamp("new_deadline", { withTimezone: true }),
+  confirmationStatus: varchar("confirmation_status", { length: 32 })
+    .notNull()
+    .default("SYSTEM_CALCULATED"),
+  calculatedDueDate: timestamp("calculated_due_date", { withTimezone: true }),
+  calculationProvenance: jsonb("calculation_provenance").default({}),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  confirmedBy: uuid("confirmed_by"),
+  overrideDueDate: timestamp("override_due_date", { withTimezone: true }),
+  overrideReason: text("override_reason"),
+  overrideAt: timestamp("override_at", { withTimezone: true }),
+  overrideBy: uuid("override_by"),
+  supersededAt: timestamp("superseded_at", { withTimezone: true }),
+  supersededBy: uuid("superseded_by"),
 
   // Reminders
   reminderDays: integer("reminder_days").array(), // days before deadline to send reminders
@@ -407,6 +420,7 @@ export const grievanceDeadlines = pgTable("grievance_deadlines", {
   grievanceIdx: index("idx_grievance_deadlines_grievance").on(table.grievanceId),
   dueIdx: index("idx_grievance_deadlines_due").on(table.dueDate),
   statusIdx: index("idx_grievance_deadlines_status").on(table.status),
+  confirmationStatusIdx: index("idx_grievance_deadlines_confirmation_status").on(table.confirmationStatus),
 }));
 
 // ============================================================================
@@ -688,4 +702,3 @@ export type InsertGrievanceSettlement = typeof grievanceSettlements.$inferInsert
 
 export type GrievanceCommunication = typeof grievanceCommunications.$inferSelect;
 export type InsertGrievanceCommunication = typeof grievanceCommunications.$inferInsert;
-
