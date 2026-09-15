@@ -104,6 +104,33 @@ describe('GET /api/documents/[id]/download', () => {
     expect(res.status).toBe(403);
   });
 
+  it('denies download when an explicit grant allows view but not download', async () => {
+    mocks.db._selectQueue.push(
+      [{
+        id: 'doc-1',
+        title: 'A',
+        name: 'A',
+        filename: 'a.pdf',
+        fileUrl: 'https://old',
+        mimeType: 'application/pdf',
+        privacyLabel: 'privileged',
+        linkedEntityType: 'grievance',
+        linkedEntityId: 'case-1',
+      }],
+      [{ id: 'grant-1', canDownload: false }],
+      [{ storageKey: 'documents/org-1/file.pdf' }],
+    );
+    mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
+
+    const res = await GET(new Request('https://example.com/api/documents/doc-1/download'), {
+      organizationId: 'org-1',
+      userId: 'user-1',
+    }, { id: 'doc-1' });
+
+    expect(res.status).toBe(403);
+    expect(mocks.generateSasUrl).not.toHaveBeenCalled();
+  });
+
   it('returns signed download url when access is allowed', async () => {
     mocks.db._selectQueue.push(
       [{

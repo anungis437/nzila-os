@@ -67,7 +67,10 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
 
   const explicitGrant = (
     await db
-      .select({ id: documentAccessGrants.id })
+      .select({
+        id: documentAccessGrants.id,
+        canDownload: documentAccessGrants.canDownload,
+      })
       .from(documentAccessGrants)
       .where(
         and(
@@ -117,6 +120,10 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
 
   if (!allowed) {
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this document');
+  }
+
+  if (explicitGrant && !explicitGrant.canDownload) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have permission to download this document');
   }
 
   const latestVersion = (
