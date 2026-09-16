@@ -25,6 +25,26 @@ export type ExternalResourceParams = {
   matterId: string;
 };
 
+type NextRouteContext<TParams extends object> = {
+  params?: TParams | Promise<TParams>;
+};
+
+type ExternalRouteContext<TParams extends object> = TParams | NextRouteContext<TParams>;
+
+async function resolveRouteParams<TParams extends object>(
+  params?: ExternalRouteContext<TParams>,
+): Promise<TParams | undefined> {
+  if (!params) {
+    return undefined;
+  }
+
+  if ('params' in params) {
+    return await params.params;
+  }
+
+  return params as TParams;
+}
+
 export function withExternalMatterResourceAuth<TParams extends object = ExternalResourceParams>(
   options: {
     requiredPermission: ExternalMatterPermission;
@@ -36,10 +56,11 @@ export function withExternalMatterResourceAuth<TParams extends object = External
     params?: TParams,
   ) => Promise<Response> | Response,
 ) {
-  return async (request: Request, params?: TParams) => {
+  return async (request: Request, params?: ExternalRouteContext<TParams>) => {
     try {
       const user = await requireUser();
-      const resource = options.resolve(request, params);
+      const routeParams = await resolveRouteParams(params);
+      const resource = options.resolve(request, routeParams);
       const actor = {
         userId: user.userId,
         representativeOrganizationId: (user as { organizationId?: string }).organizationId,
@@ -65,7 +86,7 @@ export function withExternalMatterResourceAuth<TParams extends object = External
           matterId: resource.matterId,
           authorityId: decision.authorityId,
           matterGrantId: decision.matterGrantId,
-        }, params);
+        }, routeParams);
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
