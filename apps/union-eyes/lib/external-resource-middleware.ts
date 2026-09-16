@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/api-auth-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { logger } from '@/lib/logger';
 import {
   authorizeExternalMatterAccess,
   type ExternalMatterPermission,
@@ -101,6 +102,9 @@ export function withExternalMatterResourceAuth<TParams extends object = External
       if (message === 'Unauthorized') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
+      logger.error('External matter resource request failed closed', error, {
+        requiredPermission: options.requiredPermission,
+      });
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
   };
