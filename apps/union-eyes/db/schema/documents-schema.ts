@@ -58,6 +58,7 @@ export const documents = pgTable('documents', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id'),
   folderId: uuid('folder_id').references(() => documentFolders.id),
   
   // File information
@@ -210,5 +211,4 @@ export type DocumentLink = typeof documentLinks.$inferSelect;
 export type NewDocumentLink = typeof documentLinks.$inferInsert;
 export type DocumentAccessGrant = typeof documentAccessGrants.$inferSelect;
 export type NewDocumentAccessGrant = typeof documentAccessGrants.$inferInsert;
-
 

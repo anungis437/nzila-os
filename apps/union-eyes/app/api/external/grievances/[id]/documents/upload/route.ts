@@ -55,6 +55,7 @@ export const POST = withExternalMatterResourceAuth(
         .insert(documents)
         .values({
           organizationId: context.organizationId,
+          orgId: context.organizationId,
           title: parsed.data.title,
           filename: parsed.data.filename,
           name: parsed.data.title,
