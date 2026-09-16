@@ -2,7 +2,7 @@
  * Documents Schema
  * Database schema for general document management with folder support
  */
-import { pgTable, text, integer, timestamp, uuid, boolean, jsonb, index, uniqueIndex, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp, uuid, boolean, jsonb, index, uniqueIndex, pgEnum, bigint } from 'drizzle-orm/pg-core';
 import { organizations } from '../schema-organizations';
 import { claims } from './claims-schema';
 
@@ -63,6 +63,12 @@ export const documents = pgTable('documents', {
   
   // File information
   title: text('title'),
+  category: text('category'),
+  blobContainer: text('blob_container'),
+  blobPath: text('blob_path'),
+  contentType: text('content_type'),
+  sizeBytes: bigint('size_bytes', { mode: 'number' }),
+  sha256: text('sha256'),
   filename: text('filename'),
   name: text('name').notNull(),
   fileUrl: text('file_url').notNull(),
@@ -74,7 +80,6 @@ export const documents = pgTable('documents', {
   // Metadata
   description: text('description'),
   tags: text('tags').array(),
-  category: text('category'),
   contentText: text('content_text'), // Extracted text content for search
   
   // Upload information
@@ -211,4 +216,3 @@ export type DocumentLink = typeof documentLinks.$inferSelect;
 export type NewDocumentLink = typeof documentLinks.$inferInsert;
 export type DocumentAccessGrant = typeof documentAccessGrants.$inferSelect;
 export type NewDocumentAccessGrant = typeof documentAccessGrants.$inferInsert;
-

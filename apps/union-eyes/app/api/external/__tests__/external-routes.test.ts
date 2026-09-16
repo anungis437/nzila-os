@@ -268,6 +268,12 @@ describe('external resource routes', () => {
     expect(valuesByTable[0]).toMatchObject({
       organizationId: '99999999-9999-9999-9999-999999999999',
       orgId: '99999999-9999-9999-9999-999999999999',
+      category: 'other',
+      blobContainer: 'union-eyes',
+      blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
+      contentType: 'application/pdf',
+      sizeBytes: 1234,
+      sha256: '0'.repeat(64),
       uploadedBy: '11111111-1111-1111-1111-111111111111',
     });
   });

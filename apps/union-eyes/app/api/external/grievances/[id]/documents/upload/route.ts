@@ -7,6 +7,8 @@ import { withExternalMatterResourceAuth } from '@/lib/external-resource-middlewa
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
 
+const documentBlobContainer = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
+
 const externalUploadSchema = z.object({
   title: z.string().min(1).max(300),
   filename: z.string().min(1).max(500),
@@ -57,6 +59,12 @@ export const POST = withExternalMatterResourceAuth(
           organizationId: context.organizationId,
           orgId: context.organizationId,
           title: parsed.data.title,
+          category: 'other',
+          blobContainer: documentBlobContainer,
+          blobPath: resolvedBlob.blobPath,
+          contentType: parsed.data.mimeType,
+          sizeBytes: parsed.data.fileSize,
+          sha256: resolvedBlob.contentHash,
           filename: parsed.data.filename,
           name: parsed.data.title,
           fileUrl: resolvedBlob.fileUrl,
@@ -67,7 +75,11 @@ export const POST = withExternalMatterResourceAuth(
           uploadedBy: context.actor.userId,
           privacyLabel: parsed.data.privacyLabel,
         })
-        .returning();
+        .returning({
+          id: documents.id,
+          title: documents.title,
+          name: documents.name,
+        });
 
       await tx.insert(documentVersions).values({
         organizationId: context.organizationId,
