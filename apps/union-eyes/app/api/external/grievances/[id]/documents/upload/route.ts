@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
+import { db } from '@/db/db';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { externalDocumentAccessGrants } from '@/db/schema/representation-authority-schema';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withExplicitUserContext } from '@/lib/db/with-rls-context';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
 import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
@@ -52,8 +53,8 @@ export const POST = withExternalMatterResourceAuth(
       fileUrl: parsed.data.fileUrl,
     });
 
-    const created = await withRLSContext({ organizationId: context.organizationId }, async (tx) => {
-      const [insertedDocument] = await tx
+    const created = await withExplicitUserContext(context.actor.userId, async () => {
+      const [insertedDocument] = await db
         .insert(documents)
         .values({
           organizationId: context.organizationId,
@@ -81,7 +82,7 @@ export const POST = withExternalMatterResourceAuth(
           name: documents.name,
         });
 
-      await tx.insert(documentVersions).values({
+      await db.insert(documentVersions).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         versionNo: 1,
@@ -90,7 +91,7 @@ export const POST = withExternalMatterResourceAuth(
         uploadedBy: context.actor.userId,
       });
 
-      await tx.insert(documentLinks).values({
+      await db.insert(documentLinks).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         linkedEntityType: 'grievance',
@@ -98,7 +99,7 @@ export const POST = withExternalMatterResourceAuth(
         linkedBy: context.actor.userId,
       });
 
-      await tx.insert(externalDocumentAccessGrants).values({
+      await db.insert(externalDocumentAccessGrants).values({
         authorityId: context.authorityId,
         matterGrantId: context.matterGrantId,
         organizationId: context.organizationId,
@@ -115,7 +116,7 @@ export const POST = withExternalMatterResourceAuth(
       });
 
       return insertedDocument;
-    });
+    }, context.organizationId);
 
     return NextResponse.json({ data: { id: created.id, title: created.title ?? created.name } }, { status: 201 });
   },

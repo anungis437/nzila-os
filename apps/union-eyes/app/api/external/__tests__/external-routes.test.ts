@@ -14,9 +14,11 @@ const mocks = vi.hoisted(() => {
     selectQueue,
     db: {
       select: vi.fn(() => query),
+      insert: vi.fn(),
     },
     requireUser: vi.fn(),
     withRLSContext: vi.fn(),
+    withExplicitUserContext: vi.fn(),
     authorizeExternalMatterAccess: vi.fn(),
     authorizeExternalDocumentAccess: vi.fn(),
     generateSasUrl: vi.fn(),
@@ -26,7 +28,10 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@/db/db', () => ({ db: mocks.db }));
 vi.mock('@/lib/api-auth-guard', () => ({ requireUser: mocks.requireUser }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: mocks.withRLSContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: mocks.withRLSContext,
+  withExplicitUserContext: mocks.withExplicitUserContext,
+}));
 vi.mock('@/lib/services/external-resource-authorization-service', () => ({
   authorizeExternalMatterAccess: mocks.authorizeExternalMatterAccess,
   authorizeExternalDocumentAccess: mocks.authorizeExternalDocumentAccess,
@@ -39,6 +44,7 @@ describe('external resource routes', () => {
     vi.clearAllMocks();
     mocks.selectQueue.length = 0;
     mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: () => Promise<unknown>) => operation());
+    mocks.withExplicitUserContext.mockImplementation(async (_userId: string, operation: () => Promise<unknown>) => operation());
     mocks.requireUser.mockResolvedValue({ userId: '11111111-1111-1111-1111-111111111111', organizationId: '22222222-2222-2222-2222-222222222222' });
     mocks.authorizeExternalMatterAccess.mockResolvedValue({
       allowed: true,
@@ -246,7 +252,7 @@ describe('external resource routes', () => {
         }),
       })),
     };
-    mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: (transaction: typeof tx) => Promise<unknown>) => operation(tx));
+    mocks.db.insert.mockImplementation(tx.insert);
 
     const { POST } = await import('@/app/api/external/grievances/[id]/documents/upload/route');
     const response = await POST(
@@ -265,6 +271,11 @@ describe('external resource routes', () => {
     );
 
     expect(response.status).toBe(201);
+    expect(mocks.withExplicitUserContext).toHaveBeenCalledWith(
+      '11111111-1111-1111-1111-111111111111',
+      expect.any(Function),
+      '99999999-9999-9999-9999-999999999999',
+    );
     expect(valuesByTable[0]).toMatchObject({
       organizationId: '99999999-9999-9999-9999-999999999999',
       orgId: '99999999-9999-9999-9999-999999999999',
