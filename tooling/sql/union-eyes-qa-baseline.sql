@@ -7,6 +7,16 @@
 -- This is intentionally narrow and idempotent. It is only used by
 -- tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs in QA/CI mode.
 
+DO $$ BEGIN
+  CREATE ROLE union_eyes_runtime NOSUPERUSER NOBYPASSRLS NOLOGIN;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE ROLE union_eyes_system NOSUPERUSER NOBYPASSRLS NOLOGIN;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE SCHEMA IF NOT EXISTS user_management;
 CREATE SCHEMA IF NOT EXISTS audit_security;
 
