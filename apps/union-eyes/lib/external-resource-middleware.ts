@@ -29,13 +29,21 @@ type NextRouteContext<TParams extends object> = {
   params?: TParams | Promise<TParams>;
 };
 
-type ExternalRouteContext<TParams extends object> = TParams | NextRouteContext<TParams>;
+type ExternalRouteContext<TParams extends object> = TParams | Promise<TParams> | NextRouteContext<TParams>;
+
+function isPromiseLike<T>(value: unknown): value is Promise<T> {
+  return Boolean(value && typeof (value as { then?: unknown }).then === 'function');
+}
 
 async function resolveRouteParams<TParams extends object>(
   params?: ExternalRouteContext<TParams>,
 ): Promise<TParams | undefined> {
   if (!params) {
     return undefined;
+  }
+
+  if (isPromiseLike<TParams>(params)) {
+    return await params;
   }
 
   if ('params' in params) {

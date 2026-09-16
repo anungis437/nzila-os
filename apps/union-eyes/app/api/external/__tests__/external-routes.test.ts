@@ -142,6 +142,36 @@ describe('external resource routes', () => {
     }));
   });
 
+  it('resolves the dynamic grievance id from a promised params object', async () => {
+    const { GET } = await import('@/app/api/external/grievances/[id]/route');
+    mocks.selectQueue.push([{
+      id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      grievanceNumber: 'GRV-1',
+      title: 'External appeal',
+      type: 'individual',
+      status: 'filed',
+      priority: 'medium',
+      step: 'step_1',
+      filedDate: new Date('2026-01-01T00:00:00.000Z'),
+      responseDeadline: null,
+      employerName: 'Employer',
+      workplaceName: 'Site A',
+      cbaArticle: '12',
+      cbaSection: '4',
+      summary: null,
+    }]);
+
+    const response = await GET(
+      new Request('https://example.test/api/external/grievances/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa?organizationId=99999999-9999-9999-9999-999999999999'),
+      Promise.resolve({ id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(expect.objectContaining({
+      matterId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    }));
+  });
+
   it('denies exact matter routes when a revoked or otherwise invalid authority is reported', async () => {
     const { GET } = await import('@/app/api/external/grievances/[id]/route');
     mocks.authorizeExternalMatterAccess.mockResolvedValueOnce({
