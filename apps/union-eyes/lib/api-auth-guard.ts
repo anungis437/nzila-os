@@ -667,11 +667,16 @@ function getPermissionsForRole(role: string): string[] {
   return [];
 }
 
+function isUuid(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 /**
  * Get unified user context with organization membership from database
  */
 export async function getUserContext(): Promise<UnifiedUserContext | null> {
-  const { userId } = await auth();
+  const authResult = await auth();
+  const { userId } = authResult;
 
   if (!userId) {
     return null;
@@ -755,6 +760,24 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
       };
     } catch (err) {
       logger.warn('[Auth] getUserContext: Entra/generic fallback failed', { userId, error: String(err) });
+    }
+
+    if (
+      authResult.sessionClaims?.authMethod === 'password' &&
+      isUuid(authResult.orgId)
+    ) {
+      const normalizedRole = normalizeRole(authResult.orgRole ?? 'member');
+      logger.info('[Auth] getUserContext: using password session org bootstrap context', {
+        userId,
+        organizationId: authResult.orgId,
+        role: normalizedRole,
+      });
+      return {
+        userId,
+        organizationId: authResult.orgId,
+        roles: [normalizedRole],
+        permissions: getPermissionsForRole(normalizedRole),
+      };
     }
 
     return null;

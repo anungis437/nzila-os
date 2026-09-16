@@ -367,6 +367,25 @@ describe('ApiAuthGuard', () => {
       const ctx = await getUserContext();
       expect(ctx!.roles).toContain('officer');
     });
+
+    it('uses password session organization when membership lookup is blocked before RLS context', async () => {
+      mocks.mockAuth.mockResolvedValue({
+        userId: 'user_123',
+        orgId: '11111111-1111-4111-8111-111111111111',
+        orgRole: 'member',
+        sessionClaims: { authMethod: 'password' },
+      });
+      mocks.mockOrgMembersFindFirst.mockResolvedValue(undefined);
+      mocks.mockGetOrganizationIdForUser.mockRejectedValue(new Error('RLS context required'));
+      mocks.mockClerkCurrentUser.mockResolvedValue({ publicMetadata: {} });
+
+      const ctx = await getUserContext();
+
+      expect(ctx).not.toBeNull();
+      expect(ctx!.userId).toBe('user_123');
+      expect(ctx!.organizationId).toBe('11111111-1111-4111-8111-111111111111');
+      expect(ctx!.roles).toContain('member');
+    });
   });
 
   // ── getUserContextForOrganization ────────────────────────────────
