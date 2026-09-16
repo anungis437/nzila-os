@@ -36,6 +36,36 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE document_privacy_label AS ENUM (
+    'public_internal',
+    'team_confidential',
+    'lro_confidential',
+    'privileged',
+    'case_restricted',
+    'highly_sensitive'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE document_record_status AS ENUM ('active', 'archived', 'deleted');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE document_linked_entity_type AS ENUM (
+    'case',
+    'grievance',
+    'member',
+    'policy_library',
+    'template_library',
+    'collective_agreement',
+    'other'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS public.organizations (
   id uuid PRIMARY KEY,
   name text NOT NULL,
@@ -481,6 +511,46 @@ CREATE TABLE IF NOT EXISTS public.grievances (
   response_deadline timestamptz,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.documents (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE,
+  org_id uuid,
+  title text,
+  category text,
+  blob_container text,
+  blob_path text,
+  content_type text,
+  size_bytes bigint,
+  sha256 text,
+  filename text,
+  name text NOT NULL DEFAULT 'E2E document',
+  file_url text NOT NULL DEFAULT 'about:blank',
+  file_size integer,
+  file_type text NOT NULL DEFAULT 'application/octet-stream',
+  document_type text,
+  mime_type text,
+  description text,
+  tags text[],
+  content_text text,
+  uploaded_by text NOT NULL DEFAULT 'e2e',
+  uploaded_at timestamptz NOT NULL DEFAULT now(),
+  privacy_label document_privacy_label NOT NULL DEFAULT 'team_confidential',
+  contains_pii boolean NOT NULL DEFAULT false,
+  contains_medical_sensitive boolean NOT NULL DEFAULT false,
+  contains_legal_privilege boolean NOT NULL DEFAULT false,
+  status document_record_status NOT NULL DEFAULT 'active',
+  member_pii boolean,
+  medical_sensitive boolean,
+  disciplinary_sensitive boolean,
+  is_confidential boolean DEFAULT false,
+  access_level text DEFAULT 'standard',
+  checksum text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  deleted_at timestamptz,
+  metadata jsonb DEFAULT '{}'::jsonb
 );
 
 -- Compatibility alias: some legacy paths query unqualified `audit_logs`
