@@ -57,6 +57,13 @@
       "when": 1789513920000,
       "tag": "0007_auth_bootstrap_runtime_remediation",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789588800000,
+      "tag": "0008_runtime_acceptance_closure",
+      "breakpoints": true
     }
   ]
 }

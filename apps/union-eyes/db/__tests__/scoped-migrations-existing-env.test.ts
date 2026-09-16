@@ -30,6 +30,7 @@ const CLI_PATH = path.join(REPO_ROOT, 'tooling/scripts/apply-union-eyes-scoped-m
 const TARGET_TAG = '0005_add_icra_assessment_capability_token';
 const EXTERNAL_PRIVILEGE_TAG = '0006_external_specialist_runtime_privilege_closure';
 const AUTH_BOOTSTRAP_TAG = '0007_auth_bootstrap_runtime_remediation';
+const RUNTIME_ACCEPTANCE_TAG = '0008_runtime_acceptance_closure';
 
 class FakeClient {
   ledgerTableExists = false;
@@ -161,6 +162,7 @@ describe('existing-environment scoped migration executor CLI', () => {
       expect(result.appliedTags).toContain(TARGET_TAG);
       expect(result.appliedTags).toContain(EXTERNAL_PRIVILEGE_TAG);
       expect(result.appliedTags).toContain(AUTH_BOOTSTRAP_TAG);
+      expect(result.appliedTags).toContain(RUNTIME_ACCEPTANCE_TAG);
       expect(result.finalPending).toBe(0);
       expect(client.ledger.size).toBe(entries.length);
     });
@@ -200,10 +202,12 @@ describe('existing-environment scoped migration executor CLI', () => {
       const hash0005 = computeMigrationHash(MIGRATIONS_DIR, TARGET_TAG).hash;
       const hash0006 = computeMigrationHash(MIGRATIONS_DIR, EXTERNAL_PRIVILEGE_TAG).hash;
       const hash0007 = computeMigrationHash(MIGRATIONS_DIR, AUTH_BOOTSTRAP_TAG).hash;
+      const hash0008 = computeMigrationHash(MIGRATIONS_DIR, RUNTIME_ACCEPTANCE_TAG).hash;
       expect(client.ledger.has(hash0004)).toBe(false);
       expect(client.ledger.has(hash0005)).toBe(false);
       expect(client.ledger.has(hash0006)).toBe(false);
       expect(client.ledger.has(hash0007)).toBe(false);
+      expect(client.ledger.has(hash0008)).toBe(false);
     });
 
     it('post-apply verification fails closed if a journal entry remains pending after applyScopedMigrations returns', async () => {
@@ -253,6 +257,32 @@ describe('existing-environment scoped migration executor CLI', () => {
   });
 
   describe('authority and scope boundaries', () => {
+    it('keeps the runtime acceptance closure tenant-and-actor scoped and insert-only', () => {
+      const migration = fs.readFileSync(
+        path.join(MIGRATIONS_DIR, `${RUNTIME_ACCEPTANCE_TAG}.sql`),
+        'utf8',
+      );
+      const rollback = fs.readFileSync(
+        path.join(MIGRATIONS_DIR, `${RUNTIME_ACCEPTANCE_TAG}.rollback.sql`),
+        'utf8',
+      );
+
+      expect(migration).toContain('ADD COLUMN IF NOT EXISTS "checksum" text');
+      expect(migration).toContain('ALTER TABLE "audit_security"."audit_logs" FORCE ROW LEVEL SECURITY');
+      expect(migration).toContain('DROP POLICY IF EXISTS "audit_insert_all"');
+      expect(migration).toContain('FOR INSERT');
+      expect(migration).toContain('TO "union_eyes_runtime"');
+      expect(migration).toContain("current_setting('app.current_org_id', true)");
+      expect(migration).toContain("current_setting('app.current_user_id', true)");
+      expect(migration).toContain('GRANT INSERT ON TABLE "audit_security"."audit_logs"');
+      expect(migration).not.toMatch(/GRANT\s+(SELECT|UPDATE|DELETE|ALL)[^;]*union_eyes_runtime/i);
+      expect(migration).not.toMatch(/union_eyes_system/);
+
+      expect(rollback).toContain('REVOKE INSERT ON TABLE "audit_security"."audit_logs"');
+      expect(rollback).toContain('DROP POLICY IF EXISTS "ue_runtime_audit_insert"');
+      expect(rollback).not.toMatch(/DROP\s+COLUMN/i);
+    });
+
     it('imports only the shared scoped-migration executor and pg/dotenv/node builtins — no bootstrap, snapshot, RLS, or role-provisioning modules', () => {
       const cliSrc = fs.readFileSync(CLI_PATH, 'utf8');
       const importLines = cliSrc.match(/^import .+$/gm) ?? [];

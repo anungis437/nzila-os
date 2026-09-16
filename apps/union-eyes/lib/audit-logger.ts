@@ -145,17 +145,18 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
 
     // If organizationId is provided, store in database with RLS context
     if (entry.organizationId) {
+      const organizationId = entry.organizationId;
       try {
         // Import schema dynamically to avoid circular dependencies
         const { auditLogs } = await import('@/db/schema');
         
-        await withRLSContext(async () => {
+        await withRLSContext({ organizationId }, async () => {
           return db.insert(auditLogs).values({
             action: entry.action || entry.eventType, // Map eventType to action
             resourceType: entry.resource || 'unknown', // Map resource to resourceType
             resourceId: entry.resourceId,
             userId: entry.userId,
-            organizationId: entry.organizationId!,
+            organizationId,
             ipAddress: entry.ipAddress,
             userAgent: entry.userAgent,
             severity: (entry.severity || AuditSeverity.MEDIUM).toLowerCase(), // Ensure lowercase
@@ -432,4 +433,3 @@ export async function auditBulkOperation(params: {
     outcome: 'success',
   });
 }
-

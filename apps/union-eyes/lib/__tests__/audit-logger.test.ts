@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
   mockInsert: vi.fn(),
   mockValues: vi.fn(),
+  mockWithRLSContext: vi.fn(),
 }));
 
 vi.mock('@/db', () => ({
@@ -22,7 +23,9 @@ vi.mock('../logger', () => ({
 }));
 
 vi.mock('../db/with-rls-context', () => ({
-  withRLSContext: vi.fn((fn: () => unknown) => fn()),
+  withRLSContext: mocks.mockWithRLSContext.mockImplementation(
+    (_context: unknown, operation: () => unknown) => operation(),
+  ),
 }));
 
 import {
@@ -73,6 +76,10 @@ describe('audit-logger', () => {
     });
 
     // The withRLSContext mock passes through, so insert should be called
+    expect(mocks.mockWithRLSContext).toHaveBeenCalledWith(
+      { organizationId: 'org-1' },
+      expect.any(Function),
+    );
     expect(mocks.mockInsert).toHaveBeenCalled();
   });
 
