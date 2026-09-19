@@ -460,12 +460,12 @@ export function ICRAAssessmentFlow({ locale = 'en-CA' }: { locale?: string }) {
 
       if (q.type === 'likert_5') {
         // Likert: rawValue is "1".."5". Normalize to 0..1.
-        // Confidence-sensing questions: higher = better → (raw-1)/4.
-        // Risk-inverted: higher raw = worse → (5-raw)/4.
+        // Risk inversion is applied once by the scoring engine. Persist the
+        // canonical raw normalization here so replay and server scoring agree.
         const numeric = Number.parseInt(rawValue, 10);
         if (!Number.isFinite(numeric) || numeric < q.scale.min || numeric > q.scale.max) continue;
         const linear = (numeric - q.scale.min) / (q.scale.max - q.scale.min);
-        normalizedScore = q.riskInverted ? 1 - linear : linear;
+        normalizedScore = linear;
       } else if ('options' in q) {
         const selectedOption = q.options.find((o) => o.value === rawValue);
         if (!selectedOption) continue;

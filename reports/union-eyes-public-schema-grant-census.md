@@ -1,10 +1,10 @@
 # Union Eyes — Public-Schema Grant-Scope Census
 
-Generated: 2026-09-15T11:48:10.635Z
+Generated: 2026-09-19T04:46:36.879Z
 
 PR #752 round 8 terminology correction: scanSchemaDeclarations() (+ the ADDITIONAL_PUBLIC_SCHEMA_FILES merge below, for sibling files outside db/schema/** that SCHEMA_ROOT's walk never visits) proves a table is DECLARED in TypeScript/Drizzle source — it does NOT independently prove the table exists in the deployed PostgreSQL catalog, in migration history, with the expected schema, or that the declaration is not itself an orphaned/stale artifact. Do not read these counts as "live physical tables" until cross-referenced against pg_catalog/information_schema and migration history (tracked separately, see rlsVerificationTier below — currently DECLARED only, no live-catalog evidence in this run). Does not include services/financial-service's own separate database boundary. This census answers scope-completeness for the eventual explicit-GRANT generator; it does NOT re-verify RLS policy correctness (see scripts/rls-verify.ts for that).
 
-- Additional declaration files merged (outside db/schema/**): C:\Users\AubertNungisa\Documents\Codex\2026-09-14\https-github-com-anungis437-nzila-os\work\nzila-os\apps\union-eyes\db\schema-organizations.ts, C:\Users\AubertNungisa\Documents\Codex\2026-09-14\https-github-com-anungis437-nzila-os\work\nzila-os\apps\union-eyes\db\schema-applications.ts, C:\Users\AubertNungisa\Documents\Codex\2026-09-14\https-github-com-anungis437-nzila-os\work\nzila-os\apps\union-eyes\db\data\communication.ts
+- Additional declaration files merged (outside db/schema/**): C:\Users\AubertNungisa\Documents\Codex\2026-09-18\paused-here-current-state-is-stable\work\nzila-os\apps\union-eyes\db\schema-organizations.ts, C:\Users\AubertNungisa\Documents\Codex\2026-09-18\paused-here-current-state-is-stable\work\nzila-os\apps\union-eyes\db\schema-applications.ts, C:\Users\AubertNungisa\Documents\Codex\2026-09-18\paused-here-current-state-is-stable\work\nzila-os\apps\union-eyes\db\data\communication.ts
 - Total canonical DECLARED (schema, table) keys: 711
 - Canonical DECLARED public-schema tables: 702
 - Canonical DECLARED non-public-schema tables: 9 (schemas: audit_security, user_management)

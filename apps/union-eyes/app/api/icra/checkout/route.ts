@@ -35,6 +35,7 @@ export const runtime = 'nodejs';
 const bodySchema = z.object({
   assessmentId: z.string().uuid('Invalid assessment ID'),
   tierId: z.enum(['executive_continuity_brief', 'institutional_continuity_diagnostic']),
+  locale: z.enum(['en-CA', 'fr-CA']).default('en-CA'),
 });
 
 // ── Pricing (CAD) — midpoint of published ranges, override via env ──────────
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { assessmentId, tierId } = parse.data;
+  const { assessmentId, tierId, locale } = parse.data;
 
   // Verify the assessment exists AND the caller holds its capability
   // (prevent arbitrary UUID injection / unlocking someone else's report).
@@ -156,17 +157,18 @@ export async function POST(request: NextRequest) {
   // Build the checkout session
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
-  const successUrl = `${baseUrl}/continuity-assessment/results/${assessmentId}?tier_unlocked=${tierId}`;
-  const cancelUrl = `${baseUrl}/continuity-assessment/results/${assessmentId}`;
+  const successUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}?tier_unlocked=${tierId}`;
+  const cancelUrl = `${baseUrl}/${locale}/continuity-assessment/results/${assessmentId}`;
 
   const currency = (process.env.STRIPE_DEFAULT_CURRENCY ?? 'CAD').toLowerCase();
 
   try {
     const stripe = getStripeClient();
-    const session = await stripe.checkout.sessions.create({
+    const checkoutParams = {
       mode: 'payment',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       line_items: buildLineItems(tierId, currency) as any,
+      managed_payments: { enabled: true },
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
@@ -176,7 +178,10 @@ export async function POST(request: NextRequest) {
       },
       // Collect buyer email for receipt — does not require account creation
       customer_creation: 'if_required',
-    });
+    } as Parameters<typeof stripe.checkout.sessions.create>[0] & {
+      managed_payments: { enabled: boolean };
+    };
+    const session = await stripe.checkout.sessions.create(checkoutParams);
 
     if (!session.url) {
       throw new Error('Stripe returned no checkout URL');

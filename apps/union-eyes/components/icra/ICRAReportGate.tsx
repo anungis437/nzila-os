@@ -35,6 +35,7 @@ interface ICRAReportGateProps {
   chapterNumber?: number;
   /** Optional "what is inside" bullet preview (3–4 short items). */
   chapters?: readonly string[];
+  locale?: 'en-CA' | 'fr-CA';
 }
 
 const TIER_PRICE: Record<Exclude<ReportTierId, 'continuity_reflection'>, string> = {
@@ -68,6 +69,7 @@ export function ICRAReportGate({
   ctaLabel,
   chapterNumber,
   chapters,
+  locale = 'en-CA',
 }: ICRAReportGateProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export function ICRAReportGate({
       const res = await fetch('/api/icra/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentId, tierId: requiredTier }),
+        body: JSON.stringify({ assessmentId, tierId: requiredTier, locale }),
       });
       const data = (await res.json()) as { url?: string; error?: string; tierId?: string };
       if (res.status === 409 && data.tierId) {

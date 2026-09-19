@@ -23,7 +23,7 @@ export const COPY = {
       'Every organization has people quietly holding things together — and when they leave, decisions, context, and operational know-how leave with them.',
     sub:
       'Critical knowledge often lives inside people instead of systems, so leadership transitions feel like rebuilding from scratch. Take a short readiness check to see where your organization is most exposed.',
-    primaryCta: 'Take the 10-minute readiness check',
+    primaryCta: 'Begin the readiness assessment',
     secondaryCta: 'Read what this is, and what it is not',
   },
   /**

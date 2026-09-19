@@ -257,6 +257,26 @@ describe('existing-environment scoped migration executor CLI', () => {
   });
 
   describe('authority and scope boundaries', () => {
+    it('creates auth membership prerequisites before applying their RLS policies', () => {
+      const migration = fs.readFileSync(
+        path.join(MIGRATIONS_DIR, `${EXTERNAL_PRIVILEGE_TAG}.sql`),
+        'utf8',
+      );
+      const createTable = migration.indexOf(
+        'CREATE TABLE IF NOT EXISTS "user_management"."organization_users"',
+      );
+      const createUniqueIndex = migration.indexOf(
+        'CREATE UNIQUE INDEX IF NOT EXISTS "organization_users_user_id_organization_id_idx"',
+      );
+      const enableRls = migration.indexOf(
+        'ALTER TABLE "user_management"."organization_users" ENABLE ROW LEVEL SECURITY',
+      );
+
+      expect(createTable).toBeGreaterThan(-1);
+      expect(createUniqueIndex).toBeGreaterThan(createTable);
+      expect(enableRls).toBeGreaterThan(createUniqueIndex);
+    });
+
     it('keeps the runtime acceptance closure tenant-and-actor scoped and insert-only', () => {
       const migration = fs.readFileSync(
         path.join(MIGRATIONS_DIR, `${RUNTIME_ACCEPTANCE_TAG}.sql`),
@@ -268,6 +288,8 @@ describe('existing-environment scoped migration executor CLI', () => {
       );
 
       expect(migration).toContain('ADD COLUMN IF NOT EXISTS "checksum" text');
+      expect(migration).toContain('CREATE SCHEMA IF NOT EXISTS "audit_security"');
+      expect(migration).toContain('CREATE TABLE IF NOT EXISTS "audit_security"."audit_logs"');
       expect(migration).toContain('ALTER TABLE "audit_security"."audit_logs" FORCE ROW LEVEL SECURITY');
       expect(migration).toContain('DROP POLICY IF EXISTS "audit_insert_all"');
       expect(migration).toContain('FOR INSERT');
@@ -277,6 +299,9 @@ describe('existing-environment scoped migration executor CLI', () => {
       expect(migration).toContain('GRANT INSERT ON TABLE "audit_security"."audit_logs"');
       expect(migration).not.toMatch(/GRANT\s+(SELECT|UPDATE|DELETE|ALL)[^;]*union_eyes_runtime/i);
       expect(migration).not.toMatch(/union_eyes_system/);
+      expect(migration.indexOf('CREATE TABLE IF NOT EXISTS "audit_security"."audit_logs"')).toBeLessThan(
+        migration.indexOf('ALTER TABLE "audit_security"."audit_logs" ENABLE ROW LEVEL SECURITY'),
+      );
 
       expect(rollback).toContain('REVOKE INSERT ON TABLE "audit_security"."audit_logs"');
       expect(rollback).toContain('DROP POLICY IF EXISTS "ue_runtime_audit_insert"');

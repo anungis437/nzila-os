@@ -7,6 +7,30 @@
 ALTER TABLE "documents"
   ADD COLUMN IF NOT EXISTS "checksum" text;--> statement-breakpoint
 
+CREATE SCHEMA IF NOT EXISTS "audit_security";--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "audit_security"."audit_logs" (
+  "audit_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "organization_id" uuid,
+  "user_id" varchar(255),
+  "action" varchar(100) NOT NULL,
+  "resource_type" varchar(50) NOT NULL,
+  "resource_id" uuid,
+  "old_values" jsonb,
+  "new_values" jsonb,
+  "ip_address" varchar(45),
+  "user_agent" text,
+  "session_id" uuid,
+  "correlation_id" uuid,
+  "severity" varchar(20) DEFAULT 'info',
+  "outcome" varchar(20) DEFAULT 'success',
+  "error_message" text,
+  "metadata" jsonb DEFAULT '{}'::jsonb,
+  "archived" boolean DEFAULT false NOT NULL,
+  "archived_at" timestamp with time zone,
+  "archived_path" text,
+  "created_at" timestamp with time zone DEFAULT now()
+);--> statement-breakpoint
+
 ALTER TABLE "audit_security"."audit_logs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "audit_security"."audit_logs" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
 

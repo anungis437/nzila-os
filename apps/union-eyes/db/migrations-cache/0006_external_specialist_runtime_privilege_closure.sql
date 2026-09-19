@@ -29,6 +29,23 @@ CREATE TABLE IF NOT EXISTS "user_management"."users" (
   "created_at" timestamp with time zone DEFAULT now(),
   "updated_at" timestamp with time zone DEFAULT now()
 );--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_management"."organization_users" (
+  "organization_user_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "organization_id" uuid NOT NULL,
+  "user_id" varchar(255) NOT NULL,
+  "role" varchar(50) DEFAULT 'member' NOT NULL,
+  "permissions" jsonb DEFAULT '[]'::jsonb,
+  "is_active" boolean DEFAULT true,
+  "is_primary" boolean DEFAULT false,
+  "invited_by" varchar(255),
+  "invited_at" timestamp with time zone,
+  "joined_at" timestamp with time zone,
+  "last_access_at" timestamp with time zone,
+  "created_at" timestamp with time zone DEFAULT now(),
+  "updated_at" timestamp with time zone DEFAULT now()
+);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "organization_users_user_id_organization_id_idx"
+  ON "user_management"."organization_users" ("user_id", "organization_id");--> statement-breakpoint
 ALTER TABLE "user_management"."users" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "user_management"."users" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "user_management"."organization_users" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint

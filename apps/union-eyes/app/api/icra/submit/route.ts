@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import type { Answer, ConsentRecord } from '@/lib/icra/types'
-import { scoreAssessment } from '@/lib/icra/scoring'
+import { buildAnswer, scoreAssessment } from '@/lib/icra/scoring'
 import { rateLimit } from '@/lib/rate-limit'
 import { fireAndForgetEvent, hashIp } from '@/lib/icra/observability'
 import { verifyTurnstileToken } from '@/lib/icra/turnstile'
@@ -22,6 +22,7 @@ import {
   QUESTION_BANK_VERSION,
   CTX_PRIMARY_CHALLENGE_MAX_LENGTH,
   CTX_SELECT_VALUE_MAX_LENGTH,
+  questionById,
 } from '@/lib/icra/questions'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import {
@@ -53,6 +54,41 @@ interface SubmitBody {
   answers: Answer[]
   locale?: string
   turnstileToken?: string | null
+}
+
+function canonicalizeAnswers(
+  submitted: Answer[],
+  expectedQuestionIds: ReadonlySet<string>,
+): Answer[] {
+  const seen = new Set<string>()
+  const canonical: Answer[] = []
+
+  for (const candidate of submitted) {
+    if (!candidate || typeof candidate.questionId !== 'string') {
+      throw new Error('Each answer must include a questionId.')
+    }
+    if (seen.has(candidate.questionId)) {
+      throw new Error(`Duplicate answer for question ${candidate.questionId}.`)
+    }
+    if (!expectedQuestionIds.has(candidate.questionId)) {
+      throw new Error(`Question ${candidate.questionId} is not part of this assessment route.`)
+    }
+
+    const question = questionById(candidate.questionId)
+    if (!question) throw new Error(`Unknown question ${candidate.questionId}.`)
+
+    // Never trust client-supplied scores, weights, versions, or inversion flags.
+    // Rebuild the complete answer from the governed question bank and raw value.
+    canonical.push(buildAnswer(question, candidate.rawValue))
+    seen.add(candidate.questionId)
+  }
+
+  const missing = [...expectedQuestionIds].filter((id) => !seen.has(id))
+  if (missing.length > 0) {
+    throw new Error(`Assessment is incomplete (${missing.length} unanswered question${missing.length === 1 ? '' : 's'}).`)
+  }
+
+  return canonical
 }
 
 function validateBody(body: unknown): body is SubmitBody {
@@ -143,6 +179,34 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     normalizedOrgContext = entries.length > 0 ? Object.fromEntries(entries) : null
   }
 
+  let routedForSubmission: ReturnType<typeof routeQuestionBank> | null = null
+  let profileForRouting: ReturnType<typeof classifyOrgContext> | null = null
+  try {
+    profileForRouting = classifyOrgContext({ rawForm: normalizedOrgContext ?? {} })
+    routedForSubmission = routeQuestionBank(
+      ALL_QUESTIONS as unknown as RoutableQuestion[],
+      profileForRouting,
+    )
+  } catch (routingErr) {
+    logger.warn('icra.assessment.routing_validation_fallback', {
+      error: routingErr instanceof Error ? routingErr.message : 'unknown',
+    })
+  }
+
+  const expectedQuestionIds = new Set(
+    (routedForSubmission?.includedQuestions ?? ALL_QUESTIONS).map((question) => question.id),
+  )
+
+  let canonicalAnswers: Answer[]
+  try {
+    canonicalAnswers = canonicalizeAnswers(answers, expectedQuestionIds)
+  } catch (answerErr) {
+    return NextResponse.json(
+      { error: answerErr instanceof Error ? answerErr.message : 'Invalid assessment answers.' },
+      { status: 400 },
+    )
+  }
+
   try {
     return await withSystemContext(async (tx) => {
       const capabilityToken = generateCapabilityToken()
@@ -154,15 +218,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // without a schema migration. Never includes raw answers / PII.
       let organizationContextForInsert: Record<string, unknown> | null = normalizedOrgContext
       try {
-        const profileForRouting = classifyOrgContext({
+        const persistedProfile = profileForRouting ?? classifyOrgContext({
           rawForm: normalizedOrgContext ?? {},
         })
-        const routed = routeQuestionBank(
+        const routed = routedForSubmission ?? routeQuestionBank(
           ALL_QUESTIONS as unknown as RoutableQuestion[],
-          profileForRouting,
+          persistedProfile,
         )
         const adaptive = buildPersistedAdaptiveContext(
-          profileForRouting,
+          persistedProfile,
           routed,
           QUESTION_BANK_VERSION,
         )
@@ -198,16 +262,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         throw new Error('Assessment insert returned no id')
       }
 
-      const { profile } = scoreAssessment(assessmentId, answers, normalizedOrgContext)
+      const { profile } = scoreAssessment(assessmentId, canonicalAnswers, normalizedOrgContext)
 
       // Run all dependent inserts in parallel — they each only depend on
       // assessmentId, so this collapses ~5 sequential round-trips into one.
       const inserts: Array<Promise<unknown>> = []
 
-      if (answers.length > 0) {
+      if (canonicalAnswers.length > 0) {
         inserts.push(
           tx.insert(icraAssessmentAnswers).values(
-            answers.map((a) => ({
+            canonicalAnswers.map((a) => ({
               assessmentId,
               questionId: a.questionId,
               questionVersion: a.questionVersion,

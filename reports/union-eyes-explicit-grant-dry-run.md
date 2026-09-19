@@ -1,6 +1,6 @@
 # Union Eyes — Explicit Grant Dry-Run Plan
 
-Generated: 2026-09-15T11:48:25.555Z
+Generated: 2026-09-19T04:46:08.890Z
 
 Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.
 

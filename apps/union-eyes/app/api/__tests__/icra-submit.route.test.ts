@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   hashIp: vi.fn(),
   fireAndForgetEvent: vi.fn(),
   verifyTurnstileToken: vi.fn(),
+  buildAnswer: vi.fn(),
   scoreAssessment: vi.fn(),
   withSystemContext: vi.fn(),
   logger: {
@@ -26,7 +27,10 @@ vi.mock('@/lib/icra/observability', () => ({
   fireAndForgetEvent: m.fireAndForgetEvent,
 }));
 vi.mock('@/lib/icra/turnstile', () => ({ verifyTurnstileToken: m.verifyTurnstileToken }));
-vi.mock('@/lib/icra/scoring', () => ({ scoreAssessment: m.scoreAssessment }));
+vi.mock('@/lib/icra/scoring', () => ({
+  buildAnswer: m.buildAnswer,
+  scoreAssessment: m.scoreAssessment,
+}));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/icra/adaptation', () => ({
@@ -46,10 +50,10 @@ function baseBody() {
     orgContext: { sector: 'public' },
     answers: [
       {
-        questionId: 'q1',
-        questionVersion: '1',
-        rawValue: 'yes',
-        normalizedScore: 0.5,
+        questionId: 'od_01',
+        questionVersion: 999,
+        rawValue: '0',
+        normalizedScore: 0.99,
         weightsSnapshot: { governance: 1 },
         riskInverted: false,
         answeredAt: new Date().toISOString(),
@@ -71,7 +75,25 @@ describe('icra/submit route', () => {
     m.rateLimit.mockReturnValue({ success: true });
     m.verifyTurnstileToken.mockResolvedValue({ success: true });
     m.classifyOrgContext.mockReturnValue({ orgType: 'local' });
-    m.routeQuestionBank.mockReturnValue([{ id: 'q1' }]);
+    m.routeQuestionBank.mockReturnValue({
+      includedQuestions: [{ id: 'od_01' }],
+      deferredQuestions: [],
+      requiredQuestions: [{ id: 'od_01' }],
+      optionalContextQuestions: [],
+      routingRationale: [],
+      routeVersion: 'test',
+      usedSafeDefault: false,
+      selectionFingerprint: 'test',
+    });
+    m.buildAnswer.mockImplementation((question: any, rawValue: string) => ({
+      questionId: question.id,
+      questionVersion: 3,
+      rawValue,
+      normalizedScore: 0,
+      weightsSnapshot: { institutional_continuity: 1 },
+      riskInverted: Boolean(question.riskInverted),
+      answeredAt: '2026-09-18T00:00:00.000Z',
+    }));
     m.buildPersistedAdaptiveContext.mockReturnValue({ routed: true });
     m.embedPersistedAdaptiveContext.mockReturnValue({ sector: 'public', _adaptive: { routed: true } });
     m.scoreAssessment.mockReturnValue({
@@ -153,6 +175,54 @@ describe('icra/submit route', () => {
     expect(response.status).toBe(201);
     expect(payload).toMatchObject({ assessmentId: 'assessment_1' });
     expect(m.scoreAssessment).toHaveBeenCalled();
+  });
+
+  it('rebuilds scores from raw answers instead of trusting client scoring fields', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/icra/submit', {
+      method: 'POST',
+      body: JSON.stringify(baseBody()),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(201);
+    expect(m.buildAnswer).toHaveBeenCalledWith(expect.objectContaining({ id: 'od_01' }), '0');
+    expect(m.scoreAssessment).toHaveBeenCalledWith(
+      'assessment_1',
+      [expect.objectContaining({
+        questionId: 'od_01',
+        questionVersion: 3,
+        normalizedScore: 0,
+        weightsSnapshot: { institutional_continuity: 1 },
+      })],
+      { sector: 'public' },
+    );
+  });
+
+  it('rejects an incomplete routed assessment', async () => {
+    const { POST } = await loadRoute();
+    m.routeQuestionBank.mockReturnValueOnce({
+      includedQuestions: [{ id: 'od_01' }, { id: 'od_02' }],
+      deferredQuestions: [],
+      requiredQuestions: [{ id: 'od_01' }, { id: 'od_02' }],
+      optionalContextQuestions: [],
+      routingRationale: [],
+      routeVersion: 'test',
+      usedSafeDefault: false,
+      selectionFingerprint: 'test',
+    });
+
+    const response = await POST(new NextRequest('http://localhost/api/icra/submit', {
+      method: 'POST',
+      body: JSON.stringify(baseBody()),
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringContaining('incomplete'),
+    });
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 
   it('issues a capability token and sets the issuance cookie on creation', async () => {

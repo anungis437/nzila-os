@@ -54,7 +54,7 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
       'Executive Stewardship Reflections',
       'Full Continuity Burden Index — human compensation indicators',
     ],
-    ctaLabel: 'Take the 10-minute readiness check',
+    ctaLabel: 'Begin the readiness assessment',
     ctaHref: '/continuity-assessment/start',
   },
 

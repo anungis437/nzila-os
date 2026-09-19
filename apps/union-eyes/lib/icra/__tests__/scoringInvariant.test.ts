@@ -10,7 +10,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildUniformAnswers, buildGradedAnswers } from '../../integration/__fixtures__/ociFixtures';
-import { scoreAssessment } from '../scoring';
+import { questionById } from '../questions';
+import { buildAnswer, scoreAssessment } from '../scoring';
 
 describe('OCRA scoring invariants', () => {
   it('composite is a finite integer in [0, 100] for every uniform band', () => {
@@ -47,5 +48,22 @@ describe('OCRA scoring invariants', () => {
     const b = scoreAssessment('invariant:eq-a', buildUniformAnswers(2)).profile;
     expect(a.dimensions).toEqual(b.dimensions);
     expect(a.sections).toEqual(b.sections);
+  });
+
+  it('inverts risk-worded responses exactly once', () => {
+    const question = questionById('gv_03');
+    expect(question).toBeDefined();
+
+    const lowDependency = scoreAssessment(
+      'invariant:risk-low',
+      [buildAnswer(question!, '0')],
+    ).profile;
+    const embeddedDependency = scoreAssessment(
+      'invariant:risk-high',
+      [buildAnswer(question!, '4')],
+    ).profile;
+
+    expect(lowDependency.composite).toBe(100);
+    expect(embeddedDependency.composite).toBe(0);
   });
 });

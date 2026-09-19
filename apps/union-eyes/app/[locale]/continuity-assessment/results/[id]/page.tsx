@@ -213,7 +213,11 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       </div>
       {/* ── Report body ─────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
-        <ICRAProfile profile={profile} tierId={profile.reportTierId} />
+        <ICRAProfile
+          profile={profile}
+          tierId={profile.reportTierId}
+          locale={locale === 'fr-CA' ? 'fr-CA' : 'en-CA'}
+        />
       </section>
     </>
   );

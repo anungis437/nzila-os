@@ -121,12 +121,13 @@ const OBSERVATION_SEVERITY_ORDER: Record<ContinuityObservation['severity'], numb
 interface ICRAProfileProps {
   profile: InstitutionalContinuityProfile;
   tierId?: ReportTierId;
+  locale?: 'en-CA' | 'fr-CA';
 }
 
 const DIMENSION_LABELS: Record<string, string> = {
   institutional_continuity: 'Organizational Continuity',
-  governance_fragility: 'Governance Fragility',
-  trust_debt: 'Trust Debt',
+  governance_fragility: 'Governance Resilience',
+  trust_debt: 'Trust Resilience',
   operational_memory: 'Operational Memory',
   transition_readiness: 'Transition Readiness',
 };
@@ -161,7 +162,7 @@ function DimensionBar({ dim }: { dim: DimensionScore }) {
           {label}
           {isRisk && (
             <span className="ml-1.5 rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] text-stone-500">
-              risk dimension
+              risk-adjusted
             </span>
           )}
         </span>
@@ -338,7 +339,11 @@ function StewardshipSignalList({ signals }: { signals: StewardshipSignal[] }) {
   );
 }
 
-export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAProfileProps) {
+export function ICRAProfile({
+  profile,
+  tierId = 'continuity_reflection',
+  locale = 'en-CA',
+}: ICRAProfileProps) {
   const { maturityBand, composite, dimensions, sections, observations, recommendations } = profile;
   const assessmentId = profile.assessmentId;
   const insights = profile.insights ?? [];
@@ -448,6 +453,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
               teaser="The full analysis names the specific places where institutional continuity is currently being maintained through informal human effort rather than institutional systems."
               requiredTier="executive_continuity_brief"
               assessmentId={assessmentId}
+              locale={locale}
               chapterNumber={5}
               chapters={[
                 'A ranked list of the institution\u2019s active human-compensation indicators',
@@ -595,6 +601,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 teaser="Governance procedures are in place, but the evidentiary trail required to defend them under audit appears thinner than the structure suggests."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
+                locale={locale}
                 chapterNumber={1}
                 chapters={[
                   'Where governance interpretation has quietly concentrated in a small number of people',
@@ -610,6 +617,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 teaser="A meaningful portion of institutional continuity appears to be carried informally — sustainable until the people carrying it change."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
+                locale={locale}
                 chapterNumber={2}
                 chapters={[
                   'Where continuity is currently held by individuals rather than institutional systems',
@@ -625,6 +633,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 teaser="Operational coherence may currently depend on a smaller circle of people than the governance posture suggests."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
+                locale={locale}
                 chapterNumber={3}
                 chapters={[
                   'A map of where critical institutional knowledge is currently concentrated',
@@ -640,6 +649,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
                 teaser="Modernization that outpaces continuity infrastructure tends to import operational fragility faster than it retires it."
                 requiredTier="executive_continuity_brief"
                 assessmentId={assessmentId}
+                locale={locale}
                 chapterNumber={4}
                 chapters={[
                   'Where current modernization plans may erode institutional memory if unaccompanied',
@@ -758,6 +768,7 @@ export function ICRAProfile({ profile, tierId = 'continuity_reflection' }: ICRAP
               teaser="Additional recommendations — immediate, medium-term, and structural — are sequenced inside the Leadership Briefing Report so they reinforce rather than fragment one another."
               requiredTier="executive_continuity_brief"
               assessmentId={assessmentId}
+              locale={locale}
               chapterNumber={6}
               chapters={[
                 'A sequenced list of immediate, medium-term, and structural recommendations',

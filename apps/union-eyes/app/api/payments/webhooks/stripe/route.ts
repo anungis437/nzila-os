@@ -28,6 +28,13 @@ export const dynamic = 'force-dynamic';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? '';
 
+const PLATFORM_LEDGER_EVENT_TYPES = new Set([
+  'payment_intent.succeeded',
+  'invoice.paid',
+  'invoice.payment_failed',
+  'charge.refunded',
+]);
+
 function verifyStripeSignature(
   payload: string,
   signature: string,
@@ -52,18 +59,25 @@ function verifyStripeSignature(
     .update(signedPayload)
     .digest('hex');
 
-  return parts.signatures.some(
-    (sig) => crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)),
-  );
+  const expectedBuffer = Buffer.from(expected);
+  return parts.signatures.some((sig) => {
+    const signatureBuffer = Buffer.from(sig);
+    return (
+      signatureBuffer.length === expectedBuffer.length &&
+      crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
+    );
+  });
 }
 
 /** Resolve billing account ID from org, return null if not found. */
 async function resolveBillingAccountId(organizationId: string): Promise<string | null> {
-  const [acct] = await db
-    .select({ id: billingAccounts.id })
-    .from(billingAccounts)
-    .where(eq(billingAccounts.organizationId, organizationId))
-    .limit(1);
+  const [acct] = await withSystemContext((tx) =>
+    tx
+      .select({ id: billingAccounts.id })
+      .from(billingAccounts)
+      .where(eq(billingAccounts.organizationId, organizationId))
+      .limit(1),
+  );
   return acct?.id ?? null;
 }
 
@@ -88,15 +102,21 @@ export async function POST(request: NextRequest) {
     const eventType = event?.type as string;
     const eventId = event?.id as string;
 
-    // Idempotency: check if we already processed this event
-    const [existing] = await db
-      .select()
-      .from(platformPayments)
-      .where(eq(platformPayments.externalReference, eventId))
-      .limit(1);
+    // Organization billing events use the platform ledger as their replay
+    // guard. Checkout products own idempotency in their fulfillment tables,
+    // so they must not depend on the organization billing schema.
+    if (PLATFORM_LEDGER_EVENT_TYPES.has(eventType)) {
+      const [existing] = await withSystemContext((tx) =>
+        tx
+          .select()
+          .from(platformPayments)
+          .where(eq(platformPayments.externalReference, eventId))
+          .limit(1),
+      );
 
-    if (existing) {
-      return NextResponse.json({ received: true, status: 'duplicate' });
+      if (existing) {
+        return NextResponse.json({ received: true, status: 'duplicate' });
+      }
     }
 
     switch (eventType) {
@@ -424,7 +444,12 @@ export async function POST(request: NextRequest) {
               icraTierId,
               err: icraErr,
             });
-            // Fall through — return 200 to prevent Stripe retries, issue is logged
+            // A paid report must not remain locked after a transient failure.
+            // Returning non-2xx asks Stripe to retry this idempotent fulfillment.
+            return NextResponse.json(
+              { received: false, error: 'ICRA fulfillment failed' },
+              { status: 500 },
+            );
           }
         } else if (session?.metadata?.product === 'workbook') {
           // ── Workbook (Self-Guided) tier fulfillment ──
@@ -439,11 +464,13 @@ export async function POST(request: NextRequest) {
           }
 
           try {
-            const [existing] = await db
-              .select({ reportTierId: workbooks.reportTierId, claimToken: workbooks.claimToken })
-              .from(workbooks)
-              .where(eq(workbooks.id, workbookId))
-              .limit(1);
+            const [existing] = await withSystemContext((tx) =>
+              tx
+                .select({ reportTierId: workbooks.reportTierId, claimToken: workbooks.claimToken })
+                .from(workbooks)
+                .where(eq(workbooks.id, workbookId))
+                .limit(1),
+            );
 
             if (!existing) {
               logger.warn('[stripe-webhook] Workbook not found', { workbookId });
@@ -468,32 +495,34 @@ export async function POST(request: NextRequest) {
             const paymentRef =
               (session?.payment_intent as string | undefined) ?? (session?.id as string);
 
-            await db
-              .update(workbooks)
-              .set({
-                reportTierId: workbookTierId,
-                stripePaymentRef: paymentRef,
-                claimEmail: customerEmail,
-                claimToken,
-                claimTokenExpiresAt: claimExpiry,
-                status: 'awaiting_claim',
-                updatedAt: new Date(),
-              })
-              .where(eq(workbooks.id, workbookId));
+            await withSystemContext(async (tx) => {
+              await tx
+                .update(workbooks)
+                .set({
+                  reportTierId: workbookTierId,
+                  stripePaymentRef: paymentRef,
+                  claimEmail: customerEmail,
+                  claimToken,
+                  claimTokenExpiresAt: claimExpiry,
+                  status: 'awaiting_claim',
+                  updatedAt: new Date(),
+                })
+                .where(eq(workbooks.id, workbookId));
 
-            // Audit-grade purchase record (uniq on stripePaymentRef \u2014 idempotent)
-            await db
-              .insert(workbookPurchases)
-              .values({
-                workbookId,
-                stripePaymentRef: paymentRef,
-                tierId: workbookTierId,
-                amountCents:
-                  typeof session?.amount_total === 'number' ? session.amount_total : 0,
-                currency: (session?.currency as string | undefined)?.toUpperCase() ?? 'CAD',
-                customerEmail,
-              })
-              .onConflictDoNothing();
+              // Audit-grade purchase record (uniq on stripePaymentRef \u2014 idempotent)
+              await tx
+                .insert(workbookPurchases)
+                .values({
+                  workbookId,
+                  stripePaymentRef: paymentRef,
+                  tierId: workbookTierId,
+                  amountCents:
+                    typeof session?.amount_total === 'number' ? session.amount_total : 0,
+                  currency: (session?.currency as string | undefined)?.toUpperCase() ?? 'CAD',
+                  customerEmail,
+                })
+                .onConflictDoNothing();
+            });
 
             logger.info('[stripe-webhook] Workbook tier upgraded & claim token issued', {
               workbookId,
@@ -557,7 +586,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error) {
     logger.error('[stripe-webhook] Error processing webhook:', error);
-    // Always return 200 to prevent Stripe retries on internal errors
-    return NextResponse.json({ received: true, error: 'Internal processing error' });
+    // Preserve Stripe's retry contract for transient database or downstream
+    // failures. All mutation branches are idempotent.
+    return NextResponse.json(
+      { received: false, error: 'Internal processing error' },
+      { status: 500 },
+    );
   }
 }

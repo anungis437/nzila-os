@@ -165,6 +165,21 @@ describe('payments/webhooks/stripe route', () => {
     await expect(response.json()).resolves.toMatchObject({ error: 'Invalid signature' });
   });
 
+  it('rejects malformed signatures without throwing', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    const response = await POST(new NextRequest('http://localhost/api/payments/webhooks/stripe', {
+      method: 'POST',
+      body: JSON.stringify({ id: 'evt_1', type: 'payment_intent.succeeded', data: { object: {} } }),
+      headers: {
+        'content-type': 'application/json',
+        'stripe-signature': 't=1700000000,v1=short',
+      },
+    }));
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({ error: 'Invalid signature' });
+  });
+
   it('rejects requests when the webhook secret is missing', async () => {
     const { POST } = await loadRoute('');
     const payload = JSON.stringify({ id: 'evt_1', type: 'payment_intent.succeeded', data: { object: {} } });
@@ -183,6 +198,39 @@ describe('payments/webhooks/stripe route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ received: true, status: 'duplicate' });
+  });
+
+  it('returns a retryable failure when system database access fails', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.withSystemContext.mockRejectedValueOnce(new Error('database unavailable'));
+    const payload = JSON.stringify({
+      id: 'evt_retryable_failure',
+      type: 'payment_intent.succeeded',
+      data: { object: {} },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      received: false,
+      error: 'Internal processing error',
+    });
+  });
+
+  it('acknowledges unrelated signed events without querying the billing ledger', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    const payload = JSON.stringify({
+      id: 'evt_configuration_probe',
+      type: 'unioneyes.configuration.probe',
+      data: { object: {} },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ received: true });
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 
   it('records a successful payment intent and captures the transaction fee', async () => {
@@ -310,7 +358,7 @@ describe('payments/webhooks/stripe route', () => {
 
   it('upgrades workbook purchases and issues a claim token', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([], [{ reportTierId: 'continuity_reflection', claimToken: null }]);
+    m.queueSelect([{ reportTierId: 'continuity_reflection', claimToken: null }]);
     m.queueUpdate([]);
     const payload = JSON.stringify({
       id: 'evt_workbook_1',
@@ -344,13 +392,40 @@ describe('payments/webhooks/stripe route', () => {
     }));
   });
 
-  it('returns a non-retrying success envelope on internal parsing errors', async () => {
+  it('returns a retryable error when ICRA paid-report fulfillment fails', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.withSystemContext.mockRejectedValueOnce(new Error('transient database failure'));
+    const payload = JSON.stringify({
+      id: 'evt_icra_failure_1',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_icra_failure_1',
+          metadata: {
+            product: 'icra_report',
+            icra_assessment_id: '00000000-0000-0000-0000-000000000099',
+            icra_tier_id: 'executive_continuity_brief',
+          },
+        },
+      },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      received: false,
+      error: 'ICRA fulfillment failed',
+    });
+  });
+
+  it('returns a retryable failure on internal parsing errors', async () => {
     const { POST } = await loadRoute('whsec_test');
     const response = await POST(makeStripeRequest('not-json', 'whsec_test'));
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(500);
     await expect(response.json()).resolves.toMatchObject({
-      received: true,
+      received: false,
       error: 'Internal processing error',
     });
   });
