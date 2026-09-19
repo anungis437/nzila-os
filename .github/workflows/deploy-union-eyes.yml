@@ -1592,8 +1592,7 @@ jobs:
           # paths get a SEPARATE SYSTEM_DATABASE_URL for `union_eyes_system`.
           #
           # This creates/updates the Container App secrets as native Key Vault
-          # references (same pattern already used for resend-api-key /
-          # cron-secret) whenever the underlying Key Vault secret exists —
+          # references whenever the underlying Key Vault secret exists —
           # writing a Key Vault secret does NOT automatically create a
           # Container App secret; those are two different stores, and this
           # step is the explicit handoff between them.
@@ -1630,8 +1629,38 @@ jobs:
             fi
           }
 
+          ensure_required_kv_backed_secret() {
+            local SECRET_NAME="$1"
+            local ENV_VAR_NAME="$2"
+
+            if ! az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query id -o tsv >/dev/null 2>&1; then
+              echo "::error::Required production secret ${SECRET_NAME} not found in Key Vault ${KEY_VAULT_NAME}."
+              exit 1
+            fi
+
+            az containerapp secret set \
+              --name "$TARGET_APP" \
+              --resource-group "$TARGET_RG" \
+              --secrets "${SECRET_NAME}=keyvaultref:https://${KEY_VAULT_NAME}.vault.azure.net/secrets/${SECRET_NAME},identityref:system" \
+              >/dev/null
+            FRONTEND_ENV_VARS+=("${ENV_VAR_NAME}=secretref:${SECRET_NAME}")
+            echo "::notice::${ENV_VAR_NAME} wired to required Key Vault-backed secret ${SECRET_NAME}."
+          }
+
           ensure_kv_backed_secret "union-eyes-runtime-database-url" "DATABASE_URL"
           ensure_kv_backed_secret "union-eyes-system-database-url" "SYSTEM_DATABASE_URL"
+
+          if [ "${{ needs.plan.outputs.environment }}" = "production" ]; then
+            ensure_required_kv_backed_secret "resend-api-key" "RESEND_API_KEY"
+            ensure_required_kv_backed_secret "resend-webhook-secret" "RESEND_WEBHOOK_SECRET"
+            FRONTEND_ENV_VARS+=(
+              "EMAIL_PROVIDER=resend"
+              "RESEND_FROM_EMAIL=noreply@unioneyes.app"
+              "EMAIL_FROM=noreply@unioneyes.app"
+              "EMAIL_REPLY_TO=support@unioneyes.app"
+              "READY_REQUIRE_EMAIL_DELIVERY=true"
+            )
+          fi
 
           if [ "${{ needs.plan.outputs.environment }}" = "pilot" ]; then
             FRONTEND_ENV_VARS+=(
