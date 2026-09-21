@@ -172,10 +172,12 @@ class IntegrationIdempotencyKey(models.Model):
             models.Index(fields=["expires_at"], name="idx_idempkey_expires"),
         ]
         constraints = [
+            # Deterministic DB invariant. TTL/expiry is enforced as a data
+            # lifecycle (reservation reclaim), not a time-relative partial index
+            # (Postgres cannot reference now() in an index predicate).
             models.UniqueConstraint(
                 fields=["request_hash", "org_id"],
                 name="uq_idempkey_hash_org",
-                condition=models.Q(expires_at__gte=timezone.now()),
             ),
         ]
 
