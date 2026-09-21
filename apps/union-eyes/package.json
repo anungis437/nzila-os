@@ -22,6 +22,7 @@
     "clean": "rm -rf .next .turbo node_modules",
     "db:generate": "drizzle-kit generate",
     "seed:test-env": "tsx scripts/seed-test-env.ts",
+    "db:provision-roles": "tsx scripts/provision-runtime-db-roles.ts",
     "db:bootstrap": "node ../../tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
     "db:align": "tsx scripts/align-org-schema.ts",
     "db:migrate": "node ../../tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
