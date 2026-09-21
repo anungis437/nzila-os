@@ -231,6 +231,14 @@ $$ LANGUAGE plpgsql;
 -- a genuinely separate system/platform authority, not ordinary tenant
 -- authentication — matches billing/isolation.py's MultiPartyIsolationMixin; the
 -- only real writer is the system cron path via withSystemContext).
+-- Legacy-lineage compatibility: a database that ran the frozen Round58 lineage
+-- (db/migrations/20260910_rls_enforcement_expansion_round58.sql) already defines
+-- this same-signature helper with different parameter names (p_org_column_a/b),
+-- and PostgreSQL CREATE OR REPLACE cannot rename an existing function's input
+-- parameters. Drop it first (idempotent, never CASCADE) so the canonical scoped
+-- definition below applies cleanly on both fresh scoped and legacy databases.
+DROP FUNCTION IF EXISTS ue_create_multi_party_rls_policy(text, text, text);
+--> statement-breakpoint
 CREATE OR REPLACE FUNCTION ue_create_multi_party_rls_policy(
   p_table_name TEXT,
   p_party_column_1 TEXT,
