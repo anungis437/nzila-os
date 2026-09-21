@@ -71,6 +71,13 @@
       "when": 1789660000000,
       "tag": "0009_baseline_runtime_role_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789720000000,
+      "tag": "0010_tenant_isolation_rls_foundation",
+      "breakpoints": true
     }
   ]
 }

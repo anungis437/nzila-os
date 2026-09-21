@@ -63,16 +63,21 @@ function canonicalizeStatements(sql: string): string[] {
 }
 
 describe('0009 baseline runtime-role grant migration — journal registration', () => {
-  it('is registered as the final scoped journal entry with breakpoints enabled', () => {
+  it('is registered with breakpoints enabled, immediately before the 0010 RLS foundation entry', () => {
     const journal = JSON.parse(fs.readFileSync(JOURNAL_PATH, 'utf8'));
     const entries = journal.entries ?? [];
-    const last = entries[entries.length - 1];
-    expect(last.tag).toBe(BASELINE_TAG);
-    expect(last.breakpoints).toBe(true);
-    // strictly-increasing idx and monotonic ordering after 0008
+    // 0009 is no longer the final entry — 0010_tenant_isolation_rls_foundation
+    // was appended after it. Locate 0009 by tag and assert its position.
+    const baselineIdx = entries.findIndex((e: { tag: string }) => e.tag === BASELINE_TAG);
+    expect(baselineIdx).toBeGreaterThanOrEqual(0);
+    const baseline = entries[baselineIdx];
+    expect(baseline.breakpoints).toBe(true);
+    // strictly-increasing idx and monotonic ordering
     const idxs = entries.map((e: { idx: number }) => e.idx);
     expect(idxs).toEqual([...idxs].sort((a, b) => a - b));
-    expect(last.idx).toBe(entries.length - 1);
+    expect(baseline.idx).toBe(baselineIdx);
+    // the entry that follows 0009 is the 0010 RLS foundation migration
+    expect(entries[baselineIdx + 1]?.tag).toBe('0010_tenant_isolation_rls_foundation');
   });
 
   it('has a migration file on disk that the shared executor can hash', () => {
