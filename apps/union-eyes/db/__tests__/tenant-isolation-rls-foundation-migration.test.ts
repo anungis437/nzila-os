@@ -69,19 +69,23 @@ function nonCommentSql(source: string): string {
 }
 
 describe('0010 RLS foundation migration — journal registration', () => {
-  it('is registered as the final scoped journal entry at idx 10 with breakpoints enabled, after 0009', () => {
+  it('is registered at idx 10 with breakpoints enabled, immediately after 0009', () => {
     const journal = JSON.parse(fs.readFileSync(JOURNAL_PATH, 'utf8'));
     const entries = journal.entries ?? [];
-    const last = entries[entries.length - 1];
-    expect(last.tag).toBe(RLS_TAG);
-    expect(last.idx).toBe(10);
-    expect(last.breakpoints).toBe(true);
+    const pos = entries.findIndex((e: { tag: string }) => e.tag === RLS_TAG);
+    expect(pos).toBeGreaterThanOrEqual(0);
+    const self = entries[pos];
+    expect(self.tag).toBe(RLS_TAG);
+    expect(self.idx).toBe(10);
+    expect(self.breakpoints).toBe(true);
     // strictly-increasing idx and monotonic ordering
     const idxs = entries.map((e: { idx: number }) => e.idx);
     expect(idxs).toEqual([...idxs].sort((a, b) => a - b));
-    expect(last.idx).toBe(entries.length - 1);
+    expect(self.idx).toBe(pos);
     // immediately follows the 0009 baseline grant migration
-    expect(entries[entries.length - 2]?.tag).toBe('0009_baseline_runtime_role_grants');
+    expect(entries[pos - 1]?.tag).toBe('0009_baseline_runtime_role_grants');
+    // the later storage-authority RLS closures (0011, 0012) build on 0010.
+    expect(entries[pos + 1]?.tag).toBe('0011_storage_authority_rls_completion');
   });
 
   it('has a migration file on disk that the shared executor can hash', () => {

@@ -25,6 +25,18 @@ import type { StorageAuthorityEntry } from './types';
 
 export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
+    table: "audit_logs",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "CLOSED (0011 source-native storage-authority completion): the SOURCE-NATIVE public.audit_logs is the Django `core` app's AuditLog model (backend/core/models.py db_table='audit_logs', backend/core/migrations/0001_initial.py) — a DIFFERENT physical table from the Drizzle audit_security.audit_logs the app reads schema-qualified (app/api/activities, app/api/admin/ai-usage) and from the 0008 ue_runtime_audit_* set. Router-registered at /api/audit-logs/ via backend/core/urls.py -> backend/core/views.py AuditLogsViewSet, a full ModelViewSet with queryset=AuditLogs.objects.all() + permission_classes=[IsAuthenticated] + filterset_fields=['organization_id','user_id'] — the unscoped objects.all()+IsAuthenticated cross-org pattern (any authenticated user of any org could list/retrieve/create/update/delete every org's audit rows). organization_id is nullable: NULL rows are platform/system audit events, which a strict direct-org policy correctly keeps invisible to every tenant (fail-closed). backend/core/tasks.py archives (UPDATE audit_logs) on a background schedule (system). 0011 adds direct-org RLS (runtime sees only current_org rows; union_eyes_system full access for the archival job and cross-org compliance reads) — DB-level closure of the ViewSet's missing scoping.",
+    supportingCapability: ["backend/core/models.py","backend/core/views.py","backend/core/urls.py","backend/core/tasks.py"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
+    requiredSystemPrivileges: ["SELECT","UPDATE"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
+    reviewPriority: "NONE",
+  },
+  {
     table: "ab_tests",
     classification: "CONTAINED_NO_AUTHORITY",
     reason: "CLOSED (round 50, state-machine root and fan-out cascade authority): lib/ab-testing/ab-test-engine.ts (the TS side) has zero real callers anywhere under app/, actions/, lib/, services/. Django (ai_core app) has a live, router-registered AbTestsViewSet (queryset=AbTests.objects.all(), IsAuthenticated-only, no organization scoping) — contained via the existing DenyAllPermission in backend/ai_core/views.py (round 35). There is no legitimate consumer on either side. Root of the ab_test_variants/ab_test_assignments/ab_test_events cascade, all closed identically this round.",

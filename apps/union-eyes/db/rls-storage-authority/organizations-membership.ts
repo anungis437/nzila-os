@@ -25,6 +25,18 @@ import type { StorageAuthorityEntry } from './types';
 
 export const organizationsMembershipEntries: StorageAuthorityEntry[] = [
   {
+    table: "organization_users",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "CLOSED (0011 source-native storage-authority completion): the SOURCE-NATIVE public.organization_users is the Django `auth_core` app's OrganizationUsers model (backend/auth_core/models.py db_table='organization_users', backend/auth_core/migrations/0001_initial.py) — a DIFFERENT physical table from the Drizzle user_management.organization_users covered by 0007. organization_id NOT NULL. Router-registered at /api/organization-users/ via backend/auth_core/urls.py -> backend/auth_core/views.py OrganizationUsersViewSet, a full ModelViewSet with queryset=OrganizationUsers.objects.all() + permission_classes=[IsAuthenticated] + filterset_fields=['organization_id'] — the unscoped objects.all()+IsAuthenticated cross-org membership-disclosure pattern. Django's OrganizationIsolationMiddleware/OIDCJWTMiddleware attach request.organization_id but never set a DB session GUC, so isolation was application-layer only; 0011 adds direct-org RLS (runtime sees only current_org membership rows; union_eyes_system full access for auth-resolution/cross-org platform paths that run under withSystemContext). Analogous to the 0108-protected organization_members table's direct-org geometry.",
+    supportingCapability: ["backend/auth_core/models.py","backend/auth_core/views.py","backend/auth_core/urls.py"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
+    requiredSystemPrivileges: ["SELECT"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
+    reviewPriority: "NONE",
+  },
+  {
     table: "clc_organization_sync_log",
     classification: "SYSTEM_ONLY",
     reason: "Manually verified 2026-09-02, corrected 2026-09-02 (round 4 review): organization_id is NULLABLE (\"Nullable for batch sync operations\" per db/schema/clc-sync-audit-schema.ts) — cross-affiliate CLC federation sync audit log, not a per-tenant-partitionable resource. Reachable via app/[locale]/dashboard/clc/staff/page.tsx; that route is gated by app/[locale]/dashboard/clc/layout.tsx's server-side requireUser()+hasMinRole(\"clc_staff\") check restricting /dashboard/clc/* to CLC Staff (role 180) and above. Round-4 correction: request-level PLATFORM_ADMIN authorization does not by itself justify union_eyes_runtime DB access to a SYSTEM_ONLY table — getCLCOperationalMetrics() previously queried this table via the ordinary db import despite the role gate; fixed to run inside withSystemContext(), so dbExecutionPrincipal is SYSTEM_RUNTIME (not TENANT_RUNTIME) and requiredRuntimePrivileges is [] (union_eyes_runtime gets nothing; only union_eyes_system needs SELECT). services/clc/clc-api-integration.ts (the other listed reference) has zero independent callers.",
