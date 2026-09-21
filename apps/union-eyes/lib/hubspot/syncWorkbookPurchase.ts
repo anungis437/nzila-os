@@ -11,6 +11,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { workbookMemoryHolders, workbooks } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { createDeal, upsertContact } from '@/lib/services/crm-service';
 import {
@@ -25,7 +26,12 @@ import {
   type WorkbookTierKey,
 } from './workbookPropertyMapper';
 
-export type WorkbookSyncSkipReason = 'no_email' | 'crm_disabled' | 'workbook_missing';
+export type WorkbookSyncSkipReason =
+  | 'no_email'
+  | 'crm_disabled'
+  | 'workbook_missing'
+  | 'crm_data_load_failure'
+  | 'crm_provider_failure';
 
 export interface SyncWorkbookPurchaseInput {
   workbookId: string;
@@ -46,54 +52,77 @@ export type SyncWorkbookPurchaseResult =
 export async function syncWorkbookPurchase(
   input: SyncWorkbookPurchaseInput,
 ): Promise<SyncWorkbookPurchaseResult> {
+  if (!input.email) {
+    return { ok: false, skipped: 'no_email' };
+  }
+  if (!process.env.HUBSPOT_API_KEY) {
+    return { ok: false, skipped: 'crm_disabled' };
+  }
+
+  // Trusted data load. The workbook was already fulfilled by the Stripe
+  // webhook under system authority; load its cartography under a bounded
+  // system context scoped to THIS workbook. The CRM network calls below run
+  // AFTER this context has closed \u2014 no DB context spans provider I/O.
+  let cartography: ReturnType<typeof runStewardshipCartography>;
   try {
-    if (!input.email) {
-      return { ok: false, skipped: 'no_email' };
-    }
-    if (!process.env.HUBSPOT_API_KEY) {
-      return { ok: false, skipped: 'crm_disabled' };
-    }
+    const loaded = await withSystemContext(async () => {
+      const [wb] = await db
+        .select({ id: workbooks.id })
+        .from(workbooks)
+        .where(eq(workbooks.id, input.workbookId))
+        .limit(1);
 
-    const [wb] = await db
-      .select({ id: workbooks.id })
-      .from(workbooks)
-      .where(eq(workbooks.id, input.workbookId))
-      .limit(1);
+      if (!wb) {
+        return null;
+      }
 
-    if (!wb) {
+      // Aggregate cartography \u2014 deterministic, no PII.
+      const holders = await db
+        .select({
+          id: workbookMemoryHolders.id,
+          role: workbookMemoryHolders.role,
+          tenureBand: workbookMemoryHolders.tenureBand,
+          criticality: workbookMemoryHolders.criticality,
+          successorIdentified: workbookMemoryHolders.successorIdentified,
+        })
+        .from(workbookMemoryHolders)
+        .where(eq(workbookMemoryHolders.workbookId, input.workbookId));
+
+      return runStewardshipCartography(
+        holders.map((h) => ({
+          id: h.id,
+          role: h.role,
+          criticality: h.criticality as
+            | 'routine'
+            | 'important'
+            | 'load_bearing'
+            | 'institution_critical'
+            | null,
+          tenureBand: h.tenureBand as '0_3y' | '3_7y' | '7_15y' | '15y_plus' | null,
+          successorIdentified: h.successorIdentified,
+        })),
+      );
+    });
+
+    if (loaded === null) {
       logger.warn('[hubspot-workbook] workbook missing for purchase sync', {
         workbookId: input.workbookId,
       });
       return { ok: false, skipped: 'workbook_missing' };
     }
+    cartography = loaded;
+  } catch (err) {
+    // DB / authority failure loading the already-fulfilled workbook. This is
+    // NOT crm_disabled \u2014 the CRM is configured; the data load failed.
+    logger.error('[hubspot-workbook] workbook data load failed', {
+      workbookId: input.workbookId,
+      tier: input.tier,
+      message: err instanceof Error ? err.message : String(err),
+    });
+    return { ok: false, skipped: 'crm_data_load_failure' };
+  }
 
-    // Aggregate cartography \u2014 deterministic, no PII.
-    const holders = await db
-      .select({
-        id: workbookMemoryHolders.id,
-        role: workbookMemoryHolders.role,
-        tenureBand: workbookMemoryHolders.tenureBand,
-        criticality: workbookMemoryHolders.criticality,
-        successorIdentified: workbookMemoryHolders.successorIdentified,
-      })
-      .from(workbookMemoryHolders)
-      .where(eq(workbookMemoryHolders.workbookId, input.workbookId));
-
-    const cartography = runStewardshipCartography(
-      holders.map((h) => ({
-        id: h.id,
-        role: h.role,
-        criticality: h.criticality as
-          | 'routine'
-          | 'important'
-          | 'load_bearing'
-          | 'institution_critical'
-          | null,
-        tenureBand: h.tenureBand as '0_3y' | '3_7y' | '7_15y' | '15y_plus' | null,
-        successorIdentified: h.successorIdentified,
-      })),
-    );
-
+  try {
     const contactProperties = {
       ...buildWorkbookContactProperties({
         tier: input.tier,
@@ -147,12 +176,15 @@ export async function syncWorkbookPurchase(
 
     return { ok: true, contactId, dealId, stage };
   } catch (err) {
-    // Non-blocking contract: never throw upstream.
+    // Non-blocking contract: never throw upstream. A failure here is a CRM
+    // provider (network / API) failure \u2014 distinct from crm_disabled (no API
+    // key) and crm_data_load_failure (DB / authority failure loading the
+    // already-fulfilled workbook).
     logger.error('[hubspot-workbook] purchase sync failed', {
       workbookId: input.workbookId,
       tier: input.tier,
       message: err instanceof Error ? err.message : String(err),
     });
-    return { ok: false, skipped: 'crm_disabled' };
+    return { ok: false, skipped: 'crm_provider_failure' };
   }
 }

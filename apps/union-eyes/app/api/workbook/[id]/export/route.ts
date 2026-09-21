@@ -8,11 +8,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { generateWorkbookPdf } from '@/lib/workbook-pdf/generateWorkbookPdf';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -30,55 +29,59 @@ export async function GET(
 ) {
   const { id: workbookId } = await params;
 
-  // Auth + org enforcement: only the user who claimed the workbook (or a
-  // member of the same organization) may export the PDF.
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  }
-
-  const [wb] = await db
-    .select({
-      id: workbooks.id,
-      reportTierId: workbooks.reportTierId,
-      status: workbooks.status,
-      claimedByUserId: workbooks.claimedByUserId,
-    })
-    .from(workbooks)
-    .where(eq(workbooks.id, workbookId))
-    .limit(1);
-
-  if (!wb) {
-    return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
-  }
-
-  // Org-scope check: workbook must be claimed and the requester must either be
-  // the claimant or share their organization.
-  if (!wb.claimedByUserId) {
-    return NextResponse.json({ error: 'Workbook not claimed' }, { status: 403 });
-  }
-  if (wb.claimedByUserId !== userId) {
-    const requesterOrgId = await getOrganizationIdForUser(userId);
-    const ownerOrgId = await getOrganizationIdForUser(wb.claimedByUserId);
-    if (!requesterOrgId || !ownerOrgId || requesterOrgId !== ownerOrgId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-  }
-
-  if (!wb.reportTierId || !ELIGIBLE_TIERS.has(wb.reportTierId)) {
-    return NextResponse.json(
-      { error: 'Export requires the Self-Guided Workbook tier or higher.' },
-      { status: 402 },
-    );
-  }
-
   try {
-    const buffer = await generateWorkbookPdf({ workbookId });
-    if (!buffer) {
+    // Authorization is resolved first (claimant or same-organization peer);
+    // the tier read and every protected PDF child read then run inside the DB
+    // execution context that matches the resolved authority. The export
+    // surface is claimed-only: an unclaimed (pre-claim) workbook has no
+    // identity-bound owner and cannot be exported by the bearer id alone.
+    const access = await withClaimedWorkbookAccess(
+      { workbookId, operation: 'read' },
+      async (authority) => {
+        if (authority.kind === 'preclaim') {
+          return { kind: 'unclaimed' as const };
+        }
+
+        const [wb] = await db
+          .select({ reportTierId: workbooks.reportTierId })
+          .from(workbooks)
+          .where(eq(workbooks.id, workbookId))
+          .limit(1);
+
+        if (!wb) {
+          return { kind: 'not_found' as const };
+        }
+        if (!wb.reportTierId || !ELIGIBLE_TIERS.has(wb.reportTierId)) {
+          return { kind: 'tier' as const };
+        }
+
+        const buffer = await generateWorkbookPdf({ workbookId });
+        if (!buffer) {
+          return { kind: 'not_found' as const };
+        }
+        return { kind: 'ok' as const, buffer };
+      },
+    );
+
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
+    const outcome = access.value;
+    if (outcome.kind === 'unclaimed') {
+      return NextResponse.json({ error: 'Workbook not claimed' }, { status: 403 });
+    }
+    if (outcome.kind === 'not_found') {
       return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
     }
+    if (outcome.kind === 'tier') {
+      return NextResponse.json(
+        { error: 'Export requires the Self-Guided Workbook tier or higher.' },
+        { status: 402 },
+      );
+    }
 
-    return new NextResponse(new Uint8Array(buffer), {
+    return new NextResponse(new Uint8Array(outcome.buffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

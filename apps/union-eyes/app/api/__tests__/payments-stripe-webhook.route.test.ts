@@ -25,17 +25,41 @@ const m = vi.hoisted(() => {
     return chain;
   };
 
-  const createInsertChain = () => ({
-    values: vi.fn(() => ({
-      onConflictDoNothing: vi.fn(() => Promise.resolve(undefined)),
+  const createInsertChain = () => {
+    const chain = {
+      values: vi.fn(() => chain),
+      onConflictDoNothing: vi.fn(() => chain),
       returning: vi.fn(() => nextInsert()),
-    })),
-  });
+      then: (resolve: (value: unknown[]) => unknown) => nextInsert().then(resolve),
+    };
+    return chain;
+  };
 
-  const createUpdateChain = () => ({
-    set: vi.fn(() => ({
-      where: vi.fn(() => nextUpdate()),
-    })),
+  const createUpdateChain = () => {
+    const chain = {
+      set: vi.fn(() => chain),
+      where: vi.fn(() => chain),
+      returning: vi.fn(() => nextUpdate()),
+      then: (resolve: (value: unknown[]) => unknown) => nextUpdate().then(resolve),
+    };
+    return chain;
+  };
+
+  const withSystemContext = vi.fn(async (fn: (db: unknown) => Promise<unknown>) => {
+    const snapshot = {
+      selectQueue: [...state.selectQueue],
+      insertResults: [...state.insertResults],
+      updateResults: [...state.updateResults],
+    };
+
+    try {
+      return await fn(mockDb);
+    } catch (error) {
+      state.selectQueue = snapshot.selectQueue;
+      state.insertResults = snapshot.insertResults;
+      state.updateResults = snapshot.updateResults;
+      throw error;
+    }
   });
 
   return {
@@ -51,7 +75,7 @@ const m = vi.hoisted(() => {
     createSelectChain,
     createInsertChain,
     createUpdateChain,
-    withSystemContext: vi.fn(async (fn: (db: unknown) => Promise<unknown>) => fn(mockDb)),
+    withSystemContext,
     evaluateFee: vi.fn(),
     captureTransactionFee: vi.fn(),
     reverseTransactionFee: vi.fn(),
@@ -100,7 +124,8 @@ vi.mock('@/lib/icra/claim-tokens', () => ({
 }));
 
 function makeStripeRequest(payload: string, secret: string, signature = true) {
-  const timestamp = '1700000000';
+  // Fresh timestamp so the webhook's signature-freshness window is satisfied.
+  const timestamp = String(Math.floor(Date.now() / 1000));
   const hash = createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex');
   return new NextRequest('http://localhost/api/payments/webhooks/stripe', {
     method: 'POST',
@@ -140,6 +165,8 @@ describe('payments/webhooks/stripe route', () => {
     m.generateClaimToken.mockReturnValue('claim-token-123');
     m.computeClaimExpiry.mockReturnValue(new Date('2026-06-30T00:00:00.000Z'));
     m.auditLog.mockResolvedValue(undefined);
+    m.reverseTransactionFee.mockResolvedValue(undefined);
+    m.captureTransactionFee.mockResolvedValue(undefined);
   });
 
   it('rejects requests without a stripe signature header', async () => {
@@ -189,15 +216,61 @@ describe('payments/webhooks/stripe route', () => {
     await expect(response.json()).resolves.toMatchObject({ error: 'Webhook secret not configured' });
   });
 
-  it('short-circuits duplicate events', async () => {
+  it('treats a replayed platform payment as an idempotent duplicate', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([{ id: 'existing-payment' }]);
-    const payload = JSON.stringify({ id: 'evt_duplicate', type: 'invoice.paid', data: { object: {} } });
+    // resolveBillingAccountId -> billing; reservation conflicts (empty insert)
+    // -> load the owning payment -> ownership matches -> duplicate.
+    m.queueSelect(
+      [{ id: 'billing-1' }],
+      [{ id: 'existing-payment', method: 'stripe', amount: '10.00', currency: 'CAD' }],
+    );
+    m.queueInsert([]);
+    const payload = JSON.stringify({
+      id: 'evt_duplicate',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: 'pi_dup',
+          amount: 1000,
+          currency: 'cad',
+          metadata: { organization_id: TEST_ORG_ID },
+        },
+      },
+    });
 
     const response = await POST(makeStripeRequest(payload, 'whsec_test'));
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ received: true, status: 'duplicate' });
+    expect(m.captureTransactionFee).not.toHaveBeenCalled();
+  });
+
+  it('rejects a reference conflict whose persisted payment does not match (collision)', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    // Reservation conflicts, but the owning payment is a DIFFERENT amount — an
+    // identifier collision must not authorize a different payment.
+    m.queueSelect(
+      [{ id: 'billing-1' }],
+      [{ id: 'other-payment', method: 'stripe', amount: '999.00', currency: 'CAD' }],
+    );
+    m.queueInsert([]);
+    const payload = JSON.stringify({
+      id: 'evt_collision',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: 'pi_collision',
+          amount: 1000,
+          currency: 'cad',
+          metadata: { organization_id: TEST_ORG_ID },
+        },
+      },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(500);
+    expect(m.captureTransactionFee).not.toHaveBeenCalled();
   });
 
   it('returns a retryable failure when system database access fails', async () => {
@@ -235,7 +308,8 @@ describe('payments/webhooks/stripe route', () => {
 
   it('records a successful payment intent and captures the transaction fee', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([], [{ id: 'billing-1' }]);
+    m.queueSelect([{ id: 'billing-1' }]);
+    m.queueInsert([{ id: 'payment-1' }]);
     const payload = JSON.stringify({
       id: 'evt_payment_1',
       type: 'payment_intent.succeeded',
@@ -263,7 +337,7 @@ describe('payments/webhooks/stripe route', () => {
 
   it('reconciles invoice.paid events and captures invoice fees', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([], [{ id: 'billing-1' }]);
+    m.queueSelect([{ id: 'billing-1' }]);
     const payload = JSON.stringify({
       id: 'evt_invoice_paid_1',
       type: 'invoice.paid',
@@ -297,7 +371,6 @@ describe('payments/webhooks/stripe route', () => {
 
   it('marks invoice.payment_failed as failed reconciliation', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([]);
     const payload = JSON.stringify({
       id: 'evt_invoice_failed_1',
       type: 'invoice.payment_failed',
@@ -327,7 +400,8 @@ describe('payments/webhooks/stripe route', () => {
 
   it('records charge.refunded events and reverses captured fees', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([], [{ id: 'billing-1' }], [{ id: 'fee-event-1' }]);
+    m.queueSelect([{ id: 'billing-1' }], [{ id: 'fee-event-1' }]);
+    m.queueInsert([{ id: 'refund-payment-1' }]);
     const payload = JSON.stringify({
       id: 'evt_refund_1',
       type: 'charge.refunded',
@@ -358,8 +432,10 @@ describe('payments/webhooks/stripe route', () => {
 
   it('upgrades workbook purchases and issues a claim token', async () => {
     const { POST } = await loadRoute('whsec_test');
-    m.queueSelect([{ reportTierId: 'continuity_reflection', claimToken: null }]);
-    m.queueUpdate([]);
+    // Existence guard → fresh reservation wins → guarded update wins.
+    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
+    m.queueUpdate([{ id: 'workbook-1' }]);
     const payload = JSON.stringify({
       id: 'evt_workbook_1',
       type: 'checkout.session.completed',
@@ -385,11 +461,198 @@ describe('payments/webhooks/stripe route', () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ received: true });
     expect(mockDb.update).toHaveBeenCalled();
+    expect(m.syncWorkbookPurchase).toHaveBeenCalledTimes(1);
     expect(m.syncWorkbookPurchase).toHaveBeenCalledWith(expect.objectContaining({
       workbookId: 'workbook-1',
       paymentReference: 'pi_123',
       email: 'buyer@example.com',
     }));
+  });
+
+  it('treats an exact replay (same payment, same workbook) as an idempotent no-op', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    // Existence guard → reservation conflicts → owning purchase is this workbook.
+    m.queueSelect([{ id: 'workbook-1' }], [{ workbookId: 'workbook-1' }]);
+    m.queueInsert([]);
+    const payload = JSON.stringify({
+      id: 'evt_workbook_replay',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_workbook_replay',
+          payment_intent: 'pi_replay',
+          amount_total: 12500,
+          currency: 'cad',
+          customer_email: 'buyer@example.com',
+          metadata: {
+            product: 'workbook',
+            workbook_id: 'workbook-1',
+            workbook_tier_id: 'workbook_self_guided',
+          },
+        },
+      },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ received: true });
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.generateClaimToken).toHaveBeenCalledTimes(1); // computed, but never persisted
+    expect(m.syncWorkbookPurchase).not.toHaveBeenCalled();
+  });
+
+  it('rejects a payment reference already owned by another workbook', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.queueSelect(
+      [{ reportTierId: 'continuity_reflection', claimToken: null }],
+      [{ workbookId: 'workbook-2' }],
+    );
+    m.queueInsert([]);
+    const payload = JSON.stringify({
+      id: 'evt_workbook_conflict',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_workbook_conflict',
+          payment_intent: 'pi_shared',
+          amount_total: 12500,
+          currency: 'cad',
+          customer_email: 'buyer@example.com',
+          metadata: {
+            product: 'workbook',
+            workbook_id: 'workbook-1',
+            workbook_tier_id: 'workbook_self_guided',
+          },
+        },
+      },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      received: false,
+      error: 'Workbook fulfillment failed',
+    });
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.syncWorkbookPurchase).not.toHaveBeenCalled();
+    expect(m.state.insertResults).toEqual([[]]);
+  });
+
+  it('rejects contention: reservation wins but the guarded workbook update returns zero rows', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    // Existence guard passes, reservation wins, but the guarded UPDATE finds the
+    // workbook already transitioned → zero rows → throw.
+    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
+    m.queueUpdate([]);
+    const payload = JSON.stringify({
+      id: 'evt_workbook_contention',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_workbook_contention',
+          payment_intent: 'pi_contended',
+          amount_total: 12500,
+          currency: 'cad',
+          customer_email: 'buyer@example.com',
+          metadata: {
+            product: 'workbook',
+            workbook_id: 'workbook-1',
+            workbook_tier_id: 'workbook_self_guided',
+          },
+        },
+      },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      received: false,
+      error: 'Workbook fulfillment failed',
+    });
+    expect(m.syncWorkbookPurchase).not.toHaveBeenCalled();
+    // Reservation rolled back with the failed transaction.
+    expect(m.state.insertResults).toEqual([[{ id: 'purchase-1', workbookId: 'workbook-1' }]]);
+  });
+
+  it('returns a retryable failure when workbook persistence throws', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.withSystemContext.mockRejectedValueOnce(new Error('workbook persistence unavailable'));
+    const payload = JSON.stringify({
+      id: 'evt_workbook_persistence',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_workbook_persistence',
+          payment_intent: 'pi_persist',
+          amount_total: 12500,
+          currency: 'cad',
+          customer_email: 'buyer@example.com',
+          metadata: {
+            product: 'workbook',
+            workbook_id: 'workbook-1',
+            workbook_tier_id: 'workbook_self_guided',
+          },
+        },
+      },
+    });
+
+    const response = await POST(makeStripeRequest(payload, 'whsec_test'));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      received: false,
+      error: 'Workbook fulfillment failed',
+    });
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.syncWorkbookPurchase).not.toHaveBeenCalled();
+  });
+
+  it('reserves and succeeds on a retry after a rolled-back attempt', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    // First attempt: reservation wins, guarded update returns zero → throw →
+    // the mock restores the queue snapshot (models the reservation rolling back).
+    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
+    m.queueUpdate([]);
+    const makePayload = (eventId: string) =>
+      JSON.stringify({
+        id: eventId,
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            id: 'cs_workbook_retry',
+            payment_intent: 'pi_retry',
+            amount_total: 12500,
+            currency: 'cad',
+            customer_email: 'buyer@example.com',
+            metadata: {
+              product: 'workbook',
+              workbook_id: 'workbook-1',
+              workbook_tier_id: 'workbook_self_guided',
+            },
+          },
+        },
+      });
+
+    const first = await POST(makeStripeRequest(makePayload('evt_retry_1'), 'whsec_test'));
+    expect(first.status).toBe(500);
+    // The reservation was rolled back with the failed transaction.
+    expect(m.state.insertResults).toEqual([[{ id: 'purchase-1', workbookId: 'workbook-1' }]]);
+
+    // Second identical delivery once the transient contention has cleared: the
+    // reservation is available again and the guarded update now wins.
+    m.resetQueues();
+    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
+    m.queueUpdate([{ id: 'workbook-1' }]);
+    const second = await POST(makeStripeRequest(makePayload('evt_retry_2'), 'whsec_test'));
+    expect(second.status).toBe(200);
+    await expect(second.json()).resolves.toMatchObject({ received: true });
+    expect(m.syncWorkbookPurchase).toHaveBeenCalledTimes(1);
   });
 
   it('returns a retryable error when ICRA paid-report fulfillment fails', async () => {

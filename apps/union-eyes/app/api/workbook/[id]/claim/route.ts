@@ -12,12 +12,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, gt, isNull } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
-import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { isClaimExpired } from '@/lib/icra/claim-tokens';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -64,42 +63,56 @@ export async function POST(
   }
 
   try {
-    const [row] = await db
-      .select({
-        id: workbooks.id,
-        claimToken: workbooks.claimToken,
-        claimTokenExpiresAt: workbooks.claimTokenExpiresAt,
-        claimedAt: workbooks.claimedAt,
-        reportTierId: workbooks.reportTierId,
-      })
-      .from(workbooks)
-      .where(and(eq(workbooks.id, workbookId), eq(workbooks.claimToken, claimToken)))
-      .limit(1);
+    const result = await withSystemContext(async (tx) => {
+      const claimedAt = new Date();
+      const [claimed] = await tx
+        .update(workbooks)
+        .set({
+          claimedByUserId: userId,
+          claimedOrgId: orgId,
+          claimedAt,
+          claimToken: null,
+          claimTokenExpiresAt: null,
+          status: 'active',
+          updatedAt: claimedAt,
+        })
+        .where(
+          and(
+            eq(workbooks.id, workbookId),
+            eq(workbooks.claimToken, claimToken),
+            isNull(workbooks.claimedAt),
+            gt(workbooks.claimTokenExpiresAt, claimedAt),
+          ),
+        )
+        .returning({ id: workbooks.id });
 
-    if (!row) {
+      if (claimed) {
+        return { status: 'claimed' as const };
+      }
+
+      const [row] = await tx
+        .select({
+          claimedAt: workbooks.claimedAt,
+          claimTokenExpiresAt: workbooks.claimTokenExpiresAt,
+        })
+        .from(workbooks)
+        .where(and(eq(workbooks.id, workbookId), eq(workbooks.claimToken, claimToken)))
+        .limit(1);
+
+      if (!row) return { status: 'not_found' as const };
+      if (row.claimedAt) return { status: 'already_claimed' as const };
+      return { status: 'expired' as const };
+    });
+
+    if (result.status === 'not_found') {
       return NextResponse.json({ error: 'Workbook not found or token invalid' }, { status: 404 });
     }
-
-    if (row.claimedAt) {
+    if (result.status === 'already_claimed') {
       return NextResponse.json({ error: 'Workbook already claimed' }, { status: 409 });
     }
-
-    if (isClaimExpired(row.claimTokenExpiresAt)) {
+    if (result.status === 'expired') {
       return NextResponse.json({ error: 'Claim token expired' }, { status: 410 });
     }
-
-    await db
-      .update(workbooks)
-      .set({
-        claimedByUserId: userId,
-        claimedOrgId: orgId,
-        claimedAt: new Date(),
-        claimToken: null,
-        claimTokenExpiresAt: null,
-        status: 'active',
-        updatedAt: new Date(),
-      })
-      .where(eq(workbooks.id, workbookId));
 
     logger.info('[workbook-claim] Workbook claimed', { workbookId, userId, orgId });
 

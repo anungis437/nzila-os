@@ -20,7 +20,7 @@ import {
   workbookMemoryHolders,
 } from '@/db/schema/workbook-schema';
 import { runStewardshipCartography } from '@/lib/workbook/engines/stewardshipCartography';
-import { verifyClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -73,13 +73,17 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: workbookId } = await params;
-  const access = await verifyClaimedWorkbookAccess(workbookId);
-  if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
-  }
   try {
-    const payload = await loadCartography(workbookId);
-    return NextResponse.json(payload);
+    // Authorization is resolved first; the protected cartography read then runs
+    // inside the DB execution context that matches the resolved authority.
+    const access = await withClaimedWorkbookAccess(
+      { workbookId, operation: 'read' },
+      async () => loadCartography(workbookId),
+    );
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+    return NextResponse.json(access.value);
   } catch (err) {
     logger.error('[workbook-memory-holders:get] DB error', { workbookId, err });
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
@@ -92,11 +96,8 @@ export async function POST(
 ) {
   const { id: workbookId } = await params;
 
-  const access = await verifyClaimedWorkbookAccess(workbookId);
-  if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
-  }
-
+  // Parse + validate before establishing any DB execution context so no
+  // transaction is held open across the request body read.
   let body: any;
   try {
     body = await request.json();
@@ -113,23 +114,35 @@ export async function POST(
   }
 
   try {
-    const [inserted] = await db
-      .insert(workbookMemoryHolders)
-      .values({
-        workbookId,
-        role: parse.data.role,
-        displayName: parse.data.displayName ?? null,
-        responsibility: parse.data.responsibility,
-        tenureBand: parse.data.tenureBand ?? null,
-        criticality: parse.data.criticality ?? null,
-        successorIdentified: parse.data.successorIdentified,
-        notes: parse.data.notes ?? null,
-      })
-      .returning({ id: workbookMemoryHolders.id });
+    // Authorization is resolved first; the protected insert + cartography read
+    // then run inside the DB execution context that matches the authority.
+    const access = await withClaimedWorkbookAccess(
+      { workbookId, operation: 'write' },
+      async () => {
+        const [inserted] = await db
+          .insert(workbookMemoryHolders)
+          .values({
+            workbookId,
+            role: parse.data.role,
+            displayName: parse.data.displayName ?? null,
+            responsibility: parse.data.responsibility,
+            tenureBand: parse.data.tenureBand ?? null,
+            criticality: parse.data.criticality ?? null,
+            successorIdentified: parse.data.successorIdentified,
+            notes: parse.data.notes ?? null,
+          })
+          .returning({ id: workbookMemoryHolders.id });
 
-    const cartography = await loadCartography(workbookId);
+        const cartography = await loadCartography(workbookId);
+        return { id: inserted?.id, ...cartography };
+      },
+    );
 
-    return NextResponse.json({ id: inserted?.id, ...cartography }, { status: 201 });
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
+    return NextResponse.json(access.value, { status: 201 });
   } catch (err) {
     logger.error('[workbook-memory-holders:post] DB error', { workbookId, err });
     return NextResponse.json({ error: 'Failed to add memory holder' }, { status: 503 });
