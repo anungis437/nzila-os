@@ -92,6 +92,13 @@
       "when": 1789840000000,
       "tag": "0012_storage_authority_rls_final_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789900000000,
+      "tag": "0013_workbook_credential_payment_authority",
+      "breakpoints": true
     }
   ]
 }
