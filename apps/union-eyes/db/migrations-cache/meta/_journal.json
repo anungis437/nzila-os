@@ -64,6 +64,13 @@
       "when": 1789588800000,
       "tag": "0008_runtime_acceptance_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789660000000,
+      "tag": "0009_baseline_runtime_role_grants",
+      "breakpoints": true
     }
   ]
 }
