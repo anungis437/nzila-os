@@ -278,7 +278,7 @@ class Documents(BaseModel):
     organization_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
-        db_table = "ue_documents"
+        db_table = "documents"
         verbose_name = "Documents"
 
 
