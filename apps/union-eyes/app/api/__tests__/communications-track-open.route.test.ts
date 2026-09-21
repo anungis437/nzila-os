@@ -96,17 +96,34 @@ describe('communications/track/open/[campaignId]/[recipientId] route', () => {
     expect(mockDb.update).toHaveBeenCalledTimes(2);
   });
 
-  it('allows open tracking without a configured secret', async () => {
+  it('fails closed without a configured secret: serves the pixel but records nothing', async () => {
     const { GET } = await loadRoute();
 
-    m.queueSelect([{ id: 'msg_3', openedAt: null, status: 'sent' }], [{ stats: {} }]);
-
-    const response = await GET(new NextRequest('http://localhost/api/communications/track/open/c3/r3'), {
+    const response = await GET(new NextRequest('http://localhost/api/communications/track/open/c3/r3?token=anything'), {
       params: Promise.resolve({ campaignId: 'c3', recipientId: 'r3' }),
+    });
+
+    // Neutral pixel is still served (email rendering is preserved) ...
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('image/gif');
+    // ... but the open is NOT recorded and the misconfiguration is logged.
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.logger.warn).toHaveBeenCalled();
+  });
+
+  it('does not record when the token is wrong under a configured secret', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret_open';
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/communications/track/open/c4/r4?token=forged'), {
+      params: Promise.resolve({ campaignId: 'c4', recipientId: 'r4' }),
     });
 
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('image/gif');
-    expect(m.logger.warn).not.toHaveBeenCalled();
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.logger.warn).toHaveBeenCalled();
   });
 });

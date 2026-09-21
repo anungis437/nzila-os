@@ -89,9 +89,11 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   });
 
   it('renders the French confirmation copy when locale is fr-CA', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET } = await loadRoute();
+    const t = token('secret', 'r1:unsubscribe');
 
-    const response = await GET(new NextRequest('http://localhost/api/communications/unsubscribe/r1?reason=manual&locale=fr-CA'), {
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&locale=fr-CA&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
     const html = await response.text();
@@ -117,11 +119,57 @@ describe('communications/unsubscribe/[recipientId] route', () => {
   });
 
   it('handles fallback unsubscribe when no campaign id is provided', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
     const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/communications/unsubscribe/r1?reason=manual'), {
+    const t = token('secret', 'r1:unsubscribe');
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?reason=manual&token=${t}`), {
       params: Promise.resolve({ recipientId: 'r1' }),
     });
 
     expect(response.status).toBe(200);
+  });
+
+  it('fails closed without a configured secret: 401 and no mutation', async () => {
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=whatever'), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+
+    expect(response.status).toBe(401);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-unsubscribe (open/click) token — action binding', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    // A valid OPEN-tracking token (payload has no `:unsubscribe` action suffix).
+    const openToken = token('secret', 'c1:r1');
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r1?campaignId=c1&token=${openToken}`), {
+      params: Promise.resolve({ recipientId: 'r1' }),
+    });
+
+    expect(response.status).toBe(401);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('rejects a token bound to a different recipient', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret';
+    const { GET } = await loadRoute();
+    // Token was issued for recipient r1, but the request targets r2.
+    const tokenForR1 = token('secret', 'c1:r1:unsubscribe');
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/unsubscribe/r2?campaignId=c1&token=${tokenForR1}`), {
+      params: Promise.resolve({ recipientId: 'r2' }),
+    });
+
+    expect(response.status).toBe(401);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 });

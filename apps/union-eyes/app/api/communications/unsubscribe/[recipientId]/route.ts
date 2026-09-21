@@ -1,44 +1,16 @@
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq, ne } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { campaigns, communicationPreferences, consentRecords, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 function requireOrgAccess(_request: NextRequest): boolean {
   return true;
-}
-
-function getTrackingSecret(): string {
-  return process.env.COMMUNICATIONS_TRACKING_SECRET || process.env.RESEND_TRACKING_SECRET || '';
-}
-
-function signTrackingPayload(secret: string, payload: string): string {
-  return crypto.createHmac('sha256', secret).update(payload).digest('hex');
-}
-
-function isValidTrackingToken(token: string | null, candidates: string[]): boolean {
-  const secret = getTrackingSecret();
-  if (!secret) {
-    return true;
-  }
-  if (!token) {
-    return false;
-  }
-
-  const tokenBuffer = Buffer.from(token, 'utf8');
-  return candidates.some((candidate) => {
-    const expected = signTrackingPayload(secret, candidate);
-    const expectedBuffer = Buffer.from(expected, 'utf8');
-    if (tokenBuffer.length !== expectedBuffer.length) {
-      return false;
-    }
-    return crypto.timingSafeEqual(tokenBuffer, expectedBuffer);
-  });
 }
 
 function incrementStat(stats: any, key: string): Record<string, unknown> {
@@ -90,14 +62,22 @@ export async function GET(
   const reason = request.nextUrl.searchParams.get('reason') || 'unsubscribe_link';
   const locale = request.nextUrl.searchParams.get('locale') || 'en-CA';
 
+  // Action-bound candidates only: an unsubscribe token MUST carry the
+  // `:unsubscribe` action suffix, so an open/click tracking token (which signs
+  // `${campaignId}:${recipientId}` / `${campaignId}:${recipientId}:${url}`) can
+  // never authorize an unsubscribe mutation (UNSUBSCRIBE_TOKEN_SCOPE).
   const tokenCandidates = campaignId
-    ? [`${campaignId}:${recipientId}:unsubscribe`, `${campaignId}:${recipientId}`]
+    ? [`${campaignId}:${recipientId}:unsubscribe`]
     : [`${recipientId}:unsubscribe`];
 
-  if (!isValidTrackingToken(token, tokenCandidates)) {
-    logger.warn('[communications/unsubscribe] Invalid unsubscribe token', {
+  // Fail closed: a missing/placeholder secret (configuration_missing) or a
+  // forged/absent token (invalid) rejects with 401 and performs NO mutation.
+  const verification = verifyTrackingToken(token, tokenCandidates);
+  if (verification !== 'valid') {
+    logger.warn('[communications/unsubscribe] Unsubscribe token not authorized', {
       recipientId,
       campaignId,
+      reason: verification,
     });
     return new NextResponse('Invalid unsubscribe token', { status: 401 });
   }

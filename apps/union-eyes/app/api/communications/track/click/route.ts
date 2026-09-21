@@ -1,44 +1,16 @@
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { campaigns, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 function requireOrgAccess(_request: NextRequest): boolean {
   return true;
-}
-
-function getTrackingSecret(): string {
-  return process.env.COMMUNICATIONS_TRACKING_SECRET || process.env.RESEND_TRACKING_SECRET || '';
-}
-
-function signTrackingPayload(secret: string, payload: string): string {
-  return crypto.createHmac('sha256', secret).update(payload).digest('hex');
-}
-
-function isValidTrackingToken(token: string | null, candidates: string[]): boolean {
-  const secret = getTrackingSecret();
-  if (!secret) {
-    return true;
-  }
-  if (!token) {
-    return false;
-  }
-
-  const tokenBuffer = Buffer.from(token, 'utf8');
-  return candidates.some((candidate) => {
-    const expected = signTrackingPayload(secret, candidate);
-    const expectedBuffer = Buffer.from(expected, 'utf8');
-    if (tokenBuffer.length !== expectedBuffer.length) {
-      return false;
-    }
-    return crypto.timingSafeEqual(tokenBuffer, expectedBuffer);
-  });
 }
 
 function incrementStat(stats: any, key: string): Record<string, unknown> {
@@ -67,6 +39,15 @@ function getSafeRedirectUrl(url: string | null): string | null {
   }
 }
 
+// Neutral, fail-closed rejection for click links that cannot be verified. It does
+// NOT redirect to the caller-supplied url: the only way to obtain a redirect from
+// this endpoint is a token whose signature is bound to that exact destination, so
+// a forged or unsigned link can never turn this route into an open redirect
+// (TRACKING_CLICK_OPEN_REDIRECT = NO).
+function linkRejectionResponse(): NextResponse {
+  return NextResponse.json({ error: 'This link could not be verified' }, { status: 400 });
+}
+
 export async function GET(request: NextRequest) {
   const campaignId = request.nextUrl.searchParams.get('campaignId');
   const recipientId = request.nextUrl.searchParams.get('recipientId');
@@ -79,26 +60,32 @@ export async function GET(request: NextRequest) {
   }
 
   if (!requireOrgAccess(request)) {
-    return NextResponse.redirect(redirectTarget, { status: 302 });
+    return linkRejectionResponse();
   }
 
   if (!campaignId || !recipientId) {
-    return NextResponse.redirect(redirectTarget, { status: 302 });
+    return linkRejectionResponse();
   }
 
+  // The redirect destination is bound into every candidate payload, so a valid
+  // token proves the platform signed a link to exactly this destination.
   const tokenCandidates = [
     `${campaignId}:${recipientId}:${redirectTarget}`,
-    `${campaignId}:${recipientId}`,
     ...(messageId ? [`${campaignId}:${recipientId}:${messageId}:${redirectTarget}`] : []),
   ];
 
-  if (!isValidTrackingToken(token, tokenCandidates)) {
-    logger.warn('[communications/click-track] Invalid tracking token', {
+  // Fail closed: a missing/placeholder secret (configuration_missing) or a
+  // forged/absent token (invalid) records nothing AND performs no attacker-
+  // controlled redirect. Only a valid, destination-bound token redirects.
+  const verification = verifyTrackingToken(token, tokenCandidates);
+  if (verification !== 'valid') {
+    logger.warn('[communications/click-track] Tracking token not authorized', {
       campaignId,
       recipientId,
       hasMessageId: Boolean(messageId),
+      reason: verification,
     });
-    return NextResponse.redirect(redirectTarget, { status: 302 });
+    return linkRejectionResponse();
   }
 
   await withSystemContext(async () => {
