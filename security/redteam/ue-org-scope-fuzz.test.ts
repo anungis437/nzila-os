@@ -56,6 +56,7 @@ const ORG_ENFORCEMENT_PATTERNS = [
   /withApiAuth\b/,        // UE auth guard wrapper (api-auth-guard)
   /withRoleAuth\b/,       // UE role-based auth guard wrapper
   /withOrganizationAuth/, // legacy wrapper
+  /withClaimedWorkbookAccess\b/, // workbook claimant / same-org authority wrapper (resolves claimant or same-org peer before any protected read)
   /sourceOrganizationId/, // explicit cross-org reference (e.g. clause library search)
 ]
 
