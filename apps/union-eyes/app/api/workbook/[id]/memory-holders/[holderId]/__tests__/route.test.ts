@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  verifyClaimedWorkbookAccess: vi.fn(),
+  withClaimedWorkbookAccess: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   updateResult: [{ id: 'holder_1' }] as unknown[],
   deleteResult: [{ id: 'holder_1' }] as unknown[],
@@ -25,7 +25,7 @@ const mockDb = {
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/workbook/access-control', () => ({
-  verifyClaimedWorkbookAccess: m.verifyClaimedWorkbookAccess,
+  withClaimedWorkbookAccess: m.withClaimedWorkbookAccess,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn() }));
@@ -40,12 +40,20 @@ async function loadRoute() {
 describe('workbook/[id]/memory-holders/[holderId] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.verifyClaimedWorkbookAccess.mockResolvedValue({ ok: true });
+    // Default: authority resolves; run the protected callback and wrap its result,
+    // mirroring the real withClaimedWorkbookAccess execution boundary.
+    m.withClaimedWorkbookAccess.mockImplementation(
+      async (_args: unknown, callback: (authority: unknown) => Promise<unknown>) => ({
+        ok: true,
+        value: await callback({ kind: 'claimant', workbookId: 'w1' }),
+        authority: { kind: 'claimant', workbookId: 'w1' },
+      }),
+    );
   });
 
   it('PATCH returns the access-control error status when access is denied', async () => {
     const { PATCH } = await loadRoute();
-    m.verifyClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
+    m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
 
     const response = await PATCH(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
       method: 'PATCH',
@@ -65,12 +73,15 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
 
     expect(response.status).toBe(200);
-    expect(m.verifyClaimedWorkbookAccess).toHaveBeenCalledWith('w1');
+    expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
+      { workbookId: 'w1', operation: 'write' },
+      expect.any(Function),
+    );
   });
 
   it('DELETE returns the access-control error status when access is denied', async () => {
     const { DELETE } = await loadRoute();
-    m.verifyClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 401, error: 'Authentication required' });
+    m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 401, error: 'Authentication required' });
 
     const response = await DELETE(new NextRequest('http://localhost/api/workbook/w1/memory-holders/h1', {
       method: 'DELETE',
@@ -88,6 +99,9 @@ describe('workbook/[id]/memory-holders/[holderId] route', () => {
     }), { params: Promise.resolve({ id: 'w1', holderId: 'h1' }) });
 
     expect(response.status).toBe(200);
-    expect(m.verifyClaimedWorkbookAccess).toHaveBeenCalledWith('w1');
+    expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
+      { workbookId: 'w1', operation: 'write' },
+      expect.any(Function),
+    );
   });
 });
