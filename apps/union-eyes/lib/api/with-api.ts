@@ -109,6 +109,15 @@ export interface WithApiOptions<
    */
   requireOrg?: boolean;
 
+  /**
+   * Run the handler inside a transaction-local RLS context
+   * (`withRLSContext({ organizationId })`) so org-scoped RLS policies apply to
+   * the handler's own DB reads/writes. Opt-in — set by the CRUD factory for
+   * org-scoped resources. Custom routes that manage their own context, or that
+   * are system/public, leave this unset.
+   */
+  rlsOrgContext?: boolean;
+
   // ── Validation ────────────────────────────────────────────────────────────
 
   /** Zod schema for request body (automatically parsed from `request.json()`) */
@@ -594,7 +603,20 @@ export function withApi<
         traceId,
       };
 
-      const result = await handler(ctx);
+      const runHandler = () => handler(ctx);
+      const result = await (async () => {
+        // Opt-in: run org-scoped handlers inside a transaction-local RLS
+        // context so the handler's own DB work is visible to the
+        // RLS-constrained runtime role. Skip if already inside a tenant tx.
+        if (options.rlsOrgContext && resolvedOrganizationId) {
+          const { getActiveTenantDb } = await import('@/db/tenant-context-storage');
+          if (!getActiveTenantDb()) {
+            const { withRLSContext } = await import('@/lib/db/with-rls-context');
+            return withRLSContext({ organizationId: resolvedOrganizationId }, runHandler);
+          }
+        }
+        return runHandler();
+      })();
 
       // ── 8b. Post-handler policies (fire-and-forget) ────────────────────
       // Auto-audit emission for routes with evidenceRequired: true.
