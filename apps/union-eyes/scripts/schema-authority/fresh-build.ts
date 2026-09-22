@@ -69,14 +69,13 @@ function readConn(): PgConn {
   };
 }
 
-function databaseUrl(conn: PgConn, dbName: string): string {
-  const pass = encodeURIComponent(conn.password);
-  const user = encodeURIComponent(conn.user);
-  return `postgres://${user}:${pass}@${conn.host}:${conn.port}/${dbName}`;
+// Build a pg client config (never a URL string with inline credentials).
+function pgConfig(conn: PgConn, database: string): pg.ClientConfig {
+  return { host: conn.host, port: Number(conn.port), user: conn.user, password: conn.password, database };
 }
 
 async function createDisposableDatabase(conn: PgConn, adminDb: string, target: string): Promise<void> {
-  const admin = new pg.Client({ connectionString: databaseUrl(conn, adminDb) });
+  const admin = new pg.Client(pgConfig(conn, adminDb));
   await admin.connect();
   try {
     // Guarded drop + create. Identifier is validated against the disposable prefix.
@@ -110,7 +109,7 @@ function runDjangoMigrate(conn: PgConn, dbName: string, checkOnly: boolean): voi
   }
 }
 
-async function applyExtensionsAndScoped(url: string): Promise<{ scopedApplied: number; scopedTags: string[] }> {
+async function applyExtensionsAndScoped(conn: PgConn, dbName: string): Promise<{ scopedApplied: number; scopedTags: string[] }> {
   const sharedUrl = pathToFileURL(path.join(REPO_ROOT, 'tooling', 'scripts', 'lib', 'union-eyes-scoped-migrations.mjs')).href;
   const shared = (await import(sharedUrl)) as {
     ensureExtensions: (client: unknown, opts?: { log?: (m: string) => void }) => Promise<void>;
@@ -119,7 +118,7 @@ async function applyExtensionsAndScoped(url: string): Promise<{ scopedApplied: n
       opts: { journalPath: string; migrationsDir: string; log?: (m: string) => void },
     ) => Promise<{ applied: number; appliedTags: string[] }>;
   };
-  const client = new pg.Client({ connectionString: url });
+  const client = new pg.Client(pgConfig(conn, dbName));
   await client.connect();
   try {
     await shared.ensureExtensions(client, { log });
@@ -150,12 +149,12 @@ async function applyExtensionsAndScoped(url: string): Promise<{ scopedApplied: n
   }
 }
 
-function maybeRunRls(url: string): string {
+function maybeRunRls(conn: PgConn, dbName: string): string {
   if (process.env.UE_SCHEMA_CONTRACT_RLS !== '1') return 'SKIPPED';
   const res = spawnSync('pnpm', ['rls:verify'], {
     cwd: APP_ROOT,
     stdio: 'inherit',
-    env: { ...process.env, DATABASE_URL: url },
+    env: { ...process.env, PGHOST: conn.host, PGPORT: conn.port, PGUSER: conn.user, PGPASSWORD: conn.password, PGDATABASE: dbName },
     shell: process.platform === 'win32',
   });
   return res.status === 0 ? 'PASS' : 'FAIL';
@@ -179,15 +178,13 @@ async function main(): Promise<void> {
   log(`target disposable DB = ${dbName} (admin=${adminDb}, host=${conn.host}:${conn.port}, user=${conn.user})`);
   await createDisposableDatabase(conn, adminDb, dbName);
 
-  const url = databaseUrl(conn, dbName);
-
   // extensions -> Django migrate -> scoped Drizzle -> migrate --check -> RLS -> generate
   runDjangoMigrate(conn, dbName, false);
-  const { scopedApplied, scopedTags } = await applyExtensionsAndScoped(url);
+  const { scopedApplied, scopedTags } = await applyExtensionsAndScoped(conn, dbName);
   runDjangoMigrate(conn, dbName, true);
-  const rls = maybeRunRls(url);
+  const rls = maybeRunRls(conn, dbName);
 
-  const result = await generate(url);
+  const result = await generate(pgConfig(conn, dbName));
   fs.mkdirSync(GENERATED_DIR, { recursive: true });
   fs.writeFileSync(CANONICAL_SCHEMA_PATH, serializeArtifact(result));
   fs.writeFileSync(CANONICAL_SCHEMA_SHA_PATH, `${result.digest}\n`);
@@ -198,7 +195,7 @@ async function main(): Promise<void> {
   log(`wrote ${CANONICAL_SCHEMA_PATH}`);
 
   if (process.env.UE_SCHEMA_CONTRACT_DROP === '1') {
-    const admin = new pg.Client({ connectionString: databaseUrl(conn, adminDb) });
+    const admin = new pg.Client(pgConfig(conn, adminDb));
     await admin.connect();
     await admin.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`);
     await admin.end();

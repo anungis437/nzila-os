@@ -171,8 +171,8 @@ export async function introspect(client: pg.Client): Promise<CanonicalSchema[]> 
   return normalizeSchemas(schemas);
 }
 
-export async function generate(databaseUrl: string): Promise<GenerateResult> {
-  const client = new pg.Client({ connectionString: databaseUrl });
+export async function generate(config: pg.ClientConfig): Promise<GenerateResult> {
+  const client = new pg.Client(config);
   await client.connect();
   try {
     // Read-only guarantee: refuse to mutate anything.
@@ -214,7 +214,7 @@ async function main(): Promise<void> {
   const outFile = outIdx >= 0 ? path.join(outDir, 'canonical-schema.json') : CANONICAL_SCHEMA_PATH;
   const shaFile = outIdx >= 0 ? path.join(outDir, 'canonical-schema.sha256') : CANONICAL_SCHEMA_SHA_PATH;
 
-  const result = await generate(databaseUrl);
+  const result = await generate({ connectionString: databaseUrl });
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(outFile, serializeArtifact(result));
   fs.writeFileSync(shaFile, `${result.digest}\n`);
