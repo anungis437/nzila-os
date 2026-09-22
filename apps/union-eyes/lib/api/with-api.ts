@@ -346,7 +346,20 @@ export function withApi<
       if (user) {
         try {
           const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
-          resolvedOrganizationId = await getOrganizationIdForUser(user.id);
+          const { withRLSContext } = await import('@/lib/db/with-rls-context');
+          // Resolve org under the authenticated identity's own transaction-local
+          // RLS context so the user-scoped membership policy
+          // (user_id = app.current_user_id) is satisfied. The 'system' sentinel
+          // sets app.current_user_id and clears org — the designed bootstrap for
+          // "which org does this authenticated user belong to" before an active
+          // org is known. Runtime role, no privilege escalation, no client-trusted
+          // org. Only overwrite when a membership is actually resolved, so the
+          // auth-validated organization survives a null resolution.
+          const resolved = await withRLSContext(
+            { organizationId: 'system' },
+            async () => getOrganizationIdForUser(user!.id),
+          );
+          if (resolved) resolvedOrganizationId = resolved;
         } catch {
           // Keep auth metadata organization as fallback.
         }
