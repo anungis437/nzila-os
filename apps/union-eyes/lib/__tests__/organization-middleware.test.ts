@@ -37,6 +37,13 @@ vi.mock('@/lib/api-auth-guard', () => ({
   requireUserForOrganization: vi.fn(),
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (ctxOrOp: any, op?: any) => {
+    const operation = typeof ctxOrOp === 'function' ? ctxOrOp : op;
+    return operation();
+  }),
+}));
+
 vi.mock('@nzila/os-core', () => ({
   createLogger: vi.fn(() => ({
     info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(),
@@ -52,12 +59,14 @@ import {
 } from '../organization-middleware';
 import { getOrganizationIdForUser, validateOrganizationExists } from '@/lib/organization-utils';
 import { requireUser, requireUserForOrganization } from '@/lib/api-auth-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { NextRequest, NextResponse } from 'next/server';
 
 const mockGetOrgIdForUser = vi.mocked(getOrganizationIdForUser);
 const mockValidateOrgExists = vi.mocked(validateOrganizationExists);
 const mockRequireUser = vi.mocked(requireUser);
 const mockRequireUserForOrg = vi.mocked(requireUserForOrganization);
+const mockWithRLS = vi.mocked(withRLSContext);
 
 // ─── getOrganizationId ───────────────────────────────────────────────────────
 
@@ -207,5 +216,24 @@ describe('withOrganizationAuth', () => {
       }),
       undefined,
     );
+  });
+
+  it('resolves org under the system bootstrap context, then runs membership check + handler under the resolved org context', async () => {
+    mockRequireUser.mockResolvedValue({ userId: 'user_1' } as any);
+    mockGetOrgIdForUser.mockResolvedValue('org-1');
+    mockRequireUserForOrg.mockResolvedValue({
+      userId: 'user_1',
+      organizationId: 'org-1',
+      memberId: 'mem-1',
+    } as any);
+    const handler = vi.fn().mockResolvedValue({ body: 'ok', status: 200 } as any);
+
+    await withOrganizationAuth(handler)({} as NextRequest);
+
+    // Bootstrap: org is resolved under the identity-only 'system' context so the
+    // user-scoped membership read succeeds before an active org is known.
+    expect(mockWithRLS).toHaveBeenNthCalledWith(1, { organizationId: 'system' }, expect.any(Function));
+    // Then membership verification + handler run under the resolved org context.
+    expect(mockWithRLS).toHaveBeenNthCalledWith(2, { organizationId: 'org-1' }, expect.any(Function));
   });
 });
