@@ -603,7 +603,7 @@ export function withApi<
         traceId,
       };
 
-      const runHandler = () => handler(ctx);
+      const runHandler = async () => handler(ctx);
       const result = await (async () => {
         // Opt-in: run org-scoped handlers inside a transaction-local RLS
         // context so the handler's own DB work is visible to the
