@@ -1,0 +1,180 @@
+{
+  "$schema": "./runtime-drift-dispositions.schema.json",
+  "version": 1,
+  "generatedBy": "phase-de-runtime-required-audit",
+  "doctrine": {
+    "meaning": "Checked-in record of Drizzle/ORM declarations that are NOT runtime-required-now. Their physical absence must NEVER fail schema:contract:verify. This artifact exists so the permanent contract system does not later 'rediscover' intentionally rejected schema requirements and recreate the stale-ORM-as-canonical mistake the audit eliminated.",
+    "classVocabulary": {
+      "STALE_RUNTIME_ASSUMPTION": "Runtime code referenced a column that has no physical existence and is a rename/removed concept; consumers are rewritten, not the schema.",
+      "INCIDENTAL_ONLY": "Declared in Drizzle but never consumed by any canonical-43 path; trim the Drizzle declaration.",
+      "NON_RUNTIME_ORM_DRIFT": "ORM-declared columns not exercised by any current runtime path (NOT_REQUIRED_NOW); may become REQUIRED_LATER.",
+      "NOT_IMPLEMENTED": "No runtime path reads the table at all; declared columns are unwired.",
+      "NON_BLOCKING_SEMANTIC": "Column exists physically; only its representation/type differs from the Drizzle declaration. Not a 42703 execution blocker. Type adjudication deferred.",
+      "SECURITY_SENSITIVE_DO_NOT_RESTORE": "PII/2FA columns that must NOT be materialised physically merely because a full-shape Drizzle read declares them; fix is to narrow the projection."
+    }
+  },
+  "dispositions": [
+    {
+      "schema": "public",
+      "table": "organizations",
+      "column": "app_id",
+      "class": "STALE_RUNTIME_ASSUMPTION",
+      "requiredNow": false,
+      "action": "TRIM_DRIZZLE",
+      "reason": "Drizzle schema-organizations.ts declares appId/index/relation but no physical app_id exists and Django Organizations has no app_id. Rewrite org.appId consumers to org.id. Verifier MUST NOT report app_id as a missing required column."
+    },
+    {
+      "schema": "public",
+      "table": "organization_members",
+      "column": "tenant_id",
+      "class": "STALE_RUNTIME_ASSUMPTION",
+      "requiredNow": false,
+      "action": "TRIM_DRIZZLE",
+      "reason": "tenant_id is a stale legacyOrgId rename; not physically present, not consumed by canonical-43."
+    },
+    {
+      "schema": "public",
+      "table": "organization_members",
+      "column": "preferred_contact_method",
+      "class": "INCIDENTAL_ONLY",
+      "requiredNow": false,
+      "action": "TRIM_DRIZZLE",
+      "reason": "Declared in Drizzle but never consumed by canonical-43."
+    },
+    {
+      "schema": "public",
+      "table": "organization_members",
+      "column": "exemption_approved_at",
+      "class": "INCIDENTAL_ONLY",
+      "requiredNow": false,
+      "action": "TRIM_DRIZZLE",
+      "reason": "Declared in Drizzle but never consumed by canonical-43."
+    },
+    {
+      "schema": "public",
+      "table": "organization_members",
+      "column": "search_vector",
+      "class": "INCIDENTAL_ONLY",
+      "requiredNow": false,
+      "action": "TRIM_DRIZZLE",
+      "reason": "Declared in Drizzle but never consumed by canonical-43."
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "column": "phone_verified_at",
+      "class": "SECURITY_SENSITIVE_DO_NOT_RESTORE",
+      "requiredNow": false,
+      "action": "NARROW_DRIZZLE_PROJECTION",
+      "reason": "users full-shape findFirst appears only in NON-canonical-43 action paths. Fix is columns:{userId,email} projection; do NOT materialise this column physically merely because declared."
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "column": "two_factor_secret",
+      "class": "SECURITY_SENSITIVE_DO_NOT_RESTORE",
+      "requiredNow": false,
+      "action": "NARROW_DRIZZLE_PROJECTION",
+      "reason": "Security-sensitive 2FA column; NOT_REQUIRED_NOW; must never be restored physically to satisfy a stale full-shape read."
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "column": "two_factor_backup_codes",
+      "class": "SECURITY_SENSITIVE_DO_NOT_RESTORE",
+      "requiredNow": false,
+      "action": "NARROW_DRIZZLE_PROJECTION",
+      "reason": "Security-sensitive 2FA column; NOT_REQUIRED_NOW."
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "column": "encrypted_sin",
+      "class": "SECURITY_SENSITIVE_DO_NOT_RESTORE",
+      "requiredNow": false,
+      "action": "NARROW_DRIZZLE_PROJECTION",
+      "reason": "Security-sensitive PII column; NOT_REQUIRED_NOW."
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "column": "encrypted_ssn",
+      "class": "SECURITY_SENSITIVE_DO_NOT_RESTORE",
+      "requiredNow": false,
+      "action": "NARROW_DRIZZLE_PROJECTION",
+      "reason": "Security-sensitive PII column; NOT_REQUIRED_NOW."
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "column": "encrypted_bank_account",
+      "class": "SECURITY_SENSITIVE_DO_NOT_RESTORE",
+      "requiredNow": false,
+      "action": "NARROW_DRIZZLE_PROJECTION",
+      "reason": "Security-sensitive PII column; NOT_REQUIRED_NOW."
+    },
+    {
+      "schema": "public",
+      "table": "grievance_deadlines",
+      "column": "*",
+      "class": "NON_RUNTIME_ORM_DRIFT",
+      "requiredNow": false,
+      "action": "DEFER_TO_REQUIRED_LATER",
+      "reason": "All reachable sites PROJECT (select id / select id,dueDate,calculatedDueDate + scoped UPDATE). No canonical-43 page-load performs a full-shape read. The declared-but-missing columns are write/action-path REQUIRED_LATER, not page-load blockers."
+    },
+    {
+      "schema": "public",
+      "table": "notifications",
+      "column": "*",
+      "class": "NOT_IMPLEMENTED",
+      "requiredNow": false,
+      "action": "DEFER",
+      "reason": "No app runtime performs .from(notifications) or db.query.notifications; the notification-service reads users/organization_members. Declared-but-missing columns are unwired. Not a release blocker."
+    },
+    {
+      "schema": "public",
+      "table": "claims",
+      "column": "claim_amount",
+      "class": "NON_BLOCKING_SEMANTIC",
+      "requiredNow": false,
+      "action": "DEFER_TYPE_ADJUDICATION",
+      "reason": "numeric-vs-varchar money representation; column exists physically and functions as string. NOT a 42703 execution blocker."
+    },
+    {
+      "schema": "public",
+      "table": "claims",
+      "column": "settlement_amount",
+      "class": "NON_BLOCKING_SEMANTIC",
+      "requiredNow": false,
+      "action": "DEFER_TYPE_ADJUDICATION",
+      "reason": "numeric-vs-varchar money representation; column exists physically. Not a blocker."
+    },
+    {
+      "schema": "public",
+      "table": "claims",
+      "column": "legal_costs",
+      "class": "NON_BLOCKING_SEMANTIC",
+      "requiredNow": false,
+      "action": "DEFER_TYPE_ADJUDICATION",
+      "reason": "numeric-vs-varchar money representation; column exists physically. Not a blocker."
+    },
+    {
+      "schema": "public",
+      "table": "claims",
+      "column": "court_costs",
+      "class": "NON_BLOCKING_SEMANTIC",
+      "requiredNow": false,
+      "action": "DEFER_TYPE_ADJUDICATION",
+      "reason": "numeric-vs-varchar money representation; column exists physically. Not a blocker."
+    },
+    {
+      "schema": "public",
+      "table": "grievances",
+      "column": "related_grievance_ids",
+      "class": "NON_BLOCKING_SEMANTIC",
+      "requiredNow": false,
+      "action": "DEFER_TYPE_ADJUDICATION",
+      "reason": "uuid[]-vs-jsonb representation difference; column exists physically. Not a 42703 blocker."
+    }
+  ]
+}

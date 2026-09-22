@@ -85,7 +85,11 @@
     "db:scoped-migrate:existing": "node ../../tooling/scripts/apply-union-eyes-scoped-migrations-existing-env.mjs",
     "rls:authority-convergence-report": "tsx scripts/generate-authority-convergence-report.ts",
     "schema:publish-from-oracle": "tsx ../../tooling/db/canonical-schema/publish-from-runtime-oracle.ts",
-    "schema:verify-canonical": "tsx ../../tooling/db/canonical-schema/verify.ts"
+    "schema:verify-canonical": "tsx ../../tooling/db/canonical-schema/verify.ts",
+    "schema:contract:generate": "tsx scripts/schema-authority/generate-canonical-schema.ts",
+    "schema:contract:verify": "tsx scripts/schema-authority/verify-runtime-contract.ts",
+    "schema:contract:fresh-build": "tsx scripts/schema-authority/fresh-build.ts",
+    "schema:authority:lint": "tsx scripts/schema-authority/lint-authority.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.985.0",
