@@ -61,6 +61,7 @@ import { logger } from '@/lib/logger';
 import { AuditEventType, AuditSeverity, auditLog } from '@/lib/audit-logger';
 import { ROLE_PERMISSIONS } from '@/lib/auth/roles';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 // =============================================================================
 // AUTH RE-EXPORTS
@@ -807,6 +808,9 @@ export async function getUserContextForOrganization(
     return null;
   }
 
+  // Membership tables are tenant-RLS org-scoped. Resolve under system
+  // authority (filter still binds userId + organizationId in WHERE).
+  return withSystemContext(async () => {
   const membership = await db.query.organizationMembers.findFirst({
     where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, organizationId)),
     columns: { id: true, organizationId: true, role: true },
@@ -865,6 +869,7 @@ export async function getUserContextForOrganization(
     permissions: getPermissionsForRole(role),
     memberId: membership.id,
   };
+  });
 }
 
 // =============================================================================
