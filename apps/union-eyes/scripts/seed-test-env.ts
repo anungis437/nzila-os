@@ -180,6 +180,8 @@ async function seed(): Promise<void> {
         organizationType: org.organizationType,
         hierarchyPath: [...org.hierarchyPath],
         hierarchyLevel: org.hierarchyLevel,
+        // Canonical snapshot enforces NOT NULL on sectors without a DB default.
+        sectors: [],
         status: 'active',
         createdAt: NOW,
         updatedAt: NOW,
