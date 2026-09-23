@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T14:12:24.663Z",
+  "generatedAt": "2026-09-23T15:17:00.751Z",
   "status": {
     "f60040Schema": "PARTIAL_RUNTIME_SCHEMA",
     "previousRuntimeContractCompleteness": "INSUFFICIENT",
@@ -118,8 +118,8 @@
     "runtimeTablesWithOwner": 339,
     "runtimeTablesWithoutSchemaOwner": 10,
     "runtimeTablesWithMultipleSchemaOwners": 233,
-    "bootstrapParticipatingCreationTables": 41,
-    "bootstrapMissingCreationTables": 308
+    "bootstrapParticipatingCreationTables": 64,
+    "bootstrapMissingCreationTables": 285
   },
   "requiredFollowUp": [
     "Measure presentInF60040 against the accepted f60040 physical schema snapshot instead of inferring it from source.",
@@ -182,7 +182,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/ai/clause-reasoning.ts"
@@ -191,11 +191,18 @@
         "apps/union-eyes/lib/ai/clause-reasoning.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"ai_clause_reasonings",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -227,7 +234,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/ai/steward-copilot.ts"
@@ -236,11 +243,18 @@
         "apps/union-eyes/lib/ai/steward-copilot.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"ai_copilot_sessions",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -271,7 +285,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/ai/grievance-triage.ts"
@@ -280,11 +294,18 @@
         "apps/union-eyes/lib/ai/grievance-triage.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"ai_grievance_triages",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -315,7 +336,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/ai/executive-insights.ts"
@@ -324,11 +345,18 @@
         "apps/union-eyes/lib/ai/executive-insights.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"ai_insight_reports",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -4754,18 +4782,25 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": null,
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/services/clause-intelligence.ts"
       ],
       "activeRuntimeWriters": [],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"clause_embeddings",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -6139,7 +6174,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/create-compliance-tables.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/compliance/alerts/route.ts",
@@ -6149,11 +6184,18 @@
       ],
       "activeRuntimeWriters": [],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"compliance_alerts",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -7517,18 +7559,25 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [],
       "activeRuntimeWriters": [
         "apps/union-eyes/lib/services/dispatch-engine.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"dispatch_assignments",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
@@ -7560,7 +7609,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/services/dispatch-engine.ts"
@@ -7569,11 +7618,18 @@
         "apps/union-eyes/lib/services/dispatch-engine.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"dispatch_requests",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
@@ -7603,18 +7659,25 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/services/dispatch-engine.ts"
       ],
       "activeRuntimeWriters": [],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"dispatch_rules",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
@@ -8671,7 +8734,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/employers/communications/route.ts"
@@ -8680,11 +8743,18 @@
         "apps/union-eyes/app/api/employers/communications/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"employer_communications",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -8715,7 +8785,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/employers/communications/contacts/route.ts"
@@ -8724,11 +8794,18 @@
         "apps/union-eyes/app/api/employers/communications/contacts/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"employer_contacts",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -9194,18 +9271,25 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/create-compliance-tables.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/compliance/reports/route.ts"
       ],
       "activeRuntimeWriters": [],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"employer_reports",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -9243,7 +9327,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/lib/ai/employer-risk.ts"
@@ -9252,11 +9336,18 @@
         "apps/union-eyes/lib/ai/employer-risk.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"employer_risk_scores",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -17354,7 +17445,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/governance/policies/rules/route.ts",
@@ -17365,11 +17456,18 @@
         "apps/union-eyes/app/api/governance/policy-templates/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"governance_policies",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -17566,7 +17664,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/grievances/[id]/route.ts",
@@ -17584,11 +17682,18 @@
         "apps/union-eyes/app/api/grievances/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"grievance_events",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -23732,7 +23837,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/pension/benefits/route.ts"
@@ -23741,11 +23846,18 @@
         "apps/union-eyes/app/api/pension/benefits/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_benefit_claims",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -23783,7 +23895,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/finance/summary/route.ts",
@@ -23795,11 +23907,18 @@
         "apps/union-eyes/app/api/pension/contributions/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_contributions",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -23837,7 +23956,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/finance/summary/route.ts",
@@ -23849,11 +23968,18 @@
         "apps/union-eyes/app/api/pension/members/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_members",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -23884,7 +24010,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/pension/plans/[id]/route.ts",
@@ -23896,11 +24022,18 @@
         "apps/union-eyes/app/api/pension/plans/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_plans",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -23938,7 +24071,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/pension/t4a/route.ts",
@@ -23949,11 +24082,18 @@
         "apps/union-eyes/app/api/tax/t4a/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_t4a_records",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -23984,7 +24124,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/pension/trustee-meetings/[id]/route.ts",
@@ -23995,11 +24135,18 @@
         "apps/union-eyes/app/api/pension/trustee-meetings/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_trustee_meetings",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -24037,7 +24184,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/pension/trustees/[id]/route.ts",
@@ -24048,11 +24195,18 @@
         "apps/union-eyes/app/api/pension/trustees/route.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"pension_trustees",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -27780,7 +27934,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "tooling/sql/union-eyes-qa-baseline.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/[locale]/dashboard/stewards/page.tsx",
@@ -27792,11 +27946,18 @@
         "apps/union-eyes/lib/services/steward-assignment.ts"
       ],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"stewards",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
@@ -27833,7 +27994,7 @@
       ],
       "djangoModel": null,
       "djangoCreatingMigration": null,
-      "sqlCreatingMigration": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "sqlCreatingMigration": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
       "otherCreatingMigration": "scripts/stub-migration.sql",
       "activeRuntimeReaders": [
         "apps/union-eyes/app/api/executive/dashboard/route.ts",
@@ -27841,11 +28002,18 @@
       ],
       "activeRuntimeWriters": [],
       "presentInF60040": "UNKNOWN_NOT_MEASURED",
-      "creationLineage": "OTHER_GOVERNED_LINEAGE",
+      "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
       "scopeDisposition": null,
       "canonicalRequirement": "REQUIRED",
       "schemaOwner": "PLATFORM_SQL_OWNED",
       "creationEvidence": [
+        {
+          "lineage": "UNION_EYES_PLATFORM_SQL",
+          "file": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+          "match": "CREATE TABLE IF NOT EXISTS \"strategic_goals",
+          "historicalOrder": 35,
+          "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP"
+        },
         {
           "lineage": "UNION_EYES_AUDIT_SQL",
           "file": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
