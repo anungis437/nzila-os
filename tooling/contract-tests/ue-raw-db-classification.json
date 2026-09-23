@@ -268,6 +268,15 @@
     "app/api/organizations/current/route.ts": {
       "category": "requires-rls-context",
       "reason": "Reserved sentinel /organizations/current; resolves org then reads under withRLSContext."
+    },
+    "app/api/documents/repository/[id]/route.ts": {
+      "category": "requires-org-scope-wrapper",
+      "reason": "Repository document item under withOrganizationAuth; queries scoped via withRLSContext.",
+      "migration": true
+    },
+    "app/api/grievances/[id]/route.ts": {
+      "category": "requires-rls-context",
+      "reason": "Grievance item GET under withOrganizationAuth + withRLSContext."
     }
   }
 }

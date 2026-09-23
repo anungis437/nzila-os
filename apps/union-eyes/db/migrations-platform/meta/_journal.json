@@ -36,6 +36,13 @@
       "when": 1758640000000,
       "tag": "0005_organization_members_deleted_at",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1758650000000,
+      "tag": "0006_documents_runtime_columns",
+      "breakpoints": true
     }
   ]
 }
