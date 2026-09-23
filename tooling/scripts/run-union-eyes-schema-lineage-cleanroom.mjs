@@ -9,7 +9,7 @@
  *   3. Django migrate (canonical Django SCHEMA_CREATION) — default ON
  *   4. Cleanroom foundation shims (enums / unique keys required by later SQL)
  *   5. Historical SCHEMA_CREATION SQL from SCHEMA_LINEAGE_MANIFEST (dependency-safe order)
- *   6. Post-freeze PLATFORM_SQL journal (0001–0005)
+ *   6. Post-freeze PLATFORM_SQL journal (0001–0006)
  *   7. Scoped migrations-cache (RLS/grants/cache)
  *   8. Presence + digest probes
  *
