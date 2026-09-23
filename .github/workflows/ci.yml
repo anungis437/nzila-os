@@ -659,7 +659,7 @@ jobs:
         run: |
           k6 run \
             --env PROFILE=ci \
-            --env BASE_URL="${{ vars.PERF_BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io' }}" \
+            --env BASE_URL="${{ vars.PERF_BASE_URL || 'https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io' }}" \
             --env AUTH_TOKEN="${{ secrets.PERF_AUTH_TOKEN }}" \
             --summary-export=tests/load/k6-summary.json \
             tests/load/smoke.js

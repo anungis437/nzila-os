@@ -55,7 +55,7 @@ describe('scoped 0013 — journal registration', () => {
 
   it('is the highest journal index (appended, not inserted mid-lineage)', () => {
     const maxIdx = Math.max(...JOURNAL.entries.map((e) => e.idx));
-    expect(maxIdx).toBe(13);
+    expect(maxIdx).toBe(14); // 0014_lineage_restoration_rls_closure appended after 0013
   });
 
   it('splits into exactly three breakpoint-delimited statements', () => {

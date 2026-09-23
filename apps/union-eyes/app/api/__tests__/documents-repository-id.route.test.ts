@@ -41,6 +41,14 @@ const mockDb: any = {
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (a: any, b?: any) => {
+    const fn = typeof a === 'function' ? a : b;
+    return fn({});
+  },
+  withSystemContext: async (fn: any) => fn({}),
+}));
+
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/services/document-governance-service', () => ({
   isDocumentVisibleByPolicy: m.isDocumentVisibleByPolicy,
