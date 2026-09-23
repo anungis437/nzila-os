@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T15:19:07.914468+00:00",
+  "generatedAt": "2026-09-23T15:19:14.627447+00:00",
   "ORDERED_SCHEMA_LINEAGE_DEFINED": "YES",
   "POST_FREEZE_PLATFORM_SQL_ROOT": "apps/union-eyes/db/migrations-platform",
   "SCOPED_RLS_CLOSURE": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql",
@@ -82,7 +82,7 @@
     "bootstrapParticipatingCreationTables": 41,
     "bootstrapMissingCreationTables": 308
   },
-  "commitSha": "bff58351e8c7f4a6c9c352e642c821db97064d21",
+  "commitSha": "07842deca43347188eaa32447e02ee7ed1367fca",
   "publisher": {
     "PUBLISHER_SECOND_SCHEMA_AUTHORITY": "NO",
     "PUBLISHER_CANONICAL_ORACLE": "PASS",
@@ -127,5 +127,6 @@
   },
   "AZURE_MAY_PROCEED_NEXT": true,
   "UNRELATED_FILES_INCLUDED": 0,
-  "COMPLETE_SCHEMA_CONVERGENCE_SHA": "bff58351e8c7f4a6c9c352e642c821db97064d21"
+  "COMPLETE_SCHEMA_CONVERGENCE_SHA": "07842deca43347188eaa32447e02ee7ed1367fca",
+  "publisherCommitSha": "bff58351e8c7f4a6c9c352e642c821db97064d21"
 }
