@@ -66,7 +66,7 @@
   "COMPLETE_RUNTIME_SCHEMA_CONVERGENCE": "PASS",
   "READY_FOR_FRESH_AZURE_STAGING_RECONSTITUTION": "YES",
   "AZURE_TOUCHED": false,
-  "COMMITTED": false,
+  "COMMITTED": true,
   "blockers": [],
   "oracleCounts": {
     "storageAuthorityEntries": 805,
@@ -81,5 +81,6 @@
     "runtimeTablesWithMultipleSchemaOwners": 233,
     "bootstrapParticipatingCreationTables": 41,
     "bootstrapMissingCreationTables": 308
-  }
+  },
+  "commitSha": "dfe5251652efaedbc6712361495f1ba9ddefed26"
 }
