@@ -1,0 +1,136 @@
+{
+  "phase": "H",
+  "title": "PRIMARY_AUTHENTICATION staging proof (PG password/session)",
+  "generatedAtUtc": "2026-09-23T20:29:10Z",
+  "timezoneNote": "America/Toronto (ET)",
+  "scope": {
+    "environment": "staging",
+    "productionTouched": false,
+    "prMerged": false,
+    "baseUrl": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "activeRevision": "nzila-os-union-eyes-staging--0000259",
+    "revisionTrafficPercent": 100,
+    "health": {
+      "statusCode": 200,
+      "environment": "staging",
+      "ok": true
+    },
+    "authMechanism": "PG-backed password/session via POST /api/auth/login -> nzila_session cookie",
+    "notUsed": [
+      "x-ue-acceptance-auth",
+      "Entra/OIDC interactive SSO"
+    ]
+  },
+  "seed": {
+    "action": "TARGETED_UPSERT_QA_FIXTURES",
+    "reason": "QA fixture users missing from staging user_management.users (no password hashes for primary proof path)",
+    "method": "Admin DB URL (BYPASSRLS) targeted SQL upsert; argon2id hash matching platform-auth password options; no full seed wipe; no unrelated audit delete",
+    "orgId": "11111111-1111-4111-8111-111111111111",
+    "usersSeeded": [
+      {
+        "userId": "ue-qa-admin-primary",
+        "email": "ue.qa.admin.primary@nzila.test",
+        "role": "admin"
+      },
+      {
+        "userId": "ue-qa-member-primary",
+        "email": "ue.qa.member.primary@nzila.test",
+        "role": "member"
+      },
+      {
+        "userId": "ue-qa-steward-primary",
+        "email": "ue.qa.steward.primary@nzila.test",
+        "role": "steward"
+      }
+    ],
+    "passwordSource": "UE_TEST_USER_PASSWORD from apps/union-eyes/tests/fixtures/test-users.ts (value redacted)",
+    "riskMitigation": "Seeded prior user_management.user_sessions rows for proof client IP so admin privileged-role risk score stayed below MFA gate",
+    "secretsInArtifacts": false
+  },
+  "proof": {
+    "primaryAuthStatus": "PASS",
+    "cookieName": "nzila_session",
+    "endpoints": {
+      "negativeWrongPassword": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "status": 401,
+        "sessionIssued": false
+      },
+      "login": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "status": 200,
+        "sessionIssued": true
+      },
+      "me": {
+        "method": "GET",
+        "path": "/api/auth/me",
+        "status": 200
+      },
+      "userRole": {
+        "method": "GET",
+        "path": "/api/auth/user-role",
+        "status": 200
+      },
+      "organizationsCurrent": {
+        "method": "GET",
+        "path": "/api/organizations/current",
+        "status": 200
+      },
+      "membersMe": {
+        "method": "GET",
+        "path": "/api/members/me",
+        "status": 200
+      },
+      "notifications": {
+        "method": "GET",
+        "path": "/api/notifications",
+        "status": 200
+      }
+    },
+    "personas": {
+      "adminPrimary": {
+        "email": "ue.qa.admin.primary@nzila.test",
+        "userId": "ue-qa-admin-primary",
+        "login": 200,
+        "me": 200,
+        "role": "admin",
+        "orgId": "11111111-1111-4111-8111-111111111111",
+        "wrongPassword": 401,
+        "ok": true
+      },
+      "memberPrimary": {
+        "email": "ue.qa.member.primary@nzila.test",
+        "userId": "ue-qa-member-primary",
+        "login": 200,
+        "me": 200,
+        "role": "member",
+        "orgId": "11111111-1111-4111-8111-111111111111",
+        "wrongPassword": 401,
+        "ok": true
+      },
+      "stewardPrimary": {
+        "email": "ue.qa.steward.primary@nzila.test",
+        "userId": "ue-qa-steward-primary",
+        "login": 200,
+        "me": 200,
+        "role": "steward",
+        "orgId": "11111111-1111-4111-8111-111111111111",
+        "wrongPassword": 401,
+        "ok": true
+      }
+    },
+    "identityResolved": true,
+    "orgResolved": true,
+    "roleResolved": true,
+    "rlsBackedCall": true
+  },
+  "limitations": [
+    "First admin login without prior session-IP seed hit MFA risk gate; after seeding matching IP session row, password login issued nzila_session",
+    "/api/grievances and /api/auth/role returned 500 on this revision; role proven via /api/auth/user-role",
+    "BACKUP_ENTRA_AUTHENTICATION still NOT_YET_PROVEN",
+    "CONTROLLED_PILOT_READINESS remains BLOCKED due to EXTERNAL_SPECIALIST_BOUNDARY PARTIAL and expired waivers/governance debt"
+  ],
+  "productionTouched": false
+}
