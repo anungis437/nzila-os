@@ -151,13 +151,23 @@ async function seed(): Promise<void> {
     }
 
     // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
-    // Canonical PG15 snapshot may omit audit_security (legacy-lineage only); skip when absent.
-    await safeCleanup('audit_security.security_events', async () => {
-      await tx.execute(sql`delete from audit_security.security_events`)
-    })
-    await safeCleanup('audit_security.audit_logs', async () => {
-      await tx.execute(sql`delete from audit_security.audit_logs`)
-    })
+    // Canonical PG15 snapshot may omit audit_security (legacy-lineage only).
+    // Pre-check with to_regclass — a failed DELETE aborts the surrounding transaction,
+    // so catch-based safeCleanup alone is insufficient here.
+    if (await tableExists('audit_security.security_events')) {
+      await safeCleanup('audit_security.security_events', async () => {
+        await tx.execute(sql`delete from audit_security.security_events`)
+      })
+    } else {
+      console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.security_events')
+    }
+    if (await tableExists('audit_security.audit_logs')) {
+      await safeCleanup('audit_security.audit_logs', async () => {
+        await tx.execute(sql`delete from audit_security.audit_logs`)
+      })
+    } else {
+      console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.audit_logs')
+    }
 
     // Remove existing QA orgs and recreate deterministically.
     await tx.delete(organizations).where(inArray(organizations.id, orgIds))
