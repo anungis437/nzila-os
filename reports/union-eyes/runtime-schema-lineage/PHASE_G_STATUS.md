@@ -1,56 +1,63 @@
-# Phase G Runtime/Pilot Acceptance — BLOCKED
+# Phase G Runtime/Pilot Acceptance - BLOCKED (original two defects CLEARED)
 
-Generated: 2026-09-23T16:01:38.848462+00:00
+Generated: 2026-09-23T18:05:38.850505+00:00 (America/Toronto EDT reporting context)
 
 ## Disposition
-- FRESH_CANONICAL_STAGING = **PASS** (reconstitution baseline held; rls-verify 1697/1697)
+- FRESH_CANONICAL_STAGING = **PASS**
+- APP_SCHEMA_COMPATIBILITY = **PASS** (deleted_at + /organizations/current)
 - PHASE_G_DEPLOYED_RUNTIME_AUTHORITY = **BLOCKED**
 - READY_FOR_POST_G_RELEASE_DISPOSITION = **NO**
 - PRODUCTION_TOUCHED = **NO**
 - Snapshot lifecycle / PR = **not started** (Phase G not PASS)
 
-## Section 1 — Provenance
-- Traffic revision: nzila-os-union-eyes-staging--0000247 @ 100%
-- Image: sha256:3fa0a3de2f17cf3be5cd3666d9eb61d6e69cbb3029e9d66c451707195f2ada1b
-- Image source SHA: b30798326afbb1ad24b72b33b2be5f300bd6023c
-- Release: UE-2026-09-22-b307983
-- Schema source SHA: f71c6e5cac4c68d706285a37050748e21103574d
-- APP_SCHEMA_COMPATIBILITY = **FAIL** (see blockers)
+## Section 1 - Provenance
+- Traffic revision: **nzila-os-union-eyes-staging--0000255** @ 100%
+- Image: `sha256:2437fc0090de0029f97b6d6112e7b45aae6f892b418816577851601e9c474d02`
+- Image source SHA: `a7a3f0e0d24f1b96a9c26b4e025fe44347034a79`
+- Deploy run: https://github.com/anungis437/nzila-os/actions/runs/35896982322
+- Schema source SHA: `f71c6e5cac4c68d706285a37050748e21103574d`
+- APP_SCHEMA_COMPATIBILITY = **PASS**
+- Worktree tip `24513797a` (grievance withRLSContext) **not** in this image
 
-## Section 2 — Fixtures
-- STAGING_ACCEPTANCE_FIXTURES = PASS (synthetic UUID ORG_A/B, roles, matters, docs, representation + external grants)
-- PRODUCTION_DATA_USED = NO / REAL_MEMBER_DATA_USED = NO
+## Cleared blockers (this dispatch)
+1. **ORG_MEMBERS_DELETED_AT_MISSING** — PLATFORM_SQL `0005_organization_members_deleted_at` applied to staging; column present; folded into platform journal for clean-room reconstitutions.
+2. **ORGANIZATIONS_CURRENT_ROUTE_UUID** — dedicated `app/api/organizations/current/route.ts`; `[id]` rejects non-UUID/sentinel `current`.
 
-## Section 3 — RLS SQL boundary
-- union_eyes_runtime: ROLSUPER=false, ROLBYPASSRLS=false
-- No-context org/matter/doc counts = 0
-- ORG/MATTER/DOCUMENT A↔B isolation = PASS
-- TRANSACTION_CONTEXT_LEAKAGE = 0
-- rls-verify --mode=preflight = **1697/1697 PASS**, MISSING_RLS_TARGET_TABLES = 0
+## Supporting app fixes also in image a7a3f0e0d
+- `getOrganizationIdForUser` / `getUserContextForOrganization` / entitlement + rbac lookups under `withSystemContext` (tenant RLS bootstrap)
+- INV-31b classification for `/organizations/current`
+- Scoped drizzle ledger backfilled on staging so ICRA 0005 gate GO
 
-## Section 4 — Runtime surfaces
-- billing_subscriptions present; SQL surfaces queryable under org context
-- HTTP /api/dues/billing-cycle: BILLING_CYCLE_MISSING_RELATION_ERROR=**NO**; reached 403 officer role (not 42P01)
+## Section 2 - Fixtures
+- Synthetic UUID ORG_A/B identities retained
+- `organization_members` + `user_management.organization_users` seeded
+- `org_entitlements`: `grievance_case_suite`, `financial_intelligence_suite` active for ORG_A/B
+- ADMIN_A role set to `officer` for billing-cycle
 
-## Section 5–7 — HTTP / pilot
-- Acceptance-auth identity-only; Playwright test auth DISABLED
-- UNAUTHENTICATED → 401 (PASS)
-- Authenticated positives BLOCKED by org-resolution / route defects (see below)
+## Section 4 - Billing
+- `/api/dues/billing-cycle` → **200** (schema OK; no missing-relation)
 
-## Exact blockers
-1. **ORG_MEMBERS_DELETED_AT_MISSING** — app selects organization_members.deleted_at but column absent on reconstituted staging.
-2. **ORGANIZATIONS_CURRENT_ROUTE_UUID** — /api/organizations/current uses path token current as UUID.
+## Section 5–7 - HTTP / pilot (rev 0000255)
+| Case | Status |
+|------|--------|
+| ADMIN_A_health | 200 |
+| *_org_current (A roles + ADMIN_B) | 200 |
+| ADMIN_A_grievances_list | 200 empty `data:[]` |
+| ADMIN_A_grievance_A | 404 |
+| ADMIN_A_document_A | 403 app_owner |
+| BILLING_CYCLE | 200 |
+| UNAUTHENTICATED | 401 |
+| CROSS_ORG grievance reads | 404 (no cross-tenant leak) |
+| SAME_ROLE_UNAUTHORIZED_admin_route | 403 |
 
-## Section 8 — PG15
-- Restore/runtime/RLS on Azure PG15 = PASS → ACCEPTED_FOR_STAGING
-- Recommendation: align clean-room CI to PG15 (not implemented)
+## Remaining blockers
+1. **GRIEVANCE_HANDLER_MISSING_RLS_CONTEXT** — list/get omit `withRLSContext({organizationId})`; fix committed as `24513797a` but **not deployed** on 0000255.
+2. **DOCUMENT_ROUTE_REQUIRES_APP_OWNER** — document positive path blocked by app_owner gate vs Phase G fixture roles.
+
+## Section 8 - PG15
+- ACCEPTED_FOR_STAGING (prior)
 
 ## Resources mutated (staging only)
-- ACA traffic + env allowlist on 
-zila-os-union-eyes-staging / 
-zila-canada-staging-rg
-- DB fixture rows in 
-zila_os_staging on 
-zila-staging-db / 
-zila-staging-rg
-- Temporary firewall rule for operator IP (cleanup separately if still present)
+- ACA `nzila-os-union-eyes-staging` / `nzila-canada-staging-rg` — revisions through 0000255; traffic 100% on 0000255
+- DB `nzila_os_staging` — PLATFORM_SQL 0005; organization_members seed; org_entitlements; ADMIN_A→officer; grievance status→filed; scoped drizzle ledger backfill
+- **No production**
