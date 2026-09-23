@@ -70,3 +70,13 @@ Institutional roles (outgoing/incoming ED, board, auditor) are **not** native `S
 | Reference-config + fictional fixtures | **Documented / data only** |
 | Claim/date/authority columns | **Documented gap only** |
 | Member365/LRIS | **Sketch only** |
+
+
+## 8. Phase 3 update (2026-09-23)
+
+| Item | Status |
+| --- | --- |
+| `claim-chain.ts` + `institutional-context.ts` | **Implemented** (migration-free register) |
+| Wired choke into `listSageEvidenceItems` + export package generate + API | **Implemented** |
+| First-class DB columns for occurredAt/authority | Still optional future — register covers pilot Q&A |
+| DEMO_PATH | `reference-configs/.../DEMO_PATH.md` |

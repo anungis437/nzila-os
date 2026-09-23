@@ -1,0 +1,47 @@
+{
+  "label": "FICTIONAL claim register — NOT real OMHRA",
+  "disclaimer": "Synthetic claim→evidence→source→date→authority entries for Leadership Transition demos and tests.",
+  "org_id": "00000000-1111-4000-8000-0000000000aa",
+  "workspace_id": "00000000-2222-4000-8000-0000000000bb",
+  "claims": [
+    {
+      "claimId": "CLM-retire-2024",
+      "claim": "Outgoing executive announced planned retirement effective 2025-Q2",
+      "evidenceItemId": "ev-internal-retirement-announce",
+      "sourceId": "src-internal-retirement-announce",
+      "occurredAt": "2024-01-20",
+      "authorityActorId": "actor-outgoing-ed",
+      "authorityRoleLabel": "outgoing_executive",
+      "authorizationLevel": "internal",
+      "workspaceId": "00000000-2222-4000-8000-0000000000bb",
+      "orgId": "00000000-1111-4000-8000-0000000000aa"
+    },
+    {
+      "claimId": "CLM-why-b",
+      "claim": "Why choose B — deeper institutional memory on member program delivery",
+      "evidenceItemId": "ev-sensitive-why-b",
+      "sourceId": "src-sensitive-why-b",
+      "occurredAt": "2024-09-12",
+      "authorityActorId": "actor-board-chair",
+      "authorityRoleLabel": "board_member",
+      "whatChanged": "FICTIONAL: 2023 membership model change increased dependency on conference continuity",
+      "whatUnresolved": "FICTIONAL: 2026 advocacy funding envelope still unconfirmed",
+      "authorizationLevel": "sensitive",
+      "workspaceId": "00000000-2222-4000-8000-0000000000bb",
+      "orgId": "00000000-1111-4000-8000-0000000000aa"
+    },
+    {
+      "claimId": "CLM-excluded-complaint",
+      "claim": "Active workplace complaint touching shortlist (excluded)",
+      "evidenceItemId": "ev-excluded-complaint",
+      "sourceId": "src-excluded-complaint",
+      "occurredAt": "2025-02-01",
+      "authorityActorId": "actor-ed-admin",
+      "authorityRoleLabel": "ed_admin",
+      "whatUnresolved": "FICTIONAL: complaint process ongoing — incoming executive default deny",
+      "authorizationLevel": "excluded",
+      "workspaceId": "00000000-2222-4000-8000-0000000000bb",
+      "orgId": "00000000-1111-4000-8000-0000000000aa"
+    }
+  ]
+}
