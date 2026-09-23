@@ -40,7 +40,7 @@
   "PRE_COMPLETE_RUNTIME_SCHEMA_DIGEST": "f60040e62c1253d0e3aa6476e993241c331f8e02b10a16015ec83c2577a73c47",
   "DIGEST_NOTE": "Unchanged from presence convergence; RLS policies are not relation objects in the digest query",
   "billingCycleApi": "QUERY_PROOF_PASS_AS_union_eyes_runtime_NO_BYPASS",
-  "billingCycleHttp": "NOT_RUN_NO_APP_SERVER",
+  "billingCycleHttp": "NOT_RUN_REQUIRES_NEXT_AUTH_ENTITLEMENT",
   "billingTablesPresent": [
     "billing_accounts",
     "billing_adjustments",
@@ -82,5 +82,5 @@
     "bootstrapParticipatingCreationTables": 41,
     "bootstrapMissingCreationTables": 308
   },
-  "commitSha": "dfe5251652efaedbc6712361495f1ba9ddefed26"
+  "commitSha": "37f0c729c15c1f7d275fa313ebbba04b075ff8b3"
 }
