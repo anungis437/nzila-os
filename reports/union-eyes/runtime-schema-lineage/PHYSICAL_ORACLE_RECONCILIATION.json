@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T14:48:05.384133+00:00",
+  "generatedAt": "2026-09-23T14:55:58.956873+00:00",
   "physicalRelationCountPublic": 698,
   "oracleUniverse": 349,
   "MISSING_CANONICAL_RUNTIME_TABLES_raw": 10,
@@ -31,7 +31,7 @@
     "historicalSchemaCreationSkip": 17,
     "platformPass": 4,
     "platformFail": 0,
-    "scopedPass": 14,
+    "scopedPass": 15,
     "scopedFail": 0
   }
 }
