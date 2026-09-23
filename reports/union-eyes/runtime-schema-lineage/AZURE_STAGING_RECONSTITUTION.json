@@ -1,0 +1,109 @@
+{
+  "host": "nzila-staging-db.postgres.database.azure.com",
+  "database": "nzila_os_staging",
+  "nonSystemTables": 705,
+  "baseRelations": 705,
+  "probes": {
+    "billing_subscriptions": "billing_subscriptions",
+    "organizations": "organizations",
+    "employer_payroll_runs": "employer_payroll_runs",
+    "integration_partners": "integration_partners",
+    "security_posture_checks": "security_posture_checks"
+  },
+  "roles": [
+    {
+      "rolname": "nzilaadmin",
+      "rolsuper": false,
+      "rolbypassrls": true
+    },
+    {
+      "rolname": "union_eyes_runtime",
+      "rolsuper": false,
+      "rolbypassrls": false
+    },
+    {
+      "rolname": "union_eyes_system",
+      "rolsuper": false,
+      "rolbypassrls": false
+    }
+  ],
+  "rls": {
+    "rls_on": 327,
+    "rls_forced": 326,
+    "base_tables": 698
+  },
+  "requiredCount": 332,
+  "missingRequiredCount": 0,
+  "missingRequiredSample": [],
+  "generatedAt": "2026-09-23T15:37:21.749669+00:00",
+  "AZURE_TOUCHED": true,
+  "STAGING_ONLY": true,
+  "PRODUCTION_TOUCHED": false,
+  "runbook": {
+    "primary": "tooling/scripts/run-union-eyes-schema-lineage-cleanroom.mjs (complete lineage source)",
+    "governance_reference": "docs/categories/platform-and-operations/architecture/orm-governance/environment-bootstrap-strategy.md",
+    "method": "pg_dump from local cleanroom Docker ue-schema-lineage-pg16/union_eyes_lineage then pg_restore into Azure staging empty DB; re-apply scoped grant SQLs 0006-0009 because restore used --no-acl",
+    "COMPLETE_RUNTIME_SCHEMA_DIGEST": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+    "COMPLETE_SCHEMA_CONVERGENCE_SHA": "f71c6e5cac4c68d706285a37050748e21103574d"
+  },
+  "resourcesMutated": [
+    {
+      "type": "postgresFlexibleServerFirewallRule",
+      "name": "ue-lineage-reconst-202609231127",
+      "rg": "nzila-staging-rg",
+      "server": "nzila-staging-db",
+      "action": "create_then_delete",
+      "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "type": "postgresDatabase",
+      "name": "nzila_os_staging",
+      "server": "nzila-staging-db",
+      "rg": "nzila-staging-rg",
+      "action": "DROP+CREATE then pg_restore complete lineage + grant SQLs",
+      "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    },
+    {
+      "type": "containerApp",
+      "name": "nzila-os-union-eyes-staging",
+      "rg": "nzila-canada-staging-rg",
+      "action": "scale min0 then min1/max2",
+      "subscription": "5d819f33-d16f-429c-a3c0-5b0e94740ba3"
+    }
+  ],
+  "resourcesNotTouched": [
+    {
+      "type": "postgresFlexibleServer",
+      "name": "nzila-os-union-eyes-prod-db",
+      "rg": "nzila-canada-prod-rg"
+    },
+    {
+      "type": "resourceGroup",
+      "name": "nzila-canada-prod-rg"
+    }
+  ],
+  "verification": {
+    "MISSING_REQUIRED_TABLES": 0,
+    "nonSystemTables": 705,
+    "billing_subscriptions": "billing_subscriptions",
+    "runtime_select_grants": 700,
+    "rls": {
+      "rls_on": 327,
+      "rls_forced": 326,
+      "base_tables": 698
+    },
+    "health": {
+      "url": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health",
+      "status": 200,
+      "database": "ok",
+      "environment": "staging"
+    }
+  },
+  "image": "nzilacanadaacr.azurecr.io/nzila-os-union-eyes@sha256:3fa0a3de2f17cf3be5cd3666d9eb61d6e69cbb3029e9d66c451707195f2ada1b",
+  "imageRedeployed": false,
+  "READY_FOR_PILOT_PROOF": true,
+  "notes": [
+    "Official snapshot-restore path exists but staging blob list lacked Storage Blob Data Reader; reconstitution used verified local cleanroom complete dump (digest 92611387...) instead of incomplete prior staging schema (billing_subscriptions was null before).",
+    "Azure staging Postgres is PG15; dump sourced from local PG16 cleanroom; restore completed with 0 pg_restore error lines."
+  ]
+}
