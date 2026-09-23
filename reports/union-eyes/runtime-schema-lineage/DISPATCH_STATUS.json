@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T15:20:35.762802+00:00",
+  "generatedAt": "2026-09-23T15:37:21.749669+00:00",
   "ORDERED_SCHEMA_LINEAGE_DEFINED": "YES",
   "POST_FREEZE_PLATFORM_SQL_ROOT": "apps/union-eyes/db/migrations-platform",
   "SCOPED_RLS_CLOSURE": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql",
@@ -64,8 +64,8 @@
   },
   "schemaPresenceConvergence": "YES",
   "COMPLETE_RUNTIME_SCHEMA_CONVERGENCE": "PASS",
-  "READY_FOR_FRESH_AZURE_STAGING_RECONSTITUTION": "YES",
-  "AZURE_TOUCHED": false,
+  "READY_FOR_FRESH_AZURE_STAGING_RECONSTITUTION": "DONE",
+  "AZURE_TOUCHED": true,
   "COMMITTED": true,
   "blockers": [],
   "oracleCounts": {
@@ -129,5 +129,8 @@
   "UNRELATED_FILES_INCLUDED": 0,
   "COMPLETE_SCHEMA_CONVERGENCE_SHA": "f71c6e5cac4c68d706285a37050748e21103574d",
   "publisherCommitSha": "bff58351e8c7f4a6c9c352e642c821db97064d21",
-  "publisherFeatureSha": "bff58351e8c7f4a6c9c352e642c821db97064d21"
+  "publisherFeatureSha": "bff58351e8c7f4a6c9c352e642c821db97064d21",
+  "AZURE_STAGING_RECONSTITUTION": "PASS",
+  "READY_FOR_PILOT_PROOF": true,
+  "azureReconstitutionReport": "reports/union-eyes/runtime-schema-lineage/AZURE_STAGING_RECONSTITUTION.json"
 }
