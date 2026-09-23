@@ -33,6 +33,9 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E · ${{ matrix.app }}
+    # staging env supplies AZURE_CLIENT_ID/TENANT_ID for OIDC snapshot retrieve
+    # (repo-level secrets lack those; staging has no protection reviewers).
+    environment: staging
     timeout-minutes: 45  # union-eyes includes DB migration + seed; other apps finish in ≤5 min
     strategy:
       fail-fast: false
@@ -103,7 +106,8 @@ jobs:
 
       - name: Azure login (UE snapshot retrieve)
         if: matrix.app == 'union-eyes'
-        uses: azure/login@v2
+        continue-on-error: true
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -138,7 +142,25 @@ jobs:
           SQL
 
           echo "Retrieving canonical snapshot ${SNAPSHOT_ID} from Azure Blob..."
-          az storage blob download             --account-name nzilastagingstore             --container-name nzila-staging-snapshots             --name "${SNAPSHOT_ID}.dump"             --file "$DUMP_PATH"             --auth-mode login
+          if az account show >/dev/null 2>&1; then
+            az storage blob download \
+              --account-name nzilastagingstore \
+              --container-name nzila-staging-snapshots \
+              --name "${SNAPSHOT_ID}.dump" \
+              --file "$DUMP_PATH" \
+              --auth-mode login
+          elif [ -n "${AZURE_STORAGE_ACCOUNT_KEY:-}" ]; then
+            echo "OIDC session unavailable; falling back to account-key auth for snapshot retrieve"
+            az storage blob download \
+              --account-name nzilastagingstore \
+              --container-name nzila-staging-snapshots \
+              --name "${SNAPSHOT_ID}.dump" \
+              --file "$DUMP_PATH" \
+              --account-key "$AZURE_STORAGE_ACCOUNT_KEY"
+          else
+            echo "::error::No Azure auth for snapshot retrieve (OIDC login failed and AZURE_STORAGE_ACCOUNT_KEY unset)"
+            exit 1
+          fi
 
           ACTUAL_SHA256="$(sha256sum "$DUMP_PATH" | awk '{print $1}')"
           echo "Retrieved SHA256=${ACTUAL_SHA256}"
@@ -161,6 +183,7 @@ jobs:
           UE_DB_SNAPSHOT_ID: staging-canonical-20260923T184938Z-92611387
           POSTGRES_MAJOR: '15'
           PGSSLMODE: disable
+          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
 
       - name: Start app
         run: |
