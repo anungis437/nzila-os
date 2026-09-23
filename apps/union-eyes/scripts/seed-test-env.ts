@@ -180,8 +180,14 @@ async function seed(): Promise<void> {
         organizationType: org.organizationType,
         hierarchyPath: [...org.hierarchyPath],
         hierarchyLevel: org.hierarchyLevel,
-        // Canonical snapshot enforces NOT NULL on sectors without a DB default.
+        // Canonical snapshot has NOT NULL columns without server DEFAULTs;
+        // drizzle .default() is client-only and still emits NULL via DEFAULT.
         sectors: [],
+        clcAffiliated: false,
+        memberCount: 0,
+        activeMemberCount: 0,
+        settings: {},
+        featuresEnabled: [],
         status: 'active',
         createdAt: NOW,
         updatedAt: NOW,
