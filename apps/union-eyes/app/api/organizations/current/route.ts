@@ -15,12 +15,13 @@ export const dynamic = 'force-dynamic';
  * (which would bind the literal "current" as a UUID).
  */
 export async function GET() {
-  const { userId } = await auth();
+  const { userId, orgId: sessionOrgId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   let organizationId: string;
   try {
-    organizationId = await getOrganizationIdForUser(userId);
+    // Acceptance/session auth may already carry orgId (verified membership).
+    organizationId = sessionOrgId || (await getOrganizationIdForUser(userId));
   } catch {
     return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
   }
