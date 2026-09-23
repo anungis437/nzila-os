@@ -35,8 +35,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
-import { applyScopedMigrations as applyScopedMigrationsShared } from './lib/union-eyes-scoped-migrations.mjs';
-import { applyPlatformMigrations as applyPlatformMigrationsShared } from './lib/union-eyes-platform-migrations.mjs';
+import {
+  applyScopedMigrations as applyScopedMigrationsShared,
+  baselineScopedMigrations as baselineScopedMigrationsShared,
+} from './lib/union-eyes-scoped-migrations.mjs';
+import {
+  applyPlatformMigrations as applyPlatformMigrationsShared,
+  baselinePlatformMigrations as baselinePlatformMigrationsShared,
+} from './lib/union-eyes-platform-migrations.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -219,6 +225,25 @@ async function applySqlFile(client, sqlFilePath, label) {
   }
 }
 
+
+async function baselineMigrationsAfterSnapshot(client) {
+  info('Snapshot restored — baselining scoped + platform migration ledgers (no DDL replay).');
+  const scoped = await baselineScopedMigrationsShared(client, {
+    journalPath: SCOPED_JOURNAL,
+    migrationsDir: SCOPED_MIGRATIONS_DIR,
+    log: info,
+  });
+  let platform = { stamped: 0, stampedTags: [] };
+  if (fs.existsSync(PLATFORM_JOURNAL)) {
+    platform = await baselinePlatformMigrationsShared(client, {
+      journalPath: PLATFORM_JOURNAL,
+      migrationsDir: PLATFORM_MIGRATIONS_DIR,
+      log: info,
+    });
+  }
+  return { scoped, platform };
+}
+
 async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
   if (restoreSnapshotUrl) {
     return { applied: false };
@@ -317,6 +342,10 @@ async function main() {
     await ensureExtensions(client);
 
     const restoreSummary = await maybeRestoreSnapshot();
+
+    if (restoreSummary.restored) {
+      await baselineMigrationsAfterSnapshot(client);
+    }
 
     const scopedJournal = JSON.parse(fs.readFileSync(SCOPED_JOURNAL, 'utf8'));
     const scopedEntries = scopedJournal.entries ?? [];
