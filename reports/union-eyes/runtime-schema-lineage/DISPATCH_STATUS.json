@@ -173,8 +173,9 @@
   "schemaPresenceConvergence": "YES",
   "READY_FOR_FRESH_AZURE_STAGING_RECONSTITUTION": "NO",
   "AZURE_TOUCHED": false,
-  "COMMITTED": false,
+  "COMMITTED": true,
   "blockers": [
     "RLS UNENFORCED on 100 present tables (see rls-unenforced-tables.txt)"
-  ]
+  ],
+  "commitSha": "b6c4d55209ad1582668455715517ffd71b2cea55"
 }
