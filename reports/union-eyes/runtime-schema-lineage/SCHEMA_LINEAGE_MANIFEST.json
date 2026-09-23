@@ -1,0 +1,3244 @@
+{
+  "generatedAt": "2026-09-23T14:14:31.156Z",
+  "SCHEMA_LINEAGE_MANIFEST": "DETERMINISTIC",
+  "ORDERED_SCHEMA_LINEAGE_DEFINED": "YES",
+  "HISTORICAL_FIXTURE_DATA_IMPORTED": "NO",
+  "PRODUCTION_DATA_REQUIRED": "NO",
+  "DETERMINISM_BASIS": [
+    "DJANGO_MIGRATIONS: topological order of Migration.dependencies among backend apps that own primary CreateModel files for the 320",
+    "UNION_EYES_LEGACY_SQL: apps/union-eyes/db/migrations/meta/_journal.json idx/when for journaled files; primary creators absent from journal ordered by filename numeric/date after journaled set",
+    "UNION_EYES_SCOPED_SQL: apps/union-eyes/db/migrations-cache/meta/_journal.json idx (active bootstrap executor)",
+    "UNION_EYES_AUDIT_SQL: apps/union-eyes/db/migrations-audit/meta/_journal.json idx",
+    "ROOT_SQL: filename sort among top-level migrations/*.sql primary creators",
+    "Phase order follows oracle lineageMap historicalOrder (10 Django → 20 Legacy → 30 Scoped → 40 Audit → 60 Root)"
+  ],
+  "EXCLUDED_FROM_SCHEMA_CREATION_BOOTSTRAP_PATH": [
+    "FIXTURE_SEEDING (tooling/sql QA baseline, staging seeds)",
+    "Destructive data ops not required for empty-DB schema materialization",
+    "Snapshot restore (optional operational path; PRODUCTION_DATA_REQUIRED=NO for clean-room)"
+  ],
+  "CURRENT_FRESH_BOOTSTRAP_NOTE": "Fresh bootstrap: extensions → optional snapshot → optional QA baseline → migrations-cache (scoped) → migrations-platform (PLATFORM_SQL) → attestation. Legacy db/migrations remains frozen/not replayed.",
+  "djangoAppTopoOrder": [
+    "bargaining",
+    "grievances",
+    "services",
+    "exit_interviews",
+    "auth_core",
+    "billing",
+    "ai_core",
+    "core",
+    "analytics",
+    "unions",
+    "content",
+    "notifications",
+    "compliance"
+  ],
+  "counts": {
+    "totalManifestSteps": 97,
+    "SCHEMA_CREATION_steps_in_bootstrap_path": 37,
+    "tablesCoveredBySchemaCreationPath": 337,
+    "expectedWithCreation": 337,
+    "missingFromOrdered": 0,
+    "classificationCounts": {
+      "SCHEMA_CREATION": 62,
+      "SCHEMA_EVOLUTION": 25,
+      "OTHER": 5,
+      "FIXTURE_SEEDING": 1,
+      "GRANTS": 3,
+      "DATA_MIGRATION": 1
+    },
+    "platformSqlCreationSteps": 3,
+    "platformSqlTables": 17
+  },
+  "missingFromOrdered": [],
+  "schemaCreationOrdered": [
+    {
+      "step": 1,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "tablesCreated": [
+        "arbitration_decisions",
+        "arbitration_precedents",
+        "bargaining_notes",
+        "bargaining_proposals",
+        "cba_clauses",
+        "clause_comparisons",
+        "clause_library_tags",
+        "collective_agreements",
+        "negotiations",
+        "shared_clause_library",
+        "tentative_agreements"
+      ],
+      "tableCount": 11,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=bargaining migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 2,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "tablesCreated": [
+        "arbitrations",
+        "claim_deadlines",
+        "claim_updates",
+        "claims",
+        "defensibility_packs",
+        "grievance_deadlines",
+        "grievance_documents",
+        "grievance_settlements",
+        "grievance_timeline",
+        "grievance_transitions",
+        "grievances",
+        "settlements"
+      ],
+      "tableCount": 12,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=grievances migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 3,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "tablesCreated": [
+        "compliance_snapshots",
+        "domain_events",
+        "evidence_packs",
+        "integration_idempotency_keys",
+        "integration_registry"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=services migration=0001_enterprise_hardening; deps=[]"
+    },
+    {
+      "step": 4,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py",
+      "tablesCreated": [
+        "exit_interview_documents",
+        "exit_interview_events",
+        "exit_interviews"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=exit_interviews migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 5,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "tablesCreated": [
+        "feature_flags",
+        "member_history_events",
+        "organization_members",
+        "organization_users",
+        "organizations",
+        "pending_profiles",
+        "profiles",
+        "sso_providers"
+      ],
+      "tableCount": 8,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=auth_core migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 6,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "tablesCreated": [
+        "account_mappings",
+        "bank_accounts",
+        "bank_reconciliation",
+        "bank_reconciliations",
+        "chart_of_accounts",
+        "clc_remittance_mapping",
+        "clc_sync_log",
+        "cost_centers",
+        "donation_campaigns",
+        "dues_rates",
+        "dues_transactions",
+        "employer_remittances",
+        "erp_invoices",
+        "financial_periods",
+        "gl_account_mappings",
+        "gl_transaction_log",
+        "gl_trial_balance",
+        "member_arrears",
+        "member_dues_ledger",
+        "payment_cycles",
+        "payment_disputes",
+        "payment_methods",
+        "payment_plans",
+        "payments",
+        "per_capita_remittances",
+        "remittance_exceptions",
+        "remittance_line_items",
+        "strike_fund_disbursements"
+      ],
+      "tableCount": 28,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=billing migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 7,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "tablesCreated": [
+        "ai_safety_filters",
+        "ai_usage_metrics",
+        "chat_messages",
+        "chat_sessions",
+        "knowledge_base",
+        "ml_predictions",
+        "model_metadata"
+      ],
+      "tableCount": 7,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=ai_core migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 8,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "tablesCreated": [
+        "alert_executions",
+        "alert_rules",
+        "api_integrations",
+        "audit_logs",
+        "automation_rules",
+        "external_accounts",
+        "external_benefit_coverage",
+        "external_benefit_dependents",
+        "external_benefit_enrollments",
+        "external_benefit_plans",
+        "external_benefit_utilization",
+        "external_communication_channels",
+        "external_communication_files",
+        "external_communication_messages",
+        "external_communication_users",
+        "external_customers",
+        "external_departments",
+        "external_employees",
+        "external_insurance_beneficiaries",
+        "external_insurance_claims",
+        "external_insurance_policies",
+        "external_invoices",
+        "external_lms_completions",
+        "external_lms_courses",
+        "external_lms_enrollments",
+        "external_lms_learners",
+        "external_lms_progress",
+        "external_payments",
+        "external_positions",
+        "integration_api_keys",
+        "integration_configs",
+        "integration_sync_log",
+        "integration_webhooks",
+        "security_events"
+      ],
+      "tableCount": 34,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=core migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 9,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "tablesCreated": [
+        "analytics_metrics",
+        "contribution_rates",
+        "external_data_sync_log",
+        "insight_recommendations",
+        "kpi_configurations",
+        "reports",
+        "trend_analyses"
+      ],
+      "tableCount": 7,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=analytics migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 10,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "tablesCreated": [
+        "bargaining_units",
+        "budget_pool",
+        "calendar_events",
+        "calendars",
+        "committees",
+        "congress_memberships",
+        "course_registrations",
+        "course_sessions",
+        "employers",
+        "external_calendar_connections",
+        "federations",
+        "holidays",
+        "meeting_rooms",
+        "member_certifications",
+        "member_employment",
+        "member_location_consent",
+        "member_segments",
+        "organizer_tasks",
+        "organizing_campaigns",
+        "poll_votes",
+        "polls",
+        "recognition_award_types",
+        "recognition_awards",
+        "recognition_programs",
+        "reward_budget_envelopes",
+        "reward_redemptions",
+        "reward_wallet_ledger",
+        "steward_assignments",
+        "survey_answers",
+        "survey_questions",
+        "survey_responses",
+        "surveys",
+        "training_courses",
+        "training_programs",
+        "voter_eligibility",
+        "votes",
+        "voting_options",
+        "voting_sessions",
+        "worksites"
+      ],
+      "tableCount": 39,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=unions migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 11,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "tablesCreated": [
+        "board_packet_distributions",
+        "board_packets",
+        "case_studies",
+        "cms_media_library",
+        "cms_pages",
+        "data_aggregation_consent",
+        "document_folders",
+        "document_signers",
+        "documents",
+        "movement_trends",
+        "pilot_applications",
+        "pilot_metrics",
+        "signature_audit_trail",
+        "signature_documents",
+        "social_accounts",
+        "social_analytics",
+        "social_campaigns",
+        "social_posts",
+        "testimonials"
+      ],
+      "tableCount": 19,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=content migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 12,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "tablesCreated": [
+        "campaigns",
+        "communication_preferences",
+        "in_app_notifications",
+        "message_log",
+        "message_read_receipts",
+        "message_templates",
+        "message_threads",
+        "messages",
+        "mobile_devices",
+        "newsletter_campaigns",
+        "newsletter_distribution_lists",
+        "newsletter_list_subscribers",
+        "newsletter_recipients",
+        "notification_delivery_log",
+        "notification_queue",
+        "notification_templates",
+        "notification_tracking",
+        "notifications",
+        "push_devices",
+        "push_notifications",
+        "sms_campaigns",
+        "sms_conversations",
+        "sms_messages",
+        "user_notification_preferences"
+      ],
+      "tableCount": 24,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=notifications migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 13,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "tablesCreated": [
+        "consent_records",
+        "cookie_consents",
+        "data_classification_policy",
+        "data_subject_access_requests",
+        "gdpr_data_requests",
+        "geofence_events",
+        "geofences",
+        "hazard_reports",
+        "location_deletion_log",
+        "location_tracking",
+        "location_tracking_audit",
+        "location_tracking_config",
+        "policy_evaluations",
+        "policy_exceptions",
+        "policy_rules",
+        "ppe_equipment",
+        "provincial_consent",
+        "provincial_data_handling",
+        "provincial_privacy_config",
+        "safety_inspections",
+        "safety_training_records",
+        "user_consents",
+        "workplace_incidents"
+      ],
+      "tableCount": 23,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=compliance migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 60,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 41,
+      "journalWhen": 1778212237478,
+      "tag": "0041_steady_reavers",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0041_steady_reavers.sql",
+      "tablesCreated": [
+        "org_configurations"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Primary creator for 1 runtime tables"
+    },
+    {
+      "step": 65,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 25,
+      "tag": "0025_pilot_enrollments",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0025_pilot_enrollments.sql",
+      "tablesCreated": [
+        "pilot_enrollments",
+        "pilot_milestones"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 66,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 82,
+      "tag": "0082_add_pilot_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0082_add_pilot_tables.sql",
+      "tablesCreated": [
+        "pilot_checklist_items",
+        "pilot_demo_seeds"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 67,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 83,
+      "tag": "0083_data_source_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0083_data_source_tables.sql",
+      "tablesCreated": [
+        "dues_assignments"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 68,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 85,
+      "tag": "0085_monetization_infrastructure_layer",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "tablesCreated": [
+        "commercial_contracts",
+        "contract_line_items",
+        "entitlement_usage_log",
+        "org_entitlements",
+        "subscription_events_log"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 69,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 86,
+      "tag": "0086_monetization_phase2",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "tablesCreated": [
+        "contract_covered_orgs",
+        "fee_adjustments",
+        "reconciliation_exceptions",
+        "reconciliation_matches",
+        "reconciliation_runs",
+        "transaction_fee_events",
+        "transaction_fee_rules"
+      ],
+      "tableCount": 7,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 70,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 89,
+      "tag": "0089_ingestion_hardening",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "tablesCreated": [
+        "grievance_timeline_events",
+        "ingestion_batches",
+        "ingestion_records"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 71,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 96,
+      "tag": "0096_add_missing_ue_required_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "tablesCreated": [
+        "committee_action_items",
+        "committee_documents",
+        "committee_intelligence_snapshots",
+        "committee_meeting_attendees",
+        "committee_meetings"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 72,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 98,
+      "tag": "0098_predeployment_hardening",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0098_predeployment_hardening.sql",
+      "tablesCreated": [
+        "case_documents"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 73,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 104,
+      "tag": "0104_dedup_and_quality_warnings",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "tablesCreated": [
+        "data_quality_warnings",
+        "duplicate_group_members",
+        "duplicate_groups"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 74,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 105,
+      "tag": "0105_correspondence_pipeline",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "tablesCreated": [
+        "correspondence",
+        "correspondence_audit_trail",
+        "correspondence_recipients",
+        "user_signatures"
+      ],
+      "tableCount": 4,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 75,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 9000,
+      "tag": "070_governed_case_access_documents",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "GRANTS",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "tablesCreated": [
+        "document_access_grants",
+        "document_links",
+        "document_versions",
+        "grievance_case_access_assignments"
+      ],
+      "tableCount": 4,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 76,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260325000000,
+      "tag": "20260325_dapl_platform_ledger",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "tablesCreated": [
+        "allocation_basis_snapshots",
+        "allocation_rule_versions",
+        "allocation_rules",
+        "allocation_run_lines",
+        "allocation_runs",
+        "billing_accounts",
+        "billing_periods",
+        "chargeback_statements",
+        "org_subscriptions",
+        "payment_allocations",
+        "platform_cost_ledger_entries",
+        "platform_invoice_line_items",
+        "platform_invoices",
+        "platform_payments",
+        "subscription_plans"
+      ],
+      "tableCount": 15,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 77,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260328000000,
+      "tag": "20260328_jurisdiction_preferences",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql",
+      "tablesCreated": [
+        "member_jurisdiction_preferences"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 78,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260401000000,
+      "tag": "20260401_cba_intelligence_public_sources",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "tablesCreated": [
+        "cba_intel_agreements",
+        "cba_intel_benchmark_snapshots",
+        "cba_intel_clauses",
+        "cba_intel_documents",
+        "cba_intel_extraction_runs",
+        "cba_intel_findings",
+        "cba_intel_ingestion_jobs",
+        "cba_intel_review_decisions",
+        "cba_intel_sources",
+        "cba_intel_wage_adjustments"
+      ],
+      "tableCount": 10,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 79,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260404000000,
+      "tag": "20260404_pilot_observability",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260404_pilot_observability.sql",
+      "tablesCreated": [
+        "pilot_events",
+        "pilot_feedback"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 80,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260915000000,
+      "tag": "20260915_external_representation_authority",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "tablesCreated": [
+        "external_document_access_grants",
+        "external_matter_access_grants",
+        "representation_authorities"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 82,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 1,
+      "journalWhen": 1779377374582,
+      "tag": "0001_lean_iron_man",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "tablesCreated": [
+        "workbook_governance_lineage_entries",
+        "workbook_memory_holders",
+        "workbook_modules",
+        "workbook_purchases",
+        "workbooks"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Active fresh-bootstrap executor applies this; creates runtime tables"
+    },
+    {
+      "step": 95,
+      "phase": "UNION_EYES_AUDIT_SQL",
+      "phaseOrder": 40,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 0,
+      "journalWhen": 1774442085233,
+      "tag": "0000_familiar_silhouette",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "tablesCreated": [
+        "ai_clause_reasonings",
+        "ai_copilot_sessions",
+        "ai_grievance_triages",
+        "ai_insight_reports",
+        "clause_embeddings",
+        "compliance_alerts",
+        "employer_communications",
+        "employer_contacts",
+        "employer_reports",
+        "employer_risk_scores",
+        "governance_policies",
+        "grievance_events",
+        "pension_benefit_claims",
+        "pension_contributions",
+        "pension_members",
+        "pension_plans",
+        "pension_t4a_records",
+        "pension_trustee_meetings",
+        "pension_trustees",
+        "stewards",
+        "strategic_goals"
+      ],
+      "tableCount": 21,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Audit lineage; no fresh-bootstrap executor"
+    },
+    {
+      "step": 96,
+      "phase": "UNION_EYES_AUDIT_SQL",
+      "phaseOrder": 40,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 1,
+      "journalWhen": 1774443901239,
+      "tag": "0001_silky_elektra",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "tablesCreated": [
+        "dispatch_assignments",
+        "dispatch_requests",
+        "dispatch_rules"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Audit lineage; no fresh-bootstrap executor"
+    },
+    {
+      "step": 97,
+      "phase": "ROOT_SQL",
+      "phaseOrder": 60,
+      "orderingBasis": "filename_sort_within_root_migrations",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "migrations/0045_union_eyes_deadline_engine.sql",
+      "tablesCreated": [
+        "deadline_audit_events",
+        "deadline_reminders"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Root migrations/*.sql (top-level); not executed by UE fresh bootstrap"
+    },
+    {
+      "step": 35,
+      "phase": "UNION_EYES_PLATFORM_SQL",
+      "phaseOrder": 35,
+      "orderingBasis": "drizzle_meta_journal_idx_post_freeze_platform",
+      "journalIdx": 0,
+      "journalWhen": 1789960000000,
+      "tag": "0001_billing_subscriptions",
+      "classification": "SCHEMA_CREATION",
+      "path": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "includeInSchemaCreationBootstrapPath": true,
+      "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP",
+      "tablesCreated": [
+        "billing_subscriptions"
+      ]
+    },
+    {
+      "step": 36,
+      "phase": "UNION_EYES_PLATFORM_SQL",
+      "phaseOrder": 35,
+      "orderingBasis": "drizzle_meta_journal_idx_post_freeze_platform",
+      "journalIdx": 1,
+      "journalWhen": 1789960001000,
+      "tag": "0002_employer_execution_and_related_a",
+      "classification": "SCHEMA_CREATION",
+      "path": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "includeInSchemaCreationBootstrapPath": true,
+      "currentBootstrapStatus": "EXECUTED_BY_FRESH_BOOTSTRAP",
+      "tablesCreated": [
+        "break_policies",
+        "cba_rule_set_items",
+        "cba_rule_versions",
+        "employer_execution_artifacts",
+        "employer_execution_compliance_events",
+        "employer_execution_evidence_links",
+        "employer_execution_profiles",
+        "employer_execution_replays",
+        "employer_payroll_run_items",
+        "employer_payroll_runs",
+        "employer_remittance_run_items",
+        "employer_remittance_runs",
+        "employer_timesheet_batches",
+        "employer_timesheet_entries",
+        "member_breaks",
+        "satisfaction_surveys"
+      ]
+    }
+  ],
+  "fullOrderedSteps": [
+    {
+      "step": 1,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "tablesCreated": [
+        "arbitration_decisions",
+        "arbitration_precedents",
+        "bargaining_notes",
+        "bargaining_proposals",
+        "cba_clauses",
+        "clause_comparisons",
+        "clause_library_tags",
+        "collective_agreements",
+        "negotiations",
+        "shared_clause_library",
+        "tentative_agreements"
+      ],
+      "tableCount": 11,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=bargaining migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 2,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "tablesCreated": [
+        "arbitrations",
+        "claim_deadlines",
+        "claim_updates",
+        "claims",
+        "defensibility_packs",
+        "grievance_deadlines",
+        "grievance_documents",
+        "grievance_settlements",
+        "grievance_timeline",
+        "grievance_transitions",
+        "grievances",
+        "settlements"
+      ],
+      "tableCount": 12,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=grievances migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 3,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "tablesCreated": [
+        "compliance_snapshots",
+        "domain_events",
+        "evidence_packs",
+        "integration_idempotency_keys",
+        "integration_registry"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=services migration=0001_enterprise_hardening; deps=[]"
+    },
+    {
+      "step": 4,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py",
+      "tablesCreated": [
+        "exit_interview_documents",
+        "exit_interview_events",
+        "exit_interviews"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=exit_interviews migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 5,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "tablesCreated": [
+        "feature_flags",
+        "member_history_events",
+        "organization_members",
+        "organization_users",
+        "organizations",
+        "pending_profiles",
+        "profiles",
+        "sso_providers"
+      ],
+      "tableCount": 8,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=auth_core migration=0001_initial; deps=[]"
+    },
+    {
+      "step": 6,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "tablesCreated": [
+        "account_mappings",
+        "bank_accounts",
+        "bank_reconciliation",
+        "bank_reconciliations",
+        "chart_of_accounts",
+        "clc_remittance_mapping",
+        "clc_sync_log",
+        "cost_centers",
+        "donation_campaigns",
+        "dues_rates",
+        "dues_transactions",
+        "employer_remittances",
+        "erp_invoices",
+        "financial_periods",
+        "gl_account_mappings",
+        "gl_transaction_log",
+        "gl_trial_balance",
+        "member_arrears",
+        "member_dues_ledger",
+        "payment_cycles",
+        "payment_disputes",
+        "payment_methods",
+        "payment_plans",
+        "payments",
+        "per_capita_remittances",
+        "remittance_exceptions",
+        "remittance_line_items",
+        "strike_fund_disbursements"
+      ],
+      "tableCount": 28,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=billing migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 7,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "tablesCreated": [
+        "ai_safety_filters",
+        "ai_usage_metrics",
+        "chat_messages",
+        "chat_sessions",
+        "knowledge_base",
+        "ml_predictions",
+        "model_metadata"
+      ],
+      "tableCount": 7,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=ai_core migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 8,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "tablesCreated": [
+        "alert_executions",
+        "alert_rules",
+        "api_integrations",
+        "audit_logs",
+        "automation_rules",
+        "external_accounts",
+        "external_benefit_coverage",
+        "external_benefit_dependents",
+        "external_benefit_enrollments",
+        "external_benefit_plans",
+        "external_benefit_utilization",
+        "external_communication_channels",
+        "external_communication_files",
+        "external_communication_messages",
+        "external_communication_users",
+        "external_customers",
+        "external_departments",
+        "external_employees",
+        "external_insurance_beneficiaries",
+        "external_insurance_claims",
+        "external_insurance_policies",
+        "external_invoices",
+        "external_lms_completions",
+        "external_lms_courses",
+        "external_lms_enrollments",
+        "external_lms_learners",
+        "external_lms_progress",
+        "external_payments",
+        "external_positions",
+        "integration_api_keys",
+        "integration_configs",
+        "integration_sync_log",
+        "integration_webhooks",
+        "security_events"
+      ],
+      "tableCount": 34,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=core migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 9,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "tablesCreated": [
+        "analytics_metrics",
+        "contribution_rates",
+        "external_data_sync_log",
+        "insight_recommendations",
+        "kpi_configurations",
+        "reports",
+        "trend_analyses"
+      ],
+      "tableCount": 7,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=analytics migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 10,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "tablesCreated": [
+        "bargaining_units",
+        "budget_pool",
+        "calendar_events",
+        "calendars",
+        "committees",
+        "congress_memberships",
+        "course_registrations",
+        "course_sessions",
+        "employers",
+        "external_calendar_connections",
+        "federations",
+        "holidays",
+        "meeting_rooms",
+        "member_certifications",
+        "member_employment",
+        "member_location_consent",
+        "member_segments",
+        "organizer_tasks",
+        "organizing_campaigns",
+        "poll_votes",
+        "polls",
+        "recognition_award_types",
+        "recognition_awards",
+        "recognition_programs",
+        "reward_budget_envelopes",
+        "reward_redemptions",
+        "reward_wallet_ledger",
+        "steward_assignments",
+        "survey_answers",
+        "survey_questions",
+        "survey_responses",
+        "surveys",
+        "training_courses",
+        "training_programs",
+        "voter_eligibility",
+        "votes",
+        "voting_options",
+        "voting_sessions",
+        "worksites"
+      ],
+      "tableCount": 39,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=unions migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 11,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "tablesCreated": [
+        "board_packet_distributions",
+        "board_packets",
+        "case_studies",
+        "cms_media_library",
+        "cms_pages",
+        "data_aggregation_consent",
+        "document_folders",
+        "document_signers",
+        "documents",
+        "movement_trends",
+        "pilot_applications",
+        "pilot_metrics",
+        "signature_audit_trail",
+        "signature_documents",
+        "social_accounts",
+        "social_analytics",
+        "social_campaigns",
+        "social_posts",
+        "testimonials"
+      ],
+      "tableCount": 19,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=content migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 12,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "tablesCreated": [
+        "campaigns",
+        "communication_preferences",
+        "in_app_notifications",
+        "message_log",
+        "message_read_receipts",
+        "message_templates",
+        "message_threads",
+        "messages",
+        "mobile_devices",
+        "newsletter_campaigns",
+        "newsletter_distribution_lists",
+        "newsletter_list_subscribers",
+        "newsletter_recipients",
+        "notification_delivery_log",
+        "notification_queue",
+        "notification_templates",
+        "notification_tracking",
+        "notifications",
+        "push_devices",
+        "push_notifications",
+        "sms_campaigns",
+        "sms_conversations",
+        "sms_messages",
+        "user_notification_preferences"
+      ],
+      "tableCount": 24,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=notifications migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 13,
+      "phase": "DJANGO_MIGRATIONS",
+      "phaseOrder": 10,
+      "orderingBasis": "django_migration_dependencies_topo",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "tablesCreated": [
+        "consent_records",
+        "cookie_consents",
+        "data_classification_policy",
+        "data_subject_access_requests",
+        "gdpr_data_requests",
+        "geofence_events",
+        "geofences",
+        "hazard_reports",
+        "location_deletion_log",
+        "location_tracking",
+        "location_tracking_audit",
+        "location_tracking_config",
+        "policy_evaluations",
+        "policy_exceptions",
+        "policy_rules",
+        "ppe_equipment",
+        "provincial_consent",
+        "provincial_data_handling",
+        "provincial_privacy_config",
+        "safety_inspections",
+        "safety_training_records",
+        "user_consents",
+        "workplace_incidents"
+      ],
+      "tableCount": 23,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Django app=compliance migration=0001_initial; deps=[{\"app\":\"auth_core\",\"name\":\"0001_initial\"}]"
+    },
+    {
+      "step": 14,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 0,
+      "journalWhen": 1763406880019,
+      "tag": "0000_flippant_luke_cage",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0000_flippant_luke_cage.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 15,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 1,
+      "journalWhen": 1763594511882,
+      "tag": "0001_phase5b_inter_union_features",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0001_phase5b_inter_union_features.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 16,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 2,
+      "journalWhen": 1764959563791,
+      "tag": "0002_true_selene",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0002_true_selene.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 17,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 3,
+      "journalWhen": 1764959585710,
+      "tag": "0003_curious_agent_zero",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0003_curious_agent_zero.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 18,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 4,
+      "journalWhen": 1770355877546,
+      "tag": "0004_phase2_complete",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations/0004_phase2_complete.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 19,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 4.5,
+      "journalWhen": 1770363000000,
+      "tag": "20260507_fixup_create_break_glass_activations",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260507_fixup_create_break_glass_activations.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 20,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 5,
+      "journalWhen": 1770371778360,
+      "tag": "0005_lazy_kate_bishop",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0005_lazy_kate_bishop.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 21,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 6,
+      "journalWhen": 1770537031000,
+      "tag": "0006_flat_stepford_cuckoos",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0006_flat_stepford_cuckoos.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 22,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 7,
+      "journalWhen": 1770621501496,
+      "tag": "0007_add_wage_benchmarks",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0007_add_wage_benchmarks.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 23,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 7.5,
+      "journalWhen": 1770621520000,
+      "tag": "20260507_fixup_pre_0008_missing_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260507_fixup_pre_0008_missing_tables.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 24,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 29,
+      "journalWhen": 1770621523496,
+      "tag": "0071_update_messaging_rls_for_session_context",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0071_update_messaging_rls_for_session_context.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 25,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 28,
+      "journalWhen": 1770621522496,
+      "tag": "0070_add_organization_users_rls_policies",
+      "classification": "OTHER",
+      "allClasses": [
+        "OTHER"
+      ],
+      "path": "apps/union-eyes/db/migrations/0070_add_organization_users_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 26,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 31,
+      "journalWhen": 1770621525496,
+      "tag": "0073_update_documents_reports_calendar_rls",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0073_update_documents_reports_calendar_rls.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 27,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 30,
+      "journalWhen": 1770621524496,
+      "tag": "0072_update_in_app_notifications_rls",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0072_update_in_app_notifications_rls.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 28,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 25,
+      "journalWhen": 1770621519496,
+      "tag": "0067_add_congress_memberships",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0067_add_congress_memberships.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 29,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 24,
+      "journalWhen": 1770621518496,
+      "tag": "0066_drop_obsolete_search_vector_trigger",
+      "classification": "OTHER",
+      "allClasses": [
+        "OTHER"
+      ],
+      "path": "apps/union-eyes/db/migrations/0066_drop_obsolete_search_vector_trigger.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 30,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 27,
+      "journalWhen": 1770621521496,
+      "tag": "0069_rename_tenant_users_to_organization_users",
+      "classification": "OTHER",
+      "allClasses": [
+        "OTHER"
+      ],
+      "path": "apps/union-eyes/db/migrations/0069_rename_tenant_users_to_organization_users.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 31,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 26,
+      "journalWhen": 1770621520496,
+      "tag": "0068_add_peer_detection_indexes",
+      "classification": "OTHER",
+      "allClasses": [
+        "OTHER"
+      ],
+      "path": "apps/union-eyes/db/migrations/0068_add_peer_detection_indexes.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 32,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 37,
+      "journalWhen": 1770621531496,
+      "tag": "0079_ai_cost_tracking_phase1",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0079_ai_cost_tracking_phase1.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 33,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 36,
+      "journalWhen": 1770621530496,
+      "tag": "0078_force_dues_transactions_rls",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0078_force_dues_transactions_rls.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 34,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 39,
+      "journalWhen": 1770621533496,
+      "tag": "0081_add_missing_critical_indexes",
+      "classification": "FIXTURE_SEEDING",
+      "allClasses": [
+        "FIXTURE_SEEDING"
+      ],
+      "path": "apps/union-eyes/db/migrations/0081_add_missing_critical_indexes.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 35,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 38,
+      "journalWhen": 1770621532496,
+      "tag": "0080_add_schema_drift_protection",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0080_add_schema_drift_protection.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 36,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 33,
+      "journalWhen": 1770621527496,
+      "tag": "0075_add_organizations_rls_policies",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0075_add_organizations_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 37,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 32,
+      "journalWhen": 1770621526496,
+      "tag": "0074_add_hierarchical_rls_functions",
+      "classification": "GRANTS",
+      "allClasses": [
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations/0074_add_hierarchical_rls_functions.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 38,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 35,
+      "journalWhen": 1770621529496,
+      "tag": "0077_migrate_claim_deadlines_to_org_id",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0077_migrate_claim_deadlines_to_org_id.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 39,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 34,
+      "journalWhen": 1770621528496,
+      "tag": "0076_add_claims_rls_policies",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0076_add_claims_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 40,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 13,
+      "journalWhen": 1770621507496,
+      "tag": "0055_align_user_ids_to_clerk",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0055_align_user_ids_to_clerk.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 41,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 12,
+      "journalWhen": 1770621506496,
+      "tag": "0054_add_calendar_rls_policies",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0054_add_calendar_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 42,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 15,
+      "journalWhen": 1770621509496,
+      "tag": "0057_recreate_training_views",
+      "classification": "OTHER",
+      "allClasses": [
+        "OTHER"
+      ],
+      "path": "apps/union-eyes/db/migrations/0057_recreate_training_views.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 43,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 14,
+      "journalWhen": 1770621508496,
+      "tag": "0056_add_missing_fk_constraints",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0056_add_missing_fk_constraints.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 44,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 9,
+      "journalWhen": 1770621503496,
+      "tag": "0051_add_messaging_rls_policies",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0051_add_messaging_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 45,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 8,
+      "journalWhen": 1770621502496,
+      "tag": "0008_lean_mother_askani",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations/0008_lean_mother_askani.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 46,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 11,
+      "journalWhen": 1770621505496,
+      "tag": "0053_add_reports_rls_policies",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0053_add_reports_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 47,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 10,
+      "journalWhen": 1770621504496,
+      "tag": "0052_add_notifications_documents_rls",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0052_add_notifications_documents_rls.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 48,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 21,
+      "journalWhen": 1770621515496,
+      "tag": "0063_add_audit_log_archive_support",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations/0063_add_audit_log_archive_support.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 49,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 20,
+      "journalWhen": 1770621514496,
+      "tag": "0062_add_immutable_transition_history",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0062_add_immutable_transition_history.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 50,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 23,
+      "journalWhen": 1770621517496,
+      "tag": "0065_add_governance_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0065_add_governance_tables.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 51,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 22,
+      "journalWhen": 1770621516496,
+      "tag": "0064_add_immutability_triggers",
+      "classification": "DATA_MIGRATION",
+      "allClasses": [
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0064_add_immutability_triggers.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 52,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 17,
+      "journalWhen": 1770621511496,
+      "tag": "0059_convert_remaining_user_ids",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0059_convert_remaining_user_ids.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 53,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 16,
+      "journalWhen": 1770621510496,
+      "tag": "0058_world_class_rls_policies",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0058_world_class_rls_policies.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 54,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 19,
+      "journalWhen": 1770621513496,
+      "tag": "0061_add_defensibility_packs",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0061_add_defensibility_packs.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 55,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 18,
+      "journalWhen": 1770621512496,
+      "tag": "0060_add_visibility_scopes",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0060_add_visibility_scopes.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 56,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 19,
+      "journalWhen": 1771003000895,
+      "tag": "0019_lonely_stephen_strange",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0019_lonely_stephen_strange.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 57,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 20,
+      "journalWhen": 1771006344559,
+      "tag": "0020_keen_roulette",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0020_keen_roulette.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 58,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 21,
+      "journalWhen": 1771010093200,
+      "tag": "0021_steady_darwin",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0021_steady_darwin.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 59,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 40,
+      "journalWhen": 1778198400000,
+      "tag": "20260507_fixup_phase5b_org_fks",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260507_fixup_phase5b_org_fks.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 60,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 41,
+      "journalWhen": 1778212237478,
+      "tag": "0041_steady_reavers",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0041_steady_reavers.sql",
+      "tablesCreated": [
+        "org_configurations"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Primary creator for 1 runtime tables"
+    },
+    {
+      "step": 61,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 42,
+      "journalWhen": 1778212282721,
+      "tag": "0042_perpetual_karen_page",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0042_perpetual_karen_page.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 62,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 43,
+      "journalWhen": 1778213031280,
+      "tag": "0043_fantastic_mysterio",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0043_fantastic_mysterio.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 63,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 44,
+      "journalWhen": 1778298000000,
+      "tag": "20260508_fixup_post_0019_align_modern_schema",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260508_fixup_post_0019_align_modern_schema.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 64,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 45,
+      "journalWhen": 1778384400000,
+      "tag": "20260509_fixup_auth_mfa_magic_invites",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260509_fixup_auth_mfa_magic_invites.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Journal entry; not a primary creator for the 320 (evolution/rls/other)"
+    },
+    {
+      "step": 65,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 25,
+      "tag": "0025_pilot_enrollments",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0025_pilot_enrollments.sql",
+      "tablesCreated": [
+        "pilot_enrollments",
+        "pilot_milestones"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 66,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 82,
+      "tag": "0082_add_pilot_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "apps/union-eyes/db/migrations/0082_add_pilot_tables.sql",
+      "tablesCreated": [
+        "pilot_checklist_items",
+        "pilot_demo_seeds"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 67,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 83,
+      "tag": "0083_data_source_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0083_data_source_tables.sql",
+      "tablesCreated": [
+        "dues_assignments"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 68,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 85,
+      "tag": "0085_monetization_infrastructure_layer",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "tablesCreated": [
+        "commercial_contracts",
+        "contract_line_items",
+        "entitlement_usage_log",
+        "org_entitlements",
+        "subscription_events_log"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 69,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 86,
+      "tag": "0086_monetization_phase2",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "tablesCreated": [
+        "contract_covered_orgs",
+        "fee_adjustments",
+        "reconciliation_exceptions",
+        "reconciliation_matches",
+        "reconciliation_runs",
+        "transaction_fee_events",
+        "transaction_fee_rules"
+      ],
+      "tableCount": 7,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 70,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 89,
+      "tag": "0089_ingestion_hardening",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "tablesCreated": [
+        "grievance_timeline_events",
+        "ingestion_batches",
+        "ingestion_records"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 71,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 96,
+      "tag": "0096_add_missing_ue_required_tables",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "tablesCreated": [
+        "committee_action_items",
+        "committee_documents",
+        "committee_intelligence_snapshots",
+        "committee_meeting_attendees",
+        "committee_meetings"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 72,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 98,
+      "tag": "0098_predeployment_hardening",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0098_predeployment_hardening.sql",
+      "tablesCreated": [
+        "case_documents"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 73,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 104,
+      "tag": "0104_dedup_and_quality_warnings",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "tablesCreated": [
+        "data_quality_warnings",
+        "duplicate_group_members",
+        "duplicate_groups"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 74,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 105,
+      "tag": "0105_correspondence_pipeline",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "tablesCreated": [
+        "correspondence",
+        "correspondence_audit_trail",
+        "correspondence_recipients",
+        "user_signatures"
+      ],
+      "tableCount": 4,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 75,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 9000,
+      "tag": "070_governed_case_access_documents",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "GRANTS",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "tablesCreated": [
+        "document_access_grants",
+        "document_links",
+        "document_versions",
+        "grievance_case_access_assignments"
+      ],
+      "tableCount": 4,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 76,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260325000000,
+      "tag": "20260325_dapl_platform_ledger",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "tablesCreated": [
+        "allocation_basis_snapshots",
+        "allocation_rule_versions",
+        "allocation_rules",
+        "allocation_run_lines",
+        "allocation_runs",
+        "billing_accounts",
+        "billing_periods",
+        "chargeback_statements",
+        "org_subscriptions",
+        "payment_allocations",
+        "platform_cost_ledger_entries",
+        "platform_invoice_line_items",
+        "platform_invoices",
+        "platform_payments",
+        "subscription_plans"
+      ],
+      "tableCount": 15,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 77,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260328000000,
+      "tag": "20260328_jurisdiction_preferences",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql",
+      "tablesCreated": [
+        "member_jurisdiction_preferences"
+      ],
+      "tableCount": 1,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 78,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260401000000,
+      "tag": "20260401_cba_intelligence_public_sources",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "tablesCreated": [
+        "cba_intel_agreements",
+        "cba_intel_benchmark_snapshots",
+        "cba_intel_clauses",
+        "cba_intel_documents",
+        "cba_intel_extraction_runs",
+        "cba_intel_findings",
+        "cba_intel_ingestion_jobs",
+        "cba_intel_review_decisions",
+        "cba_intel_sources",
+        "cba_intel_wage_adjustments"
+      ],
+      "tableCount": 10,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 79,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260404000000,
+      "tag": "20260404_pilot_observability",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260404_pilot_observability.sql",
+      "tablesCreated": [
+        "pilot_events",
+        "pilot_feedback"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 80,
+      "phase": "UNION_EYES_LEGACY_SQL",
+      "phaseOrder": 20,
+      "orderingBasis": "filename_numeric_or_date_after_journal",
+      "journalIdx": null,
+      "journalWhen": 20260915000000,
+      "tag": "20260915_external_representation_authority",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "DATA_MIGRATION"
+      ],
+      "path": "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "tablesCreated": [
+        "external_document_access_grants",
+        "external_matter_access_grants",
+        "representation_authorities"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Present as primary creator for runtime tables but NOT listed in legacy meta/_journal.json; ordered by filename numeric/date after journaled lineage"
+    },
+    {
+      "step": 81,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 0,
+      "journalWhen": 1779375168277,
+      "tag": "0000_outstanding_viper",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0000_outstanding_viper.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 82,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 1,
+      "journalWhen": 1779377374582,
+      "tag": "0001_lean_iron_man",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "tablesCreated": [
+        "workbook_governance_lineage_entries",
+        "workbook_memory_holders",
+        "workbook_modules",
+        "workbook_purchases",
+        "workbooks"
+      ],
+      "tableCount": 5,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Active fresh-bootstrap executor applies this; creates runtime tables"
+    },
+    {
+      "step": 83,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 2,
+      "journalWhen": 1779377798708,
+      "tag": "0002_certain_juggernaut",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0002_certain_juggernaut.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 84,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 3,
+      "journalWhen": 1779378075698,
+      "tag": "0003_dizzy_alex_wilder",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0003_dizzy_alex_wilder.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 85,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 4,
+      "journalWhen": 1788011111317,
+      "tag": "0004_hesitant_chameleon",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0004_hesitant_chameleon.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 86,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 5,
+      "journalWhen": 1788307664621,
+      "tag": "0005_add_icra_assessment_capability_token",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0005_add_icra_assessment_capability_token.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 87,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 6,
+      "journalWhen": 1789488000000,
+      "tag": "0006_external_specialist_runtime_privilege_closure",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 88,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 7,
+      "journalWhen": 1789513920000,
+      "tag": "0007_auth_bootstrap_runtime_remediation",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0007_auth_bootstrap_runtime_remediation.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 89,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 8,
+      "journalWhen": 1789588800000,
+      "tag": "0008_runtime_acceptance_closure",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0008_runtime_acceptance_closure.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 90,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 9,
+      "journalWhen": 1789660000000,
+      "tag": "0009_baseline_runtime_role_grants",
+      "classification": "GRANTS",
+      "allClasses": [
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 91,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 10,
+      "journalWhen": 1789720000000,
+      "tag": "0010_tenant_isolation_rls_foundation",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 92,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 11,
+      "journalWhen": 1789780000000,
+      "tag": "0011_storage_authority_rls_completion",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0011_storage_authority_rls_completion.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 93,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 12,
+      "journalWhen": 1789840000000,
+      "tag": "0012_storage_authority_rls_final_closure",
+      "classification": "SCHEMA_EVOLUTION",
+      "allClasses": [
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0012_storage_authority_rls_final_closure.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 94,
+      "phase": "UNION_EYES_SCOPED_SQL",
+      "phaseOrder": 30,
+      "orderingBasis": "drizzle_meta_journal_idx_active_bootstrap",
+      "journalIdx": 13,
+      "journalWhen": 1789900000000,
+      "tag": "0013_workbook_credential_payment_authority",
+      "classification": "GRANTS",
+      "allClasses": [
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-cache/0013_workbook_credential_payment_authority.sql",
+      "tablesCreated": [],
+      "tableCount": 0,
+      "includeInSchemaCreationBootstrapPath": false,
+      "notes": "Active fresh-bootstrap; primarily RLS/grants/cache support"
+    },
+    {
+      "step": 95,
+      "phase": "UNION_EYES_AUDIT_SQL",
+      "phaseOrder": 40,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 0,
+      "journalWhen": 1774442085233,
+      "tag": "0000_familiar_silhouette",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "GRANTS"
+      ],
+      "path": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "tablesCreated": [
+        "ai_clause_reasonings",
+        "ai_copilot_sessions",
+        "ai_grievance_triages",
+        "ai_insight_reports",
+        "clause_embeddings",
+        "compliance_alerts",
+        "employer_communications",
+        "employer_contacts",
+        "employer_reports",
+        "employer_risk_scores",
+        "governance_policies",
+        "grievance_events",
+        "pension_benefit_claims",
+        "pension_contributions",
+        "pension_members",
+        "pension_plans",
+        "pension_t4a_records",
+        "pension_trustee_meetings",
+        "pension_trustees",
+        "stewards",
+        "strategic_goals"
+      ],
+      "tableCount": 21,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Audit lineage; no fresh-bootstrap executor"
+    },
+    {
+      "step": 96,
+      "phase": "UNION_EYES_AUDIT_SQL",
+      "phaseOrder": 40,
+      "orderingBasis": "drizzle_meta_journal_idx",
+      "journalIdx": 1,
+      "journalWhen": 1774443901239,
+      "tag": "0001_silky_elektra",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION"
+      ],
+      "path": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "tablesCreated": [
+        "dispatch_assignments",
+        "dispatch_requests",
+        "dispatch_rules"
+      ],
+      "tableCount": 3,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Audit lineage; no fresh-bootstrap executor"
+    },
+    {
+      "step": 97,
+      "phase": "ROOT_SQL",
+      "phaseOrder": 60,
+      "orderingBasis": "filename_sort_within_root_migrations",
+      "classification": "SCHEMA_CREATION",
+      "allClasses": [
+        "SCHEMA_CREATION",
+        "SCHEMA_EVOLUTION",
+        "RLS_SECURITY"
+      ],
+      "path": "migrations/0045_union_eyes_deadline_engine.sql",
+      "tablesCreated": [
+        "deadline_audit_events",
+        "deadline_reminders"
+      ],
+      "tableCount": 2,
+      "includeInSchemaCreationBootstrapPath": true,
+      "notes": "Root migrations/*.sql (top-level); not executed by UE fresh bootstrap"
+    }
+  ],
+  "POST_FREEZE_PLATFORM_SQL_ROOT": "apps/union-eyes/db/migrations-platform",
+  "platformSteps": [
+    {
+      "step": 35,
+      "phase": "UNION_EYES_PLATFORM_SQL",
+      "phaseOrder": 35,
+      "tag": "0001_billing_subscriptions",
+      "path": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "classification": "SCHEMA_CREATION",
+      "tablesCreated": [
+        "billing_subscriptions"
+      ]
+    },
+    {
+      "step": 36,
+      "phase": "UNION_EYES_PLATFORM_SQL",
+      "phaseOrder": 35,
+      "tag": "0002_employer_execution_and_related_a",
+      "path": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "classification": "SCHEMA_CREATION",
+      "tablesCreated": [
+        "break_policies",
+        "cba_rule_set_items",
+        "cba_rule_versions",
+        "employer_execution_artifacts",
+        "employer_execution_compliance_events",
+        "employer_execution_evidence_links",
+        "employer_execution_profiles",
+        "employer_execution_replays",
+        "employer_payroll_run_items",
+        "employer_payroll_runs",
+        "employer_remittance_run_items",
+        "employer_remittance_runs",
+        "employer_timesheet_batches",
+        "employer_timesheet_entries",
+        "member_breaks",
+        "satisfaction_surveys"
+      ]
+    },
+    {
+      "step": 37,
+      "phase": "UNION_EYES_PLATFORM_SQL",
+      "phaseOrder": 35,
+      "tag": "0003_integration_partners_and_security_posture",
+      "path": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "classification": "SCHEMA_CREATION",
+      "tablesCreated": [
+        "integration_partners",
+        "security_posture_checks"
+      ]
+    }
+  ]
+}

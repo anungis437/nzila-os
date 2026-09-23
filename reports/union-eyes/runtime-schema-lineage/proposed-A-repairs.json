@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-09-23T14:14:30.958Z",
+  "counts": {
+    "dispositionAOriginal": 19,
+    "IMPLEMENTED": 19,
+    "BLOCKED": 0
+  },
+  "implemented": [
+    {
+      "TABLE": "billing_subscriptions",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "cba_rule_versions",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "cba_rule_set_items",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_execution_profiles",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_timesheet_batches",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_timesheet_entries",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_payroll_runs",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_payroll_run_items",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_remittance_runs",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_remittance_run_items",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_execution_artifacts",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_execution_replays",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_execution_evidence_links",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "employer_execution_compliance_events",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "break_policies",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "member_breaks",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "satisfaction_surveys",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "integration_partners",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    },
+    {
+      "TABLE": "security_posture_checks",
+      "STATUS": "IMPLEMENTED",
+      "PRIOR_DISPOSITION": "A",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "CREATION_LINEAGE": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": true
+    }
+  ],
+  "stillBlocked": []
+}

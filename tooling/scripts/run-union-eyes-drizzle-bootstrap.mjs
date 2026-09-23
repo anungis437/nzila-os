@@ -19,7 +19,9 @@
  *      schema). Controlled by UE_DB_RESTORE_SNAPSHOT_URL.
  *   5. Scoped Drizzle migration application from
  *      apps/union-eyes/db/migrations-cache/ (cache/runtime support only).
- *   6. Bootstrap attestation written to drizzle.bootstrap_attestations.
+ *   6. Post-freeze PLATFORM_SQL SCHEMA_CREATION from
+ *      apps/union-eyes/db/migrations-platform/ (forward-only business CREATE).
+ *   7. Bootstrap attestation written to drizzle.bootstrap_attestations.
  *
  * It does NOT:
  *   - replay legacy migrations under db/migrations/
@@ -34,6 +36,7 @@ import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
 import { applyScopedMigrations as applyScopedMigrationsShared } from './lib/union-eyes-scoped-migrations.mjs';
+import { applyPlatformMigrations as applyPlatformMigrationsShared } from './lib/union-eyes-platform-migrations.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +47,8 @@ const LEGACY_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations');
 const LEGACY_FREEZE_SENTINEL = path.join(LEGACY_MIGRATIONS_DIR, '.lineage-frozen');
 const SCOPED_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-cache');
 const SCOPED_JOURNAL = path.join(SCOPED_MIGRATIONS_DIR, 'meta', '_journal.json');
+const PLATFORM_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-platform');
+const PLATFORM_JOURNAL = path.join(PLATFORM_MIGRATIONS_DIR, 'meta', '_journal.json');
 const QA_BASELINE_SQL = path.join(repoRoot, 'tooling', 'sql', 'union-eyes-qa-baseline.sql');
 
 const REQUIRED_EXTENSIONS = [
@@ -163,6 +168,22 @@ async function applyScopedMigrations(client) {
     return await applyScopedMigrationsShared(client, {
       journalPath: SCOPED_JOURNAL,
       migrationsDir: SCOPED_MIGRATIONS_DIR,
+      log: info,
+    });
+  } catch (err) {
+    fail(err.message);
+  }
+}
+
+async function applyPlatformMigrations(client) {
+  if (!fs.existsSync(PLATFORM_JOURNAL)) {
+    info('No post-freeze PLATFORM_SQL journal found; skipping.');
+    return { applied: 0, appliedTags: [] };
+  }
+  try {
+    return await applyPlatformMigrationsShared(client, {
+      journalPath: PLATFORM_JOURNAL,
+      migrationsDir: PLATFORM_MIGRATIONS_DIR,
       log: info,
     });
   } catch (err) {
@@ -304,11 +325,15 @@ async function main() {
     info('Applying scoped Drizzle migrations from db/migrations-cache/ ...');
     const migrateSummary = await applyScopedMigrations(client);
 
+    info('Applying post-freeze PLATFORM_SQL migrations from db/migrations-platform/ ...');
+    const platformSummary = await applyPlatformMigrations(client);
+
     await writeBootstrapAttestation(client, {
       snapshotDigest: restoreSummary.snapshotDigest,
       restored: restoreSummary.restored,
       qaBaselineApplied: baselineSummary.applied,
       scopedMigrationsApplied: migrateSummary.applied,
+      platformMigrationsApplied: platformSummary.applied,
       timestamp: new Date().toISOString(),
     });
 
