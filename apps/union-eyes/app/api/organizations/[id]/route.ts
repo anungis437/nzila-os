@@ -45,11 +45,20 @@ function mapOrg(row: typeof organizations.$inferSelect) {
 
 type Params = { params: Promise<{ id: string }> };
 
+function assertOrgIdParam(id: string): NextResponse | null {
+  if (id === 'current' || !/^[0-9a-fA-F-]{36}$/.test(id)) {
+    return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 });
+  }
+  return null;
+}
+
 export async function GET(_req: NextRequest, { params }: Params) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
+  const invalid = assertOrgIdParam(id);
+  if (invalid) return invalid;
   const [row] = await db.select().from(organizations).where(eq(organizations.id, id));
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
@@ -84,6 +93,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params;
+  {
+    const invalid = assertOrgIdParam(id);
+    if (invalid) return invalid;
+  }
 
   // Require caller to be a member of THIS org with admin+ role
   let userCtx;
@@ -120,6 +133,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id } = await params;
+  {
+    const invalid = assertOrgIdParam(id);
+    if (invalid) return invalid;
+  }
 
   // Require caller to be a member of THIS org with admin+ role
   let userCtx;
