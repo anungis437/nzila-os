@@ -1,0 +1,35 @@
+{
+  "label": "FICTIONAL candidates for @nzila/sage-core synthesis-context tests / local harnesses",
+  "disclaimer": "NOT real OMHRA. Derived from chronology-2022-2026.json.",
+  "org_id": "00000000-1111-4000-8000-0000000000aa",
+  "workspace_id": "00000000-2222-4000-8000-0000000000bb",
+  "candidates": [
+    {
+      "evidenceItemId": "ev-public-plan-2022",
+      "sourceId": "src-public-plan-2022",
+      "workspaceId": "00000000-2222-4000-8000-0000000000bb",
+      "orgId": "00000000-1111-4000-8000-0000000000aa",
+      "authorizationLevel": "public",
+      "title": "FICTIONAL public strategic plan 2022",
+      "excerpt": "Member service continuity is a published priority."
+    },
+    {
+      "evidenceItemId": "ev-sensitive-why-b",
+      "sourceId": "src-sensitive-why-b",
+      "workspaceId": "00000000-2222-4000-8000-0000000000bb",
+      "orgId": "00000000-1111-4000-8000-0000000000aa",
+      "authorizationLevel": "sensitive",
+      "title": "FICTIONAL board interview pack — why B",
+      "excerpt": "Why we chose candidate B remains confidential in this fixture."
+    },
+    {
+      "evidenceItemId": "ev-excluded-complaint",
+      "sourceId": "src-excluded-complaint",
+      "workspaceId": "00000000-2222-4000-8000-0000000000bb",
+      "orgId": "00000000-1111-4000-8000-0000000000aa",
+      "authorizationLevel": "excluded",
+      "title": "FICTIONAL excluded complaint file",
+      "excerpt": "Unresolved complaint narrative must never enter incoming synthesis context."
+    }
+  ]
+}
