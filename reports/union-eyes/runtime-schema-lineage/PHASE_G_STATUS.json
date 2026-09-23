@@ -1,0 +1,176 @@
+{
+  "generatedAt": "2026-09-23T16:01:38.848462+00:00",
+  "PRODUCTION_TOUCHED": false,
+  "section1_provenance": {
+    "STAGING_ACA_REVISION": "nzila-os-union-eyes-staging--0000247",
+    "STAGING_ACA_REVISION_TRAFFIC_PERCENT": 100,
+    "PRIOR_TRAFFIC_REVISION": "nzila-os-union-eyes-staging--0000246",
+    "STAGING_IMAGE_DIGEST": "sha256:3fa0a3de2f17cf3be5cd3666d9eb61d6e69cbb3029e9d66c451707195f2ada1b",
+    "STAGING_IMAGE_SOURCE_SHA": "b30798326afbb1ad24b72b33b2be5f300bd6023c",
+    "STAGING_RELEASE_ID": "UE-2026-09-22-b307983",
+    "SCHEMA_SOURCE_SHA": "f71c6e5cac4c68d706285a37050748e21103574d",
+    "TRAFFIC_ACTIONS": [
+      "Shifted 100% traffic from --0000230 (8497c37 ScaledToZero) to --0000246 (b307983)",
+      "Updated UNION_EYES_ACCEPTANCE_AUTH_USER_IDS to include Phase G UUIDs -> created --0000247",
+      "Shifted 100% traffic to --0000247"
+    ],
+    "APP_SCHEMA_COMPATIBILITY": "FAIL",
+    "APP_SCHEMA_COMPATIBILITY_EVIDENCE": [
+      "Deployed app resolves org via organization_members.deleted_at IS NULL",
+      "Reconstituted staging physical table organization_members has no deleted_at column",
+      "Live error: PostgresError: column organization_members.deleted_at does not exist",
+      "Additionally /api/organizations/current binds path segment current as UUID -> invalid input syntax for type uuid: current"
+    ],
+    "IMAGE_REDEPLOYED": false,
+    "ACA_TRAFFIC_SHIFTED": true,
+    "ACA_ENV_UPDATED": true
+  },
+  "section2_fixtures": {
+    "STAGING_ACCEPTANCE_FIXTURES": "PASS",
+    "PRODUCTION_DATA_USED": false,
+    "REAL_MEMBER_DATA_USED": false,
+    "identity": "UUID principals + UUID orgs/matters/documents/grants; user_management.users.user_id varchar stores UUID strings; acceptance allowlist updated"
+  },
+  "section3_rls_boundary": {
+    "ROLSUPER": false,
+    "ROLBYPASSRLS": false,
+    "NO_CONTEXT_ORG_MATTER_DOC_ROWS": 0,
+    "ORG_A_B_ISOLATION": "PASS",
+    "MATTER_ISOLATION": "PASS",
+    "DOCUMENT_ISOLATION": "PASS",
+    "TRANSACTION_CONTEXT_LEAKAGE": 0,
+    "RLS_VERIFY_PREFLIGHT": "1697/1697 PASS",
+    "MISSING_RLS_TARGET_TABLES": 0
+  },
+  "section4_runtime_surfaces": {
+    "billing_subscriptions_present": true,
+    "SQL_SURFACE_COUNTS": {
+      "billing_periods": 0,
+      "billing_accounts": 0,
+      "billing_subscriptions": 0,
+      "platform_invoices": 0,
+      "platform_payments": 0,
+      "org_subscriptions": 0,
+      "document_versions": 0,
+      "ai_grievance_triages": 0,
+      "billing_subscriptions_present": true
+    },
+    "BILLING_CYCLE_MISSING_RELATION_ERROR": "NO",
+    "BILLING_CYCLE_RUNTIME_QUERY": "PASS",
+    "BILLING_CYCLE_HTTP_STATUS": 403,
+    "BILLING_CYCLE_NOTE": "Reached authz (403 Requires officer) \u2014 not missing-relation; schema surface OK"
+  },
+  "section5_http_authority_matrix": {
+    "PLAYWRIGHT_TEST_AUTH": "DISABLED",
+    "ACCEPTANCE_AUTH": "identity-only header x-unioneyes-acceptance-auth",
+    "UNAUTHENTICATED": "401 PASS",
+    "POSITIVE_ADMIN_MEMBER_STEWARD_EXTERNAL": "BLOCKED \u2014 org resolution / route defects",
+    "NEGATIVE_CROSS_ORG_AND_ROLE": "Observed 403 denials but membership resolution broken; not clean authority proof",
+    "http": [
+      {
+        "name": "ADMIN_A_health",
+        "status": 200
+      },
+      {
+        "name": "ADMIN_A_org_current",
+        "status": 500
+      },
+      {
+        "name": "MEMBER_A_org_current",
+        "status": 500
+      },
+      {
+        "name": "STEWARD_A_org_current",
+        "status": 500
+      },
+      {
+        "name": "EXTERNAL_SPECIALIST_A_org_current",
+        "status": 500
+      },
+      {
+        "name": "ADMIN_A_grievances_list",
+        "status": 403
+      },
+      {
+        "name": "ADMIN_A_grievance_A",
+        "status": 403
+      },
+      {
+        "name": "ADMIN_A_document_A",
+        "status": 403
+      },
+      {
+        "name": "BILLING_CYCLE",
+        "status": 403
+      },
+      {
+        "name": "UNAUTHENTICATED",
+        "status": 401
+      },
+      {
+        "name": "CROSS_ORG_A_reads_B_matter",
+        "status": 403
+      },
+      {
+        "name": "CROSS_ORG_B_reads_A_matter",
+        "status": 403
+      },
+      {
+        "name": "UNGRANTED_MEMBER_A_doc_B",
+        "status": 403
+      },
+      {
+        "name": "SAME_ROLE_UNAUTHORIZED_admin_route",
+        "status": 403
+      }
+    ]
+  },
+  "section6_shared_rls_context": {
+    "CRUD_LIST_GET_CREATE_UPDATE_DELETE_RLS_CONTEXT": "BLOCKED",
+    "DIRECT_ORG_RESOLUTION_CALLERS": "BLOCKED",
+    "RLS_CONTEXT_LEAKAGE": 0,
+    "exact_defect": "organization_members.deleted_at missing breaks getOrganizationIdForUser / withOrganizationAuth path"
+  },
+  "section7_pilot_smoke": {
+    "AUTHENTICATED_APP_LOAD": "PARTIAL (health 200; org/current 500)",
+    "ORGANIZATION_CONTEXT": "FAIL",
+    "MEMBER_LOOKUP": "FAIL",
+    "GRIEVANCE_OR_MATTER_FLOW": "FAIL (403 membership)",
+    "DOCUMENT_FLOW": "FAIL",
+    "ROLE_GOVERNED_ACTION": "FAIL",
+    "AUDIT_EVENT_OR_EQUIVALENT": "NOT_EXERCISED",
+    "cosmetic_vs_authority": "Failures are authority/org-resolution defects, not cosmetic"
+  },
+  "section8_pg15": {
+    "POSTGRES_15_SCHEMA_RESTORE": "PASS",
+    "POSTGRES_15_RUNTIME": "PASS",
+    "POSTGRES_15_RLS": "PASS",
+    "UNSUPPORTED_FEATURES_FOUND": [],
+    "ACCEPTED_FOR_STAGING": true,
+    "recommendation": "Align clean-room CI Postgres to PG15 unless Azure upgrade to 16 is planned (not implemented this dispatch)"
+  },
+  "section9_disposition": {
+    "FRESH_CANONICAL_STAGING": "PASS",
+    "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "BLOCKED",
+    "READY_FOR_POST_G_RELEASE_DISPOSITION": "NO",
+    "blockers": [
+      {
+        "id": "ORG_MEMBERS_DELETED_AT_MISSING",
+        "severity": "BLOCKER",
+        "section": "6/5",
+        "defect": "App query against organization_members includes deleted_at, but reconstituted staging schema has no such column.",
+        "evidence": "az containerapp logs: Error resolving organization for user / column organization_members.deleted_at does not exist",
+        "classification": "APP_SCHEMA_DRIFT_OR_INCOMPLETE_PHYSICAL_COLUMN",
+        "do_not": "Do not weaken RLS. Do not reopen full schema architecture without targeted disposition for organization_members.deleted_at."
+      },
+      {
+        "id": "ORGANIZATIONS_CURRENT_ROUTE_UUID",
+        "severity": "BLOCKER",
+        "section": "5/7",
+        "defect": "/api/organizations/current treats literal path token current as organizations.id UUID.",
+        "evidence": "PostgresError: invalid input syntax for type uuid: \"current\"",
+        "classification": "APPLICATION_ROUTE_DEFECT"
+      }
+    ]
+  }
+}
