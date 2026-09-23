@@ -21,7 +21,9 @@
     "./sql-client": "./src/sql-client.ts",
     "./postgres-mappers": "./src/postgres-mappers.ts",
     "./postgres-repository": "./src/postgres-repository.ts",
-    "./synthesis-context": "./src/synthesis-context.ts"
+    "./synthesis-context": "./src/synthesis-context.ts",
+    "./claim-chain": "./src/claim-chain.ts",
+    "./institutional-context": "./src/institutional-context.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -181,3 +181,19 @@ export function assertAuthorizedSynthesisPath(input: {
   }
   return payload
 }
+
+
+/**
+ * Canonical synthesis-safety choke marker.
+ *
+ * EVERY evidence-bearing retrieval / context-assembly / export-evidence path in
+ * sage-core MUST call this (or buildAuthorizedEvidenceContextPayload via this
+ * wrapper) before returning narrative, ids, or package embeddings to a principal.
+ * Architectural regression tests grep for this symbol at required entry points.
+ */
+export function applyAuthorizedEvidenceContextChoke(
+  principal: SageSynthesisPrincipal,
+  candidates: readonly SageEvidenceContextCandidate[],
+): SageAuthorizedEvidenceContextPayload {
+  return buildAuthorizedEvidenceContextPayload(principal, candidates)
+}
