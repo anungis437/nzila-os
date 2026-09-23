@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T16:01:38.848462+00:00",
+  "generatedAt": "2026-09-23T12:01:38.848462-04:00",
   "ORDERED_SCHEMA_LINEAGE_DEFINED": "YES",
   "POST_FREEZE_PLATFORM_SQL_ROOT": "apps/union-eyes/db/migrations-platform",
   "SCOPED_RLS_CLOSURE": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql",
@@ -112,7 +112,7 @@
     "LINT": {
       "outcome": "PASS",
       "classification": "KNOWN_MAINLINE_DEBT",
-      "notes": "0 errors; 2550 pre-existing warnings (no-console / unused eslint-disable) \u2014 not introduced by this workstream"
+      "notes": "0 errors; 2550 pre-existing warnings (no-console / unused eslint-disable) — not introduced by this workstream"
     },
     "TEST_FAST": {
       "outcome": "PASS_SCOPED",
@@ -122,7 +122,7 @@
     "GOVERNANCE_AUDIT": {
       "outcome": "PASS",
       "classification": "CLEAN",
-      "notes": "pnpm governance:check-db-imports \u2014 0 violations"
+      "notes": "pnpm governance:check-db-imports — 0 violations"
     }
   },
   "AZURE_MAY_PROCEED_NEXT": true,
@@ -133,27 +133,14 @@
   "AZURE_STAGING_RECONSTITUTION": "PASS",
   "READY_FOR_PILOT_PROOF": true,
   "azureReconstitutionReport": "reports/union-eyes/runtime-schema-lineage/AZURE_STAGING_RECONSTITUTION.json",
-  "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "BLOCKED",
+  "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "PASS",
   "READY_FOR_POST_G_RELEASE_DISPOSITION": false,
   "PHASE_G_REPORT": "reports/union-eyes/runtime-schema-lineage/PHASE_G_STATUS.json",
-  "PHASE_G_BLOCKERS": [
-    {
-      "id": "ORG_MEMBERS_DELETED_AT_MISSING",
-      "severity": "BLOCKER",
-      "section": "6/5",
-      "defect": "App query against organization_members includes deleted_at, but reconstituted staging schema has no such column.",
-      "evidence": "az containerapp logs: Error resolving organization for user / column organization_members.deleted_at does not exist",
-      "classification": "APP_SCHEMA_DRIFT_OR_INCOMPLETE_PHYSICAL_COLUMN",
-      "do_not": "Do not weaken RLS. Do not reopen full schema architecture without targeted disposition for organization_members.deleted_at."
-    },
-    {
-      "id": "ORGANIZATIONS_CURRENT_ROUTE_UUID",
-      "severity": "BLOCKER",
-      "section": "5/7",
-      "defect": "/api/organizations/current treats literal path token current as organizations.id UUID.",
-      "evidence": "PostgresError: invalid input syntax for type uuid: \"current\"",
-      "classification": "APPLICATION_ROUTE_DEFECT"
-    }
-  ],
-  "PRODUCTION_TOUCHED": false
+  "PHASE_G_BLOCKERS": [],
+  "PRODUCTION_TOUCHED": false,
+  "PHASE_G_PASS_AT": "2026-09-23T18:40:33.0878292Z",
+  "PHASE_G_LIVE_REVISION": "nzila-os-union-eyes-staging--0000259",
+  "PHASE_G_LIVE_DIGEST": "sha256:48e6a0295df45f3cb4727bf0b46edab09a55a8c1a414279cc9d2be94e18e3501",
+  "PHASE_G_LIVE_SHA": "eae195f21",
+  "PHASE_G_DEPLOY_RUN": "https://github.com/anungis437/nzila-os/actions/runs/35902008722"
 }
