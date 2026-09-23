@@ -20,7 +20,8 @@ describe('runtime schema authority oracle', () => {
       preCompleteRuntimeSchemaDigest: FROZEN_DJANGO_DIGEST,
     })
     expect(oracle.counts.runtimeUniverseTables).toBeGreaterThan(300)
-    expect(oracle.counts.runtimeTablesWithoutSchemaOwner).toBeGreaterThan(0)
+    // Disposition-adjusted remaining no-owner set is the explicit 8F+2G cohort.
+    expect(oracle.counts.runtimeTablesWithoutSchemaOwner).toBe(10)
     expect(oracle.counts.bootstrapMissingCreationTables).toBeGreaterThan(0)
   }, 60_000)
 
@@ -34,26 +35,30 @@ describe('runtime schema authority oracle', () => {
       sqlCreatingMigration: 'apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql',
     })
     expect(billingPeriods?.djangoCreatingMigration).toBeNull()
-    expect(
-      billingPeriods?.creationEvidence.some(
-        (evidence) => evidence.currentBootstrapStatus === 'EXECUTED_BY_FRESH_BOOTSTRAP',
-      ),
-    ).toBe(false)
     expect(billingPeriods?.activeRuntimeReaders.length).toBeGreaterThan(0)
   }, 60_000)
 
-  it('keeps runtime-projected tables without creation lineage unresolved until explicit evidence is added', () => {
+  it('assigns billing_subscriptions to post-freeze PLATFORM_SQL lineage (0001)', () => {
     const billingSubscriptions = oracle.records.find(
       (record) => record.table === 'billing_subscriptions',
     )
 
     expect(billingSubscriptions).toBeDefined()
     expect(billingSubscriptions).toMatchObject({
-      schemaOwner: 'UNKNOWN',
-      creationLineage: 'PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE',
-      canonicalRequirement: 'UNRESOLVED',
+      schemaOwner: 'PLATFORM_SQL_OWNED',
+      creationLineage: 'ACTIVE_SQL_PLATFORM_LINEAGE',
+      canonicalRequirement: 'REQUIRED',
+      sqlCreatingMigration:
+        'apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql',
     })
-    expect(billingSubscriptions?.creationEvidence).toEqual([])
+    expect(
+      billingSubscriptions?.creationEvidence.some(
+        (evidence) =>
+          evidence.file ===
+            'apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql' &&
+          evidence.currentBootstrapStatus === 'EXECUTED_BY_FRESH_BOOTSTRAP',
+      ),
+    ).toBe(true)
     expect(billingSubscriptions?.activeRuntimeReaders.length).toBeGreaterThan(0)
   }, 60_000)
 })
