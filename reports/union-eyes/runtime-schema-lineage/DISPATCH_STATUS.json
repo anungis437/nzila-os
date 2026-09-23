@@ -134,7 +134,6 @@
   "READY_FOR_PILOT_PROOF": true,
   "azureReconstitutionReport": "reports/union-eyes/runtime-schema-lineage/AZURE_STAGING_RECONSTITUTION.json",
   "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "PASS",
-  "READY_FOR_POST_G_RELEASE_DISPOSITION": false,
   "PHASE_G_REPORT": "reports/union-eyes/runtime-schema-lineage/PHASE_G_STATUS.json",
   "PHASE_G_BLOCKERS": [],
   "PRODUCTION_TOUCHED": false,
@@ -142,5 +141,8 @@
   "PHASE_G_LIVE_REVISION": "nzila-os-union-eyes-staging--0000259",
   "PHASE_G_LIVE_DIGEST": "sha256:48e6a0295df45f3cb4727bf0b46edab09a55a8c1a414279cc9d2be94e18e3501",
   "PHASE_G_LIVE_SHA": "eae195f21",
-  "PHASE_G_DEPLOY_RUN": "https://github.com/anungis437/nzila-os/actions/runs/35902008722"
+  "PHASE_G_DEPLOY_RUN": "https://github.com/anungis437/nzila-os/actions/runs/35902008722",
+  "CANONICAL_SNAPSHOT_LIFECYCLE": "PASS",
+  "UE_DB_SNAPSHOT_ID": "staging-canonical-20260923T184938Z-92611387",
+  "READY_FOR_POST_G_RELEASE_DISPOSITION": "YES"
 }
