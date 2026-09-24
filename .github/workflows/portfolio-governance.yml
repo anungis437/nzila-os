@@ -36,7 +36,7 @@ jobs:
         run: pnpm exec tsx scripts/validate-portfolio.ts
 
       - name: Enforce CIVIC / OCI doctrine integrity
-        run: pnpm validate:civic-oci-doctrine
+        run: pnpm exec tsx scripts/validate-civic-oci-doctrine.ts
 
       - name: Check canonical truth surfaces
         run: pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts

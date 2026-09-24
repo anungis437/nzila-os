@@ -73,8 +73,8 @@ invariant carries an authority citation and a reason it must be machine-readable
 6. ignores `docs/oci/superseded/**` and other undeclared material by construction.
 
 The validator fails with invariant ID, artifact, authority, expected state, and observed state.
-It is exposed through `pnpm validate:civic-oci-doctrine`, included in `validate:doctrine`, and
-exercised by the normal contract-test CI gate.
+Run it locally with `pnpm exec tsx scripts/validate-civic-oci-doctrine.ts`. It is included in
+`validate:doctrine` and exercised by the normal contract-test CI gate.
 
 ## Legitimate change process
 
