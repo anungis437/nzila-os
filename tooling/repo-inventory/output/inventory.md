@@ -33,7 +33,7 @@
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 105 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 35 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 110 | Partner portal for managing deals, commissions, certifications, and go-to-market |
-| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 185 | Internal admin console for managing platform services — events, knowledge, ontol |
+| platform-admin | Next.js | 3015 | ✅ | ✅ | ✅ | ✅ | 187 | Internal admin console for managing platform services — events, knowledge, ontol |
 | test-scaffold-gp | Next.js | — | ✅ | ✅ | ❌ | ✅ | 8 |  |
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |

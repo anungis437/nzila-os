@@ -542,7 +542,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 185
+      "codeFileCount": 187
     },
     {
       "name": "test-scaffold-gp",
