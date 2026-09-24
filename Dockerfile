@@ -13,6 +13,18 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN npm install -g pnpm@10.11.0 --ignore-scripts
 
+# Runtime image identity. Every final app stage inherits from base, so these
+# values remain available to dynamic /api/version handlers after the builder
+# stage has been discarded.
+ARG GITHUB_SHA=unknown
+ARG BUILD_TIME=unknown
+ARG ARTIFACT_ID=unknown
+ARG RELEASE_ID=unknown
+ENV GITHUB_SHA=$GITHUB_SHA
+ENV BUILD_TIME=$BUILD_TIME
+ENV ARTIFACT_ID=$ARTIFACT_ID
+ENV RELEASE_ID=$RELEASE_ID
+
 # ============================================
 # Dependencies stage
 # ============================================

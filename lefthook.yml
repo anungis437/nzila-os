@@ -43,6 +43,9 @@ pre-commit:
       glob:
         - "apps/**/*"
         - "packages/**/*"
+        - "services/*/package.json"
+        - "tooling/*/package.json"
+        - "tooling/**/*.{test,spec}.{ts,tsx,js,jsx}"
         - ".github/workflows/**/*"
         - "governance/exceptions/**/*"
         - "README.md"
@@ -66,8 +69,9 @@ pre-commit:
       stage_fixed: true
       fail_text: |
         Inventory regeneration aborted: unstaged/untracked changes exist under
-        apps/**, packages/**, .github/workflows/**, governance/exceptions/**, or the
-        canonical count docs. Stage or stash them, then retry the commit.
+        apps/**, packages/**, inventory-relevant services/tooling paths,
+        .github/workflows/**, governance/exceptions/**, or the canonical count
+        docs. Stage or stash them, then retry the commit.
 
 pre-push:
   commands:
