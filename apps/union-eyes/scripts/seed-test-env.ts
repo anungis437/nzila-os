@@ -186,7 +186,7 @@ async function seed(): Promise<void> {
         hierarchyLevel: org.hierarchyLevel,
         // Snapshot enforces NOT NULL without server DEFAULTs for several
         // columns that only have drizzle client-side .default() — set explicitly.
-        sectors: [] as const,
+        sectors: [],
         clcAffiliated: false,
         memberCount: 0,
         activeMemberCount: 0,
@@ -338,6 +338,8 @@ async function seed(): Promise<void> {
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({
+        // Snapshot claims.id is NOT NULL without a server DEFAULT.
+        id: randomUUID(),
         claimId: c.claimId,
         claimNumber: c.claimNumber,
         organizationId: c.organizationId,
