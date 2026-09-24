@@ -48,6 +48,14 @@ function isMissingColumnError(error: any): boolean {
   return cause?.code === '42703'
 }
 
+/** Soft-skip helper for non-RBAC seed tables (claim_updates): missing col OR NOT NULL w/o DEFAULT. */
+function isNonCriticalSeedSchemaDrift(error: any): boolean {
+  if (!error || typeof error !== 'object') return false
+  const cause = (error as { cause?: { code?: string } }).cause
+  // 42703 undefined_column, 23502 not_null_violation (snapshot NOT NULL without DEFAULT)
+  return cause?.code === '42703' || cause?.code === '23502'
+}
+
 function isMissingRelationError(error: any): boolean {
   if (!error || typeof error !== 'object') return false
   const cause = (error as { cause?: { code?: string } }).cause
@@ -409,6 +417,9 @@ async function seed(): Promise<void> {
     await db.transaction(async (tx) => {
       await tx.insert(claimUpdates).values(
         casesFixture.map((c, index) => ({
+          // Snapshot claim_updates.id/update_id often NOT NULL without server DEFAULT.
+          id: randomUUID(),
+          updateId: randomUUID(),
           claimId: c.claimId,
           updateType: 'seed_baseline',
           message: `Deterministic QA baseline #${index + 1}`,
@@ -426,7 +437,8 @@ async function seed(): Promise<void> {
       )
     })
   } catch (error) {
-    if (!isMissingColumnError(error)) throw error
+    // claim_updates is not load-bearing for RBAC/role-nav E2E; soft-skip drift.
+    if (!isNonCriticalSeedSchemaDrift(error)) throw error
     console.warn(
       `[ue:seed:test-env] claim_updates insert skipped due schema drift: ${describePgError(error)}`,
     )

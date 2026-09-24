@@ -13,3 +13,16 @@ ALTER TABLE claim_updates ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::
 ALTER TABLE claim_updates ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 ALTER TABLE claim_updates ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 ALTER TABLE claim_updates ADD COLUMN IF NOT EXISTS update_id uuid;
+
+-- Snapshot claim_updates.id/update_id may be NOT NULL without server DEFAULT.
+DO $$
+BEGIN
+  BEGIN
+    ALTER TABLE claim_updates ALTER COLUMN id SET DEFAULT gen_random_uuid();
+  EXCEPTION WHEN undefined_column OR datatype_mismatch OR undefined_function THEN NULL;
+  END;
+  BEGIN
+    ALTER TABLE claim_updates ALTER COLUMN update_id SET DEFAULT gen_random_uuid();
+  EXCEPTION WHEN undefined_column OR datatype_mismatch OR undefined_function THEN NULL;
+  END;
+END $$;
