@@ -7,7 +7,7 @@ assertNotProduction('seed-test-env')
 import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
-import { users, organizationUsers } from '@/db/schema/domains/member/user-management'
+import { organizationUsers } from '@/db/schema/domains/member/user-management'
 import { profiles } from '@/db/schema/profiles-schema'
 import { authOrgPolicies, authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { hashPassword } from '@nzila/platform-auth/password'
