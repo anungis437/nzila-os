@@ -6,13 +6,17 @@ import { execFileSync } from "node:child_process";
 const PREFIXES = [
   "apps/",
   "packages/",
+  "tooling/contract-tests/",
   ".github/workflows/",
   "governance/exceptions/",
 ];
 const EXACT_FILES = new Set(["README.md", "README.business.md", "ARCHITECTURE.md"]);
+const WORKSPACE_MANIFEST = /^(services|tooling)\/[^/]+\/package\.json$/;
+const TOOLING_TEST = /^tooling\/.*\.(test|spec)\.(ts|tsx|js|jsx)$/;
 
 function isInventoryRelevant(path) {
   if (EXACT_FILES.has(path)) return true;
+  if (WORKSPACE_MANIFEST.test(path) || TOOLING_TEST.test(path)) return true;
   return PREFIXES.some((prefix) => path.startsWith(prefix));
 }
 
