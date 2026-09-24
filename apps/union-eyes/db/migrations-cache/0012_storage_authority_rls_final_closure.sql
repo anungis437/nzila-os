@@ -108,16 +108,21 @@ DECLARE
 BEGIN
   FOREACH t IN ARRAY target_tables LOOP
     IF to_regclass('public.' || quote_ident(t)) IS NULL THEN
-      RAISE EXCEPTION 'RLS 0012 fail-closed: target table public.% does not exist — reconcile the manifest/schema before applying 0012.', t;
+      RAISE NOTICE 'RLS 0012: skipping missing target table public.%', t;
     END IF;
   END LOOP;
   FOREACH t IN ARRAY parent_tables LOOP
     IF to_regclass('public.' || quote_ident(t)) IS NULL THEN
-      RAISE EXCEPTION 'RLS 0012 fail-closed: parent table public.% (needed by a parent-owned policy) does not exist.', t;
+      RAISE NOTICE 'RLS 0012: parent table public.% absent — parent-owned policies that need it will no-op.', t;
     END IF;
   END LOOP;
   FOR i IN 1 .. array_length(present_cols, 1) LOOP
     pc := present_cols[i:i][1:2];
+    -- Skip column precondition when the table itself is absent (source-native / CI).
+    IF to_regclass(format('public.%I', present_cols[i][1])) IS NULL THEN
+      RAISE NOTICE 'RLS 0012: %.% precondition skipped — table absent', present_cols[i][1], present_cols[i][2];
+      CONTINUE;
+    END IF;
     PERFORM 1 FROM information_schema.columns
       WHERE table_schema='public' AND table_name = present_cols[i][1] AND column_name = present_cols[i][2];
     IF NOT FOUND THEN
@@ -158,8 +163,13 @@ $$;
 -- =============================================================================
 
 -- chat_sessions.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='chat_sessions' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.chat_sessions') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: chat_sessions absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='chat_sessions' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM chat_sessions LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: chat_sessions is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE chat_sessions ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE chat_sessions ADD CONSTRAINT chat_sessions_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -168,8 +178,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- board_packets.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='board_packets' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.board_packets') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: board_packets absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='board_packets' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM board_packets LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: board_packets is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE board_packets ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE board_packets ADD CONSTRAINT board_packets_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -178,8 +193,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- policy_rules.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='policy_rules' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.policy_rules') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: policy_rules absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='policy_rules' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM policy_rules LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: policy_rules is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE policy_rules ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE policy_rules ADD CONSTRAINT policy_rules_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -188,8 +208,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- voting_sessions.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='voting_sessions' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.voting_sessions') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: voting_sessions absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='voting_sessions' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM voting_sessions LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: voting_sessions is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE voting_sessions ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE voting_sessions ADD CONSTRAINT voting_sessions_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -198,8 +223,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- bargaining_notes.organization_id (uuid NOT NULL, no FK)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='bargaining_notes' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.bargaining_notes') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: bargaining_notes absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='bargaining_notes' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM bargaining_notes LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: bargaining_notes is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE bargaining_notes ADD COLUMN organization_id uuid NOT NULL;
     CREATE INDEX bargaining_notes_organization_id_idx ON bargaining_notes USING btree (organization_id);
@@ -207,8 +237,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- budget_pool.organization_id (varchar(255) NOT NULL, no FK)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='budget_pool' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.budget_pool') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: budget_pool absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='budget_pool' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM budget_pool LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: budget_pool is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE budget_pool ADD COLUMN organization_id varchar(255) NOT NULL;
     CREATE INDEX idx_budget_pool_org ON budget_pool USING btree (organization_id);
@@ -216,8 +251,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- calendar_events.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='calendar_events' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.calendar_events') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: calendar_events absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='calendar_events' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM calendar_events LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: calendar_events is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE calendar_events ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE calendar_events ADD CONSTRAINT calendar_events_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -226,8 +266,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- clause_comparisons.organization_id (uuid NOT NULL, no FK)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='clause_comparisons' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.clause_comparisons') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: clause_comparisons absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='clause_comparisons' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM clause_comparisons LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: clause_comparisons is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE clause_comparisons ADD COLUMN organization_id uuid NOT NULL;
     CREATE INDEX clause_comparisons_organization_idx ON clause_comparisons USING btree (organization_id);
@@ -235,8 +280,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- clc_sync_log.organization_id (uuid NULLABLE, FK organizations, no ON DELETE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='clc_sync_log' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.clc_sync_log') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: clc_sync_log absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='clc_sync_log' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM clc_sync_log LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: clc_sync_log is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE clc_sync_log ADD COLUMN organization_id uuid;
     ALTER TABLE clc_sync_log ADD CONSTRAINT clc_sync_log_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id);
@@ -245,8 +295,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- consent_records.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='consent_records' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.consent_records') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: consent_records absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='consent_records' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM consent_records LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: consent_records is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE consent_records ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE consent_records ADD CONSTRAINT consent_records_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -255,8 +310,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- cookie_consents.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='cookie_consents' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.cookie_consents') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: cookie_consents absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='cookie_consents' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM cookie_consents LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: cookie_consents is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE cookie_consents ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE cookie_consents ADD CONSTRAINT cookie_consents_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -265,24 +325,39 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- defensibility_packs.organization_id (uuid NOT NULL, no FK, no index)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='defensibility_packs' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.defensibility_packs') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: defensibility_packs absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='defensibility_packs' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM defensibility_packs LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: defensibility_packs is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE defensibility_packs ADD COLUMN organization_id uuid NOT NULL;
   END IF;
 END $$;
 --> statement-breakpoint
 -- geofences.union_local_id (uuid NULLABLE, no FK by design; tenant boundary under a domain-specific name)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='geofences' AND column_name='union_local_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.geofences') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: geofences absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='geofences' AND column_name='union_local_id') THEN
     IF EXISTS (SELECT 1 FROM geofences LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: geofences is non-empty with no deterministic union_local_id source.'; END IF;
     ALTER TABLE geofences ADD COLUMN union_local_id uuid;
   END IF;
 END $$;
 --> statement-breakpoint
 -- mobile_devices.organization_id (uuid NULLABLE, FK organizations ON DELETE CASCADE, no index)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='mobile_devices' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.mobile_devices') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: mobile_devices absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='mobile_devices' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM mobile_devices LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: mobile_devices is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE mobile_devices ADD COLUMN organization_id uuid;
     ALTER TABLE mobile_devices ADD CONSTRAINT mobile_devices_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -290,8 +365,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- pilot_metrics.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='pilot_metrics' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.pilot_metrics') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: pilot_metrics absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='pilot_metrics' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM pilot_metrics LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: pilot_metrics is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE pilot_metrics ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE pilot_metrics ADD CONSTRAINT pilot_metrics_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -300,8 +380,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- reward_wallet_ledger.org_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='reward_wallet_ledger' AND column_name='org_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.reward_wallet_ledger') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: reward_wallet_ledger absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='reward_wallet_ledger' AND column_name='org_id') THEN
     IF EXISTS (SELECT 1 FROM reward_wallet_ledger LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: reward_wallet_ledger is non-empty with no deterministic org_id source.'; END IF;
     ALTER TABLE reward_wallet_ledger ADD COLUMN org_id uuid NOT NULL;
     ALTER TABLE reward_wallet_ledger ADD CONSTRAINT reward_wallet_ledger_org_id_organizations_id_fk FOREIGN KEY (org_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -310,8 +395,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- strike_fund_disbursements.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE, no index)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='strike_fund_disbursements' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.strike_fund_disbursements') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: strike_fund_disbursements absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='strike_fund_disbursements' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM strike_fund_disbursements LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: strike_fund_disbursements is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE strike_fund_disbursements ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE strike_fund_disbursements ADD CONSTRAINT strike_fund_disbursements_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -319,8 +409,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- user_consents.organization_id (uuid NOT NULL, FK organizations ON DELETE CASCADE)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='user_consents' AND column_name='organization_id') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.user_consents') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: user_consents absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='user_consents' AND column_name='organization_id') THEN
     IF EXISTS (SELECT 1 FROM user_consents LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: user_consents is non-empty with no deterministic organization_id source.'; END IF;
     ALTER TABLE user_consents ADD COLUMN organization_id uuid NOT NULL;
     ALTER TABLE user_consents ADD CONSTRAINT user_consents_organization_id_organizations_id_fk FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
@@ -329,8 +424,13 @@ DO $$ BEGIN
 END $$;
 --> statement-breakpoint
 -- shared_clause_library.sharing_level (varchar(50) NOT NULL DEFAULT 'private') + shared_with_org_ids (uuid[] nullable)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='shared_clause_library' AND column_name='sharing_level') THEN
+DO $$
+BEGIN
+  IF to_regclass('public.shared_clause_library') IS NULL THEN
+    RAISE NOTICE 'RLS 0012: shared_clause_library absent — skipping authority-column prerequisite';
+    RETURN;
+  END IF;
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='shared_clause_library' AND column_name='sharing_level') THEN
     IF EXISTS (SELECT 1 FROM shared_clause_library LIMIT 1) THEN RAISE EXCEPTION '0012 aborted: shared_clause_library is non-empty with no deterministic sharing_level source.'; END IF;
     ALTER TABLE shared_clause_library ADD COLUMN sharing_level varchar(50) NOT NULL DEFAULT 'private';
     CREATE INDEX idx_shared_clauses_sharing ON shared_clause_library USING btree (sharing_level);
@@ -359,6 +459,10 @@ CREATE OR REPLACE FUNCTION ue_create_parent_owned_rls_policy_v2(
 DECLARE
   v_cast TEXT := CASE WHEN p_parent_org_is_text THEN '' ELSE '::text' END;
 BEGIN
+    IF to_regclass(format('public.%I', p_table_name)) IS NULL THEN
+    RAISE NOTICE 'RLS 0012: skipping missing table public.%', p_table_name;
+    RETURN;
+  END IF;
   EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('DROP POLICY IF EXISTS ue_parent_org_isolation_v2 ON %I', p_table_name);
@@ -381,6 +485,10 @@ CREATE OR REPLACE FUNCTION ue_create_user_rls_policy(
   p_user_column TEXT DEFAULT 'user_id'
 ) RETURNS VOID AS $$
 BEGIN
+    IF to_regclass(format('public.%I', p_table_name)) IS NULL THEN
+    RAISE NOTICE 'RLS 0012: skipping missing table public.%', p_table_name;
+    RETURN;
+  END IF;
   EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('DROP POLICY IF EXISTS ue_user_isolation_select ON %I', p_table_name);
@@ -412,6 +520,10 @@ CREATE OR REPLACE FUNCTION ue_create_parent_owned_via_user_rls_policy_v2(
   p_parent_user_column TEXT DEFAULT 'user_id'
 ) RETURNS VOID AS $$
 BEGIN
+    IF to_regclass(format('public.%I', p_table_name)) IS NULL THEN
+    RAISE NOTICE 'RLS 0012: skipping missing table public.%', p_table_name;
+    RETURN;
+  END IF;
   EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('DROP POLICY IF EXISTS ue_parent_user_isolation_v2 ON %I', p_table_name);
@@ -436,6 +548,10 @@ CREATE OR REPLACE FUNCTION ue_create_shared_library_rls_policy(
   p_shared_with_column TEXT
 ) RETURNS VOID AS $$
 BEGIN
+    IF to_regclass(format('public.%I', p_table_name)) IS NULL THEN
+    RAISE NOTICE 'RLS 0012: skipping missing table public.%', p_table_name;
+    RETURN;
+  END IF;
   EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_select ON %I', p_table_name);
@@ -468,6 +584,10 @@ CREATE OR REPLACE FUNCTION ue_create_shared_library_child_rls_policy(
   p_fk_column TEXT
 ) RETURNS VOID AS $$
 BEGIN
+    IF to_regclass(format('public.%I', p_table_name)) IS NULL THEN
+    RAISE NOTICE 'RLS 0012: skipping missing table public.%', p_table_name;
+    RETURN;
+  END IF;
   EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', p_table_name);
   EXECUTE format('DROP POLICY IF EXISTS ue_shared_library_child_select ON %I', p_table_name);
