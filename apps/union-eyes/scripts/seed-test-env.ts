@@ -48,12 +48,13 @@ function isMissingColumnError(error: any): boolean {
   return cause?.code === '42703'
 }
 
-/** Soft-skip helper for non-RBAC seed tables (claim_updates): missing col OR NOT NULL w/o DEFAULT. */
+/** Soft-skip helper for non-RBAC seed tables (claim_updates). */
 function isNonCriticalSeedSchemaDrift(error: any): boolean {
   if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string } }).cause
-  // 42703 undefined_column, 23502 not_null_violation (snapshot NOT NULL without DEFAULT)
-  return cause?.code === '42703' || cause?.code === '23502'
+  const cause = (error as { cause?: { code?: string }; code?: string }).cause
+  const code = cause?.code ?? (error as { code?: string }).code
+  // 42703 undefined_column, 23502 not_null_violation, 23503 FK mismatch vs snapshot
+  return code === '42703' || code === '23502' || code === '23503'
 }
 
 function isMissingRelationError(error: any): boolean {
