@@ -1,4 +1,4 @@
-import { createHash } from 'crypto'
+import { createHash, randomUUID } from 'crypto'
 import { inArray, sql } from 'drizzle-orm'
 import { assertNotProduction } from '@/lib/runtime/production-guard'
 import { db } from '@/db/db'
@@ -316,6 +316,8 @@ async function seed(): Promise<void> {
         .insert(profiles)
         .values(
           usersFixture.map((u) => ({
+            // Snapshot profiles.id is NOT NULL without a server DEFAULT.
+            id: randomUUID(),
             userId: u.userId,
             email: u.email,
             membership: 'free' as const,
