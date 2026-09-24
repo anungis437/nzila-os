@@ -1,6 +1,6 @@
 # Operational Evidence Snapshot
 
-> Generated: 2026-09-09T22:44:01.180Z
+> Generated: 2026-09-24T01:48:54.100Z
 > Policy: fields without measurable evidence remain null and include source_needed.
 
 ## Metrics (30-day window unless noted)
@@ -8,8 +8,8 @@
 | Metric | Value | Unit | Source |
 |---|---:|---|---|
 | deploy_frequency_30d | 0.47 | deploys/week | ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week) |
-| build_success_rate_30d | null | % | GitHub Actions API (not available in current execution context) |
-| median_build_minutes | null | minutes | GitHub Actions API (not available in current execution context) |
+| build_success_rate_30d | 65.93 | % | GitHub Actions API ci.yml runs on main (30d window, completed runs: 91) |
+| median_build_minutes | 37.77 | minutes | GitHub Actions API ci.yml runs on main (30d window, completed runs: 91) |
 | change_failure_rate_30d | 0 | % | ops/outputs/dora-metrics.json: metrics.change_failure_rate.value |
 | mttr_minutes | 0 | minutes | ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes) |
 | uptime_30d | null | % | Azure Monitor / Application Insights uptime SLO exporter |
@@ -22,8 +22,6 @@
 
 ## Missing Source Wiring
 
-- build_success_rate_30d: Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history.
-- median_build_minutes: Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history.
 - uptime_30d: No committed uptime export in repository. Wire Azure Monitor export to ops/outputs/uptime.json.
 - p50_latency_ms: No committed route latency export found. Publish p50/p95 rollup to ops/outputs/latency.json.
 - p95_latency_ms: No committed route latency export found. Publish p50/p95 rollup to ops/outputs/latency.json.
