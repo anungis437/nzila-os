@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  verifyClaimedWorkbookAccess: vi.fn(),
+  withClaimedWorkbookAccess: vi.fn(),
   runStewardshipCartography: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   selectQueue: [] as unknown[][],
@@ -27,7 +27,7 @@ const mockDb = {
 
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/workbook/access-control', () => ({
-  verifyClaimedWorkbookAccess: m.verifyClaimedWorkbookAccess,
+  withClaimedWorkbookAccess: m.withClaimedWorkbookAccess,
 }));
 vi.mock('@/lib/workbook/engines/stewardshipCartography', () => ({
   runStewardshipCartography: m.runStewardshipCartography,
@@ -39,6 +39,26 @@ async function loadRoute() {
   return import('../route');
 }
 
+function allowAccess() {
+  m.withClaimedWorkbookAccess.mockImplementation(
+    async (
+      args: { workbookId: string; operation: 'read' | 'write' },
+      cb: (authority: unknown) => Promise<unknown>,
+    ) => {
+      const authority = {
+        kind: 'preclaim',
+        workbookId: args.workbookId,
+        claimedByUserId: null,
+        claimedOrgId: null,
+        actorUserId: null,
+        operation: args.operation,
+      };
+      const value = await cb(authority);
+      return { ok: true as const, value, authority };
+    },
+  );
+}
+
 // ROUND 50 REGRESSION: memory-holders GET/POST previously only checked
 // workbook existence, not claimed-ownership — see lib/workbook/access-control.ts
 // and its dedicated test suite for the underlying logic. These tests prove
@@ -47,13 +67,13 @@ describe('workbook/[id]/memory-holders route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
-    m.verifyClaimedWorkbookAccess.mockResolvedValue({ ok: true });
     m.runStewardshipCartography.mockReturnValue({ score: 0 });
+    allowAccess();
   });
 
   it('GET returns the access-control error status when access is denied', async () => {
     const { GET } = await loadRoute();
-    m.verifyClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
+    m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/memory-holders'), {
       params: Promise.resolve({ id: 'w1' }),
@@ -64,7 +84,7 @@ describe('workbook/[id]/memory-holders route', () => {
 
   it('GET returns 404 when access-control reports the workbook missing', async () => {
     const { GET } = await loadRoute();
-    m.verifyClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 404, error: 'Workbook not found' });
+    m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 404, error: 'Workbook not found' });
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/memory-holders'), {
       params: Promise.resolve({ id: 'w1' }),
@@ -82,12 +102,15 @@ describe('workbook/[id]/memory-holders route', () => {
     });
 
     expect(response.status).toBe(200);
-    expect(m.verifyClaimedWorkbookAccess).toHaveBeenCalledWith('w1');
+    expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
+      { workbookId: 'w1', operation: 'read' },
+      expect.any(Function),
+    );
   });
 
   it('POST returns the access-control error status when access is denied', async () => {
     const { POST } = await loadRoute();
-    m.verifyClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
+    m.withClaimedWorkbookAccess.mockResolvedValueOnce({ ok: false, status: 403, error: 'Forbidden' });
 
     const response = await POST(new NextRequest('http://localhost/api/workbook/w1/memory-holders', {
       method: 'POST',
@@ -107,6 +130,9 @@ describe('workbook/[id]/memory-holders route', () => {
     }), { params: Promise.resolve({ id: 'w1' }) });
 
     expect(response.status).toBe(201);
-    expect(m.verifyClaimedWorkbookAccess).toHaveBeenCalledWith('w1');
+    expect(m.withClaimedWorkbookAccess).toHaveBeenCalledWith(
+      { workbookId: 'w1', operation: 'write' },
+      expect.any(Function),
+    );
   });
 });
