@@ -42,11 +42,6 @@ function assertSafeRuntime(): void {
   }
 }
 
-function isMissingColumnError(error: any): boolean {
-  if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string } }).cause
-  return cause?.code === '42703'
-}
 
 /** Soft-skip helper for non-RBAC seed tables (claim_updates). */
 function isNonCriticalSeedSchemaDrift(error: any): boolean {
