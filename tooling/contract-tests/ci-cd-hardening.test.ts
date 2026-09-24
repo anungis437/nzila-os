@@ -147,4 +147,33 @@ describe('CI-005: GitOps deploy avoids documentation and Union Eyes churn', () =
     expect(src).toContain('--set-env-vars "${ENV_VARS[@]}"')
     expect(src).not.toContain('ENV_VARS="NODE_ENV=production NEXT_PUBLIC_APP_ENV=${ENV}"')
   })
+
+  it('fails closed on post-deploy health, drift, and evidence', () => {
+    const workflowPath = join(ROOT, '.github', 'workflows', 'gitops-deploy.yml')
+    const src = readSafe(workflowPath)
+
+    expect(src).toContain('Resolve protected probe credentials')
+    expect(src).toContain('--secret-name orchestrator-api-key')
+    expect(src).toContain('echo "::add-mask::$ORCHESTRATOR_API_KEY"')
+    expect(src).toContain("'.apps[$app].routing.healthPath // \"/api/health\"'")
+    expect(src).toContain('echo "::error::Post-deploy health check failed')
+    expect(src).not.toMatch(/drift-version\.ts[\s\S]{0,200}\|\| true/)
+    expect(src).not.toMatch(/build-deploy-evidence\.ts[^\n]*\|\| true/)
+  })
+
+  it('uses inventory fallback routing and authenticated version probes without staging exceptions', () => {
+    const smoke = readSafe(join(ROOT, 'scripts', 'release', 'run-smoke.ts'))
+    const drift = readSafe(join(ROOT, 'scripts', 'release', 'drift-version.ts'))
+    const evidence = readSafe(join(ROOT, 'scripts', 'release', 'build-deploy-evidence.ts'))
+
+    expect(smoke).toContain("versionHeaders['x-api-key'] = process.env.ORCHESTRATOR_API_KEY")
+    expect(smoke).toContain('const ok = probes.every((probe) => probe.ok)')
+    expect(smoke).not.toContain('nonBlockingForStaging')
+
+    expect(drift).toContain('stagingFallback?: string')
+    expect(drift).toContain("headers['x-api-key'] = process.env.ORCHESTRATOR_API_KEY")
+    expect(drift).toContain("env === 'staging' ? cfg.routing?.stagingFallback : undefined")
+
+    expect(evidence).toContain("if (promotionVerdict !== 'ready') process.exit(1)")
+  })
 })
