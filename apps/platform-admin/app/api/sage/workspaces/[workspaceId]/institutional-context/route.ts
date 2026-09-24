@@ -64,6 +64,16 @@ export async function POST(
   const { workspaceId } = await context.params
   return withOrgScope(request, async (ctx) => {
     try {
+      const idempotencyKey = request.headers.get('Idempotency-Key')
+      if (!idempotencyKey || idempotencyKey.trim().length === 0) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: { code: 'IDEMPOTENCY_KEY_REQUIRED', message: 'Idempotency-Key header is required' },
+          },
+          { status: 400 },
+        )
+      }
       const raw = await request.json().catch(() => ({}))
       const parsed = RequestBody.safeParse(raw)
       if (!parsed.success) {
