@@ -338,12 +338,14 @@ async function seed(): Promise<void> {
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({
-        // Snapshot claims.id is NOT NULL without a server DEFAULT.
+        // Snapshot NOT NULL columns often lack server DEFAULTs that drizzle
+        // .default() assumes — set client defaults explicitly.
         id: randomUUID(),
         claimId: c.claimId,
         claimNumber: c.claimNumber,
         organizationId: c.organizationId,
         memberId: c.memberId,
+        isAnonymous: false,
         claimType: c.claimType,
         status: c.status,
         priority: c.priority,
@@ -351,9 +353,19 @@ async function seed(): Promise<void> {
         incidentDate: 'incidentDate' in c ? c.incidentDate : NOW,
         location: 'location' in c ? c.location : 'Unknown Location',
         desiredOutcome: 'desiredOutcome' in c ? c.desiredOutcome : null,
+        witnessesPresent: false,
+        previouslyReported: false,
         filedDate: NOW,
         assignedTo: 'assignedTo' in c ? c.assignedTo : null,
         assignedAt: 'assignedTo' in c ? NOW : null,
+        progress: 0,
+        claimAmount: '0',
+        settlementAmount: '0',
+        legalCosts: '0',
+        courtCosts: '0',
+        attachments: [],
+        voiceTranscriptions: [],
+        metadata: {},
         createdAt: NOW,
         updatedAt: NOW,
       })),
