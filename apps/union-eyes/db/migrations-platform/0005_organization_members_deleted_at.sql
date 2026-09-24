@@ -59,3 +59,19 @@ EXCEPTION
   WHEN datatype_mismatch THEN
     NULL;
 END $$;
+
+-- Snapshot reconstitutions often have NOT NULL columns without server DEFAULTs.
+-- Drizzle inserts omit unset fields as SQL DEFAULT — set safe defaults + backfill.
+ALTER TABLE organization_members ALTER COLUMN exempt_from_per_capita SET DEFAULT false;
+UPDATE organization_members SET exempt_from_per_capita = false WHERE exempt_from_per_capita IS NULL;
+DO $$
+BEGIN
+  BEGIN
+    ALTER TABLE organization_members ALTER COLUMN member_category SET DEFAULT 'full_member';
+  EXCEPTION WHEN undefined_column THEN NULL;
+  END;
+  BEGIN
+    UPDATE organization_members SET member_category = 'full_member' WHERE member_category IS NULL;
+  EXCEPTION WHEN undefined_column THEN NULL;
+  END;
+END $$;

@@ -393,6 +393,10 @@ async function seed(): Promise<void> {
         email: u.email,
         metadata: 'metadata' in u ? u.metadata : null,
         isPrimary: true,
+        // Snapshot has several NOT NULL columns without server DEFAULTs; Drizzle
+        // emits SQL DEFAULT for omitted schema fields which then violates NOT NULL.
+        memberCategory: 'full_member',
+        exemptFromPerCapita: false,
         joinedAt: NOW,
         createdAt: NOW,
         updatedAt: NOW,
