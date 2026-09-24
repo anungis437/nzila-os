@@ -378,6 +378,9 @@ async function seed(): Promise<void> {
   await db.transaction(async (tx) => {
     await tx.insert(organizationMembers).values(
       usersFixture.map((u) => ({
+        // Snapshot organization_members.id is NOT NULL without a server DEFAULT;
+        // Drizzle defaultRandom() emits SQL DEFAULT which then violates NOT NULL.
+        id: randomUUID(),
         userId: u.userId,
         // organization_members.organization_id is uuid in the canonical Drizzle
         // schema; pass the org UUID directly. (The slug variant lives in the

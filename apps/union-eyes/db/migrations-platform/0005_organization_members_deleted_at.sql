@@ -38,3 +38,24 @@ ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS member_category text;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exempt_from_per_capita boolean;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exemption_reason text;
 ALTER TABLE organization_members ADD COLUMN IF NOT EXISTS exemption_approved_by varchar(255);
+
+-- Snapshot id is often NOT NULL without a server default; Drizzle defaultRandom()
+-- emits SQL DEFAULT. Ensure a server default exists for non-seed writers too.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'organization_members'
+      AND column_name = 'id'
+      AND column_default IS NULL
+  ) THEN
+    ALTER TABLE organization_members ALTER COLUMN id SET DEFAULT gen_random_uuid();
+  END IF;
+EXCEPTION
+  WHEN undefined_function THEN
+    -- gen_random_uuid requires pgcrypto/pg13+; ignore if unavailable — seed sets id explicitly.
+    NULL;
+  WHEN datatype_mismatch THEN
+    NULL;
+END $$;
