@@ -1,5 +1,15 @@
 # Union Eyes — CI / Governance Evidence
 
+> **Temporal status — SUPERSEDED FOR CURRENT POSTURE (added 2026-09-24):** this document is dated
+> 2026-05 and predates the `UE_SAAS_OPERATIONAL_READINESS` gate ruling of 2026-08-31
+> ([`../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md`](../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md))
+> and the Phase 3A runtime findings of 2026-09-01
+> ([`../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md`](../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md)).
+> The current gate reads **`NO_GO — RUNTIME_PROOF_REQUIRED`**. Any `CURRENT`, `GO`, `LOCKED`, or
+> `VERIFIED` marking below describes this document's own state in 2026-05, not the current pilot
+> posture, and must not be quoted as buyer-facing readiness. Body retained unmodified as
+> historical evidence; current posture lives in [`../README.md`](../README.md).
+
 **Status:** CURRENT  
 **Last updated:** 2026-05-14  
 **Source of truth:** Live CI gates — `pnpm typecheck`, `pnpm exec tsx scripts/check-ue-db-import-guard.ts`, contract tests  
@@ -20,6 +30,7 @@ Result:  Tasks: 3 successful, 3 total | Cached: 2 cached | Time: 1m12.96s
 ```
 
 **`apps/union-eyes/tsconfig.json`:**
+
 ```json
 {
   "compilerOptions": {
@@ -32,6 +43,7 @@ Result:  Tasks: 3 successful, 3 total | Cached: 2 cached | Time: 1m12.96s
 Files fixed this sprint: **46 files**, +580 / −516 lines.
 
 Key fixes:
+
 - `RLSTx = typeof db` (postgres.js adapter — correct for Drizzle/postgres.js)
 - `withRLSContext` overloads reordered (tx-arg overloads first — required for TS overload resolution)
 - `AnyColumn` → `PgColumn<unknown>` in all 4 self-referential FK schema lambdas
@@ -66,13 +78,14 @@ All 14 previously raw-db-import violation files migrated to `withRLSContext` / `
 // apps/union-eyes/lib/db/with-rls-context.ts
 if (!orgId) {
   throw new Error(
-    "Organization context is required for RLS-protected operations. " +
-    "Use withSystemRLSContext for system operations."
-  );
+    'Organization context is required for RLS-protected operations. ' +
+      'Use withSystemRLSContext for system operations.',
+  )
 }
 ```
 
 **Explicit bypass wrappers:**
+
 - `withSystemRLSContext` — for system operations (audited)
 - `withPlatformAdminRLSContext` — for platform admin operations (audited)
 
@@ -88,7 +101,7 @@ Intake idempotency hash includes `organizationId`:
 // apps/union-eyes/app/api/cases/intake/route.ts
 const idempotencyKey = createHash('sha256')
   .update(`${organizationId}:${memberId}:${caseType}:${dateWindow}`)
-  .digest('hex');
+  .digest('hex')
 ```
 
 Prevents cross-org idempotency key collisions.
@@ -112,6 +125,7 @@ env:
 ```
 
 `reports/runtime/platform-runtime-truth-latest.json`:
+
 ```json
 "productionResourceGroup": "nzila-canada-prod-rg",
 "stagingResourceGroup": "nzila-canada-staging-rg",
@@ -150,6 +164,7 @@ All 14 deployed container apps resolve to `canadacentral.azurecontainerapps.io`.
 **Result:** 19/19 tests pass
 
 FSM invariants enforced:
+
 - `closed → triage` restricted to `system_admin` only
 - Invalid transitions return 409
 - SLA breach surfaces as warnings
@@ -178,12 +193,12 @@ Headers propagated: `X-Governance-Correlation`, `X-Governance-Trace`
 
 The following evidence items require **live environment confirmation** before expanding beyond the controlled pilot:
 
-| Item | Command / Action | Where to store |
-|---|---|---|
-| Prod URL smoke test | `curl https://<pilot-url>/api/health` | `reports/runtime/smoke-test-prod-YYYYMMDD.json` |
-| Prod resource group confirmation | `pnpm exec tsx scripts/proof/ingest-azure-runtime.ts` | `reports/runtime/azure-runtime-latest.json` |
-| Key Vault separation | Azure portal screenshot or CLI output | `reports/runtime/keyvault-separation-YYYYMMDD.txt` |
-| Azure Monitor workbook export | Portal → Workbooks → Export | `reports/runtime/monitor-workbook-YYYYMMDD.json` |
-| Restore drill evidence | Per `docs/union-eyes/dr/restore-drill-runbook.md` | `reports/runtime/restore-drill-YYYYMMDD.md` |
+| Item                             | Command / Action                                      | Where to store                                     |
+| -------------------------------- | ----------------------------------------------------- | -------------------------------------------------- |
+| Prod URL smoke test              | `curl https://<pilot-url>/api/health`                 | `reports/runtime/smoke-test-prod-YYYYMMDD.json`    |
+| Prod resource group confirmation | `pnpm exec tsx scripts/proof/ingest-azure-runtime.ts` | `reports/runtime/azure-runtime-latest.json`        |
+| Key Vault separation             | Azure portal screenshot or CLI output                 | `reports/runtime/keyvault-separation-YYYYMMDD.txt` |
+| Azure Monitor workbook export    | Portal → Workbooks → Export                           | `reports/runtime/monitor-workbook-YYYYMMDD.json`   |
+| Restore drill evidence           | Per `docs/union-eyes/dr/restore-drill-runbook.md`     | `reports/runtime/restore-drill-YYYYMMDD.md`        |
 
-*These are operational proof items, not code items. The code is ready; the env confirmation is pending.*
+_These are operational proof items, not code items. The code is ready; the env confirmation is pending._

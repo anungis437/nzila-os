@@ -1,5 +1,15 @@
 # Pilot Operations Runbook — Union Eyes CUPE Controlled Pilot
 
+> **Temporal status — SUPERSEDED FOR CURRENT POSTURE (added 2026-09-24):** this document is dated
+> 2026-05 and predates the `UE_SAAS_OPERATIONAL_READINESS` gate ruling of 2026-08-31
+> ([`../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md`](../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md))
+> and the Phase 3A runtime findings of 2026-09-01
+> ([`../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md`](../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md)).
+> The current gate reads **`NO_GO — RUNTIME_PROOF_REQUIRED`**. Any `CURRENT`, `GO`, `LOCKED`, or
+> `VERIFIED` marking below describes this document's own state in 2026-05, not the current pilot
+> posture, and must not be quoted as buyer-facing readiness. Body retained unmodified as
+> historical evidence; current posture lives in [`../README.md`](../README.md).
+
 **Status:** CURRENT  
 **Last updated:** 2026-05-14  
 **Source of truth:** This document + `PILOT_SCOPE_LOCK.md`  
@@ -14,14 +24,14 @@ All items must be confirmed before real member data is admitted.
 
 ### Pre-Launch Gates (L-001 to L-006)
 
-| # | Condition | Owner | Status |
-|---|-----------|-------|--------|
-| L-001 | DPA signed by pilot org | Legal / Product | ☐ PENDING |
-| L-002 | Live Azure environment confirmed (Sections A–G of runbook) | SRE | ☐ PENDING |
-| L-003 | Pilot steward accounts created with correct roles | Engineering | ☐ PENDING |
-| L-004 | Pilot org/worksite/member data loaded via onboarding flow | Engineering | ☐ PENDING |
-| L-005 | Emergency escalation contacts confirmed | Product | ☐ PENDING |
-| L-006 | End-of-pilot evidence export tested (dry run) | Engineering | ☐ PENDING |
+| #     | Condition                                                  | Owner           | Status    |
+| ----- | ---------------------------------------------------------- | --------------- | --------- |
+| L-001 | DPA signed by pilot org                                    | Legal / Product | ☐ PENDING |
+| L-002 | Live Azure environment confirmed (Sections A–G of runbook) | SRE             | ☐ PENDING |
+| L-003 | Pilot steward accounts created with correct roles          | Engineering     | ☐ PENDING |
+| L-004 | Pilot org/worksite/member data loaded via onboarding flow  | Engineering     | ☐ PENDING |
+| L-005 | Emergency escalation contacts confirmed                    | Product         | ☐ PENDING |
+| L-006 | End-of-pilot evidence export tested (dry run)              | Engineering     | ☐ PENDING |
 
 ---
 
@@ -59,13 +69,13 @@ All items must be confirmed before real member data is admitted.
 
 ## 3. Roles and Permissions Setup
 
-| Role | Capabilities | Creation method |
-|------|-------------|----------------|
-| `org_admin` | Full org config, user management, reports | Admin console → Org Settings |
-| `steward` | Case intake, case management, evidence upload, worksite queue | Admin console → User Management |
-| `privacy_director` | Audit log access, evidence export, privacy requests | Admin console → User Management |
-| `member` | Case submission, case status view | Self-registration or import |
-| `platform_admin` | Cross-org support access (Nzila team only) | Internal tooling only |
+| Role               | Capabilities                                                  | Creation method                 |
+| ------------------ | ------------------------------------------------------------- | ------------------------------- |
+| `org_admin`        | Full org config, user management, reports                     | Admin console → Org Settings    |
+| `steward`          | Case intake, case management, evidence upload, worksite queue | Admin console → User Management |
+| `privacy_director` | Audit log access, evidence export, privacy requests           | Admin console → User Management |
+| `member`           | Case submission, case status view                             | Self-registration or import     |
+| `platform_admin`   | Cross-org support access (Nzila team only)                    | Internal tooling only           |
 
 All role assignments are logged in the audit trail.
 
@@ -76,25 +86,26 @@ All role assignments are logged in the audit trail.
 ### Tier 1 — Self-Service
 
 Direct pilot users to:
+
 - In-app help and tooltips
 - Pilot user guide (provided at kickoff)
 - FAQ document (delivered separately)
 
 ### Tier 2 — Pilot Contact
 
-| Channel | Response SLA | Coverage |
-|---------|-------------|----------|
-| Pilot Slack channel | 4 hours | Business hours (ET) |
-| Email: pilot-support@nzila.ca | 24 hours | Mon–Fri |
+| Channel                       | Response SLA | Coverage            |
+| ----------------------------- | ------------ | ------------------- |
+| Pilot Slack channel           | 4 hours      | Business hours (ET) |
+| Email: pilot-support@nzila.ca | 24 hours     | Mon–Fri             |
 
 ### Tier 3 — Engineering Escalation
 
-| Trigger | Escalation path |
-|---------|----------------|
-| Data not saving / loss suspected | Engineering Lead → immediate |
-| Authentication failure (org-wide) | SRE → immediate |
-| Evidence export failure | Engineering + SRE → same-day |
-| Suspected cross-org data leak | Security Lead → immediate, incident declared |
+| Trigger                           | Escalation path                              |
+| --------------------------------- | -------------------------------------------- |
+| Data not saving / loss suspected  | Engineering Lead → immediate                 |
+| Authentication failure (org-wide) | SRE → immediate                              |
+| Evidence export failure           | Engineering + SRE → same-day                 |
+| Suspected cross-org data leak     | Security Lead → immediate, incident declared |
 
 ---
 
@@ -102,11 +113,11 @@ Direct pilot users to:
 
 ### Severity Classification
 
-| Severity | Definition | Response time | Example |
-|----------|-----------|---------------|---------|
-| SEV-1 | Data loss, cross-org leak, auth failure | Immediate (< 30 min) | Member data visible to wrong org |
-| SEV-2 | Feature unavailable, evidence export broken | 4 hours | Case creation failing |
-| SEV-3 | Degraded UX, slow load, minor UI bug | Next business day | Dashboard takes 10s to load |
+| Severity | Definition                                  | Response time        | Example                          |
+| -------- | ------------------------------------------- | -------------------- | -------------------------------- |
+| SEV-1    | Data loss, cross-org leak, auth failure     | Immediate (< 30 min) | Member data visible to wrong org |
+| SEV-2    | Feature unavailable, evidence export broken | 4 hours              | Case creation failing            |
+| SEV-3    | Degraded UX, slow load, minor UI bug        | Next business day    | Dashboard takes 10s to load      |
 
 ### Incident Response Steps
 
@@ -156,11 +167,11 @@ The evidence export feature is a primary pilot deliverable.
 
 ## 8. Weekly Review Cadence
 
-| Meeting | Participants | Agenda |
-|---------|-------------|--------|
-| Weekly pilot sync | Pilot org ED + stewards, Nzila Product | Cases processed, issues, feedback |
-| Weekly internal review | Nzila Product + Engineering | Metrics review, incidents, scope adherence |
-| Monthly exec check-in | Pilot org leadership, Nzila founders | Progress vs. success criteria, expansion discussion |
+| Meeting                | Participants                           | Agenda                                              |
+| ---------------------- | -------------------------------------- | --------------------------------------------------- |
+| Weekly pilot sync      | Pilot org ED + stewards, Nzila Product | Cases processed, issues, feedback                   |
+| Weekly internal review | Nzila Product + Engineering            | Metrics review, incidents, scope adherence          |
+| Monthly exec check-in  | Pilot org leadership, Nzila founders   | Progress vs. success criteria, expansion discussion |
 
 ---
 
@@ -183,17 +194,17 @@ The 90-day pilot concludes with a formal assessment against `PILOT_SUCCESS_METRI
 
 Expansion beyond the controlled pilot is CONDITIONAL and requires:
 
-| Gate | Requirement |
-|------|-------------|
-| E-001 | Live Azure evidence complete (all Sections A–G of runbook) |
-| E-002 | Minimum pilot success bars met (see §9 above) |
-| E-003 | Security lead sign-off on live evidence manifest |
-| E-004 | Legal sign-off on any expansion org DPAs |
-| E-005 | Product review of any new modules not in current scope lock |
+| Gate  | Requirement                                                      |
+| ----- | ---------------------------------------------------------------- |
+| E-001 | Live Azure evidence complete (all Sections A–G of runbook)       |
+| E-002 | Minimum pilot success bars met (see §9 above)                    |
+| E-003 | Security lead sign-off on live evidence manifest                 |
+| E-004 | Legal sign-off on any expansion org DPAs                         |
+| E-005 | Product review of any new modules not in current scope lock      |
 | E-006 | SRE capacity confirmation (monitoring, on-call, backup coverage) |
 
 **Do not expand scope without going through this gate.**
 
 ---
 
-*Operations questions: contact Nzila pilot team at pilot-support@nzila.ca*
+_Operations questions: contact Nzila pilot team at pilot-support@nzila.ca_

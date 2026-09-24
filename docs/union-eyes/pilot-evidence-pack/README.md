@@ -1,10 +1,16 @@
 # Union Eyes — Pilot Evidence Pack
 
-> **Status note (2026-08-31):** the `✅ CONTROLLED PILOT — GO` verdict below is dated
+> **Status note (updated 2026-09-24):** the `✅ CONTROLLED PILOT — GO` verdict below is dated
 > 2026-05-14/2026-05-21 and predates the current operational-readiness gate. The current
-> gate, `UE_SAAS_OPERATIONAL_READINESS`, reads **`NO_GO`** as of the 2026-08-31 audit — see
-> [`../reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`](../reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md)
-> and [`../README.md`](../README.md). The evidence artifacts below (CI captures, Azure
+> gate, `UE_SAAS_OPERATIONAL_READINESS`, reads **`NO_GO — RUNTIME_PROOF_REQUIRED`** — see the
+> ruling of record
+> [`../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md`](../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md)
+> (2026-08-31, superseding
+> [`24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md`](../reality-remediation/24_UE_SAAS_OPERATIONAL_READINESS_AUDIT.md)),
+> the open Phase 3A evidence ledger
+> [`../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md`](../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md)
+> (2026-09-01, whose §4 records that database-enforced tenant isolation was absent/bypassed in
+> staging at that time), and [`../README.md`](../README.md). The evidence artifacts below (CI captures, Azure
 > live-capture runbooks, restore-drill records) are retained as historical evidence; the
 > summary "GO" verdict at the top of this page is superseded and should not be quoted as the
 > current pilot posture.
@@ -20,42 +26,42 @@ This directory contains the complete evidence package for the Union Eyes v0.1 co
 
 ## Documents
 
-| Document | Purpose | Status |
-|---|---|---|
-| [BUYER_REVIEW_INDEX.md](./BUYER_REVIEW_INDEX.md) | **Start here** — guided review paths by role | ✅ Complete |
-| [PILOT_READINESS_MEMO.md](./PILOT_READINESS_MEMO.md) | Executive memo — GO/NO-GO decision, conditions | ✅ Complete |
-| [PILOT_SCOPE_LOCK.md](./PILOT_SCOPE_LOCK.md) | Frozen pilot scope — in-scope modules, parameters, freeze process | ✅ Complete |
-| [SECURITY_BUYER_PACK.md](./SECURITY_BUYER_PACK.md) | CISO-facing security controls pack | ✅ Complete (v2.0) |
-| [CI_GOVERNANCE_EVIDENCE.md](./CI_GOVERNANCE_EVIDENCE.md) | CI gate captures — typecheck 0 errors, DB guard 0 violations | ✅ Complete |
-| [RUNTIME_EVIDENCE_PACK.md](./RUNTIME_EVIDENCE_PACK.md) | Runtime evidence — code-verified + live Azure VERIFIED 2026-05-21 | ✅ Section A + Section B |
-| [LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](./LIVE_EVIDENCE_CAPTURE_RUNBOOK.md) | Exact `az` CLI commands for Azure proof (executed 2026-05-20) | ✅ Executed |
-| [ORG_ISOLATION_CONTROL_MAP.md](./ORG_ISOLATION_CONTROL_MAP.md) | 9 org-isolation controls — code locations, tests, residual risks | ✅ Complete |
-| [READINESS_COMMANDS.md](./READINESS_COMMANDS.md) | Canonical readiness gate commands with expected outputs | ✅ Complete |
-| [PILOT_OPERATIONS_RUNBOOK.md](./PILOT_OPERATIONS_RUNBOOK.md) | Kickoff, onboarding, support, incident, expansion gate | ✅ Complete |
-| [PILOT_SUCCESS_METRICS.md](./PILOT_SUCCESS_METRICS.md) | 90-day success criteria and expansion thresholds | ✅ Complete |
-| [INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md](./INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md) | Technical moat, risk register, valuation implications | ✅ Complete |
+| Document                                                                             | Purpose                                                           | Status                   |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------------------------ |
+| [BUYER_REVIEW_INDEX.md](./BUYER_REVIEW_INDEX.md)                                     | **Start here** — guided review paths by role                      | ✅ Complete              |
+| [PILOT_READINESS_MEMO.md](./PILOT_READINESS_MEMO.md)                                 | Executive memo — GO/NO-GO decision, conditions                    | ✅ Complete              |
+| [PILOT_SCOPE_LOCK.md](./PILOT_SCOPE_LOCK.md)                                         | Frozen pilot scope — in-scope modules, parameters, freeze process | ✅ Complete              |
+| [SECURITY_BUYER_PACK.md](./SECURITY_BUYER_PACK.md)                                   | CISO-facing security controls pack                                | ✅ Complete (v2.0)       |
+| [CI_GOVERNANCE_EVIDENCE.md](./CI_GOVERNANCE_EVIDENCE.md)                             | CI gate captures — typecheck 0 errors, DB guard 0 violations      | ✅ Complete              |
+| [RUNTIME_EVIDENCE_PACK.md](./RUNTIME_EVIDENCE_PACK.md)                               | Runtime evidence — code-verified + live Azure VERIFIED 2026-05-21 | ✅ Section A + Section B |
+| [LIVE_EVIDENCE_CAPTURE_RUNBOOK.md](./LIVE_EVIDENCE_CAPTURE_RUNBOOK.md)               | Exact `az` CLI commands for Azure proof (executed 2026-05-20)     | ✅ Executed              |
+| [ORG_ISOLATION_CONTROL_MAP.md](./ORG_ISOLATION_CONTROL_MAP.md)                       | 9 org-isolation controls — code locations, tests, residual risks  | ✅ Complete              |
+| [READINESS_COMMANDS.md](./READINESS_COMMANDS.md)                                     | Canonical readiness gate commands with expected outputs           | ✅ Complete              |
+| [PILOT_OPERATIONS_RUNBOOK.md](./PILOT_OPERATIONS_RUNBOOK.md)                         | Kickoff, onboarding, support, incident, expansion gate            | ✅ Complete              |
+| [PILOT_SUCCESS_METRICS.md](./PILOT_SUCCESS_METRICS.md)                               | 90-day success criteria and expansion thresholds                  | ✅ Complete              |
+| [INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md](./INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md) | Technical moat, risk register, valuation implications             | ✅ Complete              |
 
 ---
 
 ## Quick Summary
 
-| Question | Answer |
-|---|---|
-| Is Union Eyes pilot-safe? | **Yes** — controlled pilot, 1 org, signed DPA required |
-| Any CISO-level blockers? | **No** — EXC-001 resolved, RLS fail-closed, 0 raw-db imports, strict TS, live Azure verified |
+| Question                             | Answer                                                                                                                                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Is Union Eyes pilot-safe?            | **Yes** — controlled pilot, 1 org, signed DPA required                                                                                                                                                                                            |
+| Any CISO-level blockers?             | **No** — EXC-001 resolved, RLS fail-closed, 0 raw-db imports, strict TS, live Azure verified                                                                                                                                                      |
 | What's pending for broad production? | DPA counter-signature + SOC 2 / pen-test scheduling (commercial/process — live Azure inventory verified 2026-05-21; **live PITR restore drill executed and verified 2026-05-21** — see `reports/runtime/live-captures/2026-05-20/restore-drill/`) |
-| Data residency compliant? | **Yes** — Azure Canada Central verified live 2026-05-21 |
-| Can buyers review today? | **Yes** — direct them to BUYER_REVIEW_INDEX.md |
+| Data residency compliant?            | **Yes** — Azure Canada Central verified live 2026-05-21                                                                                                                                                                                           |
+| Can buyers review today?             | **Yes** — direct them to BUYER_REVIEW_INDEX.md                                                                                                                                                                                                    |
 
 ---
 
 ## Three-Layer Runtime Status
 
-| Layer | State | Source |
-|-------|-------|--------|
-| Code/config posture | ✅ HEALTHY | `reports/runtime/platform-runtime-truth-latest.json` |
-| Live operational proof | ✅ VERIFIED 2026-05-21 | `reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json` |
-| Production expansion | ✅ GO 2026-05-21 | Live PITR restore drill verified (RESTORE-DRILL-2026-05-20-001); remaining items are commercial — see `restore-drill/restore-drill-manifest.json` |
+| Layer                  | State                  | Source                                                                                                                                            |
+| ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code/config posture    | ✅ HEALTHY             | `reports/runtime/platform-runtime-truth-latest.json`                                                                                              |
+| Live operational proof | ✅ VERIFIED 2026-05-21 | `reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json`                                                                 |
+| Production expansion   | ✅ GO 2026-05-21       | Live PITR restore drill verified (RESTORE-DRILL-2026-05-20-001); remaining items are commercial — see `restore-drill/restore-drill-manifest.json` |
 
 ---
 
@@ -74,4 +80,3 @@ pnpm readiness:union-eyes
 ```
 
 Runs: TypeScript check, DB import guard, Union Eyes tests, runtime truth JSON parse.
-
