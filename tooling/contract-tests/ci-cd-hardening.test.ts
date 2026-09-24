@@ -136,4 +136,15 @@ describe('CI-005: GitOps deploy avoids documentation and Union Eyes churn', () =
       /app:\s*\[[^\]]*\bunion-eyes\b[^\]]*\]/,
     )
   })
+
+  it('passes Container Apps environment variables as distinct CLI arguments', () => {
+    const workflowPath = join(ROOT, '.github', 'workflows', 'gitops-deploy.yml')
+    const src = readSafe(workflowPath)
+
+    expect(src).toContain('ENV_VARS=(')
+    expect(src).toContain('"NODE_ENV=production"')
+    expect(src).toContain('"NEXT_PUBLIC_APP_ENV=${ENV}"')
+    expect(src).toContain('--set-env-vars "${ENV_VARS[@]}"')
+    expect(src).not.toContain('ENV_VARS="NODE_ENV=production NEXT_PUBLIC_APP_ENV=${ENV}"')
+  })
 })

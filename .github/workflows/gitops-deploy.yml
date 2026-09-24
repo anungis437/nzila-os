@@ -468,14 +468,17 @@ jobs:
             echo "Updating $CA_NAME → $IMAGE ..."
 
             # Build runtime env var overrides (upserted, not replacing existing secret refs)
-            ENV_VARS="NODE_ENV=production NEXT_PUBLIC_APP_ENV=${ENV}"
+            ENV_VARS=(
+              "NODE_ENV=production"
+              "NEXT_PUBLIC_APP_ENV=${ENV}"
+            )
 
             # union-eyes is owned by auto-promote-union-eyes.yml — do not handle here.
             az containerapp update \
               --name "$CA_NAME" \
               --resource-group "$RG" \
               --image "$IMAGE" \
-              --set-env-vars "$ENV_VARS" \
+              --set-env-vars "${ENV_VARS[@]}" \
               --output none 2>&1 || FAILED+=("$APP")
 
             if ! printf '%s\n' "${FAILED[@]}" | grep -Fxq "$APP"; then
