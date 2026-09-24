@@ -1,0 +1,114 @@
+{
+  "label": "FICTIONAL — NOT real OMHRA",
+  "disclaimer": "Synthetic chronology for Leadership Transition / Institutional Memory pattern tests. No real persons, complaints, or board decisions.",
+  "pattern_id": "leadership-transition-institutional-memory",
+  "example_first_case": "municipal_hr_association_style_transition",
+  "org_id": "00000000-1111-4000-8000-0000000000aa",
+  "workspace_id": "00000000-2222-4000-8000-0000000000bb",
+  "roles": {
+    "outgoing_executive": "actor-outgoing-ed",
+    "incoming_executive": "actor-incoming-ed",
+    "ed_admin": "actor-ed-admin",
+    "board_member": "actor-board-chair"
+  },
+  "timeline": [
+    {
+      "id": "EVT-2022-01",
+      "date": "2022-03-15",
+      "summary": "FICTIONAL: Association publishes strategic plan emphasizing member service continuity.",
+      "evidence_item_id": "ev-public-plan-2022",
+      "source_class": "public_governance",
+      "authorization_level": "public",
+      "incoming_executive_default_access": true
+    },
+    {
+      "id": "EVT-2023-02",
+      "date": "2023-06-01",
+      "summary": "FICTIONAL: Board asks staff to document succession criteria for ED role (authorized_only pack).",
+      "evidence_item_id": "ev-board-succession-criteria",
+      "source_class": "board_authorized",
+      "authorization_level": "authorized_only",
+      "incoming_executive_default_access": false
+    },
+    {
+      "id": "EVT-2024-03",
+      "date": "2024-01-20",
+      "summary": "FICTIONAL: Outgoing ED announces planned retirement effective 2025-Q2 (internal continuity brief).",
+      "evidence_item_id": "ev-internal-retirement-announce",
+      "source_class": "internal_continuity",
+      "authorization_level": "internal",
+      "incoming_executive_default_access": true
+    },
+    {
+      "id": "EVT-2024-04",
+      "date": "2024-09-10",
+      "summary": "FICTIONAL: Shortlist comparison — Option A (external) vs Option B (internal continuity). Public summary only states a process is underway.",
+      "evidence_item_id": "ev-admin-process-notice",
+      "source_class": "administrative_ops",
+      "authorization_level": "administrative",
+      "incoming_executive_default_access": true
+    },
+    {
+      "id": "EVT-2024-05",
+      "date": "2024-09-12",
+      "summary": "FICTIONAL RESTRICTED: Why choose B — board interview pack cites Option B's deeper institutional memory on member program delivery and lower transition risk to conference operations. NOT for incoming executive without grant.",
+      "evidence_item_id": "ev-sensitive-why-b",
+      "source_class": "sensitive_hr_adjacent",
+      "authorization_level": "sensitive",
+      "incoming_executive_default_access": false,
+      "answers": {
+        "why_choose_b": "FICTIONAL: Option B retained tacit knowledge of member conference logistics and municipal HR network relationships built 2019–2024.",
+        "what_changed": "FICTIONAL: 2023 membership model change increased dependency on continuity of conference and advocacy calendars.",
+        "what_unresolved": "FICTIONAL: Funding envelope for 2026 advocacy still unconfirmed; owner = board finance committee."
+      }
+    },
+    {
+      "id": "EVT-2025-06",
+      "date": "2025-02-01",
+      "summary": "FICTIONAL EXCLUDED: Active workplace complaint file touching a shortlisted party — solicitor-client / excluded. Incoming executive must not access.",
+      "evidence_item_id": "ev-excluded-complaint",
+      "source_class": "excluded_complaint_legal",
+      "authorization_level": "excluded",
+      "incoming_executive_default_access": false,
+      "excerpt_for_leak_tests_only": "FICTIONAL: Unresolved complaint narrative must never enter incoming synthesis context."
+    },
+    {
+      "id": "EVT-2025-07",
+      "date": "2025-05-15",
+      "summary": "FICTIONAL: Board records human decision — appoint Option B; rationale references only authorized_only + internal evidence in the decision record envelope.",
+      "evidence_item_id": "ev-decision-appoint-b",
+      "source_class": "board_authorized",
+      "authorization_level": "authorized_only",
+      "incoming_executive_default_access": false,
+      "decision_record": {
+        "decision": "FICTIONAL: Appoint candidate B as incoming ED effective 2025-07-01.",
+        "referenced_evidence_item_ids": ["ev-board-succession-criteria", "ev-internal-retirement-announce"],
+        "human_reviewer_role": "board_member",
+        "unresolved_carried_forward": ["2026 advocacy funding envelope"]
+      }
+    },
+    {
+      "id": "EVT-2026-08",
+      "date": "2026-01-10",
+      "summary": "FICTIONAL: Incoming ED onboarding checklist (internal) — excludes sensitive/excluded packs unless grants issued.",
+      "evidence_item_id": "ev-internal-onboarding-checklist",
+      "source_class": "internal_continuity",
+      "authorization_level": "internal",
+      "incoming_executive_default_access": true
+    }
+  ],
+  "synthesis_safety_expectations": {
+    "incoming_executive_without_grants_may_see": [
+      "ev-public-plan-2022",
+      "ev-internal-retirement-announce",
+      "ev-admin-process-notice",
+      "ev-internal-onboarding-checklist"
+    ],
+    "incoming_executive_without_grants_must_not_see": [
+      "ev-board-succession-criteria",
+      "ev-sensitive-why-b",
+      "ev-excluded-complaint",
+      "ev-decision-appoint-b"
+    ]
+  }
+}

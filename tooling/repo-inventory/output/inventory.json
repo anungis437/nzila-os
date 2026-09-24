@@ -5,7 +5,7 @@
   "workspacePackageCount": 258,
   "workflowCount": 54,
   "contractTestCount": 283,
-  "tsTestFileCount": 2663,
+  "tsTestFileCount": 2668,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -542,7 +542,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 183
+      "codeFileCount": 187
     },
     {
       "name": "test-scaffold-gp",

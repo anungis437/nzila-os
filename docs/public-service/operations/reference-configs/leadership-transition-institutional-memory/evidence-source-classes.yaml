@@ -1,0 +1,53 @@
+# FICTIONAL / REFERENCE ONLY — evidence source classes for leadership transition
+schema_version: 1
+pattern_id: leadership-transition-institutional-memory
+
+# Maps CLEAR-style source classes → default SAGE authorization_level + handling.
+classes:
+  - id: public_governance
+    label: Public governance artifacts
+    examples: [published annual report, public AGM minutes, public strategic plan]
+    default_authorization_level: public
+    contains_personal_information_default: false
+
+  - id: administrative_ops
+    label: Administrative / operating records
+    examples: [org charts, service catalogues, approved SOPs]
+    default_authorization_level: administrative
+    contains_personal_information_default: false
+
+  - id: internal_continuity
+    label: Internal continuity briefs
+    examples: [handover notes labeled internal, program dependency lists]
+    default_authorization_level: internal
+    contains_personal_information_default: false
+
+  - id: board_authorized
+    label: Board-authorized transition materials
+    examples: [board-approved succession criteria, authorized transition checklist]
+    default_authorization_level: authorized_only
+    contains_personal_information_default: false
+    requires_explicit_grant: true
+
+  - id: sensitive_hr_adjacent
+    label: Sensitive HR-adjacent (non-adjudicative)
+    examples: [confidential candidate comparison notes, restricted interview packs]
+    default_authorization_level: sensitive
+    contains_personal_information_default: true
+    requires_explicit_grant: true
+    notes: Not labour adjudication; still highly restricted.
+
+  - id: excluded_complaint_legal
+    label: Excluded complaint / legal hold / privileged
+    examples: [active complaint files, solicitor-client material]
+    default_authorization_level: excluded
+    contains_personal_information_default: true
+    requires_explicit_grant: true
+    default_excluded_from_external_review: true
+    notes: Incoming executive default = no access.
+
+handling_rules:
+  - Incoming executive sees public/administrative/internal by membership+role only.
+  - authorized_only / sensitive / excluded require explicit non-revoked grants.
+  - Synthesis/retrieval MUST run authorization-before-context (@nzila/sage-core synthesis-context).
+  - Decision records inherit most-restrictive referenced evidence authorization.
