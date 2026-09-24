@@ -10,7 +10,6 @@
 > `UE_SAAS_OPERATIONAL_READINESS = NO_GO — RUNTIME_PROOF_REQUIRED`. Dispositions recorded below
 > are historical and do not establish current readiness.
 
-
 **Baseline**: `origin/main @ 828239787` (Phase 1 merged, all tests passing)
 
 **Working Branch**: `perf/gha-phase-2-ue-product-completeness`
@@ -20,6 +19,7 @@
 **Audit Start Date**: 2026-08-29
 
 **Audit Objective**: Close all release-critical Union Eyes product gaps into one of five final dispositions:
+
 - `CLOSED_AND_PROVEN`
 - `REAL_GAP` (requires remediation)
 - `ACCEPTED_OPERATING_LIMITATION`
@@ -64,7 +64,8 @@
 
 **Status**: `CLOSED_AND_PROVEN`
 **Disposition**: `CLOSED_AND_PROVEN`
-**Evidence**: 
+**Evidence**:
+
 - Baseline: 16,077 tests PASS on main @ 828239787
 - 18 LIUNA-specific contract tests all pass
 - Phase 1 closure assumptions validated
@@ -81,7 +82,8 @@
 
 **Status**: `AUDIT_REQUIRED`
 **Disposition**: `PENDING_EVIDENCE`
-**Investigation Required**: 
+**Investigation Required**:
+
 - Review `apps/union-eyes/db/schema/domains/` for hash-chain and immutability patterns
 - Examine migration `0062_add_immutable_transition_history.sql` and `0064_add_immutability_triggers.sql`
 - Validate cryptographic constraints on audit tables
@@ -100,6 +102,7 @@
 **Status**: `AUDIT_REQUIRED`
 **Disposition**: `PENDING_COVERAGE_VALIDATION`
 **Investigation Required**:
+
 - What observability tests currently pass?
 - Is APM/telemetry implemented for Union Eyes?
 - What is the scope of observable events?
@@ -118,6 +121,7 @@
 **Status**: `AUDIT_REQUIRED`
 **Disposition**: `PENDING_ENFORCEMENT_VALIDATION`
 **Investigation Required**:
+
 - How is access-review enforcement currently implemented?
 - Is there an operator-triggered access-review workflow?
 - Are RLS policies enforced at database level?
@@ -136,12 +140,14 @@
 **Status**: `CLOSED_AND_PROVEN` (regression corrected 2026-08-30, see #715)
 **Disposition**: `CLOSED_AND_PROVEN`
 **Implementation Complete (member status enforcement only)**:
+
 - Gate 13 (background job cancellation) claimed implemented & validated on 2026-08-29, but `financial-service` did not typecheck against `main` (24 TS errors) — fixed by [#715](https://github.com/anungis437/nzila-os/pull/715)
 - Member status enforcement: Auth middleware fail-closed validation + event-driven session/case access revocation
 - Authentication/offboarding enforcement: Both synchronous (auth layer) and asynchronous (event listener) paths implemented
 - Commits: `af983b3c4` (Gate 13), `d446311f1` (regression fix, #715)
 
 **Evidence**:
+
 - Gate 13 workstream: 5 financial jobs (Payroll, Benefits, Expenses, TimekeepingAdvance, ComplianceTraining) with idempotent cancellation, safe-point guards, terminal handlers
 - Member status enforcement: auth-middleware.ts validateMemberStatus() fail-closed + pilot-event-listeners.ts member.status_changed handler for session/access revocation
 - Member status mutation: route.ts PUT handler emits member.status_changed event with userId/organizationId/status context
@@ -161,6 +167,7 @@
 **Status**: `CLOSED_AND_PROVEN` (regression corrected 2026-08-30, see #715)
 **Disposition**: `CLOSED_AND_PROVEN` — Phase-2 engineering-domain scope only (see note in Summary Overview above; the stricter LIUNA-facing Gate 13 bar is separate and still open)
 **Regression found post-merge (2026-08-29) and fixed (2026-08-30, #715)**:
+
 - Added the three persistence tables `JobCancellationService` always assumed (`ue_governance_job_execution_state`, `ue_governance_job_cancellation_request`, `ue_governance_job_cancellation_audit_event`) plus a hand-authored migration and an audit-immutability trigger
 - Replaced the mismatched positional-arg API (`isJobCancelled`/`completeJob`/`failJob`/`cancelJob`/`getExecutionState`) with a single `{ executionStateId, organizationId, ... }` config object, eliminating a real argument-transposition bug in `stipend-processing-workflow.ts`
 - Fixed a variable-scoping bug in `payment-collection-workflow.ts` and a broken 6-arg `startJobExecution` call in `stipend-processing-workflow.ts`
@@ -169,24 +176,28 @@
 - Commits: `af983b3c4` (original Gate 13 implementation), `d446311f1` (regression fix, #715)
 
 **What this closes (Phase-2 engineering-domain scope)**:
-  - Execution-state lifecycle (create/complete/fail/cancel) is schema-backed, type-correct, and unit-test-proven
-  - Organization-boundary isolation is proven on every state-transition query
-  - Audit events are persisted (append-only, immutability-trigger-enforced) for every lifecycle transition
-  - Repeated cancellation requests are idempotent
+
+- Execution-state lifecycle (create/complete/fail/cancel) is schema-backed, type-correct, and unit-test-proven
+- Organization-boundary isolation is proven on every state-transition query
+- Audit events are persisted (append-only, immutability-trigger-enforced) for every lifecycle transition
+- Repeated cancellation requests are idempotent
 
 **What remains open (LIUNA-specific `LIUNA_GATE_13_BACKGROUND_JOB_AND_PROVIDER_ARTIFACT_CANCELLATION`, see [27-gate-13-background-job-provider-artifact-cancellation-proof.md](docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/27-gate-13-background-job-provider-artifact-cancellation-proof.md))**:
-  - Re-dispatch prevention: `jobRunId` is freshly generated per invocation (uuidv4), not derived from the computed `idempotencyKey`, so a cancelled job's *type* can still be re-scheduled on the next cron tick under a new run id
-  - Reconciliation pass: no scheduled job scans for executions whose owning identity/membership/authorization context has since become invalid
-  - Operator escalation runbook for provider-side residuals (SAS URLs, external email/SMS, IdP tokens): documented as prose limitations only, not a standalone runbook artifact
-  - Contract-test-level (not just unit-test-level) pinning of the scoped Gate 13 assertions
+
+- Re-dispatch prevention: `jobRunId` is freshly generated per invocation (uuidv4), not derived from the computed `idempotencyKey`, so a cancelled job's _type_ can still be re-scheduled on the next cron tick under a new run id
+- Reconciliation pass: no scheduled job scans for executions whose owning identity/membership/authorization context has since become invalid
+- Operator escalation runbook for provider-side residuals (SAS URLs, external email/SMS, IdP tokens): documented as prose limitations only, not a standalone runbook artifact
+- Contract-test-level (not just unit-test-level) pinning of the scoped Gate 13 assertions
 
 **Out-of-Scope (ACCEPTED OPERATING LIMITATIONS, unchanged)**:
-  - Automatic provider-side artifact invalidation: Provider APIs do not expose cancellation; must be manual
-  - Instant IdP token revocation: IdP token invalidation has inherent latency (provider-controlled)
-  - Browser cache clearing: Cannot be guaranteed (client-side cache outside application control)
-  - SAS recall / cross-tenant cleanup: Storage provider does not expose revocation APIs
+
+- Automatic provider-side artifact invalidation: Provider APIs do not expose cancellation; must be manual
+- Instant IdP token revocation: IdP token invalidation has inherent latency (provider-controlled)
+- Browser cache clearing: Cannot be guaranteed (client-side cache outside application control)
+- SAS recall / cross-tenant cleanup: Storage provider does not expose revocation APIs
 
 **Test Evidence**:
+
 - `financial-service` unit tests: 551/551 passing (29/29 files)
 - Focused Gate 13 proof suite: 9/9 passing
 - Contract tests referencing financial-service (control-plane-authority, db-boundary, governance-no-bypass, revenue-enforcement, ue-no-raw-db): 338/338 passing
@@ -204,6 +215,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - FSM enforcement: Grievance.LIFECYCLE_TRANSITIONS in `grievance-lifecycle.ts` enforces legal state transitions at application layer
 - Immutable transitions: Database trigger `grievance_transitions_immutability_guard` (migration 0064) prevents transition record modification post-creation
 - Terminal state enforcement: `terminal_transitions` table marks RESOLVED/DISMISSED as terminal; `is_terminal_state()` function blocks further transitions
@@ -212,6 +224,7 @@
 - Idempotency: Multiple transition attempts to same terminal state idempotent (no-op INSERT pattern)
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS including `test/grievance-lifecycle-*.test.ts` (state machine coverage)
 - No failures in grievance pathway tests
 - Case assignment survival proven in integration tests
@@ -229,6 +242,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Hierarchical RLS policies: `CREATE_ORG_RLS_POLICY()` function in migration 0074 enforces row-level access control at SELECT/INSERT/UPDATE/DELETE time
 - Database-level enforcement: RLS policies applied at table level; no application-level checks can bypass database constraints
 - Multi-tenant boundary validation: User queries filtered by `current_user_org_id` context variable; cross-tenant data access returns 0 rows (proven by contract tests)
@@ -236,6 +250,7 @@
 - Runtime proof: Contract tests in `test/rls-*.test.ts` validate SELECT, INSERT, UPDATE deny policies across tenant boundaries
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS including `test/rls-isolation-*.test.ts` (multi-tenant boundary coverage)
 - Contract tests PASS: User A cannot see User B's cases when in different orgs
 - No failures in cross-tenant test suite
@@ -253,6 +268,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Export cryptographic signing: Evidence exports signed with PKCS#7 envelope; certificates issued by internal PKI chain (verified in export-service.ts)
 - Export audit trail immutability: All export events logged to audit_events table with `operation='evidence_export'`, `user_id`, `timestamp`, exported file manifest; audit table protected by database immutability trigger
 - Staff-scoped export: `evidenceExportService.exportForUser()` filters by `userId`, `organizationId` context; cross-org export denied at middleware layer
@@ -260,6 +276,7 @@
 - Cryptographic validation: SHA-256 hashes with RSA-4096 cert chain; validation function `validateExportSignature()` in libs/crypto.ts
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS including `test/evidence-export-*.test.ts` (signature validation coverage)
 - Contract tests PASS: Export signatures validate correctly; tampering detected
 - No failures in export pathway tests
@@ -277,6 +294,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - At-rest encryption: Azure Storage Accounts configured with AES-256-GCM encryption (verified via Azure SDK properties)
 - Encryption key management: Keys stored in Azure Key Vault with automated rotation every 90 days; Key Vault access via managed identity (system-assigned on Container Apps)
 - Key rotation implementation: Automated rotation via Azure Key Management service; decryption automatically uses current key version
@@ -285,6 +303,7 @@
 - Encryption validation: Blobs retrieved from storage automatically decrypted at application layer via `decrypt()` function (libs/crypto.ts)
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS including `test/storage-encryption-*.test.ts` (encryption/decryption coverage)
 - No failures in storage pathway tests
 - Integration tests verify: plaintext never written to storage; blobs always encrypted
@@ -302,6 +321,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Database-level immutability: `audit_log_immutability_guard()` trigger (migration 0064) REJECTS all UPDATE/DELETE operations on audit_logs, grievance_transitions, case_audit_events tables
 - Trigger enforcement: PostgreSQL trigger functions called before any mutation attempt; mutations blocked at database layer (not just application logic)
 - Append-only pattern: Only INSERT allowed on audit tables; audit_events table has no UPDATE/DELETE permissions granted in role definitions
@@ -310,6 +330,7 @@
 - Baseline regression suite: 16,077 tests PASS including `test/audit-integrity-*.test.ts` (hash-chain coverage)
 
 **Test Evidence**:
+
 - Hash-chain tests PASS: Sequential audit events produce valid chain; tampering detection works
 - Immutability tests PASS: Trigger rejection verified for UPDATE/DELETE attempts
 - No failures in audit pathway tests
@@ -327,6 +348,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Reconciliation service: `ReconciliationService` in `apps/union-eyes/services/reconciliation-service.ts` provides `importCases()`, `reconcileConflicts()`, `validateDataIntegrity()`
 - Conflict detection: Service implements deterministic conflict matching: (case_number + organization_id + created_date) comparison; duplicate detection returns conflict list
 - Conflict resolution: `resolveConflict()` implements user-provided merge strategy (KEEP_SOURCE, KEEP_TARGET, MERGE_FIELDS); resolution idempotent (operation IDs prevent re-application)
@@ -335,6 +357,7 @@
 - Import validation: Pre-import checks verify: schema compliance, foreign key validity, RLS context correctness
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS including `test/import-reconciliation-*.test.ts` (conflict detection and resolution coverage)
 - Conflict resolution tests PASS: Merge strategies work correctly; re-applying same import idempotent
 - No failures in import pathway tests
@@ -352,6 +375,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Backup mechanism: Azure Database for PostgreSQL with geo-redundant backup (PITR enabled, 30-day retention policy)
 - RTO validation: Restore drill executed 2026-04-24T14:30:00Z; measured RTO ~4 minutes (database back online, queries responding)
 - RPO validation: PITR guarantees RPO < 1 minute (continuous transaction log backup)
@@ -361,6 +385,7 @@
 - Drill evidence: Drill timings preserved: backup size 8.3 GB, restore duration 4m23s, verification duration 42s
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS (validates database schema and referential integrity)
 - Backup restore drill PASS: 2026-04-24, all smoke tests passed
 - No failures in backup/restore pathway
@@ -378,6 +403,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Rollback mechanism: Azure Container Apps revision activation + traffic switching via `az containerapp update`
 - Automation: Rollback is manual (on-call decision) but single-command execution; documented in ROLLBACK_VALIDATION.md (lines 23-103)
 - Rollback drill: Executed 2026-05-17T18:45:00Z; measured rollback duration ~23 seconds (revision activation + traffic switch complete)
@@ -387,6 +413,7 @@
 - Testing: Rollback procedure tested in staging environment; documented in CI (GitHub Actions workflow runs available)
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS (validates application layer logic)
 - Rollback drill PASS: 2026-05-17, rollback completed in 23s, health probes passed
 - No failures in rollback pathway
@@ -404,6 +431,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Deployment architecture: GitOps-driven (git commit SHA tags container image); no manual deployments; automatic promotion via GitHub Actions
 - Deployment stages: local build (GitHub Actions) → Azure Container Registry push → staging deploy (health-gate) → production deploy (manual approval gate)
 - Pre-deploy validation: Typecheck, lint, tests, migration safety all run before deployment (configured in gh-actions/ci.yml)
@@ -414,6 +442,7 @@
 - Runbook validation: Procedure has been walked through in staging; deployment cycle time measured and documented
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS (run pre-deploy, gates push to registry)
 - Pre-deploy validation: Typecheck (3 packages, 34.618s), lint, test suite all passing
 - Deployment drills: Staging and production deployments completed successfully per GitHub Actions logs
@@ -431,6 +460,7 @@
 **Status**: `AUDIT_COMPLETE`
 **Disposition**: `CLOSED_AND_PROVEN`
 **Evidence**:
+
 - Legal hold mechanism: When matter placed on legal hold, `legal_hold.status='ACTIVE'` set; triggers cascade to all related documents via matter_id foreign key
 - Hold scope: Legal hold applies to: matter_documents (join), grievance_documents (join), evidence_items (join), audit_logs (immutable already, hold is declarative)
 - Hold enforcement: Document mutation guard (Domain 9) prevents UPDATE/DELETE on held documents; query filter WHERE legal_hold_id IS NULL OR legal_hold.status != 'ACTIVE' blocks direct document updates
@@ -440,6 +470,7 @@
 - Audit trail: Every hold action logged via Domain 11 audit (immutable); hold lifecycle events captured
 
 **Test Evidence**:
+
 - Baseline regression suite: 16,077 tests PASS including `test/legal-hold-*.test.ts` (hold cascade, mutation guard, release logic)
 - Legal hold tests PASS: Placing hold prevents mutations; releasing hold allows mutations; matter-wide scope validated
 - No failures in legal hold pathway
@@ -454,24 +485,25 @@
 
 ## Gates Status (Phase 1 Inheritance)
 
-| Gate # | Name | Phase 1 Status | Blocks Recording | Blocks Pilot | Phase 2 Action |
-|--------|------|----------------|------------------|--------------|----------------|
-| 1 | LIUNA App Auth Containment | CLOSED_UNDER_RECORDING_TERMS | ❌ No | ❌ No | Inherit/Validate |
-| 2 | LIUNA Notification Containment | CLOSED_UNDER_RECORDING_TERMS | ❌ No | ❌ No | Inherit/Validate |
-| 3A | CLC Sync Determinism | CLOSED_UNDER_RECORDING_TERMS | ❌ No | ❌ No | Inherit/Validate |
-| 3B | Budget/Appropriation Boundary | CLOSED_UNDER_RECORDING_TERMS | ❌ No | ❌ No | Inherit/Validate |
-| 4 | Member ID Universe Alignment | CLOSED | ❌ No | ❌ No | Inherit/Validate |
-| 5 | RLS Org Isolation | CLOSED | ❌ No | ✅ Yes* | Revalidate (area #8) |
-| 6 | Audit Hash-Chain Immutability | CLOSED | ❌ No | ✅ Yes* | Revalidate (area #11) |
-| 7 | Document Signature Chain | CLOSED | ❌ No | ✅ Yes* | Revalidate |
-| 8 | Staff Export Scoping | CLOSED | ❌ No | ✅ Yes* | Revalidate (area #9) |
-| 9 | Member Segment Lifecycle | CLOSED | ❌ No | ✅ Yes* | Revalidate |
-| 10A | Auth Offboarding | CLOSED | ❌ No | ✅ Yes* | Inherit/Validate (area #5) |
-| 10B | Background Token Revocation | CLOSED_WITH_LIMITATION (provider-side limits) | ❌ No | ⚠️ Partial | Inherit/Validate (area #6) |
-| 13 | Background Job Cancellation | **SCOPED_NOT_YET_PROVEN** | ❌ No | 🔴 **YES** | **IMPLEMENT or DEFER** (area #6) |
+| Gate # | Name                           | Phase 1 Status                                | Blocks Recording | Blocks Pilot | Phase 2 Action                   |
+| ------ | ------------------------------ | --------------------------------------------- | ---------------- | ------------ | -------------------------------- |
+| 1      | LIUNA App Auth Containment     | CLOSED_UNDER_RECORDING_TERMS                  | ❌ No            | ❌ No        | Inherit/Validate                 |
+| 2      | LIUNA Notification Containment | CLOSED_UNDER_RECORDING_TERMS                  | ❌ No            | ❌ No        | Inherit/Validate                 |
+| 3A     | CLC Sync Determinism           | CLOSED_UNDER_RECORDING_TERMS                  | ❌ No            | ❌ No        | Inherit/Validate                 |
+| 3B     | Budget/Appropriation Boundary  | CLOSED_UNDER_RECORDING_TERMS                  | ❌ No            | ❌ No        | Inherit/Validate                 |
+| 4      | Member ID Universe Alignment   | CLOSED                                        | ❌ No            | ❌ No        | Inherit/Validate                 |
+| 5      | RLS Org Isolation              | CLOSED                                        | ❌ No            | ✅ Yes\*     | Revalidate (area #8)             |
+| 6      | Audit Hash-Chain Immutability  | CLOSED                                        | ❌ No            | ✅ Yes\*     | Revalidate (area #11)            |
+| 7      | Document Signature Chain       | CLOSED                                        | ❌ No            | ✅ Yes\*     | Revalidate                       |
+| 8      | Staff Export Scoping           | CLOSED                                        | ❌ No            | ✅ Yes\*     | Revalidate (area #9)             |
+| 9      | Member Segment Lifecycle       | CLOSED                                        | ❌ No            | ✅ Yes\*     | Revalidate                       |
+| 10A    | Auth Offboarding               | CLOSED                                        | ❌ No            | ✅ Yes\*     | Inherit/Validate (area #5)       |
+| 10B    | Background Token Revocation    | CLOSED_WITH_LIMITATION (provider-side limits) | ❌ No            | ⚠️ Partial   | Inherit/Validate (area #6)       |
+| 13     | Background Job Cancellation    | **SCOPED_NOT_YET_PROVEN**                     | ❌ No            | 🔴 **YES**   | **IMPLEMENT or DEFER** (area #6) |
 
-**Legend**: 
-- ✅ Yes* = Blocks only if defects found in Phase 2 validation
+**Legend**:
+
+- ✅ Yes\* = Blocks only if defects found in Phase 2 validation
 - ⚠️ Partial = Blocks unless accepted as operating limitation
 
 ---
@@ -509,18 +541,21 @@ Phase 2 is **COMPLETE** when:
 ## Next Phase 2 Actions
 
 **Immediate (Blocking)**:
+
 1. Make Gate 13 implementation vs deferral decision
 2. If implementing: Design background-job cancellation architecture
 3. Complete data-integrity audit (immutability triggers validation)
 4. Revalidate all 13 gates on current main
 
 **Systematic (Audit)**:
+
 1. Code audit for all 16 release-critical areas
 2. Test validation runs
 3. Documentation updates with evidence
 4. Maturity classification review
 
 **Exit Deliverables**:
+
 1. phase2_complete_ledger.md (all findings with disposition + evidence)
 2. Updated maturity classification (union-eyes.maturity.json)
 3. Updated readiness report (08-executive-readiness-report.md)
@@ -534,12 +569,14 @@ Phase 2 is **COMPLETE** when:
 **Gate 13 Current Status**: REAL_GAP (zero implementation anywhere)
 
 **Option A: Implement in Phase 2**
+
 - Scope: Local cancellation, idempotency, reconciliation, runbook, audit capture
 - Timeline: Phase 2 (unknown duration)
 - Tests: Contract tests required per bounded scope
 - Outcome: Gate closes, pilot readiness unblocked
 
 **Option B: Defer as Accepted Operating Limitation**
+
 - Scope: None (no implementation)
 - Timeline: Phase 2 (decision only)
 - Tests: None required
@@ -559,12 +596,14 @@ Phase 2 is **COMPLETE** when:
 **Trigger**: [#713](https://github.com/anungis437/nzila-os/issues/713) — filed after merging an unrelated fix ([#712](https://github.com/anungis437/nzila-os/pull/712)) surfaced that `financial-service` does not typecheck on `main` (24 errors), invalidating the `CLOSED_AND_PROVEN` claim for Domain 5 and Domain 6 (Gate 13).
 
 **Program state**:
+
 - `PHASE_2 = REOPENED_FOR_REGRESSION_CORRECTION` (Domains 5 & 6 only; Domains 1–4, 7–16 remain `CLOSED_AND_PROVEN` and are unaffected)
 - `PHASE_3 = HOLD` — do not resume Phase 3 planning/execution until this addendum is closed
 
 **Merged-main SHA at time of correction start**: `ca6fe3645941359fa22cf06ff0638b15ea33d5f8` (includes #712)
 
 **Closure requirement** (all must hold before Domains 5/6 revert to `CLOSED_AND_PROVEN` and `PHASE_3` reopens):
+
 - `FINANCIAL_SERVICE_TYPECHECK = PASS`
 - `GATE_13_PERSISTENCE = PROVEN` (schema + migration for job execution/cancellation/audit tracking, reviewed via Security Design Review)
 - `GATE_13_WORKFLOW_INTEGRATION = PROVEN` (analytics-processor, arrears-management-workflow, payment-collection-workflow, stipend-processing-workflow all correct against the canonical `JobCancellationService` API)
@@ -573,6 +612,7 @@ Phase 2 is **COMPLETE** when:
 This is an evidence correction to the existing audit, not a rollback of the other 14 domains.
 
 **Closed 2026-08-30** via [#715](https://github.com/anungis437/nzila-os/pull/715) (merge commit `d446311f1f83718ab168d2b4666aacdb7f2bffaf`):
+
 - `FINANCIAL_SERVICE_TYPECHECK = PASS`
 - `GATE_13_PERSISTENCE = PROVEN` (Phase-2 engineering-domain scope: schema/migration/immutability trigger added, unit-test-proven)
 - `GATE_13_WORKFLOW_INTEGRATION = PROVEN` (all 4 workflow files + the previously-correct 5th aligned to the canonical object API)

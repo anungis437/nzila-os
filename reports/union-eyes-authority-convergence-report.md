@@ -1,21 +1,21 @@
 # Union Eyes — Storage Authority Convergence Report
 
-Generated: 2026-09-24T12:45:47.606Z
+Generated: 2026-09-24T13:01:04.397Z
 
 ## Classification counts
 
-| Classification | Count |
-| --- | --- |
-| TENANT_RLS_REQUIRED | 269 |
-| USER_RLS_REQUIRED | 13 |
-| LATENT_UNREACHABLE | 293 |
-| SYSTEM_ONLY | 22 |
-| CONTAINED_NO_AUTHORITY | 137 |
-| PARENT_OWNED_RLS_REQUIRED | 37 |
-| GLOBAL_REFERENCE_DATA | 25 |
-| MIXED_GLOBAL_TENANT_RLS_REQUIRED | 3 |
-| SEPARATE_DATABASE_BOUNDARY | 2 |
-| MULTI_PARTY_RLS_REQUIRED | 4 |
+| Classification                   | Count |
+| -------------------------------- | ----- |
+| TENANT_RLS_REQUIRED              | 269   |
+| USER_RLS_REQUIRED                | 13    |
+| LATENT_UNREACHABLE               | 293   |
+| SYSTEM_ONLY                      | 22    |
+| CONTAINED_NO_AUTHORITY           | 137   |
+| PARENT_OWNED_RLS_REQUIRED        | 37    |
+| GLOBAL_REFERENCE_DATA            | 25    |
+| MIXED_GLOBAL_TENANT_RLS_REQUIRED | 3     |
+| SEPARATE_DATABASE_BOUNDARY       | 2     |
+| MULTI_PARTY_RLS_REQUIRED         | 4     |
 
 ## Authority-model convergence (invocationAuthority / dbExecutionPrincipal / privileges)
 

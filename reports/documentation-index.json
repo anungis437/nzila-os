@@ -1,10 +1,15 @@
 {
-  "generatedAt": "2026-09-24T12:36:20.148Z",
-  "totalDocuments": 1768,
+  "generatedAt": "2026-09-24T12:59:52.712Z",
+  "totalDocuments": 1771,
   "staleDocuments": 0,
   "categories": [
     {
       "category": "CIVIC_OCI_ALIGNMENT.md",
+      "count": 1,
+      "staleCount": 0
+    },
+    {
+      "category": "DOCUMENT_DISPOSITION.md",
       "count": 1,
       "staleCount": 0
     },
@@ -200,7 +205,7 @@
     },
     {
       "category": "readiness",
-      "count": 19,
+      "count": 20,
       "staleCount": 0
     },
     {
@@ -220,7 +225,7 @@
     },
     {
       "category": "union-eyes",
-      "count": 67,
+      "count": 68,
       "staleCount": 0
     },
     {
@@ -6873,6 +6878,12 @@
       "stale": false
     },
     {
+      "path": "docs/DOCUMENT_DISPOSITION.md",
+      "category": "DOCUMENT_DISPOSITION.md",
+      "lastValidated": "2026-09-24",
+      "stale": false
+    },
+    {
       "path": "docs/documentation-index.md",
       "category": "documentation-index.md",
       "lastValidated": "2026-09-24",
@@ -9867,6 +9878,12 @@
       "stale": false
     },
     {
+      "path": "docs/readiness/README.md",
+      "category": "readiness",
+      "lastValidated": "2026-09-24",
+      "stale": false
+    },
+    {
       "path": "docs/readiness/runtime-artifact-identity-evidence.md",
       "category": "readiness",
       "lastValidated": "2026-09-24",
@@ -10738,6 +10755,12 @@
     },
     {
       "path": "docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-09-24",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/reality-remediation/README.md",
       "category": "union-eyes",
       "lastValidated": "2026-09-24",
       "stale": false

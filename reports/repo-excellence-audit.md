@@ -1,23 +1,23 @@
 # Repo Excellence Audit
 
-Generated: 2026-09-24T12:36:21.783Z
+Generated: 2026-09-24T12:59:54.194Z
 
 Overall score: 7.8 / 10
 
 ## Category Scores
 
-| Category | Score |
-| --- | ---: |
-| runtime_proof | 8 |
-| duplication | 8 |
-| script_sprawl | 1.8 |
-| hidden_fragility | 8 |
-| docs_truth | 9 |
-| naming_consistency | 10 |
-| ci_efficiency | 9 |
-| overengineering | 5.9 |
-| dead_assets | 7.9 |
-| ownership | 10 |
+| Category           | Score |
+| ------------------ | ----: |
+| runtime_proof      |     8 |
+| duplication        |     8 |
+| script_sprawl      |   1.8 |
+| hidden_fragility   |     8 |
+| docs_truth         |     9 |
+| naming_consistency |    10 |
+| ci_efficiency      |     9 |
+| overengineering    |   5.9 |
+| dead_assets        |   7.9 |
+| ownership          |    10 |
 
 ## Gate Blockers
 
@@ -35,4 +35,3 @@ Overall score: 7.8 / 10
 - [ci_efficiency] Effective active workflow count is 51 (total 54, emergency/manual 3).
 - [overengineering] Effective workflow surface remains larger than ideal for a disciplined canonical release path.
 - [dead_assets] Active app-specific deployment entry points remain and should be converged into the canonical release path.
-
