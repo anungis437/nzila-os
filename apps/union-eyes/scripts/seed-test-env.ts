@@ -139,8 +139,12 @@ async function seed(): Promise<void> {
       await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
     })
 
-    await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
-    await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
+    await safeCleanup('organization_members', async () => {
+      await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
+    })
+    await safeCleanup('user_management.organization_users', async () => {
+      await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
+    })
     const profilesAvailable = await tableExists('profiles')
     if (profilesAvailable) {
       await safeCleanup('profiles', async () => {
@@ -196,34 +200,9 @@ async function seed(): Promise<void> {
       })),
     )
 
-    await tx
-      .insert(users)
-      .values(
-        usersFixture.map((u) => ({
-          userId: u.userId,
-          email: u.email,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          displayName: `${u.firstName} ${u.lastName}`,
-          isActive: u.status === 'active',
-          isSystemAdmin: false,
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
-      .onConflictDoUpdate({
-        target: users.userId,
-        set: {
-          email: sql`excluded.email`,
-          firstName: sql`excluded.first_name`,
-          lastName: sql`excluded.last_name`,
-          displayName: sql`excluded.display_name`,
-          isActive: sql`excluded.is_active`,
-          isSystemAdmin: false,
-          updatedAt: NOW,
-        },
-      })
-
+    // Domain `users` and packages `authUsers` both map to user_management.users.
+    // Domain schema drifts ahead of the canonical snapshot (e.g. phone_verified_at);
+    // seed only through authUsers which matches the snapshot column set.
     await tx
       .insert(authUsers)
       .values(
@@ -263,20 +242,7 @@ async function seed(): Promise<void> {
         },
       })
 
-    await tx.insert(organizationUsers).values(
-      usersFixture.map((u) => ({
-        organizationId: u.orgId,
-        userId: u.userId,
-        role: u.role,
-        permissions: [],
-        isActive: u.status === 'active',
-        isPrimary: true,
-        joinedAt: NOW,
-        createdAt: NOW,
-        updatedAt: NOW,
-      })),
-    )
-
+    // Same dual-mapping issue as users — prefer authOrganizationUsers only.
     await tx
       .insert(authOrganizationUsers)
       .values(
