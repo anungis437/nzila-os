@@ -124,6 +124,18 @@ jobs:
           mkdir -p "$DUMP_DIR"
 
           # Empty PG15 with vector extension support (matches restore-proof target).
+          # Retry image pull — Docker Hub intermittently returns 502.
+          for attempt in 1 2 3 4 5; do
+            if docker pull pgvector/pgvector:pg15; then
+              break
+            fi
+            echo "docker pull attempt ${attempt} failed; sleeping $((attempt * 5))s"
+            sleep $((attempt * 5))
+            if [ "$attempt" -eq 5 ]; then
+              echo "::error::Failed to pull pgvector/pgvector:pg15 after 5 attempts"
+              exit 1
+            fi
+          done
           docker run --name ci-e2e-postgres             -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e             -p 5432:5432 -d pgvector/pgvector:pg15
           timeout 90 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
 
