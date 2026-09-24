@@ -372,35 +372,30 @@ async function seed(): Promise<void> {
     )
   })
 
-  // Separate transaction for organization_members (may fail due to schema drift)
-  try {
-    await db.transaction(async (tx) => {
-      await tx.insert(organizationMembers).values(
-        usersFixture.map((u) => ({
-          userId: u.userId,
-          // organization_members.organization_id is uuid in the canonical Drizzle
-          // schema; pass the org UUID directly. (The slug variant lives in the
-          // legacy schema-organizations.ts mirror; the canonical schema wins for
-          // seed inserts so the seeded rows resolve under getUserRole().)
-          organizationId: u.orgId,
-          role: u.role,
-          status: u.status,
-          name: `${u.firstName} ${u.lastName}`,
-          email: u.email,
-          metadata: 'metadata' in u ? u.metadata : null,
-          isPrimary: true,
-          joinedAt: NOW,
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
-    })
-  } catch (error) {
-    if (!isMissingColumnError(error)) throw error
-    console.warn(
-      `[ue:seed:test-env] organization_members insert skipped due schema drift: ${describePgError(error)}`,
+  // organization_members is load-bearing for RBAC / role-landing E2E. Soft-skipping
+  // on schema drift previously masked missing platform DDL (everyone fell back to
+  // member). Fail hard so CI surfaces the gap instead of timing out on role-nav.
+  await db.transaction(async (tx) => {
+    await tx.insert(organizationMembers).values(
+      usersFixture.map((u) => ({
+        userId: u.userId,
+        // organization_members.organization_id is uuid in the canonical Drizzle
+        // schema; pass the org UUID directly. (The slug variant lives in the
+        // legacy schema-organizations.ts mirror; the canonical schema wins for
+        // seed inserts so the seeded rows resolve under getUserRole().)
+        organizationId: u.orgId,
+        role: u.role,
+        status: u.status,
+        name: `${u.firstName} ${u.lastName}`,
+        email: u.email,
+        metadata: 'metadata' in u ? u.metadata : null,
+        isPrimary: true,
+        joinedAt: NOW,
+        createdAt: NOW,
+        updatedAt: NOW,
+      })),
     )
-  }
+  })
 
   // Separate transaction for claim_updates (may fail due to schema drift)
   try {

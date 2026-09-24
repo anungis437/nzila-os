@@ -41,7 +41,6 @@ import {
 } from './lib/union-eyes-scoped-migrations.mjs';
 import {
   applyPlatformMigrations as applyPlatformMigrationsShared,
-  baselinePlatformMigrations as baselinePlatformMigrationsShared,
 } from './lib/union-eyes-platform-migrations.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -227,21 +226,21 @@ async function applySqlFile(client, sqlFilePath, label) {
 
 
 async function baselineMigrationsAfterSnapshot(client) {
-  info('Snapshot restored — baselining scoped + platform migration ledgers (no DDL replay).');
+  // Scoped migrations often CREATE objects already present in the canonical
+  // snapshot; stamp their hashes so applyScopedMigrations is a no-op.
+  //
+  // Do NOT baseline PLATFORM_SQL here. Platform migrations are additive and
+  // idempotent (CREATE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS) and exist
+  // specifically to close runtime gaps on reconstituted snapshots (e.g. 0005
+  // organization_members.deleted_at / tenant_id). Baselining them skips DDL
+  // and leaves getUserRole / seed broken (everyone falls back to member).
+  info('Snapshot restored — baselining scoped migration ledger only (platform DDL will apply next).');
   const scoped = await baselineScopedMigrationsShared(client, {
     journalPath: SCOPED_JOURNAL,
     migrationsDir: SCOPED_MIGRATIONS_DIR,
     log: info,
   });
-  let platform = { stamped: 0, stampedTags: [] };
-  if (fs.existsSync(PLATFORM_JOURNAL)) {
-    platform = await baselinePlatformMigrationsShared(client, {
-      journalPath: PLATFORM_JOURNAL,
-      migrationsDir: PLATFORM_MIGRATIONS_DIR,
-      log: info,
-    });
-  }
-  return { scoped, platform };
+  return { scoped, platform: { stamped: 0, stampedTags: [] } };
 }
 
 async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {

@@ -36,7 +36,7 @@ jobs:
     # staging env supplies AZURE_CLIENT_ID/TENANT_ID for OIDC snapshot retrieve
     # (repo-level secrets lack those; staging has no protection reviewers).
     environment: staging
-    timeout-minutes: 45  # union-eyes includes DB migration + seed; other apps finish in ≤5 min
+    timeout-minutes: 60  # union-eyes: snapshot restore + platform DDL + seed + full Playwright; others ≤5 min
     strategy:
       fail-fast: false
       matrix:
