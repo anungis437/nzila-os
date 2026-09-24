@@ -18,9 +18,9 @@ Nzila is a governed multi-product software group with one shared operating engin
 
 ## Proof and buyer trust
 
-- Proof Center: [../proof-center/portfolio-proof-index.md](../proof-center/portfolio-proof-index.md)
-- Buyer packs: [../buyers/union-eyes-buyer-pack.md](../buyers/union-eyes-buyer-pack.md), [../buyers/flow-buyer-pack.md](../buyers/flow-buyer-pack.md)
-- Investor one-pager: [../investor/final-investor-onepager.md](../investor/final-investor-onepager.md)
+- Proof Center: [docs/proof-center/portfolio-proof-index.md](../../../proof-center/portfolio-proof-index.md)
+- Buyer packs: [docs/categories/stakeholders/buyers/union-eyes-buyer-pack.md](../../stakeholders/buyers/union-eyes-buyer-pack.md), [docs/categories/stakeholders/buyers/flow-buyer-pack.md](../../stakeholders/buyers/flow-buyer-pack.md)
+- Investor one-pager: [docs/categories/stakeholders/investor/final-investor-onepager.md](../../stakeholders/investor/final-investor-onepager.md)
 
 ## Platform posture
 

@@ -76,7 +76,7 @@ Runtime governance dashboards and APIs must reflect:
 - The snapshot digest (where applicable) of every environment
   displayed.
 - The TSOSA secret topology of every environment displayed (per
-  [`transitional-shared-secret-topology.md`](../../union-eyes/release/transitional-shared-secret-topology.md)).
+  [`transitional-shared-secret-topology.md`](../../../products-and-market/union-eyes/release/transitional-shared-secret-topology.md)).
 
 These reflections may not be omitted; they make ORM authority and
 operational topology visible at runtime governance level.

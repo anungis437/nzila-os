@@ -167,7 +167,7 @@ CI enforces portfolio-governance, compliance drift, and reliability checks on ev
 - **CI**: 47 GitHub Actions workflows covering governance, security, deployment, and compliance
 - **Monorepo**: pnpm workspaces + Turborepo
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview, [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md) for the decision-infrastructure architecture map, and [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md) for product-to-decision mapping.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview, [docs/categories/platform-and-operations/architecture/ARCHITECTURE_MAP.md](docs/categories/platform-and-operations/architecture/ARCHITECTURE_MAP.md) for the decision-infrastructure architecture map, and [docs/categories/platform-and-operations/architecture/decision-infrastructure-map.md](docs/categories/platform-and-operations/architecture/decision-infrastructure-map.md) for product-to-decision mapping.
 
 ## Audit Guarantees
 
@@ -187,11 +187,11 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview, [docs/archit
 
 | Audience | Location | Contents |
 |----------|----------|----------|
-| **Builders** | [docs/builders/](docs/builders/) | Setup, commands, architecture, contributing |
+| **Builders** | [docs/builders/](docs/categories/stakeholders/builders/) | Setup, commands, architecture, contributing |
 | **Operators** | [docs/ops/](docs/ops/) | Release, incidents, staging, runbooks |
-| **Buyers** | [docs/buyers/](docs/buyers/) | Product packs, security, reliability, pricing |
+| **Buyers** | [docs/buyers/](docs/categories/stakeholders/buyers/) | Product packs, security, reliability, pricing |
 | **Security** | [SECURITY.md](SECURITY.md), [docs/governance/](docs/governance/) | Policies, threat model, vendor assessment |
-| **Investors** | [docs/investor/](docs/investor/) | Growth narrative, moat analysis, revenue scenarios |
+| **Investors** | [docs/investor/](reports/investor/) | Growth narrative, moat analysis, revenue scenarios |
 | **All** | [docs/INDEX.md](docs/INDEX.md) | Complete documentation index |
 
 ## Maturity Signals

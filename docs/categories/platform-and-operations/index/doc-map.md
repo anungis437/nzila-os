@@ -2,7 +2,7 @@
 
 > Every document in the Nzila OS documentation, organized by section.
 >
-> See also: [Glossary](glossary.md) · [Root README](../../README.md) · [ARCHITECTURE.md](../../ARCHITECTURE.md)
+> See also: [Glossary](glossary.md) · [Root README](../../README.md) · [ARCHITECTURE.md](../itsm/ARCHITECTURE.md)
 
 ---
 
@@ -337,8 +337,8 @@ Each app may have its own `docs/` folder. See the app README for links.
 
 | App | Docs | Index |
 |---|---|---|
-| union-eyes | `apps/union-eyes/docs/` (14 files) | [INDEX.md](../../apps/union-eyes/docs/INDEX.md) |
-| flow | `apps/flow/docs/` (38 files) | [INDEX.md](../../apps/flow/docs/INDEX.md) |
+| union-eyes | `apps/union-eyes/docs/` (14 files) | [INDEX.md](../../../../apps/union-eyes/docs/INDEX.md) |
+| flow | `apps/flow/docs/` (38 files) | [INDEX.md](../../../../apps/flow/docs/INDEX.md) |
 | zonga | `apps/zonga/docs/` (10 files) | See app README |
 | cfo | `apps/cfo/docs/` (3 files) | See app README |
 | control-plane | `apps/control-plane/docs/` (4 files) | See app README |

@@ -73,4 +73,4 @@ Marketing surface refactors (homepage copy, hero blocks, trust center, pricing p
 
 ## 8. Authority
 
-Anchored to [UE Operating System Reclassification](ue-operating-system-reclassification.md) and [Procurement & Governance Positioning Refactor](../../nzila-cognition-doctrine/procurement-governance-positioning-refactor.md).
+Anchored to [UE Operating System Reclassification](ue-operating-system-reclassification.md) and [Procurement & Governance Positioning Refactor](../../../historical-archive/archive/iterations/nzila-cognition-doctrine/procurement-governance-positioning-refactor.md).

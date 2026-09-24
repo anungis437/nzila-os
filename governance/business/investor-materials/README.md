@@ -26,7 +26,7 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 | [**One-Pager: UnionEyes**](./one-pager-union-eyes.md) | 🏆 **Flagship** — 4,773 entities, union management platform | Feb 2026 | B2B SaaS, Labor Tech investors |
 | [**One-Pager: ABR Insights**](./one-pager-abr.md) | 🏆 **Flagship** — LMS + Tribunal Database, 9.1/10 production | Feb 2026 | Edtech, Legaltech, Impact investors |
 | [**One-Pager: CORA**](./one-pager-cora.md) | 🏆 **Flagship** — AgTech supply chain, 80+ entities | Feb 2026 | AgTech, Supply Chain investors |
-| [**Executive Summary**](./executive-summary.md) | 2-page business overview | Feb 2026 | First meetings, warm intros |
+| [**Executive Summary**](../../../docs/categories/stakeholders/commercial/executive-summary.md) | 2-page business overview | Feb 2026 | First meetings, warm intros |
 
 ### 📊 Financial Materials
 

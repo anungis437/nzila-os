@@ -86,7 +86,7 @@ UE is now positioned as **the operational infrastructure layer for institutional
 
 Anchored to:
 
-- [Institutional Operational Cognition Doctrine](../../nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md)
-- [Master Maturity Index](../../nzila-maturity-elevation/master-maturity-index.md)
-- [Final Full Maturity Review](../../nzila-final-convergence/final-full-maturity-review.md)
+- [Institutional Operational Cognition Doctrine](../../../historical-archive/archive/iterations/nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md)
+- [Master Maturity Index](../../../historical-archive/archive/iterations/nzila-maturity-elevation/master-maturity-index.md)
+- [Final Full Maturity Review](../../../historical-archive/archive/iterations/nzila-final-convergence/final-full-maturity-review.md)
 - [UE Operating System Reclassification](ue-operating-system-reclassification.md)

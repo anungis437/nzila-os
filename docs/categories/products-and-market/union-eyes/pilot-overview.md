@@ -74,4 +74,4 @@ friction, and feedback before the next decision point.
 
 - [Quick Start](./quick-start.md) — Submit an intake and follow progress
 - [Admin Guide](./admin-guide.md) — Day-to-day administration
-- [Pilot Scope (technical)](../../apps/union-eyes/docs/PILOT_SCOPE.md) — Technical pilot boundaries
+- [Pilot Scope (technical)](../../../../apps/union-eyes/docs/procurement/PILOT_SCOPE.md) — Technical pilot boundaries

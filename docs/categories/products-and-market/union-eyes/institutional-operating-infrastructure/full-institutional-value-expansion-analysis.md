@@ -87,4 +87,4 @@ Doctrine convergence materially increased Union Eyes' enterprise value posture b
 
 ## 13. Authority
 
-Anchored to [Final Full Maturity Review](../../nzila-final-convergence/final-full-maturity-review.md) and [UE Operating System Reclassification](ue-operating-system-reclassification.md).
+Anchored to [Final Full Maturity Review](../../../historical-archive/archive/iterations/nzila-final-convergence/final-full-maturity-review.md) and [UE Operating System Reclassification](ue-operating-system-reclassification.md).

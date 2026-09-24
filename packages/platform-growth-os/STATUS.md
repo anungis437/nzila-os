@@ -62,4 +62,4 @@ explainable, and version-pinned for an honest ML upgrade path.
 
 * No "world-class". No "leverage synergies". The brand-voice check enforces this on stored copy — and the package tests this enforcement.
 * No invented metrics. Every count and every $ in `pnpm growthos:report` is computed from records on disk.
-* No hidden duplication. The audit that produced this package is in [`docs/commercial/GROWTHOS_OVERVIEW.md`](../../docs/commercial/GROWTHOS_OVERVIEW.md).
+* No hidden duplication. The audit that produced this package is in [`docs/commercial/GROWTHOS_OVERVIEW.md`](../../docs/categories/stakeholders/commercial/GROWTHOS_OVERVIEW.md).

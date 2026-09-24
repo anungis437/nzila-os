@@ -27,58 +27,58 @@
 
 | File | Purpose |
 |---|---|
-| [platform/registry/layers.json](../../platform/registry/layers.json) | Layer map with paths, dependency rules, and allowed overrides |
-| [platform/registry/apps.json](../../platform/registry/apps.json) | App registry: tier, owner, domain, capability flags |
-| [platform/registry/platform-registry.json](../../platform/registry/platform-registry.json) | Canonical registry: apps, platform services, shared packages, governance surfaces |
-| [platform/registry/platform-surfaces.json](../../platform/registry/platform-surfaces.json) | Surface capability registry: allowed/forbidden feature classes per surface |
-| [platform/registry/environments.json](../../platform/registry/environments.json) | Environment definitions: development, staging, production |
+| [platform/registry/layers.json](../../../../platform/registry/layers.json) | Layer map with paths, dependency rules, and allowed overrides |
+| [platform/registry/apps.json](../../../../platform/registry/apps.json) | App registry: tier, owner, domain, capability flags |
+| [platform/registry/platform-registry.json](../../../../platform/registry/platform-registry.json) | Canonical registry: apps, platform services, shared packages, governance surfaces |
+| [platform/registry/platform-surfaces.json](../../../../platform/registry/platform-surfaces.json) | Surface capability registry: allowed/forbidden feature classes per surface |
+| [platform/registry/environments.json](../../../../platform/registry/environments.json) | Environment definitions: development, staging, production |
 
 ## Templates
 
 | Template | Purpose |
 |---|---|
-| [templates/architecture-decision-record.md](../../templates/architecture-decision-record.md) | ADR template for platform-vs-app placement decisions |
+| [templates/architecture-decision-record.md](../../../../templates/architecture-decision-record.md) | ADR template for platform-vs-app placement decisions |
 
 ## App Domain Models
 
 | App | Document |
 |---|---|
-| union-eyes | [apps/union-eyes/docs/DOMAIN_MODEL.md](../../apps/union-eyes/docs/DOMAIN_MODEL.md) |
-| flow | [apps/flow/docs/DOMAIN_MODEL.md](../../apps/flow/docs/architecture/DOMAIN_MODEL.md) |
-| zonga | [apps/zonga/docs/DOMAIN_MODEL.md](../../apps/zonga/docs/DOMAIN_MODEL.md) |
+| union-eyes | [apps/web/docs/DOMAIN_MODEL.md](../../../../apps/web/docs/DOMAIN_MODEL.md) |
+| flow | [apps/flow/docs/architecture/DOMAIN_MODEL.md](../../../../apps/flow/docs/architecture/DOMAIN_MODEL.md) |
+| zonga | [apps/zonga/docs/DOMAIN_MODEL.md](../../../../apps/zonga/docs/DOMAIN_MODEL.md) |
 
 ## App Architecture Shapes
 
 | App | Shape Doc | Meta |
 |---|---|---|
-| union-eyes | [ARCHITECTURE_SHAPE.md](../../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/union-eyes/app-architecture.meta.json) |
-| flow | [ARCHITECTURE_SHAPE.md](../../apps/flow/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/flow/app-architecture.meta.json) |
-| zonga | [ARCHITECTURE_SHAPE.md](../../apps/zonga/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/zonga/app-architecture.meta.json) |
-| cfo | [ARCHITECTURE_SHAPE.md](../../apps/cfo/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/cfo/app-architecture.meta.json) |
-| partners | [ARCHITECTURE_SHAPE.md](../../apps/partners/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/partners/app-architecture.meta.json) |
-| control-plane | [ARCHITECTURE_SHAPE.md](../../apps/control-plane/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/control-plane/app-architecture.meta.json) |
-| web | [ARCHITECTURE_SHAPE.md](../../apps/web/docs/ARCHITECTURE_SHAPE.md) | [meta](../../apps/web/app-architecture.meta.json) |
+| union-eyes | [ARCHITECTURE_SHAPE.md](../../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/union-eyes/app-architecture.meta.json) |
+| flow | [ARCHITECTURE_SHAPE.md](../../../../apps/flow/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/flow/app-architecture.meta.json) |
+| zonga | [ARCHITECTURE_SHAPE.md](../../../../apps/zonga/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/zonga/app-architecture.meta.json) |
+| cfo | [ARCHITECTURE_SHAPE.md](../../../../apps/cfo/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/cfo/app-architecture.meta.json) |
+| partners | [ARCHITECTURE_SHAPE.md](../../../../apps/partners/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/partners/app-architecture.meta.json) |
+| control-plane | [ARCHITECTURE_SHAPE.md](../../../../apps/control-plane/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/control-plane/app-architecture.meta.json) |
+| web | [ARCHITECTURE_SHAPE.md](../../../../apps/web/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/web/app-architecture.meta.json) |
 
 ## Control Plane Governance
 
 | Document | Purpose |
 |---|---|
-| [Route Governance](../../apps/control-plane/docs/ROUTE_GOVERNANCE.md) | Per-route bucket assignment and justification |
-| [route.meta.json](../../apps/control-plane/route.meta.json) | Machine-readable route manifest (v2: with actionability_score, duplication_risk, source_contracts_used) |
+| [Route Governance](../../../../apps/control-plane/docs/ROUTE_GOVERNANCE.md) | Per-route bucket assignment and justification |
+| [route.meta.json](../../../../apps/control-plane/route.meta.json) | Machine-readable route manifest (v2: with actionability_score, duplication_risk, source_contracts_used) |
 
 ## Route Manifests (All Surfaces)
 
 | Surface | Manifest | Routes |
 |---|---|---|
-| Control Plane | [route.meta.json](../../apps/control-plane/route.meta.json) | 13 routes |
-| Console | [route.meta.json](../../apps/console/route.meta.json) | 22 routes |
-| Platform Admin | [route.meta.json](../../apps/platform-admin/route.meta.json) | 13 routes |
+| Control Plane | [route.meta.json](../../../../apps/control-plane/route.meta.json) | 13 routes |
+| Console | [route.meta.json](../../../../apps/console/route.meta.json) | 22 routes |
+| Platform Admin | [route.meta.json](../../../../apps/platform-admin/route.meta.json) | 13 routes |
 
 ## Surface Migration Tracking
 
 | Document | Purpose |
 |---|---|
-| [platform-surface-migrations/README.md](../platform-surface-migrations/README.md) | Active surface boundary violations and migration plans |
+| [docs/categories/historical-archive/archive/iterations/platform-surface-migrations/README.md](../../historical-archive/archive/iterations/platform-surface-migrations/README.md) | Active surface boundary violations and migration plans |
 
 ## Enforcement Scripts
 

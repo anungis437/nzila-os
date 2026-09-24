@@ -23,22 +23,22 @@ Validated platform guarantees:
 
 | Path | Validation Outcome |
 |---|---|
-| [apps/union-eyes/app/api/cases/route.ts](apps/union-eyes/app/api/cases/route.ts) | Emits `cases_created` with trace + actor context |
+| [apps/union-eyes/app/api/cases/route.ts](../../app/api/cases/route.ts) | Emits `cases_created` with trace + actor context |
 | [apps/union-eyes/app/api/cases/[caseId]/assign/route.ts](apps/union-eyes/app/api/cases/[caseId]/assign/route.ts) | Emits `assignment_efficiency` |
 | [apps/union-eyes/app/api/cases/[caseId]/export/route.ts](apps/union-eyes/app/api/cases/[caseId]/export/route.ts) | Emits `evidence_pack_exports` |
-| [apps/union-eyes/app/api/workflow/transition/route.ts](apps/union-eyes/app/api/workflow/transition/route.ts) | Emits transition success/failure and response/resolution metrics |
-| [apps/union-eyes/app/api/cron/sla-watchdog/route.ts](apps/union-eyes/app/api/cron/sla-watchdog/route.ts) | Emits `sla_breach_count` and `sla_compliance_rate` with denominator inputs |
-| [apps/union-eyes/lib/pilot-metrics.ts](apps/union-eyes/lib/pilot-metrics.ts) | Central adapter for UnionEyes metric emits |
+| [apps/union-eyes/app/api/workflow/transition/route.ts](../../app/api/workflow/transition/route.ts) | Emits transition success/failure and response/resolution metrics |
+| [apps/union-eyes/app/api/cron/sla-watchdog/route.ts](../../app/api/cron/sla-watchdog/route.ts) | Emits `sla_breach_count` and `sla_compliance_rate` with denominator inputs |
+| [apps/union-eyes/lib/pilot-metrics.ts](../../lib/pilot-metrics.ts) | Central adapter for UnionEyes metric emits |
 
 ## Platform Guardrail Status
 
 | Guardrail | Source | Status |
 |---|---|---|
-| traceId required | [packages/platform-pilot-metrics/src/service.ts](packages/platform-pilot-metrics/src/service.ts) | enforced |
-| actor or system actor required | [packages/platform-pilot-metrics/src/service.ts](packages/platform-pilot-metrics/src/service.ts) | enforced |
-| org/pilot consistency check | [packages/platform-pilot-metrics/src/service.ts](packages/platform-pilot-metrics/src/service.ts) | enforced |
-| audit linkage insertion | [packages/platform-pilot-metrics/src/service.ts](packages/platform-pilot-metrics/src/service.ts) | enforced |
-| guardrail tests | [packages/platform-pilot-metrics/src/service.audit.test.ts](packages/platform-pilot-metrics/src/service.audit.test.ts) | passing in targeted run |
+| traceId required | [packages/platform-pilot-metrics/src/service.ts](../../../../packages/platform-pilot-metrics/src/service.ts) | enforced |
+| actor or system actor required | [packages/platform-pilot-metrics/src/service.ts](../../../../packages/platform-pilot-metrics/src/service.ts) | enforced |
+| org/pilot consistency check | [packages/platform-pilot-metrics/src/service.ts](../../../../packages/platform-pilot-metrics/src/service.ts) | enforced |
+| audit linkage insertion | [packages/platform-pilot-metrics/src/service.ts](../../../../packages/platform-pilot-metrics/src/service.ts) | enforced |
+| guardrail tests | [packages/platform-pilot-metrics/src/service.audit.test.ts](../../../../packages/platform-pilot-metrics/src/service.audit.test.ts) | passing in targeted run |
 
 ## Validation Commands
 
@@ -57,6 +57,6 @@ pnpm vitest run packages/platform-pilot-metrics/src/service.audit.test.ts
 
 ## Canonical References
 
-- [apps/union-eyes/docs/PILOT_SCOPE.md](apps/union-eyes/docs/PILOT_SCOPE.md)
-- [docs/union-eyes/pilot-kpis.md](docs/union-eyes/pilot-kpis.md)
-- [docs/platform/pilot-metrics-architecture.md](docs/platform/pilot-metrics-architecture.md)
+- [apps/union-eyes/docs/procurement/PILOT_SCOPE.md](PILOT_SCOPE.md)
+- [docs/categories/products-and-market/union-eyes/pilot-kpis.md](../../../../docs/categories/products-and-market/union-eyes/pilot-kpis.md)
+- [docs/categories/platform-and-operations/platform/pilot-metrics-architecture.md](../../../../docs/categories/platform-and-operations/platform/pilot-metrics-architecture.md)

@@ -2,7 +2,7 @@
 
 This brief is superseded by the final concise one-pager:
 
-- [Final Investor One-Pager](../investor/final-investor-onepager.md)
+- [Final Investor One-Pager](../../stakeholders/investor/final-investor-onepager.md)
 
 ## Current investor-relevant truth
 
@@ -13,5 +13,5 @@ This brief is superseded by the final concise one-pager:
 
 For proof and buyer evidence, use:
 
-- [Proof Center](../proof-center/portfolio-proof-index.md)
-- [Buyer Packs](../buyers/union-eyes-buyer-pack.md)
+- [Proof Center](../../../proof-center/portfolio-proof-index.md)
+- [Buyer Packs](../../stakeholders/buyers/union-eyes-buyer-pack.md)

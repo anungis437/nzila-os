@@ -2,7 +2,7 @@
 
 **Purpose**: Scripted demo flow for buyer evaluations and pilot onboarding.  
 **Audience**: Sales team, platform team, pilot onboarding lead  
-**Personas**: Alex Martins (Grievance Officer), Diane Okafor (Executive Director), James Tran (IT Director) — see [docs/procurement/demo-personas.md](../procurement/demo-personas.md)  
+**Personas**: Alex Martins (Grievance Officer), Diane Okafor (Executive Director), James Tran (IT Director) — see [docs/categories/platform-and-operations/procurement/demo-personas.md](../../platform-and-operations/procurement/demo-personas.md)  
 **Environment**: Staging with demo seed data only — **never use real member data**  
 **Last updated**: 2026-04-22
 

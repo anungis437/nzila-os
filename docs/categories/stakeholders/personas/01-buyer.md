@@ -12,7 +12,7 @@ powers every product line — agriculture, commerce, trade, finance, case
 management — through a single audited platform with tamper-evident evidence,
 org-scoped multi-tenancy, and automated compliance gates.
 
-For a full business overview see [README.business.md](../../README.business.md).
+For a full business overview see [README.business.md](../../../../README.business.md).
 
 ---
 
@@ -20,10 +20,10 @@ For a full business overview see [README.business.md](../../README.business.md).
 
 | Artefact | Description | Location |
 |----------|-------------|----------|
-| Procurement Pack | Signed, verifiable ZIP with security, data, ops, governance, sovereignty proofs | [procurement-pack.md](../governance/procurement-pack.md) |
-| Evidence Packs | Per-action tamper-evident bundles (hash-chained, Azure Blob sealed) | [evidence-packs.md](../architecture/evidence-packs.md) |
-| Build Attestation | Ed25519-signed build provenance + SBOM | [SBOM & attestation](../governance/enterprise-readiness.md#5-supply-chain-integrity) |
-| Compliance Snapshots | Deterministic, hash-chained compliance point-in-time records | [compliance-snapshots.md](../architecture/compliance-snapshots.md) |
+| Procurement Pack | Signed, verifiable ZIP with security, data, ops, governance, sovereignty proofs | [procurement-pack.md](../../platform-and-operations/governance/procurement-pack.md) |
+| Evidence Packs | Per-action tamper-evident bundles (hash-chained, Azure Blob sealed) | [evidence-packs.md](../../platform-and-operations/architecture/evidence-packs.md) |
+| Build Attestation | Ed25519-signed build provenance + SBOM | [SBOM & attestation](../../platform-and-operations/governance/enterprise-readiness.md#5-supply-chain-integrity) |
+| Compliance Snapshots | Deterministic, hash-chained compliance point-in-time records | [compliance-snapshots.md](../../platform-and-operations/architecture/compliance-snapshots.md) |
 
 ---
 
@@ -36,11 +36,11 @@ For a full business overview see [README.business.md](../../README.business.md).
 | Secret scanning | Gitleaks + TruffleHog on every commit |
 | Container scanning | Trivy with CRITICAL severity threshold |
 | Vulnerability policy | Fail-closed gate — no unwaived CRITICAL/HIGH vulns ship |
-| Penetration testing | Documented plan in [pentest-plan.md](../governance/pentest-plan.md) |
-| Secure coding | Training programme in [secure-coding-training.md](../governance/secure-coding-training.md) |
+| Penetration testing | Documented plan in [pentest-plan.md](../../platform-and-operations/governance/pentest-plan.md) |
+| Secure coding | Training programme in [secure-coding-training.md](../../platform-and-operations/governance/secure-coding-training.md) |
 
-For full details see [SECURITY.md](../../SECURITY.md) and the
-[Enterprise Readiness Index](../governance/enterprise-readiness.md).
+For full details see [SECURITY.md](../../../../SECURITY.md) and the
+[Enterprise Readiness Index](../../platform-and-operations/governance/enterprise-readiness.md).
 
 ---
 
@@ -49,8 +49,8 @@ For full details see [SECURITY.md](../../SECURITY.md) and the
 | Domain | Documentation |
 |--------|--------------|
 | Corporate governance | Board continuity, succession, cap table, SAFE mechanics — `governance/corporate/` |
-| AI governance | Model cards, budget caps, evaluation harness, no-shadow-AI enforcement — [AI Platform Contract](../architecture/AI_PLATFORM_CONTRACT.md) |
-| Change management | Formal change requests, approval workflows, change calendar — [Change Policy](../governance/CHANGE_POLICY.md) |
+| AI governance | Model cards, budget caps, evaluation harness, no-shadow-AI enforcement — [AI Platform Contract](../../platform-and-operations/architecture/AI_PLATFORM_CONTRACT.md) |
+| Change management | Formal change requests, approval workflows, change calendar — [Change Policy](../../platform-and-operations/governance/CHANGE_POLICY.md) |
 | Data lifecycle | Retention policies, 72-hour breach notification, org-scoped isolation |
 | Financial controls | QBO sync, Stripe reconciliation, tax calendar — CFO app |
 
@@ -68,7 +68,7 @@ For full details see [SECURITY.md](../../SECURITY.md) and the
 | Evidence pipeline | Ingestion → FSM → Evidence sealed workflow via `@nzila/governed-workflow` |
 | CI gates | 12+ automated checks block deployment on any failure (no skip flags) |
 
-For the full technical architecture see [ARCHITECTURE.md](../../ARCHITECTURE.md).
+For the full technical architecture see [ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md).
 
 ---
 
@@ -82,7 +82,7 @@ To independently verify a procurement pack:
 4. Hash-check every file against the manifest
 5. Confirm the `keyId` matches expected signing identity
 
-Full procedure: [Procurement Pack docs](../governance/procurement-pack.md).
+Full procedure: [Procurement Pack docs](../../platform-and-operations/governance/procurement-pack.md).
 
 ---
 
@@ -90,7 +90,7 @@ Full procedure: [Procurement Pack docs](../governance/procurement-pack.md).
 
 | Goal | Link |
 |------|------|
-| Deep technical evaluation | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
-| Governance audit | [Enterprise Readiness Index](../governance/enterprise-readiness.md) |
+| Deep technical evaluation | [ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md) |
+| Governance audit | [Enterprise Readiness Index](../../platform-and-operations/governance/enterprise-readiness.md) |
 | Operator's view | [02-operator.md](02-operator.md) |
 | Auditor's view | [03-auditor.md](03-auditor.md) |

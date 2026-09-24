@@ -1,6 +1,6 @@
 # Continuity Governance Attestation Model
 
-> **Status:** Canonical assurance · **Layer:** Continuity attestation · **Inherits:** [../nzila-ip/continuity-ontology.md](../nzila-ip/continuity-ontology.md), [../nzila-governance/continuity-safe-deployment-governance.md](../nzila-governance/continuity-safe-deployment-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
+> **Status:** Canonical assurance · **Layer:** Continuity attestation · **Inherits:** [docs/categories/historical-archive/archive/iterations/nzila-ip/continuity-ontology.md](../../historical-archive/archive/iterations/nzila-ip/continuity-ontology.md), [docs/categories/historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
 
 This document formalizes the **continuity governance attestation model**: the standardized attestations Nzila produces to demonstrate that continuity safety is preserved across deployment, routing, isolation, onboarding, modernization, and operational coherence.
 

@@ -66,4 +66,4 @@ cp ops/environments/local.env .env.local
 - [COMMANDS.md](COMMANDS.md) — Full command reference
 - [ARCHITECTURE_MAP.md](ARCHITECTURE_MAP.md) — How the repo is organized
 - [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
-- [../../ARCHITECTURE.md](../../ARCHITECTURE.md) — Technical architecture
+- [docs/categories/platform-and-operations/itsm/ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md) — Technical architecture

@@ -1,6 +1,6 @@
 # Institutional Trust Scoring Model
 
-> **Status:** Canonical assurance · **Layer:** Trust maturity scoring · **Inherits:** [institutional-certification-framework.md](institutional-certification-framework.md), [../nzila-governance/doctrine-governance-scorecard.md](../nzila-governance/doctrine-governance-scorecard.md)
+> **Status:** Canonical assurance · **Layer:** Trust maturity scoring · **Inherits:** [institutional-certification-framework.md](institutional-certification-framework.md), [docs/categories/historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md](../../historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md)
 
 This document defines a **governance-safe trust maturity scoring framework**: a stewardship instrument that reads, in interpretive form, the trust posture of Nzila systems across institutional dimensions.
 
@@ -68,7 +68,7 @@ Is the system operating in real institutions under governance, with stakeholder 
 | Forming | Reviews and partial evidence in place; certification class at C1; trajectory unclear |
 | Concern | Drift indicators present, doctrine violations on file, or evidence absence at the expected level |
 
-Bands are read from the [evidence pipeline](governance-evidence-pipeline-architecture.md), the [scorecard](../nzila-governance/doctrine-governance-scorecard.md), and standing certification status. They are not assigned by impression.
+Bands are read from the [evidence pipeline](governance-evidence-pipeline-architecture.md), the [scorecard](../../historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md), and standing certification status. They are not assigned by impression.
 
 ---
 

@@ -141,7 +141,7 @@ The Nzila operational governance posture as of this phase is:
   legitimacy per the operator mandate.
 - **Production:** not yet provisioned; production must follow the
   isolation contract in
-  [TSOSA §4](../../union-eyes/release/transitional-shared-secret-topology.md)
+  [TSOSA §4](../../../products-and-market/union-eyes/release/transitional-shared-secret-topology.md)
   and the production bootstrap policy in
   [migration-execution-governance.md §7](./migration-execution-governance.md).
 

@@ -168,7 +168,7 @@ A deployed environment is **topologically legitimate** when:
   restored (if configured), scoped Drizzle migrations applied, and a
   bootstrap attestation written with `legacy_replay_override = false`.
 - The runtime advertises `SECRET_TOPOLOGY` per
-  [TSOSA](../../union-eyes/release/transitional-shared-secret-topology.md).
+  [TSOSA](../../../products-and-market/union-eyes/release/transitional-shared-secret-topology.md).
 
 If any of those conditions is not met, the environment is operating
 outside the canonical topology and must be flagged in the environment's

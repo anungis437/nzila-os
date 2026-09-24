@@ -289,7 +289,7 @@ Components are ready for:
 ## 🔗 Related Documentation
 
 - [UnionEyes Architecture](../../docs/)
-- [API Documentation](../../docs/api/)
+- [API Documentation](../../../zonga/app/(marketing)/docs/api/)
 - [Component Library](../ui/)
 - [Type Definitions](../../types/)
 

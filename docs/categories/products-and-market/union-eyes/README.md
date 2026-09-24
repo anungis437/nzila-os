@@ -35,7 +35,7 @@ UnionEyes supports the full representation flow:
 | **Work** | The active casework surface for steward-led representation |
 | **Outcomes** | The results and follow-through view for members and reps |
 
-For the full glossary, see [Glossary](../index/glossary.md).
+For the full glossary, see [Glossary](../../platform-and-operations/index/glossary.md).
 
 ## Documentation by Role
 
@@ -59,11 +59,11 @@ For the full glossary, see [Glossary](../index/glossary.md).
 ### Developers and Platform Engineers
 
 - [Architecture](../../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) — System design
-- [Domain Model](../../apps/union-eyes/docs/DOMAIN_MODEL.md) — Entities and relationships
-- [Developer Index](../../apps/union-eyes/docs/INDEX.md) — Full developer documentation hub
+- [Domain Model](../../../../apps/web/docs/DOMAIN_MODEL.md) — Entities and relationships
+- [Developer Index](../../../../apps/union-eyes/docs/INDEX.md) — Full developer documentation hub
 
 ## Related Documentation
 
 - [CUPE Pilot Docs](../pilot/cupe/) — All CUPE-specific pilot materials
-- [Platform Architecture](../../ARCHITECTURE.md) — Overall system architecture
-- [Security Policy](../../SECURITY.md) — Security controls and policies
+- [Platform Architecture](../../platform-and-operations/itsm/ARCHITECTURE.md) — Overall system architecture
+- [Security Policy](../../../../SECURITY.md) — Security controls and policies

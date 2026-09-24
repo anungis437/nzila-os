@@ -6,15 +6,15 @@ Technical and operational documentation grouped by platform lifecycle.
 
 - [Architecture](../../architecture/)
 - [Platform Contracts and Guides](../../platform/)
-- [Control Plane](../../control-plane/)
-- [Decision Layer](../../decision-layer/)
-- [Intelligence](../../intelligence/)
+- [Control Plane](control-plane/)
+- [Decision Layer](decision-layer/)
+- [Intelligence](../../oci/superseded/intelligence/)
 
 ## Delivery and Runtime
 
-- [Deployment](../../deploy/)
+- [Deployment](deploy/)
 - [Migration](../../migration/)
-- [Release Docs](../../releases/)
+- [Release Docs](releases/)
 - [Operations](../../ops/)
 - [Runtime Runbooks](../../runbooks/)
 
@@ -22,8 +22,8 @@ Technical and operational documentation grouped by platform lifecycle.
 
 - [Governance](../../governance/)
 - [Security](../../../security)
-- [Risk](../../risk/)
+- [Risk](risk/)
 - [Hardening](../../hardening/)
-- [Stress Test](../../stress-test/)
-- [Procurement](../../procurement/)
-- [Reference](../../reference/)
+- [Stress Test](stress-test/)
+- [Procurement](../../oci/superseded/procurement/)
+- [Reference](reference/)

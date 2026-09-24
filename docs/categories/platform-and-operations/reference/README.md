@@ -4,13 +4,13 @@ Technical reference documentation for the Nzila OS platform.
 
 ## Architecture
 
-- [Architecture Overview](architecture.md) — System design and invariants
+- [Architecture Overview](../../products-and-market/union-eyes/employer-execution/architecture.md) — System design and invariants
 - [Package Catalogue](packages.md) — All packages and their roles
 - [Database Schema](schema.md) — Drizzle ORM schema reference
 
 ## Security
 
-- [Policy Engine](policy-engine.md) — RBAC, zero-trust, and OPA policies
+- [Policy Engine](../architecture/policy-engine.md) — RBAC, zero-trust, and OPA policies
 - [Evidence System](evidence.md) — Hash-chained audit trails
 
 ## AI

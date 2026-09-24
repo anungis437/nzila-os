@@ -31,6 +31,6 @@ This repository already uses Kilo metadata under `.kilo/`.
 
 ## Related Docs
 
-- [Contributing Guide](../../CONTRIBUTING.md)
+- [Contributing Guide](../../stakeholders/builders/CONTRIBUTING.md)
 - [Package Ownership Matrix](./PACKAGE_OWNERSHIP_MATRIX.md)
 - [App Lifecycle Process](./APP_LIFECYCLE_PROCESS.md)

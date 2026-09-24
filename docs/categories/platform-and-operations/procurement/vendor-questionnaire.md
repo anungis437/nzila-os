@@ -4,7 +4,7 @@
 **Version**: 1.0 | 2026-04-22  
 **Respondent**: Nzila OS Inc. — Platform Security
 
-> This document provides standard answers for union IT / privacy officer security questionnaires. All claims are cross-referenced to [docs/commercial/claims-ledger.md](../commercial/claims-ledger.md).
+> This document provides standard answers for union IT / privacy officer security questionnaires. All claims are cross-referenced to [docs/categories/stakeholders/commercial/claims-ledger.md](../../stakeholders/commercial/claims-ledger.md).
 
 ---
 
@@ -17,7 +17,7 @@ All member data is stored exclusively in **Microsoft Azure Canada Central (Toron
 AI inference uses Azure OpenAI (East US). This is covered by Microsoft's contractual no-training commitment — member data is never used to train public models. If your organization requires strict in-Canada AI processing, this can be discussed.
 
 **Q3. Do you comply with PIPEDA?**  
-Our platform is designed with PIPEDA principles in mind (data minimization, purpose limitation, consent, retention controls). We do not make a legal certification of PIPEDA compliance — organizations requiring formal certification should engage legal counsel. A DPA template is available at [docs/procurement/dpa.md](./dpa.md).
+Our platform is designed with PIPEDA principles in mind (data minimization, purpose limitation, consent, retention controls). We do not make a legal certification of PIPEDA compliance — organizations requiring formal certification should engage legal counsel. A DPA template is available at [docs/categories/platform-and-operations/procurement/dpa.md](./dpa.md).
 
 ---
 
@@ -83,7 +83,7 @@ Yes. All AI-assisted actions are logged in the standard audit trail with the sam
 ## Section 6: Incident Response
 
 **Q17. What is your incident response SLA?**  
-We commit to notifying affected organizations within **72 hours** of becoming aware of a Security Incident, consistent with PIPEDA breach notification requirements. Our DPA template at [docs/procurement/dpa.md](./dpa.md) formalizes this commitment.
+We commit to notifying affected organizations within **72 hours** of becoming aware of a Security Incident, consistent with PIPEDA breach notification requirements. Our DPA template at [docs/categories/platform-and-operations/procurement/dpa.md](./dpa.md) formalizes this commitment.
 
 **Q18. Do you have a documented incident response plan?**  
 Yes. See `SECURITY.md` in the platform repository for our security response process and contacts.
@@ -114,4 +114,4 @@ We run on Azure Container Apps in Canada Central with Azure's built-in redundanc
 ---
 
 *For follow-up questions, contact: <security@nzila.ca>*  
-*Claims cross-reference: [docs/commercial/claims-ledger.md](../commercial/claims-ledger.md)*
+*Claims cross-reference: [docs/categories/stakeholders/commercial/claims-ledger.md](../../stakeholders/commercial/claims-ledger.md)*

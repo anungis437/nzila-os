@@ -99,4 +99,4 @@ Until then, the file-backed core is honest, fast, and deployable today.
 - [GROWTHOS_OVERVIEW.md](./GROWTHOS_OVERVIEW.md)
 - [NZILA_INTERNAL_AGENCY_MODEL.md](./NZILA_INTERNAL_AGENCY_MODEL.md)
 - [CHANNEL_STRATEGY_MAP.md](./CHANNEL_STRATEGY_MAP.md)
-- [docs/runbooks/growthos-operator-runbook.md](../runbooks/growthos-operator-runbook.md)
+- [docs/categories/platform-and-operations/runbooks/growthos-operator-runbook.md](../../platform-and-operations/runbooks/growthos-operator-runbook.md)

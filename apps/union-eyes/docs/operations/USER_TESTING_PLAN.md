@@ -350,5 +350,5 @@ A task is **FAIL** if:
 ---
 
 *Results from all sessions are recorded in [USER_TESTING_RESULTS.md](./USER_TESTING_RESULTS.md).*
-*For pilot scope and success metrics, see [PILOT_SCOPE.md](./PILOT_SCOPE.md).*
-*For the demo script, see [CAPE-DEMO-FLOW.md](./CAPE-DEMO-FLOW.md).*
+*For pilot scope and success metrics, see [PILOT_SCOPE.md](../procurement/PILOT_SCOPE.md).*
+*For the demo script, see [CAPE-DEMO-FLOW.md](../procurement/CAPE-DEMO-FLOW.md).*

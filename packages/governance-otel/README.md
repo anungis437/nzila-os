@@ -2,7 +2,7 @@
 
 OpenTelemetry adapter that maps governance event envelopes onto OTel spans with semantic governance attributes. Reuses whatever OTel provider is already installed by the host app (`@nzila/os-core/telemetry`); does NOT install or replace the SDK.
 
-See [docs/nzila-runtime-integration/opentelemetry-governance-integration.md](../../docs/nzila-runtime-integration/opentelemetry-governance-integration.md).
+See [docs/categories/historical-archive/archive/iterations/nzila-runtime-integration/opentelemetry-governance-integration.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-integration/opentelemetry-governance-integration.md).
 
 ## Posture
 

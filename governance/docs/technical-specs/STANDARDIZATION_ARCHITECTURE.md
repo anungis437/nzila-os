@@ -590,10 +590,10 @@ tenant_key_mapping = {
 - **[BACKBONE_ARCHITECTURE.md](../BACKBONE_ARCHITECTURE.md)** — Detailed backbone component specs, implementation roadmap
 - **[MIGRATION_PLAN.md](../MIGRATION_PLAN.md)** — 2-batch parallel migration strategy, 8-week timeline
 - **[PORTFOLIO_DEEP_DIVE.md](../PORTFOLIO_DEEP_DIVE.md)** — Platform analysis, entity counts, complexity assessments
-- **[automation/generators/manifest_generator.py](../automation/generators/manifest_generator.py)** — Automated manifest generation logic
-- **[automation/orchestrator.py](../automation/orchestrator.py)** — Migration orchestration entry point
-- **[business/README.md](../../business/README.md)** — Portfolio overview, strategic positioning
-- **[nzila-scripts-book-template/](../nzila-scripts-book-template/)** — Template structure for standardized modules
+- **[automation/generators/manifest_generator.py](../../../packages/automation/generators/core/manifest_generator.py)** — Automated manifest generation logic
+- **[automation/orchestrator.py](../../../packages/automation/orchestrator.py)** — Migration orchestration entry point
+- **[governance/business/README.md](../../business/README.md)** — Portfolio overview, strategic positioning
+- **[nzila-scripts-book-template/](../../../packages/scripts-book/nzila-scripts-book-template/)** — Template structure for standardized modules
 
 ---
 

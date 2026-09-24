@@ -15,14 +15,14 @@ Located in repository root for quick access:
 
 ### Portfolio & Platform Analysis
 
-- **[PORTFOLIO_DEEP_DIVE.md](../../PORTFOLIO_DEEP_DIVE.md)** - Comprehensive analysis of 15 legacy platforms across 10 verticals
-- **[BACKBONE_ARCHITECTURE.md](../../BACKBONE_ARCHITECTURE.md)** - Technical architecture for unified Nzila Backbone infrastructure
-- **[BACKBONE_BUILD_PLAN.md](../../BACKBONE_BUILD_PLAN.md)** - Implementation roadmap and migration strategy
-- **[MULTI_VERTICAL_STRATEGY.md](../../MULTI_VERTICAL_STRATEGY.md)** - Cross-vertical integration and synergy opportunities
+- **[PORTFOLIO_DEEP_DIVE.md](PORTFOLIO_DEEP_DIVE.md)** - Comprehensive analysis of 15 legacy platforms across 10 verticals
+- **[BACKBONE_ARCHITECTURE.md](BACKBONE_ARCHITECTURE.md)** - Technical architecture for unified Nzila Backbone infrastructure
+- **[BACKBONE_BUILD_PLAN.md](BACKBONE_BUILD_PLAN.md)** - Implementation roadmap and migration strategy
+- **[MULTI_VERTICAL_STRATEGY.md](MULTI_VERTICAL_STRATEGY.md)** - Cross-vertical integration and synergy opportunities
 
 ### Business Intelligence
 
-- **[BUSINESS_AUTOMATION_OPPORTUNITIES.md](../../BUSINESS_AUTOMATION_OPPORTUNITIES.md)** - Identified automation opportunities across operations
+- **[BUSINESS_AUTOMATION_OPPORTUNITIES.md](BUSINESS_AUTOMATION_OPPORTUNITIES.md)** - Identified automation opportunities across operations
 
 ---
 
@@ -123,7 +123,7 @@ Start with [CORPORATE_DASHBOARD.md](./CORPORATE_DASHBOARD.md) for high-level ove
 Explore `/business/` directories for vertical strategies, market research, and operational metrics.
 
 ### For Technical Teams
-Review [BACKBONE_ARCHITECTURE.md](../../BACKBONE_ARCHITECTURE.md) and `/platform/` for technical specifications.
+Review [BACKBONE_ARCHITECTURE.md](BACKBONE_ARCHITECTURE.md) and `/platform/` for technical specifications.
 
 ### For Operations
 Check `/corporate/` for governance policies and `/knowledge/playbooks/` for operational procedures.

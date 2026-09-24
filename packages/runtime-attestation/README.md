@@ -3,8 +3,8 @@
 Runtime attestation envelopes and content-addressable governance evidence ledger records.
 
 See:
-- [docs/nzila-runtime-governance/runtime-attestation-pipeline.md](../../docs/nzila-runtime-governance/runtime-attestation-pipeline.md)
-- [docs/nzila-runtime-governance/governance-evidence-ledger.md](../../docs/nzila-runtime-governance/governance-evidence-ledger.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-attestation-pipeline.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-attestation-pipeline.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-evidence-ledger.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-evidence-ledger.md)
 
 ## Posture
 

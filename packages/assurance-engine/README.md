@@ -3,7 +3,7 @@
 Interpretive assurance bandings per assurance dimension. Refuses composite collapse — there is no single "assurance score" surface.
 
 See:
-- [docs/nzila-runtime-governance/runtime-assurance-engine.md](../../docs/nzila-runtime-governance/runtime-assurance-engine.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-assurance-engine.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-assurance-engine.md)
 
 ## Posture
 

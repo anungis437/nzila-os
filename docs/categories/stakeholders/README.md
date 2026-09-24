@@ -4,26 +4,26 @@ Documentation grouped by stakeholder audience.
 
 ## Engineering Builders
 
-- [Builder Guides](../../builders/)
+- [Builder Guides](builders/)
 - [Developer Golden Path](../../GOLDEN_PATH_DEVELOPER_GUIDE.md)
 
 ## Operators
 
-- [Operator Guides](../../operators/)
+- [Operator Guides](operators/)
 - [Operations Runbooks](../../ops/)
 - [Runtime Runbooks](../../runbooks/)
 
 ## Buyers and Procurement
 
-- [Buyer Packs](../../buyers/)
-- [Commercial Documentation](../../commercial/)
-- [Go-to-Market Documentation](../../gtm/)
+- [Buyer Packs](buyers/)
+- [Commercial Documentation](commercial/)
+- [Go-to-Market Documentation](gtm/)
 
 ## Investors
 
-- [Investor Documentation](../../investor/)
+- [Investor Documentation](investor/)
 
 ## Personas and Public Narrative
 
-- [Personas](../../personas/)
+- [Personas](personas/)
 - [Public Narrative](../../public/)

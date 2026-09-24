@@ -81,4 +81,4 @@ Operators see these in the cockpit's "Recommended action" column.
 
 - [GROWTHOS_OVERVIEW.md](./GROWTHOS_OVERVIEW.md)
 - [NZILA_INTERNAL_AGENCY_MODEL.md](./NZILA_INTERNAL_AGENCY_MODEL.md)
-- [packages/platform-growth-os/src/types.ts](../../packages/platform-growth-os/src/types.ts) — canonical channel + status enums
+- [packages/platform-growth-os/src/types.ts](../../../../packages/platform-growth-os/src/types.ts) — canonical channel + status enums

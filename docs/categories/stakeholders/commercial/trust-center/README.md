@@ -26,7 +26,7 @@ cannot demonstrate.
 - One-page executive summary: [`UNION_EYES_SECURITY_ONE_PAGER.md`](../UNION_EYES_SECURITY_ONE_PAGER.md)
 - Procurement Q&A: [`sales-kit/AUTH_PROCUREMENT_QA.md`](../sales-kit/AUTH_PROCUREMENT_QA.md)
 - Access modes (commercial-friendly): [`UNION_EYES_ACCESS_MODES.md`](../UNION_EYES_ACCESS_MODES.md)
-- Internal runbooks: [`docs/runbooks/union-eyes-auth-operations.md`](../../runbooks/union-eyes-auth-operations.md), [`docs/runbooks/union-eyes-identity-lifecycle.md`](../../runbooks/union-eyes-identity-lifecycle.md)
+- Internal runbooks: [`docs/runbooks/union-eyes-auth-operations.md`](../../../platform-and-operations/runbooks/union-eyes-auth-operations.md), [`docs/runbooks/union-eyes-identity-lifecycle.md`](../../../platform-and-operations/runbooks/union-eyes-identity-lifecycle.md)
 
 *Last revised: 2026-04-24.*
 

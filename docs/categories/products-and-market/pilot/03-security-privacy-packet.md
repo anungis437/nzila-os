@@ -63,8 +63,8 @@ Nzila OS is a multi-tenant platform with strict tenant isolation:
 
 ## 5. Incident Response
 
-- Documented incident response playbook: [incident-response.md](../ops/incident-response.md)
-- 24/7 on-call rotation with defined SLAs: [on-call.md](../ops/on-call.md)
+- Documented incident response playbook: [incident-response.md](../../platform-and-operations/ops/incident-response.md)
+- 24/7 on-call rotation with defined SLAs: [on-call.md](../../platform-and-operations/ops/on-call.md)
 - Automated health monitoring with alert thresholds
 - Post-incident review (PIR) within 5 BD for P1 incidents
 
@@ -134,4 +134,4 @@ Each artifact is:
 
 - [Scope Checklist](01-scope-checklist.md)
 - [Monitoring & SLOs](04-monitoring-and-slos.md)
-- [Deploy Profiles](../deploy/profiles.md)
+- [Deploy Profiles](../../platform-and-operations/deploy/profiles.md)

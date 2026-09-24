@@ -2,7 +2,7 @@
 
 Pure-data primitives for the governance operations layer. Provides posture cards, governance-safe timeline shapes, role-model resolution, calm interpretation helpers, and design tokens. Consumers (host apps) render these primitives — this package never assumes a UI framework.
 
-See [docs/nzila-governance-operations/](../../docs/nzila-governance-operations/).
+See [docs/nzila-governance-operations/](../../docs/categories/historical-archive/archive/iterations/nzila-governance-operations/).
 
 ## Posture
 

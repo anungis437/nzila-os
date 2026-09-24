@@ -1,6 +1,6 @@
 # Master Assurance Index
 
-> **Status:** Canonical assurance · **Layer:** Index · **Inherits:** all assurance documents in this directory and the corpus in [../nzila-ip/](../nzila-ip/), [../nzila-governance/](../nzila-governance/)
+> **Status:** Canonical assurance · **Layer:** Index · **Inherits:** all assurance documents in this directory and the corpus in [../nzila-ip/](../../historical-archive/archive/iterations/nzila-ip/), [../nzila-governance/](../../historical-archive/archive/iterations/nzila-governance/)
 
 This index is the **single navigational map** of Nzila's assurance and certification layer. It enumerates each assurance instrument, its purpose, its doctrinal and governance basis, and its evidence anchor.
 
@@ -11,10 +11,10 @@ It is the document a steward, certification body, regulator, procurement officer
 ## 1. Source Layers
 
 ### 1.1 Doctrine Corpus
-Authoritative source under [../nzila-ip/](../nzila-ip/). Indexed at [../nzila-ip/master-ip-index.md](../nzila-ip/master-ip-index.md).
+Authoritative source under [../nzila-ip/](../../historical-archive/archive/iterations/nzila-ip/). Indexed at [docs/categories/historical-archive/archive/iterations/nzila-ip/master-ip-index.md](../../historical-archive/archive/iterations/nzila-ip/master-ip-index.md).
 
 ### 1.2 Governance Operationalization
-Operational governance under [../nzila-governance/](../nzila-governance/). Indexed at [../nzila-governance/master-governance-index.md](../nzila-governance/master-governance-index.md).
+Operational governance under [../nzila-governance/](../../historical-archive/archive/iterations/nzila-governance/). Indexed at [docs/categories/historical-archive/archive/iterations/nzila-governance/master-governance-index.md](../../historical-archive/archive/iterations/nzila-governance/master-governance-index.md).
 
 ### 1.3 Assurance and Certification (this layer)
 Continuous verification under [./](./). Indexed by this document.
@@ -110,12 +110,12 @@ For platform engineering and assurance owners:
 
 For AI engineers seeking assurance pathways:
 1. [governance-safe-ai-assurance-model.md](governance-safe-ai-assurance-model.md)
-2. [../nzila-governance/continuity-safe-ai-governance.md](../nzila-governance/continuity-safe-ai-governance.md)
+2. [docs/categories/historical-archive/archive/iterations/nzila-governance/continuity-safe-ai-governance.md](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-ai-governance.md)
 3. [institutional-certification-framework.md](institutional-certification-framework.md)
 
 For executive surface owners:
 1. [executive-cognitive-safety-assurance.md](executive-cognitive-safety-assurance.md)
-2. [../nzila-governance/executive-cognitive-governance-standards.md](../nzila-governance/executive-cognitive-governance-standards.md)
+2. [docs/categories/historical-archive/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md](../../historical-archive/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md)
 
 For investors evaluating institutional posture:
 1. [README](README.md)

@@ -132,4 +132,4 @@ spec:
 ## Next Steps
 
 - [Tutorial 2: Adding AI to an App](adding-ai.md)
-- [Reference: Package Catalogue](../reference/packages.md)
+- [Reference: Package Catalogue](../../platform-and-operations/reference/packages.md)

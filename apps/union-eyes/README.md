@@ -698,9 +698,9 @@ Union-Eyes is preparing for a **4-week controlled pilot with CAPE** (Canadian As
 
 | Document | Purpose |
 |----------|---------|
-| [CAPE Pilot Playbook](docs/CAPE-PILOT-PLAYBOOK.md) | Week-by-week deployment guide, training plan, success metrics |
-| [CAPE Pilot Audit Report](docs/CAPE-PILOT-AUDIT-REPORT.md) | Technical readiness assessment (score: 8.5/10, verdict: Pilot Ready) |
-| [CAPE Demo Flow](docs/CAPE-DEMO-FLOW.md) | 7-minute demo sequence for leadership |
+| [CAPE Pilot Playbook](docs/procurement/CAPE-PILOT-PLAYBOOK.md) | Week-by-week deployment guide, training plan, success metrics |
+| [CAPE Pilot Audit Report](docs/procurement/CAPE-PILOT-AUDIT-REPORT.md) | Technical readiness assessment (score: 8.5/10, verdict: Pilot Ready) |
+| [CAPE Demo Flow](docs/procurement/CAPE-DEMO-FLOW.md) | 7-minute demo sequence for leadership |
 
 ### Representation Protocol
 
@@ -758,7 +758,7 @@ Proprietary — Nzila Digital Ventures. All rights reserved.
 | Nzila OS README | [README.md](../../README.md) |
 | Business Overview | [README.business.md](../../README.business.md) |
 | Architecture | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
-| Repo Contract | [docs/repo-contract/](../../docs/repo-contract/) |
+| Repo Contract | [docs/repo-contract/](../../docs/categories/platform-and-operations/repo-contract/) |
 | Security Policy | [SECURITY.md](../../SECURITY.md) |
 | Changelog | [CHANGELOG.md](../../CHANGELOG.md) |
 
@@ -770,7 +770,7 @@ Proprietary — Nzila Digital Ventures. All rights reserved.
 | **Components** | [Federation components](components/federation/README.md) |
 | **Database** | [Schema guide](db/README.md), [Migrations](db/migrations/README.md) |
 | **Integrations** | [Framework guide](lib/integrations/README.md), [Payment processor](lib/payment-processor/README.md) |
-| **CAPE Pilot** | [Playbook](docs/CAPE-PILOT-PLAYBOOK.md), [Audit report](docs/CAPE-PILOT-AUDIT-REPORT.md), [Demo flow](docs/CAPE-DEMO-FLOW.md) |
+| **CAPE Pilot** | [Playbook](docs/procurement/CAPE-PILOT-PLAYBOOK.md), [Audit report](docs/procurement/CAPE-PILOT-AUDIT-REPORT.md), [Demo flow](docs/procurement/CAPE-DEMO-FLOW.md) |
 | **Security** | [SECURITY.md](../../SECURITY.md), [Governance](../../governance/) |
 | **Operations** | [Runbooks](../../ops/runbooks/), [Incident response](../../ops/incident-response/) |
 

@@ -135,4 +135,4 @@ When you call `ai.generate()`, the AI gateway (`@nzila/ai-core`) automatically:
 
 - [How-To: Create a Model Card](../how-to/create-model-card.md)
 - [Reference: AI Gateway](../reference/ai-gateway.md)
-- [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
+- [Explanation: AI Risk Management](../../platform-and-operations/explanation/ai-risk-management.md)

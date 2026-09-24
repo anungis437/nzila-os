@@ -10,7 +10,7 @@ This document is the authoritative page-level reference for the UnionEyes labour
 
 **How to use this document:**
 - **Product testers** — use the page-by-page entries to build test cases and check that role gating, empty states, and data rendering work correctly.
-- **Demo operators** — look for pages rated `HIGH` under *Pilot/Demo Relevance* and cross-reference with the [DEMO_RUNBOOK.md](./DEMO_RUNBOOK.md).
+- **Demo operators** — look for pages rated `HIGH` under *Pilot/Demo Relevance* and cross-reference with the [DEMO_RUNBOOK.md](../operations/DEMO_RUNBOOK.md).
 - **Security reviewers** — use the Role Access Matrix and the *Intended Roles* field on every page to verify no privilege escalation paths exist.
 
 **Routing model:** All user-facing pages live under `app/[locale]/` with the locale prefix injected at runtime (e.g., `/en/dashboard/inbox`). The auth group uses `(auth)` route-group parentheses; the primary dashboard uses `(dashboard)` for layout inheritance. Route segments that look like `[id]` or `[[...slug]]` are dynamic.
@@ -215,7 +215,7 @@ This document is the authoritative page-level reference for the UnionEyes labour
 - **Error State:** Grievance not found or org mismatch → 404. API error → toast with retry option.
 - **Audit/Governance Relevance:** All workflow transitions are audit-logged with `actorId`, `traceId`, and timestamp. HIGH governance relevance — grievance FSM transitions drive `workflow_transition_success_rate` pilot metric.
 - **Pilot/Demo Relevance:** HIGH — the Demo Runbook Scene 3 walks through FSM blocking and correct state transitions on this page.
-- **Notes:** The FSM intentionally prevents jumping from `triage` directly to `resolved`. Testers must verify this constraint. See [DEMO_RUNBOOK.md](./DEMO_RUNBOOK.md) Scene 3.
+- **Notes:** The FSM intentionally prevents jumping from `triage` directly to `resolved`. Testers must verify this constraint. See [DEMO_RUNBOOK.md](../operations/DEMO_RUNBOOK.md) Scene 3.
 
 ---
 

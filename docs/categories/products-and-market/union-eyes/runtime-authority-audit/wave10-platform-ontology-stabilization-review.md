@@ -40,7 +40,7 @@ And the dual-entry motion:
 ### 3.2 Route and module runtime baseline
 
 - Canonical dashboard modules and retire/merge posture already documented in [full-canonical-module-inventory.md](full-canonical-module-inventory.md#L1).
-- Root entry redirects to locale root (marketing + authenticated portal split) in [app/page.tsx](../../../../../apps/union-eyes/app/page.tsx#L1).
+- Root entry redirects to locale root (marketing + authenticated portal split) in [app/page.tsx](../../../../../apps/web/app/page.tsx#L1).
 - Locale root already supports continuity-first and authenticated operations entry in [app/[locale]/page.tsx](../../../../../apps/union-eyes/app/[locale]/page.tsx#L1).
 
 ### 3.3 Concrete route/API signals relevant to ontology

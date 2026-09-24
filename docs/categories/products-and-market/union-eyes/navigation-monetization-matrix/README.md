@@ -28,7 +28,7 @@ This layer codifies the principle that **navigation IS monetization** — not in
 ## Validator
 
 - Script: `node tooling/scripts/validate-navigation-monetization.mjs`
-- Source: [tooling/scripts/validate-navigation-monetization.mjs](../../../tooling/scripts/validate-navigation-monetization.mjs)
+- Source: [tooling/scripts/validate-navigation-monetization.mjs](../../../../../tooling/scripts/validate-navigation-monetization.mjs)
 
 ## Doctrinal Posture
 

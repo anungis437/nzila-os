@@ -113,7 +113,7 @@ export async function register() {
    - Reference: [`examples/refactored-dues-payment-route.ts`](./examples/refactored-dues-payment-route.ts)
 
 2. **Stripe Webhook Handler**
-   - File: [`app/api/stripe/webhooks/route.ts`](../../app/api/stripe/webhooks/route.ts)
+   - File: [`app/api/stripe/webhooks/route.ts`](../../../console/app/api/stripe/webhooks/route.ts)
    - Priority: HIGH (critical for payment processing)
    - Estimated time: 45 minutes
 

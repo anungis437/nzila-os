@@ -12,7 +12,7 @@ CI runs on every PR: lint, typecheck, contract tests, governance gates.
 
 ## Before You Code
 
-1. Pick a product/package from the [product catalog](../../governance/portfolio/product-catalog.json)
+1. Pick a product/package from the [product catalog](../../../../governance/portfolio/product-catalog.json)
 2. Check the lifecycle status — don't invest in `frozen` or `sunset` products
 3. Read the relevant app README under `apps/<name>/`
 

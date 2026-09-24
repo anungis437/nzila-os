@@ -51,7 +51,7 @@ Customer Browser → Nzila CDN → Azure App Service (Nzila Sub)
 
 1. Nzila provisions org in shared infrastructure.
 2. Customer configures via Console.
-3. Data onboarding (see [data onboarding guide](../pilot/02-data-onboarding.md)).
+3. Data onboarding (see [data onboarding guide](../../products-and-market/pilot/02-data-onboarding.md)).
 4. Go live.
 
 ---
@@ -168,6 +168,6 @@ The deploy profile is visible in `Console → Deploy Profile`:
 
 ## Related Documents
 
-- [Scope Checklist](../pilot/01-scope-checklist.md)
-- [Security & Privacy Packet](../pilot/03-security-privacy-packet.md)
-- [Monitoring & SLOs](../pilot/04-monitoring-and-slos.md)
+- [Scope Checklist](../../products-and-market/pilot/01-scope-checklist.md)
+- [Security & Privacy Packet](../../products-and-market/pilot/03-security-privacy-packet.md)
+- [Monitoring & SLOs](../../products-and-market/pilot/04-monitoring-and-slos.md)

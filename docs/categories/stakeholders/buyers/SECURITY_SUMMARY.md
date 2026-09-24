@@ -43,7 +43,7 @@
 
 ## Security Governance
 
-- **Vulnerability disclosure**: [SECURITY.md](../../SECURITY.md)
+- **Vulnerability disclosure**: [SECURITY.md](../../../../SECURITY.md)
 - **Vendor risk register**: `docs/platform/THIRD_PARTY_RISK_REGISTER.md`
 - **Data residency policy**: `docs/platform/DATA_RESIDENCY_POLICY.md`
 - **Secure coding training**: `docs/governance/secure-coding-training.md`

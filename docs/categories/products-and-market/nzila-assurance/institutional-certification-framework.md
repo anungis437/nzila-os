@@ -1,6 +1,6 @@
 # Institutional Certification Framework
 
-> **Status:** Canonical assurance · **Layer:** Certification architecture · **Inherits:** [../nzila-ip/](../nzila-ip/), [../nzila-governance/](../nzila-governance/)
+> **Status:** Canonical assurance · **Layer:** Certification architecture · **Inherits:** [../nzila-ip/](../../historical-archive/archive/iterations/nzila-ip/), [../nzila-governance/](../../historical-archive/archive/iterations/nzila-governance/)
 
 This document defines Nzila's **formal certification architecture**: the classes of certification that Nzila systems can hold, the tiers of maturity within each class, the dimensions against which certification is assessed, and the discipline by which certification is awarded, sustained, and revoked.
 
@@ -12,7 +12,7 @@ Certification at Nzila is not a marketing badge. It is a **governance-grade atte
 
 The certification framework:
 
-- Is **doctrine-grounded** — every certification class derives from doctrine in [../nzila-ip/](../nzila-ip/)
+- Is **doctrine-grounded** — every certification class derives from doctrine in [../nzila-ip/](../../historical-archive/archive/iterations/nzila-ip/)
 - Is **evidence-backed** — certification requires reviewable evidence from the [governance evidence pipeline](governance-evidence-pipeline-architecture.md)
 - Is **tiered** — maturity is recognized in stages; absolutism is rejected
 - Is **revocable** — certification at any tier can be downgraded when evidence degrades
@@ -28,13 +28,13 @@ Certification that cannot be defended externally is not certification.
 A Nzila system can be certified across the following classes. Classes are independent; a system can be certified in some and not others.
 
 ### 2.1 Doctrine-Compliant System
-The system expresses doctrine as specified in [../nzila-governance/doctrine-to-product-mapping.md](../nzila-governance/doctrine-to-product-mapping.md). Surfaces, signals, authority framing, aggregation stance, and vocabulary all align.
+The system expresses doctrine as specified in [docs/categories/historical-archive/archive/iterations/nzila-governance/doctrine-to-product-mapping.md](../../historical-archive/archive/iterations/nzila-governance/doctrine-to-product-mapping.md). Surfaces, signals, authority framing, aggregation stance, and vocabulary all align.
 
 ### 2.2 Governance-Safe Deployment
-Deployments operate under [../nzila-governance/continuity-safe-deployment-governance.md](../nzila-governance/continuity-safe-deployment-governance.md): release manifest, sequencing, pacing, reversibility, environment isolation, stakeholder visibility.
+Deployments operate under [docs/categories/historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md): release manifest, sequencing, pacing, reversibility, environment isolation, stakeholder visibility.
 
 ### 2.3 Continuity-Safe Modernization
-Modernization initiatives are paced to absorption capacity, sequenced for continuity preservation, and reversible at every step (per [../nzila-ip/institutional-modernization-methodology.md](../nzila-ip/institutional-modernization-methodology.md)).
+Modernization initiatives are paced to absorption capacity, sequenced for continuity preservation, and reversible at every step (per [docs/categories/historical-archive/archive/iterations/nzila-ip/institutional-modernization-methodology.md](../../historical-archive/archive/iterations/nzila-ip/institutional-modernization-methodology.md)).
 
 ### 2.4 Operational Legitimacy Readiness
 The system meets the legitimacy validation defined in [operational-legitimacy-assurance-system.md](operational-legitimacy-assurance-system.md): pilot realism, deployment realism, organizational trust pacing.
@@ -43,13 +43,13 @@ The system meets the legitimacy validation defined in [operational-legitimacy-as
 AI capability satisfies [governance-safe-ai-assurance-model.md](governance-safe-ai-assurance-model.md): explainability, human authority, anti-surveillance, reviewability.
 
 ### 2.6 Continuity-Safe UX
-Surfaces meet calmness, density, hierarchy, and restraint standards from [../nzila-governance/institutional-design-governance.md](../nzila-governance/institutional-design-governance.md).
+Surfaces meet calmness, density, hierarchy, and restraint standards from [docs/categories/historical-archive/archive/iterations/nzila-governance/institutional-design-governance.md](../../historical-archive/archive/iterations/nzila-governance/institutional-design-governance.md).
 
 ### 2.7 Executive Cognitive Governance
 Executive surfaces meet the measurable thresholds in [executive-cognitive-safety-assurance.md](executive-cognitive-safety-assurance.md).
 
 ### 2.8 Pilot-Safe Operational Posture
-Pilot scope is structurally enforced (per [../nzila-governance/executable-doctrine-enforcement.md](../nzila-governance/executable-doctrine-enforcement.md)): no scope drift, no production contamination, no demo coupling.
+Pilot scope is structurally enforced (per [docs/categories/historical-archive/archive/iterations/nzila-governance/executable-doctrine-enforcement.md](../../historical-archive/archive/iterations/nzila-governance/executable-doctrine-enforcement.md)): no scope drift, no production contamination, no demo coupling.
 
 ---
 

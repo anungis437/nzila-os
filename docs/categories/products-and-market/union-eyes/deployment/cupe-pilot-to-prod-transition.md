@@ -142,10 +142,10 @@ If production deployment fails or a P0 incident occurs within 1 hour of go-live:
 
 ## 8. References
 
-- Evidence pack: [`artifacts/ue-pilot-launch/launch-evidence-pack.md`](../../../artifacts/ue-pilot-launch/launch-evidence-pack.md)
-- GitOps production manifest: [`infrastructure/gitops/environments/production.yml`](../../../infrastructure/gitops/environments/production.yml)
-- Production env vars: [`ops/environments/prod.env`](../../../ops/environments/prod.env)
-- Region validation script: [`scripts/validate-prod-region.ts`](../../../scripts/validate-prod-region.ts)
-- Dry-run script: [`scripts/ue-prod-canadacentral-dry-run.ts`](../../../scripts/ue-prod-canadacentral-dry-run.ts)
-- SRE reliability audit: [`reports/sre-reliability-audit.json`](../../../reports/sre-reliability-audit.json)
-- Go-live decision: [`reports/ue-go-live-decision.md`](../../../reports/ue-go-live-decision.md)
+- Evidence pack: [`artifacts/ue-pilot-launch/launch-evidence-pack.md`](../../../../../artifacts/ue-pilot-launch/launch-evidence-pack.md)
+- GitOps production manifest: [`infrastructure/gitops/environments/production.yml`](../../../../../infrastructure/gitops/environments/production.yml)
+- Production env vars: [`ops/environments/prod.env`](../../../../../ops/environments/prod.env)
+- Region validation script: [`scripts/validate-prod-region.ts`](../../../../../scripts/validate-prod-region.ts)
+- Dry-run script: [`scripts/ue-prod-canadacentral-dry-run.ts`](../../../../../scripts/ue-prod-canadacentral-dry-run.ts)
+- SRE reliability audit: [`reports/sre-reliability-audit.json`](../../../../../reports/audits/sre-reliability-audit.json)
+- Go-live decision: [`reports/ue-go-live-decision.md`](../../../../../reports/strategic/ue-go-live-decision.md)

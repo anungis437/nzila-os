@@ -73,15 +73,15 @@ Zonga has completed its Client Launch Readiness Sprint and is cleared for a firs
 
 | Report | Location |
 |---|---|
-| Master Launch Readiness | [reports/zonga-launch-readiness.md](../../reports/zonga-launch-readiness.md) |
-| Auth / RBAC Audit | [reports/zonga-auth-rbac-audit.md](../../reports/zonga-auth-rbac-audit.md) |
-| Billing / Payouts Readiness | [reports/zonga-billing-payouts-readiness.md](../../reports/zonga-billing-payouts-readiness.md) |
-| Upload / Streaming Readiness | [reports/zonga-streaming-readiness.md](../../reports/zonga-streaming-readiness.md) |
-| Admin Panel Gap Audit | [reports/zonga-admin-gap-audit.md](../../reports/zonga-admin-gap-audit.md) |
-| Legal Launch Pack | [reports/zonga-legal-launch-pack.md](../../reports/zonga-legal-launch-pack.md) |
-| Backup & IR Plan | [reports/zonga-backup-ir-plan.md](../../reports/zonga-backup-ir-plan.md) |
-| Client Onboarding Script | [reports/zonga-client-onboarding-script.md](../../reports/zonga-client-onboarding-script.md) |
-| Go-Live Decision | [reports/zonga-go-live-decision.md](../../reports/zonga-go-live-decision.md) |
+| Master Launch Readiness | [reports/operational/zonga-launch-readiness.md](../../reports/operational/zonga-launch-readiness.md) |
+| Auth / RBAC Audit | [reports/audits/zonga-auth-rbac-audit.md](../../reports/audits/zonga-auth-rbac-audit.md) |
+| Billing / Payouts Readiness | [reports/operational/zonga-billing-payouts-readiness.md](../../reports/operational/zonga-billing-payouts-readiness.md) |
+| Upload / Streaming Readiness | [reports/operational/zonga-streaming-readiness.md](../../reports/operational/zonga-streaming-readiness.md) |
+| Admin Panel Gap Audit | [reports/archive/root-cleanup/zonga-admin-gap-audit.md](../../reports/archive/root-cleanup/zonga-admin-gap-audit.md) |
+| Legal Launch Pack | [reports/operational/zonga-legal-launch-pack.md](../../reports/operational/zonga-legal-launch-pack.md) |
+| Backup & IR Plan | [reports/operational/zonga-backup-ir-plan.md](../../reports/operational/zonga-backup-ir-plan.md) |
+| Client Onboarding Script | [reports/operational/zonga-client-onboarding-script.md](../../reports/operational/zonga-client-onboarding-script.md) |
+| Go-Live Decision | [reports/strategic/zonga-go-live-decision.md](../../reports/strategic/zonga-go-live-decision.md) |
 
 ### Launch Day
 

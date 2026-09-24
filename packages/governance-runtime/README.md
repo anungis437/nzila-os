@@ -3,8 +3,8 @@
 Runtime governance primitives. Release and environment identity readers, deployment legitimacy validation, and inline governance assertions usable from any Nzila product.
 
 See:
-- [docs/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md](../../docs/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md)
-- [docs/nzila-runtime-governance/deployment-legitimacy-validation-engine.md](../../docs/nzila-runtime-governance/deployment-legitimacy-validation-engine.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/deployment-legitimacy-validation-engine.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/deployment-legitimacy-validation-engine.md)
 
 ## Posture
 

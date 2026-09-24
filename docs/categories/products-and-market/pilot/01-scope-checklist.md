@@ -25,11 +25,11 @@
 
 ### 3. Technical Readiness
 
-- [ ] Deploy profile selected (Managed / Sovereign / Hybrid) — see [profiles.md](../deploy/profiles.md)
+- [ ] Deploy profile selected (Managed / Sovereign / Hybrid) — see [profiles.md](../../platform-and-operations/deploy/profiles.md)
 - [ ] Environment provisioned (Azure region, DB, blob storage)
 - [ ] SLO policy reviewed — thresholds acceptable for pilot
 - [ ] Perf budgets reviewed (`ops/perf-budgets.yml`) — enabled or deferred
-- [ ] On-call rotation covers pilot org (see [on-call.md](../ops/on-call.md))
+- [ ] On-call rotation covers pilot org (see [on-call.md](../../platform-and-operations/ops/on-call.md))
 
 ### 4. Security & Compliance
 
@@ -44,7 +44,7 @@
 - [ ] SLO monitoring active for pilot org
 - [ ] Health digest alerts enabled for pilot org
 - [ ] Console → System Health populated
-- [ ] Runbooks reviewed for pilot-relevant incidents (see [runbooks](../../ops/runbooks/))
+- [ ] Runbooks reviewed for pilot-relevant incidents (see [runbooks](../../../../ops/runbooks/))
 
 ### 6. Demo & Training
 

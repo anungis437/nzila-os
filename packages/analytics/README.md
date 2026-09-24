@@ -155,11 +155,11 @@ python -m analytics.generators.export_manager --template board_report --format m
 
 ## 🔗 Related Documentation
 
-- [Backbone Architecture](../BACKBONE_ARCHITECTURE.md)
-- [Portfolio Deep Dive](../PORTFOLIO_DEEP_DIVE.md)
-- [Financial Projections](../business/financial-models/5-year-projections.md)
-- [AI Infrastructure](../ai/README.md)
-- [Corporate Dashboard](../CORPORATE_DASHBOARD.md)
+- [Backbone Architecture](../../governance/docs/BACKBONE_ARCHITECTURE.md)
+- [Portfolio Deep Dive](../../governance/docs/PORTFOLIO_DEEP_DIVE.md)
+- [Financial Projections](../../governance/business/financial-models/5-year-projections.md)
+- [AI Infrastructure](../../governance/ai/README.md)
+- [Corporate Dashboard](../../governance/docs/CORPORATE_DASHBOARD.md)
 
 ---
 

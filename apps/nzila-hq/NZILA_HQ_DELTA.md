@@ -13,26 +13,26 @@ What it lacked was the **operator surface**: when a page errors, the user got th
 ## What changed
 
 ### New primitives (no deps)
-- [`lib/cn.ts`](apps/nzila-hq/lib/cn.ts) — 6-line class-name combinator. No `clsx` / `cva` dep.
-- [`components/primitives/Skeleton.tsx`](apps/nzila-hq/components/primitives/Skeleton.tsx) — `SkeletonLine`, `SkeletonBlock`, `SkeletonKpiStrip`, `SkeletonCard`, `SkeletonTable`. Tuned to the existing `Card` / `Stat` rhythm so loading shapes match settled shapes.
-- [`components/primitives/ErrorPanel.tsx`](apps/nzila-hq/components/primitives/ErrorPanel.tsx) — calm, on-brand error surface. Detects the `NZILA_HQ_RBAC_DENIED:` prefix thrown by `assertCapability` and renders a friendlier "Access denied" path. Copy-incident-ID button (clipboard + 1.5 s confirm). `<details>` for the raw message so devs can still see it without it dominating the page.
+- [`lib/cn.ts`](lib/cn.ts) — 6-line class-name combinator. No `clsx` / `cva` dep.
+- [`components/primitives/Skeleton.tsx`](components/primitives/Skeleton.tsx) — `SkeletonLine`, `SkeletonBlock`, `SkeletonKpiStrip`, `SkeletonCard`, `SkeletonTable`. Tuned to the existing `Card` / `Stat` rhythm so loading shapes match settled shapes.
+- [`components/primitives/ErrorPanel.tsx`](components/primitives/ErrorPanel.tsx) — calm, on-brand error surface. Detects the `NZILA_HQ_RBAC_DENIED:` prefix thrown by `assertCapability` and renders a friendlier "Access denied" path. Copy-incident-ID button (clipboard + 1.5 s confirm). `<details>` for the raw message so devs can still see it without it dominating the page.
 
 ### Route boundaries — every page is now resilient
 Per-section `error.tsx` (client component, wraps `ErrorPanel`) and tailored `loading.tsx` were added for:
 
-- [`app/error.tsx`](apps/nzila-hq/app/error.tsx) + [`app/loading.tsx`](apps/nzila-hq/app/loading.tsx) — root fallbacks
+- [`app/error.tsx`](app/error.tsx) + [`app/loading.tsx`](app/loading.tsx) — root fallbacks
 - `portfolio`, `crm`, `pipeline`, `dependency`, `delegation`, `finance`, `documents`, `reports`, `integrations`
 
 Each `loading.tsx` uses the skeleton variant that matches the page's actual layout (KPI strips for finance/portfolio/pipeline, tables for crm/documents, card grids for delegation/integrations) — so the perceived wait is calm and shape-stable, not a generic spinner.
 
 ### Capability-aware CommandPalette
-- [`components/shell/CommandPalette.tsx`](apps/nzila-hq/components/shell/CommandPalette.tsx) — ⌘K / Ctrl+K global hotkey. Subsequence + substring + prefix scoring (no `cmdk` / fuzzy lib). Recents persisted to `nzila-hq:palette:recents` (max 6) and pinned to the top of the empty-query view. Arrow keys + Enter + Esc wired. Mouseover updates the active row.
-- [`lib/palette.ts`](apps/nzila-hq/lib/palette.ts) — server-only builder that derives the palette item list from `NAV` filtered by the current user's RBAC capabilities. **A user can never jump to a route they can't view.**
-- [`components/shell/PaletteTrigger.tsx`](apps/nzila-hq/components/shell/PaletteTrigger.tsx) — small `Jump to… ⌘ K` button in the desktop TopBar so the shortcut is discoverable without docs.
+- [`components/shell/CommandPalette.tsx`](components/shell/CommandPalette.tsx) — ⌘K / Ctrl+K global hotkey. Subsequence + substring + prefix scoring (no `cmdk` / fuzzy lib). Recents persisted to `nzila-hq:palette:recents` (max 6) and pinned to the top of the empty-query view. Arrow keys + Enter + Esc wired. Mouseover updates the active row.
+- [`lib/palette.ts`](lib/palette.ts) — server-only builder that derives the palette item list from `NAV` filtered by the current user's RBAC capabilities. **A user can never jump to a route they can't view.**
+- [`components/shell/PaletteTrigger.tsx`](components/shell/PaletteTrigger.tsx) — small `Jump to… ⌘ K` button in the desktop TopBar so the shortcut is discoverable without docs.
 
 ### MobileShell
-- [`components/shell/MobileShell.tsx`](apps/nzila-hq/components/shell/MobileShell.tsx) — sticky `md:hidden` top bar with menu toggle. Slide-in drawer wraps the existing `Sidebar` (no duplication). Body-scroll lock while open. Auto-closes on route change.
-- [`app/layout.tsx`](apps/nzila-hq/app/layout.tsx) — desktop `Sidebar` and `TopBar` are now `hidden md:block`; `MobileShell` and `CommandPalette` mount unconditionally. Main padding scales `px-4 py-6 md:px-8 md:py-8`.
+- [`components/shell/MobileShell.tsx`](components/shell/MobileShell.tsx) — sticky `md:hidden` top bar with menu toggle. Slide-in drawer wraps the existing `Sidebar` (no duplication). Body-scroll lock while open. Auto-closes on route change.
+- [`app/layout.tsx`](app/layout.tsx) — desktop `Sidebar` and `TopBar` are now `hidden md:block`; `MobileShell` and `CommandPalette` mount unconditionally. Main padding scales `px-4 py-6 md:px-8 md:py-8`.
 
 ## What I did *not* touch (deliberately)
 
@@ -73,7 +73,7 @@ The 17-phase mission asked for everything from real persistence to an LLM Chief 
 
 ### What was built
 
-- **Capital Allocation engine — Phase 5.** [packages/hq-domain/src/allocation-engine.ts](packages/hq-domain/src/allocation-engine.ts) plus [llocation-engine.test.ts](packages/hq-domain/src/allocation-engine.test.ts) (6/6 passing). Pure deterministic function. Six axes (revenue, pipeline, margin, fit, founder load, confidence) with weights summing to 100, runtime-checked. Outputs exactly the recommendation enum the mission specified:  invest-more | hold | restructure | pause | exit . Founder load inverts the dependency-engine score so the "looks great but only the founder can run it" venture cannot earn an invest-more.
+- **Capital Allocation engine — Phase 5.** [packages/hq-domain/src/allocation-engine.ts](../../packages/hq-domain/src/allocation-engine.ts) plus [llocation-engine.test.ts](../../packages/hq-domain/src/allocation-engine.test.ts) (6/6 passing). Pure deterministic function. Six axes (revenue, pipeline, margin, fit, founder load, confidence) with weights summing to 100, runtime-checked. Outputs exactly the recommendation enum the mission specified:  invest-more | hold | restructure | pause | exit . Founder load inverts the dependency-engine score so the "looks great but only the founder can run it" venture cannot earn an invest-more.
 ---
 
 ## Increment v3 — Allocator OS (the rest of the 10/10 promise)
@@ -90,7 +90,7 @@ Where v2 turned the scoring engines on, v3 turns the **operator surface** on. Fo
 - **`finance-engine.ts` — Phase 7 CFO truth.** `agingBuckets` (current/1-30/31-60/61-90/90+), `burnEstimate` (90-day window normalized to monthly, by category), `runwayMonths`, `concentrationByClient` (Herfindahl + top share), `runScenario` accepting `{ cutBurnPct?, loseClientOrgId?, raiseCents?, newMonthlyInflowCents? }`. 6/6 tests pass.
 - **`chief-of-staff.ts` — Phase 4 deterministic COS.** Three outputs: `generateTodayTopFive` (ranks: critical alerts 100 > founder-touch deals 70+30·prob > overdue founder tasks 80+min(20,overdueDays)), `generateUrgentRiskDigest` (groups critical alerts + RED dependencies + worst-case scenario notes), `generateCapitalDirectionMemo` (groups movers by recommendation enum + flags those whose recommendation changed). 4/4 tests pass. Markdown bodies are exportable on every card.
 
-#### New repository methods (in [server/repository.ts](apps/nzila-hq/server/repository.ts))
+#### New repository methods (in [server/repository.ts](server/repository.ts))
 
 - `metricsHistory(window)`, `allocationDelta()`, `simulateCapital(scenario)`, `simulateFounderTime(scenario)` — wire the engines above.
 - `delegationMoves()` — synthesizes the move list from the existing tasks/contacts seed.
@@ -99,16 +99,16 @@ Where v2 turned the scoring engines on, v3 turns the **operator surface** on. Fo
 
 #### New cockpit pages
 
-- **[/chief-of-staff](apps/nzila-hq/app/chief-of-staff/page.tsx)** (Phase 4 surface). Three cards: Today's Top 5, Urgent Risk Digest, Capital Direction Memo. Each card has its own `ReportExportButton`. Bullets render with `**bold**`/`_italic_` after HTML-escape. Capability `view:chief-of-staff` (founder/president/ops-lead).
-- **[/finance/cfo](apps/nzila-hq/app/finance/cfo/page.tsx)** (Phase 7 surface). KPI strip (cash, burn, inflow, net, runway), AR aging table, burn-by-category mini-bars, client concentration with share bars, worst-case scenario side-by-side (baseline vs. lose-top-client), and the explicit Provenance card. Capability `view:finance`.
-- **[/dependency/trend](apps/nzila-hq/app/dependency/trend/page.tsx)** (Phase 5+ surface). Ranked delegation moves with kind badges, impact pills (`−N pts`) and rationale. Plus the existing dependency-trend report (markdown export). Capability `view:dependency`.
-- **[/reports/board-pack](apps/nzila-hq/app/reports/board-pack/page.tsx)** (Phase 12 surface). One-click bundle of six reports (weekly CEO brief, monthly portfolio, pipeline, dependency trend, capital direction, urgent risk) into a single timestamped markdown download. Client-side blob assembly via [BoardPackExport.tsx](apps/nzila-hq/components/reports/BoardPackExport.tsx). Capability `export:report`.
-- **[/allocation](apps/nzila-hq/app/allocation/page.tsx)** gains a "Movement since last review" card before the recommendations. Filters movers with composite delta ≥3 points. Tone: amber if recommendation changed, emerald positive, rose negative. Empty state: *"No material movement (≥3 composite points) since last review. Stability is a feature."*
+- **[/chief-of-staff](app/chief-of-staff/page.tsx)** (Phase 4 surface). Three cards: Today's Top 5, Urgent Risk Digest, Capital Direction Memo. Each card has its own `ReportExportButton`. Bullets render with `**bold**`/`_italic_` after HTML-escape. Capability `view:chief-of-staff` (founder/president/ops-lead).
+- **[/finance/cfo](app/finance/cfo/page.tsx)** (Phase 7 surface). KPI strip (cash, burn, inflow, net, runway), AR aging table, burn-by-category mini-bars, client concentration with share bars, worst-case scenario side-by-side (baseline vs. lose-top-client), and the explicit Provenance card. Capability `view:finance`.
+- **[/dependency/trend](app/dependency/trend/page.tsx)** (Phase 5+ surface). Ranked delegation moves with kind badges, impact pills (`−N pts`) and rationale. Plus the existing dependency-trend report (markdown export). Capability `view:dependency`.
+- **[/reports/board-pack](app/reports/board-pack/page.tsx)** (Phase 12 surface). One-click bundle of six reports (weekly CEO brief, monthly portfolio, pipeline, dependency trend, capital direction, urgent risk) into a single timestamped markdown download. Client-side blob assembly via [BoardPackExport.tsx](components/reports/BoardPackExport.tsx). Capability `export:report`.
+- **[/allocation](app/allocation/page.tsx)** gains a "Movement since last review" card before the recommendations. Filters movers with composite delta ≥3 points. Tone: amber if recommendation changed, emerald positive, rose negative. Empty state: *"No material movement (≥3 composite points) since last review. Stability is a feature."*
 
 #### Cross-cutting
 
-- **RBAC** — added `view:chief-of-staff` capability in [lib/rbac.ts](apps/nzila-hq/lib/rbac.ts). New test suite [lib/rbac.test.ts](apps/nzila-hq/lib/rbac.test.ts) (8/8 passing) validates founder=all-caps, board-viewer=read-only, partnerships=no finance/allocation, finance≠crm, COS=founder/president/ops-lead only, every role can view executive home, and `assertCapability` throws/passes correctly.
-- **Navigation** — added `/chief-of-staff` and `/finance/cfo` and `/dependency/trend` entries to [lib/nav.ts](apps/nzila-hq/lib/nav.ts), each gated by its capability.
+- **RBAC** — added `view:chief-of-staff` capability in [lib/rbac.ts](lib/rbac.ts). New test suite [lib/rbac.test.ts](lib/rbac.test.ts) (8/8 passing) validates founder=all-caps, board-viewer=read-only, partnerships=no finance/allocation, finance≠crm, COS=founder/president/ops-lead only, every role can view executive home, and `assertCapability` throws/passes correctly.
+- **Navigation** — added `/chief-of-staff` and `/finance/cfo` and `/dependency/trend` entries to [lib/nav.ts](lib/nav.ts), each gated by its capability.
 - **`ReportExportButton`** — added optional `label` prop (default `Export .md`) so the same component supports per-card export labels in the COS page.
 
 ### Discipline (what was deliberately *not* done)

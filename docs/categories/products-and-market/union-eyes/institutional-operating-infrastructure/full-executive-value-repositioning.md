@@ -50,4 +50,4 @@ Avoid:
 
 ## 6. Authority
 
-Anchored to [Executive Cognition Maturity Elevation](../../nzila-maturity-elevation/executive-cognition-maturity-elevation.md) and [Executive & Procurement Realism Hardening](../../nzila-final-convergence/executive-procurement-realism-hardening.md).
+Anchored to [Executive Cognition Maturity Elevation](../../../historical-archive/archive/iterations/nzila-maturity-elevation/executive-cognition-maturity-elevation.md) and [Executive & Procurement Realism Hardening](../../../historical-archive/archive/iterations/nzila-final-convergence/executive-procurement-realism-hardening.md).

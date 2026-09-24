@@ -1,6 +1,6 @@
 # Environment Governance Assurance
 
-> **Status:** Canonical assurance · **Layer:** Environment and topology assurance · **Inherits:** [../nzila-governance/continuity-safe-deployment-governance.md](../nzila-governance/continuity-safe-deployment-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
+> **Status:** Canonical assurance · **Layer:** Environment and topology assurance · **Inherits:** [docs/categories/historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
 
 This document defines **measurable assurance standards for deployment topology and environment governance** — the layer at which environments are kept doctrinally separated, releases are made traceable, seeds are protected, and rollback is provable.
 

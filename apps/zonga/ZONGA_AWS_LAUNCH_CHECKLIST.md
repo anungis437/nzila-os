@@ -190,8 +190,8 @@ curl -I $SIGNED_URL
 ## 📞 Support & Documentation
 
 - **Setup Guide**: [AWS_ZONGA_SETUP.md](../../AWS_ZONGA_SETUP.md)
-- **Streaming Readiness**: [reports/zonga-streaming-readiness.md](../../reports/zonga-streaming-readiness.md)
-- **Launch Decision**: [reports/zonga-go-live-decision.md](../../reports/zonga-go-live-decision.md)
+- **Streaming Readiness**: [reports/operational/zonga-streaming-readiness.md](../../reports/operational/zonga-streaming-readiness.md)
+- **Launch Decision**: [reports/strategic/zonga-go-live-decision.md](../../reports/strategic/zonga-go-live-decision.md)
 - **Validation Script**: `apps/zonga/scripts/validate-aws-zonga.js`
 
 ---

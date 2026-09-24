@@ -89,9 +89,9 @@ day one, and the migration will be mechanical when ready.
 
 ## Where to read next
 
-- [docs/commercial/NZILA_INTERNAL_AGENCY_MODEL.md](./NZILA_INTERNAL_AGENCY_MODEL.md) — operating model
-- [docs/runbooks/growthos-operator-runbook.md](../runbooks/growthos-operator-runbook.md) — daily/weekly use
-- [docs/commercial/CHANNEL_STRATEGY_MAP.md](./CHANNEL_STRATEGY_MAP.md) — channel strategy
-- [docs/commercial/NZILA_GROWTH_MOAT.md](./NZILA_GROWTH_MOAT.md) — commercial moat
-- [packages/platform-growth-os/README.md](../../packages/platform-growth-os/README.md) — engineering quickstart
-- [packages/platform-growth-os/STATUS.md](../../packages/platform-growth-os/STATUS.md) — what's shipped vs deferred
+- [docs/categories/stakeholders/commercial/NZILA_INTERNAL_AGENCY_MODEL.md](./NZILA_INTERNAL_AGENCY_MODEL.md) — operating model
+- [docs/categories/platform-and-operations/runbooks/growthos-operator-runbook.md](../../platform-and-operations/runbooks/growthos-operator-runbook.md) — daily/weekly use
+- [docs/categories/stakeholders/commercial/CHANNEL_STRATEGY_MAP.md](./CHANNEL_STRATEGY_MAP.md) — channel strategy
+- [docs/categories/stakeholders/commercial/NZILA_GROWTH_MOAT.md](./NZILA_GROWTH_MOAT.md) — commercial moat
+- [packages/platform-growth-os/README.md](../../../../packages/platform-growth-os/README.md) — engineering quickstart
+- [packages/platform-growth-os/STATUS.md](../../../../packages/platform-growth-os/STATUS.md) — what's shipped vs deferred

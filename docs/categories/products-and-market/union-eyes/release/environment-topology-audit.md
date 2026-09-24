@@ -30,7 +30,7 @@
 | Container App                  | RG                          | Revision    | Image tag                                    | Custom domains                                                                                                       |
 | ------------------------------ | --------------------------- | ----------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `nzila-os-union-eyes`          | `nzila-canada-staging-rg`   | `0000263`†  | `nzila/union-eyes:f1e66a2d04720c5e8df59454e14e75104292f250` | `unioneyes.app`, `app.unioneyes.app`, `www.unioneyes.app`, `staging.unioneyes.app`, `staging-app.unioneyes.app` |
-| `nzila-os-union-eyes-staging`  | —                           | —           | —                                            | **DOES NOT EXIST** (referenced by [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml) until this Phase A refactor)        |
+| `nzila-os-union-eyes-staging`  | —                           | —           | —                                            | **DOES NOT EXIST** (referenced by [deploy-union-eyes.yml](../../../../../.github/workflows/deploy-union-eyes.yml) until this Phase A refactor)        |
 | `nzila-os-union-eyes-demo`     | —                           | —           | —                                            | **DOES NOT EXIST** (Phase A action item)                                                                              |
 | `nzila-os-union-eyes-pilot`    | —                           | —           | —                                            | **DOES NOT EXIST** (Phase A action item)                                                                              |
 | `nzila-os-union-eyes-prod`     | —                           | —           | —                                            | **DOES NOT EXIST** (Phase A action item — prod currently runs on the staging-named ACA)                              |
@@ -132,7 +132,7 @@ Verified live `/api/health` after the env-var update:
 
 | Workflow                                        | Triggers              | Targets                                                  | Phase A status                 |
 | ----------------------------------------------- | --------------------- | -------------------------------------------------------- | ------------------------------ |
-| [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml) | push `main`, push `develop`, manual | staging | demo | pilot | production | **REFACTORED** during Phase A: now supports all four envs in `plan` step; injects release metadata + `NZILA_MODE`. |
+| [.github/workflows/deploy-union-eyes.yml](../../../../../.github/workflows/deploy-union-eyes.yml) | push `main`, push `develop`, manual | staging | demo | pilot | production | **REFACTORED** during Phase A: now supports all four envs in `plan` step; injects release metadata + `NZILA_MODE`. |
 
 Plan-step outputs added by Phase A: `nzila_mode`, `deployment_type`, `feature_profile`, `release_id`, `build_time`. All four are propagated into `az containerapp update --set-env-vars`.
 
@@ -142,17 +142,17 @@ Plan-step outputs added by Phase A: `nzila_mode`, `deployment_type`, `feature_pr
 
 | Code surface                                                                 | Phase A change                                                              |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [apps/union-eyes/lib/runtime/production-guard.ts](../../../apps/union-eyes/lib/runtime/production-guard.ts) | **NEW** — `assertNotProduction(scriptName)` shared module.                  |
-| [apps/union-eyes/lib/runtime/production-guard.mjs](../../../apps/union-eyes/lib/runtime/production-guard.mjs) | **NEW** — ESM mirror for `.mjs` seed scripts.                                |
-| [apps/union-eyes/lib/runtime/environment.ts](../../../apps/union-eyes/lib/runtime/environment.ts) | **NEW** — canonical `getUeEnvironment()`, `getNzilaMode()`, `getDeploymentType()`, `getFeatureProfile()`. |
+| [apps/union-eyes/lib/runtime/production-guard.ts](../../../../../apps/union-eyes/lib/runtime/production-guard.ts) | **NEW** — `assertNotProduction(scriptName)` shared module.                  |
+| [apps/union-eyes/lib/runtime/production-guard.mjs](../../../../../apps/union-eyes/lib/runtime/production-guard.mjs) | **NEW** — ESM mirror for `.mjs` seed scripts.                                |
+| [apps/union-eyes/lib/runtime/environment.ts](../../../../../apps/union-eyes/lib/runtime/environment.ts) | **NEW** — canonical `getUeEnvironment()`, `getNzilaMode()`, `getDeploymentType()`, `getFeatureProfile()`. |
 | `apps/union-eyes/scripts/seed-clc-demo-environment.ts`                       | guard call added before `main()`.                                           |
 | `apps/union-eyes/scripts/seed-cba-intelligence.ts`                           | guard call added.                                                           |
 | `apps/union-eyes/scripts/seed-employer-execution-marathon.ts`                | guard call added.                                                           |
 | `apps/union-eyes/scripts/seed-test-env.ts`                                   | guard call added.                                                           |
 | `apps/union-eyes/scripts/seed-union-eyes-demo.ts`                            | guard call added.                                                           |
 | `apps/union-eyes/scripts/seed-cupe-pilot.mjs`                                | guard call added (uses `.mjs` mirror).                                      |
-| [apps/union-eyes/infra/environments/union-eyes-env.bicep](../../../apps/union-eyes/infra/environments/union-eyes-env.bicep) | **NEW** — per-env ACA + PG + KV + LAW Bicep.                                 |
-| [apps/union-eyes/infra/environments/provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1) | **NEW** — one-shot provisioner for all four envs.                            |
+| [apps/union-eyes/infra/environments/union-eyes-env.bicep](../../../../../apps/union-eyes/infra/environments/union-eyes-env.bicep) | **NEW** — per-env ACA + PG + KV + LAW Bicep.                                 |
+| [apps/union-eyes/infra/environments/provision-all.ps1](../../../../../apps/union-eyes/infra/environments/provision-all.ps1) | **NEW** — one-shot provisioner for all four envs.                            |
 
 ---
 

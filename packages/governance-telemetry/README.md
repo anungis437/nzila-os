@@ -2,7 +2,7 @@
 
 Foundational governance event contracts for Nzila runtime governance. Defines the canonical event envelope, severity vocabulary, scope vocabulary, doctrine citation shape, and the schema-validated event type taxonomy used across all Nzila products.
 
-See the [governance telemetry architecture](../../docs/nzila-runtime-governance/governance-telemetry-architecture.md) and the [cross-product fabric](../../docs/nzila-runtime-governance/cross-product-governance-runtime-fabric.md) for the institutional contract this package materializes.
+See the [governance telemetry architecture](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-telemetry-architecture.md) and the [cross-product fabric](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/cross-product-governance-runtime-fabric.md) for the institutional contract this package materializes.
 
 ## Posture
 

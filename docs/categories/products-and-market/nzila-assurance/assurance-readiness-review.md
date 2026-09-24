@@ -4,7 +4,7 @@
 
 This document is the **standing readiness review** for the assurance and certification layer. It assesses how completely Nzila's governance has been translated into continuously verifiable assurance infrastructure: where certification and evidence are mature, where they are partial, where they are absent, and what the trajectory looks like toward external attestation.
 
-It is the assurance-side mirror of the [governance readiness review](../nzila-governance/doctrine-operationalization-readiness-review.md) and the [IP formalization readiness review](../nzila-ip/ip-formalization-readiness-review.md).
+It is the assurance-side mirror of the [governance readiness review](../../historical-archive/archive/iterations/nzila-governance/doctrine-operationalization-readiness-review.md) and the [IP formalization readiness review](../../historical-archive/archive/iterations/nzila-ip/ip-formalization-readiness-review.md).
 
 It exists to ensure Nzila reads its own assurance posture honestly — without the optimistic drift that has historically eroded vendor governance claims at the moment of external scrutiny.
 

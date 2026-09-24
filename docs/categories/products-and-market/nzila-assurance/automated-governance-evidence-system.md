@@ -1,6 +1,6 @@
 # Automated Governance Evidence System
 
-> **Status:** Canonical assurance · **Layer:** Evidence generation · **Inherits:** [../nzila-governance/executable-doctrine-enforcement.md](../nzila-governance/executable-doctrine-enforcement.md), [institutional-certification-framework.md](institutional-certification-framework.md)
+> **Status:** Canonical assurance · **Layer:** Evidence generation · **Inherits:** [docs/categories/historical-archive/archive/iterations/nzila-governance/executable-doctrine-enforcement.md](../../historical-archive/archive/iterations/nzila-governance/executable-doctrine-enforcement.md), [institutional-certification-framework.md](institutional-certification-framework.md)
 
 This document specifies the **automated governance evidence system**: the architecture by which Nzila systems continuously produce reviewable evidence of their governance posture, deployment legitimacy, doctrine compliance, and continuity safety — without dependence on manual narrative.
 

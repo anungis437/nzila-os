@@ -3,8 +3,8 @@
 System-centered continuity posture observation. Categorically refuses behavioral ranking, individual scoring, or person-resolving observation.
 
 See:
-- [docs/nzila-runtime-governance/continuity-observability-system.md](../../docs/nzila-runtime-governance/continuity-observability-system.md)
-- [docs/nzila-runtime-governance/executive-cognitive-safety-monitoring.md](../../docs/nzila-runtime-governance/executive-cognitive-safety-monitoring.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/continuity-observability-system.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/continuity-observability-system.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/executive-cognitive-safety-monitoring.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/executive-cognitive-safety-monitoring.md)
 
 ## Posture
 

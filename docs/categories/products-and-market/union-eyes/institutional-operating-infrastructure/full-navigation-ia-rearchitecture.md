@@ -58,4 +58,4 @@ Sidebar, route group, and navigation-component refactors are doctrinally specifi
 
 ## 7. Authority
 
-Anchored to [UE Operating System Reclassification](ue-operating-system-reclassification.md) and [Cross-App UX Embodiment Finalization](../../nzila-final-convergence/cross-app-ux-embodiment-finalization.md).
+Anchored to [UE Operating System Reclassification](ue-operating-system-reclassification.md) and [Cross-App UX Embodiment Finalization](../../../historical-archive/archive/iterations/nzila-final-convergence/cross-app-ux-embodiment-finalization.md).

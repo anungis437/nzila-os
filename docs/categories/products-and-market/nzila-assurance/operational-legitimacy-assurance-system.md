@@ -1,6 +1,6 @@
 # Operational Legitimacy Assurance System
 
-> **Status:** Canonical assurance · **Layer:** Operational legitimacy assurance · **Inherits:** [../nzila-ip/operational-legitimacy-framework.md](../nzila-ip/operational-legitimacy-framework.md), [../nzila-governance/continuity-safe-deployment-governance.md](../nzila-governance/continuity-safe-deployment-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
+> **Status:** Canonical assurance · **Layer:** Operational legitimacy assurance · **Inherits:** [docs/categories/historical-archive/archive/iterations/nzila-ip/operational-legitimacy-framework.md](../../historical-archive/archive/iterations/nzila-ip/operational-legitimacy-framework.md), [docs/categories/historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
 
 This document defines assurance standards for **institutional deployment realism and operational legitimacy** — the property that distinguishes a system genuinely operating in real institutions under governance from one that merely demonstrates capability in controlled settings.
 
@@ -126,7 +126,7 @@ Operational legitimacy is not earned in a single release. Trust pacing is itself
 - Executive cognitive load tracked over time
 - Stakeholder communication backlog is bounded
 
-Pacing that exceeds institutional rhythm — even with PASS verdicts on individual changes — is itself an indicator at the [scorecard](../nzila-governance/doctrine-governance-scorecard.md).
+Pacing that exceeds institutional rhythm — even with PASS verdicts on individual changes — is itself an indicator at the [scorecard](../../historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md).
 
 ---
 

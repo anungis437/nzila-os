@@ -250,7 +250,7 @@ All operations are scoped via `OrgContext.orgId`:
 
 *Prepared for IRAP project file. See also:*
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md)
-- [Commerce Engine README](../../docs/commerce/README.md)
-- [Legacy Review](../../docs/commerce/LEGACY_REVIEW.md)
-- [Domain Model Draft](../../docs/commerce/DOMAIN_MODEL_DRAFT.md)
+- [ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md)
+- [Commerce Engine README](README.md)
+- [Legacy Review](LEGACY_REVIEW.md)
+- [Domain Model Draft](DOMAIN_MODEL_DRAFT.md)

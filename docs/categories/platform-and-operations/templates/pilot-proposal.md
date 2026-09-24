@@ -107,8 +107,8 @@ The pilot is complete when:
 
 ## References
 
-- [Platform DR Summary](../../docs/public/restore-readiness-summary.md)
-- [Trust Center](../../docs/public/trust-center.md)
-- [Procurement Pack](../../artifacts/commercial/procurement-pack.md)
-- [Revenue Profile](../../docs/union-eyes/revenue-profile.md)
-- [Pilot Admin Runbook](../../docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
+- [Platform DR Summary](../../../public/restore-readiness-summary.md)
+- [Trust Center](../../stakeholders/public/trust-center.md)
+- [Procurement Pack](../../../../artifacts/commercial/procurement-pack.md)
+- [Revenue Profile](../../products-and-market/union-eyes/revenue-profile.md)
+- [Pilot Admin Runbook](../../products-and-market/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)

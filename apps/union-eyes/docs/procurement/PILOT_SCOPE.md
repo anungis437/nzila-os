@@ -2,7 +2,7 @@
 
 This document defines the current technical scope for UnionEyes pilot proof metrics after the pilot-metrics refactor.
 
-Audience-friendly overview: [Pilot Overview](../../docs/union-eyes/pilot-overview.md)
+Audience-friendly overview: [Pilot Overview](../../../../docs/categories/products-and-market/union-eyes/pilot-overview.md)
 
 ## Pilot Objective
 
@@ -24,11 +24,11 @@ The pilot proof path is now action-based and route-driven.
 | `GET /api/cases/[caseId]/export` | `evidence_pack_exports` |
 | `POST /api/cron/sla-watchdog` | `sla_breach_count`, `sla_compliance_rate` |
 
-All emits are executed through [apps/union-eyes/lib/pilot-metrics.ts](apps/union-eyes/lib/pilot-metrics.ts), which resolves the active pilot by `org_id + app_scope=union-eyes`.
+All emits are executed through [apps/union-eyes/lib/pilot-metrics.ts](../../lib/pilot-metrics.ts), which resolves the active pilot by `org_id + app_scope=union-eyes`.
 
 ## Platform Write Guarantees
 
-Metric writes in [packages/platform-pilot-metrics/src/service.ts](packages/platform-pilot-metrics/src/service.ts) enforce:
+Metric writes in [packages/platform-pilot-metrics/src/service.ts](../../../../packages/platform-pilot-metrics/src/service.ts) enforce:
 - required `traceId`
 - required identity (`actorId` or `systemActorId`)
 - required org/pilot scope consistency (`orgId` must match pilot owner org)
