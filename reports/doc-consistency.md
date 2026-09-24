@@ -1,26 +1,26 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-09-24T12:36:19.053Z
+> Generated: 2026-09-24T12:58:14.141Z
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Files Scanned | 2436 |
-| Total Findings | 2248 |
-| Errors | 0 |
-| Warnings | 623 |
-| Info | 1625 |
+| Metric         | Value |
+| -------------- | ----- |
+| Files Scanned  | 2439  |
+| Total Findings | 2248  |
+| Errors         | 0     |
+| Warnings       | 623   |
+| Info           | 1625  |
 
 ## Findings by Rule
 
-| Rule | Count |
-|------|-------|
-| naming-inconsistency | 1587 |
-| stale-reference | 431 |
-| missing-package-readme | 112 |
-| stale-package-ref | 80 |
-| stale-date | 38 |
+| Rule                   | Count |
+| ---------------------- | ----- |
+| naming-inconsistency   | 1587  |
+| stale-reference        | 431   |
+| missing-package-readme | 112   |
+| stale-package-ref      | 80    |
+| stale-date             | 38    |
 
 ## stale-package-ref (80)
 
@@ -565,7 +565,7 @@
 - ℹ️ `docs/INDEX.md:168` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/INDEX.md:181` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/README.md:49` — "buyer pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/README.md:51` — "buyer pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:96` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:157` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/architecture/authority-policy-registry-and-decision-events.md:159` — "orgId" should be "org_id" (tenant identifier)
@@ -1734,7 +1734,7 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:1058` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:1061` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:164` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:123` — "evidence bundle" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/governance/runtime/runtime-separation-plan.md:153` — "Evidence bundle" should be "evidence pack" (evidence artifact)
@@ -1817,8 +1817,8 @@
 - ℹ️ `docs/nzila-residual-closure/r9-org-resolver-callsite-audit.md:143` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/nzila-residual-closure/r9-org-resolver-callsite-audit.md:144` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/nzila-runtime-integrity/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/nzila-runtime-integrity/README.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/nzila-runtime-integrity/README.md:52` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-runtime-integrity/README.md:12` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-runtime-integrity/README.md:61` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-runtime-integrity/final-runtime-integrity-review.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-runtime-integrity/final-runtime-integrity-review.md:68` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-runtime-integrity/final-runtime-integrity-review.md:113` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1828,7 +1828,7 @@
 - ℹ️ `docs/nzila-runtime-integrity/full-organization-identity-convergence.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-runtime-integrity/full-organization-identity-convergence.md:37` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/nzila-sovereignty-proving/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/nzila-sovereignty-proving/README.md:5` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/nzila-sovereignty-proving/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-sovereignty-proving/full-auth-identity-stress-validation.md:7` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-sovereignty-proving/full-auth-identity-stress-validation.md:11` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/nzila-sovereignty-proving/full-auth-identity-stress-validation.md:58` — "orgId" should be "org_id" (tenant identifier)
@@ -1978,62 +1978,62 @@
 - ℹ️ `docs/runbooks/production-rollback.md:32` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/runbooks/production-rollback.md:37` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/P4_AUTHORITY_ROLLOUT_REMEDIATION.md:36` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/README.md:16` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/README.md:19` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/any-elimination.md:158` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:43` — "Buyer Pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:63` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:67` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:85` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:90` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/BUYER_REVIEW_INDEX.md:54` — "Buyer Pack" should be "procurement pack" (procurement artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:75` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:79` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:98` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/CI_GOVERNANCE_EVIDENCE.md:103` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:33` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:105` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:107` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:23` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:142` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:179` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:153` — "buyer pack" should be "procurement pack" (procurement artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:270` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:24` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:43` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:115` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:117` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:33` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:152` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:189` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/INVESTOR_TECHNICAL_DILIGENCE_SUMMARY.md:163` — "buyer pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:280` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:300` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:17` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:19` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:31` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:60` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:66` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:75` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:88` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:89` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:144` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:147` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:144` — "Evidence Package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:174` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:34` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:35` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:74` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:112` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:125` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/README.md:17` — "evidence package" should be "evidence pack" (evidence artifact)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:38` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:39` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:40` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:41` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:42` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:43` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:44` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:45` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:46` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:47` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:48` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:290` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/LIVE_EVIDENCE_CAPTURE_RUNBOOK.md:310` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:27` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:29` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:41` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:70` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:76` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:85` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:98` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:99` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:154` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/ORG_ISOLATION_CONTROL_MAP.md:157` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:155` — "Evidence Package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_OPERATIONS_RUNBOOK.md:185` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:44` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:45` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_READINESS_MEMO.md:84` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:122` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/PILOT_SUCCESS_METRICS.md:135` — "evidence package" should be "evidence pack" (evidence artifact)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/README.md:23` — "evidence package" should be "evidence pack" (evidence artifact)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:49` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:50` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:51` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:79` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:81` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:27` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:34` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:52` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:53` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:54` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:55` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:56` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:57` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:58` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:59` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:60` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:61` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:62` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:90` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/RUNTIME_EVIDENCE_PACK.md:92` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:37` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:43` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:44` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/pilot-evidence-pack/SECURITY_BUYER_PACK.md:1` — "Buyer Pack" should be "procurement pack" (procurement artifact)
 - ℹ️ `docs/union-eyes/qa/rbac-reality-map.md:29` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/reality-remediation/00_PROGRAM_CHARTER.md:90` — "evidence bundle" should be "evidence pack" (evidence artifact)

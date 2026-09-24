@@ -1,22 +1,31 @@
 # Nzila OS — Residual Closure Layer
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-05-09 → 2026-05-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `pnpm validate:residual-closure`, plus the operational-honesty and org-resolver guardrails, resolve this directory by path; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 > **Doctrine.** Residual elimination, stewardship hardening — not new systems.
 
 This layer closes the 9 named residuals (R1–R9) recorded in [`../nzila-sovereignty-proving/full-tier2-operational-sovereignty-review.md`](../nzila-sovereignty-proving/full-tier2-operational-sovereignty-review.md). Anti-expansion: every change closes a named residual; no architecture churn, no feature growth, no semantic expansion.
 
 ## Residual register
 
-| ID | Doc | Severity | Status (this PR) |
-|---|---|---|---|
-| R1 | [r1-pilot-django-sidecar-binding-closure.md](./r1-pilot-django-sidecar-binding-closure.md) | High | **DEFERRED** — runbook + procedure shipped; live deploy is a substrate-cost action scoped to a discrete chore PR |
-| R2 | [r2-cognition-degradation-drill-corpus.md](./r2-cognition-degradation-drill-corpus.md) | Medium | **PARTIALLY CLOSED** — drill protocol shipped; live execution scoped to recurring chore cadence |
-| R3 | [r3-continuity-degradation-drill-corpus.md](./r3-continuity-degradation-drill-corpus.md) | Medium | **PARTIALLY CLOSED** — drill protocol shipped; live execution scoped to recurring chore cadence |
-| R4 | [r4-notification-degradation-drill-corpus.md](./r4-notification-degradation-drill-corpus.md) | Low | **PARTIALLY CLOSED** — drill protocol shipped; live execution scoped to recurring chore cadence |
-| R5 | [r5-locale-double-prefix-fix.md](./r5-locale-double-prefix-fix.md) | Low | **CLOSED** — locale alias normalization landed in `apps/union-eyes/proxy.ts`; single-hop 308 |
-| R6 | [r6-seeded-persona-corpus-completion.md](./r6-seeded-persona-corpus-completion.md) | Medium | **DEFERRED** — corpus inventory shipped; substrate seeding scoped to a discrete chore PR |
-| R7 | [r7-operational-honesty-copy-sweep.md](./r7-operational-honesty-copy-sweep.md) | Low | **PARTIALLY CLOSED** — sweep inventory shipped; copy edits scoped to a discrete chore PR |
-| R8 | [r8-provider-key-rotation-cadence.md](./r8-provider-key-rotation-cadence.md) | Medium | **PARTIALLY CLOSED** — rotation cadence + procedure shipped; first quarterly rotation scoped to chore cadence |
-| R9 | [r9-org-resolver-callsite-audit.md](./r9-org-resolver-callsite-audit.md) | Low | **CLOSED at the audit layer** — call-site enumeration shipped with named ambiguity sites; surgical removal scoped to chore PR |
+| ID  | Doc                                                                                          | Severity | Status (this PR)                                                                                                              |
+| --- | -------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| R1  | [r1-pilot-django-sidecar-binding-closure.md](./r1-pilot-django-sidecar-binding-closure.md)   | High     | **DEFERRED** — runbook + procedure shipped; live deploy is a substrate-cost action scoped to a discrete chore PR              |
+| R2  | [r2-cognition-degradation-drill-corpus.md](./r2-cognition-degradation-drill-corpus.md)       | Medium   | **PARTIALLY CLOSED** — drill protocol shipped; live execution scoped to recurring chore cadence                               |
+| R3  | [r3-continuity-degradation-drill-corpus.md](./r3-continuity-degradation-drill-corpus.md)     | Medium   | **PARTIALLY CLOSED** — drill protocol shipped; live execution scoped to recurring chore cadence                               |
+| R4  | [r4-notification-degradation-drill-corpus.md](./r4-notification-degradation-drill-corpus.md) | Low      | **PARTIALLY CLOSED** — drill protocol shipped; live execution scoped to recurring chore cadence                               |
+| R5  | [r5-locale-double-prefix-fix.md](./r5-locale-double-prefix-fix.md)                           | Low      | **CLOSED** — locale alias normalization landed in `apps/union-eyes/proxy.ts`; single-hop 308                                  |
+| R6  | [r6-seeded-persona-corpus-completion.md](./r6-seeded-persona-corpus-completion.md)           | Medium   | **DEFERRED** — corpus inventory shipped; substrate seeding scoped to a discrete chore PR                                      |
+| R7  | [r7-operational-honesty-copy-sweep.md](./r7-operational-honesty-copy-sweep.md)               | Low      | **PARTIALLY CLOSED** — sweep inventory shipped; copy edits scoped to a discrete chore PR                                      |
+| R8  | [r8-provider-key-rotation-cadence.md](./r8-provider-key-rotation-cadence.md)                 | Medium   | **PARTIALLY CLOSED** — rotation cadence + procedure shipped; first quarterly rotation scoped to chore cadence                 |
+| R9  | [r9-org-resolver-callsite-audit.md](./r9-org-resolver-callsite-audit.md)                     | Low      | **CLOSED at the audit layer** — call-site enumeration shipped with named ambiguity sites; surgical removal scoped to chore PR |
 
 Final review: [full-residual-elimination-review.md](./full-residual-elimination-review.md)
 

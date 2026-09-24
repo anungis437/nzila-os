@@ -1,5 +1,14 @@
 # Union Eyes — Final Runtime Convergence & Institutional Embodiment Authority
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-05-09 → 2026-05-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `tooling/scripts/validate-runtime-convergence.mjs` resolves this directory through `tooling/scripts/lib/ue-doc-paths.mjs`; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../../union-eyes/README.md`](../../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../../DOCUMENT_DISPOSITION.md`](../../DOCUMENT_DISPOSITION.md).
+
 > Doctrine layer that closes the final distance between **institutional doctrine** and **lived runtime experience**. This is the canonical runtime embodiment authority layer.
 
 This layer exists because the prior layers — doctrine, governance, cognition, monetization, category, procurement, marketing, and operational infrastructure — are converged. The remaining gaps are **experiential** convergence gaps. UE must increasingly feel **institutionally inevitable**, not historically accumulated.

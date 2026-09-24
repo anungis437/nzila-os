@@ -7,6 +7,8 @@ This directory is the documentation entry point. Start here, then follow the aud
   (`pnpm docs:index` — generated, do not hand-edit)
 - **Historical / completed-programme material:**
   [categories/historical-archive/](categories/historical-archive/)
+- **Which documents are current, historical, generated or validator-pinned:**
+  [DOCUMENT_DISPOSITION.md](DOCUMENT_DISPOSITION.md)
 
 ## Reading order
 

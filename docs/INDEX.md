@@ -229,6 +229,10 @@ read by validators (`pnpm validate:tier2-hardening`, `validate:residual-closure`
 `validate:final-convergence`, `field-ops:validate`), so they stay in place rather than moving to
 the archive.
 
+Per-family disposition (current authority, supporting, machine-consumed, historical, superseded,
+generated, unresolved) and the exact validator that pins each tree in place are recorded in
+[DOCUMENT_DISPOSITION.md](DOCUMENT_DISPOSITION.md).
+
 They are not a substitute for current authority. For current platform state read
 [../ARCHITECTURE.md](../ARCHITECTURE.md); for current product posture read the portfolio
 catalog; for current Union Eyes readiness read [union-eyes/README.md](union-eyes/README.md).

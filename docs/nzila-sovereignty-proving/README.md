@@ -1,5 +1,14 @@
 # Nzila OS — Sovereignty Proving Layer
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-05-09 → 2026-05-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `pnpm validate:sovereignty-proving` resolves this directory by path; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 > **Doctrine authority.** Not aesthetics. Not feature plumbing. Operational stress-proving.
 
 This layer exists to certify that Nzila OS behaves **institutionally correctly under operational stress** — not merely during healthy runtime conditions. It is the canonical operational stress-proofing authority and the upstream gate for the **Tier 2 Operational Sovereignty Certification**.
@@ -10,16 +19,16 @@ The proving cadence is governance-safe, continuity-safe, anti-surveillance, evid
 
 ## Canonical proving documents
 
-| # | Document | Purpose |
-|---|----------|---------|
-| 1 | [`full-live-degradation-traversal-program.md`](./full-live-degradation-traversal-program.md) | Live degraded-runtime traversal across dev / staging / demo / pilot |
-| 2 | [`full-fail-closed-runtime-proof.md`](./full-fail-closed-runtime-proof.md) | Proof that the runtime fails closed under contract violation |
-| 3 | [`full-operational-honesty-certification.md`](./full-operational-honesty-certification.md) | Certification that the ecosystem never overstates legitimacy |
-| 4 | [`full-cognition-degradation-governance.md`](./full-cognition-degradation-governance.md) | Bounded cognition degradation behavior |
-| 5 | [`full-auth-identity-stress-validation.md`](./full-auth-identity-stress-validation.md) | Identity stress traversal under degradation |
-| 6 | [`full-continuity-safe-operations-proving.md`](./full-continuity-safe-operations-proving.md) | Continuity preservation under operational degradation |
-| 7 | [`full-live-sovereignty-traversal-e2e.md`](./full-live-sovereignty-traversal-e2e.md) | End-to-end sovereign environment traversal |
-| 8 | [`full-tier2-operational-sovereignty-review.md`](./full-tier2-operational-sovereignty-review.md) | Final Tier 2 operational sovereignty verdict + Tier 3 readiness |
+| #   | Document                                                                                         | Purpose                                                             |
+| --- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| 1   | [`full-live-degradation-traversal-program.md`](./full-live-degradation-traversal-program.md)     | Live degraded-runtime traversal across dev / staging / demo / pilot |
+| 2   | [`full-fail-closed-runtime-proof.md`](./full-fail-closed-runtime-proof.md)                       | Proof that the runtime fails closed under contract violation        |
+| 3   | [`full-operational-honesty-certification.md`](./full-operational-honesty-certification.md)       | Certification that the ecosystem never overstates legitimacy        |
+| 4   | [`full-cognition-degradation-governance.md`](./full-cognition-degradation-governance.md)         | Bounded cognition degradation behavior                              |
+| 5   | [`full-auth-identity-stress-validation.md`](./full-auth-identity-stress-validation.md)           | Identity stress traversal under degradation                         |
+| 6   | [`full-continuity-safe-operations-proving.md`](./full-continuity-safe-operations-proving.md)     | Continuity preservation under operational degradation               |
+| 7   | [`full-live-sovereignty-traversal-e2e.md`](./full-live-sovereignty-traversal-e2e.md)             | End-to-end sovereign environment traversal                          |
+| 8   | [`full-tier2-operational-sovereignty-review.md`](./full-tier2-operational-sovereignty-review.md) | Final Tier 2 operational sovereignty verdict + Tier 3 readiness     |
 
 ## Validator
 
