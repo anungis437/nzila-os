@@ -175,7 +175,7 @@ Staging → production promotion with governance gates at every step:
 
 CI enforces portfolio-governance, compliance drift, and reliability checks on every PR.
 
-## Portfolio governance
+## Portfolio Governance
 
 - **Single truth source** — [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json) drives all portfolio artifacts.
 - **Generated status** — [reports/portfolio-status.md](reports/portfolio-status.md).
