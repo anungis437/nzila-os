@@ -1,6 +1,6 @@
 # Ownership Registry
 
-Generated: 2026-08-27T20:40:32.349Z
+Generated: 2026-09-24T12:36:19.590Z
 
 Coverage: 100% (27/27 serious systems owned)
 
@@ -31,7 +31,7 @@ Coverage: 100% (27/27 serious systems owned)
 | nzila-hq | tier-3 | not-deployed | team-platform-ops@nzila.ai | oncall-platform@nzila.ai | team-platform-admin@nzila.ai | team-platform-admin@nzila.ai |
 | orchestrator-api | internal | staging-only | team-platform-ops@nzila.ai | oncall-platform@nzila.ai | team-platform-admin@nzila.ai | team-platform-admin@nzila.ai |
 | partners | tier-1 | prod-approved | team-platform-ops@nzila.ai | oncall-partners@nzila.ai | team-partners-business@nzila.ai | team-partners-engineering@nzila.ai |
-| platform-admin | frozen | frozen | team-platform-ops@nzila.ai | oncall-platform@nzila.ai | team-platform-admin@nzila.ai | team-platform-admin@nzila.ai |
+| platform-admin | frozen | staging-only | team-platform-ops@nzila.ai | oncall-platform@nzila.ai | team-platform-admin@nzila.ai | team-platform-admin@nzila.ai |
 | test-scaffold-gp | tier-5 | deprecated | team-platform-ops@nzila.ai | oncall-platform@nzila.ai | team-platform-admin@nzila.ai | team-platform-admin@nzila.ai |
 | trade | tier-2 | incubating | team-platform-ops@nzila.ai | oncall-trade@nzila.ai | team-trade-business@nzila.ai | team-trade-engineering@nzila.ai |
 | trustcore | tier-3 | not-deployed | team-platform-ops@nzila.ai | oncall-platform@nzila.ai | team-platform-admin@nzila.ai | team-platform-admin@nzila.ai |

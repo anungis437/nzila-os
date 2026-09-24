@@ -14,10 +14,10 @@ unwritten pages have been removed; the authoritative substitute is named where o
 
 ## Not authored as how-to guides
 
-| Topic | Where the current answer lives |
-|-------|-------------------------------|
-| Deploy to Azure | [../../platform-and-operations/ops/](../../platform-and-operations/ops/) and `infrastructure/` |
-| Add a new org | [../../platform-and-operations/architecture/ORG_ISOLATION.md](../../platform-and-operations/architecture/ORG_ISOLATION.md) |
+| Topic             | Where the current answer lives                                                                                             |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Deploy to Azure   | [../../platform-and-operations/ops/](../../platform-and-operations/ops/) and `infrastructure/`                             |
+| Add a new org     | [../../platform-and-operations/architecture/ORG_ISOLATION.md](../../platform-and-operations/architecture/ORG_ISOLATION.md) |
 | Add an OPA policy | [../../platform-and-operations/architecture/policy-engine.md](../../platform-and-operations/architecture/policy-engine.md) |
-| Configure SLOs | [../../platform-and-operations/ops/](../../platform-and-operations/ops/) |
-| Run chaos tests | `scripts/` chaos and game-day entrypoints in `package.json` |
+| Configure SLOs    | [../../platform-and-operations/ops/](../../platform-and-operations/ops/)                                                   |
+| Run chaos tests   | `scripts/` chaos and game-day entrypoints in `package.json`                                                                |

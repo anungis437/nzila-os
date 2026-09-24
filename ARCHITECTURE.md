@@ -26,17 +26,17 @@ It provides:
 
 When documentation and these artifacts disagree, these artifacts win.
 
-| Concern | Authority |
-| --- | --- |
-| Capability ownership between apps | `apps/control-plane/lib/capability-ownership.ts` |
-| Operational / integration registry | `packages/platform-contracts/src/registry.ts` |
-| Product tier, GTM posture, revenue status | `governance/portfolio/product-catalog.json` (only editable portfolio source) |
-| Platform + app status manifest | `nzila-truth-manifest.json` (generated) |
-| Repo inventory (apps, packages, workflows, tests) | `tooling/repo-inventory/output/inventory.json` (generated) |
-| Union Eyes capability state | `apps/union-eyes/lib/reality/capability-registry.ts` |
-| Per-app control posture | `apps/<app>/control-manifest.json` |
-| Package ownership metadata | `packages/<pkg>/package.meta.json` |
-| Platform adoption exceptions | `governance/exceptions/platform-adoption-exceptions.json` |
+| Concern                                           | Authority                                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Capability ownership between apps                 | `apps/control-plane/lib/capability-ownership.ts`                             |
+| Operational / integration registry                | `packages/platform-contracts/src/registry.ts`                                |
+| Product tier, GTM posture, revenue status         | `governance/portfolio/product-catalog.json` (only editable portfolio source) |
+| Platform + app status manifest                    | `nzila-truth-manifest.json` (generated)                                      |
+| Repo inventory (apps, packages, workflows, tests) | `tooling/repo-inventory/output/inventory.json` (generated)                   |
+| Union Eyes capability state                       | `apps/union-eyes/lib/reality/capability-registry.ts`                         |
+| Per-app control posture                           | `apps/<app>/control-manifest.json`                                           |
+| Package ownership metadata                        | `packages/<pkg>/package.meta.json`                                           |
+| Platform adoption exceptions                      | `governance/exceptions/platform-adoption-exceptions.json`                    |
 
 ## Monorepo Structure
 

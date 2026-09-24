@@ -7,15 +7,15 @@ If a document here disagrees with the current repository, the current repository
 
 ## Where current authority lives
 
-| Subject | Current authority |
-|---------|-------------------|
-| Platform purpose, commercial spine | [../../../README.md](../../../README.md) |
-| Architecture, authority boundaries | [../../../ARCHITECTURE.md](../../../ARCHITECTURE.md) |
-| Union Eyes engineering + readiness | [../../union-eyes/README.md](../../union-eyes/README.md) |
-| CIVIC / OCI positioning | [../../CIVIC_OCI_ALIGNMENT.md](../../CIVIC_OCI_ALIGNMENT.md) |
-| OCI doctrine dispositions | [../../oci/SUPERSEDED.md](../../oci/SUPERSEDED.md) |
-| Product posture | [../../../governance/portfolio/product-catalog.json](../../../governance/portfolio/product-catalog.json) |
-| Current documentation index | [../../INDEX.md](../../INDEX.md) |
+| Subject                            | Current authority                                                                                        |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Platform purpose, commercial spine | [../../../README.md](../../../README.md)                                                                 |
+| Architecture, authority boundaries | [../../../ARCHITECTURE.md](../../../ARCHITECTURE.md)                                                     |
+| Union Eyes engineering + readiness | [../../union-eyes/README.md](../../union-eyes/README.md)                                                 |
+| CIVIC / OCI positioning            | [../../CIVIC_OCI_ALIGNMENT.md](../../CIVIC_OCI_ALIGNMENT.md)                                             |
+| OCI doctrine dispositions          | [../../oci/SUPERSEDED.md](../../oci/SUPERSEDED.md)                                                       |
+| Product posture                    | [../../../governance/portfolio/product-catalog.json](../../../governance/portfolio/product-catalog.json) |
+| Current documentation index        | [../../INDEX.md](../../INDEX.md)                                                                         |
 
 ## Contents
 
