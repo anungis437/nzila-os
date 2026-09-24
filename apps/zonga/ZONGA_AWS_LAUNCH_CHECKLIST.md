@@ -22,7 +22,7 @@
 - [x] CloudFront TTL Set to 14400 seconds (4 hours)
 
 ### Documentation
-- [x] AWS_ZONGA_SETUP.md (10-part comprehensive guide)
+- [x] docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md (10-part comprehensive guide)
 - [x] apps/zonga/.env.example (updated with AWS vars)
 - [x] AWS validation script created
 
@@ -50,7 +50,7 @@ ZONGA_CLOUDFRONT_KEY_PAIR_ID=<key-pair-id>
 ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM=<private-key-pem>
 ```
 
-**Reference**: AWS_ZONGA_SETUP.md Part 4
+**Reference**: docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md Part 4
 
 ---
 
@@ -67,7 +67,7 @@ base64 -i /tmp/public-key.pem | tr -d '\n'
 aws cloudfront create-public-key --public-key-config '{...}'
 ```
 
-**Reference**: AWS_ZONGA_SETUP.md Part 4
+**Reference**: docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md Part 4
 
 ---
 
@@ -85,7 +85,7 @@ node apps/zonga/scripts/validate-aws-zonga.js
 
 **Expected**: Job submitted, queued, and eventually completed in S3 output bucket
 
-**Reference**: AWS_ZONGA_SETUP.md Part 7
+**Reference**: docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md Part 7
 
 ---
 
@@ -108,7 +108,7 @@ curl -I $SIGNED_URL
 # Expected: 200 OK
 ```
 
-**Reference**: AWS_ZONGA_SETUP.md Part 8
+**Reference**: docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md Part 8
 
 ---
 
@@ -189,7 +189,7 @@ curl -I $SIGNED_URL
 
 ## 📞 Support & Documentation
 
-- **Setup Guide**: [AWS_ZONGA_SETUP.md](../../AWS_ZONGA_SETUP.md)
+- **Setup Guide**: [AWS_ZONGA_SETUP.md](../../docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md)
 - **Streaming Readiness**: [reports/operational/zonga-streaming-readiness.md](../../reports/operational/zonga-streaming-readiness.md)
 - **Launch Decision**: [reports/strategic/zonga-go-live-decision.md](../../reports/strategic/zonga-go-live-decision.md)
 - **Validation Script**: `apps/zonga/scripts/validate-aws-zonga.js`

@@ -5,9 +5,8 @@ Understanding-oriented documentation discussing concepts and design decisions.
 ## Architecture Decisions
 
 - [Why Evidence-First](evidence-first.md) — Hash-chained audit trails as a core invariant
-- [Org Isolation Model](org-isolation.md) — Multi-org data isolation strategy
-- [Stack Authority](stack-authority.md) — Why each stack owns its data layer
-- [Content vs Governance](content-governance.md) — Separation of concerns
+- [Org Isolation Model](../architecture/ORG_ISOLATION.md) — Multi-org data isolation strategy
+- [Stack Authority](../architecture/STACK_AUTHORITY.md) — Why each stack owns its data layer
 
 ## AI & ML
 
@@ -15,4 +14,5 @@ Understanding-oriented documentation discussing concepts and design decisions.
 
 ## Operations
 
-- [SLO Philosophy](slo-philosophy.md) — Error budgets, burn rates, and alerting
+No explanation page is authored for SLO philosophy. Operational practice lives in
+[../ops/](../ops/).

@@ -1,9 +1,28 @@
 # Nzila OS Documentation
 
-> Iteration, planning, and convergence history is archived under [archive/iterations](categories/historical-archive/archive/iterations/).
-> Use this page and [documentation-index.md](documentation-index.md) for active documentation only.
+This directory is the documentation entry point. Start here, then follow the audience path.
 
-## High-Level Categories
+- **Curated index of current documentation:** [INDEX.md](INDEX.md)
+- **Generated, exhaustive file listing:** [documentation-index.md](documentation-index.md)
+  (`pnpm docs:index` — generated, do not hand-edit)
+- **Historical / completed-programme material:**
+  [categories/historical-archive/](categories/historical-archive/)
+
+## Reading order
+
+1. [../README.md](../README.md) — what NzilaOS is, what it is not, commercial spine.
+2. [../ARCHITECTURE.md](../ARCHITECTURE.md) — authority boundaries, capability ownership,
+   machine-readable authorities.
+3. Product truth — [union-eyes/README.md](union-eyes/README.md) (Union Eyes),
+   [CIVIC_OCI_ALIGNMENT.md](CIVIC_OCI_ALIGNMENT.md) and [oci/README.md](oci/README.md) (CIVIC/OCI).
+4. Builder docs — [categories/stakeholders/builders/](categories/stakeholders/builders/).
+5. Operator docs — [categories/platform-and-operations/ops/](categories/platform-and-operations/ops/).
+6. Security and governance — [../SECURITY.md](../SECURITY.md),
+   [categories/platform-and-operations/governance/](categories/platform-and-operations/governance/).
+7. Evidence and release — [proof-center/portfolio-proof-index.md](proof-center/portfolio-proof-index.md).
+8. History — [categories/historical-archive/](categories/historical-archive/).
+
+## High-level categories
 
 - [Documentation Categories](categories/README.md)
 - [Stakeholders](categories/stakeholders/README.md)
@@ -11,29 +30,25 @@
 - [Products and Market](categories/products-and-market/README.md)
 - [Historical Archive](categories/historical-archive/README.md)
 
-## Start Here
+## Frequently needed
 
-- Canonical docs index: [Documentation Index](documentation-index.md)
-- Commercial proof index: [Proof Center](proof-center/portfolio-proof-index.md)
-- Buyer packs: [Union Eyes](categories/stakeholders/buyers/union-eyes-buyer-pack.md) · [Flow](categories/stakeholders/buyers/flow-buyer-pack.md)
-- Investor summary: [Final Investor One-Pager](categories/stakeholders/investor/final-investor-onepager.md)
 - Platform overview: [What Is Nzila](categories/platform-and-operations/platform/what-is-nzila.md)
-- Portfolio truth: [Portfolio Matrix](platform/portfolio-matrix.md)
+- Golden path for developers: [Golden Path Developer Guide](categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
+- Runbooks: [../ops/runbooks/README.md](../ops/runbooks/README.md)
+- Ownership registry: [ops/ownership-registry.md](ops/ownership-registry.md)
+- Status authority model: [Status Authority Model](categories/platform-and-operations/platform/STATUS_AUTHORITY_MODEL.md)
+- Procurement pack: [Procurement Pack](categories/platform-and-operations/governance/procurement-pack.md)
+- Portfolio matrix (generated from `governance/portfolio/product-catalog.json`):
+  [platform/portfolio-matrix.md](platform/portfolio-matrix.md)
 
-## Product Profiles
+## How to read status claims
 
-- [Union Eyes Revenue Profile](categories/products-and-market/union-eyes/revenue-profile.md)
-- [Flow Revenue Profile](categories/products-and-market/flow/revenue-profile.md)
-
-## Governance and Operations
-
-- [Ownership Registry](ops/ownership-registry.md)
-- [Procurement Pack](categories/platform-and-operations/governance/procurement-pack.md)
-- [Status Authority Model](categories/platform-and-operations/platform/STATUS_AUTHORITY_MODEL.md)
-- [CUPE Pilot Runbook](categories/products-and-market/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
-
-## Developer and Runtime References
-
-- [Architecture](../ARCHITECTURE.md)
-- [Golden Path Developer Guide](categories/stakeholders/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
-- [Runbooks](../ops/runbooks/README.md)
+- Portfolio tier, GTM posture and revenue status come from
+  [../governance/portfolio/product-catalog.json](../governance/portfolio/product-catalog.json).
+  Everything else portfolio-shaped is generated from it.
+- A product having documentation, code, or a buyer pack does **not** make it a current
+  commercial priority. Only Union Eyes and CIVIC are the active commercial spine.
+- Readiness language (`DESIGN`, `IMPLEMENTED`, `TESTED`, `DEPLOYED`, `RUNTIME-VERIFIED`,
+  `OPERATIONALLY PROVEN`) is load-bearing. Do not flatten it.
+- Documents describing a finished programme or a past state carry a status banner and are not
+  current authority.

@@ -51,7 +51,7 @@
 
 | App | Shape Doc | Meta |
 |---|---|---|
-| union-eyes | [ARCHITECTURE_SHAPE.md](../../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/union-eyes/app-architecture.meta.json) |
+| union-eyes | [ARCHITECTURE_SHAPE.md](../../../../apps/union-eyes/docs/architecture/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/union-eyes/app-architecture.meta.json) |
 | flow | [ARCHITECTURE_SHAPE.md](../../../../apps/flow/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/flow/app-architecture.meta.json) |
 | zonga | [ARCHITECTURE_SHAPE.md](../../../../apps/zonga/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/zonga/app-architecture.meta.json) |
 | cfo | [ARCHITECTURE_SHAPE.md](../../../../apps/cfo/docs/ARCHITECTURE_SHAPE.md) | [meta](../../../../apps/cfo/app-architecture.meta.json) |

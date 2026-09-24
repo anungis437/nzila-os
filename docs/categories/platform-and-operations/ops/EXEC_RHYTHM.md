@@ -110,8 +110,8 @@ All data sections use placeholder patterns consistent with Command Center. Auth 
 
 | Link | Purpose |
 |------|---------|
-| [Command Center](../../../../apps/console/app/(dashboard)/command-center/) | Executive home — start here |
-| [Execution](../../../../apps/console/app/(dashboard)/execution/) | Initiative and blocker tracking |
+| Command Center — `apps/console/app/(dashboard)/command-center/` | Executive home — start here |
+| Execution — `apps/console/app/(dashboard)/execution/` | Initiative and blocker tracking |
 | [Portfolio](../../../../governance/portfolio/) | Venture and product allocation |
 | [Capital](../../../../governance/foundations/capital/) | Burn + runway |
 | [Client List](../../../../apps/console/app/api/itsm/clients/) | Full client roster |

@@ -424,8 +424,8 @@ Monitor after week 1 and adjust capacity/limits accordingly.
 - [AWS MediaConvert API](https://docs.aws.amazon.com/mediaconvert/latest/ug/what-is.html)
 - [AWS IVS Getting Started](https://docs.aws.amazon.com/ivs/latest/userguide/getting-started.html)
 - [CloudFront Signed URLs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-signed-urls.html)
-- [Zonga Streaming Code](packages/zonga-streaming-aws/)
-- [Zonga Launch Readiness Report](reports/operational/zonga-launch-readiness.md)
+- [Zonga Streaming Code](../../../../packages/zonga-streaming-aws/)
+- [Zonga Launch Readiness Report](../../../../reports/operational/zonga-launch-readiness.md)
 
 ---
 

@@ -32,14 +32,14 @@ And the dual-entry motion:
 
 ### 3.1 Identity, category, and procurement posture
 
-- Institutional operating infrastructure category is already explicit in [final-ue-operating-infrastructure-review.md](../institutional-operating-infrastructure/final-ue-operating-infrastructure-review.md#L1).
-- Navigation and IA are already framed around institutional flows in [full-navigation-ia-rearchitecture.md](../institutional-operating-infrastructure/full-navigation-ia-rearchitecture.md#L1).
-- Procurement and sales motion are already continuity-governance-first in [full-procurement-sales-motion-refactor.md](../institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md#L1).
-- Monetization is maturity-tiered (not AI utility) in [full-monetization-rearchitecture.md](../institutional-operating-infrastructure/full-monetization-rearchitecture.md#L1).
+- Institutional operating infrastructure category is already explicit in [final-ue-operating-infrastructure-review.md](../institutional-operating-infrastructure/final-ue-operating-infrastructure-review.md).
+- Navigation and IA are already framed around institutional flows in [full-navigation-ia-rearchitecture.md](../institutional-operating-infrastructure/full-navigation-ia-rearchitecture.md).
+- Procurement and sales motion are already continuity-governance-first in [full-procurement-sales-motion-refactor.md](../institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md).
+- Monetization is maturity-tiered (not AI utility) in [full-monetization-rearchitecture.md](../institutional-operating-infrastructure/full-monetization-rearchitecture.md).
 
 ### 3.2 Route and module runtime baseline
 
-- Canonical dashboard modules and retire/merge posture already documented in [full-canonical-module-inventory.md](full-canonical-module-inventory.md#L1).
+- Canonical dashboard modules and retire/merge posture already documented in [full-canonical-module-inventory.md](full-canonical-module-inventory.md).
 - Root entry redirects to locale root (marketing + authenticated portal split) in [app/page.tsx](../../../../../apps/web/app/page.tsx#L1).
 - Locale root already supports continuity-first and authenticated operations entry in [app/[locale]/page.tsx](../../../../../apps/union-eyes/app/[locale]/page.tsx#L1).
 
@@ -98,7 +98,7 @@ What diverges:
 What is aligned:
 
 - Core operations surfaces are implemented: work, grievances/cases, governance, committees, communications, onboarding, outcomes.
-- Operations-first practical workflow is explicit in route structure and user journey validation in [USER_JOURNEY_VALIDATION.md](../../../../../apps/union-eyes/docs/operations/USER_JOURNEY_VALIDATION.md#L1).
+- Operations-first practical workflow is explicit in route structure and user journey validation in [USER_JOURNEY_VALIDATION.md](../../../../../apps/union-eyes/docs/operations/USER_JOURNEY_VALIDATION.md).
 
 What diverges:
 
@@ -113,7 +113,7 @@ What diverges:
 What is aligned:
 
 - Governance UI and API surfaces are extensive, including lifecycle, policy events, snapshots, conflicts, board packets, and elections.
-- Gating and sovereignty posture has prior wave evidence in [wave5-institutional-refinement-review.md](wave5-institutional-refinement-review.md#L1).
+- Gating and sovereignty posture has prior wave evidence in [wave5-institutional-refinement-review.md](wave5-institutional-refinement-review.md).
 
 What diverges:
 
@@ -411,7 +411,7 @@ Phase 4 introduces doctrine-level controls for semantic dictionary governance an
 
 Union Eyes now includes a constitutional semantic dictionary as a machine-validated governance artifact:
 
-- Dictionary artifact: [docs/categories/products-and-market/union-eyes/runtime-authority-audit/constitutional-semantic-dictionary.md](../runtime-authority-audit/constitutional-semantic-dictionary.md#L1)
+- Dictionary artifact: [docs/categories/products-and-market/union-eyes/runtime-authority-audit/constitutional-semantic-dictionary.md](../runtime-authority-audit/constitutional-semantic-dictionary.md)
 - Matrix source of truth: [config/continuity-ontology-matrix.json](../../../../../apps/union-eyes/config/continuity-ontology-matrix.json#L1)
 - Validator: [scripts/validate-ontology-dictionary.ts](../../../../../apps/union-eyes/scripts/validate-ontology-dictionary.ts#L1)
 
@@ -485,7 +485,7 @@ This explicitly follows proportional governance hardening:
 
 Union Eyes now records a formal constitutional baseline for frozen ontology domains:
 
-- Constitution artifact: [docs/categories/products-and-market/union-eyes/runtime-authority-audit/ontology-constitution-v1.md](ontology-constitution-v1.md#L1)
+- Constitution artifact: [docs/categories/products-and-market/union-eyes/runtime-authority-audit/ontology-constitution-v1.md](ontology-constitution-v1.md)
 - Matrix constitutional metadata: [config/continuity-ontology-matrix.json](../../../../../apps/union-eyes/config/continuity-ontology-matrix.json#L1) (`constitution`)
 
 Frozen-domain changes are now explicitly treated as constitutional amendments rather than routine refactors.
@@ -502,7 +502,7 @@ Union Eyes now generates machine-readable anti-pattern telemetry across docs, pr
 - Script hook: [apps/union-eyes/package.json](../../../../../apps/union-eyes/package.json#L1) (`ontology:antipatterns:inventory`)
 - Output artifacts:
 	- [apps/union-eyes/reports/ontology-antipattern-inventory.json](../../../../../apps/union-eyes/reports/ontology-antipattern-inventory.json#L1)
-	- [apps/union-eyes/reports/ontology-antipattern-inventory.md](../../../../../apps/union-eyes/reports/ontology-antipattern-inventory.md#L1)
+	- [apps/union-eyes/reports/ontology-antipattern-inventory.md](../../../../../apps/union-eyes/reports/ontology-antipattern-inventory.md)
 
 ### 15.2 Severity and classification calibration
 
@@ -534,7 +534,7 @@ Union Eyes now generates a baseline report from the anti-pattern inventory for g
 - Script hook: [apps/union-eyes/package.json](../../../../../apps/union-eyes/package.json#L1) (`observability:semantic`)
 - Generated outputs:
 	- [apps/union-eyes/reports/semantic-observability-baseline.json](../../../../../apps/union-eyes/reports/semantic-observability-baseline.json#L1)
-	- [apps/union-eyes/reports/semantic-observability-baseline.md](../../../../../apps/union-eyes/reports/semantic-observability-baseline.md#L1)
+	- [apps/union-eyes/reports/semantic-observability-baseline.md](../../../../../apps/union-eyes/reports/semantic-observability-baseline.md)
 
 ### 16.2 Telemetry intent
 

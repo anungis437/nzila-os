@@ -113,7 +113,7 @@ Write-Host "ZONGA_CLOUDFRONT_KEY_PAIR_ID=<manual-setup>"
 Write-Host "ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM=<manual-setup>"
 Write-Host "ZONGA_CLOUDFRONT_TTL_SEC=14400"
 Write-Host ""
-Write-Host "See AWS_ZONGA_SETUP.md for detailed steps" -ForegroundColor Cyan
+Write-Host "See docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md for detailed steps" -ForegroundColor Cyan
 Write-Host ""
 # AWS Setup Script for Zonga (PowerShell)
 # Usage: .\scripts\aws-zonga-setup.ps1
@@ -298,13 +298,13 @@ Write-Host "ZONGA_MEDIACONVERT_ENDPOINT=$MediaConvertEndpoint"
 Write-Host "ZONGA_MEDIACONVERT_ROLE_ARN=$RoleArn"
 Write-Host "ZONGA_MEDIACONVERT_OUTPUT_PREFIX=processed/"
 Write-Host ""
-Write-Host "# CloudFront (manual setup - see AWS_ZONGA_SETUP.md Part 4)"
+Write-Host "# CloudFront (manual setup - see docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md Part 4)"
 Write-Host "ZONGA_CLOUDFRONT_DOMAIN=<your-distribution-domain>"
 Write-Host "ZONGA_CLOUDFRONT_KEY_PAIR_ID=<your-key-pair-id>"
 Write-Host "ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM=<private-key-pem>"
 Write-Host "ZONGA_CLOUDFRONT_TTL_SEC=14400"
 Write-Host ""
-Write-Host "Documentation: AWS_ZONGA_SETUP.md" -ForegroundColor Cyan
+Write-Host "Documentation: docs/categories/products-and-market/zonga/AWS_ZONGA_SETUP.md" -ForegroundColor Cyan
 Write-Host ""
 
 # Cleanup

@@ -1,5 +1,16 @@
 # Phase 2 — Union Eyes Product Completeness Audit & Closure
 
+> **HISTORICAL — completed work programme.** This document records the Union Eyes Phase 2
+> product-completeness audit as it was planned/executed on branch
+> `perf/gha-phase-2-ue-product-completeness` from baseline `origin/main @ 828239787`. It was
+> archived from the repository root because it described a past programme, not current state.
+>
+> Current Union Eyes engineering and readiness authority:
+> [docs/union-eyes/README.md](../../../../union-eyes/README.md). Current gate:
+> `UE_SAAS_OPERATIONAL_READINESS = NO_GO — RUNTIME_PROOF_REQUIRED`. Dispositions recorded below
+> are historical and do not establish current readiness.
+
+
 **Baseline**: `origin/main @ 828239787` (Phase 1 merged, all tests passing)
 
 **Working Branch**: `perf/gha-phase-2-ue-product-completeness`

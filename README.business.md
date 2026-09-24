@@ -11,13 +11,21 @@ Nzila OS is **not a SaaS product we sell**. It is the internal operating fabric 
 
 | | |
 |---|---|
-| **17 production apps** | Customer-facing products + internal control surfaces |
-| **215 shared packages** | Platform, domain, and infrastructure libraries across the monorepo |
-| **8,000+ contract tests** | Architectural invariants enforced on every commit |
-| **53 CI/CD workflows** | Governance, security, deployment, compliance |
-| **5 governance gates** | Dependency audit, secret scan, CodeQL, Trivy, AI red-team |
+| **Application surfaces** | Customer-facing products + internal control surfaces — see the generated [repo inventory](tooling/repo-inventory/output/repo-inventory.md) |
+| **Shared packages** | Platform, domain, and infrastructure libraries across the monorepo — same generated inventory |
+| **Contract tests** | Architectural invariants in `tooling/contract-tests/`, enforced on every commit |
+| **CI/CD automation** | `.github/workflows/` — governance, security, deployment, compliance |
+| **Governance gates** | Dependency audit, secret scan, CodeQL, Trivy, AI red-team |
 | **One auth authority** | `@nzila/platform-auth` (Argon2id passwords + optional Entra SSO) |
 | **One audit substrate** | Hash-chained, evidence-sealed, residency-scoped |
+
+Counts are deliberately not hardcoded on this page: they drift within a week. The generated
+inventory above is the current answer, and `pnpm docs:sync` checks documentation against it.
+
+Commercial posture is **not** described here. Only two lanes are the active commercial motion
+(Union Eyes and CIVIC) — see the root [README.md](README.md) and
+[governance/portfolio/README.md](governance/portfolio/README.md). The product lines below are
+the technical portfolio inventory, not a go-to-market plan.
 
 ---
 
@@ -30,7 +38,7 @@ Every meaningful action — a payment approval, a regulatory filing, a contract 
 For high-stakes business events (contract completions, compliance attestations, terminal decisions), Nzila OS bundles supporting documents, actor identity, timestamps, and a cryptographic seal into an immutable **evidence pack** stored in Azure Blob with WORM semantics. Auditors get a verifiable artifact, not a folder of PDFs.
 
 ### 3. Org-scoped by construction
-There is no "default" org, no global data, no cross-org leakage. Org isolation is enforced in the schema, in row-level security, in the API guards, and re-verified by ~250 contract tests on every PR. New tables that don't declare an `org_id` (or an explicit FK-scoped exemption) fail CI.
+There is no "default" org, no global data, no cross-org leakage. Org isolation is enforced in the schema, in row-level security, in the API guards, and re-verified by contract tests on every PR. New tables that don't declare an `org_id` (or an explicit FK-scoped exemption) fail CI.
 
 ### 4. AI under governance
 Every AI / ML capability is bounded by a **per-app AI profile**: budget caps, model allow-list, prompt versioning, drift monitoring, red-team adversarial tests. No app calls a model provider directly — all inference flows through `@nzila/platform-governed-ai` so spend, content, and risk are observable in one place.

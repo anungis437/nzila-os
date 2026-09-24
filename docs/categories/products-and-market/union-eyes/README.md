@@ -58,7 +58,7 @@ For the full glossary, see [Glossary](../../platform-and-operations/index/glossa
 
 ### Developers and Platform Engineers
 
-- [Architecture](../../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) — System design
+- [Architecture](../../../../apps/union-eyes/docs/architecture/ARCHITECTURE_SHAPE.md) — System design
 - [Domain Model](../../../../apps/web/docs/DOMAIN_MODEL.md) — Entities and relationships
 - [Developer Index](../../../../apps/union-eyes/docs/INDEX.md) — Full developer documentation hub
 

@@ -19,7 +19,7 @@ The baseline exists to measure:
 
 - Warning inventory source: [apps/union-eyes/reports/ontology-antipattern-inventory.json](../../../../../apps/union-eyes/reports/ontology-antipattern-inventory.json#L1)
 - Generated baseline: [apps/union-eyes/reports/semantic-observability-baseline.json](../../../../../apps/union-eyes/reports/semantic-observability-baseline.json#L1)
-- Baseline summary: [apps/union-eyes/reports/semantic-observability-baseline.md](../../../../../apps/union-eyes/reports/semantic-observability-baseline.md#L1)
+- Baseline summary: [apps/union-eyes/reports/semantic-observability-baseline.md](../../../../../apps/union-eyes/reports/semantic-observability-baseline.md)
 
 ## Governance Stack Snapshot
 
