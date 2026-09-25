@@ -218,6 +218,26 @@ describe('external resource routes', () => {
     expect(mocks.authorizeExternalDocumentAccess).not.toHaveBeenCalled();
   });
 
+  it('fails closed when the matter grant is valid but the document grant is missing', async () => {
+    const { GET } = await import('@/app/api/external/documents/[id]/route');
+    mocks.authorizeExternalDocumentAccess.mockResolvedValueOnce({
+      allowed: false,
+      reason: 'document_grant_missing',
+      authorityId: '33333333-3333-3333-3333-333333333333',
+      matterGrantId: '44444444-4444-4444-4444-444444444444',
+    });
+
+    const response = await GET(
+      new Request('https://example.test/api/external/documents/00700000-0000-4000-8000-000000000052?organizationId=00700000-0000-4000-8000-000000000001&matterId=00700000-0000-4000-8000-000000000021&matterType=grievance'),
+      { id: '00700000-0000-4000-8000-000000000052' },
+    );
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.error).toBe('Forbidden');
+    expect(mocks.db.select).not.toHaveBeenCalled();
+  });
+
   it('denies external document downloads when the document grant lacks download permission', async () => {
     const { GET } = await import('@/app/api/external/documents/[id]/download/route');
     mocks.authorizeExternalDocumentAccess.mockResolvedValueOnce({
