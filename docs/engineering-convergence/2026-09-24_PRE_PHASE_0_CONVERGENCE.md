@@ -19,6 +19,8 @@ SaaS-readiness declaration and it does not authorize production promotion.
 
 ```text
 ENGINEERING_ESTATE_ACCOUNTED = IN_PROGRESS
+P0_2_REPOSITORY_TOPOLOGY = PASS
+P0_3_DEVELOPMENT_LEDGER = IN_PROGRESS
 UNACCOUNTED_DEVELOPMENT != 0
 OPEN_PR_DISPOSITION = IN_PROGRESS
 LOCAL_WORKTREE_DISPOSITION = IN_PROGRESS
@@ -150,6 +152,11 @@ the convergence plan is approved.
 - Rationale: establishes executable one-owner doctrine and Django migrations
   for Django-canonical entities; merges cleanly into starting main but requires
   exact-head validation
+- Current-main delta: 36 files, 9 commits, 3 Django migrations, schema-owner
+  registry/contracts, fresh-build guards, and RLS context corrections; 4 paths
+  overlap DEV-004
+- Current PR state: mergeable but stale/unstable against `abc7e07...`; 15
+  historical check failures mean its old CI is not integration evidence
 
 ### DEV-004 - UE complete runtime-schema lineage
 
@@ -160,6 +167,12 @@ the convergence plan is approved.
 - Relationship: GATE_A_BLOCKER
 - Disposition: `REBASE_AND_COMPLETE`
 - Canonical survivor: replacement of #799 built on DEV-003
+- Current PR state: #799 has 125 files and 47 commits, with 80 successful and
+  6 skipped checks at its exact head, but now conflicts with current `main`;
+  #797 has 82 files and 23 commits and is the older lineage
+- P0.3 ruling: #797 is `DUPLICATE` / `SUPERSEDED_BY_MAINLINE_LANE` once the
+  replacement is visible; #799 remains the implementation source, not a
+  directly mergeable final branch
 - Preserve: platform SQL `0001-0004`, valid `0007` only after ownership
   adjudication, `0014` RLS closure after target validation, oracle, deterministic
   clean-room runner, snapshot lifecycle, unique runtime fixes, tests
@@ -173,9 +186,12 @@ the convergence plan is approved.
 - Head: `f75e0d6d0b9e1ea73b75632595e33c48197e343b`
 - Domains: UNION_EYES, SECURITY, CI_GOVERNANCE
 - Relationship: NON_BLOCKING after current-main equivalents
-- Disposition: `SUPERSEDED_BY_MAIN` / `DUPLICATE`
-- Proof still required: byte-level comparison for the two workbook test files
-  that conflict with main before closure
+- Disposition: `SUPERSEDED_BY_MAIN`
+- Proof: workbook test behavior is present through #801, Ops evidence refresh
+  through #805, and the org-scope red-team recognition through #806; all three
+  are ancestors of current `main`
+- Current PR state: conflicting, 10 failed historical checks; no unique
+  implementation requirement remains in its six-file patch
 
 ### DEV-006 - Repository truth convergence
 
@@ -184,9 +200,13 @@ the convergence plan is approved.
 - Domains: DOCUMENTATION, CI_GOVERNANCE, CIVIC_BOUNDARY
 - Relationship: FOUNDATIONAL
 - Disposition: `REBASE_AND_COMPLETE`
-- Notes: clean synthetic merge into starting main; current failure is the
-  owner-approved/approved-experiment label gate. Integrate after schema/code
-  convergence, then regenerate truth surfaces and re-run #810 doctrine checks.
+- Current scope: 234 files, 8 commits, primarily documentation/report
+  convergence plus `claim-verification` validation-source changes
+- Current PR state: mergeable with one Governance Gates failure, but based
+  eight commits behind current `main`
+- Notes: integrate after schema/code convergence, regenerate every derived
+  truth surface, and re-run #810 doctrine checks. Do not carry its temporal
+  readiness claims forward without regeneration.
 
 ### DEV-007 - Local docs-convergence precursor
 
@@ -362,6 +382,12 @@ the convergence plan is approved.
 - Disposition: `REBASE_AND_COMPLETE` as an isolated dependency programme
 - Constraint: do not mix lockfile resolution with DEV-003/DEV-004 until their
   convergence branch has stable dependency state
+- Clean current heads: #786, #787, #790, #791, #793, #794
+- Unstable current heads: #778-#785, #788, #789, #792
+- Major/high-blast-radius updates requiring dedicated validation: #778 Vitest,
+  #780 Pylint, #781 filelock, #784 pytest, #788 Node types, #793 Changesets
+- Each PR remains an individually accountable sub-lane; none is authorized for
+  merge during the inspection freeze.
 
 ### DEV-024 - Local branches without active PRs
 
@@ -372,6 +398,63 @@ the convergence plan is approved.
 - Relationship: mostly NON_BLOCKING or OUT_OF_SCOPE
 - Disposition: `SUPERSEDED_BY_MAIN`, `HISTORICAL_ONLY`, or `DUPLICATE` according
   to merged-PR mapping; Wave-1 fixtures and B-005 are separately tracked above
+- Complete branch identities, exact heads, upstreams, ahead/behind counts, and
+  tip ancestry are recorded in the P0.2 topology snapshot.
+
+## P0.3 inspection evidence
+
+### Pull-request estate
+
+| PR | Files | Current state | Recommended disposition |
+| ---: | ---: | --- | --- |
+| #795 | 6 | conflicting; content present through #801/#805/#806 | `SUPERSEDED_BY_MAIN` |
+| #796 | 36 | mergeable, unstable, 15 historical failures | `REBASE_AND_COMPLETE` |
+| #797 | 82 | conflicting older lineage | `DUPLICATE` after replacement |
+| #799 | 125 | conflicting; exact old head had 80 pass/0 fail | `REBASE_AND_COMPLETE` via replacement |
+| #808 | 234 | mergeable, one governance failure | `REBASE_AND_COMPLETE` last |
+
+The 17 Dependabot PRs are retained as separate dependency sub-lanes under
+DEV-023. Their shared lockfile overlap is an architectural ordering constraint,
+not permission to batch-merge them.
+
+### Dirty worktree estate
+
+Twelve non-ledger worktrees remain dirty after the P0.2 commit. No staged files
+were found. Their working files were compared directly with current `main`:
+
+- RLS foundation: 16 files; 9 source/migration/test paths plus generated reports.
+- Phase 0C: generated runtime/evidence outputs and one stray placeholder file.
+- CourtLens Gap 3 final/proof: generated evidence plus two helper-script edits.
+- Docs convergence precursor: 12 documentation moves/edits; duplicate of #808.
+- PR673 forensic worktree: one generated DORA output.
+- Shared UE checkout: 40 status entries spanning commissioning tools, schema
+  oracle, snapshot publishing, Wave-1 probes, OCI/CIVIC routes, reports, and
+  local ACR operator scripts.
+- Runtime-lineage worktree: 49 untracked Phase H/pilot evidence and helper
+  artifacts; none exists on current `main`.
+- Controlled-pilot E2E: 23 entries, including 11 source/config/lockfile edits
+  and generated evidence.
+- B-005 and Orchestrator worktrees: generated documentation/report drift only;
+  their committed implementations are integrated.
+- Platform-admin version worktree: two untracked version-drift outputs; the
+  exact-tip proof is integrated evidence.
+
+### Stash estate
+
+All 27 stashes remain preserved. Mechanical path/size inspection confirms:
+
+- stashes 0-2 are small generated report/inventory/output drift;
+- stash 3 is the material August authority lane: 972 files, including active
+  Union Eyes source among a large evidence payload;
+- stashes 4-9 and 12, 14, 17-21, 24 are bounded generated/local or narrow source
+  snapshots requiring equivalence checks before disposal;
+- stashes 10, 11, 13, and 15 are very large historical cleanup snapshots with
+  mass deletions and must never be blindly applied;
+- stashes 16, 22, 23, 25, and 26 contain potentially valuable source across
+  auth, Union Eyes, platform, infrastructure, and tests and remain explicit
+  component-review lanes.
+
+No stash has been applied, dropped, rewritten, or converted into a commit.
 
 ## Conflict map
 
