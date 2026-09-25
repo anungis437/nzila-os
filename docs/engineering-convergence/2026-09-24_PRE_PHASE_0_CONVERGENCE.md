@@ -526,18 +526,18 @@ No production approval will be granted merely to turn that state green.
 
 ## Intended integration order
 
-1. Complete P0.2/P0.3 classification against `abc7e07...`; treat DEV-002 as
+1. Complete P0.2/P0.3 classification against `abc7e07...`; treat LANE-002 as
    integrated foundational work and do not rediscover or reimplement it.
 2. Defer platform-admin portfolio/readiness reclassification until the
    convergence decision authorizes metadata work.
-3. Rebase DEV-003 and obtain exact-head schema-authority CI.
-4. Build the DEV-004 replacement on DEV-003, regenerate clean-room/oracle/RLS
+3. Rebase LANE-003 and obtain exact-head schema-authority CI.
+4. Build the LANE-004 replacement on LANE-003, regenerate clean-room/oracle/RLS
    evidence, and obtain exact-head CI.
 5. Close #795/#797 as superseded only after replacement work is visible and
    verified; update or replace #799 without force-pushing protected history.
-6. Rebase DEV-006 on the converged code baseline, regenerate truth surfaces,
+6. Rebase LANE-006 on the converged code baseline, regenerate truth surfaces,
    and validate CIVIC doctrine non-regression.
-7. Reconcile DEV-008 through DEV-014 into accepted programme requirements or
+7. Reconcile LANE-007 through LANE-029 into accepted programme requirements or
    narrowly scoped PRs.
 8. Preserve historical/experimental branches and stashes under explicit refs,
    then remove only those worktrees/stashes proven redundant and authorized
