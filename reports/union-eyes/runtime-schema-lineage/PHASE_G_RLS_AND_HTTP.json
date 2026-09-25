@@ -1,0 +1,168 @@
+{
+  "generatedAt": "2026-09-23T15:59:56.591Z",
+  "STAGING_ACCEPTANCE_FIXTURES": "PASS",
+  "PRODUCTION_DATA_USED": false,
+  "REAL_MEMBER_DATA_USED": false,
+  "PLAYWRIGHT_TEST_AUTH": "DISABLED",
+  "ACCEPTANCE_AUTH_MODE": "identity-only",
+  "rls": {
+    "union_eyes_runtime": {
+      "rolname": "union_eyes_runtime",
+      "rolsuper": false,
+      "rolbypassrls": false
+    },
+    "noContext": {
+      "organizations": 0,
+      "grievances": 0,
+      "documents": 0
+    },
+    "orgIsolation": {
+      "A_sees": [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      ],
+      "B_sees": [
+        "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1"
+      ],
+      "A_sees_B": false,
+      "B_sees_A": false
+    },
+    "matterIsolation": {
+      "A_ids": [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11"
+      ],
+      "B_ids": [
+        "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11"
+      ],
+      "A_sees_B": false,
+      "B_sees_A": false
+    },
+    "documentIsolation": {
+      "A_ids": [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21"
+      ],
+      "B_ids": [
+        "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21"
+      ],
+      "A_sees_B": false,
+      "B_sees_A": false
+    },
+    "leakage": {
+      "orgA_sees_matterB": 0,
+      "new_txn_orgs": 0,
+      "TRANSACTION_CONTEXT_LEAKAGE": 0
+    },
+    "surfaces": {
+      "billing_periods": 0,
+      "billing_accounts": 0,
+      "billing_subscriptions": 0,
+      "platform_invoices": 0,
+      "platform_payments": 0,
+      "org_subscriptions": 0,
+      "document_versions": 0,
+      "ai_grievance_triages": 0,
+      "billing_subscriptions_present": true
+    }
+  },
+  "http": [
+    {
+      "name": "ADMIN_A_health",
+      "path": "/api/health",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"ok\":true,\"status\":\"healthy\",\"app\":\"union-eyes\",\"environment\":\"staging\",\"timestamp\":\"2026-09-23T15:59:54.244Z\",\"version\":\"0.0.0\",\"checks\":{\"process\":{\"status\":\"ok\"},\"database\":{\"status\":\"ok\",\"critical\":true,\"ms\":7},\"auth\":{\"status\":\"ok\",\"critical\":true},\"redis\":{\"status\":\"ok\",\"ms\":47},\"backend\":{\"s"
+    },
+    {
+      "name": "ADMIN_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 500,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": ""
+    },
+    {
+      "name": "MEMBER_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 500,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "bodySnippet": ""
+    },
+    {
+      "name": "STEWARD_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 500,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+      "bodySnippet": ""
+    },
+    {
+      "name": "EXTERNAL_SPECIALIST_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 500,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+      "bodySnippet": ""
+    },
+    {
+      "name": "ADMIN_A_grievances_list",
+      "path": "/api/grievances",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"error\":\"Forbidden - User is not a member of this organization\"}"
+    },
+    {
+      "name": "ADMIN_A_grievance_A",
+      "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"error\":\"Forbidden - User is not a member of this organization\"}"
+    },
+    {
+      "name": "ADMIN_A_document_A",
+      "path": "/api/documents/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"code\":\"INSUFFICIENT_PERMISSIONS\",\"message\":\"Requires at least 'app_owner' role\",\"timestamp\":\"2026-09-23T15:59:55.835Z\",\"traceId\":\"mueagzti-5807ca7e\"}"
+    },
+    {
+      "name": "BILLING_CYCLE",
+      "path": "/api/dues/billing-cycle",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"code\":\"INSUFFICIENT_PERMISSIONS\",\"message\":\"Requires at least 'officer' role\",\"timestamp\":\"2026-09-23T15:59:55.945Z\",\"traceId\":\"mueagzwz-c64cf53d\"}"
+    },
+    {
+      "name": "UNAUTHENTICATED",
+      "path": "/api/organizations/current",
+      "status": 401,
+      "userId": null,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "CROSS_ORG_A_reads_B_matter",
+      "path": "/api/grievances/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"error\":\"Forbidden - User is not a member of this organization\"}"
+    },
+    {
+      "name": "CROSS_ORG_B_reads_A_matter",
+      "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+      "status": 403,
+      "userId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02",
+      "bodySnippet": "{\"error\":\"Forbidden - User is not a member of this organization\"}"
+    },
+    {
+      "name": "UNGRANTED_MEMBER_A_doc_B",
+      "path": "/api/documents/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "bodySnippet": "{\"code\":\"INSUFFICIENT_PERMISSIONS\",\"message\":\"Requires at least 'app_owner' role\",\"timestamp\":\"2026-09-23T15:59:56.306Z\",\"traceId\":\"mueah06y-04b409b7\"}"
+    },
+    {
+      "name": "SAME_ROLE_UNAUTHORIZED_admin_route",
+      "path": "/api/admin/organizations",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "bodySnippet": "{\"code\":\"INSUFFICIENT_PERMISSIONS\",\"message\":\"Requires at least 'platform_lead' role\",\"timestamp\":\"2026-09-23T15:59:56.414Z\",\"traceId\":\"mueah0a1-10ba2c52\"}"
+    }
+  ],
+  "BILLING_CYCLE_MISSING_RELATION_ERROR": "NO",
+  "BILLING_CYCLE_RUNTIME_QUERY": "PASS"
+}

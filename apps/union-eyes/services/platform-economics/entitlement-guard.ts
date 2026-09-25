@@ -26,6 +26,7 @@ import {
 import { eq, and, sql } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { NextResponse } from 'next/server';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 // ============================================================================
 // Module Keys (canonical feature identifiers)
@@ -305,6 +306,9 @@ export async function checkModuleEntitlement(
   organizationId: string,
   featureKey: string,
 ): Promise<EntitlementCheckResult> {
+  // Entitlement rows are tenant-RLS org-scoped. Lookup under system authority
+  // with organizationId / featureKey still bound in the WHERE clause.
+  return withSystemContext(async () => {
   // 1. Look up active entitlement
   const [entitlement] = await db
     .select()
@@ -377,6 +381,7 @@ export async function checkModuleEntitlement(
     usageLimit: entitlement.usageLimit ?? undefined,
     expiresAt: entitlement.expiresAt ?? undefined,
   };
+  });
 }
 
 /**

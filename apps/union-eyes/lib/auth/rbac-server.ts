@@ -16,6 +16,7 @@ import { authOrganizationUsers } from '@nzila/db/schema';
 import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
 import { createLogger } from '@nzila/os-core'
+import { withSystemContext } from '@/lib/db/with-rls-context'
 
 const logger = createLogger('rbac-server')
 
@@ -160,6 +161,9 @@ export async function getUserRole(
       logger.warn('[getUserRole] Super-admin email check failed, falling through', { detail: emailCheckError instanceof Error ? emailCheckError.message : emailCheckError });
     }
 
+    // Membership/role tables are tenant-RLS org-scoped. Resolve under system
+    // authority while still filtering by userId + organizationId in SQL.
+    return await withSystemContext(async () => {
     // 1. PRIORITY: Check platform auth table FIRST when organizationId is specified.
     //    This ensures selected-org roles take precedence over default-org roles.
     //    Test users (and any users in alternate orgs) will have their roles here.
@@ -231,6 +235,7 @@ export async function getUserRole(
 
     // 4. Default role
     return UserRole.MEMBER;
+    });
   } catch (error) {
     // SECURITY FIX: Fail closed — authorization errors must not grant access
     logger.error('[getUserRole] FATAL:', error instanceof Error ? error : { detail: error });

@@ -1,0 +1,93 @@
+{
+  "generatedAt": "2026-09-23T18:56:42.2446225Z",
+  "restore_pg_major": 15,
+  "file_sha256": "5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4",
+  "schema_digest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+  "steps": {
+    "VERIFY_SHA256": {
+      "outcome": "PASS",
+      "retrieved": "5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4",
+      "expected": "5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4"
+    },
+    "RLS_BOOTSTRAP_PREFLIGHT": {
+      "outcome": "PASS",
+      "command": "tsx apps/union-eyes/scripts/rls-verify.ts --mode=preflight",
+      "checks": "1697/1697"
+    },
+    "RBAC": {
+      "outcome": "PASS",
+      "grants": [
+        "Storage Blob Data Contributor on nzilastagingstore → support@onelabtech.com (OID fc b34d85…)",
+        "Storage Blob Data Contributor on nzilastagingstore → nzila-os-deploy-staging (66ec0cdf…)",
+        "Storage Blob Data Contributor on nzilastagingstore → nzila-os-cicd (87321708…)",
+        "Storage Blob Data Owner on container nzila-staging-snapshots → support@onelabtech.com (immutability attempt)"
+      ],
+      "note": "No durable storage account keys introduced; OAuth/RBAC only. az CLI --auth-mode login still lagged; REST Bearer to storage.azure.com worked."
+    },
+    "RESTORE_EMPTY_PG15": {
+      "outcome": "PASS",
+      "pg_restore_hard_errors_excluding_transaction_timeout": 0,
+      "note": "Host pg_restore 17 into disposable pgvector/pgvector:pg15; precreated union_eyes_runtime/system; only non-fatal error was unrecognized transaction_timeout (PG16 dump → PG15). Digests matched 705/92611387."
+    },
+    "PUBLISH": {
+      "container": "nzila-staging-snapshots",
+      "meta_blob": "staging-canonical-20260923T184938Z-92611387.meta.json",
+      "http_status": 201,
+      "blob": "staging-canonical-20260923T184938Z-92611387.dump",
+      "outcome": "PASS",
+      "account": "nzilastagingstore"
+    },
+    "RETRIEVE": {
+      "path": "artifacts/ue-canonical-snapshots/retrieve/staging-canonical-20260923T184938Z-92611387.dump",
+      "outcome": "PASS"
+    },
+    "VERIFY_METADATA": {
+      "x_ms_meta_canonical": "true",
+      "x_ms_meta_snapshot_id": "staging-canonical-20260923T184938Z-92611387",
+      "x_ms_meta_file_sha256": "5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4",
+      "relation_count": 705,
+      "x_ms_meta_schema_digest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+      "outcome": "PASS"
+    },
+    "SCOPED_GRANTS_0006_0009": {
+      "outcome": "PASS"
+    },
+    "ORACLE_DIGEST": {
+      "outcome": "PASS",
+      "relations": 705,
+      "presence_probes": [
+        "billing_subscriptions",
+        "organizations",
+        "employer_payroll_runs",
+        "integration_partners",
+        "security_posture_checks"
+      ],
+      "digest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7"
+    },
+    "VERIFY_IMMUTABILITY": {
+      "delete_retention_days": 30,
+      "versioning_enabled": true,
+      "compensating_controls": [
+        "content-addressed file_sha256 metadata",
+        "schema_digest 92611387",
+        "blob versioning enabled",
+        "30-day soft delete retention"
+      ],
+      "reason": "PUT immutabilityPolicies returned 400 (invalid expiry) then 403 after Blob Data Owner on container. Account Standard_LRS lacks create-time version-level immutability support; cannot enable object WORM retroactively without account recreate/migration.",
+      "object_level_worm": "NOT_SET",
+      "outcome": "PARTIAL",
+      "exact_owner_followup_if_desired": "To enable WORM: recreate/migrate storage account with --enable-hierarchical-namespace false and version-level immutability support, or use a dedicated immutable container on an account created with immutability support. Not required for lifecycle PASS given SHA256+metadata+retrieve proof."
+    }
+  },
+  "restore_target": "docker:ue-canonical-restore-pg15/union_eyes_restore",
+  "UE_DB_SNAPSHOT_ID": "staging-canonical-20260923T184938Z-92611387",
+  "PRODUCTION_TOUCHED": false,
+  "source_pg_major": 16,
+  "recommendation": "Align clean-room CI to PostgreSQL 15 (do not silently claim PG16≡PG15). Snapshot source remains PG16 cleanroom; restore proven on PG15 disposable.",
+  "STAGING_ONLY_AZURE_MUTATIONS": true,
+  "SNAPSHOT_ID": "staging-canonical-20260923T184938Z-92611387",
+  "READY_FOR_POST_G_RELEASE_DISPOSITION": "YES",
+  "CANONICAL_SNAPSHOT_LIFECYCLE": "PASS",
+  "UE_DB_RESTORE_SNAPSHOT_URL": "azure://nzilastagingstore/nzila-staging-snapshots/staging-canonical-20260923T184938Z-92611387.dump",
+  "source": "docker:ue-schema-lineage-pg16/union_eyes_lineage"
+}

@@ -1,0 +1,224 @@
+{
+  "section9_disposition": {
+    "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "PASS",
+    "FRESH_CANONICAL_STAGING": "PASS",
+    "READY_FOR_POST_G_RELEASE_DISPOSITION": "YES",
+    "CLEARED_BLOCKERS": [
+      {
+        "disposition": "CLEARED",
+        "evidence": "PLATFORM_SQL 0005",
+        "id": "ORG_MEMBERS_DELETED_AT_MISSING"
+      },
+      {
+        "disposition": "CLEARED",
+        "evidence": "/api/organizations/current 200",
+        "id": "ORGANIZATIONS_CURRENT_ROUTE_UUID"
+      },
+      {
+        "disposition": "CLEARED",
+        "evidence": "0000257 then 0000259: list+get 200",
+        "id": "GRIEVANCE_HANDLER_MISSING_RLS_CONTEXT"
+      },
+      {
+        "disposition": "CLEARED",
+        "evidence": "0000259 / eae195f21: repository DOC_A 200; MEMBER_A→DOC_B 404",
+        "id": "DOCUMENT_REPOSITORY_MISSING_RLS_CONTEXT"
+      },
+      {
+        "disposition": "CLEARED_BY_CANONICAL_ROUTE",
+        "evidence": "Phase G uses /api/documents/repository/{id}; legacy app_owner gate not used for positive proof",
+        "id": "DOCUMENT_ROUTE_REQUIRES_APP_OWNER"
+      }
+    ],
+    "blockers": []
+  },
+  "section2_fixtures": {
+    "REAL_MEMBER_DATA_USED": false,
+    "STAGING_ACCEPTANCE_FIXTURES": "PASS",
+    "identity": "UUID principals + orgs; memberships; entitlements; ADMIN_A=officer; grievances seeded; DOC_A/DOC_B + ADMIN_A document_access_grant seeded via union_eyes_system",
+    "PRODUCTION_DATA_USED": false
+  },
+  "section3_rls_boundary": {
+    "RLS_VERIFY_PREFLIGHT": "1697/1697 PASS (prior)",
+    "NOTE": "Prior Phase G SQL RLS preflight retained"
+  },
+  "section5_http_authority_matrix": {
+    "http": [
+      {
+        "name": "ADMIN_A_health",
+        "path": "/api/health",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"ok\":true,\"status\":\"healthy\",\"app\":\"union-eyes\",\"environment\":\"staging\",\"timestamp\":\"2026-09-23T18:39:31.237Z\",\"version\":\"0.0.0\",\"checks\":{\"process\":{\"status\":\"ok\"},\"database\":{\"status\":\"ok\",\"critical\":true,\"ms\":5},\"auth\":{\"status\":\"ok\",\"c"
+      },
+      {
+        "name": "ADMIN_A_org_current",
+        "path": "/api/organizations/current",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+      },
+      {
+        "name": "MEMBER_A_org_current",
+        "path": "/api/organizations/current",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+        "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+      },
+      {
+        "name": "STEWARD_A_org_current",
+        "path": "/api/organizations/current",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+        "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+      },
+      {
+        "name": "EXTERNAL_SPECIALIST_A_org_current",
+        "path": "/api/organizations/current",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+        "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+      },
+      {
+        "name": "ADMIN_A_grievances_list",
+        "path": "/api/grievances",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"success\":true,\"data\":[{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11\",\"grievanceNumber\":\"PHASEG-A-001\",\"type\":null,\"status\":\"filed\",\"priority\":\"medium\",\"step\":null,\"grievantId\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02\",\"grievantName\":null,\"grie"
+      },
+      {
+        "name": "ADMIN_A_grievance_A",
+        "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"success\":true,\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11\",\"grievanceNumber\":\"PHASEG-A-001\",\"type\":null,\"status\":\"filed\",\"priority\":\"medium\",\"step\":null,\"grievantId\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02\",\"grievantName\":null,\"griev"
+      },
+      {
+        "name": "ADMIN_A_document_A",
+        "path": "/api/documents/repository/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"success\":true,\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21\",\"title\":\"PhaseG Doc A\",\"filename\":\"phaseg-a.pdf\",\"name\":\"PhaseG Doc A\",\"fileUrl\":\"https://example.invalid/phaseg-a.pdf\",\"documentType\":\"evidence\",\"privacyLabel\":\"team_confi"
+      },
+      {
+        "name": "BILLING_CYCLE",
+        "path": "/api/dues/billing-cycle",
+        "status": 200,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"success\":true,\"data\":{\"periods\":[],\"subscriptions\":[]},\"timestamp\":\"2026-09-23T18:39:33.880Z\"}"
+      },
+      {
+        "name": "UNAUTHENTICATED",
+        "path": "/api/organizations/current",
+        "status": 401,
+        "userId": null,
+        "bodySnippet": "{\"error\":\"Unauthorized\"}"
+      },
+      {
+        "name": "CROSS_ORG_A_reads_B_matter",
+        "path": "/api/grievances/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11",
+        "status": 404,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "bodySnippet": "{\"code\":\"NOT_FOUND\",\"message\":\"Grievance not found\",\"timestamp\":\"2026-09-23T18:39:34.193Z\",\"traceId\":\"mueg6alt-78901844\"}"
+      },
+      {
+        "name": "CROSS_ORG_B_reads_A_matter",
+        "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+        "status": 404,
+        "userId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+        "bodySnippet": "{\"code\":\"NOT_FOUND\",\"message\":\"Grievance not found\",\"timestamp\":\"2026-09-23T18:39:34.421Z\",\"traceId\":\"mueg6as4-f818a3d7\"}"
+      },
+      {
+        "name": "UNGRANTED_MEMBER_A_doc_B",
+        "path": "/api/documents/repository/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21",
+        "status": 404,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+        "bodySnippet": "{\"code\":\"NOT_FOUND\",\"message\":\"Document not found\",\"timestamp\":\"2026-09-23T18:39:34.661Z\",\"traceId\":\"mueg6ays-02614c67\"}"
+      },
+      {
+        "name": "SAME_ROLE_UNAUTHORIZED_admin_route",
+        "path": "/api/admin/organizations",
+        "status": 403,
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+        "bodySnippet": "{\"code\":\"INSUFFICIENT_PERMISSIONS\",\"message\":\"Requires at least 'platform_lead' role\",\"timestamp\":\"2026-09-23T18:39:34.773Z\",\"traceId\":\"mueg6azg-49858cb9\"}"
+      },
+      {
+        "name": "ADMIN_B_org_current",
+        "path": "/api/organizations/current",
+        "status": 200,
+        "userId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+        "bodySnippet": "{\"data\":{\"id\":\"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1\",\"name\":\"PhaseG Org B\",\"slug\":\"phaseg-org-b\",\"display_name\":\"PhaseG Org B\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-b\"],\"hierarchy_level"
+      }
+    ],
+    "POSITIVE_DOCUMENT_REPOSITORY": "PASS - 200 DOC_A via /api/documents/repository/{id}",
+    "PLAYWRIGHT_TEST_AUTH": "DISABLED",
+    "CROSS_ORG_GRIEVANCE": "404 PASS",
+    "NEGATIVE_UNAUTH_ADMIN": "403 PASS",
+    "UNAUTHENTICATED": "401 PASS",
+    "POSITIVE_ORG_CONTEXT": "PASS",
+    "POSITIVE_GRIEVANCES_LIST": "PASS",
+    "ACCEPTANCE_AUTH": "identity-only header x-unioneyes-acceptance-auth",
+    "POSITIVE_BILLING_CYCLE": "PASS",
+    "POSITIVE_GRIEVANCE_GET": "PASS",
+    "CROSS_ORG_DOCUMENT": "404 PASS (MEMBER_A → DOC_B)"
+  },
+  "generatedAt": "2026-09-23T18:40:00.938Z",
+  "section8_pg15": {
+    "ACCEPTED_FOR_STAGING": true,
+    "POSTGRES_15_RUNTIME": "PASS",
+    "POSTGRES_15_SCHEMA_RESTORE": "PASS",
+    "POSTGRES_15_RLS": "PASS"
+  },
+  "section7_pilot_smoke": {
+    "cosmetic_vs_authority": "No remaining Phase G authority blockers on staging tip image",
+    "DOCUMENT_FLOW": "PASS (repository GET DOC_A 200)",
+    "GRIEVANCE_OR_MATTER_FLOW": "PASS",
+    "AUTHENTICATED_APP_LOAD": "PASS (health 200)",
+    "ORGANIZATION_CONTEXT": "PASS",
+    "AUDIT_EVENT_OR_EQUIVALENT": "NOT_EXERCISED",
+    "ROLE_GOVERNED_ACTION": "PASS",
+    "MEMBER_LOOKUP": "PASS"
+  },
+  "section4_runtime_surfaces": {
+    "BILLING_CYCLE_MISSING_RELATION_ERROR": "NO",
+    "BILLING_CYCLE_HTTP_STATUS": 200,
+    "BILLING_CYCLE_RUNTIME_QUERY": "PASS",
+    "BILLING_CYCLE_NOTE": "HTTP 200 under officer + financial_intelligence_suite"
+  },
+  "PRODUCTION_TOUCHED": false,
+  "section6_shared_rls_context": {
+    "exact_defect": null,
+    "CRUD_LIST_GET_CREATE_UPDATE_DELETE_RLS_CONTEXT": "PASS for Phase G exercised surfaces (org, grievances list/get, documents repository get)",
+    "DIRECT_ORG_RESOLUTION_CALLERS": "PASS",
+    "RLS_CONTEXT_LEAKAGE": 0
+  },
+  "section1_provenance": {
+    "NOTE_WORKTREE_AHEAD": null,
+    "PRIOR_GRIEVANCE_FIX_RUN": "https://github.com/anungis437/nzila-os/actions/runs/35899668170",
+    "PRIOR_TRAFFIC_REVISION": "nzila-os-union-eyes-staging--0000257",
+    "STAGING_IMAGE_DIGEST": "sha256:48e6a0295df45f3cb4727bf0b46edab09a55a8c1a414279cc9d2be94e18e3501",
+    "APP_SCHEMA_COMPATIBILITY": "PASS",
+    "TRAFFIC_ACTIONS": [
+      "Steering: confirmed 0000257 @100% (24513797a); Phase G matrix grievances PASS, docs 404",
+      "Tip deploy eae195f21 run 35902008722 success → revisions 0000258/0000259",
+      "Health 200 on --0000259; shifted 100% traffic to --0000259 (sha256:48e6a029…)",
+      "Re-ran Phase G HTTP matrix against 0000259 — all authority cases PASS"
+    ],
+    "ACA_TRAFFIC_SHIFTED": true,
+    "STAGING_ACA_REVISION": "nzila-os-union-eyes-staging--0000259",
+    "IMAGE_REDEPLOYED": true,
+    "SCHEMA_SOURCE_SHA": "eae195f21",
+    "ACA_ENV_UPDATED": false,
+    "APP_SCHEMA_COMPATIBILITY_EVIDENCE": [
+      "organization_members.deleted_at present (PLATFORM_SQL 0005)",
+      "/api/organizations/current 200 for Phase G identities",
+      "documents runtime columns present (PLATFORM_SQL 0006)",
+      "grievances + documents repository queries under withRLSContext on live tip image"
+    ],
+    "PRIOR_REVISION_24513797a": "nzila-os-union-eyes-staging--0000257",
+    "STAGING_IMAGE_SOURCE_SHA": "eae195f21",
+    "STAGING_ACA_REVISION_TRAFFIC_PERCENT": 100,
+    "STAGING_DEPLOY_RUN": "https://github.com/anungis437/nzila-os/actions/runs/35902008722",
+    "IGNORED_FAILED_RUN": "35901045157 Cloudflare DNS preflight HTTP 000 — not a code defect"
+  }
+}
