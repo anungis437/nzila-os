@@ -77,7 +77,7 @@ After #799 is on main, rebase #796 and keep the schema-authority contract plus a
 | `pnpm-lock.yaml`, `package.json`, `tooling/security/supply-chain-policy.ts` | kept main | #804 already pins `adm-zip>=0.6.1` and drops the same expired waivers. Main also keeps the civic OCI doctrine script from #810. |
 | `reports/ops/snapshot.*` | kept main | #805 snapshot (2026-09-24) is newer than the #799 copy, which nulls build metrics. |
 | `security/redteam/ue-org-scope-fuzz.test.ts` | kept main | #806 already recognizes `withClaimedWorkbookAccess` and `verifyClaimedWorkbookAccess`. |
-| `tooling/repo-inventory/output/*` | kept main | Generated inventory. New UE files did not change the committed app/workflow counts versus main; CI still regenerates and ignores date stamps. |
+| `tooling/repo-inventory/output/*` | kept main during rebase, then regenerated | Generated inventory. Rebase kept main's copy. A follow-up regenerate updates `tsTestFileCount` 2671 → 2673 and union-eyes `codeFileCount` 5243 → 5247 so the CI inventory lock (which ignores only the date stamp) stays green. |
 | `.github/workflows/ci.yml` | both | Main's affected Turbo build (#817) plus this PR's perf `BASE_URL` for union-eyes staging. |
 
 Pre-rebase migration blobs for every new or modified SQL, journal, and platform README match `3e9a0cf84`.
