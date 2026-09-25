@@ -21,6 +21,7 @@ SaaS-readiness declaration and it does not authorize production promotion.
 ENGINEERING_ESTATE_ACCOUNTED = IN_PROGRESS
 P0_2_REPOSITORY_TOPOLOGY = PASS
 P0_3_DEVELOPMENT_LEDGER = IN_PROGRESS
+P0_4_ORPHAN_DISCOVERY = PASS
 UNACCOUNTED_DEVELOPMENT != 0
 OPEN_PR_DISPOSITION = IN_PROGRESS
 LOCAL_WORKTREE_DISPOSITION = IN_PROGRESS
@@ -307,9 +308,11 @@ the convergence plan is approved.
   stashes 5-6
 - Domains: OTHER_PORTFOLIO, EVIDENCE
 - Relationship: OUT_OF_SCOPE
-- Disposition: `HISTORICAL_ONLY`
-- Notes: merged PRs provide the canonical implementation; dirty Gap 3 outputs
-  and two helper-script edits remain to be preserved or proven generated
+- Disposition: mixed `HISTORICAL_ONLY` and `EXPERIMENTAL_KEEP`
+- Notes: merged PRs provide the canonical Phase 0/1 implementation. The Gap 3
+  proof branch still contains 77 paths absent from current `main`, primarily
+  proof tooling/evidence plus a small ABR fixture surface; retain it explicitly
+  outside the SaaS critical path until the CourtLens owner decides its fate.
 
 ### DEV-017 - Detached forensic worktrees
 
@@ -317,9 +320,13 @@ the convergence plan is approved.
   detached clean worktrees
 - Domains: EVIDENCE, OTHER_PORTFOLIO
 - Relationship: OUT_OF_SCOPE
-- Disposition: `HISTORICAL_ONLY` or `ABANDON_SAFE` after object reachability and
-  dirty-output checks
-- Known dirty item: `ops/outputs/dora-metrics.json` in PR673 forensics
+- Disposition: `SUPERSEDED_BY_MAIN` for PR673 heads, `HISTORICAL_ONLY` for
+  clean base checkpoints
+- Proof: detached heads `1160f9d82` and `edf78a1d1` are PR #673 commits merged
+  on 2026-08-26; temporary Zonga head `e505b621e` is patch-equivalent to the
+  PR #673 Zonga fix `cb9fd5820`
+- Known dirty item: one generated `ops/outputs/dora-metrics.json` remains in
+  PR673 forensics and is separately accounted as local output drift
 
 ### DEV-018 - Old cleanup/convergence stashes
 
@@ -455,6 +462,44 @@ All 27 stashes remain preserved. Mechanical path/size inspection confirms:
   component-review lanes.
 
 No stash has been applied, dropped, rewritten, or converted into a commit.
+
+### Orphan-discovery ruling
+
+Remote branches without open PRs were reconciled to merged/closed lineage:
+
+- `codex/gitops-proof-fail-closed` is closed PR #813, replaced by merged #814;
+- `devin/1790252515-docs-truth-convergence` is closed #807, replaced by #808;
+- CIVIC, SAGE, dependency-waiver, GitOps, Ops-evidence, platform-version,
+  E2E-RLS, and export-scope refs map to merged PRs #802-#812/#814;
+- `fix/ue-authoritative-release-baseline` and
+  `hotfix/fr-cta-locale-redirect` point to a commit already in current `main`.
+
+Local no-PR branches were also content-checked. The Windows lint fix is
+byte-identical on current `main`; B-005 is superseded by #811; LIUNA's unique
+documents and contract test are byte-identical on current `main`; historical
+Phase 0B/0C and controlled-pilot lines remain explicit programme history.
+
+Material orphaned value remains preserved in known lanes rather than hidden:
+
+- stash 3: 159 tracked and 813 untracked paths, including 211 material
+  source/doctrine paths after generated evidence is excluded;
+- stash 16: 28 older TrustCore/platform-auth/contract paths;
+- stash 22: 267 material historical platform/Union Eyes paths;
+- stash 23: 89 material CBA/security paths;
+- stash 25: 91 dispatch, employer-portal, partner, test, and tooling paths;
+- stash 26: 42 older cross-app/auth/ML paths;
+- shared checkout commissioning tools, runtime-lineage Phase H artifacts, and
+  controlled-pilot E2E working files as listed above.
+
+These are classified lanes requiring component review or explicit retention;
+they are not permission to apply historical snapshots wholesale.
+
+### Current-main check state
+
+At `abc7e07...`, GitHub reports 91 check runs: 80 success, 4 skipped, 0
+failures, 6 cancelled GitOps jobs, and 1 waiting production gate. The targeted
+fail-closed staging run is PASS, but the combined commit state remains pending.
+No production approval will be granted merely to turn that state green.
 
 ## Conflict map
 
