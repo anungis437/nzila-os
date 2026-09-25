@@ -19,11 +19,24 @@ Put password values in a local demo vault or shell env. Do not email them. The l
 pnpm exec tsx apps/union-eyes-demo/scripts/load-sandbox-personas.ts
 ```
 
-The journey page does not require those passwords. Open:
+The journey page does not require those passwords. Start the demo and open the sandbox:
 
-`/en-CA/dashboard/external-specialist`
+```bash
+pnpm --filter @nzila/union-eyes-demo dev
+```
 
-in the union-eyes-demo app (`pnpm --filter @nzila/union-eyes-demo dev`).
+`http://localhost:3012/en-CA/dashboard/external-specialist`
+
+`127.0.0.1` is also a valid dev origin (`allowedDevOrigins` in `next.config.mjs`). Use either host. Persona buttons are client components; wait until the page has hydrated (the buttons respond) before clicking.
+
+## Hydration (dev)
+
+Next dev delivers the React debug channel over the `/_next/hmr` WebSocket. Two local blockers were fixed so that socket can complete and the sandbox hydrates:
+
+1. `proxy.ts` matcher excludes `_next/hmr` and `_next/webpack-hmr`. A middleware response cannot finish a WebSocket upgrade, so those paths must not be matched.
+2. `allowedDevOrigins` includes `127.0.0.1`. Next dev allows `localhost` by default and blocks other Origin hosts, including `127.0.0.1`, with a non-HTTP `Unauthorized` body. The browser then reports an invalid handshake and the client never hydrates.
+
+Checked with a headless Chrome click path against both origins (2026-09-25): `[HMR] connected`, then Institutional admin (hidden document line visible) → Offer access package (`OFFERED`, specialist queue not active) → External specialist (allowed title visible, hidden title omitted) → Acknowledge view access (`ACCEPTED_VIEW`, queue active) → Member (limited status, no document titles). Favicon 404 on this app is unrelated.
 
 ## What the seed contains (EC-007-01)
 
