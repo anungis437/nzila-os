@@ -805,12 +805,48 @@ function walkFiles(root: string): string[] {
   return files
 }
 
+function validateRuntimeAliases(
+  root: string,
+  contract: DoctrineContract,
+  findings: DoctrineFinding[],
+): void {
+  const appsRoot = join(root, 'apps')
+  if (!existsSync(appsRoot) || !statSync(appsRoot).isDirectory()) return
+
+  const canonicalRoot = contract.runtimeAuthorization.applicationRoot.replace(/\\/g, '/')
+  for (const file of walkFiles(appsRoot)) {
+    const artifact = relative(root, file).replace(/\\/g, '/')
+    if (artifact === canonicalRoot || artifact.startsWith(`${canonicalRoot}/`)) continue
+
+    const segments = artifact.toLowerCase().split('/')
+    if (!segments.includes('civic')) continue
+
+    const name = segments.at(-1) ?? ''
+    const isRuntimeArtifact =
+      RUNTIME_EXTENSIONS.has(extname(file).toLowerCase()) ||
+      RUNTIME_CONFIG.test(name) ||
+      name === 'package.json'
+    if (!isRuntimeArtifact) continue
+
+    findings.push(
+      finding(
+        'CIVIC_RUNTIME_UNAUTHORIZED',
+        artifact,
+        CIVIC_OCI_CONTRACT_PATH,
+        `CIVIC runtime confined to ${canonicalRoot} and explicitly authorized`,
+        'runtime-bearing CIVIC alias outside the canonical application root',
+      ),
+    )
+  }
+}
+
 function validateRuntime(
   root: string,
   contract: DoctrineContract,
   findings: DoctrineFinding[],
 ): void {
   if (contract.runtimeAuthorization.authorized) return
+  validateRuntimeAliases(root, contract, findings)
   const appRoot = join(root, contract.runtimeAuthorization.applicationRoot)
   if (!existsSync(appRoot) || !statSync(appRoot).isDirectory()) {
     findings.push(

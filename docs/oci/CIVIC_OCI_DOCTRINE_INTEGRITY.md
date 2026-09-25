@@ -68,8 +68,8 @@ invariant carries an authority citation and a reason it must be machine-readable
 2. verifies narrow, intentional anchors in current canonical documents;
 3. reads CIVIC lifecycle posture directly from the portfolio catalog;
 4. checks the declared first-touch surfaces only when that catalog describes CIVIC as pre-product;
-5. rejects recognizable runtime capabilities under `apps/civic` while runtime authorization is
-   false; and
+5. rejects recognizable runtime capabilities under `apps/civic`, and runtime-bearing CIVIC aliases
+   under any other `apps/**` path, while runtime authorization is false; and
 6. ignores `docs/oci/superseded/**` and other undeclared material by construction.
 
 The validator fails with invariant ID, artifact, authority, expected state, and observed state.

@@ -157,6 +157,30 @@ describe('CIVIC / OCI doctrine integrity', () => {
     expect(ids(root)).toContain('CIVIC_RUNTIME_UNAUTHORIZED')
   })
 
+  it('rejects a CIVIC route introduced through another application', () => {
+    const root = createFixture()
+    const runtime = join(root, 'apps/union-eyes/app/[locale]/civic/page.tsx')
+    mkdirSync(dirname(runtime), { recursive: true })
+    writeFileSync(runtime, 'export default function CivicPage() { return null }\n')
+    expect(ids(root)).toContain('CIVIC_RUNTIME_UNAUTHORIZED')
+  })
+
+  it('rejects a CIVIC package alias introduced through another application', () => {
+    const root = createFixture()
+    const runtime = join(root, 'apps/platform-admin/civic/package.json')
+    mkdirSync(dirname(runtime), { recursive: true })
+    writeFileSync(runtime, '{"scripts":{"start":"next start"}}\n')
+    expect(ids(root)).toContain('CIVIC_RUNTIME_UNAUTHORIZED')
+  })
+
+  it('allows non-runtime CIVIC governance metadata outside the placeholder', () => {
+    const root = createFixture()
+    const metadata = join(root, 'apps/union-eyes/docs/civic/decision-record.json')
+    mkdirSync(dirname(metadata), { recursive: true })
+    writeFileSync(metadata, '{"runtime":false,"status":"rejected"}\n')
+    expect(validateCivicOciDoctrine(root)).toEqual([])
+  })
+
   it('ignores historical doctrine even when it contains obsolete claims', () => {
     const root = createFixture()
     const historical = join(root, 'docs/oci/superseded/old-method.md')
