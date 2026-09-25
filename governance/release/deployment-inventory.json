@@ -426,7 +426,9 @@
         "stagingFallback": "https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://control.nzilaventures.com",
         "productionState": "active",
-        "healthPath": "/",
+        "healthPath": "/api/health",
+        "readyPath": "/api/ready",
+        "versionPath": "/api/version",
         "ingress": "restricted",
         "tls": "managed"
       },

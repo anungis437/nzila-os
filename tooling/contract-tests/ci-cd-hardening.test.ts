@@ -161,6 +161,28 @@ describe('CI-005: GitOps deploy avoids documentation and Union Eyes churn', () =
     expect(src).not.toMatch(/build-deploy-evidence\.ts[^\n]*\|\| true/)
   })
 
+  it('probes the control plane through its public runtime proof routes', () => {
+    const inventory = JSON.parse(
+      readSafe(join(ROOT, 'governance', 'release', 'deployment-inventory.json')),
+    ) as {
+      apps: Record<string, {
+        routing?: { healthPath?: string; readyPath?: string; versionPath?: string }
+      }>
+    }
+    const routing = inventory.apps['control-plane']?.routing
+
+    expect(routing?.healthPath).toBe('/api/health')
+    expect(routing?.readyPath).toBe('/api/ready')
+    expect(routing?.versionPath).toBe('/api/version')
+
+    for (const route of ['health', 'ready', 'version']) {
+      expect(
+        existsSync(join(ROOT, 'apps', 'control-plane', 'app', 'api', route, 'route.ts')),
+        `control-plane ${route} probe route must exist`,
+      ).toBe(true)
+    }
+  })
+
   it('uses inventory fallback routing and authenticated version probes without staging exceptions', () => {
     const smoke = readSafe(join(ROOT, 'scripts', 'release', 'run-smoke.ts'))
     const drift = readSafe(join(ROOT, 'scripts', 'release', 'drift-version.ts'))
