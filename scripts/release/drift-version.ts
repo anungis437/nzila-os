@@ -23,6 +23,7 @@ type Inventory = {
   apps: Record<string, {
     routing?: {
       staging?: string
+      stagingFallback?: string
       production?: string
       healthPath?: string
       versionPath?: string
@@ -80,10 +81,13 @@ function parseArg(name: string, fallback?: string): string {
 }
 
 function getHeadSha(): string {
+  const workflowSha = process.env.GITHUB_SHA?.trim()
+  if (workflowSha) return workflowSha
+
   try {
     return child_process.execSync('git rev-parse HEAD', { cwd: ROOT, encoding: 'utf8' }).trim()
   } catch {
-    return process.env.GITHUB_SHA ?? 'unknown'
+    return 'unknown'
   }
 }
 
@@ -91,7 +95,11 @@ function getHeadShortSha(headSha: string): string {
   return headSha === 'unknown' ? 'unknown' : headSha.slice(0, 8)
 }
 
-async function fetchVersion(url: string, timeoutMs: number): Promise<{ status: number; body: unknown; durationMs: number; error?: string }> {
+async function fetchVersion(
+  url: string,
+  timeoutMs: number,
+  headers: Record<string, string> = {},
+): Promise<{ status: number; body: unknown; durationMs: number; error?: string }> {
   const started = Date.now()
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -100,7 +108,7 @@ async function fetchVersion(url: string, timeoutMs: number): Promise<{ status: n
     const response = await fetch(url, {
       signal: controller.signal,
       redirect: 'manual',
-      headers: { Accept: 'application/json' },
+      headers: { Accept: 'application/json', ...headers },
     })
 
     const durationMs = Date.now() - started
@@ -210,12 +218,16 @@ async function main() {
       continue
     }
 
-    const host = env === 'production' ? cfg.routing?.production : cfg.routing?.staging
+    const primaryHost = env === 'production' ? cfg.routing?.production : cfg.routing?.staging
+    const isBlocked = !primaryHost || primaryHost === 'n/a' || primaryHost === 'blocked' || primaryHost === 'pilot-only'
+    const host = isBlocked
+      ? (env === 'staging' ? cfg.routing?.stagingFallback : undefined)
+      : primaryHost
 
-    if (!host || host === 'n/a' || host === 'blocked' || host === 'pilot-only') {
+    if (!host) {
       results.push({
         app,
-        host: host ?? 'n/a',
+        host: primaryHost ?? 'n/a',
         driftState: 'unroutable',
         headSha,
         shaMatch: false,
@@ -229,9 +241,13 @@ async function main() {
 
     const versionPath = cfg.routing?.versionPath ?? '/api/version'
     const url = `${host}${versionPath}`
+    const headers: Record<string, string> = {}
+    if (app === 'orchestrator-api' && process.env.ORCHESTRATOR_API_KEY) {
+      headers['x-api-key'] = process.env.ORCHESTRATOR_API_KEY
+    }
 
     process.stdout.write(`  ${app.padEnd(18)} → ${url} ... `)
-    const { status, body, durationMs, error } = await fetchVersion(url, timeoutMs)
+    const { status, body, durationMs, error } = await fetchVersion(url, timeoutMs, headers)
 
     const { driftState, deployedSha, shaMatch } = classifyDrift(status, body, headSha, error)
 

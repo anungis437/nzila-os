@@ -568,8 +568,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Resolve protected probe credentials
+        env:
+          DEPLOYED_APPS: ${{ needs.deploy.outputs.deployed_apps }}
+        run: |
+          set -euo pipefail
+
+          if [[ ",${DEPLOYED_APPS}," == *",orchestrator-api,"* ]]; then
+            ORCHESTRATOR_API_KEY=$(az containerapp secret show \
+              --name nzila-os-orchestrator-api \
+              --resource-group "nzila-canada-${{ needs.plan.outputs.environment }}-rg" \
+              --secret-name orchestrator-api-key \
+              --query value -o tsv)
+
+            if [ -z "$ORCHESTRATOR_API_KEY" ]; then
+              echo "::error::Unable to resolve orchestrator-api-key for protected post-deploy probes"
+              exit 1
+            fi
+
+            echo "::add-mask::$ORCHESTRATOR_API_KEY"
+            echo "ORCHESTRATOR_API_KEY=$ORCHESTRATOR_API_KEY" >> "$GITHUB_ENV"
+          fi
+
       - name: Health checks
         run: |
+          set -euo pipefail
           ENV="${{ needs.plan.outputs.environment }}"
           APPS="${{ needs.deploy.outputs.deployed_apps }}"
           echo "Running health checks for $ENV environment..."
@@ -580,9 +603,6 @@ jobs:
             --resource-group "nzila-canada-${ENV}-rg" \
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "jollydune-88c1e97f.canadacentral.azurecontainerapps.io")
 
-          # Probe /api/health (canonical health endpoint) — NOT root /
-          # Root / may redirect (307) or return app HTML even when the service is broken.
-          # /api/health is the only reliable readiness signal.
           if [ -z "$APPS" ]; then
             echo "::error::No deployed apps were provided to post-deploy verification"
             exit 1
@@ -591,20 +611,25 @@ jobs:
           IFS=',' read -r -a APPS_ARRAY <<< "$APPS"
           FAILED_HEALTH=()
           for APP in "${APPS_ARRAY[@]}"; do
-            echo "Checking $APP /api/health..."
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-              --max-time 10 --retry 3 --retry-delay 5 \
-              "https://nzila-os-${APP}.${DOMAIN}/api/health" 2>/dev/null || echo "000")
+            HEALTH_PATH=$(jq -r --arg app "$APP" \
+              '.apps[$app].routing.healthPath // "/api/health"' \
+              governance/release/deployment-inventory.json)
+            echo "Checking $APP $HEALTH_PATH..."
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+              --max-time 10 --retry 3 --retry-delay 5 --retry-all-errors \
+              "https://nzila-os-${APP}.${DOMAIN}${HEALTH_PATH}" 2>/dev/null || true)
+            STATUS=${STATUS:-000}
             if [ "$STATUS" = "200" ]; then
               echo "  ✅ $APP: HTTP $STATUS"
             else
-              echo "  ⚠️  $APP: HTTP $STATUS — /api/health did not return 200 (may be warming up)"
+              echo "  ❌ $APP: HTTP $STATUS — $HEALTH_PATH did not return 200"
               FAILED_HEALTH+=("$APP")
             fi
           done
 
           if [ ${#FAILED_HEALTH[@]} -gt 0 ]; then
-            echo "::warning::Post-deploy health check failed for: ${FAILED_HEALTH[*]} — check logs"
+            echo "::error::Post-deploy health check failed for: ${FAILED_HEALTH[*]}"
+            exit 1
           fi
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -792,15 +817,11 @@ jobs:
           # Verify the deployed apps report the expected SHA — catches partial deploys
           pnpm tsx scripts/release/drift-version.ts \
             --env ${{ needs.plan.outputs.environment }} \
-            --apps "$APPS" || true
-          # '|| true' — drift is expected immediately post-deploy while containers warm up.
-          # The drift report is uploaded as evidence; promotion gate enforces this separately.
+            --apps "$APPS"
 
       - name: Record deployment evidence
         run: |
-          pnpm tsx scripts/release/build-deploy-evidence.ts --env ${{ needs.plan.outputs.environment }} || true
-          # '|| true' — NOT-READY verdict is expected when apps are still warming up or haven't been
-          # deployed in this run. Evidence is written regardless; promotion gate enforces readiness separately.
+          pnpm tsx scripts/release/build-deploy-evidence.ts --env ${{ needs.plan.outputs.environment }}
 
       - uses: actions/upload-artifact@v4
         with:
