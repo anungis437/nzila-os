@@ -20,6 +20,11 @@ vi.mock('@/lib/api-auth-guard', () => ({
   currentUser: vi.fn(),
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn(async (fn: (tx?: unknown) => unknown) => fn({})),
+  withRLSContext: vi.fn(async (fn: (tx?: unknown) => unknown) => fn({})),
+}));
+
 vi.mock('@/db/db', () => ({
   db: {
     select: vi.fn(),

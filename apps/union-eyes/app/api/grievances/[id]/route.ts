@@ -22,6 +22,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const GET = withOrganizationAuth(async (request, context, params?: { id: string }) => {
   const { organizationId, userId } = context;
@@ -34,15 +35,18 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
       return standardErrorResponse(ErrorCode.FORBIDDEN, "Unauthorized");
     }
 
-    const [grievance] = await db
-      .select()
-      .from(grievances)
-      .where(
-        and(
-          eq(grievances.id, params.id),
-          eq(grievances.organizationId, organizationId),
-        ),
-      );
+    const [grievance] = await withRLSContext({ organizationId }, async () => {
+      const rows = await db
+        .select()
+        .from(grievances)
+        .where(
+          and(
+            eq(grievances.id, params.id),
+            eq(grievances.organizationId, organizationId),
+          ),
+        );
+      return rows;
+    });
 
     if (!grievance) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");

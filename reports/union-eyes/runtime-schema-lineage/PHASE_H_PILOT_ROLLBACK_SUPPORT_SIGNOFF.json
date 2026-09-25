@@ -1,0 +1,69 @@
+{
+  "artifact": "PHASE_H_PILOT_ROLLBACK_SUPPORT_SIGNOFF",
+  "generatedAt": "2026-09-23T22:03:50Z",
+  "generatedAtET": "2026-09-23, ~6:03 p.m. ET",
+  "named_support_owner_escalation": {
+    "primary": "support@onelabtech.com",
+    "status": "APPROVED",
+    "approved": true,
+    "note": "Approved for the staging-only pilot envelope by the named pilot authority; escalation mailbox remains support@onelabtech.com.",
+    "alternate_TBD": "TBD engineering-on-call owner if support@ mailbox not the pilot channel"
+  },
+  "kill_criteria": [
+    "Cross-org data leak detected",
+    "Audit log NAR chain breaks or gaps found",
+    "Authentication bypass or session fixation confirmed",
+    "More than 3 unhandled 500 errors per hour sustained for 30+ minutes",
+    "Pilot sponsor / platform lead requests halt",
+    "Authority regression on PRIMARY auth, RLS, tenant isolation, or external-specialist boundary"
+  ],
+  "kill_criteria_source": [
+    "artifacts/ue-pilot-launch/launch-evidence-pack.md \u00a77 Trigger Conditions (adapted to staging pilot)",
+    "PHASE_H_EVIDENCE.json J_PILOT_ENVELOPE_PROPOSAL",
+    "PHASE_H_PILOT_CLOSURE_PLAN.md"
+  ],
+  "prior_aca_revision": "nzila-os-union-eyes-staging--0000257",
+  "current_aca_revision": "nzila-os-union-eyes-staging--0000259",
+  "prior_aca_revision_source": "PHASE_G_STATUS.json section1_provenance.PRIOR_TRAFFIC_REVISION / PRIOR_REVISION_24513797a",
+  "snapshot_id": "staging-canonical-20260923T184938Z-92611387",
+  "schema_digest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+  "file_sha256": "5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4",
+  "recovery_procedure": {
+    "summary": "ACA prior revision traffic shift + disposable PG15 snapshot restore",
+    "steps": [
+      "Shift Azure Container Apps traffic from --0000259 back to prior revision --0000257 (or deactivate tip revision).",
+      "If DB state suspect: restore canonical snapshot staging-canonical-20260923T184938Z-92611387.dump into a disposable PG15 target per CANONICAL_SNAPSHOT_LIFECYCLE (RESTORE_EMPTY_PG15 PASS).",
+      "Do NOT mutate production; staging-only.",
+      "Disable/halt pilot org access as needed; notify proposed support owner."
+    ],
+    "citation": "reports/union-eyes/runtime-schema-lineage/CANONICAL_SNAPSHOT_LIFECYCLE.json (CANONICAL_SNAPSHOT_LIFECYCLE=PASS; RESTORE_EMPTY_PG15=PASS)"
+  },
+  "who_may_terminate_pilot": {
+    "proposed": [
+      "Platform lead",
+      "Pilot sponsor",
+      "Named support owner (support@onelabtech.com)"
+    ],
+    "status": "APPROVED",
+    "approved": true
+  },
+  "aca_rollback_dry_run": "OPTIONAL_NOT_RUN",
+  "aca_rollback_dry_run_note": "Not run; optional only; must not create a gate.",
+  "ROLLBACK_SUPPORT_CONTROLS": {
+    "recommended": "PASS",
+    "status": "PASS",
+    "approver": "Aubert / Nzila designated pilot authority",
+    "approverDecision": "PASS",
+    "note": "Approved for the staging-only pilot envelope; snapshot restore PASS and prior ACA revision are evidenced. ACA rollback dry-run remains optional and was not run.",
+    "signedAt": "2026-09-23T22:03:50Z"
+  },
+  "pilot_end": "2026-10-07",
+  "approval": {
+    "approver": "Aubert / Nzila designated pilot authority",
+    "signedAt": "2026-09-23T22:03:50Z",
+    "PILOT_SCOPE": "STAGING_ONLY",
+    "pilot_end": "2026-10-07",
+    "awaiting_human_approval": false
+  },
+  "awaiting_human_approval": false
+}

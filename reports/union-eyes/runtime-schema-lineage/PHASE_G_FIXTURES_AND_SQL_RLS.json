@@ -1,0 +1,197 @@
+{
+  "generatedAt": "2026-09-23T15:57:24.925Z",
+  "PRODUCTION_DATA_USED": false,
+  "REAL_MEMBER_DATA_USED": false,
+  "STAGING_ACCEPTANCE_FIXTURES": "PASS",
+  "fixtures": {
+    "ORG_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+    "ORG_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "ADMIN_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+    "MEMBER_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+    "STEWARD_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+    "EXTERNAL_SPECIALIST_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+    "ADMIN_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+    "MEMBER_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02",
+    "MATTER_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+    "MATTER_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11",
+    "DOCUMENT_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21",
+    "DOCUMENT_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21",
+    "REPRESENTATION_AUTHORITY_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa31",
+    "MATTER_GRANT_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa41",
+    "DOCUMENT_GRANT_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa51",
+    "DOC_GRANT_INTERNAL_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa61"
+  },
+  "rls": {
+    "union_eyes_runtime": {
+      "rolname": "union_eyes_runtime",
+      "rolsuper": false,
+      "rolbypassrls": false
+    },
+    "noContext": {
+      "organizations": 0,
+      "grievances": 0,
+      "documents": 0
+    },
+    "orgIsolation": {
+      "A_sees": [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      ],
+      "B_sees": [],
+      "A_sees_B": false,
+      "B_sees_A": false
+    },
+    "matterIsolation": {
+      "A_ids": [],
+      "B_ids": [],
+      "A_sees_B": false,
+      "B_sees_A": false
+    },
+    "transactionLeakage": {
+      "orgA_txn_sees_matterB": 0,
+      "new_txn_org_count": 0,
+      "TRANSACTION_CONTEXT_LEAKAGE": 0
+    },
+    "runtimeSurfaces": {
+      "billing_periods": 0,
+      "billing_accounts": 0,
+      "billing_subscriptions": 0,
+      "platform_invoices": 0,
+      "platform_payments": 0,
+      "org_subscriptions": 0,
+      "document_versions": 0,
+      "ai_grievance_triages": 0,
+      "billing_subscriptions_present": true
+    }
+  },
+  "http": [
+    {
+      "name": "ADMIN_A_health_auth",
+      "path": "/api/health",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 200,
+      "expectAuth": true,
+      "bodySnippet": "{\"ok\":true,\"status\":\"healthy\",\"app\":\"union-eyes\",\"environment\":\"staging\",\"timestamp\":\"2026-09-23T15:57:24.406Z\",\"version\":\"0.0.0\",\"checks\":{\"process\":{\"status\":\"ok\"},\"database\":{\"status\":\"ok\",\"critical\":true,\"ms\":120},\"auth\":{\"status\":\"ok\","
+    },
+    {
+      "name": "ADMIN_A_org_context",
+      "path": "/api/organizations/current",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "MEMBER_A_org_context",
+      "path": "/api/organizations/current",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "STEWARD_A_org_context",
+      "path": "/api/organizations/current",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "EXTERNAL_SPECIALIST_A_org_context",
+      "path": "/api/organizations/current",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "ADMIN_A_matters",
+      "path": "/api/grievances?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized - Authentication required\"}"
+    },
+    {
+      "name": "ADMIN_A_matter_by_id",
+      "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized - Authentication required\"}"
+    },
+    {
+      "name": "ADMIN_A_documents",
+      "path": "/api/documents?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized: Authentication required\"}"
+    },
+    {
+      "name": "BILLING_CYCLE",
+      "path": "/api/dues/billing-cycle",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"code\":\"AUTH_REQUIRED\",\"message\":\"Authentication required\",\"timestamp\":\"2026-09-23T15:57:24.594Z\",\"traceId\":\"mueadr74-2cacfb41\"}"
+    },
+    {
+      "name": "UNAUTHENTICATED",
+      "path": "/api/organizations/current",
+      "method": "GET",
+      "userId": null,
+      "status": 401,
+      "expectAuth": false,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "CROSS_ORG_ADMIN_A_reads_ORG_B_matter",
+      "path": "/api/grievances/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized - Authentication required\"}"
+    },
+    {
+      "name": "CROSS_ORG_MEMBER_B_reads_ORG_A_matter",
+      "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+      "method": "GET",
+      "userId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"error\":\"Unauthorized - Authentication required\"}"
+    },
+    {
+      "name": "UNGRANTED_MEMBER_A_external_only_doc_path",
+      "path": "/api/documents/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"code\":\"AUTH_REQUIRED\",\"message\":\"Authentication required\",\"timestamp\":\"2026-09-23T15:57:24.721Z\",\"traceId\":\"mueadrao-fe717109\"}"
+    },
+    {
+      "name": "SAME_ROLE_UNAUTHORIZED_member_admin_route",
+      "path": "/api/admin/organizations",
+      "method": "GET",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "status": 401,
+      "expectAuth": true,
+      "bodySnippet": "{\"code\":\"AUTH_REQUIRED\",\"message\":\"Authentication required\",\"timestamp\":\"2026-09-23T15:57:24.745Z\",\"traceId\":\"mueadrbb-a2acc8de\"}"
+    }
+  ],
+  "BILLING_CYCLE_MISSING_RELATION_ERROR": "NO",
+  "BILLING_CYCLE_RUNTIME_QUERY": "PASS",
+  "BILLING_CYCLE_STATUS": 401
+}

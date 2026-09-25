@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-09-23T18:52:28.483174-04:00",
+  "MAIN_SHA": "ff98963758de37255ae20cd13433c4c3b8a384b7",
+  "CONVERGENCE_BRANCH": "fix/ue-runtime-schema-lineage-restoration",
+  "CONVERGENCE_HEAD_PRE_REMEDIATE": "72c1125190b790a5b6f43def739f846cf1cdb726",
+  "WAIVER_DECISIONS": {
+    "1113686": "REMOVE_WAIVER",
+    "1113984": "REMOVE_WAIVER",
+    "1117930-1117980": "REMOVE_WAIVER",
+    "1117941-1117943": "REMOVE_WAIVER",
+    "1239030": "PATCH_DEPENDENCY adm-zip>=0.6.1"
+  },
+  "gates": [
+    {
+      "CHECK": "branch-policy",
+      "LOCAL_COMMAND": "pnpm tsx scripts/release/validate-branch-tag-policy.ts (fix/* allowed)",
+      "CI_WORKFLOW": "branch-tag-governance.yml",
+      "STATUS": "FIXED_PENDING_PUSH",
+      "ROOT_CAUSE": "PR #797 head branch workstream/* not in allow-list",
+      "MAIN_ALREADY_FAILS": "NO",
+      "CONVERGENCE_BRANCH_FAILS": "NO",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Open replacement PR from fix/ue-runtime-schema-lineage-restoration"
+    },
+    {
+      "CHECK": "Supply Chain Waiver Expiry",
+      "LOCAL_COMMAND": "pnpm tsx -e ACTIVE_WAIVERS expiry scan",
+      "CI_WORKFLOW": "nzila-governance.yml / waiver-expiry",
+      "STATUS": "FIXED_LOCAL",
+      "ROOT_CAUSE": "19 waivers expired 2026-09-18 (minimatch/immutable/next\u00d714/otel\u00d73)",
+      "MAIN_ALREADY_FAILS": "YES",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "REMOVE_WAIVER \u2014 overrides already remediate (minimatch>=10.2.3, immutable>=5.1.8, next>=16.3.3, otel exporter-prometheus>=0.217.0); advisories absent from audit"
+    },
+    {
+      "CHECK": "pnpm audit / Dependency Audit",
+      "LOCAL_COMMAND": "node tooling/security/npm-bulk-audit.mjs --audit-level=high; pnpm tsx tooling/security/supply-chain-policy.ts check-vulns audit-report.json",
+      "CI_WORKFLOW": "dependency-audit.yml + nzila-governance",
+      "STATUS": "FIXED_LOCAL",
+      "ROOT_CAUSE": "Unwaived HIGH adm-zip 1239030 (<0.6.1); expired waivers blocked policy",
+      "MAIN_ALREADY_FAILS": "YES",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "PATCH_DEPENDENCY \u2014 pnpm override adm-zip>=0.6.1 (was >=0.6.0); remove expired waivers"
+    },
+    {
+      "CHECK": "Governance Baseline / Trivy Container Scan",
+      "LOCAL_COMMAND": "trivy fs --severity HIGH,CRITICAL (equiv)",
+      "CI_WORKFLOW": "nzila-governance.yml trivy-container",
+      "STATUS": "FIXED_LOCAL",
+      "ROOT_CAUSE": "adm-zip 0.6.0 CVE-2026-77301 HIGH",
+      "MAIN_ALREADY_FAILS": "YES",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Same adm-zip>=0.6.1 override"
+    },
+    {
+      "CHECK": "Governance Gate / Baseline",
+      "LOCAL_COMMAND": "aggregate of dependency-audit + waiver-expiry",
+      "CI_WORKFLOW": "nzila-governance.yml governance-gate",
+      "STATUS": "FIXED_LOCAL",
+      "ROOT_CAUSE": "Downstream of dependency audit + waiver expiry failures",
+      "MAIN_ALREADY_FAILS": "YES",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Close via waiver + adm-zip remediations"
+    },
+    {
+      "CHECK": "Security Design Review Required",
+      "LOCAL_COMMAND": "n/a \u2014 GH label gate",
+      "CI_WORKFLOW": "security-design-review.yml",
+      "STATUS": "EVIDENCE_PREPARED",
+      "ROOT_CAUSE": "PR touches apps/union-eyes/lib/auth/rbac-server.ts; missing security-design-reviewed label",
+      "MAIN_ALREADY_FAILS": "NO",
+      "CONVERGENCE_BRANCH_FAILS": "YES_UNTIL_LABEL",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Real evidence at governance/security/design-reviews/2026-09-23-ue-rbac-system-context.md; apply label after review (not bypass)"
+    },
+    {
+      "CHECK": "Unit Tests",
+      "LOCAL_COMMAND": "pnpm --filter @nzila/union-eyes test",
+      "CI_WORKFLOW": "ci.yml / cupe-pilot-readiness",
+      "STATUS": "FIXED_LOCAL_PARTIAL",
+      "ROOT_CAUSE": "getUserRole wrapped in withSystemContext without test mocks; entitlement-guard same; governance boundary over-asserted withSystemContext",
+      "MAIN_ALREADY_FAILS": "LIKELY",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Mock withSystemContext in rbac-server + entitlement-guard tests; assert mockExecute not called on 403 governance paths"
+    },
+    {
+      "CHECK": "E2E \u00b7 union-eyes",
+      "LOCAL_COMMAND": "UE_DB_RESTORE_SNAPSHOT_URL=file://... POSTGRES_MAJOR=15 db:migrate + seed + playwright",
+      "CI_WORKFLOW": "e2e.yml",
+      "STATUS": "REMEDIATION_IN_TREE",
+      "ROOT_CAUSE": "Stale QA baseline bootstrap on postgres:16; scoped 0010 failed (member_documents missing); UE_DB_RESTORE_SNAPSHOT_URL unset",
+      "MAIN_ALREADY_FAILS": "YES",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "pgvector/pg15 + azure retrieve staging-canonical-20260923T184938Z-92611387 + SHA256 verify + file:// restore; skip QA baseline when snapshot URL set"
+    },
+    {
+      "CHECK": "Performance Regression Gate",
+      "LOCAL_COMMAND": "k6 run --env PROFILE=ci tests/load/smoke.js",
+      "CI_WORKFLOW": "ci.yml perf-regression",
+      "STATUS": "FIXED_LOCAL",
+      "ROOT_CAUSE": "Default PERF_BASE_URL pointed at dead ACA (Unavailable 404) \u2192 100% errors",
+      "MAIN_ALREADY_FAILS": "YES",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Default BASE_URL \u2192 live staging UE FQDN; allow favicon 404 (app returns 404)"
+    },
+    {
+      "CHECK": "reliability-validation",
+      "LOCAL_COMMAND": "pnpm test:fast (reliability-guard.yml)",
+      "CI_WORKFLOW": "reliability-guard.yml",
+      "STATUS": "LIKELY_FIXED_WITH_UNIT",
+      "ROOT_CAUSE": "Observed same withSystemContext/SYSTEM_DATABASE_URL unit failures in job log",
+      "MAIN_ALREADY_FAILS": "LIKELY",
+      "CONVERGENCE_BRANCH_FAILS": "WAS_YES",
+      "REQUIRED_FOR_MAIN_GREEN": "YES",
+      "REMEDIATION": "Same unit-test mocks; confirm after CI re-run"
+    }
+  ]
+}

@@ -1,0 +1,1002 @@
+[
+  {
+    "table": "ai_clause_reasonings",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/ml/ai-clause-reasoning",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "ai_copilot_sessions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/ml/ai-copilot-sessions",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "ai_grievance_triages",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/ml/ai-grievance-triage",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "ai_insight_reports",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/ml/ai-insight-reports",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "allocation_basis_snapshots",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/allocation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "allocation_rule_versions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/allocation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "allocation_rules",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/allocation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "allocation_run_lines",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/allocation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "allocation_runs",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/allocation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "billing_accounts",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "billing_periods",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "billing_subscriptions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "break_policies",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/member/member-breaks",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "case_documents",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "documents-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "cba_rule_set_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-execution-core",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "cba_rule_versions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-execution-core",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "chargeback_statements",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/allocation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "clause_embeddings",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/agreements/clause-embeddings",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "commercial_contracts",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/contracts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "committee_action_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "committee-workspace-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "committee_documents",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "committee-workspace-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "committee_intelligence_snapshots",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "committee-workspace-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "committee_meeting_attendees",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "committee-workspace-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "committee_meetings",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "committee-workspace-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "compliance_alerts",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/compliance/employer-compliance",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "contract_covered_orgs",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/contract-amendments",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "contract_line_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/contracts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "correspondence",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/documents/correspondence",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "correspondence_audit_trail",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/documents/correspondence",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "correspondence_recipients",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/documents/correspondence",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "data_quality_warnings",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "ingestion-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "deadline_audit_events",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "deadline-engine-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "deadline_reminders",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "deadline-engine-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "dispatch_assignments",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/dispatch/dispatch",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "dispatch_requests",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/dispatch/dispatch",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "dispatch_rules",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/dispatch/dispatch",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "document_access_grants",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "documents-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "document_links",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "documents-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "document_versions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "documents-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "dues_assignments",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/dues-assignments",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "duplicate_group_members",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "ingestion-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "duplicate_groups",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "ingestion-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_communications",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/communications/employer-communications",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_contacts",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/communications/employer-communications",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_execution_artifacts",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-artifacts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "employer_execution_compliance_events",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-compliance",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "employer_execution_evidence_links",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-artifacts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_execution_profiles",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-runtime-profile",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_execution_replays",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-artifacts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "employer_payroll_run_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-payroll-runs",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_payroll_runs",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-payroll-runs",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_remittance_run_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-remittance-runs",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_remittance_runs",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-remittance-runs",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_reports",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/compliance/employer-compliance",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_risk_scores",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/ml/employer-risk-scores",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_timesheet_batches",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-timesheets",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "employer_timesheet_entries",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/employer-execution/employer-timesheets",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "entitlement_usage_log",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/contracts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "fee_adjustments",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/transaction-fees",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "governance_policies",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/governance/governance-policies",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "grievance_case_access_assignments",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/claims/grievance-lifecycle",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "grievance_events",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/claims/grievance-lifecycle",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "grievance_timeline_events",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "ingestion-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "ingestion_batches",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "ingestion-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "ingestion_records",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "ingestion-schema",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "integration_partners",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/infrastructure/integrations",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "member_breaks",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/member/member-breaks",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "member_jurisdiction_preferences",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/member/jurisdiction-preferences",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "org_configurations",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "db/schema-organizations",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "org_entitlements",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/contracts",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "org_subscriptions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "payment_allocations",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_benefit_claims",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_contributions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_members",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_plans",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_t4a_records",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_trustee_meetings",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pension_trustees",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/pension",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pilot_checklist_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/pilot/pilot-onboarding",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pilot_demo_seeds",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/pilot/pilot-demo-seeds",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pilot_enrollments",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/pilot/pilot-enrollments",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pilot_events",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/pilot/pilot-events",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pilot_feedback",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/pilot/pilot-feedback",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "pilot_milestones",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/pilot/pilot-milestones",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "platform_cost_ledger_entries",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-ledger",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "platform_invoice_line_items",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "platform_invoices",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "platform_payments",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/platform-billing",
+    "scopeDisposition": null,
+    "runtimePrincipal": "mixed"
+  },
+  {
+    "table": "reconciliation_exceptions",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/reconciliation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "reconciliation_matches",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/reconciliation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "reconciliation_runs",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/reconciliation",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "satisfaction_surveys",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/claims/satisfaction",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "security_posture_checks",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/infrastructure/audit",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "stewards",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/member/stewards",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "strategic_goals",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "OTHER_GOVERNED_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/governance/strategic-goals",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "subscription_events_log",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/dunning",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "transaction_fee_events",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/transaction-fees",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "transaction_fee_rules",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/finance/transaction-fees",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  },
+  {
+    "table": "user_signatures",
+    "schemaOwner": "PLATFORM_SQL_OWNED",
+    "creationLineage": "ACTIVE_SQL_PLATFORM_LINEAGE",
+    "rlsRequired": true,
+    "canonicalRequirement": "REQUIRED",
+    "storageAuthorityDomain": "domains/documents/correspondence",
+    "scopeDisposition": null,
+    "runtimePrincipal": "tenant"
+  }
+]

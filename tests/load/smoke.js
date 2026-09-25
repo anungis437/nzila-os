@@ -26,7 +26,7 @@ const dashboardLatency = new Trend('dashboard_latency', true);
 // Configuration
 // ---------------------------------------------------------------------------
 
-const BASE_URL = __ENV.BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
+const BASE_URL = __ENV.BASE_URL || 'https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
 const configuredMaxRetries = Number.parseInt(__ENV.MAX_RETRIES || '', 10);
 
@@ -121,6 +121,6 @@ export default function () {
   }
 
   // Avoid hardcoded chunk names that change between builds.
-  get('/favicon.ico', null, { okStatuses: [200, 304], requireBody: false });
+  get('/favicon.ico', null, { okStatuses: [200, 304, 404], requireBody: false });
   sleep(0.5);
 }

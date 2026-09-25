@@ -1,0 +1,19 @@
+{
+  "IDS": {
+    "ORG_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+    "ORG_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "ADMIN_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+    "MEMBER_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+    "STEWARD_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+    "EXTERNAL_SPECIALIST_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+    "ADMIN_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+    "MEMBER_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02",
+    "MATTER_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+    "MATTER_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11",
+    "DOCUMENT_A": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21",
+    "DOCUMENT_B": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21"
+  },
+  "PRODUCTION_DATA_USED": false,
+  "REAL_MEMBER_DATA_USED": false,
+  "STAGING_ACCEPTANCE_FIXTURES": "PASS"
+}

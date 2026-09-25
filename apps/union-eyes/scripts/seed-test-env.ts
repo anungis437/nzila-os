@@ -1,4 +1,4 @@
-import { createHash } from 'crypto'
+import { createHash, randomUUID } from 'crypto'
 import { inArray, sql } from 'drizzle-orm'
 import { assertNotProduction } from '@/lib/runtime/production-guard'
 import { db } from '@/db/db'
@@ -7,7 +7,7 @@ assertNotProduction('seed-test-env')
 import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
-import { users, organizationUsers } from '@/db/schema/domains/member/user-management'
+import { organizationUsers } from '@/db/schema/domains/member/user-management'
 import { profiles } from '@/db/schema/profiles-schema'
 import { authOrgPolicies, authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
 import { hashPassword } from '@nzila/platform-auth/password'
@@ -42,10 +42,14 @@ function assertSafeRuntime(): void {
   }
 }
 
-function isMissingColumnError(error: any): boolean {
+
+/** Soft-skip helper for non-RBAC seed tables (claim_updates). */
+function isNonCriticalSeedSchemaDrift(error: any): boolean {
   if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string } }).cause
-  return cause?.code === '42703'
+  const cause = (error as { cause?: { code?: string }; code?: string }).cause
+  const code = cause?.code ?? (error as { code?: string }).code
+  // 42703 undefined_column, 23502 not_null_violation, 23503 FK mismatch vs snapshot
+  return code === '42703' || code === '23502' || code === '23503'
 }
 
 function isMissingRelationError(error: any): boolean {
@@ -139,8 +143,12 @@ async function seed(): Promise<void> {
       await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
     })
 
-    await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
-    await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
+    await safeCleanup('organization_members', async () => {
+      await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
+    })
+    await safeCleanup('user_management.organization_users', async () => {
+      await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
+    })
     const profilesAvailable = await tableExists('profiles')
     if (profilesAvailable) {
       await safeCleanup('profiles', async () => {
@@ -151,8 +159,23 @@ async function seed(): Promise<void> {
     }
 
     // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
-    await tx.execute(sql`delete from audit_security.security_events`)
-    await tx.execute(sql`delete from audit_security.audit_logs`)
+    // Canonical PG15 snapshot may omit audit_security (legacy-lineage only).
+    // Pre-check with to_regclass — a failed DELETE aborts the surrounding transaction,
+    // so catch-based safeCleanup alone is insufficient here.
+    if (await tableExists('audit_security.security_events')) {
+      await safeCleanup('audit_security.security_events', async () => {
+        await tx.execute(sql`delete from audit_security.security_events`)
+      })
+    } else {
+      console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.security_events')
+    }
+    if (await tableExists('audit_security.audit_logs')) {
+      await safeCleanup('audit_security.audit_logs', async () => {
+        await tx.execute(sql`delete from audit_security.audit_logs`)
+      })
+    } else {
+      console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.audit_logs')
+    }
 
     // Remove existing QA orgs and recreate deterministically.
     await tx.delete(organizations).where(inArray(organizations.id, orgIds))
@@ -165,40 +188,25 @@ async function seed(): Promise<void> {
         organizationType: org.organizationType,
         hierarchyPath: [...org.hierarchyPath],
         hierarchyLevel: org.hierarchyLevel,
+        // Snapshot enforces NOT NULL without server DEFAULTs for several
+        // columns that only have drizzle client-side .default() — set explicitly.
+        sectors: [],
+        clcAffiliated: false,
+        memberCount: 0,
+        activeMemberCount: 0,
+        settings: {},
+        featuresEnabled: [],
+        remittanceDay: 15,
+        fiscalYearEnd: '2024-12-31',
         status: 'active',
         createdAt: NOW,
         updatedAt: NOW,
       })),
     )
 
-    await tx
-      .insert(users)
-      .values(
-        usersFixture.map((u) => ({
-          userId: u.userId,
-          email: u.email,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          displayName: `${u.firstName} ${u.lastName}`,
-          isActive: u.status === 'active',
-          isSystemAdmin: false,
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
-      .onConflictDoUpdate({
-        target: users.userId,
-        set: {
-          email: sql`excluded.email`,
-          firstName: sql`excluded.first_name`,
-          lastName: sql`excluded.last_name`,
-          displayName: sql`excluded.display_name`,
-          isActive: sql`excluded.is_active`,
-          isSystemAdmin: false,
-          updatedAt: NOW,
-        },
-      })
-
+    // Domain `users` and packages `authUsers` both map to user_management.users.
+    // Domain schema drifts ahead of the canonical snapshot (e.g. phone_verified_at);
+    // seed only through authUsers which matches the snapshot column set.
     await tx
       .insert(authUsers)
       .values(
@@ -238,20 +246,7 @@ async function seed(): Promise<void> {
         },
       })
 
-    await tx.insert(organizationUsers).values(
-      usersFixture.map((u) => ({
-        organizationId: u.orgId,
-        userId: u.userId,
-        role: u.role,
-        permissions: [],
-        isActive: u.status === 'active',
-        isPrimary: true,
-        joinedAt: NOW,
-        createdAt: NOW,
-        updatedAt: NOW,
-      })),
-    )
-
+    // Same dual-mapping issue as users — prefer authOrganizationUsers only.
     await tx
       .insert(authOrganizationUsers)
       .values(
@@ -325,6 +320,8 @@ async function seed(): Promise<void> {
         .insert(profiles)
         .values(
           usersFixture.map((u) => ({
+            // Snapshot profiles.id is NOT NULL without a server DEFAULT.
+            id: randomUUID(),
             userId: u.userId,
             email: u.email,
             membership: 'free' as const,
@@ -345,10 +342,14 @@ async function seed(): Promise<void> {
 
     await tx.insert(claims).values(
       casesFixture.map((c) => ({
+        // Snapshot NOT NULL columns often lack server DEFAULTs that drizzle
+        // .default() assumes — set client defaults explicitly.
+        id: randomUUID(),
         claimId: c.claimId,
         claimNumber: c.claimNumber,
         organizationId: c.organizationId,
         memberId: c.memberId,
+        isAnonymous: false,
         claimType: c.claimType,
         status: c.status,
         priority: c.priority,
@@ -356,50 +357,65 @@ async function seed(): Promise<void> {
         incidentDate: 'incidentDate' in c ? c.incidentDate : NOW,
         location: 'location' in c ? c.location : 'Unknown Location',
         desiredOutcome: 'desiredOutcome' in c ? c.desiredOutcome : null,
+        witnessesPresent: false,
+        previouslyReported: false,
         filedDate: NOW,
         assignedTo: 'assignedTo' in c ? c.assignedTo : null,
         assignedAt: 'assignedTo' in c ? NOW : null,
+        progress: 0,
+        claimAmount: '0',
+        settlementAmount: '0',
+        legalCosts: '0',
+        courtCosts: '0',
+        attachments: [],
+        voiceTranscriptions: [],
+        metadata: {},
         createdAt: NOW,
         updatedAt: NOW,
       })),
     )
   })
 
-  // Separate transaction for organization_members (may fail due to schema drift)
-  try {
-    await db.transaction(async (tx) => {
-      await tx.insert(organizationMembers).values(
-        usersFixture.map((u) => ({
-          userId: u.userId,
-          // organization_members.organization_id is uuid in the canonical Drizzle
-          // schema; pass the org UUID directly. (The slug variant lives in the
-          // legacy schema-organizations.ts mirror; the canonical schema wins for
-          // seed inserts so the seeded rows resolve under getUserRole().)
-          organizationId: u.orgId,
-          role: u.role,
-          status: u.status,
-          name: `${u.firstName} ${u.lastName}`,
-          email: u.email,
-          metadata: 'metadata' in u ? u.metadata : null,
-          isPrimary: true,
-          joinedAt: NOW,
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
-    })
-  } catch (error) {
-    if (!isMissingColumnError(error)) throw error
-    console.warn(
-      `[ue:seed:test-env] organization_members insert skipped due schema drift: ${describePgError(error)}`,
+  // organization_members is load-bearing for RBAC / role-landing E2E. Soft-skipping
+  // on schema drift previously masked missing platform DDL (everyone fell back to
+  // member). Fail hard so CI surfaces the gap instead of timing out on role-nav.
+  await db.transaction(async (tx) => {
+    await tx.insert(organizationMembers).values(
+      usersFixture.map((u) => ({
+        // Snapshot organization_members.id is NOT NULL without a server DEFAULT;
+        // Drizzle defaultRandom() emits SQL DEFAULT which then violates NOT NULL.
+        id: randomUUID(),
+        userId: u.userId,
+        // organization_members.organization_id is uuid in the canonical Drizzle
+        // schema; pass the org UUID directly. (The slug variant lives in the
+        // legacy schema-organizations.ts mirror; the canonical schema wins for
+        // seed inserts so the seeded rows resolve under getUserRole().)
+        organizationId: u.orgId,
+        role: u.role,
+        status: u.status,
+        name: `${u.firstName} ${u.lastName}`,
+        email: u.email,
+        metadata: 'metadata' in u ? u.metadata : null,
+        isPrimary: true,
+        // Snapshot has several NOT NULL columns without server DEFAULTs; Drizzle
+        // emits SQL DEFAULT for omitted schema fields which then violates NOT NULL.
+        memberCategory: 'full_member',
+        exemptFromPerCapita: false,
+        joinedAt: NOW,
+        createdAt: NOW,
+        updatedAt: NOW,
+      })),
     )
-  }
+  })
 
   // Separate transaction for claim_updates (may fail due to schema drift)
   try {
     await db.transaction(async (tx) => {
       await tx.insert(claimUpdates).values(
         casesFixture.map((c, index) => ({
+          // Snapshot claim_updates.id/update_id often NOT NULL without server DEFAULT.
+          id: randomUUID(),
+          updateId: randomUUID(),
           claimId: c.claimId,
           updateType: 'seed_baseline',
           message: `Deterministic QA baseline #${index + 1}`,
@@ -417,7 +433,8 @@ async function seed(): Promise<void> {
       )
     })
   } catch (error) {
-    if (!isMissingColumnError(error)) throw error
+    // claim_updates is not load-bearing for RBAC/role-nav E2E; soft-skip drift.
+    if (!isNonCriticalSeedSchemaDrift(error)) throw error
     console.warn(
       `[ue:seed:test-env] claim_updates insert skipped due schema drift: ${describePgError(error)}`,
     )

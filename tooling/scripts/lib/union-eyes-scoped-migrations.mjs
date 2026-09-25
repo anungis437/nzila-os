@@ -137,3 +137,42 @@ export async function verifyTagApplied(client, { journalPath, migrationsDir, tag
   }
   return entry;
 }
+
+/**
+ * Stamp journal hashes into drizzle.__drizzle_migrations WITHOUT executing DDL.
+ * Used after a canonical snapshot restore whose schema already includes the
+ * objects those migrations would create (ledger often absent from pg_dump).
+ * Only stamps tags in `throughTags` when provided; otherwise stamps all entries.
+ * Idempotent: existing hashes are left untouched.
+ */
+export async function baselineScopedMigrations(client, { journalPath, migrationsDir, throughTags, log = () => {} }) {
+  const entries = readJournalEntries(journalPath);
+  const appliedHashes = await getAppliedHashes(client);
+  let stamped = 0;
+  const stampedTags = [];
+  await client.query('BEGIN');
+  try {
+    for (const entry of entries) {
+      if (throughTags && !throughTags.includes(entry.tag)) {
+        continue;
+      }
+      const { hash } = computeMigrationHash(migrationsDir, entry.tag);
+      if (appliedHashes.has(hash)) {
+        continue;
+      }
+      await client.query(
+        'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
+        [hash, entry.when ?? Date.now()],
+      );
+      appliedHashes.add(hash);
+      stamped += 1;
+      stampedTags.push(entry.tag);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw new Error(`Scoped migration baseline failed: ${err.message}`);
+  }
+  log(`scoped migration baseline: stamped ${stamped} hash(es)`);
+  return { stamped, stampedTags };
+}

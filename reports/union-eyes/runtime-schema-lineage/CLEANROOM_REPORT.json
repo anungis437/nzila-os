@@ -1,0 +1,494 @@
+{
+  "generatedAt": "2026-09-23T14:55:22.455Z",
+  "EMPTY_DATABASE_START": true,
+  "CLEAN_ROOM_ATTEMPTED": true,
+  "runner": "tooling/scripts/run-union-eyes-schema-lineage-cleanroom.mjs",
+  "djangoWired": true,
+  "skipDjango": false,
+  "applyQaFoundation": false,
+  "freezeGuard": "Production db:bootstrap still refuses legacy replay without UE_LINEAGE_REPLAY_OVERRIDE. Cleanroom uses UE_SCHEMA_LINEAGE_CLEANROOM=1.",
+  "COMPLETE_RUNTIME_SCHEMA_DIGEST": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+  "physicalRelationCount": 705,
+  "summary": {
+    "djangoMigrate": "PASS",
+    "historicalSchemaCreationPass": 19,
+    "historicalSchemaCreationFail": 0,
+    "historicalSchemaCreationSkip": 17,
+    "platformPass": 4,
+    "platformFail": 0,
+    "scopedPass": 15,
+    "scopedFail": 0
+  },
+  "steps": [
+    {
+      "step": "EMPTY_DATABASE_START",
+      "outcome": "PASS",
+      "database": "union_eyes_lineage",
+      "at": "2026-09-23T14:54:41.180Z"
+    },
+    {
+      "step": "EXTENSIONS",
+      "outcome": "PASS",
+      "note": "",
+      "at": "2026-09-23T14:54:41.500Z"
+    },
+    {
+      "step": "AUTH_FOUNDATION",
+      "outcome": "SKIP",
+      "note": "skipped when Django migrate enabled (set UE_CLEANROOM_APPLY_QA_FOUNDATION=1 to force)",
+      "at": "2026-09-23T14:54:41.500Z"
+    },
+    {
+      "step": "DJANGO_MIGRATE",
+      "outcome": "PASS",
+      "note": "ms_model... OK\r\n  Applying grievances.0003_expand_grievances_model... OK\r\n  Applying grievances.0004_expand_deadline_models... OK\r\n  Applying notifications.0001_initial... OK\r\n  Applying services.0001_enterprise_hardening... OK\r\n  Applying services.0002_remove_integrationidempotencykey_uq_idempkey_hash_org_and_more... OK\r\n  Applying sessions.0001_initial... OK\r\n  Applying unions.0001_initial... OK",
+      "at": "2026-09-23T14:55:02.566Z"
+    },
+    {
+      "step": "FOUNDATION_SHIM:organization_type",
+      "outcome": "PASS",
+      "note": "DO\n",
+      "at": "2026-09-23T14:55:02.856Z"
+    },
+    {
+      "step": "FOUNDATION_SHIM:profiles_user_id_unique",
+      "outcome": "PASS",
+      "note": "DO\n",
+      "at": "2026-09-23T14:55:03.149Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:03.960Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0098_predeployment_hardening.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0098_predeployment_hardening.sql",
+      "note": "idempotent/benign/drift errors=3",
+      "at": "2026-09-23T14:55:04.359Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:04.840Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "DJANGO_FILE:apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "outcome": "SKIP",
+      "note": "covered by DJANGO_MIGRATE manage.py migrate (not per-file)",
+      "at": "2026-09-23T14:55:05.312Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0041_steady_reavers.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0041_steady_reavers.sql",
+      "note": "idempotent/benign/drift errors=3",
+      "at": "2026-09-23T14:55:05.726Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0025_pilot_enrollments.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0025_pilot_enrollments.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:06.059Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0082_add_pilot_tables.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0082_add_pilot_tables.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:06.462Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0083_data_source_tables.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0083_data_source_tables.sql",
+      "note": "idempotent/benign/drift errors=12",
+      "at": "2026-09-23T14:55:06.833Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:07.529Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:08.344Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:08.823Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:09.249Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:09.781Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:10.090Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:10.871Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/20260404_pilot_observability.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/20260404_pilot_observability.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:11.257Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:11.712Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:12.250Z"
+    },
+    {
+      "step": "AUDIT_SNAPSHOT:apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "outcome": "SKIP",
+      "note": "forensic drizzle snapshot; skipped when Django migrate owns foundation (cleanroom)",
+      "at": "2026-09-23T14:55:12.250Z"
+    },
+    {
+      "step": "AUDIT_SNAPSHOT:apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "outcome": "SKIP",
+      "note": "forensic drizzle snapshot; skipped when Django migrate owns foundation (cleanroom)",
+      "at": "2026-09-23T14:55:12.250Z"
+    },
+    {
+      "step": "SCHEMA_CREATION:migrations/0045_union_eyes_deadline_engine.sql",
+      "outcome": "PASS",
+      "path": "migrations/0045_union_eyes_deadline_engine.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:12.756Z"
+    },
+    {
+      "step": "DEFER_PLATFORM:apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "outcome": "SKIP",
+      "note": "applied in PLATFORM_JOURNAL phase",
+      "at": "2026-09-23T14:55:12.756Z"
+    },
+    {
+      "step": "DEFER_PLATFORM:apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "outcome": "SKIP",
+      "note": "applied in PLATFORM_JOURNAL phase",
+      "at": "2026-09-23T14:55:12.756Z"
+    },
+    {
+      "step": "PLATFORM_SQL:0001_billing_subscriptions",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:13.119Z"
+    },
+    {
+      "step": "PLATFORM_SQL:0002_employer_execution_and_related_a",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:13.813Z"
+    },
+    {
+      "step": "PLATFORM_SQL:0003_integration_partners_and_security_posture",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:14.222Z"
+    },
+    {
+      "step": "PLATFORM_SQL:0004_audit_gap_canonical_tables",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-platform/0004_audit_gap_canonical_tables.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:14.949Z"
+    },
+    {
+      "step": "SCOPED:0000_outstanding_viper",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0000_outstanding_viper.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:15.542Z"
+    },
+    {
+      "step": "SCOPED:0001_lean_iron_man",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "note": "idempotent/benign/drift errors=33",
+      "at": "2026-09-23T14:55:15.892Z"
+    },
+    {
+      "step": "SCOPED:0002_certain_juggernaut",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0002_certain_juggernaut.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:16.231Z"
+    },
+    {
+      "step": "SCOPED:0003_dizzy_alex_wilder",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0003_dizzy_alex_wilder.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:16.554Z"
+    },
+    {
+      "step": "SCOPED:0004_hesitant_chameleon",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0004_hesitant_chameleon.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:17.033Z"
+    },
+    {
+      "step": "SCOPED:0005_add_icra_assessment_capability_token",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0005_add_icra_assessment_capability_token.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:17.367Z"
+    },
+    {
+      "step": "SCOPED:0006_external_specialist_runtime_privilege_closure",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:17.754Z"
+    },
+    {
+      "step": "SCOPED:0007_auth_bootstrap_runtime_remediation",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0007_auth_bootstrap_runtime_remediation.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:18.173Z"
+    },
+    {
+      "step": "SCOPED:0008_runtime_acceptance_closure",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0008_runtime_acceptance_closure.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:18.551Z"
+    },
+    {
+      "step": "SCOPED:0009_baseline_runtime_role_grants",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0009_baseline_runtime_role_grants.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:18.878Z"
+    },
+    {
+      "step": "SCOPED:0010_tenant_isolation_rls_foundation",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0010_tenant_isolation_rls_foundation.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:19.323Z"
+    },
+    {
+      "step": "SCOPED:0011_storage_authority_rls_completion",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0011_storage_authority_rls_completion.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:20.091Z"
+    },
+    {
+      "step": "SCOPED:0012_storage_authority_rls_final_closure",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0012_storage_authority_rls_final_closure.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:20.830Z"
+    },
+    {
+      "step": "SCOPED:0013_workbook_credential_payment_authority",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0013_workbook_credential_payment_authority.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:21.252Z"
+    },
+    {
+      "step": "SCOPED:0014_lineage_restoration_rls_closure",
+      "outcome": "PASS",
+      "path": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql",
+      "note": "ok",
+      "at": "2026-09-23T14:55:21.932Z"
+    },
+    {
+      "step": "PRESENCE_CHECK",
+      "outcome": "PASS",
+      "note": "tablename        \n-------------------------\n ai_safety_filters\n ai_usage_metrics\n billing_accounts\n billing_subscriptions\n case_documents\n collective_agreements\n commercial_contracts\n correspondence\n data_quality_warnings\n employer_payroll_runs\n grievance_deadlines\n ingestion_batches\n integration_partners\n member_documents\n org_configurations\n org_subscriptions\n organizations\n security_posture_checks\n(18 rows)",
+      "at": "2026-09-23T14:55:22.261Z"
+    },
+    {
+      "step": "COMPLETE_RUNTIME_SCHEMA_DIGEST",
+      "outcome": "PASS",
+      "note": "relations=705 digest=926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+      "digest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+      "relationCount": 705,
+      "at": "2026-09-23T14:55:22.455Z"
+    }
+  ],
+  "physicalRelationsSample": [
+    "audit_security.audit_logs",
+    "public.ab_test_assignments",
+    "public.ab_test_events",
+    "public.ab_test_variants",
+    "public.ab_tests",
+    "public.access_justification_requests",
+    "public.accessibility_audits",
+    "public.accessibility_issues",
+    "public.accessibility_test_suites",
+    "public.accessibility_user_testing",
+    "public.account_balance_reconciliation",
+    "public.account_mappings",
+    "public.address_change_history",
+    "public.address_validation_cache",
+    "public.ai_budgets",
+    "public.ai_clause_reasonings",
+    "public.ai_copilot_sessions",
+    "public.ai_grievance_triages",
+    "public.ai_insight_reports",
+    "public.ai_rate_limits",
+    "public.ai_safety_filters",
+    "public.ai_usage_metrics",
+    "public.alert_actions",
+    "public.alert_conditions",
+    "public.alert_escalations",
+    "public.alert_executions",
+    "public.alert_recipients",
+    "public.alert_rules",
+    "public.allocation_basis_snapshots",
+    "public.allocation_rule_versions",
+    "public.allocation_rules",
+    "public.allocation_run_lines",
+    "public.allocation_runs",
+    "public.analytics_metrics",
+    "public.analytics_scheduled_reports",
+    "public.api_access_tokens",
+    "public.api_integrations",
+    "public.arbitration_decisions",
+    "public.arbitration_precedents",
+    "public.arbitrations",
+    "public.arbitrator_profiles",
+    "public.arms_length_verification",
+    "public.audit_logs",
+    "public.auth_group",
+    "public.auth_group_permissions",
+    "public.auth_permission",
+    "public.auth_user",
+    "public.auth_user_groups",
+    "public.auth_user_user_permissions",
+    "public.automation_execution_log"
+  ]
+}
