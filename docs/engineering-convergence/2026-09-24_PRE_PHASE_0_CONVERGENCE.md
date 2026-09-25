@@ -12,6 +12,8 @@ The complete read-only P0.2 census at the current baseline is recorded in
 `2026-09-25_P0_2_REPOSITORY_TOPOLOGY.md`. The original starting SHA remains in
 this report as historical programme context. The one-disposition-per-lane
 classification is recorded in `2026-09-25_P0_5_LANE_CLASSIFICATION.md`.
+Its `LANE-*` identifiers are authoritative for integration planning; the
+earlier `DEV-*` sections below remain investigation notes.
 
 This is the working Development Convergence Ledger for Pre-Phase 0. It is not a
 SaaS-readiness declaration and it does not authorize production promotion.
@@ -24,6 +26,8 @@ P0_2_REPOSITORY_TOPOLOGY = PASS
 P0_3_DEVELOPMENT_LEDGER = PASS
 P0_4_ORPHAN_DISCOVERY = PASS
 P0_5_PRIMARY_CLASSIFICATION = PASS
+P0_6_SAAS_DOMAIN_MAPPING = PASS
+P0_7_CROSS_LANE_CONFLICT_ANALYSIS = PASS
 UNACCOUNTED_DEVELOPMENT != 0
 OPEN_PR_DISPOSITION = IN_PROGRESS
 LOCAL_WORKTREE_DISPOSITION = IN_PROGRESS
@@ -507,14 +511,18 @@ No production approval will be granted merely to turn that state green.
 
 | Lanes | Conflict | Resolution |
 | --- | --- | --- |
-| DEV-003 / DEV-004 | Competing DDL for Django-owned tables | DEV-003 owns Django entities; remove #799 `0005/0006` |
-| DEV-004 / DEV-005 | CI, workbook tests, red-team and generated reports overlap | Keep current-main or rebuilt exact-head forms only |
-| DEV-004 / DEV-009 | Two versions of schema oracle and snapshot workflow | Reconcile into one oracle and one publisher authority |
-| DEV-006 / all code lanes | Documentation may describe pre-integration state | Integrate documentation after code/schema convergence |
-| DEV-010 / DEV-011 | Methodology transparency bundled with CIVIC product routes | Split; validate OCI page independently, block CIVIC routes |
-| DEV-013 / main | Duplicate migration number and weaker credential protection | Keep main `0013`; discard local `0006` after recording proof |
-| DEV-014 / current auth/RLS | Old authority helpers use historical assumptions | Reconstruct selected requirements against current architecture |
-| DEV-023 / code lanes | Shared lockfile | Run dependency batch separately |
+| LANE-003 / LANE-004 | Four direct overlaps plus competing DDL for Django-owned tables | LANE-003 owns Django entities; remove #799 `0005/0006` |
+| LANE-004 / LANE-008 | Five overlaps including two schema oracles and snapshot/E2E authority | Reconcile into one oracle and one publisher authority |
+| LANE-004 / LANE-028 | Twenty Phase H evidence paths overlap | Treat untracked evidence as historical input; regenerate at final head |
+| LANE-004 / LANE-027 | Root package and lockfile overlap | Port only validated E2E source after schema dependency state stabilizes |
+| LANE-006 / code lanes | Documentation may describe pre-integration state | Integrate documentation after code/schema convergence |
+| LANE-006 / LANE-008/011 | Generated truth and authority reports overlap | Regenerate once from the converged implementation |
+| LANE-007 / LANE-003/004/008 | Package manifest and Wave-1 seed implementation overlap | Absorb fixtures after schema lineage is canonical |
+| LANE-008 / LANE-009 | OCI methodology transparency is bundled with unauthorized CIVIC routes | Split; validate OCI page independently and block CIVIC routes |
+| LANE-011 / main | Duplicate migration number and weaker credential protection | Keep main `0013`; exclude local `0006` after recording proof |
+| LANE-012 / current auth/RLS | Old authority helpers use historical assumptions | Reconstruct selected requirements against current architecture |
+| LANE-017 / LANE-004/027 | Lockfile/inventory and health/E2E behavior overlap | Preserve requirement; reassess after lineage/E2E convergence |
+| LANE-020 / code lanes | Shared lockfile and broad dependency surfaces | Run dependency programme separately after code convergence |
 
 ## Intended integration order
 
