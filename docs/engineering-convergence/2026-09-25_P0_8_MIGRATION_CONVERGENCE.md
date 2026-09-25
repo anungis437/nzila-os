@@ -1,7 +1,9 @@
 # P0.8 Migration Convergence
 
-**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`  
-**Inspected lanes:** LANE-003, LANE-004, LANE-011, LANE-012, LANE-024  
+**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
+
+**Inspected lanes:** LANE-003, LANE-004, LANE-011, LANE-012, LANE-024
+
 **Ruling:** `MIGRATION_LINEAGE = RECONCILIATION_REQUIRED`
 
 This is a planning ruling, not permission to apply migrations. It records the

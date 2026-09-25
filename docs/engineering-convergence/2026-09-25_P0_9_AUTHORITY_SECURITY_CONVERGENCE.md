@@ -1,8 +1,10 @@
 # P0.9 Authority and Security Convergence
 
-**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`  
+**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
+
 **Inspected lanes:** LANE-003, LANE-004, LANE-008, LANE-011, LANE-012,
-LANE-021, LANE-024, LANE-025, LANE-027  
+LANE-021, LANE-024, LANE-025, LANE-027
+
 **Ruling:** `AUTHORITY_CONVERGENCE = RECONCILIATION_REQUIRED`
 
 This file fixes the intended architecture before security-sensitive code is

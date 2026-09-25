@@ -1,7 +1,9 @@
 # P0.11 CIVIC Protection
 
-**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`  
-**Constitutional source:** merged PR #810  
+**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
+
+**Constitutional source:** merged PR #810
+
 **Ruling:** `CIVIC_DOCTRINE = AUTHORITATIVE`; `CIVIC_RUNTIME = UNAUTHORIZED`;
 `RUNTIME_GUARD_SCOPE = GAP_FOUND`
 

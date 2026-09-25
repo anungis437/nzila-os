@@ -1,7 +1,9 @@
 # P0.12 Dependency-Aware Integration Order
 
-**Starting `origin/main`:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`  
-**Plan status:** READY FOR P0.13  
+**Starting `origin/main`:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
+
+**Plan status:** READY FOR P0.13
+
 **Production promotion:** NOT AUTHORIZED
 
 This sequence follows observed dependencies. It is not ordered by branch age,

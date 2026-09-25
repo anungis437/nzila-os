@@ -1,8 +1,10 @@
 # P0.10 Documentation and Evidence Convergence
 
-**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`  
+**Baseline:** `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
+
 **Primary lane:** LANE-006 / PR #808 at inspected head
-`9b8aaa35602fcc94b4af92d94b3036a127ec0687`  
+`9b8aaa35602fcc94b4af92d94b3036a127ec0687`
+
 **Ruling:** `DOCUMENTATION_CONVERGENCE = REBASE_AND_REGENERATE`
 
 PR #808 is the documentation-truth convergence source, but it is not a static
