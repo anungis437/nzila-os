@@ -1,19 +1,19 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { execFileSync } from 'node:child_process'
+import {
+  appsFromChangedFiles,
+  eligibleForEnv,
+  GITOPS_DEPLOYABLE_APPS,
+  type DeployAppConfig,
+  type DeployEnvironment,
+} from './deploy-app-selection'
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const INVENTORY_PATH = path.join(ROOT, 'governance', 'release', 'deployment-inventory.json')
 
-type Env = 'development' | 'staging' | 'pilot' | 'production'
-
-type AppConfig = {
-  releaseStatus: 'prod-approved' | 'staging-only' | 'internal-only' | 'frozen' | 'incubating' | 'blocked'
-  prodPromotionEligible?: boolean
-  requiresExplicitProdOverride?: boolean
-}
-
 type Inventory = {
-  apps: Record<string, AppConfig>
+  apps: Record<string, DeployAppConfig>
 }
 
 function parseArg(name: string): string | undefined {
@@ -22,38 +22,21 @@ function parseArg(name: string): string | undefined {
   return process.argv[index + 1]
 }
 
-function unique<T>(items: T[]): T[] {
-  return [...new Set(items)]
-}
-
-function eligibleForEnv(app: string, env: Env, cfg: AppConfig, zongaOverride: boolean): boolean {
-  if (env === 'development') {
-    return cfg.releaseStatus !== 'frozen' && cfg.releaseStatus !== 'blocked'
-  }
-
-  if (env === 'staging') {
-    return cfg.releaseStatus === 'prod-approved' || cfg.releaseStatus === 'staging-only' || cfg.releaseStatus === 'internal-only' || cfg.releaseStatus === 'incubating'
-  }
-
-  if (env === 'pilot') {
-    // Pilot fabric currently runs union-eyes only; gating mirrors staging
-    // sovereign-substrate posture per docs/nzila-tier2-hardening/full-pilot-fabric-legitimacy.md
-    return app === 'union-eyes' && (cfg.releaseStatus === 'prod-approved' || cfg.releaseStatus === 'staging-only' || cfg.releaseStatus === 'internal-only' || cfg.releaseStatus === 'incubating')
-  }
-
-  if (app === 'zonga') {
-    return zongaOverride
-  }
-
-  // Phase 4B: internal-only surfaces are NEVER production-promotable via this
-  // pipeline. They deploy through their dedicated internal workflow instead.
-  return cfg.prodPromotionEligible === true || cfg.releaseStatus === 'prod-approved'
+function changedFilesSince(revision: string): string[] {
+  const output = execFileSync('git', ['diff', '--name-only', `${revision}..HEAD`], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  })
+  return output.split(/\r?\n/).map((file) => file.trim()).filter(Boolean)
 }
 
 function main() {
-  const env = (parseArg('--env') ?? 'staging') as Env
+  const env = (parseArg('--env') ?? 'staging') as DeployEnvironment
   const requestedRaw = parseArg('--apps') ?? 'all'
   const zongaOverride = (parseArg('--zonga-override') ?? 'false').toLowerCase() === 'true'
+  const automatic = process.argv.includes('--automatic')
+  const allowEmpty = process.argv.includes('--allow-empty')
+  const changedSince = parseArg('--changed-since')
 
   if (!['development', 'staging', 'pilot', 'production'].includes(env)) {
     throw new Error('Invalid --env value. Use development|staging|pilot|production')
@@ -61,20 +44,26 @@ function main() {
 
   const inventory = JSON.parse(fs.readFileSync(INVENTORY_PATH, 'utf8')) as Inventory
   const inventoryApps = Object.keys(inventory.apps)
+  const explicitSelection = requestedRaw !== 'all' && !automatic
 
-  const requestedApps = requestedRaw === 'all'
-    ? inventoryApps
-    : unique(requestedRaw.split(',').map((app) => app.trim()).filter(Boolean))
+  const requestedApps = automatic
+    ? appsFromChangedFiles(changedSince ? changedFilesSince(changedSince) : [])
+    : requestedRaw === 'all'
+      ? inventoryApps.filter((app) => GITOPS_DEPLOYABLE_APPS.has(app))
+      : [...new Set(requestedRaw.split(',').map((app) => app.trim()).filter(Boolean))]
 
   const unknown = requestedApps.filter((app) => !inventory.apps[app])
   if (unknown.length > 0) {
     throw new Error(`Unknown apps in request: ${unknown.join(', ')}`)
   }
 
-  const approved = requestedApps.filter((app) => eligibleForEnv(app, env, inventory.apps[app], zongaOverride))
+  const approved = requestedApps.filter((app) => (
+    GITOPS_DEPLOYABLE_APPS.has(app)
+    && eligibleForEnv(app, env, inventory.apps[app], zongaOverride, explicitSelection)
+  ))
   const denied = requestedApps.filter((app) => !approved.includes(app))
 
-  if (approved.length === 0) {
+  if (approved.length === 0 && !allowEmpty) {
     throw new Error(`No deployable apps after policy filtering for ${env}. Denied: ${denied.join(', ') || 'none'}`)
   }
 
@@ -84,7 +73,8 @@ function main() {
       app,
       releaseStatus: cfg.releaseStatus,
       prodPromotionEligible: cfg.prodPromotionEligible ?? false,
-      eligible: eligibleForEnv(app, env, cfg, zongaOverride),
+      eligible: GITOPS_DEPLOYABLE_APPS.has(app)
+        && eligibleForEnv(app, env, cfg, zongaOverride, explicitSelection),
     }
   })
 
@@ -92,7 +82,10 @@ function main() {
     environment: env,
     requestedApps,
     approvedApps: approved,
+    appsMatrix: approved,
     deniedApps: denied,
+    automatic,
+    explicitSelection,
     zongaOverride,
     decisions,
   }

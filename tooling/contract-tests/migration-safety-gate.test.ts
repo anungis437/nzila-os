@@ -257,11 +257,11 @@ describe('12: gitops-deploy.yml migration-safety isolated-job topology', () => {
     expect(checkoutStep.with?.['fetch-depth']).toBe(0)
   })
 
-  it('migration-safety wires the push-event before SHA explicitly', () => {
+  it('migration-safety checks the exact deployment commit parent', () => {
     const steps = gitopsDeployWorkflow.jobs['migration-safety'].steps
     const migrationStep = steps.find((step: { name?: string }) => step.name === 'Migration safety check')
     expect(migrationStep).toBeDefined()
-    expect(migrationStep.env?.GITHUB_EVENT_BEFORE).toBe('${{ github.event.before }}')
+    expect(migrationStep.env?.GITHUB_EVENT_BEFORE).toBe('${{ needs.plan.outputs.version }}^')
   })
 
   it('migration-safety job does not run Azure/Docker/build/deploy actions', () => {
