@@ -24,7 +24,6 @@
 
 import { auth, currentUser } from '@/lib/api-auth-guard'
 import { db } from '@/db/db'
-import { establishedRequestAuth } from '@/lib/db/request-auth-context'
 import { systemDb } from '@/db/system-db'
 import { systemContextStorage } from '@/db/system-context-storage'
 import { tenantContextStorage } from '@/db/tenant-context-storage'
@@ -114,23 +113,8 @@ export async function withRLSContext<T>(
     explicitOrgId = raw
   }
 
-  // Get authenticated user from auth provider. A request boundary that
-  // already resolved the subject via getCurrentUser() (PG session or the
-  // test harness) publishes that id on establishedRequestAuth. It fills in
-  // only when platform auth() has no user, and it cannot override a
-  // platform session that names someone else.
-  const { userId: platformUserId, orgId: clerkOrgId } = await auth()
-  const establishedUserId = establishedRequestAuth.getStore()?.userId
-  if (
-    platformUserId &&
-    establishedUserId &&
-    platformUserId !== establishedUserId
-  ) {
-    throw new Error(
-      'withRLSContext: authenticated request identity does not match the platform session.',
-    )
-  }
-  const userId = platformUserId || establishedUserId || null
+  // Get authenticated user from auth provider
+  const { userId, orgId: clerkOrgId } = await auth()
 
   if (!userId) {
     throw new Error(

@@ -13,6 +13,12 @@ import { hazardReports, workplaceIncidents } from '@/db/schema';
 
 const m = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
+  // withRLSContext calls platform auth() (re-exported by api-auth-guard).
+  // Mocking auth on the guard does not reach that binding: importOriginal
+  // loads the guard, which loads with-rls-context, which binds the platform
+  // stub before the guard mock returns. Inject the session on the platform
+  // module withRLSContext actually calls.
+  platformAuth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   getUserRole: vi.fn(),
   checkRateLimit: vi.fn(),
@@ -21,6 +27,14 @@ const m = vi.hoisted(() => ({
   dbExecute: vi.fn(),
 }));
 
+vi.mock('@nzila/platform-auth/entra/server', () => ({
+  auth: m.platformAuth,
+  currentUser: async () => null,
+  getAuth: m.platformAuth,
+  authMiddleware: () => async () => {},
+  clerkMiddleware: () => async () => {},
+  createRouteMatcher: () => () => false,
+}));
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api-auth-guard')>();
   return { ...actual, getCurrentUser: m.getCurrentUser };
@@ -110,6 +124,16 @@ beforeEach(() => {
   m.getUserRole.mockResolvedValue(null);
   m.getOrganizationIdForUser.mockResolvedValue(ORG_A);
   m.dbExecute.mockResolvedValue([]);
+  m.platformAuth.mockImplementation(async () => {
+    const user = await m.getCurrentUser();
+    if (!user?.id) return { userId: null, orgId: null, sessionClaims: null, has: () => false };
+    return {
+      userId: user.id,
+      orgId: user.organizationId ?? null,
+      sessionClaims: null,
+      has: () => false,
+    };
+  });
 });
 
 describe('health-safety hazards/incidents submission — role gating', () => {

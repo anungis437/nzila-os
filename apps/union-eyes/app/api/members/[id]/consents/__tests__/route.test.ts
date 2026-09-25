@@ -49,8 +49,19 @@ let consents: FakeConsent[];
 
 const m = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
+  // See hazards-incidents-submission: withRLSContext reads platform auth(),
+  // not the getCurrentUser override. Inject the same subject there.
+  platformAuth: vi.fn(),
 }));
 
+vi.mock('@nzila/platform-auth/entra/server', () => ({
+  auth: m.platformAuth,
+  currentUser: async () => null,
+  getAuth: m.platformAuth,
+  authMiddleware: () => async () => {},
+  clerkMiddleware: () => async () => {},
+  createRouteMatcher: () => () => false,
+}));
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<object>();
   return { ...actual, getCurrentUser: m.getCurrentUser };
@@ -126,6 +137,12 @@ function asUser(userId: string, organizationId: string) {
     imageUrl: null,
     legacyTenantId: null,
     metadata: {},
+  });
+  m.platformAuth.mockResolvedValue({
+    userId,
+    orgId: organizationId,
+    sessionClaims: null,
+    has: () => false,
   });
 }
 

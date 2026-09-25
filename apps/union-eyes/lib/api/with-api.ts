@@ -72,7 +72,6 @@ import {
   createCorrelationContext,
   correlationToHeaders,
 } from '@/lib/governance-observability/correlation';
-import { runWithEstablishedRequestAuth } from '@/lib/db/request-auth-context';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -365,11 +364,9 @@ export function withApi<
           // org is known. Runtime role, no privilege escalation, no client-trusted
           // org. Only overwrite when a membership is actually resolved, so the
           // auth-validated organization survives a null resolution.
-          const resolved = await runWithEstablishedRequestAuth(user.id, () =>
-            withRLSContext(
-              { organizationId: 'system' },
-              async () => getOrganizationIdForUser(user!.id),
-            ),
+          const resolved = await withRLSContext(
+            { organizationId: 'system' },
+            async () => getOrganizationIdForUser(user!.id),
           );
           if (resolved) resolvedOrganizationId = resolved;
         } catch {
@@ -615,9 +612,7 @@ export function withApi<
           const { getActiveTenantDb } = await import('@/db/tenant-context-storage');
           if (!getActiveTenantDb()) {
             const { withRLSContext } = await import('@/lib/db/with-rls-context');
-            return runWithEstablishedRequestAuth(user?.id, () =>
-              withRLSContext({ organizationId: resolvedOrganizationId }, runHandler),
-            );
+            return withRLSContext({ organizationId: resolvedOrganizationId }, runHandler);
           }
         }
         return runHandler();
