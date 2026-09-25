@@ -10,7 +10,8 @@
 
 The complete read-only P0.2 census at the current baseline is recorded in
 `2026-09-25_P0_2_REPOSITORY_TOPOLOGY.md`. The original starting SHA remains in
-this report as historical programme context.
+this report as historical programme context. The one-disposition-per-lane
+classification is recorded in `2026-09-25_P0_5_LANE_CLASSIFICATION.md`.
 
 This is the working Development Convergence Ledger for Pre-Phase 0. It is not a
 SaaS-readiness declaration and it does not authorize production promotion.
@@ -20,8 +21,9 @@ SaaS-readiness declaration and it does not authorize production promotion.
 ```text
 ENGINEERING_ESTATE_ACCOUNTED = IN_PROGRESS
 P0_2_REPOSITORY_TOPOLOGY = PASS
-P0_3_DEVELOPMENT_LEDGER = IN_PROGRESS
+P0_3_DEVELOPMENT_LEDGER = PASS
 P0_4_ORPHAN_DISCOVERY = PASS
+P0_5_PRIMARY_CLASSIFICATION = PASS
 UNACCOUNTED_DEVELOPMENT != 0
 OPEN_PR_DISPOSITION = IN_PROGRESS
 LOCAL_WORKTREE_DISPOSITION = IN_PROGRESS
