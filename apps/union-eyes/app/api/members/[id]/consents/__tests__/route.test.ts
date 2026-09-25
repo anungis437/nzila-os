@@ -79,8 +79,9 @@ vi.mock('@/db/schema', () => ({
   },
 }));
 
-vi.mock('@/db/db', () => ({
-  db: {
+vi.mock('@/db/db', () => {
+  const fakeDb = {
+    execute: async () => [],
     select: () => ({
       from: () => ({
         where: (predicate: Predicate) => consents.filter((c) => matches(c as unknown as Record<string, unknown>, predicate)),
@@ -97,8 +98,12 @@ vi.mock('@/db/db', () => ({
         }),
       }),
     }),
-  },
-}));
+    // withRLSContext set_config()s on the transaction, then runs the handler
+    // against this same fake so org + subject predicates still apply.
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(fakeDb),
+  };
+  return { db: fakeDb };
+});
 
 import { GET, PATCH } from '../route';
 

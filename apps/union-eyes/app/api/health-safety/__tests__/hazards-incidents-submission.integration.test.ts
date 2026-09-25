@@ -18,6 +18,7 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   dbInsert: vi.fn(),
   dbSelect: vi.fn(),
+  dbExecute: vi.fn(),
 }));
 
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
@@ -32,7 +33,18 @@ vi.mock('@/lib/rate-limiter', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/rate-limiter')>();
   return { ...actual, checkRateLimit: m.checkRateLimit };
 });
-vi.mock('@/db/db', () => ({ db: { insert: m.dbInsert, select: m.dbSelect } }));
+vi.mock('@/db/db', () => ({
+  db: {
+    insert: m.dbInsert,
+    select: m.dbSelect,
+    execute: m.dbExecute,
+    // Real withRLSContext opens a transaction and set_config()s on tx.execute
+    // before running the handler. The fake client must provide that boundary;
+    // the handler still queries through the module-level insert/select mocks.
+    transaction: async (fn: (tx: { execute: typeof m.dbExecute }) => Promise<unknown>) =>
+      fn({ execute: m.dbExecute }),
+  },
+}));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   // Wrap (not replace) the real eq() so WHERE-clause construction behaves
@@ -97,6 +109,7 @@ beforeEach(() => {
   // getCurrentUser() is what actually governs the test outcome.
   m.getUserRole.mockResolvedValue(null);
   m.getOrganizationIdForUser.mockResolvedValue(ORG_A);
+  m.dbExecute.mockResolvedValue([]);
 });
 
 describe('health-safety hazards/incidents submission — role gating', () => {

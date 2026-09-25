@@ -67,6 +67,7 @@ import {
   withPlatformAdminRLSContext,
 } from "../with-rls-context";
 import { tenantContextStorage } from "@/db/tenant-context-storage";
+import { runWithEstablishedRequestAuth } from "@/lib/db/request-auth-context";
 
 /* ── tests ──────────────────────────────────────────────────────────── */
 
@@ -218,6 +219,25 @@ describe("with-rls-context", () => {
       await expect(
         withRLSContext({ organizationId: "org-A" }, async () => "ok"),
       ).rejects.toThrow("Unauthorized");
+    });
+
+    it("uses the request-boundary identity when platform auth() has no user", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: null, orgId: null });
+      const result = await runWithEstablishedRequestAuth("user-pg", () =>
+        withRLSContext({ organizationId: "org-A" }, async () => "ok"),
+      );
+      expect(result).toBe("ok");
+      expect(appliedSetting("app.current_user_id")).toBe("user-pg");
+      expect(appliedSetting("app.current_org_id")).toBe("org-A");
+    });
+
+    it("fails closed when the request-boundary identity disagrees with the platform session", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-platform", orgId: "org-B" });
+      await expect(
+        runWithEstablishedRequestAuth("user-other", () =>
+          withRLSContext({ organizationId: "org-A" }, async () => "ok"),
+        ),
+      ).rejects.toThrow("does not match the platform session");
     });
 
     it('treats { organizationId: "system" } as a system bootstrap lookup: user set, org cleared, no throw', async () => {
