@@ -235,8 +235,8 @@ TypeScript scripts for one-time legacy data imports. Not SQL migrations — thes
 5. **Manual UE migrations** — hand-written SQL in `apps/union-eyes/db/migrations/manual/`. Number sequentially (070+).
 6. **Always test on staging before production.** Take a backup first.
 
-## Union Eyes post-freeze PLATFORM_SQL (pps/union-eyes/db/migrations-platform/)
+## Union Eyes post-freeze PLATFORM_SQL (`apps/union-eyes/db/migrations-platform/`)
 
-Forward-only SCHEMA_CREATION root authorized after the 2026-05-09 freeze of pps/union-eyes/db/migrations/.
-Executed by 	ooling/scripts/lib/union-eyes-platform-migrations.mjs during db:bootstrap after scoped migrations.
-See pps/union-eyes/db/migrations-platform/README.md.
+Forward-only SCHEMA_CREATION root authorized after the 2026-05-09 freeze of `apps/union-eyes/db/migrations/`.
+Executed by `tooling/scripts/lib/union-eyes-platform-migrations.mjs` during db:bootstrap after scoped migrations.
+See `apps/union-eyes/db/migrations-platform/README.md`.
