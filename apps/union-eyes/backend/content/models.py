@@ -288,7 +288,9 @@ class Documents(BaseModel):
     mime_type = models.TextField(null=True, blank=True)
     document_type = models.TextField(null=True, blank=True)
     size_bytes = models.BigIntegerField(null=True, blank=True)
-    file_size = models.IntegerField(null=True, blank=True)
+    # bigint matches PLATFORM_SQL 0006 (documents.file_size). IntegerField would
+    # materialize a conflicting integer when Django runs before that migration.
+    file_size = models.BigIntegerField(null=True, blank=True)
     category = models.TextField(null=True, blank=True)
     tags = ArrayField(models.TextField(), null=True, blank=True)
 

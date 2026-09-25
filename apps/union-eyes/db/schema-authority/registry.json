@@ -48,7 +48,7 @@
         "action": "ADD_TO_DJANGO",
         "addColumns": ["deleted_at", "name", "email", "phone", "department", "location", "position", "hire_date", "seniority", "union_join_date", "metadata", "joined_at"],
         "trimDrizzle": ["tenant_id", "preferred_contact_method", "exemption_approved_at", "search_vector"],
-        "detail": "lib/organization-utils.ts getOrganizationIdForUser filters isNull(deletedAt); deleted_at missing physically -> 42703 breaks EVERY dashboard (universal auth path). /api/organization/members route .map() directly consumes name/email/phone/department/location/position/hireDate/seniority/unionJoinDate/metadata. tenant_id is a stale legacyOrgId rename; the other 3 are incidental (never consumed by canonical-43)."
+        "detail": "lib/organization-utils.ts getOrganizationIdForUser filters isNull(deletedAt); deleted_at missing physically -> 42703 breaks EVERY dashboard (universal auth path). /api/organization/members route .map() directly consumes name/email/phone/department/location/position/hireDate/seniority/unionJoinDate/metadata. tenant_id is a stale legacyOrgId rename; the other 3 are incidental (never consumed by canonical-43). Physical overlap with PLATFORM_SQL 0005 is idempotent ADD COLUMN IF NOT EXISTS using the platform types; Django remains the model owner and 0005 remains the landed physical lineage."
       }
     },
     {
@@ -95,7 +95,7 @@
         "class": "CANONICAL_SCHEMA_OMISSION",
         "action": "ADD_TO_DJANGO",
         "addColumns": ["title", "filename", "name", "file_url", "file_type", "content_type", "mime_type", "document_type", "size_bytes", "file_size", "category", "tags", "uploaded_by", "uploaded_at", "folder_id", "description", "blob_container", "blob_path", "sha256", "status", "privacy_label", "contains_pii", "contains_medical_sensitive", "contains_legal_privilege", "member_pii", "medical_sensitive", "disciplinary_sensitive", "is_confidential", "access_level", "deleted_at", "metadata", "content_text"],
-        "detail": "document-service getDocumentById/listDocuments use db.query.documents.findFirst FULL-SHAPE and return the whole document to canonical-43 rows 4 (member /dashboard/documents) and 12 (staff /dashboard/documents). The Django Documents stub lacks the document entity's business fields. Finalize the exact add/trim per-field at convergence (Phase K) against document-service consumption; prefer a governed projection long-term."
+        "detail": "document-service getDocumentById/listDocuments use db.query.documents.findFirst FULL-SHAPE and return the whole document to canonical-43 rows 4 (member /dashboard/documents) and 12 (staff /dashboard/documents). The Django Documents stub lacks the document entity's business fields. Finalize the exact add/trim per-field at convergence (Phase K) against document-service consumption; prefer a governed projection long-term. Columns already in PLATFORM_SQL 0006 (name, file_url, uploaded_by, deleted_at, metadata, mime_type, file_size bigint, description) are idempotent no-ops against that lineage. Columns 0006 does not create stay Django AddField."
       }
     },
     {
@@ -120,7 +120,7 @@
           "columns": ["claim_amount", "settlement_amount", "legal_costs", "court_costs"],
           "detail": "numeric-vs-varchar money representation. Columns exist physically and function as strings; NOT a 42703 execution blocker. Deferred type adjudication."
         },
-        "detail": "idempotency_hash backs write+dedup in /api/cases/intake (+ bulk-import), reached by canonical-43 row 3 (/dashboard/claims/new)."
+        "detail": "idempotency_hash backs write+dedup in /api/cases/intake (+ bulk-import), reached by canonical-43 row 3 (/dashboard/claims/new). PLATFORM_SQL 0007 adds claim_updates columns only; it does not create claims.idempotency_hash, so the Django AddField remains the physical writer."
       }
     },
     {
