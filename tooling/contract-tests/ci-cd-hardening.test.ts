@@ -34,6 +34,15 @@ describe('CI-001: CI workflow includes contract test gate', () => {
     expect(src, 'CI must trigger on pull_request').toContain('pull_request')
     expect(src, 'CI must trigger on push to main').toMatch(/push[\s\S]*main|main[\s\S]*push/)
   })
+
+  it('keeps the protected build check while compiling only the affected graph', () => {
+    const src = readSafe(join(ROOT, '.github', 'workflows', 'ci.yml'))
+
+    expect(src).toContain('name: Build All')
+    expect(src).toContain('fetch-depth: 0')
+    expect(src).toContain('TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD"')
+    expect(src).toContain('pnpm exec turbo run build --affected')
+  })
 })
 
 // ── CI-002: All apps listed in workspace config ─────────────────────────────
@@ -104,24 +113,39 @@ describe('CI-004: Governance and enforcement infrastructure', () => {
 
 // ── CI-005: Cost-aware deploy orchestration ────────────────────────────────
 
-describe('CI-005: GitOps deploy avoids documentation and Union Eyes churn', () => {
-  it('broad GitOps deploy ignores docs, governance, product metadata, reports, and UE-owned paths', () => {
+describe('CI-005: GitOps deploy is exact-tip and app-scoped', () => {
+  it('starts after successful main CI instead of duplicating the push trigger', () => {
     const workflowPath = join(ROOT, '.github', 'workflows', 'gitops-deploy.yml')
     expect(existsSync(workflowPath), 'gitops-deploy.yml must exist').toBe(true)
 
     const src = readSafe(workflowPath)
-    for (const ignoredPath of [
-      '**.md',
-      'docs/**',
-      'governance/**',
-      'platform/products/**',
-      'reports/**',
-      'apps/union-eyes/**',
-      'packages/**',
-      '.github/workflows/deploy-union-eyes.yml',
-      '.github/workflows/auto-promote-union-eyes.yml',
-    ]) {
-      expect(src, `GitOps deploy must ignore ${ignoredPath}`).toContain(`- '${ignoredPath}'`)
+    expect(src).toContain('workflow_run:')
+    expect(src).toContain('workflows: [CI]')
+    expect(src).toContain("github.event.workflow_run.conclusion == 'success'")
+    expect(src).not.toMatch(/\n  push:\s*\n/)
+  })
+
+  it('uses a changed-app dynamic matrix and permits successful no-op runs', () => {
+    const src = readSafe(join(ROOT, '.github', 'workflows', 'gitops-deploy.yml'))
+
+    expect(src).toContain('--automatic')
+    expect(src).toContain('--changed-since "${VERSION}^"')
+    expect(src).toContain('--allow-empty')
+    expect(src).toContain('app: ${{ fromJSON(needs.plan.outputs.apps_json) }}')
+    expect(src).toContain("if: needs.plan.outputs.has_apps == 'true'")
+    expect(src).not.toContain('Check if app should be built')
+    expect(src).not.toMatch(/app:\s*\[[^\]]+\]/)
+  })
+
+  it('reuses exact-tip CI for automatic runs and retains full validation for manual dispatch', () => {
+    const src = readSafe(join(ROOT, '.github', 'workflows', 'gitops-deploy.yml'))
+
+    expect(src).toContain('Exact-tip CI authority')
+    expect(src).toContain('github.event.workflow_run.head_sha }}" = "${{ needs.plan.outputs.version')
+    for (const command of ['pnpm typecheck', 'pnpm lint', 'pnpm test:fast', 'pnpm contract-tests']) {
+      const position = src.indexOf(command)
+      expect(position, `${command} must remain available for manual dispatch`).toBeGreaterThan(-1)
+      expect(src.slice(Math.max(0, position - 100), position)).toContain("if: github.event_name == 'workflow_dispatch'")
     }
   })
 

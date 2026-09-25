@@ -167,12 +167,23 @@ jobs:
     needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
         with:
           turbo-cache-key: build
 
-      - name: Build
-        run: pnpm build
+      - name: Build affected packages
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
+          HEAD="${{ github.event.pull_request.head.sha || github.sha }}"
+
+          if [ -z "$BASE" ] || [[ "$BASE" =~ ^0+$ ]] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            BASE="${HEAD}^"
+          fi
+
+          TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD" \
+            pnpm exec turbo run build --affected
         env:
           NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
