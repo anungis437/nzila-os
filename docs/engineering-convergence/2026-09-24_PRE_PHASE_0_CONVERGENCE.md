@@ -5,6 +5,13 @@
 **Authoritative starting baseline:** `origin/main` at
 `cd94a9b58acc772ddaab3e894c70fe153e35e7e8`
 
+**Current authoritative baseline:** `origin/main` at
+`abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
+
+The complete read-only P0.2 census at the current baseline is recorded in
+`2026-09-25_P0_2_REPOSITORY_TOPOLOGY.md`. The original starting SHA remains in
+this report as historical programme context.
+
 This is the working Development Convergence Ledger for Pre-Phase 0. It is not a
 SaaS-readiness declaration and it does not authorize production promotion.
 
@@ -17,8 +24,11 @@ OPEN_PR_DISPOSITION = IN_PROGRESS
 LOCAL_WORKTREE_DISPOSITION = IN_PROGRESS
 MIGRATION_LINEAGE = RECONCILIATION_REQUIRED
 AUTHORITY_CONVERGENCE = RECONCILIATION_REQUIRED
-CIVIC_DOCTRINE_NON_REGRESSION = PASS_ON_STARTING_MAIN
-MAIN_REQUIRED_CI = RUNNING
+CIVIC_DOCTRINE_NON_REGRESSION = PASS_ON_CURRENT_MAIN
+GITOPS_FAIL_CLOSED_CONTROL = PASS
+PROTECTED_POST_DEPLOY_PROBES = PASS
+RUNTIME_PROOF_CONTROL_DEFECT = CLOSED
+MAIN_REQUIRED_CI = REVALIDATION_REQUIRED_AFTER_CONVERGENCE
 SAAS_ACTIVATION = PAUSED
 ```
 
@@ -30,12 +40,15 @@ result must be recorded before this gate can close.
 
 | Surface | Count | Notes |
 | --- | ---: | --- |
-| Local branches | 38 | Includes stale merged branches and local-only work |
-| Remote refs after fetch | 33 | Every non-main ref maps to a PR or known retained branch |
-| Worktrees | 26 | 10 dirty, 16 clean |
+| Local branches | 42 | Includes stale merged branches and local-only work |
+| Remote feature refs after fetch | 35 | Includes open PRs and merged branch residue |
+| Worktrees | 29 | 13 dirty at capture time, including this ledger worktree |
 | Stashes | 27 | Preserved; oldest is 2026-02-22 |
 | Open PRs | 22 | 5 human lanes and 17 Dependabot PRs |
 | Open human PRs | 5 | #795, #796, #797, #799, #808 |
+| Commits off current main across recorded refs | 394 | Requires content-based P0.3 classification |
+| Commits reachable only from local refs | 279 | Preserved; no deletion authorized |
+| Commits reachable only from remote refs | 81 | Preserved; no deletion authorized |
 
 The shared source checkout at `C:/APPS/nzila-ue-authoritative-baseline` remains
 untouched and dirty on `fix/ci-workbook-memory-holders-redteam-ops-snapshot`.
@@ -73,22 +86,27 @@ This resolves the principal conflict between PRs #796 and #799:
 - #799 runtime evidence remains SHA-bound historical evidence. It does not
   prove the current PR head or future converged head until regenerated.
 
-### Platform-admin B-005
+### Platform-admin B-005 and GitOps proof control
 
-GitOps run `35952148762` deployed `e4602d3d02c650c19ae95299d9221e0b5caaada2`
-and returned HTTP 200 for health, ready, and version probes. Its version-drift
-step nevertheless reported:
+PRs #811, #812, and #814 are integrated into current `main`. Targeted GitOps
+run `36075904835` completed successfully at exact SHA
+`abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`. Protected credentials, health,
+smoke, version drift, and deployment evidence all passed under fail-closed
+behavior.
+
+Record this work as integrated foundational SaaS input:
 
 ```text
-deployed=local
-head=e4602d3d
-drift score=0%
+GITOPS_FAIL_CLOSED_CONTROL = PASS
+PROTECTED_POST_DEPLOY_PROBES = PASS
+HEALTH_PROOF = PASS
+SMOKE_PROOF = PASS
+VERSION_DRIFT_PROOF = PASS
+DEPLOYMENT_EVIDENCE_CONTROL = PASS
+RUNTIME_PROOF_CONTROL_DEFECT = CLOSED
+PRODUCTION_PROMOTION = NOT PERFORMED
+SAAS_READINESS_RECLASSIFICATION = NOT PERFORMED
 ```
-
-The workflow soft-failed that result. Therefore B-005 is not closed. The
-two-file fix at `e9a87c48342c1655693ab68c5d9398974a507f84` remains a focused
-rebase-and-complete lane. Platform-admin portfolio/readiness metadata must not
-be reclassified until an exact-tip run proves version identity.
 
 ### CIVIC boundary
 
@@ -110,16 +128,16 @@ the convergence plan is approved.
 - Disposition: `MERGE_CANDIDATE` as baseline only
 - State: retained; no local `main` synchronization performed yet
 
-### DEV-002 - B-005 platform-admin version truth
+### DEV-002 - B-005 platform-admin version truth and fail-closed GitOps
 
-- Source: local `codex/b005-version-truth`
-- Head: `e9a87c48342c1655693ab68c5d9398974a507f84`
-- Files: root `Dockerfile` and one contract test
+- Source: merged PRs #811, #812, and #814; residual local/remote branches
+- Integrated head: `abc7e07bae4b11fcaf9c4d51a2245758ad31e9d8`
 - Domains: PLATFORM, DEPLOYMENT, EVIDENCE
 - Relationship: GATE_A_ENABLER
-- Disposition: `REBASE_AND_COMPLETE`
-- Required outcome: policy-compliant branch, exact-head CI, staging deploy,
-  health/ready/version PASS, and version drift PASS
+- Disposition: `SUPERSEDED_BY_MAIN` for branch residue; implementation is
+  foundational input to convergence
+- Proof: GitOps run `36075904835` passed exact-tip health, smoke, version drift,
+  and deployment evidence under fail-closed behavior
 
 ### DEV-003 - UE schema authority foundation
 
@@ -370,9 +388,10 @@ the convergence plan is approved.
 
 ## Intended integration order
 
-1. Rebase and validate DEV-002; prove B-005 exact-tip staging identity.
-2. Reclassify platform-admin only after B-005 proof, through authoritative
-   catalog/registry/inventory generation.
+1. Complete P0.2/P0.3 classification against `abc7e07...`; treat DEV-002 as
+   integrated foundational work and do not rediscover or reimplement it.
+2. Defer platform-admin portfolio/readiness reclassification until the
+   convergence decision authorizes metadata work.
 3. Rebase DEV-003 and obtain exact-head schema-authority CI.
 4. Build the DEV-004 replacement on DEV-003, regenerate clean-room/oracle/RLS
    evidence, and obtain exact-head CI.
