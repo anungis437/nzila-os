@@ -9,6 +9,7 @@ import {
   CANONICAL_CONTEXTS,
   planFastPath,
   evaluateCiResults,
+  applyExecution,
   verdictToCheckRun,
 } from './surface.mjs'
 
@@ -19,6 +20,11 @@ const RESULT_ENV = {
   'sage-postgres-concurrency': 'MA_RESULT_RLS',
   'sage-live-postgres': 'MA_RESULT_MIGRATION',
   build: 'MA_RESULT_BUILD',
+  'contract-tests': 'MA_RESULT_CONTRACTS',
+  'repository-inventory': 'MA_RESULT_INVENTORY',
+  'governance-integrity': 'MA_RESULT_GOVERNANCE',
+  'hash-chain-drift': 'MA_RESULT_HASH',
+  'operating-layer-gate': 'MA_RESULT_OPERATING',
 }
 
 function readStdin() {
@@ -73,7 +79,11 @@ async function classifyAndPublish() {
   const plan = planFastPath(pathsFromStdin(readStdin()))
   process.stdout.write(`${JSON.stringify({ action: plan.action, classification: plan.classification })}\n`)
   if (plan.action === 'DEFER_TO_CI') return
-  await publishVerdicts(plan.verdicts, headSha)
+  const verdicts = applyExecution(plan.verdicts, {
+    'governance-integrity': process.env.MA_EXEC_GOVERNANCE,
+    'repository-inventory': process.env.MA_EXEC_INVENTORY,
+  })
+  await publishVerdicts(verdicts, headSha)
 }
 
 async function publishCiResults() {
@@ -89,9 +99,25 @@ async function publishCiResults() {
   await publishVerdicts(evaluateCiResults(results), headSha)
 }
 
+function classifyOutputs() {
+  const plan = planFastPath(pathsFromStdin(readStdin()))
+  const governance = plan.classification.contexts['Merge Authority / Governance Integrity']
+  const inventory = plan.classification.contexts['Merge Authority / Repository Inventory']
+  process.stdout.write(
+    [
+      `ci_skip=${plan.classification.ciSkippedByPathsIgnore ? 'true' : 'false'}`,
+      `governance=${governance}`,
+      `inventory=${inventory}`,
+      `action=${plan.action}`,
+    ].join('\n') + '\n',
+  )
+}
+
 const command = process.argv[2]
 if (command === 'classify-and-publish') {
   await classifyAndPublish()
+} else if (command === 'classify-outputs') {
+  classifyOutputs()
 } else if (command === 'publish-ci-results') {
   await publishCiResults()
 } else {
