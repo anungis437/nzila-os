@@ -174,6 +174,18 @@ retention, evidence files.
 
 ---
 
+## Persona availability (honesty labels)
+
+Tab *identity* stays the seven-tab set above. Whether a tab is in role for an
+R6 persona is a separate map:
+`components/workspace/workspace-persona-availability.ts`.
+
+That map labels each cell `available`, `stub`, or `unavailable`. Unknown roles
+and missing cells resolve to `stub`. The labels are orientation honesty. They
+are not a Golden Journey proof, and they do not change route authorization.
+
+Intelligence remains not a top-level tab.
+
 ## Link locale handling
 
 Hrefs in this schema are stored **without** the locale prefix (matching the
