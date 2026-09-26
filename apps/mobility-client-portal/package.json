@@ -33,6 +33,6 @@
     "@types/react": "^19.1.2",
     "tailwindcss": "^4",
     "typescript": "^6.0.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   }
 }
