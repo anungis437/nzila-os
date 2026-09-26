@@ -310,7 +310,7 @@
     "dev:weekone": "turbo dev --filter=@nzila/weekone"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
+    "@changesets/cli": "^3.0.3",
     "@nzila/platform-assurance": "workspace:*",
     "@nzila/platform-change-management": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
