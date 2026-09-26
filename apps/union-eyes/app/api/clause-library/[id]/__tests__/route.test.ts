@@ -1,40 +1,113 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Round 55 — shared_clause_library OWNER_PLUS_EXPLICIT_SHARING_AUTHORITY.
-// GET is gated by read-visibility (system role: federation/congress are not
-// in ue_shared_library_select). PATCH/DELETE are owner-only tenant writes.
-// withSystemContext must not stand in for tenant mutation success.
+// GET stays on the system role: federation/congress are not in
+// ue_shared_library_select. PATCH/DELETE are owner-only tenant writes.
+//
+// TBS-02 mock contract: system and tenant callbacks are not the same
+// database. Tenant SELECT matches ue_shared_library_select (owner, explicit
+// share, or public — not federation/congress). Tenant UPDATE/DELETE apply
+// only when the witnessed parent source org equals the RLS org. System
+// context does not apply that write filter, and it is not a stand-in for
+// tenant mutation success. Cross-org denial must still hold when
+// isSharedClauseOwner is stubbed open.
 
 const h = vi.hoisted(() => {
   const queue: unknown[] = [];
   const updatePayloads: Record<string, unknown>[] = [];
   const calls = { update: 0, delete: 0 };
+  const applied = { updates: 0, deletes: 0 };
   const allowPrivilegedRead = { current: false };
-  const makeChain = () => {
+  const witnessedParentOrg = { current: null as string | null };
+  const session = { mode: 'idle' as 'idle' | 'system' | 'tenant', organizationId: '' };
+
+  const hasSourceOrg = (
+    row: unknown,
+  ): row is { sourceOrganizationId: string; sharingLevel?: string; sharedWithOrgIds?: string[] | null } =>
+    !!row &&
+    typeof row === 'object' &&
+    'sourceOrganizationId' in row &&
+    typeof (row as { sourceOrganizationId?: unknown }).sourceOrganizationId === 'string';
+
+  const tenantCanSelect = (
+    row: { sourceOrganizationId: string; sharingLevel?: string; sharedWithOrgIds?: string[] | null },
+    orgId: string,
+  ) =>
+    row.sourceOrganizationId === orgId ||
+    row.sharingLevel === 'public' ||
+    (Array.isArray(row.sharedWithOrgIds) && row.sharedWithOrgIds.includes(orgId));
+
+  const mutationPermitted = () => {
+    if (session.mode === 'system') return true;
+    if (session.mode !== 'tenant') return false;
+    return witnessedParentOrg.current !== null && witnessedParentOrg.current === session.organizationId;
+  };
+
+  const makeChain = (kind: 'select' | 'update' | 'delete') => {
+    let pendingSet: Record<string, unknown> | null = null;
     const chain: Record<string, unknown> = {};
     for (const m of ['select', 'from', 'leftJoin', 'where', 'limit', 'returning']) {
       chain[m] = () => chain;
     }
     chain.set = (v: Record<string, unknown>) => {
-      updatePayloads.push(v);
+      pendingSet = v;
       return chain;
     };
     chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
-      const v = queue.length ? queue.shift() : [];
+      if (kind === 'update' || kind === 'delete') {
+        if (!mutationPermitted()) {
+          if (queue.length) queue.shift();
+          return Promise.resolve([]).then(res, rej);
+        }
+        if (kind === 'update' && pendingSet) updatePayloads.push(pendingSet);
+        if (kind === 'update') applied.updates += 1;
+        if (kind === 'delete') applied.deletes += 1;
+      }
+
+      let v: unknown = queue.length ? queue.shift() : [];
+      if (kind === 'select' && Array.isArray(v) && hasSourceOrg(v[0])) {
+        witnessedParentOrg.current = v[0].sourceOrganizationId;
+        if (session.mode === 'tenant') {
+          v = v.filter((row) => hasSourceOrg(row) && tenantCanSelect(row, session.organizationId));
+        } else if (session.mode !== 'system') {
+          v = [];
+        }
+      }
       return (v instanceof Error ? Promise.reject(v) : Promise.resolve(v)).then(res, rej);
     };
     return chain;
   };
   const db = {
-    select: () => makeChain(),
+    select: () => makeChain('select'),
     update: () => {
       calls.update += 1;
-      return makeChain();
+      return makeChain('update');
     },
     delete: () => {
       calls.delete += 1;
-      return makeChain();
+      return makeChain('delete');
     },
+  };
+  const bindContext = (mode: 'system' | 'tenant', organizationId: string, fn: () => unknown) => {
+    const prevMode = session.mode;
+    const prevOrg = session.organizationId;
+    session.mode = mode;
+    session.organizationId = organizationId;
+    const restore = () => {
+      session.mode = prevMode;
+      session.organizationId = prevOrg;
+    };
+    try {
+      const result = fn();
+      if (result && typeof (result as { then?: unknown }).then === 'function') {
+        return Promise.resolve(result).finally(restore);
+      }
+      restore();
+      return result;
+    } catch (error) {
+      restore();
+      throw error;
+    }
   };
   const withApi = vi.fn();
   const notFound = vi.fn((resource: string, id?: string) => ({ apiError: true, status: 404, resource, id }));
@@ -44,7 +117,7 @@ const h = vi.hoisted(() => {
     if (!allowPrivilegedRead.current) {
       throw new Error('withSystemContext is not tenant mutation authority');
     }
-    return fn();
+    return bindContext('system', '', fn);
   });
   const withRLSContext = vi.fn((context: { organizationId?: string }, fn: () => unknown) => {
     if (
@@ -54,13 +127,15 @@ const h = vi.hoisted(() => {
     ) {
       throw new Error('withRLSContext requires a tenant organizationId');
     }
-    return fn();
+    return bindContext('tenant', context.organizationId, fn);
   });
   return {
     queue,
     updatePayloads,
     calls,
+    applied,
     allowPrivilegedRead,
+    witnessedParentOrg,
     db,
     withApi,
     notFound,
@@ -112,7 +187,10 @@ describe('clause-library/[id] item route (round 55)', () => {
     h.updatePayloads.length = 0;
     h.calls.update = 0;
     h.calls.delete = 0;
+    h.applied.updates = 0;
+    h.applied.deletes = 0;
     h.allowPrivilegedRead.current = false;
+    h.witnessedParentOrg.current = null;
     vi.resetModules();
   });
 
@@ -162,14 +240,16 @@ describe('clause-library/[id] item route (round 55)', () => {
   });
 
   it('PATCH 404s a non-owner even when they can read the clause (federation/congress/public readers cannot mutate)', async () => {
-    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(false);
     const { PATCH } = await loadHandlers();
 
     await expect(
       PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
     ).rejects.toMatchObject({ status: 404 });
+    expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.update).toBe(0);
+    expect(h.applied.updates).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
   });
@@ -198,6 +278,7 @@ describe('clause-library/[id] item route (round 55)', () => {
       organizationId: 'org-a',
     })) as { success: boolean };
     expect(result.success).toBe(true);
+    expect(h.applied.updates).toBe(1);
     expect(h.updatePayloads[0].clauseTitle).toBe('Updated');
     expect(h.updatePayloads[0].sourceOrganizationId).toBeUndefined();
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
@@ -205,14 +286,16 @@ describe('clause-library/[id] item route (round 55)', () => {
   });
 
   it('DELETE 404s a non-owner', async () => {
-    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a' }]);
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
     h.isSharedClauseOwner.mockReturnValue(false);
     const { DELETE } = await loadHandlers();
 
     await expect(
       DELETE({ request: req('clause-1'), organizationId: 'org-b' }),
     ).rejects.toMatchObject({ status: 404 });
+    expect(h.isSharedClauseOwner).toHaveBeenCalled();
     expect(h.calls.delete).toBe(0);
+    expect(h.applied.deletes).toBe(0);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
   });
@@ -237,7 +320,83 @@ describe('clause-library/[id] item route (round 55)', () => {
 
     const result = (await DELETE({ request: req('clause-1'), organizationId: 'org-a' })) as { success: boolean };
     expect(result.success).toBe(true);
+    expect(h.applied.deletes).toBe(1);
     expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
     expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('PATCH hides a private clause from another organization even when the owner predicate is stubbed open', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'private', sharedWithOrgIds: [] }]);
+    pushSel([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
+    const { PATCH } = await loadHandlers();
+
+    await expect(
+      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(h.isSharedClauseOwner).not.toHaveBeenCalled();
+    expect(h.calls.update).toBe(0);
+    expect(h.applied.updates).toBe(0);
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('PATCH does not apply a cross-org write when the row is publicly readable and the owner predicate is stubbed open', async () => {
+    pushSel([{ id: 'clause-1', sourceOrganizationId: 'org-a', sharingLevel: 'public' }]);
+    pushSel([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
+    const { PATCH } = await loadHandlers();
+
+    await expect(
+      PATCH({ request: req('clause-1', { clauseTitle: 'Stolen' }), organizationId: 'org-b' }),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(h.isSharedClauseOwner).toHaveBeenCalled();
+    expect(h.calls.update).toBe(1);
+    expect(h.applied.updates).toBe(0);
+    expect(h.updatePayloads).toHaveLength(0);
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('DELETE does not apply a cross-org write when an explicit share makes the row readable and the owner predicate is stubbed open', async () => {
+    pushSel([{
+      id: 'clause-1',
+      sourceOrganizationId: 'org-a',
+      sharingLevel: 'private',
+      sharedWithOrgIds: ['org-b'],
+    }]);
+    pushSel([{ id: 'clause-1' }]);
+    h.isSharedClauseOwner.mockReturnValue(true);
+    const { DELETE } = await loadHandlers();
+
+    await expect(
+      DELETE({ request: req('clause-1'), organizationId: 'org-b' }),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(h.isSharedClauseOwner).toHaveBeenCalled();
+    expect(h.calls.delete).toBe(1);
+    expect(h.applied.deletes).toBe(0);
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-b' }, expect.any(Function));
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('does not treat a system-context write as tenant success', async () => {
+    h.witnessedParentOrg.current = 'org-a';
+    h.allowPrivilegedRead.current = true;
+    h.queue.push([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
+
+    const systemRows = await h.withSystemContext(() => h.db.update().set({ clauseTitle: 'Stolen' }));
+    expect(systemRows).toEqual([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
+    expect(h.applied.updates).toBe(1);
+    expect(h.updatePayloads).toEqual([{ clauseTitle: 'Stolen' }]);
+
+    h.applied.updates = 0;
+    h.updatePayloads.length = 0;
+    h.queue.push([{ id: 'clause-1', clauseTitle: 'Stolen' }]);
+    const tenantRows = await h.withRLSContext({ organizationId: 'org-b' }, () =>
+      h.db.update().set({ clauseTitle: 'Stolen' }),
+    );
+    expect(tenantRows).toEqual([]);
+    expect(h.applied.updates).toBe(0);
+    expect(h.updatePayloads).toHaveLength(0);
   });
 });

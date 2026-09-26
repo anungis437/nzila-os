@@ -100,6 +100,12 @@ export const POST = withApi(
         })
         .returning();
 
+      // ue_shared_library_child_write is owner-org only. A zero-row insert
+      // must not be returned as a created tag.
+      if (!tag) {
+        throw ApiError.notFound('clause', id);
+      }
+
       return { tag };
     });
   },
