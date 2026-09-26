@@ -166,9 +166,13 @@ export const POST = withRoleAuth('steward', async (request, context) => {
   }
 
   const body = parsed.data;
-  const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
+  const { userId } = context as { userId: string; organizationId?: string };
+  // Membership context is the write authority. A client organizationId may
+  // only deny a mismatch; it is never the stamp source.
+  const serverOrganizationId =
+    typeof context.organizationId === 'string' ? context.organizationId : '';
 
-  if (body.organizationId !== context.organizationId) {
+  if (!serverOrganizationId || body.organizationId !== serverOrganizationId) {
     return standardErrorResponse(
       ErrorCode.FORBIDDEN,
       'Forbidden'
@@ -177,7 +181,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
 
 try {
       const folder = await createFolder({
-        organizationId: body.organizationId,
+        organizationId: serverOrganizationId,
         name: body.name,
         description: body.description || null,
         parentFolderId: body.parentFolderId || null,
@@ -192,7 +196,7 @@ try {
         severity: 'medium',
         details: { 
           folderName: body.name,
-          organizationId: body.organizationId,
+          organizationId: serverOrganizationId,
           hasParent: !!body.parentFolderId,
         },
       });

@@ -57,11 +57,29 @@ describe('documents/upload route', () => {
     form.set('file', file);
     form.set('organizationId', 'org_other');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
-    expect([200, 400, 403, 429, 500]).toContain(response.status);
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(response.status).toBe(403);
+    expect(m.createDocument).not.toHaveBeenCalled();
   });
 
-  it('uploads a valid document', async () => {
+  it('rejects a write when server organization context is missing', async () => {
+    const { POST } = await loadRoute();
+    const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
+    const form = new FormData();
+    form.set('file', file);
+    form.set('organizationId', 'org_other');
+
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+    });
+    expect(response.status).toBe(403);
+    expect(m.createDocument).not.toHaveBeenCalled();
+  });
+
+  it('uploads a valid document stamped with the server organization', async () => {
     const { POST } = await loadRoute();
     const file = new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' });
     const form = new FormData();
@@ -69,8 +87,14 @@ describe('documents/upload route', () => {
     form.set('organizationId', 'org_1');
     form.set('name', 'My File');
 
-    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }));
-    expect([200, 201, 400, 403, 429, 500, 503]).toContain(response.status);
+    const response = await POST(new Request('http://localhost/api/documents/upload', { method: 'POST', body: form }), {
+      userId: 'u1',
+      organizationId: 'org_1',
+    });
+    expect(response.status).toBe(201);
+    expect(m.createDocument).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: 'org_1',
+    }));
   });
 
   it('returns 429 when rate-limited', async () => {
