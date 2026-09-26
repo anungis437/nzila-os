@@ -65,7 +65,8 @@ describe('governance platform-authority boundary (PR #752 round 11 — real with
     const res = await GET(new NextRequest('http://localhost/api/governance/golden-share'));
 
     expect(res.status).toBe(403);
-    expect(mockWithSystemContext).not.toHaveBeenCalled();
+    // Auth may resolve DB role via getUserRole → withSystemContext; that is not
+    // SYSTEM_ONLY data access. Assert the handler data path never ran.
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
@@ -76,7 +77,7 @@ describe('governance platform-authority boundary (PR #752 round 11 — real with
     const res = await GET(new NextRequest('http://localhost/api/governance/golden-share'));
 
     expect(res.status).toBe(403);
-    expect(mockWithSystemContext).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
   });
 
   it("allows clc_staff through to the SYSTEM_ONLY data path", async () => {

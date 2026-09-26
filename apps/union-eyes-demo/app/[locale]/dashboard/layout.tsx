@@ -20,6 +20,7 @@ const NAV_ITEMS: Array<{ href: string; label: string }> = [
   { href: 'calendar', label: 'Calendar' },
   { href: 'communications', label: 'Communications' },
   { href: 'work', label: 'Work' },
+  { href: 'external-specialist', label: 'External specialist' },
 ];
 
 export default async function DashboardLayout({

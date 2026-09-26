@@ -1,0 +1,519 @@
+{
+  "phase": "H",
+  "title": "Pilot & Production Readiness Disposition \u2014 Evidence",
+  "generatedAt": "2026-09-23T21:31:54.739Z",
+  "timezoneNote": "America/Toronto (ET); timestamps UTC unless labeled",
+  "scope": {
+    "repo": "anungis437/nzila-os",
+    "pr": 797,
+    "branch": "workstream/ue-runtime-schema-lineage-restoration",
+    "headSha": "72c1125190b790a5b6f43def739f846cf1cdb726",
+    "worktree": "C:\\APPS\\nzila-ue-runtime-schema-lineage",
+    "dirtyBaselineLeftAlone": "C:\\APPS\\nzila-ue-authoritative-baseline",
+    "stagingAcaRevision": "nzila-os-union-eyes-staging--0000259",
+    "stagingRg": "nzila-canada-staging-rg",
+    "stagingDb": "nzila_os_staging on nzila-staging-db / nzila-staging-rg",
+    "snapshotId": "staging-canonical-20260923T184938Z-92611387",
+    "schemaDigest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+    "productionTouched": false,
+    "forbiddenActionsHonored": [
+      "no_production_az_mutations",
+      "no_pr_merge",
+      "no_schema_redesign",
+      "no_broad_remediation_prs",
+      "no_production_data_migration"
+    ]
+  },
+  "acceptedBaselineTrusted": {
+    "FRESH_CANONICAL_STAGING": "PASS",
+    "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "PASS",
+    "READY_FOR_POST_G_RELEASE_DISPOSITION": "YES",
+    "requiredTables": 332,
+    "rls": "1697/1697",
+    "CANONICAL_SNAPSHOT_LIFECYCLE": "PASS",
+    "SNAPSHOT_IMMUTABILITY": "PARTIAL",
+    "PRODUCTION_TOUCHED": "NO",
+    "citations": [
+      "reports/union-eyes/runtime-schema-lineage/PHASE_G_STATUS.json",
+      "reports/union-eyes/runtime-schema-lineage/CANONICAL_SNAPSHOT_LIFECYCLE.json",
+      "reports/union-eyes/runtime-schema-lineage/DISPATCH_STATUS.json",
+      "PR #797 body"
+    ]
+  },
+  "A_PR_797_CHECKS": {
+    "mergeable_state": "unstable",
+    "mergeDisposition": "DO_NOT_MERGE",
+    "headSha": "72c1125190b790a5b6f43def739f846cf1cdb726",
+    "comparedMainRef": "ff989637",
+    "checkRunSummary": {
+      "total": 85,
+      "success": 60,
+      "failure": 14,
+      "skipped": 10,
+      "in_progress_or_null": 1,
+      "note": "Performance Regression Gate was in_progress at first collection"
+    },
+    "classificationPolicy": "Parent steering 2026-09-23: do not reclassify from scratch. Attributable = branch-policy + Security Design Review Required. Remaining red = PRE_EXISTING_MAINLINE_DEBT vs main ff989637.",
+    "attributableToThisPR": [
+      {
+        "check": "branch-policy",
+        "classification": "ATTRIBUTABLE_REGRESSION",
+        "reason": "workstream/* branch naming fails branch-policy gate by design"
+      },
+      {
+        "check": "Security Design Review Required",
+        "classification": "ATTRIBUTABLE_REGRESSION",
+        "reason": "needs label security-design-reviewed; process gate, not runtime defect"
+      }
+    ],
+    "preExistingMainlineDebt": [
+      "Dependency Audit",
+      "Governance Baseline / Dependency Audit",
+      "pnpm audit",
+      "Governance Gate",
+      "Governance Baseline / Governance Gate",
+      "Supply Chain Waiver Expiry",
+      "Governance Baseline / Supply Chain Waiver Expiry",
+      "Governance Baseline / Trivy Container Scan",
+      "E2E \u2014 union-eyes",
+      "Unit Tests",
+      "reliability-validation"
+    ],
+    "citations": [
+      "gh check-runs for 72c1125190b790a5b6f43def739f846cf1cdb726",
+      "reports/union-eyes/runtime-schema-lineage/_phase_h_checks.json",
+      "reports/union-eyes/runtime-schema-lineage/_phase_h_check_classification.txt",
+      "parent steering 2026-09-23"
+    ]
+  },
+  "B_NORMAL_AUTHENTICATION_EQUIVALENCE": {
+    "correctionNote": "Reframed 2026-09-23: PRIMARY = PG password/session; Entra = backup only; INFRA_OIDC separate.",
+    "authStack": {
+      "primary": "PG-backed password/session (platform-auth password path + nzila_session)",
+      "primaryAlternate": "magic-link (same nzila_session family)",
+      "backupSso": "Microsoft Entra External ID via NextAuth (@nzila/platform-auth/entra/server)",
+      "acceptance": "x-unioneyes-acceptance-auth / ue_acceptance_auth (staging identity-only)",
+      "infraOidc": "GitHub OIDC \u2192 Azure RBAC for deploy/snapshot \u2014 NOT user login",
+      "stagingFqdn": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "loginPath": "LoginForm default mode=password \u2192 POST /api/auth/login; SSO backup \u2192 /api/auth/signin/azure-ad",
+      "confidence": "CODE_CONFIRMED",
+      "citations": [
+        "apps/union-eyes/docs/security/AUTH_REALITY_AUDIT.md",
+        "apps/union-eyes/docs/operations/PRODUCTION_TOPOLOGY.md",
+        "packages/platform-auth/src/entra/server.ts",
+        "packages/platform-auth/src/password/session.ts",
+        "packages/platform-auth/src/password/handlers.ts",
+        "apps/union-eyes/app/api/auth/login/route.ts",
+        "apps/union-eyes/components/auth/login-form.tsx",
+        "reports/union-eyes/runtime-schema-lineage/PHASE_H_AUTH_PATH_CORRECTION.md"
+      ]
+    },
+    "lanes": {
+      "PRIMARY_AUTHENTICATION": {
+        "mechanism": "PG password/session (nzila_session); magic-link alternate",
+        "status": "PASS",
+        "proofClass": "STAGING_E2E_PASSWORD_SESSION",
+        "note": "Staged QA fixture password login issued nzila_session; /api/auth/me + org + role + RLS-backed surfaces proven. See PHASE_H_PRIMARY_AUTH_PROOF.json.",
+        "proofRefs": [
+          "reports/union-eyes/runtime-schema-lineage/PHASE_H_PRIMARY_AUTH_PROOF.json",
+          "reports/union-eyes/runtime-schema-lineage/PHASE_H_PRIMARY_AUTH_PROOF.md"
+        ]
+      },
+      "BACKUP_ENTRA_AUTHENTICATION": {
+        "mechanism": "Entra External ID / NextAuth azure-ad",
+        "status": "NOT_YET_PROVEN",
+        "proofClass": "CODE_INSPECTION_ONLY",
+        "note": "Backup SSO only; not the pilot login blocker."
+      },
+      "ACCEPTANCE_AUTH": {
+        "mechanism": "x-unioneyes-acceptance-auth",
+        "status": "PASS",
+        "proofClass": "PHASE_G_EXERCISED",
+        "note": "Identity-only; does not bypass RLS/authorization."
+      },
+      "INFRA_OIDC": {
+        "mechanism": "GitHub Actions OIDC \u2192 Azure RBAC (deploy/snapshot storage)",
+        "status": "PARTIAL_PASS",
+        "proofClass": "SNAPSHOT_LIFECYCLE_RBAC_PUBLISH",
+        "note": "Proven for snapshot publish RBAC; must not be conflated with SaaS user login.",
+        "citation": "CANONICAL_SNAPSHOT_LIFECYCLE.json steps.RBAC + PUBLISH"
+      }
+    },
+    "acceptanceAuthImplementation": {
+      "header": "x-unioneyes-acceptance-auth",
+      "cookie": "ue_acceptance_auth",
+      "module": "packages/platform-auth/src/acceptance-auth.ts",
+      "wiredIn": "packages/platform-auth/src/entra/server.ts auth() step 0",
+      "behavior": "Identity-only JWT; staging surface+deployment gated; allowlisted user IDs; loads org membership; does not grant elevated authorization by itself",
+      "phaseGNote": "PHASE_G_STATUS.json ACCEPTANCE_AUTH=identity-only header"
+    },
+    "sharedAuthorityBoundary": {
+      "status": "CODE_PATH_EVIDENCE_ONLY",
+      "chain": [
+        "PRIMARY: LoginForm password \u2192 POST /api/auth/login \u2192 nzila_session cookie",
+        "auth() [entra/server.ts]: acceptance (staging) OR PG session (primary) OR Entra/NextAuth (backup)",
+        "identity (userId); acceptance also resolves organizationId from membership",
+        "getOrganizationIdForUser(userId) / org fallbacks in api-auth-guard + organization-utils",
+        "role from organizationMembers.role (DB) with platform-admin override",
+        "withRLSContext: await auth(); set_config app.current_user_id + app.current_org_id"
+      ],
+      "convergenceClaim": "Acceptance JWT, PG session, and Entra session all enter auth() \u2192 org/role resolution \u2192 withRLSContext after identity validation. Acceptance does not bypass RLS helpers. Entra is backup, not primary.",
+      "citations": [
+        "packages/platform-auth/src/acceptance-auth.ts",
+        "packages/platform-auth/src/entra/server.ts",
+        "packages/platform-auth/src/password/auth-service.ts",
+        "apps/union-eyes/lib/api-auth-guard.ts",
+        "apps/union-eyes/lib/db/with-rls-context.ts",
+        "apps/union-eyes/lib/organization-utils.ts"
+      ]
+    },
+    "verdicts": {
+      "PRIMARY_AUTHENTICATION": "PASS",
+      "BACKUP_ENTRA_AUTHENTICATION": "NOT_YET_PROVEN",
+      "NORMAL_AUTHENTICATION": "PASS",
+      "NORMAL_AUTHENTICATION_LEGACY_ALIAS": "Alias for PRIMARY_AUTHENTICATION; was wrongly Entra-framed as NOT_RUN",
+      "NORMAL_AUTH_IDENTITY_RESOLUTION": "PASS",
+      "NORMAL_AUTH_ORGANIZATION_RESOLUTION": "PASS",
+      "NORMAL_AUTH_ROLE_RESOLUTION": "PASS",
+      "ACCEPTANCE_AUTH_IS_IDENTITY_ONLY": "PASS",
+      "ACCEPTANCE_AUTH": "PASS",
+      "INFRA_OIDC": "PARTIAL_PASS",
+      "PRODUCTION_AUTH_USES_SHARED_AUTHORITY_BOUNDARY": "PASS_BY_CODE_INSPECTION",
+      "PILOT_BLOCKER": "GOVERNANCE_DEBT_ONLY_EXPIRED_WAIVERS_DEPENDENCY_GOVERNANCE_GATE"
+    },
+    "limitation": "PRIMARY password/session proven on staging with QA fixtures. Entra backup remains NOT_YET_PROVEN, but is not the pilot blocker. Pilot governance debt is accepted only for the staging envelope through 2026-10-07.",
+    "primaryAuthProof": {
+      "status": "PASS",
+      "provenAt": "2026-09-23T20:25:53.836Z",
+      "revision": "nzila-os-union-eyes-staging--0000259",
+      "cookie": "nzila_session",
+      "identityResolved": true,
+      "orgResolved": true,
+      "roleResolved": true,
+      "rlsBackedCall": true,
+      "personas": [
+        "adminPrimary",
+        "memberPrimary",
+        "stewardPrimary"
+      ],
+      "artifact": "PHASE_H_PRIMARY_AUTH_PROOF.json"
+    }
+  },
+  "C_ISOLATION_GAPS": {
+    "consumedPhaseG": [
+      "reports/union-eyes/runtime-schema-lineage/PHASE_G_STATUS.json",
+      "reports/union-eyes/runtime-schema-lineage/PHASE_G_HTTP_RERUN.json",
+      "reports/union-eyes/runtime-schema-lineage/PHASE_G_RLS_AND_HTTP.json",
+      "reports/union-eyes/runtime-schema-lineage/PHASE_G_FIXTURES_AND_SQL_RLS.json"
+    ],
+    "results": {
+      "CROSS_ORG_ISOLATION": {
+        "status": "PASS",
+        "evidence": "CROSS_ORG_A_reads_B_matter 404; CROSS_ORG_B_reads_A_matter 404; MEMBER_A->DOC_B 404",
+        "citation": "PHASE_G_STATUS.json section5_http_authority_matrix"
+      },
+      "SAME_ROLE_UNAUTHORIZED_ACCESS": {
+        "status": "PASS",
+        "evidence": "MEMBER -> /api/admin/organizations 403",
+        "citation": "PHASE_G_STATUS.json"
+      },
+      "MATTER_AUTHORITY": {
+        "status": "PASS",
+        "evidence": "ADMIN_A grievance list/get 200; cross-org grievance 404",
+        "citation": "PHASE_G_STATUS.json"
+      },
+      "DOCUMENT_AUTHORITY": {
+        "status": "PASS",
+        "evidence": "ADMIN_A DOC_A repository GET 200; MEMBER_A DOC_B 404",
+        "citation": "PHASE_G_STATUS.json; cleared on rev 0000259"
+      },
+      "EXTERNAL_SPECIALIST_BOUNDARY": {
+        "status": "PASS",
+        "evidence": "PHASE_H_EXTERNAL_SPECIALIST_MATRIX.json critical 10/10 PASS via password/nzila_session HTTP /api/external/* grant-deny matrix; RLS_CONTEXT_LEAKAGE=0",
+        "citation": "reports/union-eyes/runtime-schema-lineage/PHASE_H_EXTERNAL_SPECIALIST_MATRIX.json",
+        "residualNote": "view_documents-gated metadata GET/list returned 403 despite can_view_documents=true; document ALLOW proven via download surface"
+      },
+      "RLS_CONTEXT_LEAKAGE": {
+        "status": "PASS",
+        "evidence": "section6_shared_rls_context.RLS_CONTEXT_LEAKAGE=0",
+        "citation": "PHASE_G_STATUS.json section6_shared_rls_context"
+      }
+    },
+    "newProbesRunInPhaseH": "EXTERNAL_SPECIALIST grant/deny HTTP matrix on staging rev 0000259 (password session)"
+  },
+  "D_LIUNA_DEMO_SURFACE": {
+    "fixturesAndDocs": [
+      "docs/categories/products-and-market/union-eyes/liuna-opdc-cecof-readiness/*",
+      "apps/union-eyes/e2e/liuna-bilingual-mobile-transition.spec.ts",
+      "package scripts test:e2e:ue:stakeholders / test:e2e:ue:pilot"
+    ],
+    "phaseGSmokeAlignment": {
+      "AUTHENTICATED_APP_LOAD": "PASS",
+      "ORGANIZATION_CONTEXT": "PASS",
+      "GRIEVANCE_OR_MATTER_FLOW": "PASS",
+      "DOCUMENT_FLOW": "PASS",
+      "ROLE_GOVERNED_ACTION": "PASS",
+      "AUDIT_EVENT_OR_EQUIVALENT": "NOT_EXERCISED",
+      "citation": "PHASE_G_STATUS.json section7_pilot_smoke"
+    },
+    "DEMO_FLOWS": {
+      "status": "PASS_WITH_LIMITATIONS",
+      "note": "Authority smoke PASS per Phase G. LIUNA bilingual/mobile/a11y specs/docs exist; Phase H did not re-run Playwright LIUNA suite. Demo readiness is authority-backed, not full UI bilingual/a11y certified here."
+    }
+  },
+  "E_SECURITY_DEBT": {
+    "fromPrChecks": {
+      "CODEQL": {
+        "status": "PASS",
+        "checks": [
+          "CodeQL",
+          "Analyze (javascript-typescript)",
+          "Analyze (python)",
+          "Analyze (actions)"
+        ]
+      },
+      "SECRET_SCANNING": {
+        "status": "PASS",
+        "checks": [
+          "Gitleaks",
+          "TruffleHog OSS",
+          "Secret Scan (Gitleaks + TruffleHog)",
+          "GitGuardian Security Checks"
+        ]
+      },
+      "DEPENDENCY_VULNERABILITIES": {
+        "status": "FAIL_PREEXISTING",
+        "checks": [
+          "Dependency Audit",
+          "pnpm audit",
+          "Governance Baseline / Dependency Audit"
+        ]
+      },
+      "CONTAINER_CVES": {
+        "status": "FAIL_PREEXISTING",
+        "checks": [
+          "Governance Baseline / Trivy Container Scan"
+        ],
+        "note": "Standalone Trivy Container Scan skipped; other Trivy jobs success"
+      },
+      "EXPIRED_WAIVERS": {
+        "status": "FAIL_PREEXISTING",
+        "checks": [
+          "Supply Chain Waiver Expiry",
+          "Governance Baseline / Supply Chain Waiver Expiry"
+        ]
+      },
+      "SUPPLY_CHAIN_GATE": {
+        "status": "FAIL_PREEXISTING"
+      },
+      "GOVERNANCE_GATE": {
+        "status": "FAIL_PREEXISTING",
+        "checks": [
+          "Governance Gate",
+          "Governance Baseline / Governance Gate"
+        ]
+      },
+      "SNYK": {
+        "status": "UNKNOWN_NOT_NAMED_IN_CHECK_RUNS",
+        "note": "No check named Snyk on PR head at collection; do not invent PASS"
+      }
+    },
+    "blockingSplit": {
+      "DEMO_BLOCKING": [],
+      "PILOT_BLOCKING": [],
+      "PRODUCTION_BLOCKING": [
+        "Residual governance/dependency debt and all pre-existing production blockers",
+        "SNAPSHOT_IMMUTABILITY PARTIAL (no object WORM)",
+        "CI Postgres major not aligned to 15",
+        "E2E union-eyes failure preexisting",
+        "Unit Tests / reliability-validation preexisting failures",
+        "mergeable_state=unstable; DO_NOT_MERGE"
+      ],
+      "authFramingCorrection": {
+        "removedWrongFraming": "NORMAL_AUTHENTICATION NOT_RUN (Entra-shaped)",
+        "pilotBlockerCorrected": "PRIMARY_AUTHENTICATION_NOT_PROVEN",
+        "backupEntraNotPilotBlocker": true
+      },
+      "PILOT_RESIDUAL_RISK": [
+        "EXPIRED_WAIVERS accepted for this pilot envelope only",
+        "DEPENDENCY_VULNERABILITIES accepted for this pilot envelope only",
+        "GOVERNANCE_GATE exception approved for this pilot envelope only"
+      ]
+    }
+  },
+  "F_OPS_SNAPSHOT_IMMUTABILITY": {
+    "SNAPSHOT_IMMUTABILITY": "PARTIAL",
+    "compensatingControls": [
+      "content-addressed file_sha256 metadata",
+      "schema_digest 92611387...",
+      "blob versioning enabled",
+      "30-day soft delete retention"
+    ],
+    "objectLevelWorm": "NOT_SET",
+    "citation": "CANONICAL_SNAPSHOT_LIFECYCLE.json VERIFY_IMMUTABILITY",
+    "sufficiency": {
+      "demo": "SUFFICIENT_WITH_COMPENSATING_CONTROLS",
+      "pilot": "MARGINALLY_SUFFICIENT_IF_GOVERNED_ACCESS_TO_SNAPSHOT_ACCOUNT",
+      "production": "INSUFFICIENT_WITHOUT_WORM_OR_EQUIVALENT"
+    },
+    "ops": {
+      "OBSERVABILITY": {
+        "status": "DOCUMENTED_PARTIAL"
+      },
+      "STRUCTURED_LOGGING": {
+        "status": "DOCUMENTED_PARTIAL"
+      },
+      "HEALTH_PROBES": {
+        "status": "PASS_STAGING",
+        "evidence": "/api/health 200 on Phase G matrix"
+      },
+      "SLO": {
+        "status": "DOCUMENTED_ONLY_OR_ABSENT"
+      },
+      "ALERTING": {
+        "status": "UNKNOWN_THIN"
+      },
+      "INCIDENT_RESPONSE": {
+        "status": "DOCUMENTED_ONLY"
+      },
+      "RUNBOOKS": {
+        "status": "PRESENT"
+      },
+      "BACKUP": {
+        "status": "DOCUMENTED_CONFIGURED"
+      },
+      "RESTORE": {
+        "status": "PASS_DISPOSABLE_PG15"
+      },
+      "ROLLBACK": {
+        "status": "DOCUMENTED"
+      },
+      "DEPLOYMENT_PROVENANCE": {
+        "status": "PASS_STAGING",
+        "evidence": "PHASE_G live revision 0000259; image sha256:48e6a029..."
+      }
+    }
+  },
+  "G_POSTGRES_MAJORS": {
+    "STAGING_POSTGRES_MAJOR": 15,
+    "SNAPSHOT_RESTORE_POSTGRES_MAJOR": 15,
+    "CLEANROOM_CI_POSTGRES_MAJOR": 16,
+    "TARGET_PRODUCTION_POSTGRES_MAJOR": {
+      "docsConflict": true,
+      "likelyStagingAligned": 15,
+      "prodDocsAlsoCite": 16
+    },
+    "CI_ALIGNED_TO_15": false,
+    "verdict": "CI still on Postgres 16 (some workflows 17); staging+restore proof on 15; alignment NOT YET DONE"
+  },
+  "H_SNAPSHOT_E2E": {
+    "UE_DB_SNAPSHOT_ID": "staging-canonical-20260923T184938Z-92611387",
+    "dbRestoreScriptExists": true,
+    "script": "apps/union-eyes package.json db:restore -> tooling/scripts/restore-union-eyes-snapshot.mjs",
+    "ciWiringSnapshotRestorePlusPlaywright": "NOT_FOUND",
+    "SNAPSHOT_BOOTSTRAP": "NOT_RUN",
+    "APPLICATION_START": "NOT_RUN",
+    "PLAYWRIGHT_E2E": "NOT_RUN",
+    "note": "No broad program implemented. No preconfigured one-command CI dry-run wired to this snapshot id."
+  },
+  "I_DATA_LIFECYCLE": {
+    "AUDIT_RETENTION": "operationally_governed",
+    "BUSINESS_DATA_RETENTION": "documented_only",
+    "USER_OFFBOARDING": "documented_only",
+    "ORG_OFFBOARDING": "documented_only",
+    "DATA_EXPORT": "documented_only",
+    "DATA_DELETION": "documented_only",
+    "BACKUP_RETENTION": "operationally_governed",
+    "SNAPSHOT_RETENTION": "operationally_governed"
+  },
+  "J_PILOT_ENVELOPE_PROPOSAL": {
+    "evidenceQuality": "authority_smoke_strong__normal_auth_and_security_debt_weak",
+    "PILOT_ORGANIZATIONS": {
+      "max": 1,
+      "proposed": "Single synthetic/staging pilot org (Phase G Org A pattern) OR one carefully onboarded real local \u2014 not multi-tenant federation",
+      "rationale": "Cross-org isolation PASS but EXTERNAL_SPECIALIST_BOUNDARY PARTIAL; keep blast radius minimal"
+    },
+    "USER_TYPES": [
+      "officer/admin",
+      "member",
+      "steward",
+      "external_specialist"
+    ],
+    "USER_TYPES_EXCLUDED_UNTIL_PROVEN": [
+      "platform_lead/admin routes"
+    ],
+    "FEATURES": [
+      "org context",
+      "grievance list/get",
+      "document repository get (granted)",
+      "billing-cycle read",
+      "health"
+    ],
+    "FEATURES_OUT_OF_SCOPE": [
+      "full LIUNA bilingual/mobile certification",
+      "production IdP offboarding proof",
+      "snapshot-restore Playwright CI gate",
+      "object-WORM snapshot account"
+    ],
+    "DATA_CLASSIFICATION": "staging/synthetic fixtures preferred; real PII => confidential union case data with operationally_governed offboarding only",
+    "DURATION": "<= 2 weeks time-boxed technical pilot on staging revision lineage from 0000259 tip, not production",
+    "SUPPORT_MODEL": "engineering-on-call; no 24x7; rollback = ACA prior revision + snapshot restore to disposable PG15",
+    "ROLLBACK": "ACA revision rollback; snapshot restore proven on disposable PG15; PRODUCTION rollback NOT in scope",
+    "rationaleUpdate": "EXTERNAL_SPECIALIST_BOUNDARY PASS; specialist may be included in bounded pilot with grant-scoped access only"
+  },
+  "summaryVerdicts": {
+    "READY_FOR_CLOSED_DEMO_ON_STAGING": "CONDITIONAL_YES",
+    "READY_FOR_EXTERNAL_PILOT": "READY_WITH_LIMITATIONS",
+    "READY_FOR_PRODUCTION": "NO",
+    "MERGE_PR_797": "DO_NOT_MERGE",
+    "BLOCKED_INPUTS": [
+      "Residual governance/dependency debt accepted for pilot only; remains production-blocking and expires 2026-10-07",
+      "mergeable_state=unstable + mainline security/governance debt",
+      "SNAPSHOT_IMMUTABILITY PARTIAL for production bar",
+      "CI Postgres major misaligned (16 vs staging 15)",
+      "SNAPSHOT+Playwright E2E NOT_RUN"
+    ],
+    "CONTROLLED_PILOT_READINESS": "READY_WITH_LIMITATIONS",
+    "pilotBlockerCorrected": "GOVERNANCE_DEBT_ACCEPTED_FOR_PILOT",
+    "technicalAccessControlClosure": true,
+    "TENANT_ISOLATION": "PASS",
+    "RESOURCE_AUTHORITY": "PASS",
+    "narrative": "Technical access-control closure for the bounded staging pilot is PASS: PRIMARY_AUTHENTICATION PASS + EXTERNAL_SPECIALIST_BOUNDARY PASS + tenant/resource isolation PASS. Human-approved governance and rollback dispositions permit a staging-only pilot with limitations; residual debt remains unresolved and production remains blocked."
+  },
+  "authPathCorrection": {
+    "appliedAt": "2026-09-23T20:04:21Z",
+    "artifact": "PHASE_H_AUTH_PATH_CORRECTION.md",
+    "primaryAuthMechanism": "PG-backed password/session (@nzila/platform-auth/password + nzila_session cookie)",
+    "primaryAuthConfidence": "CODE_CONFIRMED",
+    "backupAuthMechanism": "Microsoft Entra External ID via NextAuth (azure-ad) \u2014 backup SSO only",
+    "pilotBlockerCorrected": "PRIMARY_AUTHENTICATION_NOT_PROVEN",
+    "notaBene": "Entra is NOT the pilot login blocker; INFRA_OIDC is not SaaS user login"
+  },
+  "externalSpecialistMatrix": {
+    "status": "PASS",
+    "artifact": "PHASE_H_EXTERNAL_SPECIALIST_MATRIX.json",
+    "rlsLeakage": 0,
+    "criticalPassed": 10,
+    "criticalTotal": 10,
+    "provenAt": "2026-09-23T21:31:06.791Z"
+  },
+  "controlledPilotReadiness": "READY_WITH_LIMITATIONS",
+  "pilotBlockerCorrected": "GOVERNANCE_DEBT_ACCEPTED_FOR_PILOT",
+  "nextSequence": [
+    "pilot execution/preflight"
+  ],
+  "governanceApproval": {
+    "approver": "Aubert / Nzila designated pilot authority",
+    "signedAt": "2026-09-23T22:03:50Z",
+    "PILOT_END": "2026-10-07",
+    "PILOT_SCOPE": "STAGING_ONLY",
+    "PILOT_ORGANIZATIONS": "<=2",
+    "EXPIRED_WAIVERS": "RISK_ACCEPTED_FOR_PILOT",
+    "DEPENDENCY_VULNERABILITIES": "RISK_ACCEPTED_FOR_PILOT",
+    "GOVERNANCE_GATE": "EXCEPTION_APPROVED_FOR_PILOT",
+    "ROLLBACK_SUPPORT_CONTROLS": "PASS",
+    "awaiting_human_approval": false,
+    "nextSequence": "pilot execution/preflight",
+    "note": "Residual debt accepted for this envelope only; no production precedent."
+  }
+}

@@ -364,7 +364,7 @@ async function main() {
   console.log(`  Latest:  ${path.relative(ROOT, latestPath)}`)
   console.log(`  Ledger:  ${path.relative(ROOT, LEDGER_PATH)} (${ledger.entries.length} entries)`)
 
-  if (promotionVerdict === 'not-ready') process.exit(1)
+  if (promotionVerdict !== 'ready') process.exit(1)
 }
 
 main().catch((err) => {

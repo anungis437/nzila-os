@@ -137,3 +137,72 @@ export async function verifyTagApplied(client, { journalPath, migrationsDir, tag
   }
   return entry;
 }
+
+/**
+ * Stamp journal hashes into drizzle.__drizzle_migrations WITHOUT executing DDL.
+ * Used after a canonical snapshot restore whose schema already includes the
+ * objects those migrations would create (ledger often absent from pg_dump).
+ * Only stamps tags in `throughTags` when provided; otherwise stamps all entries.
+ * Idempotent: existing hashes are left untouched.
+ */
+export async function baselineScopedMigrations(client, { journalPath, migrationsDir, throughTags, log = () => {} }) {
+  const entries = readJournalEntries(journalPath);
+  const appliedHashes = await getAppliedHashes(client);
+  let stamped = 0;
+  const stampedTags = [];
+  await client.query('BEGIN');
+  try {
+    for (const entry of entries) {
+      if (throughTags && !throughTags.includes(entry.tag)) {
+        continue;
+      }
+      const { hash } = computeMigrationHash(migrationsDir, entry.tag);
+      if (appliedHashes.has(hash)) {
+        continue;
+      }
+      await client.query(
+        'INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ($1, $2)',
+        [hash, entry.when ?? Date.now()],
+      );
+      appliedHashes.add(hash);
+      stamped += 1;
+      stampedTags.push(entry.tag);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw new Error(`Scoped migration baseline failed: ${err.message}`);
+  }
+  log(`scoped migration baseline: stamped ${stamped} hash(es)`);
+  return { stamped, stampedTags };
+}
+
+/**
+ * Canonical PostgreSQL extension set for a Union Eyes database. This is the
+ * SINGLE source of truth reused by both the fresh-bootstrap orchestrator and
+ * the schema-contract fresh-build harness, so extension provisioning cannot
+ * diverge between the production bootstrap and the measuring instrument.
+ */
+export const REQUIRED_EXTENSIONS = ['uuid-ossp', 'pgcrypto', 'pg_trgm', 'btree_gin', 'vector'];
+export const OPTIONAL_EXTENSIONS = new Set(['vector']);
+
+/**
+ * Installs the required extensions idempotently. Throws on hard failure of a
+ * non-optional extension; skips optional extensions that are unavailable.
+ * Callers that must exit the process (bootstrap) wrap this in their own
+ * fail() handler; callers that must propagate (harness) let it throw.
+ */
+export async function ensureExtensions(client, { log = () => {} } = {}) {
+  for (const ext of REQUIRED_EXTENSIONS) {
+    try {
+      await client.query(`CREATE EXTENSION IF NOT EXISTS "${ext}"`);
+      log(`extension OK: ${ext}`);
+    } catch (err) {
+      if (OPTIONAL_EXTENSIONS.has(ext)) {
+        log(`extension optional/unavailable: ${ext} (${err.message})`);
+        continue;
+      }
+      throw new Error(`Failed to create extension ${ext}: ${err.message}`);
+    }
+  }
+}

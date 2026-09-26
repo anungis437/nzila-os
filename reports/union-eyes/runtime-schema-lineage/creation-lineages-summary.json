@@ -1,0 +1,515 @@
+{
+  "CREATION_LINEAGES": [
+    "DJANGO_MIGRATIONS",
+    "ROOT_SQL",
+    "UNION_EYES_AUDIT_SQL",
+    "UNION_EYES_LEGACY_SQL",
+    "UNION_EYES_SCOPED_SQL"
+  ],
+  "TOTAL_CREATION_MIGRATIONS": 34,
+  "TABLES_PER_LINEAGE": {
+    "DJANGO_MIGRATIONS": 220,
+    "UNION_EYES_LEGACY_SQL": 69,
+    "UNION_EYES_AUDIT_SQL": 24,
+    "UNION_EYES_SCOPED_SQL": 5,
+    "ROOT_SQL": 2
+  },
+  "TABLES_PER_CREATION_FILE": {
+    "apps/union-eyes/backend/unions/migrations/0001_initial.py": {
+      "count": 39,
+      "tables": [
+        "bargaining_units",
+        "budget_pool",
+        "calendar_events",
+        "calendars",
+        "committees",
+        "congress_memberships",
+        "course_registrations",
+        "course_sessions",
+        "employers",
+        "external_calendar_connections",
+        "federations",
+        "holidays",
+        "meeting_rooms",
+        "member_certifications",
+        "member_employment",
+        "member_location_consent",
+        "member_segments",
+        "organizer_tasks",
+        "organizing_campaigns",
+        "poll_votes",
+        "polls",
+        "recognition_award_types",
+        "recognition_awards",
+        "recognition_programs",
+        "reward_budget_envelopes",
+        "reward_redemptions",
+        "reward_wallet_ledger",
+        "steward_assignments",
+        "survey_answers",
+        "survey_questions",
+        "survey_responses",
+        "surveys",
+        "training_courses",
+        "training_programs",
+        "voter_eligibility",
+        "votes",
+        "voting_options",
+        "voting_sessions",
+        "worksites"
+      ]
+    },
+    "apps/union-eyes/backend/core/migrations/0001_initial.py": {
+      "count": 34,
+      "tables": [
+        "alert_executions",
+        "alert_rules",
+        "api_integrations",
+        "audit_logs",
+        "automation_rules",
+        "external_accounts",
+        "external_benefit_coverage",
+        "external_benefit_dependents",
+        "external_benefit_enrollments",
+        "external_benefit_plans",
+        "external_benefit_utilization",
+        "external_communication_channels",
+        "external_communication_files",
+        "external_communication_messages",
+        "external_communication_users",
+        "external_customers",
+        "external_departments",
+        "external_employees",
+        "external_insurance_beneficiaries",
+        "external_insurance_claims",
+        "external_insurance_policies",
+        "external_invoices",
+        "external_lms_completions",
+        "external_lms_courses",
+        "external_lms_enrollments",
+        "external_lms_learners",
+        "external_lms_progress",
+        "external_payments",
+        "external_positions",
+        "integration_api_keys",
+        "integration_configs",
+        "integration_sync_log",
+        "integration_webhooks",
+        "security_events"
+      ]
+    },
+    "apps/union-eyes/backend/billing/migrations/0001_initial.py": {
+      "count": 28,
+      "tables": [
+        "account_mappings",
+        "bank_accounts",
+        "bank_reconciliation",
+        "bank_reconciliations",
+        "chart_of_accounts",
+        "clc_remittance_mapping",
+        "clc_sync_log",
+        "cost_centers",
+        "donation_campaigns",
+        "dues_rates",
+        "dues_transactions",
+        "employer_remittances",
+        "erp_invoices",
+        "financial_periods",
+        "gl_account_mappings",
+        "gl_transaction_log",
+        "gl_trial_balance",
+        "member_arrears",
+        "member_dues_ledger",
+        "payment_cycles",
+        "payment_disputes",
+        "payment_methods",
+        "payment_plans",
+        "payments",
+        "per_capita_remittances",
+        "remittance_exceptions",
+        "remittance_line_items",
+        "strike_fund_disbursements"
+      ]
+    },
+    "apps/union-eyes/backend/notifications/migrations/0001_initial.py": {
+      "count": 24,
+      "tables": [
+        "campaigns",
+        "communication_preferences",
+        "in_app_notifications",
+        "message_log",
+        "message_read_receipts",
+        "message_templates",
+        "message_threads",
+        "messages",
+        "mobile_devices",
+        "newsletter_campaigns",
+        "newsletter_distribution_lists",
+        "newsletter_list_subscribers",
+        "newsletter_recipients",
+        "notification_delivery_log",
+        "notification_queue",
+        "notification_templates",
+        "notification_tracking",
+        "notifications",
+        "push_devices",
+        "push_notifications",
+        "sms_campaigns",
+        "sms_conversations",
+        "sms_messages",
+        "user_notification_preferences"
+      ]
+    },
+    "apps/union-eyes/backend/compliance/migrations/0001_initial.py": {
+      "count": 23,
+      "tables": [
+        "consent_records",
+        "cookie_consents",
+        "data_classification_policy",
+        "data_subject_access_requests",
+        "gdpr_data_requests",
+        "geofence_events",
+        "geofences",
+        "hazard_reports",
+        "location_deletion_log",
+        "location_tracking",
+        "location_tracking_audit",
+        "location_tracking_config",
+        "policy_evaluations",
+        "policy_exceptions",
+        "policy_rules",
+        "ppe_equipment",
+        "provincial_consent",
+        "provincial_data_handling",
+        "provincial_privacy_config",
+        "safety_inspections",
+        "safety_training_records",
+        "user_consents",
+        "workplace_incidents"
+      ]
+    },
+    "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql": {
+      "count": 21,
+      "tables": [
+        "ai_clause_reasonings",
+        "ai_copilot_sessions",
+        "ai_grievance_triages",
+        "ai_insight_reports",
+        "clause_embeddings",
+        "compliance_alerts",
+        "employer_communications",
+        "employer_contacts",
+        "employer_reports",
+        "employer_risk_scores",
+        "governance_policies",
+        "grievance_events",
+        "pension_benefit_claims",
+        "pension_contributions",
+        "pension_members",
+        "pension_plans",
+        "pension_t4a_records",
+        "pension_trustee_meetings",
+        "pension_trustees",
+        "stewards",
+        "strategic_goals"
+      ]
+    },
+    "apps/union-eyes/backend/content/migrations/0001_initial.py": {
+      "count": 19,
+      "tables": [
+        "board_packet_distributions",
+        "board_packets",
+        "case_studies",
+        "cms_media_library",
+        "cms_pages",
+        "data_aggregation_consent",
+        "document_folders",
+        "document_signers",
+        "documents",
+        "movement_trends",
+        "pilot_applications",
+        "pilot_metrics",
+        "signature_audit_trail",
+        "signature_documents",
+        "social_accounts",
+        "social_analytics",
+        "social_campaigns",
+        "social_posts",
+        "testimonials"
+      ]
+    },
+    "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql": {
+      "count": 15,
+      "tables": [
+        "allocation_basis_snapshots",
+        "allocation_rule_versions",
+        "allocation_rules",
+        "allocation_run_lines",
+        "allocation_runs",
+        "billing_accounts",
+        "billing_periods",
+        "chargeback_statements",
+        "org_subscriptions",
+        "payment_allocations",
+        "platform_cost_ledger_entries",
+        "platform_invoice_line_items",
+        "platform_invoices",
+        "platform_payments",
+        "subscription_plans"
+      ]
+    },
+    "apps/union-eyes/backend/grievances/migrations/0001_initial.py": {
+      "count": 12,
+      "tables": [
+        "arbitrations",
+        "claim_deadlines",
+        "claim_updates",
+        "claims",
+        "defensibility_packs",
+        "grievance_deadlines",
+        "grievance_documents",
+        "grievance_settlements",
+        "grievance_timeline",
+        "grievance_transitions",
+        "grievances",
+        "settlements"
+      ]
+    },
+    "apps/union-eyes/backend/bargaining/migrations/0001_initial.py": {
+      "count": 11,
+      "tables": [
+        "arbitration_decisions",
+        "arbitration_precedents",
+        "bargaining_notes",
+        "bargaining_proposals",
+        "cba_clauses",
+        "clause_comparisons",
+        "clause_library_tags",
+        "collective_agreements",
+        "negotiations",
+        "shared_clause_library",
+        "tentative_agreements"
+      ]
+    },
+    "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql": {
+      "count": 10,
+      "tables": [
+        "cba_intel_agreements",
+        "cba_intel_benchmark_snapshots",
+        "cba_intel_clauses",
+        "cba_intel_documents",
+        "cba_intel_extraction_runs",
+        "cba_intel_findings",
+        "cba_intel_ingestion_jobs",
+        "cba_intel_review_decisions",
+        "cba_intel_sources",
+        "cba_intel_wage_adjustments"
+      ]
+    },
+    "apps/union-eyes/backend/auth_core/migrations/0001_initial.py": {
+      "count": 8,
+      "tables": [
+        "feature_flags",
+        "member_history_events",
+        "organization_members",
+        "organization_users",
+        "organizations",
+        "pending_profiles",
+        "profiles",
+        "sso_providers"
+      ]
+    },
+    "apps/union-eyes/backend/ai_core/migrations/0001_initial.py": {
+      "count": 7,
+      "tables": [
+        "ai_safety_filters",
+        "ai_usage_metrics",
+        "chat_messages",
+        "chat_sessions",
+        "knowledge_base",
+        "ml_predictions",
+        "model_metadata"
+      ]
+    },
+    "apps/union-eyes/backend/analytics/migrations/0001_initial.py": {
+      "count": 7,
+      "tables": [
+        "analytics_metrics",
+        "contribution_rates",
+        "external_data_sync_log",
+        "insight_recommendations",
+        "kpi_configurations",
+        "reports",
+        "trend_analyses"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0086_monetization_phase2.sql": {
+      "count": 7,
+      "tables": [
+        "contract_covered_orgs",
+        "fee_adjustments",
+        "reconciliation_exceptions",
+        "reconciliation_matches",
+        "reconciliation_runs",
+        "transaction_fee_events",
+        "transaction_fee_rules"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql": {
+      "count": 5,
+      "tables": [
+        "commercial_contracts",
+        "contract_line_items",
+        "entitlement_usage_log",
+        "org_entitlements",
+        "subscription_events_log"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql": {
+      "count": 5,
+      "tables": [
+        "committee_action_items",
+        "committee_documents",
+        "committee_intelligence_snapshots",
+        "committee_meeting_attendees",
+        "committee_meetings"
+      ]
+    },
+    "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py": {
+      "count": 5,
+      "tables": [
+        "compliance_snapshots",
+        "domain_events",
+        "evidence_packs",
+        "integration_idempotency_keys",
+        "integration_registry"
+      ]
+    },
+    "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql": {
+      "count": 5,
+      "tables": [
+        "workbook_governance_lineage_entries",
+        "workbook_memory_holders",
+        "workbook_modules",
+        "workbook_purchases",
+        "workbooks"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql": {
+      "count": 4,
+      "tables": [
+        "correspondence",
+        "correspondence_audit_trail",
+        "correspondence_recipients",
+        "user_signatures"
+      ]
+    },
+    "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql": {
+      "count": 4,
+      "tables": [
+        "document_access_grants",
+        "document_links",
+        "document_versions",
+        "grievance_case_access_assignments"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql": {
+      "count": 3,
+      "tables": [
+        "data_quality_warnings",
+        "duplicate_group_members",
+        "duplicate_groups"
+      ]
+    },
+    "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql": {
+      "count": 3,
+      "tables": [
+        "dispatch_assignments",
+        "dispatch_requests",
+        "dispatch_rules"
+      ]
+    },
+    "apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py": {
+      "count": 3,
+      "tables": [
+        "exit_interview_documents",
+        "exit_interview_events",
+        "exit_interviews"
+      ]
+    },
+    "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql": {
+      "count": 3,
+      "tables": [
+        "external_document_access_grants",
+        "external_matter_access_grants",
+        "representation_authorities"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql": {
+      "count": 3,
+      "tables": [
+        "grievance_timeline_events",
+        "ingestion_batches",
+        "ingestion_records"
+      ]
+    },
+    "migrations/0045_union_eyes_deadline_engine.sql": {
+      "count": 2,
+      "tables": [
+        "deadline_audit_events",
+        "deadline_reminders"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0082_add_pilot_tables.sql": {
+      "count": 2,
+      "tables": [
+        "pilot_checklist_items",
+        "pilot_demo_seeds"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0025_pilot_enrollments.sql": {
+      "count": 2,
+      "tables": [
+        "pilot_enrollments",
+        "pilot_milestones"
+      ]
+    },
+    "apps/union-eyes/db/migrations/20260404_pilot_observability.sql": {
+      "count": 2,
+      "tables": [
+        "pilot_events",
+        "pilot_feedback"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0098_predeployment_hardening.sql": {
+      "count": 1,
+      "tables": [
+        "case_documents"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0083_data_source_tables.sql": {
+      "count": 1,
+      "tables": [
+        "dues_assignments"
+      ]
+    },
+    "apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql": {
+      "count": 1,
+      "tables": [
+        "member_jurisdiction_preferences"
+      ]
+    },
+    "apps/union-eyes/db/migrations/0041_steady_reavers.sql": {
+      "count": 1,
+      "tables": [
+        "org_configurations"
+      ]
+    }
+  },
+  "CREATION_LINEAGE_CLASS_COUNTS": {
+    "DJANGO_CANONICAL_LINEAGE": 220,
+    "OTHER_GOVERNED_LINEAGE": 29,
+    "ACTIVE_SQL_PLATFORM_LINEAGE": 71,
+    "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE": 29
+  }
+}

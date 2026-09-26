@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-09-23T12:01:38.848462-04:00",
+  "ORDERED_SCHEMA_LINEAGE_DEFINED": "YES",
+  "POST_FREEZE_PLATFORM_SQL_ROOT": "apps/union-eyes/db/migrations-platform",
+  "SCOPED_RLS_CLOSURE": "apps/union-eyes/db/migrations-cache/0014_lineage_restoration_rls_closure.sql",
+  "A_RESOLUTION": {
+    "implemented": 19,
+    "blocked": 0,
+    "remainingA": 0
+  },
+  "dispositionRemaining": {
+    "A": 0,
+    "F": 8,
+    "G": 2
+  },
+  "rlsClassification100": {
+    "directOrgOrganizationId": 80,
+    "directOrgOrgId": 4,
+    "parentOwned": 16,
+    "exempted": 0,
+    "total": 100
+  },
+  "rlsExemptedPlatformGlobal": [],
+  "cleanroomSummary": {
+    "djangoMigrate": "PASS",
+    "historicalSchemaCreationPass": 19,
+    "historicalSchemaCreationFail": 0,
+    "historicalSchemaCreationSkip": 17,
+    "platformPass": 4,
+    "platformFail": 0,
+    "scopedPass": 15,
+    "scopedFail": 0
+  },
+  "djangoWired": true,
+  "physicalRelationCountPublic": 698,
+  "MISSING_CANONICAL_RUNTIME_TABLES_dispositionAdjusted": 0,
+  "RUNTIME_TABLES_WITHOUT_SCHEMA_OWNER_dispositionAdjusted": 0,
+  "UNADJUDICATED": 0,
+  "COMPLETE_RUNTIME_SCHEMA_DIGEST": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+  "PRE_COMPLETE_RUNTIME_SCHEMA_DIGEST": "f60040e62c1253d0e3aa6476e993241c331f8e02b10a16015ec83c2577a73c47",
+  "DIGEST_NOTE": "Unchanged from presence convergence; RLS policies are not relation objects in the digest query",
+  "billingCycleApi": "QUERY_PROOF_PASS_AS_union_eyes_runtime_NO_BYPASS",
+  "billingCycleHttp": "NOT_RUN_REQUIRES_NEXT_AUTH_ENTITLEMENT",
+  "billingTablesPresent": [
+    "billing_accounts",
+    "billing_adjustments",
+    "billing_periods",
+    "billing_subscriptions",
+    "billing_terms"
+  ],
+  "rlsVerifier": {
+    "mode": "preflight",
+    "outcome": "PASS",
+    "checksPassed": "1697/1697",
+    "coverageLine": "[rls-verify] manifest-driven RLS coverage: 326 RLS-required manifest tables (316 present / 10 absent), 316/316 present-and-enforced. RLS_VERIFY_MANIFEST_DRIVEN=YES RLS_VERIFY_EXPECTATIONS_WEAKENED=NO",
+    "unenforcedCount": 0,
+    "runtimePrincipal": "union_eyes_runtime",
+    "bypassRls": false,
+    "superuser": false,
+    "MISSING_RLS_TARGET_TABLES": 0,
+    "RLS_NOT_ENABLED": 0,
+    "RLS_NOT_FORCED": 0,
+    "MISSING_REQUIRED_POLICIES": 0
+  },
+  "schemaPresenceConvergence": "YES",
+  "COMPLETE_RUNTIME_SCHEMA_CONVERGENCE": "PASS",
+  "READY_FOR_FRESH_AZURE_STAGING_RECONSTITUTION": "DONE",
+  "AZURE_TOUCHED": true,
+  "COMMITTED": true,
+  "blockers": [],
+  "oracleCounts": {
+    "storageAuthorityEntries": 805,
+    "runtimeUniverseTables": 349,
+    "tenantOrMixedRuntimePrincipalTables": 349,
+    "tablesWithNonEmptyRuntimePrivileges": 346,
+    "rlsRequiredTables": 326,
+    "runtimeTablesWithExistingCreationMigration": 339,
+    "runtimeTablesWithoutCreationMigration": 10,
+    "runtimeTablesWithOwner": 339,
+    "runtimeTablesWithoutSchemaOwner": 10,
+    "runtimeTablesWithMultipleSchemaOwners": 233,
+    "bootstrapParticipatingCreationTables": 41,
+    "bootstrapMissingCreationTables": 308
+  },
+  "commitSha": "f71c6e5cac4c68d706285a37050748e21103574d",
+  "publisher": {
+    "PUBLISHER_SECOND_SCHEMA_AUTHORITY": "NO",
+    "PUBLISHER_CANONICAL_ORACLE": "PASS",
+    "MISSING_REQUIRED_TABLES": 0,
+    "MISSING_REQUIRED_COLUMNS": 0,
+    "publishedTableCount": 332,
+    "oracleSha256": "487f4fc3bbe31e55ef7f71e35102739641f426e88b10897e2b22955304844c0a",
+    "publisherScript": "tooling/db/canonical-schema/publish-from-runtime-oracle.ts",
+    "manifest": "tooling/db/canonical-schema/manifest.json"
+  },
+  "localRegressionGate": {
+    "SCHEMA_AUTHORITY_TESTS": {
+      "outcome": "PASS",
+      "classification": "ATTRIBUTABLE_REGRESSIONS_FIXED",
+      "notes": "Publisher/verify/oracle vitests green; updated billing_subscriptions expectation to PLATFORM_SQL_OWNED"
+    },
+    "RLS_TESTS": {
+      "outcome": "PASS",
+      "classification": "CLEAN",
+      "notes": "rls-0108-migration-sql-scan + rls-storage-authority-completion-migration: 12/12"
+    },
+    "TYPECHECK": {
+      "outcome": "PASS",
+      "classification": "CLEAN",
+      "notes": "pnpm --filter @nzila/union-eyes typecheck"
+    },
+    "LINT": {
+      "outcome": "PASS",
+      "classification": "KNOWN_MAINLINE_DEBT",
+      "notes": "0 errors; 2550 pre-existing warnings (no-console / unused eslint-disable) — not introduced by this workstream"
+    },
+    "TEST_FAST": {
+      "outcome": "PASS_SCOPED",
+      "classification": "UNRELATED_WORKSPACE_STATE",
+      "notes": "Full root pnpm test:fast not run (monorepo cost). Scoped UE schema/RLS vitest suite 12/12 PASS. Worktree initially lacked node_modules (UNRELATED); filtered install restored toolchain."
+    },
+    "GOVERNANCE_AUDIT": {
+      "outcome": "PASS",
+      "classification": "CLEAN",
+      "notes": "pnpm governance:check-db-imports — 0 violations"
+    }
+  },
+  "AZURE_MAY_PROCEED_NEXT": true,
+  "UNRELATED_FILES_INCLUDED": 0,
+  "COMPLETE_SCHEMA_CONVERGENCE_SHA": "f71c6e5cac4c68d706285a37050748e21103574d",
+  "publisherCommitSha": "bff58351e8c7f4a6c9c352e642c821db97064d21",
+  "publisherFeatureSha": "bff58351e8c7f4a6c9c352e642c821db97064d21",
+  "AZURE_STAGING_RECONSTITUTION": "PASS",
+  "READY_FOR_PILOT_PROOF": true,
+  "azureReconstitutionReport": "reports/union-eyes/runtime-schema-lineage/AZURE_STAGING_RECONSTITUTION.json",
+  "PHASE_G_DEPLOYED_RUNTIME_AUTHORITY": "PASS",
+  "PHASE_G_REPORT": "reports/union-eyes/runtime-schema-lineage/PHASE_G_STATUS.json",
+  "PHASE_G_BLOCKERS": [],
+  "PRODUCTION_TOUCHED": false,
+  "PHASE_G_PASS_AT": "2026-09-23T18:40:33.0878292Z",
+  "PHASE_G_LIVE_REVISION": "nzila-os-union-eyes-staging--0000259",
+  "PHASE_G_LIVE_DIGEST": "sha256:48e6a0295df45f3cb4727bf0b46edab09a55a8c1a414279cc9d2be94e18e3501",
+  "PHASE_G_LIVE_SHA": "eae195f21",
+  "PHASE_G_DEPLOY_RUN": "https://github.com/anungis437/nzila-os/actions/runs/35902008722",
+  "CANONICAL_SNAPSHOT_LIFECYCLE": "PASS",
+  "UE_DB_SNAPSHOT_ID": "staging-canonical-20260923T184938Z-92611387",
+  "READY_FOR_POST_G_RELEASE_DISPOSITION": "YES"
+}

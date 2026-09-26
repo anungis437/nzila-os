@@ -1,0 +1,19 @@
+{
+  "count": 10,
+  "tables": [
+    "anti_scab_violations",
+    "cnesst_filings",
+    "joint_hs_committees",
+    "member_dues_issues",
+    "pay_equity_exercises",
+    "payroll_deductions",
+    "preventive_withdrawals",
+    "right_of_refusal_events",
+    "wcb_claims",
+    "wcb_employer_assessments"
+  ],
+  "byDisposition": {
+    "F": 8,
+    "G": 2
+  }
+}

@@ -27,7 +27,9 @@ const h = vi.hoisted(() => {
   const withApi = vi.fn();
   const badRequest = vi.fn((msg: string) => ({ apiError: true, status: 400, msg }));
   const buildClauseVisibilityCondition = vi.fn().mockResolvedValue({ op: 'visibility' });
-  return { queue, insertedValues, db, withApi, badRequest, buildClauseVisibilityCondition };
+  const withSystemContext = vi.fn((fn: () => unknown) => fn());
+  const withRLSContext = vi.fn((_context: { organizationId: string }, fn: () => unknown) => fn());
+  return { queue, insertedValues, db, withApi, badRequest, buildClauseVisibilityCondition, withSystemContext, withRLSContext };
 });
 
 vi.mock('@/db/db', () => ({ db: h.db }));
@@ -45,7 +47,10 @@ vi.mock('drizzle-orm', () => ({
   isNull: vi.fn((col: unknown) => ({ op: 'isNull', col })),
   sql: Object.assign(vi.fn(() => ({ op: 'sql' })), { raw: vi.fn() }),
 }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: () => unknown) => fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: h.withSystemContext,
+  withRLSContext: h.withRLSContext,
+}));
 vi.mock('@/lib/api/framework', () => ({ withApi: h.withApi, ApiError: { badRequest: h.badRequest } }));
 vi.mock('@/lib/clause-library/sharing-authority', () => ({
   buildClauseVisibilityCondition: h.buildClauseVisibilityCondition,
@@ -82,5 +87,24 @@ describe('POST /api/clause-library (round 55 ownership-spoofing fix)', () => {
 
     expect(h.insertedValues[0].sourceOrganizationId).toBe('org-a');
     expect(h.insertedValues[0].sourceOrganizationId).not.toBe('attacker-controlled-org');
+    expect(h.insertedValues[0].createdBy).toBe('user-1');
+    expect(h.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org-a' }, expect.any(Function));
+    expect(h.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('rejects create when the authenticated user is missing and does not insert', async () => {
+    const { POST } = await loadHandlers();
+    const request = {
+      json: async () => ({
+        clauseTitle: 'Wage clause',
+        clauseText: 'text',
+        clauseType: 'wages',
+      }),
+    };
+
+    await expect(POST({ request, organizationId: 'org-a', userId: undefined })).rejects.toMatchObject({ status: 400 });
+    expect(h.insertedValues).toHaveLength(0);
+    expect(h.withRLSContext).not.toHaveBeenCalled();
+    expect(h.withSystemContext).not.toHaveBeenCalled();
   });
 });

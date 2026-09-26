@@ -1,0 +1,284 @@
+{
+  "artifact": "PILOT_PREFLIGHT_EVIDENCE",
+  "generatedAtUtc": "2026-09-23T22:27:36Z",
+  "generatedAtET": "2026-09-23, 6:27 PM ET",
+  "scope": {
+    "environment": "staging",
+    "PILOT_SCOPE": "STAGING_ONLY",
+    "pilot_end": "2026-10-07",
+    "ORGS_ENVELOPE": "<=2",
+    "productionTouched": false,
+    "pr797Merged": false,
+    "phaseHTreatedAsImmutable": true,
+    "baseUrl": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "subscription": "Azure subscription 1 Nzila",
+    "support": "support@onelabtech.com"
+  },
+  "phaseHInputsConsumed": {
+    "approver": "Aubert / Nzila designated pilot authority",
+    "signedAt": "2026-09-23T22:03:50Z",
+    "CONTROLLED_PILOT_READINESS": "READY_WITH_LIMITATIONS",
+    "LIUNA_DEMO_READINESS": "READY_WITH_LIMITATIONS",
+    "GENERAL_PRODUCTION": "BLOCKED",
+    "EXPIRED_WAIVERS": "RISK_ACCEPTED_FOR_PILOT",
+    "DEPENDENCY_VULNERABILITIES": "RISK_ACCEPTED_FOR_PILOT",
+    "GOVERNANCE_GATE": "EXCEPTION_APPROVED_FOR_PILOT",
+    "ROLLBACK_SUPPORT_CONTROLS": "PASS",
+    "TECHNICAL_ACCESS_CONTROL": "PASS",
+    "EXTERNAL_SPECIALIST_MATRIX": "10/10 PASS (consumed; not re-run)",
+    "PR_797_MERGE": "NOT_AUTHORIZED",
+    "PRODUCTION_PROMOTION": "NOT_AUTHORIZED",
+    "PRODUCTION_DATA_MIGRATION": "NOT_AUTHORIZED"
+  },
+  "steps": {
+    "1_staging_revision_provenance": {
+      "result": "PASS",
+      "method": "az containerapp show + revision show; HTTP /api/health /api/ready",
+      "latestRevision": "nzila-os-union-eyes-staging--0000259",
+      "trafficWeightPercent": 100,
+      "expectedRevision": "nzila-os-union-eyes-staging--0000259",
+      "matchesExpected": true,
+      "runningState": "Running",
+      "provisioningState": "Succeeded",
+      "fqdn": "nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+      "health": {
+        "path": "/api/health",
+        "httpStatus": 200,
+        "ok": true,
+        "environment": "staging",
+        "database": "ok",
+        "auth": "ok",
+        "redis": "ok"
+      },
+      "ready": {
+        "path": "/api/ready",
+        "httpStatus": 200,
+        "ready": true,
+        "gitSha": "eae195f215208fdaa0529bc70431cbf9479b5124",
+        "releaseId": "UE-2026-09-23-eae195f"
+      }
+    },
+    "2_pilot_fixture_data_sanity": {
+      "result": "PASS",
+      "action": "CONFIRM_EXISTING_NO_WIPE",
+      "targetedSeed": {
+        "neededForQaPrimaryAuth": false,
+        "neededForPhaseGAdminAWorkflow": true,
+        "action": "SET_PASSWORD_ADMIN_A_ONLY",
+        "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+        "email": "admin.a@phaseg.test",
+        "reason": "admin.a@phaseg.test previously social-login-only; password set for primary-auth workflow smoke (same Phase H pattern)",
+        "noWipe": true
+      },
+      "qaUsersPresent": [
+        "ue.qa.admin.primary@nzila.test",
+        "ue.qa.member.primary@nzila.test",
+        "ue.qa.steward.primary@nzila.test"
+      ],
+      "phasegUsersPresent": [
+        "admin.a@phaseg.test",
+        "external.a@phaseg.test",
+        "external.noauth.a@phaseg.test",
+        "member.a@phaseg.test"
+      ],
+      "fixtureOrgsObserved": [
+        {
+          "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "slug": "phaseg-org-a"
+        },
+        {
+          "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+          "slug": "phaseg-org-b"
+        },
+        {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "slug": "ue-qa-primary"
+        }
+      ],
+      "orgEnvelopeNote": "Staging contains >2 fixture orgs for isolation proofs; operational pilot envelope remains ORGS<=2 (not a DB wipe requirement)."
+    },
+    "3_primary_auth_smoke": {
+      "result": "PASS",
+      "authMechanism": "POST /api/auth/login -> nzila_session cookie",
+      "passwordSource": "UE_TEST_USER_PASSWORD from apps/union-eyes/tests/fixtures/test-users.ts (redacted)",
+      "cases": [
+        {
+          "name": "admin_wrong_password",
+          "httpStatus": 401,
+          "sessionIssued": false,
+          "result": "PASS"
+        },
+        {
+          "name": "admin_login",
+          "email": "ue.qa.admin.primary@nzila.test",
+          "httpStatus": 200,
+          "sessionIssued": true,
+          "result": "PASS"
+        },
+        {
+          "name": "admin_me",
+          "path": "/api/auth/me",
+          "httpStatus": 200,
+          "rolePath": "/api/auth/user-role",
+          "role": "admin",
+          "orgId": "11111111-1111-4111-8111-111111111111",
+          "result": "PASS"
+        },
+        {
+          "name": "member_login_me",
+          "email": "ue.qa.member.primary@nzila.test",
+          "login": 200,
+          "me": 200,
+          "result": "PASS"
+        }
+      ]
+    },
+    "4_specialist_tenant_spot_check": {
+      "result": "PASS",
+      "baselineConsumed": "PHASE_H_EXTERNAL_SPECIALIST_MATRIX 10/10 PASS",
+      "fullMatrixRerun": false,
+      "spotCheck": [
+        {
+          "case": "AUTHORIZED_SAME_ORG_MATTER",
+          "expected": "ALLOW",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "case": "AUTHORIZED_SAME_ORG_DOCUMENT_DOWNLOAD",
+          "expected": "ALLOW",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "case": "SAME_ORG_NO_MATTER_GRANT",
+          "expected": "DENY",
+          "httpStatus": 403,
+          "result": "PASS"
+        },
+        {
+          "case": "CROSS_ORG_RESOURCE",
+          "expected": "DENY",
+          "httpStatus": 403,
+          "result": "PASS"
+        }
+      ],
+      "tenantIsolation": [
+        {
+          "case": "ADMIN_A_reads_ORG_B_grievance",
+          "httpStatus": 404,
+          "result": "PASS",
+          "note": "fail-closed NOT_FOUND"
+        },
+        {
+          "case": "ADMIN_A_reads_ORG_B_document",
+          "httpStatus": 404,
+          "result": "PASS"
+        }
+      ],
+      "regressionDetected": false
+    },
+    "5_core_pilot_workflows": {
+      "result": "PASS",
+      "actor": "admin.a@phaseg.test (PhaseG ADMIN_A) via primary auth",
+      "provenPaths": [
+        {
+          "name": "ORG_CURRENT",
+          "path": "/api/organizations/current",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "name": "GRIEVANCES_LIST",
+          "path": "/api/grievances",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "name": "GRIEVANCE_A",
+          "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "name": "DOCUMENT_A",
+          "path": "/api/documents/repository/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "name": "MEMBERS_ME",
+          "path": "/api/members/me",
+          "httpStatus": 200,
+          "result": "PASS"
+        },
+        {
+          "name": "NOTIFICATIONS",
+          "path": "/api/notifications",
+          "httpStatus": 200,
+          "result": "PASS"
+        }
+      ],
+      "nonBlockingResiduals": [
+        {
+          "path": "/api/members",
+          "httpStatus": 500,
+          "classification": "NON_BLOCKING_RESIDUAL",
+          "note": "List endpoint 500; /api/members/me works. Not part of Phase G/H critical LIUNA matrix; not treated as newly observed authority regression."
+        },
+        {
+          "path": "/api/grievances (ue.qa.admin.primary org)",
+          "httpStatus": 500,
+          "classification": "KNOWN_PHASE_H_LIMITATION",
+          "note": "Already recorded in PHASE_H_PRIMARY_AUTH_PROOF limitations; PhaseG Org A grievance paths are the pilot-critical surface and PASS."
+        }
+      ]
+    },
+    "6_observability_support_readiness": {
+      "result": "PASS",
+      "namedSupportRoute": "support@onelabtech.com",
+      "supportCitation": "PHASE_H_PILOT_ROLLBACK_SUPPORT_SIGNOFF (immutable)",
+      "healthEndpoints": {
+        "/api/health": 200,
+        "/api/ready": 200,
+        "/api/status": 200,
+        "/api/version": 200
+      },
+      "acaSystemLogsReachable": true,
+      "logAnalyticsWorkspaceInRg": "workspace-nzilacanadastagingrgLHi9",
+      "acaDiagnosticSettings": "none_configured",
+      "note": "Lightweight ops reachability only; not a full SRE redesign."
+    },
+    "7_rollback_references": {
+      "result": "PASS",
+      "executedRollback": false,
+      "executedDbRestore": false,
+      "priorAcaRevision": "nzila-os-union-eyes-staging--0000257",
+      "priorRevisionActive": true,
+      "priorRevisionTraffic": 0,
+      "currentRevision": "nzila-os-union-eyes-staging--0000259",
+      "currentTraffic": 100,
+      "snapshotId": "staging-canonical-20260923T184938Z-92611387",
+      "schemaDigestPrefix": "92611387",
+      "snapshotBlobExists": true,
+      "snapshotBlob": "azure://nzilastagingstore/nzila-staging-snapshots/staging-canonical-20260923T184938Z-92611387.dump",
+      "matchesSignoff": true
+    }
+  },
+  "disposition": {
+    "PILOT_PREFLIGHT": "PASS",
+    "PILOT_EXECUTION_AUTHORIZED": "YES",
+    "BLOCKER": null,
+    "newlyObservedRegression": false
+  },
+  "forbiddenActionsHonored": [
+    "staging_only",
+    "no_pr_797_merge",
+    "no_production_az_mutations",
+    "no_production_data_migration",
+    "no_phase_h_readjudication",
+    "no_full_specialist_matrix_rerun",
+    "no_aca_rollback_executed",
+    "no_db_restore_executed"
+  ]
+}

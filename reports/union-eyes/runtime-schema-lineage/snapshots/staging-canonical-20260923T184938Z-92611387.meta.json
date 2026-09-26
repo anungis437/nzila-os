@@ -1,0 +1,15 @@
+{
+  "source_pg_major": 16,
+  "format": "pg_dump-Fc",
+  "environment": "staging-canonical",
+  "snapshot_id": "staging-canonical-20260923T184938Z-92611387",
+  "complete_schema_convergence_sha": "f71c6e5cac4c68d706285a37050748e21103574d",
+  "tip_sha": "eae195f215208fdaa0529bc70431cbf9479b5124",
+  "note": "Canonical snapshot #1 from complete cleanroom lineage matching digest 92611387. Source PG16; restore target PG15 preferred.",
+  "phase_g_pass_sha": "62cd89868b9e4249994e3774635cca333616d9f7",
+  "file_sha256": "5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4",
+  "source": "docker:ue-schema-lineage-pg16/union_eyes_lineage",
+  "created_at": "2026-09-23T18:49:40.0309128Z",
+  "schema_digest": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+  "relation_count": 705
+}

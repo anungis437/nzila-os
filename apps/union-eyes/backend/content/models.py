@@ -273,12 +273,58 @@ class DocumentFolders(BaseModel):
 
 
 class Documents(BaseModel):
-    """Migrated from drizzle: documents-schema.ts"""
+    """Migrated from drizzle: documents-schema.ts — full runtime field set (Phase F convergence)"""
 
     organization_id = models.UUIDField(null=True, blank=True)
+    folder_id = models.UUIDField(null=True, blank=True)
+
+    # File information
+    title = models.TextField(null=True, blank=True)
+    filename = models.TextField(null=True, blank=True)
+    name = models.TextField(null=True, blank=True)
+    file_url = models.TextField(null=True, blank=True)
+    file_type = models.TextField(null=True, blank=True)
+    content_type = models.TextField(null=True, blank=True)
+    mime_type = models.TextField(null=True, blank=True)
+    document_type = models.TextField(null=True, blank=True)
+    size_bytes = models.BigIntegerField(null=True, blank=True)
+    # bigint matches PLATFORM_SQL 0006 (documents.file_size). IntegerField would
+    # materialize a conflicting integer when Django runs before that migration.
+    file_size = models.BigIntegerField(null=True, blank=True)
+    category = models.TextField(null=True, blank=True)
+    tags = ArrayField(models.TextField(), null=True, blank=True)
+
+    # Blob storage
+    blob_container = models.TextField(null=True, blank=True)
+    blob_path = models.TextField(null=True, blank=True)
+    sha256 = models.TextField(null=True, blank=True)
+
+    # Content / metadata
+    description = models.TextField(null=True, blank=True)
+    content_text = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+
+    # Upload information
+    uploaded_by = models.TextField(null=True, blank=True)
+    uploaded_at = models.DateTimeField(null=True, blank=True)
+
+    # Status and access
+    status = models.CharField(max_length=20, default="active")
+    privacy_label = models.CharField(max_length=32, default="team_confidential")
+    access_level = models.CharField(max_length=50, default="standard")
+    contains_pii = models.BooleanField(default=False)
+    contains_medical_sensitive = models.BooleanField(default=False)
+    contains_legal_privilege = models.BooleanField(default=False)
+    member_pii = models.BooleanField(default=False)
+    medical_sensitive = models.BooleanField(default=False)
+    disciplinary_sensitive = models.BooleanField(default=False)
+    is_confidential = models.BooleanField(default=False)
+
+    # Soft delete
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = "ue_documents"
+        db_table = "documents"
         verbose_name = "Documents"
 
 

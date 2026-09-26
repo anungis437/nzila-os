@@ -4,9 +4,16 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withSystemContext: vi.fn(),
   db: { select: vi.fn(), insert: vi.fn() },
+  selectQueue: [] as unknown[][],
+  insertedValues: [] as Record<string, unknown>[],
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
+vi.mock('@/lib/api/framework', () => ({
+  withApi: m.withApi,
+  ApiError: {
+    badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
+  },
+}));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@nzila/db/schema', () => ({
@@ -28,10 +35,27 @@ describe('governance/lifecycle/snapshots route', () => {
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) =>
       (ctx: any) => handler(ctx));
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
-    m.db.select
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(() => ({ offset: vi.fn(async () => [{ id: 's1' }]) })) })) })) }))
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ id: 'p1' }, { id: 'p2' }]) })) }));
-    m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'snapshot_1' }]) })) });
+    m.selectQueue = [[{ id: 's1' }]];
+    m.insertedValues = [];
+    m.db.select.mockImplementation(() => {
+      const rows = (m.selectQueue.shift() ?? []) as unknown[];
+      const chain: Record<string, unknown> = {};
+      const finish = () => Promise.resolve(rows);
+      chain.from = () => chain;
+      chain.orderBy = () => chain;
+      chain.limit = () => chain;
+      chain.where = () => chain;
+      chain.offset = finish;
+      chain.then = (resolve: (value: unknown) => unknown, reject?: (reason: unknown) => unknown) =>
+        finish().then(resolve, reject);
+      return chain;
+    });
+    m.db.insert.mockReturnValue({
+      values: vi.fn((values: Record<string, unknown>) => {
+        m.insertedValues.push(values);
+        return { returning: vi.fn(async () => [{ id: 'snapshot_1' }]) };
+      }),
+    });
   });
 
   it('lists snapshots', async () => {
@@ -43,8 +67,36 @@ describe('governance/lifecycle/snapshots route', () => {
 
   it('creates a governance snapshot', async () => {
     const { POST } = await loadRoute();
+    m.selectQueue = [[{ id: 'p1' }, { id: 'p2' }]];
     const result = await POST({ request: new Request('http://localhost/api/governance/lifecycle/snapshots', { method: 'POST', body: '{}' }), user: { id: 'u1' } });
 
     expect(result).toEqual({ snapshot: { id: 'snapshot_1' } });
+    expect(m.insertedValues[0]?.generatedByUserId).toBe('u1');
+    expect(m.insertedValues[0]?.generatedByUserId).not.toBe('system');
+  });
+
+  it('POST rejects a missing user and does not stamp a system actor', async () => {
+    const { POST } = await loadRoute();
+
+    await expect(POST({
+      request: new Request('http://localhost/api/governance/lifecycle/snapshots', { method: 'POST', body: '{}' }),
+      user: null,
+    })).rejects.toMatchObject({ status: 400 });
+
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.insertedValues).toHaveLength(0);
+  });
+
+  it('POST rejects a user without an id and does not write', async () => {
+    const { POST } = await loadRoute();
+
+    await expect(POST({
+      request: new Request('http://localhost/api/governance/lifecycle/snapshots', { method: 'POST', body: '{}' }),
+      user: { id: '' },
+    })).rejects.toMatchObject({ status: 400 });
+
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 });

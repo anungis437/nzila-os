@@ -1,0 +1,66 @@
+# FICTIONAL / REFERENCE ONLY — Leadership Transition workspace role map
+# Maps institutional transition roles → SAGE application roles + evidence grants.
+# Prospect names (e.g. OMHRA) are examples only — do not hard-code into product.
+
+schema_version: 1
+pattern_id: leadership-transition-institutional-memory
+workspace:
+  suggested_status: draft
+  institution_type: other_public_institution  # override per engagement
+  risk_surface: implementation_continuity
+  notes: >
+    Boundary profile must be derived from institution_type + risk_surface.
+    No automated decisions; human review required for decision records.
+
+roles:
+  - id: outgoing_executive
+    label: Outgoing executive
+    sage_application_roles: [workspace_owner, evidence_contributor]
+    evidence_authorization_levels: [internal, authorized_only]
+    may_author_decision_records: false
+    notes: Provides institutional memory; does not unilaterally approve exports.
+
+  - id: incoming_executive
+    label: Incoming executive
+    sage_application_roles: [internal_reviewer, read_only_observer]
+    evidence_authorization_levels: [internal]
+    # Sensitive/excluded material requires explicit grant — default deny.
+    evidence_authorization_levels_default_deny: [authorized_only, sensitive, excluded]
+    may_author_decision_records: false
+    notes: >
+      Must not see restricted succession / HR / complaint materials unless
+      separately authorized. Synthesis/retrieval must use authorization-before-context.
+
+  - id: ed_admin
+    label: ED / administrative lead
+    sage_application_roles: [workspace_owner, evidence_steward]
+    evidence_authorization_levels: [internal, authorized_only, sensitive]
+    may_author_decision_records: false
+    notes: Steward of classification and grants; still cannot auto-approve own export.
+
+  - id: board_member
+    label: Board member
+    sage_application_roles: [decision_record_approver, read_only_observer]
+    evidence_authorization_levels: [internal, authorized_only]
+    may_author_decision_records: true
+    notes: Named human reviewer for decision records; export authority still separate.
+
+  - id: authorized_reviewer
+    label: Authorized reviewer
+    sage_application_roles: [internal_reviewer, privacy_records_reviewer]
+    evidence_authorization_levels: [internal, authorized_only]
+    may_author_decision_records: false
+
+  - id: restricted_contributor
+    label: Restricted contributor
+    sage_application_roles: [evidence_contributor]
+    evidence_authorization_levels: [internal]
+    may_author_decision_records: false
+    notes: Can add internal evidence; cannot read sensitive/excluded without grant.
+
+  - id: auditor
+    label: Auditor / oversight reader
+    sage_application_roles: [read_only_observer]
+    evidence_authorization_levels: [administrative, internal]
+    may_author_decision_records: false
+    notes: Oversight read posture; no automatic sensitive evidence access.

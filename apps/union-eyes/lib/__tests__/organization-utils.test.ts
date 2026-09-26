@@ -55,6 +55,10 @@ vi.mock('../logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (fn: any) => fn(),
+}));
+
 /** Helper: set up N sequential db.select→from→where→limit chains */
 function setupLimitSequence(...values: any[][]) {
   let callCount = 0;

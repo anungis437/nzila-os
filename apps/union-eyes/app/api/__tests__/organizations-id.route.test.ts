@@ -49,7 +49,7 @@ async function loadRoute() {
 }
 
 const orgRow = {
-  id: 'org_1', name: 'Org', slug: 'org', displayName: 'Org', shortName: 'Org', organizationType: 'local',
+  id: '11111111-1111-4111-8111-111111111111', name: 'Org', slug: 'org', displayName: 'Org', shortName: 'Org', organizationType: 'local',
   parentId: null, hierarchyPath: [], hierarchyLevel: 0, provinceTerritory: null, sectors: [], email: null, phone: null,
   website: null, address: null, clcAffiliated: false, affiliationDate: null, charterNumber: null, memberCount: 3,
   activeMemberCount: 2, lastMemberCountUpdate: null, subscriptionTier: 'starter', billingContactId: null,
@@ -71,7 +71,7 @@ describe('organizations/[id] route', () => {
     const { GET } = await loadRoute();
     m.auth.mockResolvedValueOnce({ userId: null });
 
-    const response = await GET(new NextRequest('http://localhost/api/organizations/org_1'), { params: Promise.resolve({ id: 'org_1' }) });
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
     expect(response.status).toBe(401);
   });
 
@@ -79,7 +79,7 @@ describe('organizations/[id] route', () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
 
-    const response = await GET(new NextRequest('http://localhost/api/organizations/org_1'), { params: Promise.resolve({ id: 'org_1' }) });
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
     expect(response.status).toBe(404);
   });
 
@@ -88,10 +88,10 @@ describe('organizations/[id] route', () => {
     m.selectQueue.push([orgRow]);
     m.executeQueue.push([{ total: 5, active: 2 }], [{ cnt: 1 }]);
 
-    const response = await GET(new NextRequest('http://localhost/api/organizations/org_1'), { params: Promise.resolve({ id: 'org_1' }) });
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.data.id).toBe('org_1');
+    expect(json.data.id).toBe('11111111-1111-4111-8111-111111111111');
     expect(json.data.totalClaims).toBe(5);
   });
 
@@ -99,9 +99,9 @@ describe('organizations/[id] route', () => {
     const { PATCH } = await loadRoute();
     m.requireUserForOrganization.mockRejectedValueOnce(new Error('forbidden'));
 
-    const response = await PATCH(new NextRequest('http://localhost/api/organizations/org_1', {
+    const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'New' }),
-    }), { params: Promise.resolve({ id: 'org_1' }) });
+    }), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
 
     expect(response.status).toBe(403);
   });
@@ -110,9 +110,9 @@ describe('organizations/[id] route', () => {
     const { PATCH } = await loadRoute();
     m.updateQueue.push([{ ...orgRow, name: 'New' }]);
 
-    const response = await PATCH(new NextRequest('http://localhost/api/organizations/org_1', {
+    const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'New' }),
-    }), { params: Promise.resolve({ id: 'org_1' }) });
+    }), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -123,8 +123,8 @@ describe('organizations/[id] route', () => {
     const { DELETE } = await loadRoute();
     m.updateQueue.push([{ ...orgRow, status: 'archived' }]);
 
-    const response = await DELETE(new NextRequest('http://localhost/api/organizations/org_1', { method: 'DELETE' }), {
-      params: Promise.resolve({ id: 'org_1' }),
+    const response = await DELETE(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', { method: 'DELETE' }), {
+      params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }),
     });
 
     expect(response.status).toBe(200);

@@ -9,6 +9,9 @@ const m = vi.hoisted(() => ({
   selectQueue: [] as unknown[][],
 }));
 
+// Shared select chain: consumed both by the authority ownership lookup (via the
+// system-context `tx`) and by the route's tier read (via module `db`). Queue
+// order per request: [ownership row, tier row].
 const mockDb = {
   select: vi.fn(() => {
     const chain = {
@@ -34,6 +37,12 @@ vi.mock('@/lib/organization-utils', () => ({
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('drizzle-orm', () => ({ eq: vi.fn() }));
+// Pass-through RLS context helpers so the real authority boundary runs against
+// the mocked db/auth. withSystemContext supplies the mock db as its `tx`.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: (cb: any) => cb(mockDb),
+  withExplicitUserContext: (_userId: string, cb: any) => cb(),
+}));
 
 async function loadRoute() {
   return import('../workbook/[id]/export/route');
@@ -48,8 +57,9 @@ describe('workbook/[id]/export route', () => {
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
   });
 
-  it('returns 401 when unauthenticated', async () => {
+  it('returns 401 when unauthenticated (claimed workbook)', async () => {
     const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
     m.auth.mockResolvedValueOnce({ userId: null });
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
@@ -72,25 +82,22 @@ describe('workbook/[id]/export route', () => {
 
   it('returns 403 when workbook is not claimed', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([
-      { id: 'w1', reportTierId: 'workbook_self_guided', claimedByUserId: null },
-    ]);
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: null, claimedOrgId: null }]);
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
       params: Promise.resolve({ id: 'w1' }),
     });
 
     expect(response.status).toBe(403);
+    // Unclaimed export is rejected before any PDF work.
+    expect(m.generateWorkbookPdf).not.toHaveBeenCalled();
   });
 
   it('returns 403 when requester is outside owner organization', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([
-      { id: 'w1', reportTierId: 'workbook_self_guided', claimedByUserId: 'owner_1' },
-    ]);
-    m.getOrganizationIdForUser
-      .mockResolvedValueOnce('org_requester')
-      .mockResolvedValueOnce('org_owner');
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_owner' }]);
+    m.auth.mockResolvedValueOnce({ userId: 'requester_1' });
+    m.getOrganizationIdForUser.mockResolvedValueOnce('org_requester');
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
       params: Promise.resolve({ id: 'w1' }),
@@ -101,9 +108,8 @@ describe('workbook/[id]/export route', () => {
 
   it('returns 402 when workbook tier is not eligible for export', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([
-      { id: 'w1', reportTierId: 'basic_preview', claimedByUserId: 'user_1' },
-    ]);
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+    m.selectQueue.push([{ reportTierId: 'basic_preview' }]);
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
       params: Promise.resolve({ id: 'w1' }),
@@ -114,9 +120,8 @@ describe('workbook/[id]/export route', () => {
 
   it('returns 404 when PDF generator returns no buffer', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([
-      { id: 'w1', reportTierId: 'workbook_self_guided', claimedByUserId: 'user_1' },
-    ]);
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+    m.selectQueue.push([{ reportTierId: 'workbook_self_guided' }]);
     m.generateWorkbookPdf.mockResolvedValueOnce(null);
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
@@ -128,9 +133,8 @@ describe('workbook/[id]/export route', () => {
 
   it('returns 503 when PDF generation throws', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([
-      { id: 'w1', reportTierId: 'workbook_self_guided', claimedByUserId: 'user_1' },
-    ]);
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+    m.selectQueue.push([{ reportTierId: 'workbook_self_guided' }]);
     m.generateWorkbookPdf.mockRejectedValueOnce(new Error('render failed'));
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
@@ -141,11 +145,10 @@ describe('workbook/[id]/export route', () => {
     expect(m.logger.error).toHaveBeenCalled();
   });
 
-  it('returns PDF attachment on success', async () => {
+  it('returns PDF attachment on success (claimant)', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([
-      { id: 'w1', reportTierId: 'workbook_self_guided', claimedByUserId: 'user_1' },
-    ]);
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'user_1', claimedOrgId: 'org_1' }]);
+    m.selectQueue.push([{ reportTierId: 'workbook_self_guided' }]);
 
     const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
       params: Promise.resolve({ id: 'w1' }),
@@ -154,5 +157,19 @@ describe('workbook/[id]/export route', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toBe('application/pdf');
     expect(response.headers.get('content-disposition')).toContain('governance-entropy-workbook-w1.pdf');
+  });
+
+  it('allows a same-organization peer to export', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: 'w1', claimedByUserId: 'owner_1', claimedOrgId: 'org_shared' }]);
+    m.selectQueue.push([{ reportTierId: 'workbook_self_guided' }]);
+    m.auth.mockResolvedValueOnce({ userId: 'peer_1' });
+    m.getOrganizationIdForUser.mockResolvedValueOnce('org_shared');
+
+    const response = await GET(new NextRequest('http://localhost/api/workbook/w1/export'), {
+      params: Promise.resolve({ id: 'w1' }),
+    });
+
+    expect(response.status).toBe(200);
   });
 });

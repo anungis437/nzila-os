@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-09-23T14:55:58.956873+00:00",
+  "physicalRelationCountPublic": 698,
+  "oracleUniverse": 349,
+  "MISSING_CANONICAL_RUNTIME_TABLES_raw": 10,
+  "MISSING_CANONICAL_RUNTIME_TABLES_dispositionAdjusted": 0,
+  "dispositionExcludedFG": [
+    "anti_scab_violations",
+    "cnesst_filings",
+    "joint_hs_committees",
+    "member_dues_issues",
+    "pay_equity_exercises",
+    "payroll_deductions",
+    "preventive_withdrawals",
+    "right_of_refusal_events",
+    "wcb_claims",
+    "wcb_employer_assessments"
+  ],
+  "missingCanonicalAdjusted": [],
+  "RUNTIME_TABLES_WITHOUT_SCHEMA_OWNER_oracle": 10,
+  "RUNTIME_TABLES_WITHOUT_SCHEMA_OWNER_dispositionAdjusted": 0,
+  "UNADJUDICATED": 0,
+  "implementedAPresent": 19,
+  "implementedAMissing": [],
+  "COMPLETE_RUNTIME_SCHEMA_DIGEST": "926113873e8b545a1ae3017e43c303a4d51daabd86b9f530398df8f62a789db7",
+  "physicalRelationCountDigest": 705,
+  "cleanroomSummary": {
+    "djangoMigrate": "PASS",
+    "historicalSchemaCreationPass": 19,
+    "historicalSchemaCreationFail": 0,
+    "historicalSchemaCreationSkip": 17,
+    "platformPass": 4,
+    "platformFail": 0,
+    "scopedPass": 15,
+    "scopedFail": 0
+  }
+}

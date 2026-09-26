@@ -13,13 +13,28 @@ import { hazardReports, workplaceIncidents } from '@/db/schema';
 
 const m = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
+  // withRLSContext calls platform auth() (re-exported by api-auth-guard).
+  // Mocking auth on the guard does not reach that binding: importOriginal
+  // loads the guard, which loads with-rls-context, which binds the platform
+  // stub before the guard mock returns. Inject the session on the platform
+  // module withRLSContext actually calls.
+  platformAuth: vi.fn(),
   getOrganizationIdForUser: vi.fn(),
   getUserRole: vi.fn(),
   checkRateLimit: vi.fn(),
   dbInsert: vi.fn(),
   dbSelect: vi.fn(),
+  dbExecute: vi.fn(),
 }));
 
+vi.mock('@nzila/platform-auth/entra/server', () => ({
+  auth: m.platformAuth,
+  currentUser: async () => null,
+  getAuth: m.platformAuth,
+  authMiddleware: () => async () => {},
+  clerkMiddleware: () => async () => {},
+  createRouteMatcher: () => () => false,
+}));
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api-auth-guard')>();
   return { ...actual, getCurrentUser: m.getCurrentUser };
@@ -32,7 +47,18 @@ vi.mock('@/lib/rate-limiter', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/rate-limiter')>();
   return { ...actual, checkRateLimit: m.checkRateLimit };
 });
-vi.mock('@/db/db', () => ({ db: { insert: m.dbInsert, select: m.dbSelect } }));
+vi.mock('@/db/db', () => ({
+  db: {
+    insert: m.dbInsert,
+    select: m.dbSelect,
+    execute: m.dbExecute,
+    // Real withRLSContext opens a transaction and set_config()s on tx.execute
+    // before running the handler. The fake client must provide that boundary;
+    // the handler still queries through the module-level insert/select mocks.
+    transaction: async (fn: (tx: { execute: typeof m.dbExecute }) => Promise<unknown>) =>
+      fn({ execute: m.dbExecute }),
+  },
+}));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   // Wrap (not replace) the real eq() so WHERE-clause construction behaves
@@ -97,6 +123,17 @@ beforeEach(() => {
   // getCurrentUser() is what actually governs the test outcome.
   m.getUserRole.mockResolvedValue(null);
   m.getOrganizationIdForUser.mockResolvedValue(ORG_A);
+  m.dbExecute.mockResolvedValue([]);
+  m.platformAuth.mockImplementation(async () => {
+    const user = await m.getCurrentUser();
+    if (!user?.id) return { userId: null, orgId: null, sessionClaims: null, has: () => false };
+    return {
+      userId: user.id,
+      orgId: user.organizationId ?? null,
+      sessionClaims: null,
+      has: () => false,
+    };
+  });
 });
 
 describe('health-safety hazards/incidents submission — role gating', () => {

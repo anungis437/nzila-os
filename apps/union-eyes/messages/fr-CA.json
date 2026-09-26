@@ -1,4 +1,62 @@
 {
+  "workspaceNav": {
+    "metaTitle": "Espace de travail | UnionEyes",
+    "metaDescription": "Une surface de travail pour le syndicat.",
+    "title": "Espace de travail",
+    "intro": "Une surface de travail pour le syndicat. Chaque section répond à une seule question opérationnelle. Les libellés indiquent si la section est dans le rôle, une ébauche d'orientation, ou indisponible.",
+    "tabsLabel": "Sections de l'espace de travail",
+    "unknownRoleBanner": "Ce rôle ne figure pas sur la carte des personas de l'espace de travail. Chaque section est libellée comme une ébauche afin de ne pas être présentée comme disponible.",
+    "availability": {
+      "available": "Dans le rôle",
+      "stub": "Ébauche",
+      "unavailable": "Indisponible"
+    },
+    "tabs": {
+      "overview": {
+        "label": "Aperçu"
+      },
+      "case-operations": {
+        "label": "Opérations de dossiers"
+      },
+      "members": {
+        "label": "Membres"
+      },
+      "governance": {
+        "label": "Gouvernance"
+      },
+      "continuity": {
+        "label": "Continuité"
+      },
+      "financial": {
+        "label": "Finances"
+      },
+      "documents": {
+        "label": "Documents"
+      }
+    },
+    "stubPanel": "Cette section est visible pour l'orientation seulement. Ce n'est pas une surface opérationnelle pour votre rôle, et rien ici n'est une mesure en direct.",
+    "unavailablePanel": "Cette section n'est pas disponible pour votre rôle.",
+    "deepWork": {
+      "unavailable": "Indisponible",
+      "unknownRole": "Rôle non reconnu. Cette destination reste fermée.",
+      "stubSection": "Non disponible depuis une section ébauche.",
+      "unavailableSection": "Non disponible pour votre rôle.",
+      "outOfRole": "Hors de votre rôle.",
+      "recoveryHint": "Surface autorisée pour ce travail approfondi.",
+      "destinations": {
+        "caseworkConsole": "Console de dossiers",
+        "institutionalIntelligenceReports": "Rapports d'intelligence institutionnelle",
+        "membersRoster": "Liste des membres",
+        "continuityIntelligence": "Intelligence de continuité",
+        "governanceCenter": "Centre de gouvernance",
+        "governanceOverview": "Aperçu de la gouvernance"
+      },
+      "remapReason": {
+        "caseworkConsole": "Ouvre la console de dossiers. La liste des dossiers est hors de votre rôle.",
+        "institutionalIntelligenceReports": "Ouvre les rapports d'intelligence institutionnelle. L'intelligence de continuité est hors de votre rôle."
+      }
+    }
+  },
   "common": {
     "appName": "Plateforme de gestion de dossiers syndicaux",
     "loading": "Chargement...",

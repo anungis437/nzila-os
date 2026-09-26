@@ -1,0 +1,232 @@
+{
+  "phase": "H",
+  "title": "EXTERNAL_SPECIALIST grant/deny matrix (staging HTTP)",
+  "generatedAtUtc": "2026-09-23T21:31:06.791Z",
+  "generatedAtEt": "2026-09-23, 5:31:06 p.m.",
+  "scope": {
+    "environment": "staging",
+    "productionTouched": false,
+    "prMerged": false,
+    "baseUrl": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+    "revisionTarget": "nzila-os-union-eyes-staging--0000259",
+    "healthStatus": 200,
+    "authMechanism": "PG password/session via POST /api/auth/login -> nzila_session",
+    "httpSurfaces": [
+      "GET /api/external/grievances/[id]?organizationId=",
+      "GET /api/external/documents/[id]?organizationId=&matterId=&matterType=",
+      "POST /api/external/grievances/[id]/documents/upload?organizationId="
+    ],
+    "codeCitations": [
+      "apps/union-eyes/lib/services/representation-authority-service.ts",
+      "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+      "apps/union-eyes/lib/services/external-document-grant-service.ts",
+      "apps/union-eyes/lib/external-resource-middleware.ts",
+      "apps/union-eyes/lib/external-resource-route-utils.ts",
+      "apps/union-eyes/db/schema/representation-authority-schema.ts",
+      "apps/union-eyes/app/api/external/grievances/[id]/route.ts",
+      "apps/union-eyes/app/api/external/documents/[id]/route.ts",
+      "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts"
+    ]
+  },
+  "seedActions": [
+    {
+      "action": "SET_PASSWORD",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+      "email": "external.a@phaseg.test"
+    },
+    {
+      "action": "UPSERT_USER",
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa05",
+      "role": "external_specialist",
+      "note": "no authority grants"
+    },
+    {
+      "action": "SEED_PRIOR_SESSIONS",
+      "ip": "203.0.113.60",
+      "users": [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa05"
+      ]
+    },
+    {
+      "action": "UPSERT_SIBLING_MATTERS",
+      "ids": [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa12",
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa13",
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa14"
+      ]
+    },
+    {
+      "action": "UPSERT_DOC_NOGRANT",
+      "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa22"
+    },
+    {
+      "action": "UPSERT_DOCUMENT_LINKS",
+      "linked": [
+        "DOC_A->MATTER_A",
+        "DOC_A_NOGRANT->MATTER_A"
+      ]
+    },
+    {
+      "action": "ENSURE_ALLOW_GRANTS_ACTIVE",
+      "authorityId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa31",
+      "matterGrantId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa41",
+      "documentGrantId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa51"
+    },
+    {
+      "action": "UPSERT_EXPIRED_GRANT",
+      "matterId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa13"
+    },
+    {
+      "action": "UPSERT_REVOKED_GRANT",
+      "matterId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa14"
+    }
+  ],
+  "login": {
+    "specialist": {
+      "status": 200,
+      "sessionIssued": true,
+      "mfa": false
+    },
+    "noAuthoritySpecialist": {
+      "status": 200,
+      "sessionIssued": true,
+      "mfa": false
+    }
+  },
+  "matrix": [
+    {
+      "case": "NO_SESSION",
+      "expected": "DENY",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 401,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "case": "LOGIN_EXTERNAL_SPECIALIST",
+      "expected": "ALLOW_SESSION",
+      "path": "/api/auth/login",
+      "httpStatus": 200,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "session_issued=true"
+    },
+    {
+      "case": "ORG_CURRENT_SPECIALIST",
+      "expected": "ALLOW",
+      "path": "/api/organizations/current",
+      "httpStatus": 200,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-"
+    },
+    {
+      "case": "AUTHORIZED_SAME_ORG_MATTER",
+      "expected": "ALLOW",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 200,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11\",\"caseNumber\":null,\"title\":\"PhaseG Matter A\",\"status\":\"filed\",\"step\":null,\"filedDate\":null,\"responseDeadline\":null,\"summary\":null}}"
+    },
+    {
+      "case": "AUTHORIZED_SAME_ORG_DOCUMENT_METADATA_VIEW",
+      "expected": "ALLOW",
+      "path": "/api/external/documents/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1&matterId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11&matterType=grievance",
+      "httpStatus": 403,
+      "result": "FAIL",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}",
+      "note": "view_documents-gated metadata surface; informational if download PASS",
+      "critical": false
+    },
+    {
+      "case": "AUTHORIZED_SAME_ORG_DOCUMENT",
+      "expected": "ALLOW",
+      "path": "/api/external/documents/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21/download?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1&matterId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11&matterType=grievance",
+      "httpStatus": 200,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21\",\"title\":\"PhaseG Doc A\",\"mimeType\":null,\"downloadUrl\":\"https://example.invalid/phaseg-a.pdf\"}}",
+      "note": "document grant -> download HTTP resource access",
+      "critical": true
+    },
+    {
+      "case": "AUTHORIZED_GOVERNED_ACTION",
+      "expected": "ALLOW",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11/documents/upload?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 400,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Invalid document payload\",\"details\":{\"formErrors\":[],\"fieldErrors\":{\"filename\":[\"Required\"],\"documentType\":[\"Required\"],\"mimeType\":[\"Required\"]}}}",
+      "note": "POST upload_documents; 400 Invalid payload after grant check = authz ALLOW",
+      "governedAction": "external_document_upload"
+    },
+    {
+      "case": "SAME_ORG_NO_MATTER_GRANT",
+      "expected": "DENY",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa12?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 403,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}"
+    },
+    {
+      "case": "SAME_ORG_NO_DOCUMENT_GRANT",
+      "expected": "DENY",
+      "path": "/api/external/documents/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa22/download?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1&matterId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11&matterType=grievance",
+      "httpStatus": 403,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}",
+      "critical": true
+    },
+    {
+      "case": "EXPIRED_GRANT",
+      "expected": "DENY",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa13?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 403,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}"
+    },
+    {
+      "case": "REVOKED_GRANT",
+      "expected": "DENY",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa14?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 403,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}"
+    },
+    {
+      "case": "CROSS_ORG_RESOURCE",
+      "expected": "DENY",
+      "path": "/api/external/grievances/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11?organizationId=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "httpStatus": 403,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}"
+    },
+    {
+      "case": "NO_AUTHORITY",
+      "expected": "DENY",
+      "path": "/api/external/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11?organizationId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "httpStatus": 403,
+      "result": "PASS",
+      "leakHits": [],
+      "bodySnippet": "{\"error\":\"Forbidden\"}",
+      "actor": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa05"
+    }
+  ],
+  "summary": {
+    "EXTERNAL_SPECIALIST_BOUNDARY": "PASS",
+    "RLS_CONTEXT_LEAKAGE": 0,
+    "criticalTotal": 10,
+    "criticalPassed": 10,
+    "criticalFailed": [],
+    "productionTouched": false
+  }
+}

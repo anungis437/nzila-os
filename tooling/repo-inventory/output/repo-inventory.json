@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-19T00:00:00.000Z",
+  "generatedAt": "2026-09-26T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 224,
   "workspacePackageCount": 258,
   "workflowCount": 54,
-  "contractTestCount": 282,
-  "tsTestFileCount": 2646,
+  "contractTestCount": 286,
+  "tsTestFileCount": 2686,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -542,7 +542,7 @@
         "ui"
       ],
       "purpose": "Internal admin console for managing platform services — events, knowledge, ontology, and more.",
-      "codeFileCount": 183
+      "codeFileCount": 187
     },
     {
       "name": "test-scaffold-gp",
@@ -688,7 +688,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 5220
+      "codeFileCount": 5270
     },
     {
       "name": "union-eyes-demo",
@@ -707,7 +707,7 @@
         "union-eyes-ui"
       ],
       "purpose": "",
-      "codeFileCount": 71
+      "codeFileCount": 80
     },
     {
       "name": "veridian-admin",

@@ -1,10 +1,10 @@
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { campaigns, messageLog } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { verifyTrackingToken } from '@/lib/communications/tracking-token';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -17,34 +17,6 @@ const PIXEL_GIF = Buffer.from(
   'R0lGODlhAQABAPAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==',
   'base64',
 );
-
-function getTrackingSecret(): string {
-  return process.env.COMMUNICATIONS_TRACKING_SECRET || process.env.RESEND_TRACKING_SECRET || '';
-}
-
-function signTrackingPayload(secret: string, payload: string): string {
-  return crypto.createHmac('sha256', secret).update(payload).digest('hex');
-}
-
-function isValidTrackingToken(token: string | null, candidates: string[]): boolean {
-  const secret = getTrackingSecret();
-  if (!secret) {
-    return true;
-  }
-  if (!token) {
-    return false;
-  }
-
-  const tokenBuffer = Buffer.from(token, 'utf8');
-  return candidates.some((candidate) => {
-    const expected = signTrackingPayload(secret, candidate);
-    const expectedBuffer = Buffer.from(expected, 'utf8');
-    if (tokenBuffer.length !== expectedBuffer.length) {
-      return false;
-    }
-    return crypto.timingSafeEqual(tokenBuffer, expectedBuffer);
-  });
-}
 
 function pixelResponse(): NextResponse {
   return new NextResponse(PIXEL_GIF, {
@@ -89,11 +61,16 @@ export async function GET(
     ...(messageId ? [`${campaignId}:${recipientId}:${messageId}`] : []),
   ];
 
-  if (!isValidTrackingToken(token, tokenCandidates)) {
-    logger.warn('[communications/open-track] Invalid tracking token', {
+  // Fail closed: a missing/placeholder secret (configuration_missing) or a
+  // forged/absent token (invalid) must serve the neutral pixel WITHOUT recording
+  // an open. Only a valid, action-bound token authorizes the analytics mutation.
+  const verification = verifyTrackingToken(token, tokenCandidates);
+  if (verification !== 'valid') {
+    logger.warn('[communications/open-track] Tracking token not authorized', {
       campaignId,
       recipientId,
       hasMessageId: Boolean(messageId),
+      reason: verification,
     });
     return pixelResponse();
   }

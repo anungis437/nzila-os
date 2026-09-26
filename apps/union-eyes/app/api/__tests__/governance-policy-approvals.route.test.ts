@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   withSystemContext: vi.fn(),
   selectQueue: [] as unknown[][],
   insertReturningQueue: [] as unknown[][],
+  insertedValues: [] as Record<string, unknown>[],
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -22,13 +23,21 @@ function makeSelectChain(rows: unknown[]) {
 const mockDb = {
   select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])),
   insert: vi.fn(() => ({
-    values: vi.fn(() => ({
-      returning: vi.fn(async () => (m.insertReturningQueue.shift() ?? []) as unknown[]),
-    })),
+    values: vi.fn((values: Record<string, unknown>) => {
+      m.insertedValues.push(values);
+      return {
+        returning: vi.fn(async () => (m.insertReturningQueue.shift() ?? []) as unknown[]),
+      };
+    }),
   })),
 };
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
+vi.mock('@/lib/api/framework', () => ({
+  withApi: m.withApi,
+  ApiError: {
+    badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
+  },
+}));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -49,6 +58,7 @@ describe('governance/lifecycle/policies/[id]/approvals route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.insertReturningQueue = [];
+    m.insertedValues = [];
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
@@ -105,6 +115,8 @@ describe('governance/lifecycle/policies/[id]/approvals route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.chain.id).toBe('chain_new');
+    expect(m.insertedValues[0]?.createdBy).toBe('u1');
+    expect(m.insertedValues[0]?.createdBy).not.toBe('system');
   });
 
   it('POST records approval action', async () => {
@@ -123,6 +135,8 @@ describe('governance/lifecycle/policies/[id]/approvals route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.action.id).toBe('action_new');
+    expect(m.insertedValues[0]?.approverUserId).toBe('u1');
+    expect(m.insertedValues[0]?.approverUserId).not.toBe('system');
   });
 
   it('POST returns error payload when record_action params are incomplete', async () => {
@@ -139,5 +153,39 @@ describe('governance/lifecycle/policies/[id]/approvals route', () => {
 
     const json = await response.json();
     expect(json.error).toContain('chainId, action, and actorRole are required.');
+    expect(mockDb.insert).not.toHaveBeenCalled();
+  });
+
+  it('POST rejects a missing user and does not stamp a system actor', async () => {
+    const { POST } = await loadRoute();
+
+    await expect(POST(
+      new NextRequest('http://localhost/api/governance/lifecycle/policies/pol_1/approvals', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ op: 'create_chain', chainType: 'single' }),
+      }),
+      { params: { id: 'pol_1' }, user: null },
+    )).rejects.toMatchObject({ status: 400 });
+
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.insertedValues).toHaveLength(0);
+  });
+
+  it('POST rejects a user without an id and does not write', async () => {
+    const { POST } = await loadRoute();
+
+    await expect(POST(
+      new NextRequest('http://localhost/api/governance/lifecycle/policies/pol_1/approvals', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ op: 'record_action', chainId: 'chain_1', action: 'approved', actorRole: 'admin' }),
+      }),
+      { params: { id: 'pol_1' }, user: { id: '' } },
+    )).rejects.toMatchObject({ status: 400 });
+
+    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(m.withSystemContext).not.toHaveBeenCalled();
   });
 });

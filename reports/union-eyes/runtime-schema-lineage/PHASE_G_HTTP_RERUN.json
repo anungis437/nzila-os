@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-09-23T18:39:35.044Z",
+  "BASE": "https://nzila-os-union-eyes-staging.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
+  "http": [
+    {
+      "name": "ADMIN_A_health",
+      "path": "/api/health",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"ok\":true,\"status\":\"healthy\",\"app\":\"union-eyes\",\"environment\":\"staging\",\"timestamp\":\"2026-09-23T18:39:31.237Z\",\"version\":\"0.0.0\",\"checks\":{\"process\":{\"status\":\"ok\"},\"database\":{\"status\":\"ok\",\"critical\":true,\"ms\":5},\"auth\":{\"status\":\"ok\",\"c"
+    },
+    {
+      "name": "ADMIN_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+    },
+    {
+      "name": "MEMBER_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+    },
+    {
+      "name": "STEWARD_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+    },
+    {
+      "name": "EXTERNAL_SPECIALIST_A_org_current",
+      "path": "/api/organizations/current",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+      "bodySnippet": "{\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1\",\"name\":\"PhaseG Org A\",\"slug\":\"phaseg-org-a\",\"display_name\":\"PhaseG Org A\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-a\"],\"hierarchy_level"
+    },
+    {
+      "name": "ADMIN_A_grievances_list",
+      "path": "/api/grievances",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"success\":true,\"data\":[{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11\",\"grievanceNumber\":\"PHASEG-A-001\",\"type\":null,\"status\":\"filed\",\"priority\":\"medium\",\"step\":null,\"grievantId\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02\",\"grievantName\":null,\"grie"
+    },
+    {
+      "name": "ADMIN_A_grievance_A",
+      "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"success\":true,\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11\",\"grievanceNumber\":\"PHASEG-A-001\",\"type\":null,\"status\":\"filed\",\"priority\":\"medium\",\"step\":null,\"grievantId\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02\",\"grievantName\":null,\"griev"
+    },
+    {
+      "name": "ADMIN_A_document_A",
+      "path": "/api/documents/repository/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"success\":true,\"data\":{\"id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa21\",\"title\":\"PhaseG Doc A\",\"filename\":\"phaseg-a.pdf\",\"name\":\"PhaseG Doc A\",\"fileUrl\":\"https://example.invalid/phaseg-a.pdf\",\"documentType\":\"evidence\",\"privacyLabel\":\"team_confi"
+    },
+    {
+      "name": "BILLING_CYCLE",
+      "path": "/api/dues/billing-cycle",
+      "status": 200,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"success\":true,\"data\":{\"periods\":[],\"subscriptions\":[]},\"timestamp\":\"2026-09-23T18:39:33.880Z\"}"
+    },
+    {
+      "name": "UNAUTHENTICATED",
+      "path": "/api/organizations/current",
+      "status": 401,
+      "userId": null,
+      "bodySnippet": "{\"error\":\"Unauthorized\"}"
+    },
+    {
+      "name": "CROSS_ORG_A_reads_B_matter",
+      "path": "/api/grievances/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb11",
+      "status": 404,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      "bodySnippet": "{\"code\":\"NOT_FOUND\",\"message\":\"Grievance not found\",\"timestamp\":\"2026-09-23T18:39:34.193Z\",\"traceId\":\"mueg6alt-78901844\"}"
+    },
+    {
+      "name": "CROSS_ORG_B_reads_A_matter",
+      "path": "/api/grievances/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11",
+      "status": 404,
+      "userId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+      "bodySnippet": "{\"code\":\"NOT_FOUND\",\"message\":\"Grievance not found\",\"timestamp\":\"2026-09-23T18:39:34.421Z\",\"traceId\":\"mueg6as4-f818a3d7\"}"
+    },
+    {
+      "name": "UNGRANTED_MEMBER_A_doc_B",
+      "path": "/api/documents/repository/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb21",
+      "status": 404,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "bodySnippet": "{\"code\":\"NOT_FOUND\",\"message\":\"Document not found\",\"timestamp\":\"2026-09-23T18:39:34.661Z\",\"traceId\":\"mueg6ays-02614c67\"}"
+    },
+    {
+      "name": "SAME_ROLE_UNAUTHORIZED_admin_route",
+      "path": "/api/admin/organizations",
+      "status": 403,
+      "userId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      "bodySnippet": "{\"code\":\"INSUFFICIENT_PERMISSIONS\",\"message\":\"Requires at least 'platform_lead' role\",\"timestamp\":\"2026-09-23T18:39:34.773Z\",\"traceId\":\"mueg6azg-49858cb9\"}"
+    },
+    {
+      "name": "ADMIN_B_org_current",
+      "path": "/api/organizations/current",
+      "status": 200,
+      "userId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+      "bodySnippet": "{\"data\":{\"id\":\"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1\",\"name\":\"PhaseG Org B\",\"slug\":\"phaseg-org-b\",\"display_name\":\"PhaseG Org B\",\"short_name\":null,\"organization_type\":\"local\",\"parent_id\":null,\"hierarchy_path\":[\"phaseg-org-b\"],\"hierarchy_level"
+    }
+  ]
+}

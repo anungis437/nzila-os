@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-09-23T15:17:02.328Z",
+  "PUBLISHER_SECOND_SCHEMA_AUTHORITY": "NO",
+  "PUBLISHER_CANONICAL_ORACLE": "PASS",
+  "MISSING_REQUIRED_TABLES": 0,
+  "MISSING_REQUIRED_COLUMNS": 0,
+  "missingRequiredTables": [],
+  "missingRequiredColumnsTables": [],
+  "publishedTableCount": 332,
+  "oracleSha256": "487f4fc3bbe31e55ef7f71e35102739641f426e88b10897e2b22955304844c0a",
+  "dispositionExcludedCount": 10,
+  "dispositionExcluded": [
+    "anti_scab_violations",
+    "cnesst_filings",
+    "joint_hs_committees",
+    "member_dues_issues",
+    "pay_equity_exercises",
+    "payroll_deductions",
+    "preventive_withdrawals",
+    "right_of_refusal_events",
+    "wcb_claims",
+    "wcb_employer_assessments"
+  ]
+}

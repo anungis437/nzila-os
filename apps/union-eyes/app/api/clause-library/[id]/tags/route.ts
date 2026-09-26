@@ -10,12 +10,17 @@
  * by tagId alone, letting a caller detach a tag row belonging to a
  * different — possibly another organization's — clause, as long as they
  * knew or guessed its id).
+ *
+ * POST/DELETE run in the caller's tenant RLS context. Child writes are
+ * owner-only under ue_shared_library_child_write. GET stays on the system
+ * role because federation/congress parent visibility is not in
+ * ue_shared_library_select and must not be added by weakening RLS.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { clauseLibraryTags, sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { eq, and } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +49,9 @@ export const GET = withApi(
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
+    // PRIVILEGED_CROSS_TENANT_REVIEW: federation/congress readers are not
+    // visible under ue_shared_library_select / child select. Keep this read
+    // on the system role. Do not widen the runtime policy.
     return withSystemContext(async () => {
       const clause = await getClauseAuthorityRow(id);
       if (!clause || !(await canReadSharedClause(organizationId, clause))) {
@@ -71,12 +79,13 @@ export const POST = withApi(
     const body = await request.json();
     const tagName = body.tagName || body.tag;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!userId) throw ApiError.badRequest('Authenticated user is required to add a tag.');
 
     if (!tagName) {
       throw ApiError.badRequest('tagName is required');
     }
 
-    return withSystemContext(async () => {
+    return withRLSContext({ organizationId }, async () => {
       const clause = await getClauseAuthorityRow(id);
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);
@@ -87,9 +96,15 @@ export const POST = withApi(
         .values({
           clauseId: id,
           tagName: tagName.trim(),
-          createdBy: userId || 'system',
+          createdBy: userId,
         })
         .returning();
+
+      // ue_shared_library_child_write is owner-org only. A zero-row insert
+      // must not be returned as a created tag.
+      if (!tag) {
+        throw ApiError.notFound('clause', id);
+      }
 
       return { tag };
     });
@@ -109,7 +124,7 @@ export const DELETE = withApi(
     const tagId = body.tagId;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    return withSystemContext(async () => {
+    return withRLSContext({ organizationId }, async () => {
       const clause = await getClauseAuthorityRow(id);
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);

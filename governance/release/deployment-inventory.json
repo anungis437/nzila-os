@@ -426,7 +426,9 @@
         "stagingFallback": "https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": "https://control.nzilaventures.com",
         "productionState": "active",
-        "healthPath": "/",
+        "healthPath": "/api/health",
+        "readyPath": "/api/ready",
+        "versionPath": "/api/version",
         "ingress": "restricted",
         "tls": "managed"
       },
@@ -486,7 +488,7 @@
     },
     "platform-admin": {
       "tier": "frozen",
-      "releaseStatus": "frozen",
+      "releaseStatus": "staging-only",
       "track": "legacy",
       "prodPromotionEligible": false,
       "owners": [
@@ -499,7 +501,9 @@
         "healthPath": "/api/health",
         "ingress": "restricted",
         "tls": "managed"
-      }
+      },
+      "stagingDeployed": false,
+      "unfreezeNote": "2026-09-23: releaseStatus frozen\u2192staging-only to allow GitOps Deploy of SAGE-enabled platform-admin to staging for B-005 base parity (CIVIC/SAGE). Still not prod-eligible."
     },
     "abr": {
       "tier": "tier-1",
@@ -597,7 +601,7 @@
         "state": "synthetic-demo",
         "owner": "veridian",
         "reviewBy": "2026-09-30",
-        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only — no live PHI is ingested or stored. Staging container app is not currently deployed in ACA; keep DNS unresolved advisory until deployment and domain binding are complete."
+        "mitigation": "Clinical workflow pilot surface. Synthetic-demo only \u2014 no live PHI is ingested or stored. Staging container app is not currently deployed in ACA; keep DNS unresolved advisory until deployment and domain binding are complete."
       },
       "routing": {
         "staging": "https://staging-veridian-care.nzilaventures.com",

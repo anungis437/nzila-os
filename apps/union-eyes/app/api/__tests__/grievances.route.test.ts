@@ -71,7 +71,10 @@ describe('grievances route', () => {
     vi.clearAllMocks();
     m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (a: unknown, b?: unknown) => {
+      const fn = (typeof a === 'function' ? a : b) as (tx?: unknown) => Promise<unknown>;
+      return fn({});
+    });
     m.dbInsertReturning.mockResolvedValue([{ id: 'grv_1', grievanceNumber: 'GRV-1', priority: 'medium' }]);
     m.dbSelectWhere.mockResolvedValue([{ id: 'grv_1', status: 'filed' }]);
     m.auditDataMutation.mockResolvedValue(undefined);

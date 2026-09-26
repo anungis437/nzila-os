@@ -549,7 +549,7 @@ class Votes(BaseModel):
     )
 
     class Meta:
-        db_table = "ue_votes"
+        db_table = "votes"
         verbose_name = "Votes"
 
 

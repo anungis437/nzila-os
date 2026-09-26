@@ -57,6 +57,11 @@ const ORG_ENFORCEMENT_PATTERNS = [
   /withRoleAuth\b/,       // UE role-based auth guard wrapper
   /withOrganizationAuth/, // legacy wrapper
   /sourceOrganizationId/, // explicit cross-org reference (e.g. clause library search)
+  // Workbook claimed-access boundary (lib/workbook/access-control.ts):
+  // resolves auth() + claimant/same-org checks, then runs the handler under the
+  // matching RLS/system DB context. Used by workbook export + memory-holders.
+  /withClaimedWorkbookAccess/,
+  /verifyClaimedWorkbookAccess/,
 ]
 
 // Patterns that explicitly bypass org scope (must be in allowlist)

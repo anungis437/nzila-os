@@ -4,29 +4,18 @@
 # Deploys Nzila OS apps to Azure Container Apps
 # using environment-aware configuration from infrastructure/gitops/.
 #
-# Supports: development/staging/pilot deployment through manual dispatch and
-# non-Union Eyes app-affecting mainline changes. Documentation/governance/report-only
-# changes and Union Eyes-owned source changes must not wake the broad dormant-app
-# deployment matrix.
+# Automatic staging deploys begin only after exact-tip CI succeeds and include
+# only non-incubating apps changed by that merge. Manual dispatch remains the
+# explicit path for incubating apps and broader environment selections.
 ##
 
 name: GitOps Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'governance/**'
-      - 'platform/products/**'
-      - 'reports/**'
-      # Union Eyes live deployment is owned by auto-promote-union-eyes.yml.
-      # Dormant non-UE apps should not build/deploy on UE-focused changes.
-      - 'apps/union-eyes/**'
-      - 'packages/**'
-      - '.github/workflows/deploy-union-eyes.yml'
-      - '.github/workflows/auto-promote-union-eyes.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -55,6 +44,7 @@ permissions:
 
 env:
   NODE_VERSION: '22'
+  DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
   ACR_NAME: nzilacanadaacr
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -64,6 +54,7 @@ env:
 jobs:
   # ── Determine deployment parameters ───────────────────────────────────────
   plan:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     name: Plan Deployment
     outputs:
@@ -72,24 +63,39 @@ jobs:
       apps: ${{ steps.plan.outputs.apps }}
       config_path: ${{ steps.plan.outputs.config_path }}
       requested_apps: ${{ steps.plan.outputs.requested_apps }}
+      apps_json: ${{ steps.plan.outputs.apps_json }}
+      has_apps: ${{ steps.plan.outputs.has_apps }}
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+          fetch-depth: 2
       - uses: ./.github/actions/setup-monorepo
       - name: Determine deployment parameters
         id: plan
         run: |
           ENV="${{ github.event.inputs.environment || 'staging' }}"
-          VERSION="${{ github.event.inputs.version || github.sha }}"
+          VERSION="${{ github.event.inputs.version || github.event.workflow_run.head_sha || github.sha }}"
           APPS="${{ github.event.inputs.apps || 'all' }}"
 
-          RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env "$ENV" --apps "$APPS")
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts \
+              --env "$ENV" --apps all --automatic \
+              --changed-since "${VERSION}^" --allow-empty)
+          else
+            RESOLVED_JSON=$(pnpm tsx scripts/release/resolve-deploy-apps.ts --env "$ENV" --apps "$APPS")
+          fi
           RESOLVED_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | join(",")')
+          APPS_JSON=$(echo "$RESOLVED_JSON" | jq -c '.appsMatrix')
+          HAS_APPS=$(echo "$RESOLVED_JSON" | jq -r '.approvedApps | length > 0')
 
           echo "environment=$ENV" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "apps=$RESOLVED_APPS" >> "$GITHUB_OUTPUT"
           echo "requested_apps=$APPS" >> "$GITHUB_OUTPUT"
+          echo "apps_json=$APPS_JSON" >> "$GITHUB_OUTPUT"
+          echo "has_apps=$HAS_APPS" >> "$GITHUB_OUTPUT"
           echo "config_path=infrastructure/gitops/environments/${ENV}.yml" >> "$GITHUB_OUTPUT"
 
           echo "### Deployment Plan" >> "$GITHUB_STEP_SUMMARY"
@@ -97,6 +103,9 @@ jobs:
           echo "- **Version**: $VERSION" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Requested apps**: $APPS" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Policy-approved apps**: $RESOLVED_APPS" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$HAS_APPS" != "true" ]; then
+            echo "- **Result**: No deployable app changes; successful no-op" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Validate environment config
         run: |
@@ -116,6 +125,7 @@ jobs:
   # migration-policy decision is available in minutes, not ~26 minutes in.
   migration-safety:
     needs: plan
+    if: needs.plan.outputs.has_apps == 'true'
     runs-on: ubuntu-latest
     name: Migration Safety Gate
 
@@ -129,33 +139,45 @@ jobs:
           # a full-tree diff whose oversized output overflowed the spawned
           # git process's stdout pipe (ENOBUFS), not a transient blip.
           fetch-depth: 0
+          ref: ${{ needs.plan.outputs.version }}
       - uses: ./.github/actions/setup-monorepo
       - name: Migration safety check
         env:
-          # github.event.before is only present on push events; the script
-          # falls back to HEAD~1..HEAD (workflow_dispatch) when absent.
-          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          # The exact deployment commit is checked against its first parent.
+          GITHUB_EVENT_BEFORE: ${{ needs.plan.outputs.version }}^
         run: pnpm exec tsx scripts/release/validate-migration-safety.ts
 
   # ── Run pre-deployment checks ─────────────────────────────────────────────
   validate:
     needs: plan
+    if: needs.plan.outputs.has_apps == 'true'
     runs-on: ubuntu-latest
     name: Pre-Deploy Validation
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.version }}
       - uses: ./.github/actions/setup-monorepo
+      - name: Exact-tip CI authority
+        if: github.event_name == 'workflow_run'
+        run: |
+          test "${{ github.event.workflow_run.conclusion }}" = "success"
+          test "${{ github.event.workflow_run.head_sha }}" = "${{ needs.plan.outputs.version }}"
       - name: Type check
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm typecheck
 
       - name: Lint
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm lint
 
       - name: Fast tests
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm test:fast
 
       - name: Run contract tests
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm contract-tests
 
       - name: Release governance audit
@@ -170,6 +192,7 @@ jobs:
   # ── Build and push images ─────────────────────────────────────────────────
   build:
     needs: [plan, validate, migration-safety]
+    if: needs.plan.outputs.has_apps == 'true'
     runs-on: ubuntu-latest
     name: Build Images
     # BR-5: image BUILD/PUSH authority. Runs under the dedicated `build` GitHub
@@ -180,27 +203,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # union-eyes is owned by .github/workflows/auto-promote-union-eyes.yml
-        # (fanout to -prod / -demo / -pilot / -staging CAs). Do not add it here.
-        app: [web, console, partners, orchestrator-api, cfo, zonga, abr, flow, agrimo, cora, trade, mobility, mobility-client-portal, control-plane, platform-admin, nacp-exams]
+        # union-eyes is owned by .github/workflows/auto-promote-union-eyes.yml.
+        app: ${{ fromJSON(needs.plan.outputs.apps_json) }}
 
     steps:
       - uses: actions/checkout@v5
-
-      - name: Check if app should be built
-        id: check
-        run: |
-          APPS="${{ needs.plan.outputs.apps }}"
-          if echo ",$APPS," | grep -q ",${{ matrix.app }},"; then
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_build=false" >> "$GITHUB_OUTPUT"
-          fi
+        with:
+          ref: ${{ needs.plan.outputs.version }}
 
       # Pre-pull the buildkit image with retries so the docker-container driver
       # doesn't fail when Docker Hub times out (Client.Timeout / DeadlineExceeded).
       - name: Pre-pull buildkit image (resilient)
-        if: steps.check.outputs.should_build == 'true'
         run: |
           attempts=4
           delay=10
@@ -216,14 +229,12 @@ jobs:
           echo "::warning::Could not pre-pull buildkit image after $attempts attempts; buildx setup will retry the pull."
 
       - name: Set up Docker Buildx
-        if: steps.check.outputs.should_build == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           driver: docker-container
           driver-opts: image=moby/buildkit:buildx-stable-1
 
       - name: Assert build identity is configured (fail-closed)
-        if: steps.check.outputs.should_build == 'true'
         env:
           BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           BUILD_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -236,7 +247,6 @@ jobs:
           fi
 
       - name: Azure Login (OIDC, build identity)
-        if: steps.check.outputs.should_build == 'true'
         uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -244,7 +254,6 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Verify authenticated identity is the build identity (fail-closed)
-        if: steps.check.outputs.should_build == 'true'
         env:
           EXPECTED_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         run: |
@@ -257,11 +266,9 @@ jobs:
           echo "Build identity verified."
 
       - name: ACR login
-        if: steps.check.outputs.should_build == 'true'
         run: az acr login --name ${{ env.ACR_NAME }}
 
       - name: Build and push
-        if: steps.check.outputs.should_build == 'true'
         run: |
           VERSION="${{ needs.plan.outputs.version }}"
           APP="${{ matrix.app }}"
@@ -290,10 +297,10 @@ jobs:
           fi
 
           # Version truth: bake git SHA and build timestamp into image for /api/version drift detection
-          BUILD_ARGS="${BUILD_ARGS} --build-arg GITHUB_SHA=${{ github.sha }}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg GITHUB_SHA=${{ needs.plan.outputs.version }}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          BUILD_ARGS="${BUILD_ARGS} --build-arg ARTIFACT_ID=${{ github.sha }}-${APP}"
-          BUILD_ARGS="${BUILD_ARGS} --build-arg RELEASE_ID=${{ github.sha }}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg ARTIFACT_ID=${{ needs.plan.outputs.version }}-${APP}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg RELEASE_ID=${{ needs.plan.outputs.version }}"
 
           # Entra External ID handles multi-app auth via NextAuth — no satellite config needed
 
@@ -322,7 +329,6 @@ jobs:
           exit 1
 
       - name: Resolve immutable image digest (BR-5 evidence)
-        if: steps.check.outputs.should_build == 'true'
         run: |
           set -euo pipefail
           VERSION="${{ needs.plan.outputs.version }}"
@@ -341,6 +347,7 @@ jobs:
   # ── Deploy to environment ─────────────────────────────────────────────────
   deploy:
     needs: [plan, build]
+    if: needs.plan.outputs.has_apps == 'true'
     runs-on: ubuntu-latest
     name: Deploy to ${{ needs.plan.outputs.environment }}
     outputs:
@@ -352,6 +359,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.version }}
       - uses: ./.github/actions/setup-monorepo
       # BR-4: environment-scoped deployment identity. This job sets
       # `environment.name: ${{ needs.plan.outputs.environment }}`, so the
@@ -468,14 +477,17 @@ jobs:
             echo "Updating $CA_NAME → $IMAGE ..."
 
             # Build runtime env var overrides (upserted, not replacing existing secret refs)
-            ENV_VARS="NODE_ENV=production NEXT_PUBLIC_APP_ENV=${ENV}"
+            ENV_VARS=(
+              "NODE_ENV=production"
+              "NEXT_PUBLIC_APP_ENV=${ENV}"
+            )
 
             # union-eyes is owned by auto-promote-union-eyes.yml — do not handle here.
             az containerapp update \
               --name "$CA_NAME" \
               --resource-group "$RG" \
               --image "$IMAGE" \
-              --set-env-vars "$ENV_VARS" \
+              --set-env-vars "${ENV_VARS[@]}" \
               --output none 2>&1 || FAILED+=("$APP")
 
             if ! printf '%s\n' "${FAILED[@]}" | grep -Fxq "$APP"; then
@@ -534,6 +546,7 @@ jobs:
   # ── Post-deployment verification ──────────────────────────────────────────
   verify:
     needs: [plan, deploy]
+    if: needs.plan.outputs.has_apps == 'true'
     runs-on: ubuntu-latest
     name: Post-Deploy Verification
     # BR-5: verification is environment-bound (it reads the deployed env's
@@ -545,6 +558,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.plan.outputs.version }}
 
       - name: Assert environment identity is configured (fail-closed)
         env:
@@ -565,8 +580,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Resolve protected probe credentials
+        env:
+          DEPLOYED_APPS: ${{ needs.deploy.outputs.deployed_apps }}
+        run: |
+          set -euo pipefail
+
+          if [[ ",${DEPLOYED_APPS}," == *",orchestrator-api,"* ]]; then
+            ORCHESTRATOR_API_KEY=$(az containerapp secret show \
+              --name nzila-os-orchestrator-api \
+              --resource-group "nzila-canada-${{ needs.plan.outputs.environment }}-rg" \
+              --secret-name orchestrator-api-key \
+              --query value -o tsv)
+
+            if [ -z "$ORCHESTRATOR_API_KEY" ]; then
+              echo "::error::Unable to resolve orchestrator-api-key for protected post-deploy probes"
+              exit 1
+            fi
+
+            echo "::add-mask::$ORCHESTRATOR_API_KEY"
+            echo "ORCHESTRATOR_API_KEY=$ORCHESTRATOR_API_KEY" >> "$GITHUB_ENV"
+          fi
+
       - name: Health checks
         run: |
+          set -euo pipefail
           ENV="${{ needs.plan.outputs.environment }}"
           APPS="${{ needs.deploy.outputs.deployed_apps }}"
           echo "Running health checks for $ENV environment..."
@@ -577,9 +615,6 @@ jobs:
             --resource-group "nzila-canada-${ENV}-rg" \
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "jollydune-88c1e97f.canadacentral.azurecontainerapps.io")
 
-          # Probe /api/health (canonical health endpoint) — NOT root /
-          # Root / may redirect (307) or return app HTML even when the service is broken.
-          # /api/health is the only reliable readiness signal.
           if [ -z "$APPS" ]; then
             echo "::error::No deployed apps were provided to post-deploy verification"
             exit 1
@@ -588,20 +623,25 @@ jobs:
           IFS=',' read -r -a APPS_ARRAY <<< "$APPS"
           FAILED_HEALTH=()
           for APP in "${APPS_ARRAY[@]}"; do
-            echo "Checking $APP /api/health..."
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-              --max-time 10 --retry 3 --retry-delay 5 \
-              "https://nzila-os-${APP}.${DOMAIN}/api/health" 2>/dev/null || echo "000")
+            HEALTH_PATH=$(jq -r --arg app "$APP" \
+              '.apps[$app].routing.healthPath // "/api/health"' \
+              governance/release/deployment-inventory.json)
+            echo "Checking $APP $HEALTH_PATH..."
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+              --max-time 10 --retry 3 --retry-delay 5 --retry-all-errors \
+              "https://nzila-os-${APP}.${DOMAIN}${HEALTH_PATH}" 2>/dev/null || true)
+            STATUS=${STATUS:-000}
             if [ "$STATUS" = "200" ]; then
               echo "  ✅ $APP: HTTP $STATUS"
             else
-              echo "  ⚠️  $APP: HTTP $STATUS — /api/health did not return 200 (may be warming up)"
+              echo "  ❌ $APP: HTTP $STATUS — $HEALTH_PATH did not return 200"
               FAILED_HEALTH+=("$APP")
             fi
           done
 
           if [ ${#FAILED_HEALTH[@]} -gt 0 ]; then
-            echo "::warning::Post-deploy health check failed for: ${FAILED_HEALTH[*]} — check logs"
+            echo "::error::Post-deploy health check failed for: ${FAILED_HEALTH[*]}"
+            exit 1
           fi
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
@@ -789,15 +829,11 @@ jobs:
           # Verify the deployed apps report the expected SHA — catches partial deploys
           pnpm tsx scripts/release/drift-version.ts \
             --env ${{ needs.plan.outputs.environment }} \
-            --apps "$APPS" || true
-          # '|| true' — drift is expected immediately post-deploy while containers warm up.
-          # The drift report is uploaded as evidence; promotion gate enforces this separately.
+            --apps "$APPS"
 
       - name: Record deployment evidence
         run: |
-          pnpm tsx scripts/release/build-deploy-evidence.ts --env ${{ needs.plan.outputs.environment }} || true
-          # '|| true' — NOT-READY verdict is expected when apps are still warming up or haven't been
-          # deployed in this run. Evidence is written regardless; promotion gate enforces readiness separately.
+          pnpm tsx scripts/release/build-deploy-evidence.ts --env ${{ needs.plan.outputs.environment }}
 
       - uses: actions/upload-artifact@v4
         with:

@@ -2,11 +2,11 @@
  * GET POST /api/agreements
  * CRUD for collective bargaining agreements (org-scoped)
  */
-import { withApi } from '@/lib/api/framework';
+import { ApiError, withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { collectiveAgreements } from '@/db/schema';
 import { eq, ilike, and, or, sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +19,10 @@ export const GET = withApi(
     },
   },
   async ({ request, organizationId }) => {
+    if (!organizationId) {
+      throw ApiError.badRequest('No active organization. Please select an organization and try again.');
+    }
+
     const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
@@ -26,12 +30,9 @@ export const GET = withApi(
     const status = url.searchParams.get('status') || '';
     const type = url.searchParams.get('type') || '';
 
-    return await withSystemContext(async () => {
+    return await withRLSContext({ organizationId }, async () => {
       const conditions: ReturnType<typeof eq>[] = [];
-
-      if (organizationId) {
-        conditions.push(eq(collectiveAgreements.organizationId, organizationId));
-      }
+      conditions.push(eq(collectiveAgreements.organizationId, organizationId));
 
       if (search) {
         conditions.push(
@@ -89,13 +90,20 @@ export const POST = withApi(
     },
   },
   async ({ request, userId, organizationId }) => {
+    if (!organizationId) {
+      throw ApiError.badRequest('No active organization. Please select an organization and try again.');
+    }
+    if (!userId) {
+      throw ApiError.badRequest('Authenticated user is required to create an agreement.');
+    }
+
     const body = await request.json();
 
-    return await withSystemContext(async () => {
+    return await withRLSContext({ organizationId }, async () => {
       const [created] = await db
         .insert(collectiveAgreements)
         .values({
-          organizationId: organizationId || body.organizationId,
+          organizationId,
           cbaNumber: body.cbaNumber,
           title: body.title,
           jurisdiction: body.jurisdiction,
@@ -116,8 +124,8 @@ export const POST = withApi(
           documentUrl: body.documentUrl ?? null,
           status: body.status ?? 'active',
           isPublic: body.isPublic ?? false,
-          createdBy: userId || 'system',
-          lastModifiedBy: userId || 'system',
+          createdBy: userId,
+          lastModifiedBy: userId,
         })
         .returning();
 

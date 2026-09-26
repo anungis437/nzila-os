@@ -1,0 +1,198 @@
+{
+  "generatedFor": "rls-unenforced-tables.txt (100)",
+  "exemptedPlatformGlobal": [],
+  "exemptedEvidence": "None of the 100 are GLOBAL_REFERENCE_DATA; oracle marks all rlsRequired=true + REQUIRED",
+  "directOrgOrganizationId": [
+    "ai_clause_reasonings",
+    "ai_copilot_sessions",
+    "ai_grievance_triages",
+    "ai_insight_reports",
+    "allocation_rules",
+    "allocation_runs",
+    "billing_accounts",
+    "billing_periods",
+    "billing_subscriptions",
+    "break_policies",
+    "case_documents",
+    "cba_rule_set_items",
+    "cba_rule_versions",
+    "chargeback_statements",
+    "commercial_contracts",
+    "committee_action_items",
+    "committee_documents",
+    "committee_intelligence_snapshots",
+    "committee_meetings",
+    "contract_covered_orgs",
+    "correspondence",
+    "data_quality_warnings",
+    "deadline_audit_events",
+    "deadline_reminders",
+    "document_access_grants",
+    "document_links",
+    "document_versions",
+    "dues_assignments",
+    "duplicate_groups",
+    "employer_communications",
+    "employer_contacts",
+    "employer_execution_artifacts",
+    "employer_execution_compliance_events",
+    "employer_execution_evidence_links",
+    "employer_execution_profiles",
+    "employer_execution_replays",
+    "employer_payroll_run_items",
+    "employer_payroll_runs",
+    "employer_remittance_run_items",
+    "employer_remittance_runs",
+    "employer_risk_scores",
+    "employer_timesheet_batches",
+    "employer_timesheet_entries",
+    "entitlement_usage_log",
+    "fee_adjustments",
+    "governance_policies",
+    "grievance_case_access_assignments",
+    "grievance_timeline_events",
+    "ingestion_batches",
+    "integration_partners",
+    "member_breaks",
+    "member_jurisdiction_preferences",
+    "org_configurations",
+    "org_entitlements",
+    "org_subscriptions",
+    "pension_benefit_claims",
+    "pension_contributions",
+    "pension_members",
+    "pension_plans",
+    "pension_t4a_records",
+    "pension_trustee_meetings",
+    "pension_trustees",
+    "pilot_checklist_items",
+    "pilot_demo_seeds",
+    "pilot_enrollments",
+    "pilot_events",
+    "pilot_feedback",
+    "pilot_milestones",
+    "platform_cost_ledger_entries",
+    "platform_invoices",
+    "platform_payments",
+    "reconciliation_exceptions",
+    "reconciliation_runs",
+    "satisfaction_surveys",
+    "security_posture_checks",
+    "strategic_goals",
+    "subscription_events_log",
+    "transaction_fee_events",
+    "transaction_fee_rules",
+    "user_signatures"
+  ],
+  "directOrgOrgId": [
+    "compliance_alerts",
+    "dispatch_requests",
+    "dispatch_rules",
+    "stewards"
+  ],
+  "parentOwned": [
+    {
+      "table": "allocation_basis_snapshots",
+      "fk": "run_id",
+      "parent": "allocation_runs",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "allocation_rule_versions",
+      "fk": "rule_id",
+      "parent": "allocation_rules",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "allocation_run_lines",
+      "fk": "run_id",
+      "parent": "allocation_runs",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "committee_meeting_attendees",
+      "fk": "meeting_id",
+      "parent": "committee_meetings",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "contract_line_items",
+      "fk": "contract_id",
+      "parent": "commercial_contracts",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "correspondence_audit_trail",
+      "fk": "correspondence_id",
+      "parent": "correspondence",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "correspondence_recipients",
+      "fk": "correspondence_id",
+      "parent": "correspondence",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "dispatch_assignments",
+      "fk": "request_id",
+      "parent": "dispatch_requests",
+      "parentOrgColumn": "org_id"
+    },
+    {
+      "table": "reconciliation_matches",
+      "fk": "run_id",
+      "parent": "reconciliation_runs",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "clause_embeddings",
+      "fk": "clause_id",
+      "parent": "cba_clauses",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "duplicate_group_members",
+      "fk": "group_id",
+      "parent": "duplicate_groups",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "employer_reports",
+      "fk": "employer_id",
+      "parent": "employers",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "grievance_events",
+      "fk": "grievance_id",
+      "parent": "grievances",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "ingestion_records",
+      "fk": "batch_id",
+      "parent": "ingestion_batches",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "payment_allocations",
+      "fk": "payment_id",
+      "parent": "platform_payments",
+      "parentOrgColumn": "organization_id"
+    },
+    {
+      "table": "platform_invoice_line_items",
+      "fk": "invoice_id",
+      "parent": "platform_invoices",
+      "parentOrgColumn": "organization_id"
+    }
+  ],
+  "counts": {
+    "directOrgOrganizationId": 80,
+    "directOrgOrgId": 4,
+    "parentOwned": 16,
+    "exempted": 0,
+    "total": 100
+  }
+}

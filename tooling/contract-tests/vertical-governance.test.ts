@@ -116,6 +116,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'constructEvent(',          // Stripe webhook signature verification
     'verifyHmac(',              // QBO webhook verification
     'verifyWebhookSignature(',  // @nzila/payments-stripe webhook verification
+    'verifyStripeSignature(',   // union-eyes canonical Stripe webhook signature verification (lib/payments/stripe-signature)
     'verifyProofAuthorization(', // Staging proof HMAC verification
     'await auth(',              // Clerk auth() direct call (e.g., OAuth callbacks)
     'await auth()',             // Clerk auth() direct call (no args)
@@ -214,4 +215,33 @@ describe('INV-11 — Every API route has authorization', () => {
       })
     }
   }
+
+  // ── Recognizer negative controls (fail-closed proof) ─────────────────────
+  // These exercise the same AUTH_PATTERNS / PUBLIC_ROUTE_PATTERNS predicates the
+  // per-route assertions use. They prove the invariant is not merely satisfied
+  // by the two current routes but still rejects a route with no recognized
+  // authorization — i.e. the contract remains fail-closed.
+  describe('recognizer fails closed', () => {
+    const hasAuth = (content: string) => AUTH_PATTERNS.some((pattern) => content.includes(pattern))
+    const isPublic = (p: string) => PUBLIC_ROUTE_PATTERNS.some((x) => p.replace(/\\/g, '/').includes(x))
+
+    it('recognizes a Stripe webhook that verifies its signature (verifyStripeSignature)', () => {
+      const content =
+        "import { verifyStripeSignature } from '@/lib/payments/stripe-signature'\n" +
+        'export async function POST(req){ const evt = await verifyStripeSignature(req); return Response.json({ ok: true }) }'
+      expect(hasAuth(content)).toBe(true)
+    })
+
+    it('does NOT recognize a webhook with no signature verification as authorized', () => {
+      const content =
+        'export async function POST(req){ const body = await req.json(); return Response.json({ ok: true }) }'
+      expect(hasAuth(content)).toBe(false)
+    })
+
+    it('recognition comes from the auth pattern, not a public-route allowlist entry for the stripe webhook', () => {
+      // The stripe webhook route must NOT be treated as generically public; its
+      // authorization is proven by verifyStripeSignature, not by an allowlist.
+      expect(isPublic('apps/union-eyes/app/api/payments/webhooks/stripe/route.ts')).toBe(false)
+    })
+  })
 })

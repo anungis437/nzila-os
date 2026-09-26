@@ -1,4 +1,62 @@
 {
+  "workspaceNav": {
+    "metaTitle": "Workspace | UnionEyes",
+    "metaDescription": "One operating surface for the union.",
+    "title": "Workspace",
+    "intro": "One operating surface for the union. Each section answers a single operational question. Labels show whether that section is in role, a stub for orientation, or unavailable.",
+    "tabsLabel": "Workspace sections",
+    "unknownRoleBanner": "This role is not on the workspace persona map. Every section is labeled as a stub so it is not presented as available.",
+    "availability": {
+      "available": "In role",
+      "stub": "Stub",
+      "unavailable": "Unavailable"
+    },
+    "tabs": {
+      "overview": {
+        "label": "Overview"
+      },
+      "case-operations": {
+        "label": "Case Operations"
+      },
+      "members": {
+        "label": "Members"
+      },
+      "governance": {
+        "label": "Governance"
+      },
+      "continuity": {
+        "label": "Continuity"
+      },
+      "financial": {
+        "label": "Financial"
+      },
+      "documents": {
+        "label": "Documents"
+      }
+    },
+    "stubPanel": "This section is visible for orientation only. It is not an in-role operating surface, and nothing shown here is a live metric.",
+    "unavailablePanel": "This section is not available for your role.",
+    "deepWork": {
+      "unavailable": "Unavailable",
+      "unknownRole": "Role not recognized. This destination stays closed.",
+      "stubSection": "Not available from a stub section.",
+      "unavailableSection": "Not available for your role.",
+      "outOfRole": "Outside your role.",
+      "recoveryHint": "Authorized surface for this deep work.",
+      "destinations": {
+        "caseworkConsole": "Casework console",
+        "institutionalIntelligenceReports": "Institutional intelligence reports",
+        "membersRoster": "Members roster",
+        "continuityIntelligence": "Continuity intelligence",
+        "governanceCenter": "Governance center",
+        "governanceOverview": "Governance overview"
+      },
+      "remapReason": {
+        "caseworkConsole": "Opens the casework console. The cases list is outside your role.",
+        "institutionalIntelligenceReports": "Opens institutional intelligence reports. Continuity intelligence is outside your role."
+      }
+    }
+  },
   "common": {
     "appName": "Union Case Management",
     "loading": "Loading...",

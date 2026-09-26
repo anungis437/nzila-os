@@ -110,6 +110,7 @@ async function main() {
     endpoint: EndpointProbeName,
     url: string,
     expectedStatuses: number[],
+    headers: Record<string, string> = {},
   ): Promise<ProbeResult> {
     const started = Date.now()
 
@@ -121,6 +122,7 @@ async function main() {
         const response = await fetch(url, {
           signal: controller.signal,
           redirect: 'manual',
+          headers,
         })
 
         const status = response.status
@@ -224,28 +226,22 @@ async function main() {
     const healthUrl = `${host}${cfg.routing?.healthPath ?? '/api/health'}`
     const readyUrl = `${host}${cfg.routing?.readyPath ?? '/api/ready'}`
     const versionUrl = `${host}${cfg.routing?.versionPath ?? '/api/version'}`
+    const versionHeaders: Record<string, string> = {}
+    if (app === 'orchestrator-api' && process.env.ORCHESTRATOR_API_KEY) {
+      versionHeaders['x-api-key'] = process.env.ORCHESTRATOR_API_KEY
+    }
 
     const probes = await Promise.all([
       probeEndpoint('health', healthUrl, [200]),
       probeEndpoint('ready', readyUrl, [200]),
-      probeEndpoint('version', versionUrl, [200]),
+      probeEndpoint('version', versionUrl, [200], versionHeaders),
     ])
 
     const failureSummary = Array.from(
       new Set(probes.filter((probe) => !probe.ok).map((probe) => probe.failureType)),
     )
 
-    // In staging: server_error/dns are transient; redirect/auth mean auth middleware is active
-    // (health returns 200 confirming the app is up — probe failures on ready/version are expected
-    // when smoke tests run without auth credentials against protected endpoints).
-    const nonBlockingForStaging = new Set<FailureType>(['server_error', 'dns', 'redirect', 'auth'])
-    const isBlockingFailure = (failureType: FailureType) => !nonBlockingForStaging.has(failureType)
-
-    // In staging we tolerate transient 5xx, redirect, and auth probe failures to avoid flakiness;
-    // still failing on hard faults (connectivity, not_found, etc.).
-    const ok = env === 'staging'
-      ? probes.every((probe) => probe.ok || !isBlockingFailure(probe.failureType))
-      : probes.every((probe) => probe.ok)
+    const ok = probes.every((probe) => probe.ok)
 
     results.push({
       app,

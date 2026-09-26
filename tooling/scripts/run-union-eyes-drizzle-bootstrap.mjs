@@ -19,7 +19,9 @@
  *      schema). Controlled by UE_DB_RESTORE_SNAPSHOT_URL.
  *   5. Scoped Drizzle migration application from
  *      apps/union-eyes/db/migrations-cache/ (cache/runtime support only).
- *   6. Bootstrap attestation written to drizzle.bootstrap_attestations.
+ *   6. Post-freeze PLATFORM_SQL SCHEMA_CREATION from
+ *      apps/union-eyes/db/migrations-platform/ (forward-only business CREATE).
+ *   7. Bootstrap attestation written to drizzle.bootstrap_attestations.
  *
  * It does NOT:
  *   - replay legacy migrations under db/migrations/
@@ -33,7 +35,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 import pg from 'pg';
-import { applyScopedMigrations as applyScopedMigrationsShared } from './lib/union-eyes-scoped-migrations.mjs';
+import {
+  applyScopedMigrations as applyScopedMigrationsShared,
+  baselineScopedMigrations as baselineScopedMigrationsShared,
+  ensureExtensions as ensureExtensionsShared,
+} from './lib/union-eyes-scoped-migrations.mjs';
+import {
+  applyPlatformMigrations as applyPlatformMigrationsShared,
+} from './lib/union-eyes-platform-migrations.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,17 +53,9 @@ const LEGACY_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations');
 const LEGACY_FREEZE_SENTINEL = path.join(LEGACY_MIGRATIONS_DIR, '.lineage-frozen');
 const SCOPED_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-cache');
 const SCOPED_JOURNAL = path.join(SCOPED_MIGRATIONS_DIR, 'meta', '_journal.json');
+const PLATFORM_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-platform');
+const PLATFORM_JOURNAL = path.join(PLATFORM_MIGRATIONS_DIR, 'meta', '_journal.json');
 const QA_BASELINE_SQL = path.join(repoRoot, 'tooling', 'sql', 'union-eyes-qa-baseline.sql');
-
-const REQUIRED_EXTENSIONS = [
-  'uuid-ossp',
-  'pgcrypto',
-  'pg_trgm',
-  'btree_gin',
-  'vector',
-];
-
-const OPTIONAL_EXTENSIONS = new Set(['vector']);
 
 loadEnv({ path: path.join(appRoot, '.env.local') });
 if (!process.env.DATABASE_URL) {
@@ -107,17 +108,10 @@ async function assertReplayRefusal() {
 }
 
 async function ensureExtensions(client) {
-  for (const ext of REQUIRED_EXTENSIONS) {
-    try {
-      await client.query(`CREATE EXTENSION IF NOT EXISTS "${ext}"`);
-      info(`extension OK: ${ext}`);
-    } catch (err) {
-      if (OPTIONAL_EXTENSIONS.has(ext)) {
-        info(`extension optional/unavailable: ${ext} (${err.message})`);
-        continue;
-      }
-      fail(`Failed to create extension ${ext}: ${err.message}`);
-    }
+  try {
+    await ensureExtensionsShared(client, { log: info });
+  } catch (err) {
+    fail(err.message);
   }
 }
 
@@ -170,6 +164,22 @@ async function applyScopedMigrations(client) {
   }
 }
 
+async function applyPlatformMigrations(client) {
+  if (!fs.existsSync(PLATFORM_JOURNAL)) {
+    info('No post-freeze PLATFORM_SQL journal found; skipping.');
+    return { applied: 0, appliedTags: [] };
+  }
+  try {
+    return await applyPlatformMigrationsShared(client, {
+      journalPath: PLATFORM_JOURNAL,
+      migrationsDir: PLATFORM_MIGRATIONS_DIR,
+      log: info,
+    });
+  } catch (err) {
+    fail(err.message);
+  }
+}
+
 async function applySqlFile(client, sqlFilePath, label) {
   if (!fs.existsSync(sqlFilePath)) {
     fail(`Required baseline SQL missing: ${sqlFilePath}`);
@@ -196,6 +206,25 @@ async function applySqlFile(client, sqlFilePath, label) {
     await client.query('ROLLBACK');
     fail(`${label} failed: ${err.message}`);
   }
+}
+
+
+async function baselineMigrationsAfterSnapshot(client) {
+  // Scoped migrations often CREATE objects already present in the canonical
+  // snapshot; stamp their hashes so applyScopedMigrations is a no-op.
+  //
+  // Do NOT baseline PLATFORM_SQL here. Platform migrations are additive and
+  // idempotent (CREATE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS) and exist
+  // specifically to close runtime gaps on reconstituted snapshots (e.g. 0005
+  // organization_members.deleted_at / tenant_id). Baselining them skips DDL
+  // and leaves getUserRole / seed broken (everyone falls back to member).
+  info('Snapshot restored — baselining scoped migration ledger only (platform DDL will apply next).');
+  const scoped = await baselineScopedMigrationsShared(client, {
+    journalPath: SCOPED_JOURNAL,
+    migrationsDir: SCOPED_MIGRATIONS_DIR,
+    log: info,
+  });
+  return { scoped, platform: { stamped: 0, stampedTags: [] } };
 }
 
 async function applyCiBaselineIfNeeded(client, scopedEntriesCount) {
@@ -297,6 +326,10 @@ async function main() {
 
     const restoreSummary = await maybeRestoreSnapshot();
 
+    if (restoreSummary.restored) {
+      await baselineMigrationsAfterSnapshot(client);
+    }
+
     const scopedJournal = JSON.parse(fs.readFileSync(SCOPED_JOURNAL, 'utf8'));
     const scopedEntries = scopedJournal.entries ?? [];
     const baselineSummary = await applyCiBaselineIfNeeded(client, scopedEntries.length);
@@ -304,11 +337,15 @@ async function main() {
     info('Applying scoped Drizzle migrations from db/migrations-cache/ ...');
     const migrateSummary = await applyScopedMigrations(client);
 
+    info('Applying post-freeze PLATFORM_SQL migrations from db/migrations-platform/ ...');
+    const platformSummary = await applyPlatformMigrations(client);
+
     await writeBootstrapAttestation(client, {
       snapshotDigest: restoreSummary.snapshotDigest,
       restored: restoreSummary.restored,
       qaBaselineApplied: baselineSummary.applied,
       scopedMigrationsApplied: migrateSummary.applied,
+      platformMigrationsApplied: platformSummary.applied,
       timestamp: new Date().toISOString(),
     });
 

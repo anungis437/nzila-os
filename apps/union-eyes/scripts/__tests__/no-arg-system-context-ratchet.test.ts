@@ -46,7 +46,7 @@ const NO_ARG_PATTERN = /withSystemContext\(\s*(async\s*)?\(\s*\)\s*=>/g;
 // here deliberately, the same way the file's other existing
 // withSystemContext(() => db.insert(...)) call sites in this route
 // already do.
-const BASELINE_COUNT = 110;
+const BASELINE_COUNT = 111; // +1 entitlement-guard withSystemContext wrap
 
 function walk(dir: string): string[] {
   const out: string[] = [];

@@ -47,24 +47,35 @@ export function withOrganizationAuth<T = any>(
     try {
       const baseUser = await requireUser();
 
-      // Get organization ID - getOrganizationIdForUser handles cookie checking and access verification
-      const organizationId = await getOrganizationIdForUser(baseUser.userId);
-      const user = await requireUserForOrganization(organizationId, baseUser.userId);
+      const { withRLSContext } = await import('@/lib/db/with-rls-context');
 
-      // Create organization context
-      const context: OrganizationContext = {
-        organizationId,
-        userId: user.userId,
-        memberId: user.memberId || '',
-      };
+      // Resolve org under the authenticated identity's bootstrap context so the
+      // user-scoped membership policy (user_id = app.current_user_id) is satisfied
+      // before an active org is known. 'system' sets app.current_user_id and
+      // clears org — runtime role, no privilege escalation, no client-trusted org.
+      const organizationId = await withRLSContext(
+        { organizationId: 'system' },
+        async () => getOrganizationIdForUser(baseUser.userId),
+      );
 
-      // Resolve params if they&apos;re a Promise
-      const params = routeContext?.params 
-        ? await Promise.resolve(routeContext.params)
-        : undefined;
+      // Run membership verification and the handler under the resolved org's
+      // transaction-local RLS context so org-scoped reads are visible to the
+      // RLS-constrained runtime role.
+      return await withRLSContext({ organizationId }, async () => {
+        const user = await requireUserForOrganization(organizationId, baseUser.userId);
 
-      // Call the handler with context
-      return await handler(request, context, params);
+        const context: OrganizationContext = {
+          organizationId,
+          userId: user.userId,
+          memberId: user.memberId || '',
+        };
+
+        const params = routeContext?.params
+          ? await Promise.resolve(routeContext.params)
+          : undefined;
+
+        return handler(request, context, params);
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Internal server error';
       logger.error("withOrganizationAuth failed", { error: message, stack: error instanceof Error ? error.stack : undefined });

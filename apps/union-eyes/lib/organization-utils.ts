@@ -11,6 +11,7 @@ import { eq, and, isNull } from "drizzle-orm";
 import { authOrganizationUsers } from '@nzila/db/schema'
 import { cookies } from "next/headers";
 import { logger } from "./logger";
+import { withSystemContext } from "@/lib/db/with-rls-context";
 /**
  * Default organization ID used for system operations
  * This points to the Default Organization where all users start
@@ -58,6 +59,13 @@ export function isDefaultOrgFallbackAllowed(): boolean {
  * @throws Error if no organization found
  */
 export async function getOrganizationIdForUser(userId: string): Promise<string> {
+  // Bootstrap membership lookups must run on the system connection.
+  // Tenant RLS on organization_members / organization_users is org-scoped;
+  // without an org id yet, runtime sees zero rows. withSystemContext is the
+  // established authority path for this chicken-and-egg resolution — it does
+  // not weaken tenant RLS for later scoped work. Filter by userId remains in
+  // every WHERE clause.
+  return withSystemContext(async () => {
   try {
     // Check if user selected a specific organization UUID via cookie.
     // This is the primary selector written by the client org switcher.
@@ -296,6 +304,7 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
     logger.error('Error resolving organization for user', error);
     throw error;
   }
+  });
 }
 
 /**
