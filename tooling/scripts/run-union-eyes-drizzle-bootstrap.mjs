@@ -38,6 +38,7 @@ import pg from 'pg';
 import {
   applyScopedMigrations as applyScopedMigrationsShared,
   baselineScopedMigrations as baselineScopedMigrationsShared,
+  ensureExtensions as ensureExtensionsShared,
 } from './lib/union-eyes-scoped-migrations.mjs';
 import {
   applyPlatformMigrations as applyPlatformMigrationsShared,
@@ -55,16 +56,6 @@ const SCOPED_JOURNAL = path.join(SCOPED_MIGRATIONS_DIR, 'meta', '_journal.json')
 const PLATFORM_MIGRATIONS_DIR = path.join(appRoot, 'db', 'migrations-platform');
 const PLATFORM_JOURNAL = path.join(PLATFORM_MIGRATIONS_DIR, 'meta', '_journal.json');
 const QA_BASELINE_SQL = path.join(repoRoot, 'tooling', 'sql', 'union-eyes-qa-baseline.sql');
-
-const REQUIRED_EXTENSIONS = [
-  'uuid-ossp',
-  'pgcrypto',
-  'pg_trgm',
-  'btree_gin',
-  'vector',
-];
-
-const OPTIONAL_EXTENSIONS = new Set(['vector']);
 
 loadEnv({ path: path.join(appRoot, '.env.local') });
 if (!process.env.DATABASE_URL) {
@@ -117,17 +108,10 @@ async function assertReplayRefusal() {
 }
 
 async function ensureExtensions(client) {
-  for (const ext of REQUIRED_EXTENSIONS) {
-    try {
-      await client.query(`CREATE EXTENSION IF NOT EXISTS "${ext}"`);
-      info(`extension OK: ${ext}`);
-    } catch (err) {
-      if (OPTIONAL_EXTENSIONS.has(ext)) {
-        info(`extension optional/unavailable: ${ext} (${err.message})`);
-        continue;
-      }
-      fail(`Failed to create extension ${ext}: ${err.message}`);
-    }
+  try {
+    await ensureExtensionsShared(client, { log: info });
+  } catch (err) {
+    fail(err.message);
   }
 }
 

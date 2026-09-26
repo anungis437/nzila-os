@@ -1,0 +1,245 @@
+{
+  "$schema": "./registry.schema.json",
+  "version": 1,
+  "generatedBy": "phase-c-schema-authority-reconciliation",
+  "doctrine": {
+    "source": "docs/categories/platform-and-operations/architecture/orm-governance/django-canonical-authority-formalization.md",
+    "rule": "Django is the only canonical owner of canonical entities. Drizzle may read canonical entities ONLY as explicit governed projections (never full-shape db.select()/db.query full-shape). No entity may be declared as a canonical table in two ORMs. Authority flows Django model -> physical schema -> generated read projections; never reverse-generate a Django model from runtime physical drift.",
+    "authorityDirection": "DJANGO_MODEL -> PHYSICAL_SCHEMA -> DRIZZLE_READ_PROJECTION"
+  },
+  "ownerKinds": {
+    "DJANGO_CANONICAL": "Canonical entity owned by exactly one Django model/app. Physical DDL is produced only by Django migrations.",
+    "DRIZZLE_SCOPED": "Non-canonical scoped read-model/cache/app-local table legitimately owned by Drizzle (ue_cache.* / projection surfaces). Never a canonical business entity.",
+    "PLATFORM_AUTH": "Owned by @nzila/platform-auth (opaque PG sessions / auth plumbing).",
+    "EXTERNAL_READONLY": "Externally provisioned; runtime reads self-scoped rows only under RLS; no ORM emits DDL."
+  },
+  "invariants": {
+    "UNOWNED_REQUIRED_TABLES": 0,
+    "DUAL_OWNED_REQUIRED_TABLES": 0,
+    "note": "A canonical (REQUIRED_NOW) table with zero owners, or with two canonical owners, is a release-blocking authority defect. The verifier (schema:contract:verify) and lint (schema:authority:lint) enforce these two counts stay 0."
+  },
+  "tables": [
+    {
+      "table": "organizations",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "auth_core",
+      "djangoModel": "Organizations",
+      "evidence": "backend/auth_core/models.py Meta.db_table=\"organizations\" (:218)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": true,
+      "reconciliation": {
+        "class": "STALE_DRIZZLE_DECLARATION",
+        "action": "TRIM_DRIZZLE",
+        "detail": "Drizzle db/schema-organizations.ts declares appId (:142), its index (:162) and relation (:243); no physical app_id column exists and Django Organizations has no app_id. Remove the Drizzle appId declaration/index/relation and rewrite org.appId consumers to org.id."
+      }
+    },
+    {
+      "table": "organization_members",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "auth_core",
+      "djangoModel": "OrganizationMembers",
+      "evidence": "backend/auth_core/models.py Meta.db_table=\"organization_members\" (:755); model :727",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": true,
+      "reconciliation": {
+        "class": "CANONICAL_SCHEMA_OMISSION",
+        "action": "ADD_TO_DJANGO",
+        "addColumns": ["deleted_at", "name", "email", "phone", "department", "location", "position", "hire_date", "seniority", "union_join_date", "metadata", "joined_at"],
+        "trimDrizzle": ["tenant_id", "preferred_contact_method", "exemption_approved_at", "search_vector"],
+        "detail": "lib/organization-utils.ts getOrganizationIdForUser filters isNull(deletedAt); deleted_at missing physically -> 42703 breaks EVERY dashboard (universal auth path). /api/organization/members route .map() directly consumes name/email/phone/department/location/position/hireDate/seniority/unionJoinDate/metadata. tenant_id is a stale legacyOrgId rename; the other 3 are incidental (never consumed by canonical-43). Physical overlap with PLATFORM_SQL 0005 is idempotent ADD COLUMN IF NOT EXISTS using the platform types; Django remains the model owner and 0005 remains the landed physical lineage."
+      }
+    },
+    {
+      "table": "profiles",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "auth_core",
+      "djangoModel": "Profiles",
+      "evidence": "backend/auth_core/models.py Meta.db_table=\"profiles\" (:544)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": true,
+      "reconciliation": {
+        "class": "VERIFY_AT_CONVERGENCE",
+        "action": "OPEN_MODEL_CONFIRM_COLUMNS",
+        "detail": "Seeded via raw physically-scoped SQL. Confirm the physical profile columns consumed by canonical-43 profile reads against the Django Profiles model before authoring any add/trim."
+      }
+    },
+    {
+      "table": "users",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "auth_core",
+      "djangoModel": "Users",
+      "evidence": "backend/auth_core/models.py Meta.db_table=\"users\" (:558)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": {
+        "class": "ONLY_INCIDENTALLY_MATERIALIZED",
+        "action": "NARROW_DRIZZLE_PROJECTION",
+        "securitySensitiveColumns": ["phone_verified_at", "two_factor_secret", "two_factor_backup_codes", "encrypted_sin", "encrypted_ssn", "encrypted_bank_account"],
+        "detail": "db.query.users.findFirst is FULL-SHAPE (no columns:{}) only in NON-canonical-43 action paths (case-timeline-service critical-signal notify, rewards/notification-service award). Preferred fix: add columns:{userId:true,email:true} projection to those findFirst calls so security-sensitive PII/2FA columns are never materialized. DO NOT restore these columns physically merely because declared."
+      }
+    },
+    {
+      "table": "documents",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "content",
+      "djangoModel": "Documents",
+      "evidence": "backend/content/models.py Meta.db_table=\"documents\" (:281); model :275 is a 5-col STUB (id/created_at/updated_at/organization_id/checksum)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": true,
+      "reconciliation": {
+        "class": "CANONICAL_SCHEMA_OMISSION",
+        "action": "ADD_TO_DJANGO",
+        "addColumns": ["title", "filename", "name", "file_url", "file_type", "content_type", "mime_type", "document_type", "size_bytes", "file_size", "category", "tags", "uploaded_by", "uploaded_at", "folder_id", "description", "blob_container", "blob_path", "sha256", "status", "privacy_label", "contains_pii", "contains_medical_sensitive", "contains_legal_privilege", "member_pii", "medical_sensitive", "disciplinary_sensitive", "is_confidential", "access_level", "deleted_at", "metadata", "content_text"],
+        "detail": "document-service getDocumentById/listDocuments use db.query.documents.findFirst FULL-SHAPE and return the whole document to canonical-43 rows 4 (member /dashboard/documents) and 12 (staff /dashboard/documents). The Django Documents stub lacks the document entity's business fields. Finalize the exact add/trim per-field at convergence (Phase K) against document-service consumption; prefer a governed projection long-term. Columns already in PLATFORM_SQL 0006 (name, file_url, uploaded_by, deleted_at, metadata, mime_type, file_size bigint, description) are idempotent no-ops against that lineage. Columns 0006 does not create stay Django AddField."
+      }
+    },
+    {
+      "table": "claims",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "grievances",
+      "djangoModel": "Claims",
+      "evidence": "backend/grievances/models.py Meta.db_table=\"claims\" (:165)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": true,
+      "reconciliation": {
+        "class": "CANONICAL_SCHEMA_OMISSION",
+        "action": "ADD_TO_DJANGO_AND_UNIFY_DRIZZLE",
+        "addColumns": ["idempotency_hash"],
+        "drizzleDeclarationConflict": {
+          "a": "db/schema/claims-schema.ts (numeric money + idempotencyHash unique :118)",
+          "b": "db/schema/domains/claims/claims.ts (varchar money + no hash)",
+          "resolution": "Collapse to a single Drizzle read-projection matching the Django Claims physical schema. This is a Drizzle-internal DUAL DECLARATION (not dual Django ownership) and violates the one-declaration rule."
+        },
+        "nonBlockingSemantic": {
+          "columns": ["claim_amount", "settlement_amount", "legal_costs", "court_costs"],
+          "detail": "numeric-vs-varchar money representation. Columns exist physically and function as strings; NOT a 42703 execution blocker. Deferred type adjudication."
+        },
+        "detail": "idempotency_hash backs write+dedup in /api/cases/intake (+ bulk-import), reached by canonical-43 row 3 (/dashboard/claims/new). PLATFORM_SQL 0007 adds claim_updates columns only; it does not create claims.idempotency_hash, so the Django AddField remains the physical writer."
+      }
+    },
+    {
+      "table": "grievances",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "grievances",
+      "djangoModel": "Grievances",
+      "evidence": "backend/grievances/models.py Meta.db_table=\"grievances\" (:435)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": true,
+      "reconciliation": {
+        "class": "NON_BLOCKING_SEMANTIC",
+        "action": "DEFER",
+        "detail": "related_grievance_ids uuid[]-vs-jsonb is a representation difference; column exists; not a 42703 blocker. Confirm no full-shape canonical-43 read requires added columns at convergence."
+      }
+    },
+    {
+      "table": "grievance_deadlines",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "grievances",
+      "djangoModel": "GrievanceDeadlines",
+      "evidence": "backend/grievances/models.py Meta.db_table=\"grievance_deadlines\" (:537)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": {
+        "class": "NON_RUNTIME_ORM_DRIFT",
+        "action": "DEFER_TO_REQUIRED_LATER",
+        "detail": "All reachable sites PROJECT: deadline-tracking-system .select({id})+innerJoin; deadline-confirmation-service .select({id,dueDate,calculatedDueDate})+scoped UPDATE. No canonical-43 page-load performs a full-shape read. The 20 declared-but-missing columns are write/action-path (REQUIRED_LATER), not page-load blockers."
+      }
+    },
+    {
+      "table": "notifications",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "notifications",
+      "djangoModel": "Notifications",
+      "evidence": "backend/notifications/models.py Meta.db_table='notifications' (:250)",
+      "runtimeAccess": "NONE_OBSERVED",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": {
+        "class": "NOT_IMPLEMENTED",
+        "action": "DEFER",
+        "detail": "No app runtime performs .from(notifications) or db.query.notifications; the 'notification-service' reads users/organization_members, not the notifications table. The 10 declared-but-missing columns are unwired. Not a release blocker."
+      }
+    },
+    {
+      "table": "member_employment",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "unions",
+      "djangoModel": "MemberEmployment",
+      "evidence": "backend/unions/models.py Meta.db_table=\"member_employment\" (:824)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": { "class": "PROPER_DB_DEFAULTS_PRESENT", "action": "NONE", "detail": "Confirmed earlier: id=gen_random_uuid(), created_at=now() defaults present physically." }
+    },
+    {
+      "table": "employment_history",
+      "owner": "DJANGO_CANONICAL",
+      "djangoApp": "unions",
+      "djangoModel": "EmploymentHistory",
+      "evidence": "backend/unions/models.py Meta.db_table=\"employment_history\" (:851)",
+      "runtimeAccess": "DRIZZLE_READ_PROJECTION",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": { "class": "PROPER_DB_DEFAULTS_PRESENT", "action": "NONE" }
+    },
+    {
+      "table": "auth_user_sessions",
+      "owner": "PLATFORM_AUTH",
+      "djangoApp": null,
+      "djangoModel": null,
+      "evidence": "@nzila/platform-auth opaque PG session store (nzila_session cookie); no Django db_table.",
+      "runtimeAccess": "PLATFORM_AUTH_DIRECT",
+      "rlsRequired": false,
+      "canonical43": false,
+      "reconciliation": { "class": "OWNED_BY_PLATFORM_AUTH", "action": "NONE" }
+    },
+    {
+      "table": "representation_authorities",
+      "owner": "EXTERNAL_READONLY",
+      "djangoApp": null,
+      "djangoModel": null,
+      "evidence": "External specialist RLS surface proven in Phases 1-4 (runtime SELECT-self; cross-scope denied). No ORM emits DDL.",
+      "runtimeAccess": "RLS_SELF_SCOPED_READ",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": { "class": "EXTERNAL_MANAGED", "action": "NONE" }
+    },
+    {
+      "table": "external_matter_access_grants",
+      "owner": "EXTERNAL_READONLY",
+      "djangoApp": null,
+      "djangoModel": null,
+      "evidence": "External specialist RLS surface (Phases 1-4).",
+      "runtimeAccess": "RLS_SELF_SCOPED_READ",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": { "class": "EXTERNAL_MANAGED", "action": "NONE" }
+    },
+    {
+      "table": "external_document_access_grants",
+      "owner": "EXTERNAL_READONLY",
+      "djangoApp": null,
+      "djangoModel": null,
+      "evidence": "External specialist RLS surface (Phases 1-4).",
+      "runtimeAccess": "RLS_SELF_SCOPED_READ",
+      "rlsRequired": true,
+      "canonical43": false,
+      "reconciliation": { "class": "EXTERNAL_MANAGED", "action": "NONE" }
+    }
+  ],
+  "computed": {
+    "UNOWNED_REQUIRED_TABLES": 0,
+    "DUAL_OWNED_REQUIRED_TABLES": 0,
+    "REQUIRED_NOW_RECONCILIATION_TABLES": ["organizations", "organization_members", "documents", "claims"],
+    "DRIZZLE_DECLARATION_CONFLICTS": ["claims"],
+    "PENDING_CONVERGENCE_MODEL_CONFIRMATION": ["profiles", "documents"]
+  }
+}

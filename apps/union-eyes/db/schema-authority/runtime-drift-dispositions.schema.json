@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nzila.dev/union-eyes/schema-authority/runtime-drift-dispositions.schema.json",
+  "title": "Union Eyes Runtime Drift Dispositions",
+  "type": "object",
+  "required": ["version", "dispositions"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "integer" },
+    "generatedBy": { "type": "string" },
+    "doctrine": { "type": "object" },
+    "dispositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["schema", "table", "column", "class", "requiredNow"],
+        "properties": {
+          "schema": { "type": "string", "minLength": 1 },
+          "table": { "type": "string", "minLength": 1 },
+          "column": { "type": "string", "minLength": 1 },
+          "class": {
+            "type": "string",
+            "enum": ["STALE_RUNTIME_ASSUMPTION", "INCIDENTAL_ONLY", "NON_RUNTIME_ORM_DRIFT", "NOT_IMPLEMENTED", "NON_BLOCKING_SEMANTIC", "SECURITY_SENSITIVE_DO_NOT_RESTORE"]
+          },
+          "requiredNow": { "type": "boolean", "enum": [false] },
+          "action": { "type": "string" },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

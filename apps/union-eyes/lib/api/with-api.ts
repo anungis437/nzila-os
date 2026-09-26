@@ -109,6 +109,15 @@ export interface WithApiOptions<
    */
   requireOrg?: boolean;
 
+  /**
+   * Run the handler inside a transaction-local RLS context
+   * (`withRLSContext({ organizationId })`) so org-scoped RLS policies apply to
+   * the handler's own DB reads/writes. Opt-in — set by the CRUD factory for
+   * org-scoped resources. Custom routes that manage their own context, or that
+   * are system/public, leave this unset.
+   */
+  rlsOrgContext?: boolean;
+
   // ── Validation ────────────────────────────────────────────────────────────
 
   /** Zod schema for request body (automatically parsed from `request.json()`) */
@@ -346,7 +355,20 @@ export function withApi<
       if (user) {
         try {
           const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
-          resolvedOrganizationId = await getOrganizationIdForUser(user.id);
+          const { withRLSContext } = await import('@/lib/db/with-rls-context');
+          // Resolve org under the authenticated identity's own transaction-local
+          // RLS context so the user-scoped membership policy
+          // (user_id = app.current_user_id) is satisfied. The 'system' sentinel
+          // sets app.current_user_id and clears org — the designed bootstrap for
+          // "which org does this authenticated user belong to" before an active
+          // org is known. Runtime role, no privilege escalation, no client-trusted
+          // org. Only overwrite when a membership is actually resolved, so the
+          // auth-validated organization survives a null resolution.
+          const resolved = await withRLSContext(
+            { organizationId: 'system' },
+            async () => getOrganizationIdForUser(user!.id),
+          );
+          if (resolved) resolvedOrganizationId = resolved;
         } catch {
           // Keep auth metadata organization as fallback.
         }
@@ -581,7 +603,20 @@ export function withApi<
         traceId,
       };
 
-      const result = await handler(ctx);
+      const runHandler = async () => handler(ctx);
+      const result = await (async () => {
+        // Opt-in: run org-scoped handlers inside a transaction-local RLS
+        // context so the handler's own DB work is visible to the
+        // RLS-constrained runtime role. Skip if already inside a tenant tx.
+        if (options.rlsOrgContext && resolvedOrganizationId) {
+          const { getActiveTenantDb } = await import('@/db/tenant-context-storage');
+          if (!getActiveTenantDb()) {
+            const { withRLSContext } = await import('@/lib/db/with-rls-context');
+            return withRLSContext({ organizationId: resolvedOrganizationId }, runHandler);
+          }
+        }
+        return runHandler();
+      })();
 
       // ── 8b. Post-handler policies (fire-and-forget) ────────────────────
       // Auto-audit emission for routes with evidenceRequired: true.

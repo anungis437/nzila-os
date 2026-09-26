@@ -49,8 +49,19 @@ let consents: FakeConsent[];
 
 const m = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
+  // See hazards-incidents-submission: withRLSContext reads platform auth(),
+  // not the getCurrentUser override. Inject the same subject there.
+  platformAuth: vi.fn(),
 }));
 
+vi.mock('@nzila/platform-auth/entra/server', () => ({
+  auth: m.platformAuth,
+  currentUser: async () => null,
+  getAuth: m.platformAuth,
+  authMiddleware: () => async () => {},
+  clerkMiddleware: () => async () => {},
+  createRouteMatcher: () => () => false,
+}));
 vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<object>();
   return { ...actual, getCurrentUser: m.getCurrentUser };
@@ -79,8 +90,9 @@ vi.mock('@/db/schema', () => ({
   },
 }));
 
-vi.mock('@/db/db', () => ({
-  db: {
+vi.mock('@/db/db', () => {
+  const fakeDb = {
+    execute: async () => [],
     select: () => ({
       from: () => ({
         where: (predicate: Predicate) => consents.filter((c) => matches(c as unknown as Record<string, unknown>, predicate)),
@@ -97,8 +109,12 @@ vi.mock('@/db/db', () => ({
         }),
       }),
     }),
-  },
-}));
+    // withRLSContext set_config()s on the transaction, then runs the handler
+    // against this same fake so org + subject predicates still apply.
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(fakeDb),
+  };
+  return { db: fakeDb };
+});
 
 import { GET, PATCH } from '../route';
 
@@ -121,6 +137,12 @@ function asUser(userId: string, organizationId: string) {
     imageUrl: null,
     legacyTenantId: null,
     metadata: {},
+  });
+  m.platformAuth.mockResolvedValue({
+    userId,
+    orgId: organizationId,
+    sessionClaims: null,
+    has: () => false,
   });
 }
 

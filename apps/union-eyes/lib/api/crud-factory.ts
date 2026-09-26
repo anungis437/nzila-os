@@ -329,6 +329,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: readRole },
         entitlement: opts.entitlement,
+        rlsOrgContext: orgScoped,
         openapi: {
           tags,
           summary: `List ${resourceName}`,
@@ -390,6 +391,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: writeRole },
         entitlement: opts.entitlement,
+        rlsOrgContext: orgScoped,
         openapi: {
           tags,
           summary: `Create ${resourceName}`,
@@ -445,6 +447,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: readRole },
         entitlement: opts.entitlement,
+        rlsOrgContext: orgScoped,
         openapi: {
           tags,
           summary: `Get ${resourceName} by ID`,
@@ -471,6 +474,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: writeRole },
         entitlement: opts.entitlement,
+        rlsOrgContext: orgScoped,
         openapi: {
           tags,
           summary: `Update ${resourceName}`,
@@ -571,6 +575,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: 'admin' },
         entitlement: opts.entitlement,
+        rlsOrgContext: orgScoped,
         openapi: {
           tags,
           summary: `Delete ${resourceName}`,

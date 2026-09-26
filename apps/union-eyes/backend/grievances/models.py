@@ -161,6 +161,11 @@ class Claims(BaseModel):
     # Metadata
     metadata = models.JSONField(default=dict, null=True, blank=True)
 
+    # Idempotency (Phase F convergence — backs write+dedup in /api/cases/intake + bulk-import)
+    idempotency_hash = models.CharField(
+        max_length=64, null=True, blank=True, unique=True
+    )
+
     class Meta:
         db_table = "claims"
         verbose_name = "Claims"

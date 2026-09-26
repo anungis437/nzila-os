@@ -1,0 +1,4 @@
+# Generated schema-contract artifacts are environment-derived and reproducible
+# via `pnpm schema:contract:fresh-build`. Do not commit them as source.
+*
+!.gitignore

@@ -176,3 +176,33 @@ export async function baselineScopedMigrations(client, { journalPath, migrations
   log(`scoped migration baseline: stamped ${stamped} hash(es)`);
   return { stamped, stampedTags };
 }
+
+/**
+ * Canonical PostgreSQL extension set for a Union Eyes database. This is the
+ * SINGLE source of truth reused by both the fresh-bootstrap orchestrator and
+ * the schema-contract fresh-build harness, so extension provisioning cannot
+ * diverge between the production bootstrap and the measuring instrument.
+ */
+export const REQUIRED_EXTENSIONS = ['uuid-ossp', 'pgcrypto', 'pg_trgm', 'btree_gin', 'vector'];
+export const OPTIONAL_EXTENSIONS = new Set(['vector']);
+
+/**
+ * Installs the required extensions idempotently. Throws on hard failure of a
+ * non-optional extension; skips optional extensions that are unavailable.
+ * Callers that must exit the process (bootstrap) wrap this in their own
+ * fail() handler; callers that must propagate (harness) let it throw.
+ */
+export async function ensureExtensions(client, { log = () => {} } = {}) {
+  for (const ext of REQUIRED_EXTENSIONS) {
+    try {
+      await client.query(`CREATE EXTENSION IF NOT EXISTS "${ext}"`);
+      log(`extension OK: ${ext}`);
+    } catch (err) {
+      if (OPTIONAL_EXTENSIONS.has(ext)) {
+        log(`extension optional/unavailable: ${ext} (${err.message})`);
+        continue;
+      }
+      throw new Error(`Failed to create extension ${ext}: ${err.message}`);
+    }
+  }
+}

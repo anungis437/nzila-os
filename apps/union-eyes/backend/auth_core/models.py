@@ -751,6 +751,20 @@ class OrganizationMembers(BaseModel):
     exemption_reason = models.TextField(null=True, blank=True)
     exemption_approved_by = models.CharField(max_length=255, null=True, blank=True)
 
+    # Phase F convergence — runtime-required member-directory + soft-delete fields
+    name = models.TextField(null=True, blank=True)
+    email = models.TextField(null=True, blank=True)
+    phone = models.TextField(null=True, blank=True)
+    department = models.TextField(null=True, blank=True)
+    location = models.TextField(null=True, blank=True)
+    position = models.TextField(null=True, blank=True)
+    hire_date = models.DateTimeField(null=True, blank=True)
+    seniority = models.IntegerField(null=True, blank=True)
+    union_join_date = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    joined_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         db_table = "organization_members"
         verbose_name = "OrganizationMembers"
