@@ -25,6 +25,8 @@ const RESULT_ENV = {
   'governance-integrity': 'MA_RESULT_GOVERNANCE',
   'hash-chain-drift': 'MA_RESULT_HASH',
   'operating-layer-gate': 'MA_RESULT_OPERATING',
+  'iac-scan': 'MA_RESULT_IAC',
+  'ops-pack-validation': 'MA_RESULT_OPS',
 }
 
 function readStdin() {
@@ -82,6 +84,8 @@ async function classifyAndPublish() {
   const verdicts = applyExecution(plan.verdicts, {
     'governance-integrity': process.env.MA_EXEC_GOVERNANCE,
     'repository-inventory': process.env.MA_EXEC_INVENTORY,
+    'iac-scan': process.env.MA_EXEC_IAC,
+    'ops-pack-validation': process.env.MA_EXEC_OPS,
   })
   await publishVerdicts(verdicts, headSha)
 }
@@ -103,11 +107,15 @@ function classifyOutputs() {
   const plan = planFastPath(pathsFromStdin(readStdin()))
   const governance = plan.classification.contexts['Merge Authority / Governance Integrity']
   const inventory = plan.classification.contexts['Merge Authority / Repository Inventory']
+  const iac = plan.classification.contexts['Merge Authority / IaC Security']
+  const ops = plan.classification.contexts['Merge Authority / Ops Documentation']
   process.stdout.write(
     [
       `ci_skip=${plan.classification.ciSkippedByPathsIgnore ? 'true' : 'false'}`,
       `governance=${governance}`,
       `inventory=${inventory}`,
+      `iac=${iac}`,
+      `ops=${ops}`,
       `action=${plan.action}`,
     ].join('\n') + '\n',
   )

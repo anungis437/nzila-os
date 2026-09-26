@@ -741,6 +741,8 @@ jobs:
       - governance-integrity
       - hash-chain-drift
       - operating-layer-gate
+      - iac-scan
+      - ops-pack-validation
     if: always() && !cancelled()
     permissions:
       contents: read
@@ -766,4 +768,6 @@ jobs:
           MA_RESULT_GOVERNANCE: ${{ needs.governance-integrity.result }}
           MA_RESULT_HASH: ${{ needs.hash-chain-drift.result }}
           MA_RESULT_OPERATING: ${{ needs.operating-layer-gate.result }}
+          MA_RESULT_IAC: ${{ needs.iac-scan.result }}
+          MA_RESULT_OPS: ${{ needs.ops-pack-validation.result }}
         run: node tooling/ci/merge-authority/publish.mjs publish-ci-results
