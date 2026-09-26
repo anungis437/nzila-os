@@ -235,3 +235,182 @@ export function gateWorkspaceDeepWork(
   }
   return { allowed: true };
 }
+
+/**
+ * EC-005 coherence. The availability map above is unchanged and this layer
+ * does not grant path access. When an AVAILABLE tab's doctrine href is
+ * outside the persona's existing path policy, the control is remapped to an
+ * already-allowed surface or kept blocked with a recovery link to one.
+ * Staff allow-list prefixes are not widened here.
+ */
+export const WORKSPACE_DEEP_WORK_COHERENCE_SCOPE = [
+  { role: "steward", tabId: "case-operations" },
+  { role: "steward", tabId: "members" },
+  { role: "steward", tabId: "continuity" },
+  { role: "executive", tabId: "continuity" },
+  { role: "executive", tabId: "governance" },
+  { role: "governance", tabId: "continuity" },
+  { role: "governance", tabId: "governance" },
+] as const satisfies ReadonlyArray<{ role: string; tabId: WorkspaceTabId }>;
+
+export interface WorkspaceDeepWorkRecoveryTarget {
+  href: string;
+  labelKey: string;
+  labelFallback: string;
+}
+
+export type WorkspaceDeepWorkResolution =
+  | { kind: "reachable" }
+  | {
+      kind: "remapped";
+      href: string;
+      labelKey: string;
+      labelFallback: string;
+      reasonKey: string;
+      reasonFallback: string;
+    }
+  | {
+      kind: "blocked";
+      reason: "unknown-role" | "stub-section" | "unavailable-section" | "out-of-role";
+      recovery?: WorkspaceDeepWorkRecoveryTarget;
+    };
+
+interface DeepWorkRemap {
+  persona: R6PersonaClass;
+  tabId: WorkspaceTabId;
+  fromPath: string;
+  href: string;
+  labelKey: string;
+  labelFallback: string;
+  reasonKey: string;
+  reasonFallback: string;
+}
+
+const DEEP_WORK_REMAPS: readonly DeepWorkRemap[] = [
+  {
+    persona: "steward",
+    tabId: "case-operations",
+    fromPath: "/dashboard/cases",
+    href: "/dashboard/workbench",
+    labelKey: "deepWork.destinations.caseworkConsole",
+    labelFallback: "Casework console",
+    reasonKey: "deepWork.remapReason.caseworkConsole",
+    reasonFallback: "Opens the casework console. The cases list is outside your role.",
+  },
+  {
+    persona: "steward",
+    tabId: "case-operations",
+    fromPath: "/dashboard/priorities",
+    href: "/dashboard/operations",
+    labelKey: "deepWork.destinations.operationsPriorities",
+    labelFallback: "Operations priorities",
+    reasonKey: "deepWork.remapReason.operationsPriorities",
+    reasonFallback: "Opens operations priorities. The priorities list is outside your role.",
+  },
+  {
+    persona: "steward",
+    tabId: "continuity",
+    fromPath: "/dashboard/continuity-intelligence",
+    href: "/dashboard/intelligence",
+    labelKey: "deepWork.destinations.institutionalIntelligenceReports",
+    labelFallback: "Institutional intelligence reports",
+    reasonKey: "deepWork.remapReason.institutionalIntelligenceReports",
+    reasonFallback:
+      "Opens institutional intelligence reports. Continuity intelligence is outside your role.",
+  },
+];
+
+const DEEP_WORK_RECOVERY: Partial<
+  Record<R6PersonaClass, Partial<Record<WorkspaceTabId, WorkspaceDeepWorkRecoveryTarget>>>
+> = {
+  steward: {
+    "case-operations": {
+      href: "/dashboard/workbench",
+      labelKey: "deepWork.destinations.caseworkConsole",
+      labelFallback: "Casework console",
+    },
+    members: {
+      href: "/dashboard/members",
+      labelKey: "deepWork.destinations.membersRoster",
+      labelFallback: "Members roster",
+    },
+    continuity: {
+      href: "/dashboard/intelligence",
+      labelKey: "deepWork.destinations.institutionalIntelligenceReports",
+      labelFallback: "Institutional intelligence reports",
+    },
+  },
+  executive: {
+    continuity: {
+      href: "/dashboard/continuity-intelligence",
+      labelKey: "deepWork.destinations.continuityIntelligence",
+      labelFallback: "Continuity intelligence",
+    },
+    governance: {
+      href: "/dashboard/governance-center",
+      labelKey: "deepWork.destinations.governanceCenter",
+      labelFallback: "Governance center",
+    },
+  },
+  governance: {
+    continuity: {
+      href: "/dashboard/continuity-intelligence",
+      labelKey: "deepWork.destinations.continuityIntelligence",
+      labelFallback: "Continuity intelligence",
+    },
+    governance: {
+      href: "/dashboard/governance",
+      labelKey: "deepWork.destinations.governanceOverview",
+      labelFallback: "Governance overview",
+    },
+  },
+};
+
+/**
+ * Resolves how a configured deep-work href should be presented.
+ * Reachable doctrine links stay as configured. Out-of-role links on an
+ * in-scope AVAILABLE tab remap to an allowed surface, or stay blocked with
+ * a recovery link, only when that alternate itself passes the path gate.
+ */
+export function resolveWorkspaceDeepWork(
+  role: string | null | undefined,
+  tabId: WorkspaceTabId,
+  href: string,
+  isPilotMode: boolean,
+): WorkspaceDeepWorkResolution {
+  const gate = gateWorkspaceDeepWork(role, tabId, href, isPilotMode);
+  if (gate.allowed) return { kind: "reachable" };
+  if (gate.reason !== "out-of-role") return { kind: "blocked", reason: gate.reason };
+
+  const persona = resolveWorkspacePersonaClass(role);
+  const path = href.split("?")[0] ?? href;
+  if (!persona) return { kind: "blocked", reason: "out-of-role" };
+
+  const remap = DEEP_WORK_REMAPS.find(
+    (candidate) =>
+      candidate.persona === persona && candidate.tabId === tabId && candidate.fromPath === path,
+  );
+  if (remap && gateWorkspaceDeepWork(role, tabId, remap.href, isPilotMode).allowed) {
+    return {
+      kind: "remapped",
+      href: remap.href,
+      labelKey: remap.labelKey,
+      labelFallback: remap.labelFallback,
+      reasonKey: remap.reasonKey,
+      reasonFallback: remap.reasonFallback,
+    };
+  }
+
+  const recovery = DEEP_WORK_RECOVERY[persona]?.[tabId];
+  const recoveryPath = recovery?.href.split("?")[0];
+  if (
+    recovery &&
+    recoveryPath &&
+    recoveryPath !== path &&
+    gateWorkspaceDeepWork(role, tabId, recovery.href, isPilotMode).allowed
+  ) {
+    return { kind: "blocked", reason: "out-of-role", recovery };
+  }
+
+  return { kind: "blocked", reason: "out-of-role" };
+}

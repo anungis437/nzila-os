@@ -41,7 +41,22 @@
       "unknownRole": "Ruolo non riconosciuto. Questa destinazione resta chiusa.",
       "stubSection": "Non disponibile da una sezione bozza.",
       "unavailableSection": "Non disponibile per il tuo ruolo.",
-      "outOfRole": "Fuori dal tuo ruolo."
+      "outOfRole": "Fuori dal tuo ruolo.",
+      "recoveryHint": "Superficie autorizzata per questo lavoro approfondito.",
+      "destinations": {
+        "caseworkConsole": "Console dei casi",
+        "operationsPriorities": "Priorità operative",
+        "institutionalIntelligenceReports": "Report di intelligence istituzionale",
+        "membersRoster": "Elenco membri",
+        "continuityIntelligence": "Intelligence di continuità",
+        "governanceCenter": "Centro di governance",
+        "governanceOverview": "Panoramica della governance"
+      },
+      "remapReason": {
+        "caseworkConsole": "Apre la console dei casi. L'elenco dei casi è fuori dal tuo ruolo.",
+        "operationsPriorities": "Apre le priorità operative. L'elenco delle priorità è fuori dal tuo ruolo.",
+        "institutionalIntelligenceReports": "Apre i report di intelligence istituzionale. L'intelligence di continuità è fuori dal tuo ruolo."
+      }
     }
   },
   "common": {

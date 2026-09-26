@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { WORKSPACE_TABS } from "../workspace-config";
+import { getWorkspaceTab, WORKSPACE_TABS } from "../workspace-config";
+import { canAccessDashboardPath, getAllowedPrefixesByExperience } from "@/lib/dashboard/role-experience";
 import {
   R6_PERSONA_CLASSES,
+  WORKSPACE_DEEP_WORK_COHERENCE_SCOPE,
   WORKSPACE_PERSONA_TAB_AVAILABILITY,
   availabilityFromCell,
   gateWorkspaceDeepWork,
   getWorkspaceTabAvailability,
   initialWorkspaceTab,
+  resolveWorkspaceDeepWork,
   resolveWorkspacePersonaClass,
   selectWorkspaceRoleInput,
+  type WorkspaceTabId,
 } from "../workspace-persona-availability";
 
 describe("workspace persona availability map", () => {
@@ -158,5 +162,199 @@ describe("workspace persona availability map", () => {
       allowed: false,
       reason: "stub-section",
     });
+  });
+});
+
+describe("workspace deep-work path coherence", () => {
+  it("keeps the EC-003 availability cells unchanged", () => {
+    expect(WORKSPACE_PERSONA_TAB_AVAILABILITY.steward["case-operations"]).toBe("available");
+    expect(WORKSPACE_PERSONA_TAB_AVAILABILITY).toEqual({
+      executive: {
+        overview: "available",
+        "case-operations": "stub",
+        members: "stub",
+        governance: "available",
+        continuity: "available",
+        financial: "stub",
+        documents: "stub",
+      },
+      steward: {
+        overview: "available",
+        "case-operations": "available",
+        members: "available",
+        governance: "stub",
+        continuity: "available",
+        financial: "stub",
+        documents: "stub",
+      },
+      governance: {
+        overview: "available",
+        "case-operations": "stub",
+        members: "stub",
+        governance: "available",
+        continuity: "available",
+        financial: "stub",
+        documents: "stub",
+      },
+      onboarding: {
+        overview: "stub",
+        "case-operations": "stub",
+        members: "stub",
+        governance: "stub",
+        continuity: "stub",
+        financial: "stub",
+        documents: "stub",
+      },
+      procurement: {
+        overview: "stub",
+        "case-operations": "stub",
+        members: "stub",
+        governance: "stub",
+        continuity: "stub",
+        financial: "stub",
+        documents: "stub",
+      },
+      "degraded-runtime": {
+        overview: "stub",
+        "case-operations": "stub",
+        members: "stub",
+        governance: "stub",
+        continuity: "stub",
+        financial: "stub",
+        documents: "stub",
+      },
+    });
+  });
+
+  it("does not widen the staff allow-list to cases, claims, grievances, or priorities", () => {
+    const staff = getAllowedPrefixesByExperience().staff;
+    expect(staff).not.toContain("/dashboard/cases");
+    expect(staff).not.toContain("/dashboard/claims");
+    expect(staff).not.toContain("/dashboard/grievances");
+    expect(staff).not.toContain("/dashboard/priorities");
+    expect(canAccessDashboardPath("/dashboard/cases", "staff", false)).toBe(false);
+    expect(canAccessDashboardPath("/dashboard/workbench", "staff", true)).toBe(true);
+  });
+
+  it("remaps steward case operations primary deep work onto the casework console", () => {
+    expect(getWorkspaceTabAvailability("steward", "case-operations")).toBe("available");
+    expect(getWorkspaceTabAvailability("chief_steward", "case-operations")).toBe("available");
+
+    for (const role of ["steward", "chief_steward"]) {
+      for (const pilot of [true, false]) {
+        const cases = resolveWorkspaceDeepWork(role, "case-operations", "/dashboard/cases", pilot);
+        expect(cases.kind).toBe("remapped");
+        if (cases.kind !== "remapped") continue;
+        expect(cases.href).toBe("/dashboard/workbench");
+        expect(cases.labelFallback).toBe("Casework console");
+        expect(cases.labelFallback.toLowerCase()).not.toBe("cases");
+        expect(gateWorkspaceDeepWork(role, "case-operations", cases.href, pilot)).toEqual({
+          allowed: true,
+        });
+        expect(gateWorkspaceDeepWork(role, "case-operations", "/dashboard/cases", pilot)).toEqual({
+          allowed: false,
+          reason: "out-of-role",
+        });
+
+        const priorities = resolveWorkspaceDeepWork(
+          role,
+          "case-operations",
+          "/dashboard/priorities",
+          pilot,
+        );
+        expect(priorities).toMatchObject({
+          kind: "remapped",
+          href: "/dashboard/operations",
+          labelFallback: "Operations priorities",
+        });
+
+        expect(
+          resolveWorkspaceDeepWork(role, "case-operations", "/dashboard/inbox?type=intake", pilot),
+        ).toEqual({ kind: "reachable" });
+
+        for (const href of ["/dashboard/claims", "/dashboard/grievances"]) {
+          const blocked = resolveWorkspaceDeepWork(role, "case-operations", href, pilot);
+          expect(blocked.kind).toBe("blocked");
+          if (blocked.kind !== "blocked") continue;
+          expect(blocked.reason).toBe("out-of-role");
+          expect(blocked.recovery?.href).toBe("/dashboard/workbench");
+          expect(blocked.recovery?.labelFallback).toBe("Casework console");
+          expect(
+            gateWorkspaceDeepWork(role, "case-operations", blocked.recovery!.href, pilot).allowed,
+          ).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("gives every in-scope available tab a reachable, remapped, or recoverable deep work", () => {
+    for (const scope of WORKSPACE_DEEP_WORK_COHERENCE_SCOPE) {
+      const tab = getWorkspaceTab(scope.tabId);
+      expect(tab).toBeDefined();
+      expect(getWorkspaceTabAvailability(scope.role, scope.tabId)).toBe("available");
+
+      for (const pilot of [true, false]) {
+        const resolutions = tab!.deepWork.map((link) =>
+          resolveWorkspaceDeepWork(scope.role, scope.tabId, link.href, pilot),
+        );
+        const allBlockedWithoutRecovery = resolutions.every(
+          (resolution) => resolution.kind === "blocked" && !resolution.recovery,
+        );
+        expect(allBlockedWithoutRecovery).toBe(false);
+
+        for (const resolution of resolutions) {
+          if (resolution.kind === "remapped") {
+            expect(resolution.labelFallback.length).toBeGreaterThan(0);
+            expect(resolution.labelFallback.startsWith("/")).toBe(false);
+            expect(resolution.reasonFallback.length).toBeGreaterThan(0);
+            expect(
+              gateWorkspaceDeepWork(scope.role, scope.tabId, resolution.href, pilot).allowed,
+            ).toBe(true);
+          }
+          if (resolution.kind === "blocked" && resolution.recovery) {
+            expect(resolution.recovery.labelFallback.startsWith("/")).toBe(false);
+            expect(
+              gateWorkspaceDeepWork(scope.role, scope.tabId, resolution.recovery.href, pilot)
+                .allowed,
+            ).toBe(true);
+          }
+        }
+      }
+    }
+  });
+
+  it("keeps executive continuity intelligence reachable and does not remap it", () => {
+    expect(
+      resolveWorkspaceDeepWork(
+        "executive",
+        "continuity",
+        "/dashboard/continuity-intelligence",
+        true,
+      ),
+    ).toEqual({ kind: "reachable" });
+    expect(
+      gateWorkspaceDeepWork(
+        "executive",
+        "continuity",
+        "/dashboard/executive-operating-intelligence",
+        true,
+      ),
+    ).toEqual({ allowed: false, reason: "out-of-role" });
+  });
+
+  it("does not add a recovery path on stub sections", () => {
+    const financial = getWorkspaceTab("financial");
+    for (const link of financial!.deepWork) {
+      const resolution = resolveWorkspaceDeepWork("steward", "financial", link.href, true);
+      expect(resolution).toEqual({ kind: "blocked", reason: "stub-section" });
+    }
+  });
+
+  it("covers the named coherence tabs and no new workspace tab", () => {
+    const tabIds = WORKSPACE_DEEP_WORK_COHERENCE_SCOPE.map((scope) => scope.tabId);
+    expect(new Set(tabIds)).toEqual(
+      new Set<WorkspaceTabId>(["case-operations", "members", "continuity", "governance"]),
+    );
+    expect(WORKSPACE_TABS.map((tab) => tab.id)).not.toContain("intelligence");
   });
 });

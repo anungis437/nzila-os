@@ -41,7 +41,22 @@
       "unknownRole": "Papel não reconhecido. Este destino permanece fechado.",
       "stubSection": "Não disponível a partir de uma seção rascunho.",
       "unavailableSection": "Não disponível para o seu papel.",
-      "outOfRole": "Fora do seu papel."
+      "outOfRole": "Fora do seu papel.",
+      "recoveryHint": "Superfície autorizada para este trabalho aprofundado.",
+      "destinations": {
+        "caseworkConsole": "Console de casos",
+        "operationsPriorities": "Prioridades operacionais",
+        "institutionalIntelligenceReports": "Relatórios de inteligência institucional",
+        "membersRoster": "Lista de membros",
+        "continuityIntelligence": "Inteligência de continuidade",
+        "governanceCenter": "Centro de governança",
+        "governanceOverview": "Visão geral da governança"
+      },
+      "remapReason": {
+        "caseworkConsole": "Abre o console de casos. A lista de casos está fora do seu papel.",
+        "operationsPriorities": "Abre as prioridades operacionais. A lista de prioridades está fora do seu papel.",
+        "institutionalIntelligenceReports": "Abre os relatórios de inteligência institucional. A inteligência de continuidade está fora do seu papel."
+      }
     }
   },
   "common": {
