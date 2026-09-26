@@ -2,9 +2,9 @@
  * Merge-authority surface.
  *
  * Reporting is separate from expensive invariant execution.
- * A context succeeds as NOT_APPLICABLE only when every changed path is
- * proven unable to affect that invariant. Anything else is CODE_OR_UNKNOWN
- * and must execute. Unknown never skips.
+ * NOT_APPLICABLE is decided per invariant. A documentation path can waive
+ * compilation while governance, inventory, or another family still executes.
+ * Unknown never skips.
  *
  * This module is dependency-free so the GitHub publisher can run it
  * without installing the monorepo.
@@ -14,44 +14,90 @@ export const CANONICAL_CONTEXTS = [
   {
     name: 'Merge Authority / Lint & Typecheck',
     ciJob: 'lint-and-typecheck',
-    ciDisplayName: 'Lint & Typecheck',
+    family: 'engineering',
     evidence: 'pnpm lint and pnpm typecheck',
   },
   {
     name: 'Merge Authority / Unit Tests',
     ciJob: 'test',
-    ciDisplayName: 'Unit Tests',
-    evidence: 'pnpm test:coverage. This does not prove pnpm test:fast is a subset. TEST_FAST_SUBSET remains UNRESOLVED.',
+    family: 'engineering',
+    evidence:
+      'pnpm test:coverage. This does not prove pnpm test:fast is a subset. TEST_FAST_SUBSET remains UNRESOLVED.',
   },
   {
     name: 'Merge Authority / Schema Integrity',
     ciJob: 'schema-drift',
-    ciDisplayName: 'Schema Drift Detection',
+    family: 'engineering',
     evidence: 'schema snapshot, canonical schema, and DB preflight',
   },
   {
     name: 'Merge Authority / PostgreSQL RLS',
     ciJob: 'sage-postgres-concurrency',
-    ciDisplayName: 'SAGE PostgreSQL Concurrency and RLS',
-    evidence: 'SAGE PostgreSQL concurrency and RLS suite',
+    family: 'engineering',
+    evidence:
+      'Database row-access enforcement via the SAGE PostgreSQL concurrency and RLS suite. This is not application or platform auth-authority validation.',
   },
   {
     name: 'Merge Authority / Migration Chain',
     ciJob: 'sage-live-postgres',
-    ciDisplayName: 'SAGE Live PostgreSQL (records lifecycle)',
+    family: 'engineering',
     evidence: 'migration immutability manifest and SAGE live PostgreSQL migration chain',
   },
   {
     name: 'Merge Authority / Affected Build',
     ciJob: 'build',
-    ciDisplayName: 'Build All',
+    family: 'engineering',
     evidence:
       'CI job Build All runs pnpm exec turbo run build --affected. This is not a full portfolio build. PORTFOLIO_BUILD_AUTHORITY remains UNRESOLVED.',
+  },
+  {
+    name: 'Merge Authority / Architectural Contracts',
+    ciJob: 'contract-tests',
+    family: 'contracts',
+    evidence:
+      'Standalone CI job Contract Tests (Architectural Invariants) runs pnpm contract-tests. The copy inside Governance Gates is not this authority source.',
+  },
+  {
+    name: 'Merge Authority / Repository Inventory',
+    ciJob: 'repository-inventory',
+    family: 'inventory',
+    evidence:
+      'pnpm inventory:generate followed by the committed inventory lock. Date stamps are ignored. This job does not collect DORA, cost, scorecards, or release evidence.',
+  },
+  {
+    name: 'Merge Authority / Governance Integrity',
+    ciJob: 'governance-integrity',
+    family: 'governance',
+    evidence:
+      'Source-tree governance validators, including auth-authority validation. Auth authority is the application and platform authorization-truth invariant. It is not PostgreSQL row-level security.',
+  },
+  {
+    name: 'Merge Authority / Hash Chain Integrity',
+    ciJob: 'hash-chain-drift',
+    family: 'hash-chain',
+    evidence: 'CI job Hash Chain Drift runs tooling/contract-tests/hash-chain-drift.test.ts.',
+  },
+  {
+    name: 'Merge Authority / Operating Layer',
+    ciJob: 'operating-layer-gate',
+    family: 'operating-layer',
+    evidence: 'CI job Operating Layer Gate runs pnpm test:operating-layer.',
   },
 ]
 
 /** Direct contexts. They already run on every PR to main and are not waived for docs. */
 export const SECRET_AUTHORITY_CONTEXTS = ['Gitleaks', 'TruffleHog OSS', 'Docker Secret Policy']
+
+/**
+ * Conditional jobs that are not canonical in this remediation.
+ * Ruleset activation stays blocked while this residual remains.
+ */
+export const CONDITIONAL_AUTHORITY_RESIDUAL = [
+  'IaC Security Scan',
+  'ML Tooling Gates',
+  'Ops Documentation Pack',
+  'AI Eval Gate',
+]
 
 /**
  * Must stay identical to pull_request.paths-ignore in .github/workflows/ci.yml.
@@ -74,7 +120,6 @@ const EXACT_DOCUMENTATION_PATHS = new Set([
   '.github/CODEOWNERS',
 ])
 
-/** Markdown under these trees can be imported, tested, or executed. */
 const CODE_TREE_PREFIXES = [
   'apps/',
   'packages/',
@@ -87,40 +132,25 @@ const CODE_TREE_PREFIXES = [
   'supabase/',
 ]
 
-/** A path segment with these names can influence schema, RLS, or migrations. */
 const OPERATIONAL_SEGMENTS = new Set(['migrations', 'migration', 'schema', 'drizzle', 'rls'])
 
-/**
- * Documentation that existing non-authority tooling reads.
- * Presence does not by itself make lint, tests, schema, RLS, migrations,
- * or affected build applicable. The check summary names the consumer
- * so a docs-only pass is not mistaken for those gates having run.
- */
-const DOCUMENTATION_CONSUMERS = [
-  {
-    id: 'governance-gate',
-    tool: 'tooling/governance/validate-governance-gate.ts',
-    matches: (p) => p.startsWith('docs/categories/platform-and-operations/platform/'),
-  },
-  {
-    id: 'ops-pack',
-    tool: 'tooling/ops/validate-ops-pack.ts',
-    matches: (p) => p.startsWith('ops/') || p === 'ARCHITECTURE.md' || p === 'SECURITY.md',
-  },
-  {
-    id: 'doc-consistency',
-    tool: 'tooling/validation/doc-consistency.ts',
-    matches: (p) =>
-      p.startsWith('docs/') ||
-      p.startsWith('content/') ||
-      p.startsWith('governance/') ||
-      p.startsWith('plans/') ||
-      p === 'README.md' ||
-      p === 'ARCHITECTURE.md' ||
-      p === 'CONTRIBUTING.md' ||
-      p === 'SECURITY.md',
-  },
+/** Markdown and policy trees read by the extracted governance validators. */
+const GOVERNANCE_DOC_PREFIXES = [
+  'docs/categories/platform-and-operations/',
+  'governance/',
+  'tooling/governance/',
 ]
+
+const GOVERNANCE_SCRIPT_PATHS = new Set([
+  'tooling/scripts/check-script-alias-regression.mjs',
+  'tooling/governance/validate-governance-gate.ts',
+  'scripts/validate-evidence-lifecycle-policy.ts',
+  'scripts/validate-truth-authority.ts',
+  'scripts/validate-auth-authority.ts',
+  'scripts/validate-ga-state.ts',
+  'scripts/validate-workspace-links.ts',
+  'tooling/governance/validate-control-manifests.ts',
+])
 
 export function normalizeRepoPath(input) {
   if (typeof input !== 'string') return null
@@ -175,33 +205,93 @@ export function isDocumentationOnlyPath(input) {
   return true
 }
 
-export function documentationConsumersFor(paths) {
-  const found = new Set()
-  for (const input of paths) {
-    const path = normalizeRepoPath(input)
-    if (!path) continue
-    for (const consumer of DOCUMENTATION_CONSUMERS) {
-      if (consumer.matches(path)) found.add(`${consumer.id}:${consumer.tool}`)
-    }
+function knownPath(input) {
+  const path = normalizeRepoPath(input)
+  if (!path || path.split('/').includes('..')) return null
+  return path
+}
+
+function requiresEngineering(path) {
+  return !isDocumentationOnlyPath(path)
+}
+
+function requiresGovernance(path) {
+  if (GOVERNANCE_DOC_PREFIXES.some((prefix) => path.startsWith(prefix))) return true
+  if (GOVERNANCE_SCRIPT_PATHS.has(path)) return true
+  if (isDocumentationOnlyPath(path)) return false
+  return true
+}
+
+function requiresInventory(path) {
+  if (
+    path.startsWith('apps/') ||
+    path.startsWith('packages/') ||
+    path.startsWith('services/') ||
+    path.startsWith('tooling/') ||
+    path.startsWith('.github/workflows/')
+  ) {
+    return true
   }
-  return [...found].sort()
+  if (/\.(test|spec)\.(ts|tsx|js|jsx)$/.test(path) || /(^|\/)test_[^/]*\.py$/.test(path)) return true
+  if (isDocumentationOnlyPath(path)) return false
+  return true
+}
+
+function requiresContracts(path) {
+  if (path.startsWith('tooling/contract-tests/')) return true
+  if (isDocumentationOnlyPath(path)) return false
+  return true
+}
+
+function requiresHashChain(path) {
+  if (path.startsWith('packages/db/') || path.startsWith('migrations/') || path.includes('hash-chain')) return true
+  if (isDocumentationOnlyPath(path)) return false
+  if (path.startsWith('docs/') || path.startsWith('ops/') || path.startsWith('apps/')) return false
+  return true
+}
+
+function requiresOperatingLayer(path) {
+  if (
+    path.startsWith('apps/console/') ||
+    path.startsWith('apps/control-plane/') ||
+    path.startsWith('apps/orchestrator-api/') ||
+    path.startsWith('tooling/contract-tests/operating-layer')
+  ) {
+    return true
+  }
+  if (isDocumentationOnlyPath(path)) return false
+  if (path.startsWith('apps/') || path.startsWith('packages/') || path.startsWith('services/')) return true
+  return true
+}
+
+const FAMILY_REQUIRES = {
+  engineering: requiresEngineering,
+  governance: requiresGovernance,
+  inventory: requiresInventory,
+  contracts: requiresContracts,
+  'hash-chain': requiresHashChain,
+  'operating-layer': requiresOperatingLayer,
 }
 
 export function classifyChangedPaths(paths) {
-  const list = Array.isArray(paths) ? paths : []
-  const normalized = list.map((path) => normalizeRepoPath(path))
-  const unproven = normalized.filter((path) => path == null || !isDocumentationOnlyPath(path))
-  const classification = list.length > 0 && unproven.length === 0 ? 'DOC_ONLY' : 'CODE_OR_UNKNOWN'
+  const list = Array.isArray(paths) ? paths.map((path) => knownPath(path)) : []
   const contexts = {}
   for (const context of CANONICAL_CONTEXTS) {
-    contexts[context.name] = classification === 'DOC_ONLY' ? 'NOT_APPLICABLE' : 'REQUIRES_EXECUTION'
+    const requires = FAMILY_REQUIRES[context.family]
+    const applicable =
+      list.length === 0 || list.some((path) => path == null || requires(path))
+    contexts[context.name] = applicable ? 'REQUIRES_EXECUTION' : 'NOT_APPLICABLE'
   }
+  const values = Object.values(contexts)
+  let classification = 'MIXED'
+  if (values.every((value) => value === 'NOT_APPLICABLE')) classification = 'ALL_NOT_APPLICABLE'
+  if (values.every((value) => value === 'REQUIRES_EXECUTION')) classification = 'CODE_OR_UNKNOWN'
   return {
     classification,
     contexts,
     secretSafety: 'APPLICABLE',
-    documentationConsumers: documentationConsumersFor(list),
-    ciSkippedByPathsIgnore: ciWillSkip(list),
+    ciSkippedByPathsIgnore: ciWillSkip(Array.isArray(paths) ? paths : []),
+    conditionalAuthorityResidual: CONDITIONAL_AUTHORITY_RESIDUAL,
   }
 }
 
@@ -212,80 +302,89 @@ function unresolvedEvidence(result) {
   return 'UNRESOLVED'
 }
 
+function verdictFor(context, fields) {
+  const evidence = fields.evidence
+  return {
+    name: context.name,
+    ciJob: context.ciJob,
+    family: context.family,
+    classifier: fields.classifier,
+    applicability: fields.applicability,
+    evidence,
+    conclusion: evidence === 'PASS' || evidence === 'NOT_APPLICABLE' ? 'success' : 'failure',
+    detail: fields.detail ?? context.evidence,
+  }
+}
+
 export function evaluateCiResults(results) {
   const source = results && typeof results === 'object' ? results : {}
   return CANONICAL_CONTEXTS.map((context) => {
     const evidence = unresolvedEvidence(source[context.ciJob])
-    return {
-      name: context.name,
-      ciJob: context.ciJob,
+    return verdictFor(context, {
       classifier: 'CODE_OR_UNKNOWN',
       applicability: 'REQUIRES_EXECUTION',
       evidence,
+      detail: `${context.evidence} Secret safety remains APPLICABLE (${SECRET_AUTHORITY_CONTEXTS.join(', ')}).`,
+    })
+  })
+}
+
+/**
+ * Overlay real executions onto a fast-path plan.
+ * A skipped job becomes NOT_APPLICABLE only when that invariant was already proven irrelevant.
+ */
+export function applyExecution(verdicts, execution) {
+  const source = execution && typeof execution === 'object' ? execution : {}
+  return verdicts.map((verdict) => {
+    const result = source[verdict.ciJob]
+    const ran = result != null && result !== '' && result !== 'skipped'
+    if (verdict.applicability === 'NOT_APPLICABLE' && !ran) return verdict
+    if (verdict.applicability === 'NOT_APPLICABLE' && result === 'success') return verdict
+    const evidence = unresolvedEvidence(ran ? result : result === 'skipped' ? 'skipped' : null)
+    return {
+      ...verdict,
+      classifier: 'CODE_OR_UNKNOWN',
+      applicability: 'REQUIRES_EXECUTION',
+      evidence: evidence === 'PASS' ? 'PASS' : evidence,
       conclusion: evidence === 'PASS' ? 'success' : 'failure',
-      detail: context.evidence,
+      detail:
+        evidence === 'PASS'
+          ? `${verdict.ciJob} completed with ${result}.`
+          : `${verdict.detail} Execution result: ${result || 'missing'}.`,
     }
   })
 }
 
-export function evaluateDocumentationOnly(classification) {
-  if (!classification || classification.classification !== 'DOC_ONLY') {
-    throw new Error('NOT_APPLICABLE requires classification DOC_ONLY')
-  }
-  const consumers = classification.documentationConsumers ?? []
-  const consumerLine =
-    consumers.length === 0
-      ? 'No known non-authority documentation consumer matched these paths.'
-      : `Known non-authority documentation consumers were not executed by this surface: ${consumers.join(', ')}.`
-  return CANONICAL_CONTEXTS.map((context) => ({
-    name: context.name,
-    ciJob: context.ciJob,
-    classifier: 'DOC_ONLY',
-    applicability: 'NOT_APPLICABLE',
-    evidence: 'NOT_APPLICABLE',
-    conclusion: 'success',
-    detail: `${context.evidence} Secret safety remains APPLICABLE (${SECRET_AUTHORITY_CONTEXTS.join(', ')}). ${consumerLine}`,
-  }))
-}
-
-/**
- * Fast path, before CI has a chance to run.
- * DOC_ONLY publishes successful NOT_APPLICABLE contexts.
- * CODE_OR_UNKNOWN that CI will not run publishes failure (unresolved), never success.
- * CODE_OR_UNKNOWN that CI will run publishes nothing here; the CI reporter does.
- */
 export function planFastPath(paths) {
   const list = Array.isArray(paths) ? paths : []
   const classification = classifyChangedPaths(list)
-  if (list.length === 0) {
-    const verdicts = CANONICAL_CONTEXTS.map((context) => ({
-      name: context.name,
-      ciJob: context.ciJob,
+  const verdicts = CANONICAL_CONTEXTS.map((context) => {
+    const applicability = classification.contexts[context.name]
+    if (applicability === 'NOT_APPLICABLE') {
+      return verdictFor(context, {
+        classifier: 'PROVEN_IRRELEVANT',
+        applicability,
+        evidence: 'NOT_APPLICABLE',
+        detail: `${context.evidence} Secret safety remains APPLICABLE (${SECRET_AUTHORITY_CONTEXTS.join(', ')}).`,
+      })
+    }
+    return verdictFor(context, {
       classifier: 'CODE_OR_UNKNOWN',
-      applicability: 'REQUIRES_EXECUTION',
+      applicability,
       evidence: 'UNRESOLVED',
-      conclusion: 'failure',
-      detail: 'Empty change set is unknown. Unknown does not skip and does not pass.',
-    }))
-    return { action: 'PUBLISH', verdicts, classification }
-  }
-  if (classification.classification === 'DOC_ONLY') {
-    return { action: 'PUBLISH', verdicts: evaluateDocumentationOnly(classification), classification }
-  }
-  if (classification.ciSkippedByPathsIgnore) {
-    const verdicts = CANONICAL_CONTEXTS.map((context) => ({
-      name: context.name,
-      ciJob: context.ciJob,
-      classifier: 'CODE_OR_UNKNOWN',
-      applicability: 'REQUIRES_EXECUTION',
-      evidence: 'UNRESOLVED',
-      conclusion: 'failure',
       detail:
-        'Classifier could not prove the invariant is unaffected, and CI paths-ignore will not execute it. Unknown does not skip and does not pass.',
-    }))
+        'This invariant is applicable and CI paths-ignore will not execute it. Unknown does not skip and does not pass.',
+    })
+  })
+
+  if (list.length === 0) {
     return { action: 'PUBLISH', verdicts, classification }
   }
-  return { action: 'DEFER_TO_CI', verdicts: [], classification }
+  const anyRequired = Object.values(classification.contexts).some((value) => value === 'REQUIRES_EXECUTION')
+  if (anyRequired && !classification.ciSkippedByPathsIgnore) {
+    return { action: 'DEFER_TO_CI', verdicts: [], classification }
+  }
+  return { action: 'PUBLISH', verdicts, classification }
 }
 
 export function verdictToCheckRun(verdict, headSha) {
@@ -293,8 +392,8 @@ export function verdictToCheckRun(verdict, headSha) {
     throw new Error('head SHA is required')
   }
   if (verdict.evidence === 'NOT_APPLICABLE') {
-    if (verdict.classifier !== 'DOC_ONLY' || verdict.applicability !== 'NOT_APPLICABLE') {
-      throw new Error(`NOT_APPLICABLE requires a DOC_ONLY classifier for ${verdict.name}`)
+    if (verdict.classifier !== 'PROVEN_IRRELEVANT' || verdict.applicability !== 'NOT_APPLICABLE') {
+      throw new Error(`NOT_APPLICABLE requires a PROVEN_IRRELEVANT classifier for ${verdict.name}`)
     }
   }
   const success = verdict.evidence === 'PASS' || verdict.evidence === 'NOT_APPLICABLE'
@@ -312,6 +411,7 @@ export function verdictToCheckRun(verdict, headSha) {
         `evidence: ${verdict.evidence}`,
         `classifier: ${verdict.classifier}`,
         `applicability: ${verdict.applicability}`,
+        `family: ${verdict.family}`,
         `ciJob: ${verdict.ciJob}`,
         verdict.detail,
       ].join('\n\n'),

@@ -672,6 +672,56 @@ jobs:
           path: tests/load/
           retention-days: 30
 
+  # Inventory lock only. The same steps remain inside Governance Gates.
+  # This job is the authority source and does not collect DORA, cost, or release evidence.
+  repository-inventory:
+    name: Repository Inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
+      - name: Regenerate inventory
+        run: pnpm inventory:generate
+      - name: Enforce committed inventory lock
+        run: |
+          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
+          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
+          if [ -n "$SUBSTANTIVE" ]; then
+            echo "Substantive inventory drift detected:"
+            echo "$DIFF"
+            exit 1
+          fi
+          echo "Inventory check passed (date-stamp differences ignored)"
+
+  # Merge-critical source-tree validators extracted from Governance Gates.
+  # DORA, cost, onboarding, scorecards, release proof, and runtime evidence stay out.
+  governance-integrity:
+    name: Governance Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Script alias regression guard
+        run: node tooling/scripts/check-script-alias-regression.mjs
+      - name: Governance fail-closed gate
+        run: pnpm exec tsx tooling/governance/validate-governance-gate.ts
+      - name: Evidence lifecycle policy gate
+        run: pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts
+      - name: Truth authority validation
+        run: pnpm exec tsx scripts/validate-truth-authority.ts
+      - name: Auth authority validation
+        run: pnpm exec tsx scripts/validate-auth-authority.ts
+      - name: GA state machine validation
+        run: pnpm exec tsx scripts/validate-ga-state.ts
+      - name: Workspace dependency integrity
+        run: pnpm exec tsx scripts/validate-workspace-links.ts
+      - name: Control manifest validation
+        run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
+
   # Canonical merge-authority contexts. This job reports; it is not itself a
   # required context. It does not run on docs-only PRs because CI paths-ignore
   # skips the workflow. The Merge Authority workflow covers that case.
@@ -686,6 +736,11 @@ jobs:
       - sage-postgres-concurrency
       - sage-live-postgres
       - build
+      - contract-tests
+      - repository-inventory
+      - governance-integrity
+      - hash-chain-drift
+      - operating-layer-gate
     if: always() && !cancelled()
     permissions:
       contents: read
@@ -706,4 +761,9 @@ jobs:
           MA_RESULT_RLS: ${{ needs.sage-postgres-concurrency.result }}
           MA_RESULT_MIGRATION: ${{ needs.sage-live-postgres.result }}
           MA_RESULT_BUILD: ${{ needs.build.result }}
+          MA_RESULT_CONTRACTS: ${{ needs.contract-tests.result }}
+          MA_RESULT_INVENTORY: ${{ needs.repository-inventory.result }}
+          MA_RESULT_GOVERNANCE: ${{ needs.governance-integrity.result }}
+          MA_RESULT_HASH: ${{ needs.hash-chain-drift.result }}
+          MA_RESULT_OPERATING: ${{ needs.operating-layer-gate.result }}
         run: node tooling/ci/merge-authority/publish.mjs publish-ci-results

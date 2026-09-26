@@ -1,41 +1,67 @@
 # CI authority surface
 
-Decision: architecture B. Canonical merge-authority contexts are published by a reporter. The existing CI and secret-scan jobs keep their names and remain the engineering implementation.
+Architecture B stays. Existing jobs implement validation. Canonical `Merge Authority / ...` checks publish the merge contract. This remediation adds the merge-critical contexts Command found missing. It does not require the whole CI workflow or the mixed Governance Gates job.
 
-Architecture A would make today's job display names the required contract. Those names already collide (`Lint & Typecheck`, `Unit Tests`, `Red-Team Adversarial`), and CI `paths-ignore` means a documentation-only pull request never creates them. Renaming the jobs would not fix that, and it would couple every workflow refactor to the future ruleset.
+## Canonical contexts
 
-## What reports
+| Context | Source job |
+| --- | --- |
+| `Merge Authority / Lint & Typecheck` | `lint-and-typecheck` |
+| `Merge Authority / Unit Tests` | `test` (`pnpm test:coverage`) |
+| `Merge Authority / Schema Integrity` | `schema-drift` |
+| `Merge Authority / PostgreSQL RLS` | `sage-postgres-concurrency` |
+| `Merge Authority / Migration Chain` | `sage-live-postgres` |
+| `Merge Authority / Affected Build` | `build` (`turbo run build --affected`) |
+| `Merge Authority / Architectural Contracts` | `contract-tests` |
+| `Merge Authority / Repository Inventory` | `repository-inventory` |
+| `Merge Authority / Governance Integrity` | `governance-integrity` |
+| `Merge Authority / Hash Chain Integrity` | `hash-chain-drift` |
+| `Merge Authority / Operating Layer` | `operating-layer-gate` |
 
-| Context | Underlying CI job | Docs-only result |
-| --- | --- | --- |
-| `Merge Authority / Lint & Typecheck` | `lint-and-typecheck` | `NOT_APPLICABLE` |
-| `Merge Authority / Unit Tests` | `test` (`pnpm test:coverage`) | `NOT_APPLICABLE` |
-| `Merge Authority / Schema Integrity` | `schema-drift` | `NOT_APPLICABLE` |
-| `Merge Authority / PostgreSQL RLS` | `sage-postgres-concurrency` | `NOT_APPLICABLE` |
-| `Merge Authority / Migration Chain` | `sage-live-postgres` | `NOT_APPLICABLE` |
-| `Merge Authority / Affected Build` | `build` (`turbo run build --affected`) | `NOT_APPLICABLE` |
+Direct secret contexts, unchanged: `Gitleaks`, `TruffleHog OSS`, `Docker Secret Policy`.
 
-`Merge Authority / Affected Build` is not a portfolio build. `PORTFOLIO_BUILD_AUTHORITY` stays unresolved. `Merge Authority / Unit Tests` does not retire `pnpm test:fast`. `TEST_FAST_SUBSET` stays unresolved.
+`Merge Authority / Affected Build` is affected closure only. `PORTFOLIO_BUILD_AUTHORITY` stays unresolved. Unit tests do not retire `pnpm test:fast`. `TEST_FAST_SUBSET` stays unresolved. `E2` stays blocked.
 
-Secret safety stays on the jobs that already run for every pull request to `main`: `Gitleaks`, `TruffleHog OSS`, and `Docker Secret Policy`. A wrapper check would either duplicate the scans or be able to pass before they finish. The classifier does not waive them.
+## Auth boundary
+
+PostgreSQL RLS is database row-access enforcement. Auth authority is the application and platform authorization-truth check inside Governance Integrity (`scripts/validate-auth-authority.ts`). A passing RLS context does not prove auth authority, and a passing Governance Integrity context does not prove row-level security.
+
+## Governance Integrity steps
+
+Included:
+
+- Script alias regression guard
+- Governance fail-closed gate
+- Evidence lifecycle policy gate
+- Truth authority validation
+- Auth authority validation
+- GA state machine validation
+- Workspace dependency integrity
+- Control manifest validation
+
+Left in Governance Gates and outside this authority context: tier focus labels, maturity summary, GA gate check, DORA, cost attribution, onboarding KPIs, strategic resilience, runtime data residency, release strict validation, platform proof generation, proof artifact verification, runtime budget, and the report upload. The embedded contract-test step and the inventory lock also remain in Governance Gates. Authority uses the standalone contract-test job and the dedicated inventory job. Removing the embedded copies is a later deduplication, not this change.
 
 ## Classifier
 
-`DOC_ONLY` only when every changed path is proven unable to affect the six engineering invariants:
+Applicability is per invariant.
 
-- `LICENSE`, `LICENSE.md`, `.gitignore`, `.editorconfig`, `.github/CODEOWNERS`, or
-- a `.md` / `.markdown` file that is outside `apps/`, `packages/`, `services/`, `tooling/`, `scripts/`, `.github/`, `migrations/`, `db/`, and `supabase/`, and whose path segments are not `schema`, `migration`, `migrations`, `drizzle`, or `rls`.
+- Engineering (lint, unit tests, schema, RLS, migration chain, affected build) is `NOT_APPLICABLE` only for a proven documentation path.
+- Governance Integrity stays applicable for `docs/categories/platform-and-operations/`, `governance/`, `tooling/governance/`, and the validator scripts themselves. Other proven documentation can be irrelevant to it.
+- Repository Inventory stays applicable for `apps/`, `packages/`, `services/`, `tooling/`, and `.github/workflows/`, because those inputs change the committed inventory.
+- Architectural contracts stay applicable for anything that is not proven documentation, and for `tooling/contract-tests/`.
+- Hash chain stays applicable for `packages/db/`, `migrations/`, and hash-chain paths.
+- Operating layer stays applicable for console, control-plane, orchestrator-api, and other application or package code.
 
-Anything else, including an empty change set, is `CODE_OR_UNKNOWN`.
+An empty change set or any path that is not proven irrelevant is `REQUIRES_EXECUTION`. Secret safety stays applicable for every pull request.
 
-`CODE_OR_UNKNOWN` defers to the CI reporter when CI will run. When CI `paths-ignore` will skip the workflow anyway, the fast path publishes `UNRESOLVED` failure. It does not publish success.
+When CI will run, the reporter waits for the source jobs. When CI `paths-ignore` skips the workflow, proven-irrelevant contexts publish `NOT_APPLICABLE`. Applicable governance integrity and inventory locks execute in the Merge Authority workflow. Any other applicable invariant that CI will not run publishes `UNRESOLVED` failure. A skipped job is not `NOT_APPLICABLE` unless the classifier already proved that invariant irrelevant.
 
-A skipped, cancelled, missing, or failed CI job never becomes `NOT_APPLICABLE` or success.
+## Conditional residual
 
-Documentation under `docs/` can still be read by governance, ops-pack, and doc-consistency tooling. Those tools are not this authority surface. The check summary names them when they match, and secret scanning still runs.
+`CONDITIONAL_AUTHORITY_RESIDUAL`
+
+These jobs are not canonical contexts in this change: `IaC Security Scan`, `ML Tooling Gates`, `Ops Documentation Pack`, `AI Eval Gate`. They stay path- or workflow-scoped inside CI. Ruleset activation is not authorized while they remain outside the authority surface.
 
 ## Ruleset
 
-This slice does not activate `main-merge-authority`, does not enable required status checks, and does not modify Reliability Guard.
-
-`E2` stays `E2_BLOCKED_AUTHORITY`.
+This change does not activate `main-merge-authority` and does not modify Reliability Guard.

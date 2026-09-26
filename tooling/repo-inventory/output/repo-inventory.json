@@ -3,9 +3,9 @@
   "appCount": 28,
   "packageCount": 224,
   "workspacePackageCount": 258,
-  "workflowCount": 54,
-  "contractTestCount": 286,
-  "tsTestFileCount": 2686,
+  "workflowCount": 55,
+  "contractTestCount": 287,
+  "tsTestFileCount": 2687,
   "pythonTestFileCount": 35,
   "apps": [
     {
@@ -884,6 +884,7 @@
     "game-day.yml",
     "gitops-deploy.yml",
     "lighthouse.yml",
+    "merge-authority.yml",
     "nzila-ga-gate.yml",
     "nzila-governance.yml",
     "nzila-playbook-runner.yml",
