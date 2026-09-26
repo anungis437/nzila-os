@@ -1,5 +1,14 @@
 # Nzila OS — Final Institutional Identity & Runtime Integrity Authority
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-05-09 → 2026-05-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `pnpm validate:runtime-integrity` resolves this directory by path; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 > Canonical authority layer for **runtime substrate hardening**. This layer closes the final distance between **doctrinal convergence** and **lived runtime determinism** by eliminating identity ambiguity, role lineage drift, organization resolution drift, workspace substrate drift, and silent runtime collapse across the Nzila OS ecosystem.
 
 This layer exists because the prior phases — doctrine, governance, infrastructure, maturity, monetization, runtime, and operational topology — have all converged. The remaining issues are no longer architectural; they are **institutional identity integrity** issues.

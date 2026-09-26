@@ -48,4 +48,4 @@ Mis-categorizing UE as labor AI SaaS commoditizes it. Categorizing it as institu
 
 ## 5. Authority
 
-Anchored to [Institutional Operational Cognition Doctrine](../../nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md) and [Procurement & Governance Positioning Refactor](../../nzila-cognition-doctrine/procurement-governance-positioning-refactor.md).
+Anchored to [Institutional Operational Cognition Doctrine](../../../historical-archive/archive/iterations/nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md) and [Procurement & Governance Positioning Refactor](../../../historical-archive/archive/iterations/nzila-cognition-doctrine/procurement-governance-positioning-refactor.md).

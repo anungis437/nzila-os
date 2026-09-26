@@ -66,4 +66,4 @@ Sales narratives must:
 
 ## 10. Authority
 
-Anchored to [Full Marketing & Category Positioning Refactor](full-marketing-category-positioning-refactor.md) and [Procurement Maturity Elevation](../../nzila-maturity-elevation/procurement-maturity-elevation.md).
+Anchored to [Full Marketing & Category Positioning Refactor](full-marketing-category-positioning-refactor.md) and [Procurement Maturity Elevation](../../../historical-archive/archive/iterations/nzila-maturity-elevation/procurement-maturity-elevation.md).

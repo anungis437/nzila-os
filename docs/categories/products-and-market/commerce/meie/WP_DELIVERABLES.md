@@ -98,9 +98,9 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 **Livrables :**
 
 - [`docs/commerce/DOMAIN_MODEL_DRAFT.md`](../DOMAIN_MODEL_DRAFT.md)
-- [`packages/commerce-core/src/types/index.ts`](../../packages/commerce-core/src/types/index.ts)
-- [`packages/commerce-core/src/enums.ts`](../../packages/commerce-core/src/enums.ts)
-- [`packages/commerce-core/src/schemas/index.ts`](../../packages/commerce-core/src/schemas/index.ts)
+- [`packages/commerce-core/src/types/index.ts`](../../../../../packages/commerce-core/src/types/index.ts)
+- [`packages/commerce-core/src/enums.ts`](../../../../../packages/commerce-core/src/enums.ts)
+- [`packages/commerce-core/src/schemas/index.ts`](../../../../../packages/commerce-core/src/schemas/index.ts)
 
 ### 3.3 Phase 3 — Moteur central (Terminée)
 
@@ -114,10 +114,10 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 
 **Livrables :**
 
-- [`packages/pricing-engine/`](../../packages/pricing-engine/) — 10 fonctions exportées, 12 types
-- [`packages/commerce-state/`](../../packages/commerce-state/) — machines à états déclaratives
-- [`packages/commerce-audit/`](../../packages/commerce-audit/) — entrées d'audit avec chaînage de hachage
-- [`packages/commerce-events/`](../../packages/commerce-events/) — bus d'événements + sagas
+- [`packages/pricing-engine/`](../../../../../packages/pricing-engine/) — 10 fonctions exportées, 12 types
+- [`packages/commerce-state/`](../../../../../packages/commerce-state/) — machines à états déclaratives
+- [`packages/commerce-audit/`](../../../../../packages/commerce-audit/) — entrées d'audit avec chaînage de hachage
+- [`packages/commerce-events/`](../../../../../packages/commerce-events/) — bus d'événements + sagas
 
 ### 3.4 Phase 4 — Couche de gouvernance (Terminée)
 
@@ -131,9 +131,9 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 
 **Livrables :**
 
-- [`packages/commerce-governance/`](../../packages/commerce-governance/) — 7 gardes de gouvernance
-- [`packages/commerce-evidence/`](../../packages/commerce-evidence/) — constructeur de paquets de preuves
-- [`packages/commerce-observability/`](../../packages/commerce-observability/) — métriques + spans
+- [`packages/commerce-governance/`](../../../../../packages/commerce-governance/) — 7 gardes de gouvernance
+- [`packages/commerce-evidence/`](../../../../../packages/commerce-evidence/) — constructeur de paquets de preuves
+- [`packages/commerce-observability/`](../../../../../packages/commerce-observability/) — métriques + spans
 
 ### 3.5 Phase 5 — Adaptateur Shop Quoter (En cours)
 
@@ -147,7 +147,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 
 **Livrables :**
 
-- [`apps/flow/`](../../apps/flow/) — adaptateur complet (supersède `@nzila/shop-quoter`)
+- [`apps/flow/`](../../../../../apps/flow/) — adaptateur complet (supersède `@nzila/shop-quoter`)
 - [`docs/commerce/IRAP_TECHNICAL_DESIGN.md`](../IRAP_TECHNICAL_DESIGN.md) — conception technique IRAP
 
 ---

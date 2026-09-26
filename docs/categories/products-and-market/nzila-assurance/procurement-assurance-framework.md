@@ -1,6 +1,6 @@
 # Procurement Assurance Framework
 
-> **Status:** Canonical assurance · **Layer:** Procurement-grade evidence · **Inherits:** [institutional-certification-framework.md](institutional-certification-framework.md), [automated-governance-evidence-system.md](automated-governance-evidence-system.md), [../nzila-governance/investor-and-procurement-narrative-alignment.md](../nzila-governance/investor-and-procurement-narrative-alignment.md)
+> **Status:** Canonical assurance · **Layer:** Procurement-grade evidence · **Inherits:** [institutional-certification-framework.md](institutional-certification-framework.md), [automated-governance-evidence-system.md](automated-governance-evidence-system.md), [docs/categories/historical-archive/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md](../../historical-archive/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md)
 
 This document translates Nzila doctrine and assurance evidence into the **language and shape that institutional procurement requires**: governance assurance, AI assurance, operational assurance, continuity assurance, deployment assurance, modernization risk assurance.
 
@@ -13,7 +13,7 @@ It exists because procurement officers, regulators, and institutional buyers nee
 Procurement assurance at Nzila is:
 
 - **Evidence-led** — assurance is anchored in artifacts from the [evidence pipeline](governance-evidence-pipeline-architecture.md), not narrative
-- **Doctrine-consistent** — language honors [../nzila-governance/investor-and-procurement-narrative-alignment.md](../nzila-governance/investor-and-procurement-narrative-alignment.md)
+- **Doctrine-consistent** — language honors [docs/categories/historical-archive/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md](../../historical-archive/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md)
 - **Operationally grounded** — claims tie to running system behavior, not roadmap
 - **Conservative** — assurance is offered only where it can be defended
 - **Categorically anti-surveillance** — assurance never frames Nzila as a surveillance, scoring, or productivity-extraction vendor
@@ -26,15 +26,15 @@ The assurance posture is operating-mode, not sales-mode.
 
 | Procurement Concern | Doctrinal Anchor | Assurance Source |
 |---------------------|------------------|------------------|
-| Governance integrity | [governance-safe intelligence](../nzila-ip/governance-safe-intelligence.md) | AI evidence, governance evidence |
-| AI risk | [continuity-safe AI governance](../nzila-governance/continuity-safe-ai-governance.md) | AI evidence, AI governance review records |
-| Operational disruption | [institutional risk philosophy](../nzila-ip/institutional-risk-philosophy.md), [continuity-safe deployment governance](../nzila-governance/continuity-safe-deployment-governance.md) | Deployment evidence, pacing evidence |
-| Workforce trust | [governance-safe intelligence](../nzila-ip/governance-safe-intelligence.md), aggregation stance | Anti-surveillance evidence, schema audits |
-| Continuity risk | [continuity ontology](../nzila-ip/continuity-ontology.md) | Continuity evidence, isolation evidence |
-| Deployment safety | [continuity-safe deployment governance](../nzila-governance/continuity-safe-deployment-governance.md) | Deployment evidence, environment governance evidence |
-| Modernization risk | [institutional modernization methodology](../nzila-ip/institutional-modernization-methodology.md) | Pacing evidence, pilot evidence |
-| Vendor lock-in | [institutional memory governance](../nzila-ip/institutional-memory-governance.md) | Portability evidence, retention evidence |
-| Explainability | [governance-safe intelligence](../nzila-ip/governance-safe-intelligence.md) | AI explainability evidence |
+| Governance integrity | [governance-safe intelligence](../../historical-archive/archive/iterations/nzila-ip/governance-safe-intelligence.md) | AI evidence, governance evidence |
+| AI risk | [continuity-safe AI governance](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-ai-governance.md) | AI evidence, AI governance review records |
+| Operational disruption | [institutional risk philosophy](../../historical-archive/archive/iterations/nzila-ip/institutional-risk-philosophy.md), [continuity-safe deployment governance](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md) | Deployment evidence, pacing evidence |
+| Workforce trust | [governance-safe intelligence](../../historical-archive/archive/iterations/nzila-ip/governance-safe-intelligence.md), aggregation stance | Anti-surveillance evidence, schema audits |
+| Continuity risk | [continuity ontology](../../historical-archive/archive/iterations/nzila-ip/continuity-ontology.md) | Continuity evidence, isolation evidence |
+| Deployment safety | [continuity-safe deployment governance](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-deployment-governance.md) | Deployment evidence, environment governance evidence |
+| Modernization risk | [institutional modernization methodology](../../historical-archive/archive/iterations/nzila-ip/institutional-modernization-methodology.md) | Pacing evidence, pilot evidence |
+| Vendor lock-in | [institutional memory governance](../../historical-archive/archive/iterations/nzila-ip/institutional-memory-governance.md) | Portability evidence, retention evidence |
+| Explainability | [governance-safe intelligence](../../historical-archive/archive/iterations/nzila-ip/governance-safe-intelligence.md) | AI explainability evidence |
 | Auditability | this framework, evidence pipeline | Signed retention, audit-trail surfaces |
 
 ---
@@ -104,7 +104,7 @@ For pilot engagements:
 
 ## 4. Procurement Language Discipline
 
-Procurement materials use approved language from [../nzila-governance/investor-and-procurement-narrative-alignment.md](../nzila-governance/investor-and-procurement-narrative-alignment.md). Specifically:
+Procurement materials use approved language from [docs/categories/historical-archive/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md](../../historical-archive/archive/iterations/nzila-governance/investor-and-procurement-narrative-alignment.md). Specifically:
 
 - "Operational trust infrastructure" (not "platform")
 - "Governance-safe modernization" (not "transformation")

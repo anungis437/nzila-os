@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-09-19T04:46:08.890Z",
+  "generatedAt": "2026-09-24T13:00:59.074Z",
   "note": "Deterministic dry-run only — does not emit or apply SQL. readyForExplicitGrant lists tables whose CLOSED classification and privilege sets are fully resolved and internally consistent; pendingReview lists NEEDS_REVIEW tables excluded from the plan. The real explicit-GRANT migration must still refuse to run while pendingReview.length > 0. riskSignals are REVIEW flags, not automatic failures — a mixed-principal table or a tenant DELETE grant can be entirely legitimate; no invariant here forbids them.",
-  "totalManifestEntries": 798,
-  "readyForExplicitGrantCount": 798,
+  "totalManifestEntries": 805,
+  "readyForExplicitGrantCount": 805,
   "pendingReviewCount": 0,
-  "tenantGrantedTableCount": 339,
-  "systemGrantedTableCount": 64,
+  "tenantGrantedTableCount": 346,
+  "systemGrantedTableCount": 71,
   "tenantOperationTotals": {
-    "SELECT": 322,
-    "INSERT": 283,
-    "UPDATE": 189,
-    "DELETE": 98
+    "SELECT": 329,
+    "INSERT": 290,
+    "UPDATE": 192,
+    "DELETE": 101
   },
   "systemOperationTotals": {
-    "SELECT": 55,
-    "INSERT": 30,
-    "UPDATE": 22,
+    "SELECT": 64,
+    "INSERT": 33,
+    "UPDATE": 24,
     "DELETE": 0
   },
   "riskSignals": {
@@ -25,6 +25,7 @@
       "arbitration_decisions",
       "arbitration_precedents",
       "arbitrations",
+      "audit_logs",
       "bank_accounts",
       "bank_reconciliation",
       "bank_reconciliations",
@@ -73,6 +74,7 @@
       "grievances",
       "hazard_reports",
       "in_app_notifications",
+      "integration_registry",
       "joint_hs_committees",
       "kpi_configurations",
       "meeting_rooms",
@@ -89,6 +91,7 @@
       "notifications",
       "org_configurations",
       "organization_members",
+      "organization_users",
       "organizing_campaigns",
       "pay_equity_exercises",
       "payment_cycles",
@@ -122,33 +125,40 @@
     "mixedPrincipalTables": [
       "alert_executions",
       "alert_rules",
+      "audit_logs",
       "billing_accounts",
       "calendars",
       "campaigns",
       "collective_agreements",
       "commercial_contracts",
       "communication_preferences",
+      "compliance_snapshots",
       "consent_records",
       "contribution_rates",
       "data_subject_access_requests",
       "deadline_audit_events",
       "deadline_reminders",
+      "domain_events",
       "dues_assignments",
       "employer_execution_artifacts",
       "employer_execution_compliance_events",
       "employer_execution_replays",
+      "evidence_packs",
       "external_data_sync_log",
       "fee_adjustments",
       "geofence_events",
       "grievance_deadlines",
       "holidays",
+      "integration_idempotency_keys",
       "integration_partners",
+      "integration_registry",
       "integration_webhooks",
       "location_tracking",
       "message_log",
       "notification_delivery_log",
       "notification_queue",
       "organization_members",
+      "organization_users",
       "organizations",
       "payments",
       "per_capita_remittances",
@@ -166,11 +176,7 @@
       "user_notification_preferences",
       "workbooks"
     ],
-    "systemOnlyBroadSystemDml": [
-      "council_elections",
-      "reserved_matter_votes",
-      "union_density"
-    ],
+    "systemOnlyBroadSystemDml": ["council_elections", "reserved_matter_votes", "union_density"],
     "globalReferenceDataWithMutations": [
       "arbitration_decisions",
       "case_studies",
@@ -257,9 +263,7 @@
     {
       "table": "account_mappings",
       "classification": "MIXED_GLOBAL_TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -295,21 +299,13 @@
     {
       "table": "ai_clause_reasonings",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "ai_copilot_sessions",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -333,19 +329,13 @@
     {
       "table": "ai_grievance_triages",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "ai_insight_reports",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -369,9 +359,7 @@
     {
       "table": "ai_safety_filters",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
@@ -383,10 +371,7 @@
     {
       "table": "ai_usage_metrics",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -410,12 +395,8 @@
     {
       "table": "alert_executions",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["INSERT"]
     },
     {
       "table": "alert_recipients",
@@ -426,64 +407,43 @@
     {
       "table": "alert_rules",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "allocation_basis_snapshots",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "allocation_rule_versions",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "allocation_rules",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "allocation_run_lines",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "allocation_runs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "analytics_metrics",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -495,12 +455,7 @@
     {
       "table": "anti_scab_violations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -512,11 +467,7 @@
     {
       "table": "api_integrations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -528,34 +479,19 @@
     {
       "table": "arbitration_decisions",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "arbitration_precedents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "arbitrations",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -589,6 +525,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "audit_logs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
+    },
+    {
       "table": "automation_execution_log",
       "classification": "LATENT_UNREACHABLE",
       "tenantPrivileges": [],
@@ -598,9 +540,7 @@
       "table": "automation_rules",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "automation_schedules",
@@ -641,12 +581,7 @@
     {
       "table": "bank_accounts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -658,23 +593,13 @@
     {
       "table": "bank_reconciliation",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "bank_reconciliations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -686,23 +611,13 @@
     {
       "table": "bargaining_notes",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "bargaining_proposals",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -714,12 +629,7 @@
     {
       "table": "bargaining_units",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -743,14 +653,8 @@
     {
       "table": "billing_accounts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "billing_adjustments",
@@ -773,18 +677,13 @@
     {
       "table": "billing_periods",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "billing_subscriptions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -808,11 +707,7 @@
     {
       "table": "board_packet_distributions",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -830,11 +725,7 @@
     {
       "table": "board_packets",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -852,12 +743,7 @@
     {
       "table": "break_policies",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -869,9 +755,7 @@
     {
       "table": "budget_pool",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -889,12 +773,7 @@
     {
       "table": "calendar_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -906,29 +785,14 @@
     {
       "table": "calendars",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "campaigns",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "card_signing_events",
@@ -939,20 +803,13 @@
     {
       "table": "case_documents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "case_studies",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -964,12 +821,7 @@
     {
       "table": "cba_clauses",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -987,60 +839,37 @@
     {
       "table": "cba_intel_agreements",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_benchmark_snapshots",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_clauses",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_documents",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_extraction_runs",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_findings",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -1052,56 +881,37 @@
     {
       "table": "cba_intel_ingestion_jobs",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_review_decisions",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_sources",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_intel_wage_adjustments",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "cba_rule_set_items",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "cba_rule_versions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -1143,39 +953,25 @@
     {
       "table": "chargeback_statements",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "chart_of_accounts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "chat_messages",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "chat_sessions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -1193,12 +989,7 @@
     {
       "table": "claim_deadlines",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -1210,29 +1001,19 @@
     {
       "table": "claim_updates",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "claims",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "clause_comparisons",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
@@ -1244,19 +1025,13 @@
     {
       "table": "clause_embeddings",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "clause_library_tags",
       "classification": "MULTI_PARTY_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -1287,9 +1062,7 @@
       "table": "clc_organization_sync_log",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "clc_per_capita_benchmarks",
@@ -1300,21 +1073,13 @@
     {
       "table": "clc_remittance_mapping",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "clc_sync_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -1338,12 +1103,7 @@
     {
       "table": "cms_media_library",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -1355,12 +1115,7 @@
     {
       "table": "cms_pages",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -1372,87 +1127,49 @@
     {
       "table": "cnesst_filings",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "collective_agreements",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "commercial_contracts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["INSERT", "UPDATE"]
     },
     {
       "table": "committee_action_items",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "committee_documents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "committee_intelligence_snapshots",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "committee_meeting_attendees",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "committee_meetings",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -1464,12 +1181,7 @@
     {
       "table": "committees",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -1487,17 +1199,8 @@
     {
       "table": "communication_preferences",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "communication_preferences_phase4",
@@ -1520,10 +1223,14 @@
     {
       "table": "compliance_alerts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
+    },
+    {
+      "table": "compliance_snapshots",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "compliance_validations",
@@ -1564,21 +1271,14 @@
     {
       "table": "congress_memberships",
       "classification": "MULTI_PARTY_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "consent_records",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["INSERT"]
     },
     {
       "table": "continuing_education",
@@ -1595,19 +1295,13 @@
     {
       "table": "contract_covered_orgs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "contract_line_items",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -1619,23 +1313,13 @@
     {
       "table": "contribution_rates",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "cookie_consents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -1653,62 +1337,38 @@
     {
       "table": "correspondence",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "correspondence_audit_trail",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "correspondence_recipients",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "cost_centers",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "cost_of_living_data",
       "classification": "GLOBAL_REFERENCE_DATA",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "council_elections",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "country_address_formats",
@@ -1719,21 +1379,13 @@
     {
       "table": "course_registrations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "course_sessions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -1800,24 +1452,18 @@
       "table": "customer_nps_surveys",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "customer_onboarding_milestones",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "data_aggregation_consent",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -1829,10 +1475,7 @@
     {
       "table": "data_classification_policy",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -1850,9 +1493,7 @@
     {
       "table": "data_quality_warnings",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -1870,15 +1511,8 @@
     {
       "table": "data_subject_access_requests",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "deadline_alerts",
@@ -1889,13 +1523,8 @@
     {
       "table": "deadline_audit_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["INSERT"]
     },
     {
       "table": "deadline_extensions",
@@ -1918,15 +1547,8 @@
     {
       "table": "deadline_reminders",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "deadline_rules",
@@ -1937,10 +1559,7 @@
     {
       "table": "defensibility_packs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -1958,54 +1577,37 @@
     {
       "table": "dispatch_assignments",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "dispatch_requests",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "dispatch_rules",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "document_access_grants",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "document_folders",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "document_links",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -2017,42 +1619,31 @@
     {
       "table": "document_signers",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "document_versions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "documents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
+    },
+    {
+      "table": "domain_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "donation_campaigns",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -2082,12 +1673,8 @@
     {
       "table": "dues_assignments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "dues_policies",
@@ -2098,12 +1685,7 @@
     {
       "table": "dues_rates",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -2115,12 +1697,7 @@
     {
       "table": "dues_transactions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -2144,20 +1721,13 @@
     {
       "table": "duplicate_group_members",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "duplicate_groups",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -2181,74 +1751,44 @@
     {
       "table": "employer_communications",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_contacts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "employer_execution_artifacts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "employer_execution_compliance_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "employer_execution_evidence_links",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "employer_execution_profiles",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "employer_execution_replays",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "employer_payroll_adjustments",
@@ -2259,60 +1799,37 @@
     {
       "table": "employer_payroll_run_items",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_payroll_runs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_remittance_run_items",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_remittance_runs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_remittances",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_reports",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -2324,41 +1841,25 @@
     {
       "table": "employer_risk_scores",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "employer_timesheet_batches",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employer_timesheet_entries",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "employers",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -2376,10 +1877,7 @@
     {
       "table": "entitlement_usage_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -2397,12 +1895,7 @@
     {
       "table": "erp_invoices",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -2430,6 +1923,12 @@
       "systemPrivileges": []
     },
     {
+      "table": "evidence_packs",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT"]
+    },
+    {
       "table": "exchange_rates",
       "classification": "CONTAINED_NO_AUTHORITY",
       "tenantPrivileges": [],
@@ -2438,19 +1937,13 @@
     {
       "table": "exit_interview_documents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "exit_interview_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -2462,11 +1955,7 @@
     {
       "table": "exit_interviews",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -2484,61 +1973,37 @@
     {
       "table": "external_accounts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_coverage",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_dependents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_enrollments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_plans",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_benefit_utilization",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -2550,12 +2015,7 @@
     {
       "table": "external_calendar_connections",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -2579,82 +2039,49 @@
     {
       "table": "external_communication_channels",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_communication_files",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_communication_messages",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_communication_users",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_customers",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_data_sync_log",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["INSERT", "UPDATE"],
+      "systemPrivileges": ["INSERT", "UPDATE"]
     },
     {
       "table": "external_departments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_document_access_grants",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -2684,115 +2111,73 @@
     {
       "table": "external_employees",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_insurance_beneficiaries",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_insurance_claims",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_insurance_policies",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_invoices",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_completions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_courses",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_enrollments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_learners",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_lms_progress",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_matter_access_grants",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "external_payments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -2834,20 +2219,13 @@
     {
       "table": "external_positions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "feature_flags",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -2895,23 +2273,14 @@
     {
       "table": "federations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "fee_adjustments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "INSERT"
-      ]
+      "tenantPrivileges": ["INSERT"],
+      "systemPrivileges": ["INSERT"]
     },
     {
       "table": "fee_settlement_batches",
@@ -2946,12 +2315,7 @@
     {
       "table": "financial_periods",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3017,74 +2381,44 @@
     {
       "table": "gdpr_data_requests",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "geofence_events",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "geofences",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "gl_account_mappings",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "gl_transaction_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "gl_trial_balance",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "golden_shares",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "governance_bylaws",
@@ -3096,17 +2430,12 @@
       "table": "governance_events",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "governance_policies",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -3130,12 +2459,7 @@
     {
       "table": "grievance_case_access_assignments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3147,34 +2471,19 @@
     {
       "table": "grievance_deadlines",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "grievance_documents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "grievance_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -3186,9 +2495,7 @@
     {
       "table": "grievance_settlements",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -3200,28 +2507,19 @@
     {
       "table": "grievance_timeline",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "grievance_timeline_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "grievance_transitions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3233,12 +2531,7 @@
     {
       "table": "grievances",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3256,25 +2549,14 @@
     {
       "table": "hazard_reports",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "holidays",
       "classification": "MIXED_GLOBAL_TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "hw_benefit_claims",
@@ -3363,12 +2645,7 @@
     {
       "table": "in_app_notifications",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3398,21 +2675,13 @@
     {
       "table": "ingestion_batches",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "ingestion_records",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -3424,50 +2693,43 @@
     {
       "table": "insight_recommendations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "integration_api_keys",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "integration_configs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
+    },
+    {
+      "table": "integration_idempotency_keys",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "integration_partners",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT"]
+    },
+    {
+      "table": "integration_registry",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "integration_sync_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -3485,12 +2747,8 @@
     {
       "table": "integration_webhooks",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "international_addresses",
@@ -3525,12 +2783,7 @@
     {
       "table": "joint_hs_committees",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3572,11 +2825,7 @@
     {
       "table": "knowledge_base",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -3588,12 +2837,7 @@
     {
       "table": "kpi_configurations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3635,37 +2879,25 @@
     {
       "table": "location_deletion_log",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "location_tracking",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "location_tracking_audit",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "location_tracking_config",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -3695,12 +2927,7 @@
     {
       "table": "meeting_rooms",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3712,32 +2939,19 @@
     {
       "table": "member_arrears",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "member_breaks",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "member_certifications",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -3773,30 +2987,19 @@
     {
       "table": "member_dues_issues",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "member_dues_ledger",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "member_employment",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3808,22 +3011,13 @@
     {
       "table": "member_history_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "member_jurisdiction_preferences",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -3835,11 +3029,7 @@
     {
       "table": "member_location_consent",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -3857,12 +3047,7 @@
     {
       "table": "member_segments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -3886,16 +3071,8 @@
     {
       "table": "message_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "message_notifications",
@@ -3912,38 +3089,25 @@
     {
       "table": "message_read_receipts",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "message_templates",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "message_threads",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "messages",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -3956,18 +3120,12 @@
       "table": "mission_audits",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "ml_predictions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -3985,11 +3143,7 @@
     {
       "table": "mobile_devices",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -4007,18 +3161,13 @@
     {
       "table": "model_metadata",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "movement_trends",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -4036,31 +3185,19 @@
     {
       "table": "negotiations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "newsletter_campaigns",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "newsletter_distribution_lists",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -4072,18 +3209,13 @@
     {
       "table": "newsletter_list_subscribers",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "newsletter_recipients",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -4107,13 +3239,8 @@
     {
       "table": "notification_delivery_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT"],
+      "systemPrivileges": ["INSERT"]
     },
     {
       "table": "notification_history",
@@ -4130,74 +3257,43 @@
     {
       "table": "notification_queue",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "notification_templates",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "notification_tracking",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "notifications",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "org_configurations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "org_entitlements",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "org_subscriptions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -4216,9 +3312,7 @@
       "table": "organization_billing_config",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "organization_contacts",
@@ -4235,24 +3329,14 @@
     {
       "table": "organization_members",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "organization_relationships",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "organization_sharing_grants",
@@ -4273,16 +3357,16 @@
       "systemPrivileges": []
     },
     {
+      "table": "organization_users",
+      "classification": "TENANT_RLS_REQUIRED",
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "systemPrivileges": ["SELECT"]
+    },
+    {
       "table": "organizations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "organizer_impacts",
@@ -4293,10 +3377,7 @@
     {
       "table": "organizer_tasks",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4314,12 +3395,7 @@
     {
       "table": "organizing_campaigns",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -4379,21 +3455,13 @@
     {
       "table": "pay_equity_exercises",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "payment_allocations",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4405,45 +3473,25 @@
     {
       "table": "payment_cycles",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "payment_disputes",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "payment_methods",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "payment_plans",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -4455,23 +3503,13 @@
     {
       "table": "payments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "payroll_deductions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -4507,10 +3545,7 @@
     {
       "table": "pending_profiles",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4522,19 +3557,13 @@
     {
       "table": "pension_benefit_claims",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "pension_contributions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4546,28 +3575,19 @@
     {
       "table": "pension_members",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "pension_plans",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "pension_t4a_records",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4579,32 +3599,20 @@
     {
       "table": "pension_trustee_meetings",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "pension_trustees",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "per_capita_remittances",
       "classification": "MULTI_PARTY_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "picket_attendance",
@@ -4627,150 +3635,91 @@
     {
       "table": "pilot_applications",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "pilot_checklist_items",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "pilot_demo_seeds",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "pilot_enrollments",
       "classification": "MIXED_GLOBAL_TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "pilot_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "pilot_feedback",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "pilot_metrics",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "pilot_milestones",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "platform_cost_ledger_entries",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "platform_invoice_line_items",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "platform_invoices",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "platform_payments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "policy_evaluations",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["INSERT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "policy_exceptions",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "policy_rules",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -4788,30 +3737,19 @@
     {
       "table": "poll_votes",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "polls",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "ppe_equipment",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4829,12 +3767,7 @@
     {
       "table": "preventive_withdrawals",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -4882,11 +3815,7 @@
     {
       "table": "profiles",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -4898,33 +3827,19 @@
     {
       "table": "provincial_consent",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "provincial_data_handling",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "provincial_privacy_config",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -4954,10 +3869,7 @@
     {
       "table": "push_devices",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -4969,73 +3881,43 @@
     {
       "table": "push_notifications",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "recognition_award_types",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "recognition_awards",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "recognition_programs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "reconciliation_exceptions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "reconciliation_matches",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "reconciliation_runs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -5054,30 +3936,18 @@
       "table": "remittance_approvals",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "remittance_exceptions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "remittance_line_items",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5107,33 +3977,20 @@
     {
       "table": "reports",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "representation_authorities",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "reserved_matter_votes",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "retention_policies",
@@ -5150,41 +4007,25 @@
     {
       "table": "reward_budget_envelopes",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "reward_redemptions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "reward_wallet_ledger",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "right_of_refusal_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5226,12 +4067,7 @@
     {
       "table": "safety_inspections",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5243,19 +4079,13 @@
     {
       "table": "safety_training_records",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "satisfaction_surveys",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -5279,18 +4109,13 @@
     {
       "table": "security_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "security_posture_checks",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -5314,20 +4139,13 @@
     {
       "table": "settlements",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "shared_clause_library",
       "classification": "MULTI_PARTY_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5345,20 +4163,13 @@
     {
       "table": "signature_audit_trail",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "signature_documents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -5406,30 +4217,19 @@
     {
       "table": "sms_campaigns",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "sms_conversations",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "sms_messages",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5453,30 +4253,19 @@
     {
       "table": "social_accounts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "social_analytics",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "social_campaigns",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -5494,20 +4283,13 @@
     {
       "table": "social_posts",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
       "systemPrivileges": []
     },
     {
       "table": "sso_providers",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -5537,25 +4319,14 @@
     {
       "table": "steward_assignments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "stewards",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "stipend_disbursements",
@@ -5566,17 +4337,13 @@
     {
       "table": "strategic_goals",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "strike_fund_disbursements",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -5612,64 +4379,43 @@
     {
       "table": "subscription_events_log",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "subscription_plans",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "support_tickets",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "survey_answers",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "survey_questions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "survey_responses",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "surveys",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5735,21 +4481,13 @@
     {
       "table": "tentative_agreements",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "testimonials",
       "classification": "GLOBAL_REFERENCE_DATA",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -5773,21 +4511,13 @@
     {
       "table": "training_courses",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "training_programs",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -5805,22 +4535,14 @@
     {
       "table": "transaction_fee_events",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT"],
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "transaction_fee_rules",
       "classification": "TENANT_RLS_REQUIRED",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT"
-      ]
+      "systemPrivileges": ["SELECT"]
     },
     {
       "table": "transfer_pricing_documentation",
@@ -5831,10 +4553,7 @@
     {
       "table": "trend_analyses",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -5883,11 +4602,7 @@
       "table": "union_density",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "union_dues_receipts",
@@ -5934,10 +4649,7 @@
     {
       "table": "user_consents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ],
+      "tenantPrivileges": ["SELECT", "UPDATE"],
       "systemPrivileges": []
     },
     {
@@ -5949,15 +4661,8 @@
     {
       "table": "user_notification_preferences",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "SELECT",
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "user_sessions",
@@ -5968,10 +4673,7 @@
     {
       "table": "user_signatures",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -6115,18 +4817,13 @@
     {
       "table": "voter_eligibility",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "votes",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT"],
       "systemPrivileges": []
     },
     {
@@ -6156,9 +4853,7 @@
     {
       "table": "voting_options",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
@@ -6176,23 +4871,14 @@
     {
       "table": "voting_sessions",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "wage_benchmarks",
       "classification": "GLOBAL_REFERENCE_DATA",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT", "UPDATE"]
     },
     {
       "table": "wage_progressions",
@@ -6209,23 +4895,13 @@
     {
       "table": "wcb_claims",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "wcb_employer_assessments",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -6244,10 +4920,7 @@
       "table": "webhook_receipts",
       "classification": "SYSTEM_ONLY",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "SELECT",
-        "INSERT"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "webhook_subscriptions",
@@ -6288,20 +4961,13 @@
     {
       "table": "workbook_governance_lineage_entries",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT"
-      ],
+      "tenantPrivileges": ["SELECT"],
       "systemPrivileges": []
     },
     {
       "table": "workbook_memory_holders",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
@@ -6313,18 +4979,14 @@
     {
       "table": "workbook_modules",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "INSERT"
-      ],
+      "tenantPrivileges": ["INSERT"],
       "systemPrivileges": []
     },
     {
       "table": "workbook_purchases",
       "classification": "PARENT_OWNED_RLS_REQUIRED",
       "tenantPrivileges": [],
-      "systemPrivileges": [
-        "INSERT"
-      ]
+      "systemPrivileges": ["SELECT", "INSERT"]
     },
     {
       "table": "workbook_stewardship_signals",
@@ -6341,14 +5003,8 @@
     {
       "table": "workbooks",
       "classification": "USER_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE"
-      ],
-      "systemPrivileges": [
-        "UPDATE"
-      ]
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE"],
+      "systemPrivileges": ["SELECT", "UPDATE"]
     },
     {
       "table": "workflow_definitions",
@@ -6365,23 +5021,13 @@
     {
       "table": "workplace_incidents",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     },
     {
       "table": "worksites",
       "classification": "TENANT_RLS_REQUIRED",
-      "tenantPrivileges": [
-        "SELECT",
-        "INSERT",
-        "UPDATE",
-        "DELETE"
-      ],
+      "tenantPrivileges": ["SELECT", "INSERT", "UPDATE", "DELETE"],
       "systemPrivileges": []
     }
   ],

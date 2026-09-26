@@ -52,7 +52,7 @@ Every release MUST set the following on its target Container App:
 
 A deploy that omits any of `RELEASE_ID`, `GITHUB_SHA`, `BUILD_TIME`, `UE_ENVIRONMENT`, `NZILA_MODE` is **invalid**.
 
-The legacy malformed pattern `NODE_ENV="production NEXT_PUBLIC_APP_ENV=staging"` is **forbidden**. The canonical helper [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts) tolerates it for runtime read but no deploy may produce it.
+The legacy malformed pattern `NODE_ENV="production NEXT_PUBLIC_APP_ENV=staging"` is **forbidden**. The canonical helper [`apps/union-eyes/lib/runtime/environment.ts`](../../../../../apps/union-eyes/lib/runtime/environment.ts) tolerates it for runtime read but no deploy may produce it.
 
 ---
 
@@ -83,7 +83,7 @@ A response that contains any of `gitSha:"local"`, `releaseId:"unknown"`, `buildT
 
 1. **Per-env target inferred from `plan` step.** No deploy step hardcodes an ACA name; all targets come from `needs.plan.outputs.app_name`.
 2. **`production` deploys are gated** by GitHub Environment protection (two reviewers, change-window check, contract tests pass, SLO gate pass, release-attestation generated).
-3. **Auto-creation of missing ACAs is forbidden in production** ([`apps/union-eyes/.github/workflows/deploy-union-eyes.yml`](../../../.github/workflows/deploy-union-eyes.yml) — non-prod envs may auto-create from Bicep).
+3. **Auto-creation of missing ACAs is forbidden in production** ([`apps/union-eyes/.github/workflows/deploy-union-eyes.yml`](../../../../../.github/workflows/deploy-union-eyes.yml) — non-prod envs may auto-create from Bicep).
 4. **No deploy may set `NZILA_MODE=pilot` or `NZILA_MODE=demo` on the production ACA.** The `plan` step enforces this via the env matrix.
 
 ---
@@ -91,7 +91,7 @@ A response that contains any of `gitSha:"local"`, `releaseId:"unknown"`, `buildT
 ## 5. Database & seed rules
 
 1. Each environment MUST have its own Postgres database. No cross-env writes.
-2. All seed/reset scripts MUST call `assertNotProduction(scriptName)` from [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts) at module-load. Bypass requires `ALLOW_PRODUCTION_SEED=1`, which is never set in CI or any deployed container.
+2. All seed/reset scripts MUST call `assertNotProduction(scriptName)` from [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../../../apps/union-eyes/lib/runtime/production-guard.ts) at module-load. Bypass requires `ALLOW_PRODUCTION_SEED=1`, which is never set in CI or any deployed container.
 3. Migrations run via the backend container's startup CMD against the env's own `PGHOST`/`PGDATABASE`. CI MUST refuse to deploy if `db:migrate --dry-run` reports pending migrations against the target env.
 
 ---

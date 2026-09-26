@@ -305,9 +305,9 @@ Access-Control-Allow-Origin error in browser console
 
 ## 📚 Documentation
 
-- **UnionEyes Setup Guide**: [CLERK_SETUP_COMPLETE.md](c:/APPS/nzila-union-eyes/backend/CLERK_SETUP_COMPLETE.md)
-- **Auth Migration Plan**: [AUTH_MIGRATION_PLAN.md](c:/APPS/nzila-automation/packages/automation/data/AUTH_MIGRATION_PLAN.md)
-- **Implementation Summary**: [AUTH_IMPLEMENTATION_SUMMARY.md](c:/APPS/nzila-automation/packages/automation/data/AUTH_IMPLEMENTATION_SUMMARY.md)
+- **UnionEyes Setup Guide**: [CLERK_SETUP_COMPLETE.md](../../../apps/union-eyes/backend/docs/archive/CLERK_SETUP_COMPLETE.md)
+- **Auth Migration Plan**: [AUTH_MIGRATION_PLAN.md](AUTH_MIGRATION_PLAN.md)
+- **Implementation Summary**: [AUTH_IMPLEMENTATION_SUMMARY.md](AUTH_IMPLEMENTATION_SUMMARY.md)
 - **Clerk Django Guide**: https://clerk.com/docs/quickstarts/django
 - **Clerk Webhooks**: https://clerk.com/docs/webhooks/overview
 

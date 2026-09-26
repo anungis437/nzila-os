@@ -1,6 +1,6 @@
 # Executive Cognitive Safety Assurance
 
-> **Status:** Canonical assurance · **Layer:** Executive surface assurance · **Inherits:** [../nzila-governance/executive-cognitive-governance-standards.md](../nzila-governance/executive-cognitive-governance-standards.md), [../nzila-ip/executive-cognitive-governance.md](../nzila-ip/executive-cognitive-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
+> **Status:** Canonical assurance · **Layer:** Executive surface assurance · **Inherits:** [docs/categories/historical-archive/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md](../../historical-archive/archive/iterations/nzila-governance/executive-cognitive-governance-standards.md), [docs/categories/historical-archive/archive/iterations/nzila-ip/executive-cognitive-governance.md](../../historical-archive/archive/iterations/nzila-ip/executive-cognitive-governance.md), [institutional-certification-framework.md](institutional-certification-framework.md)
 
 This document defines the **measurable assurance standards** for executive operational calmness and cognitive governance. It is the assurance counterpart to the executive cognitive governance standards: standards specify *what* must be true; this model specifies *how it is verified, attested, and certified*.
 

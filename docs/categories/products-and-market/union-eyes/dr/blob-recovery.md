@@ -166,6 +166,6 @@ This file should be generated after each backup cycle and contain:
 ## References
 
 - [Restore Drill Runbook](restore-drill-runbook.md)
-- [Platform DR Plan](../../../docs/ops/disaster-recovery.md)
-- [Bicep Postgres Module](../../../infrastructure/bicep/modules/postgres.bicep)
-- [Ops DR README](../../../ops/disaster-recovery/README.md)
+- [Platform DR Plan](../../../platform-and-operations/ops/disaster-recovery.md)
+- [Bicep Postgres Module](../../../../../infrastructure/bicep/modules/postgres.bicep)
+- [Ops DR README](../../../../../ops/disaster-recovery/README.md)

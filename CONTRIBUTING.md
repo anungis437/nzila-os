@@ -9,7 +9,7 @@ pnpm dev:console   # or dev:web, dev:partners
 
 ## Repo Contract
 
-Read [docs/repo-contract/README.md](docs/repo-contract/README.md) before contributing. Key rules:
+Read [docs/categories/platform-and-operations/repo-contract/README.md](docs/categories/platform-and-operations/repo-contract/README.md) before contributing. Key rules:
 
 1. No direct AI provider imports in apps — use `@nzila/ai-sdk`
 2. No direct ML table reads in apps — use `@nzila/ml-sdk`
@@ -79,11 +79,11 @@ See [SECURITY.md](SECURITY.md). Never commit secrets. Use `.env.local` for local
 
 ## Platform Operations Docs
 
-- [Kilo Usage Patterns](docs/platform/KILO_USAGE_PATTERNS.md)
-- [Package Ownership Matrix](docs/platform/PACKAGE_OWNERSHIP_MATRIX.md)
-- [App Lifecycle Process](docs/platform/APP_LIFECYCLE_PROCESS.md)
-- [Coverage Reporting](docs/platform/COVERAGE_REPORTING.md)
+- [Kilo Usage Patterns](docs/categories/platform-and-operations/platform/KILO_USAGE_PATTERNS.md)
+- [Package Ownership Matrix](docs/categories/platform-and-operations/platform/PACKAGE_OWNERSHIP_MATRIX.md)
+- [App Lifecycle Process](docs/categories/platform-and-operations/platform/APP_LIFECYCLE_PROCESS.md)
+- [Coverage Reporting](docs/categories/platform-and-operations/platform/COVERAGE_REPORTING.md)
 - [Evidence Lifecycle Policy](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
-- [Command Catalog](docs/platform/COMMAND_CATALOG.md)
-- [Strategic Telemetry](docs/platform/STRATEGIC_TELEMETRY.md)
-- [AI Incident Drill Runbook](docs/platform/AI_INCIDENT_DRILL_RUNBOOK.md)
+- [Command Catalog](docs/categories/platform-and-operations/platform/COMMAND_CATALOG.md)
+- [Strategic Telemetry](docs/categories/platform-and-operations/platform/STRATEGIC_TELEMETRY.md)
+- [AI Incident Drill Runbook](docs/categories/platform-and-operations/platform/AI_INCIDENT_DRILL_RUNBOOK.md)

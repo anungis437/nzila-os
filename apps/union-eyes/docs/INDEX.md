@@ -11,8 +11,8 @@
 
 | I am a... | Start here |
 |-----------|-----------|
-| **Pilot user (CUPE)** | [CUPE Pilot User Guide](../../docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) |
-| **Pilot admin** | [CUPE Pilot Admin Runbook](../../docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) |
+| **Pilot user (CUPE)** | [CUPE Pilot User Guide](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) |
+| **Pilot admin** | [CUPE Pilot Admin Runbook](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) |
 | **Steward / rep** | [Steward Quick Start](#steward-quick-start) |
 | **Developer** | [Architecture](./architecture/ARCHITECTURE_SHAPE.md) |
 | **Platform ops** | [Operations](./operations/) |
@@ -23,19 +23,19 @@
 
 | Document | Purpose |
 |----------|---------|
-| [CUPE Pilot User Guide](../../docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) | Step-by-step: sign in, submit intake, follow progress |
-| [CUPE Quick Start](../../docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md) | Pilot onboarding checklist |
-| [CUPE Readiness Checklist](../../docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md) | Pre-pilot environment validation |
+| [CUPE Pilot User Guide](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_USER_GUIDE.md) | Step-by-step: sign in, submit intake, follow progress |
+| [CUPE Quick Start](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOTING_QUICK_START.md) | Pilot onboarding checklist |
+| [CUPE Readiness Checklist](../../../docs/categories/products-and-market/pilot/cupe/CUPE_READINESS_CHECKLIST.md) | Pre-pilot environment validation |
 
 ### For Admins
 
 | Document | Purpose |
 |----------|---------|
-| [CUPE Admin Runbook](../../docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) | Day-to-day pilot administration |
-| [CUPE Support SOP](../../docs/pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) | Issue triage and escalation |
-| [CUPE Go/No-Go Review](../../docs/pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md) | Launch readiness gate |
-| [CUPE Rollback Runbook](../../docs/pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md) | Emergency rollback procedures |
-| [CUPE RBAC Matrix](../../docs/pilot/cupe/CUPE_RBAC_MATRIX.md) | Role permissions reference |
+| [CUPE Admin Runbook](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) | Day-to-day pilot administration |
+| [CUPE Support SOP](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) | Issue triage and escalation |
+| [CUPE Go/No-Go Review](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md) | Launch readiness gate |
+| [CUPE Rollback Runbook](../../../docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md) | Emergency rollback procedures |
+| [CUPE RBAC Matrix](../../../docs/categories/products-and-market/pilot/cupe/CUPE_RBAC_MATRIX.md) | Role permissions reference |
 
 ### For Developers
 
@@ -117,11 +117,11 @@ Historical snapshots retained for traceability.
 
 | Document | Purpose |
 |----------|---------|
-| [Scope Checklist](../../docs/pilot/01-scope-checklist.md) | Feature scope for pilot |
-| [Data Onboarding](../../docs/pilot/02-data-onboarding.md) | Tenant data setup |
-| [Security & Privacy](../../docs/pilot/03-security-privacy-packet.md) | Security controls |
-| [Monitoring & SLOs](../../docs/pilot/04-monitoring-and-slos.md) | Observability setup |
-| [Demo Script](../../docs/pilot/05-demo-script.md) | Live demo walkthrough |
+| [Scope Checklist](../../../docs/categories/products-and-market/pilot/01-scope-checklist.md) | Feature scope for pilot |
+| [Data Onboarding](../../../docs/categories/products-and-market/pilot/02-data-onboarding.md) | Tenant data setup |
+| [Security & Privacy](../../../docs/categories/products-and-market/pilot/03-security-privacy-packet.md) | Security controls |
+| [Monitoring & SLOs](../../../docs/categories/products-and-market/pilot/04-monitoring-and-slos.md) | Observability setup |
+| [Demo Script](../../../docs/categories/products-and-market/pilot/05-demo-script.md) | Live demo walkthrough |
 
 ## Glossary
 
@@ -150,9 +150,9 @@ Historical snapshots retained for traceability.
 ## Cross-References
 
 - Audience-friendly docs: [UnionEyes Hub](../../../docs/union-eyes/README.md)
-- Full glossary: [Glossary](../../docs/index/glossary.md)
-- Documentation map: [Doc Map](../../docs/index/doc-map.md)
-- Main repo README: [../../README.md](../../../README.md)
-- Platform architecture: [../../ARCHITECTURE.md](../../../ARCHITECTURE.md)
-- Contributing guide: [../../CONTRIBUTING.md](../../../CONTRIBUTING.md)
-- Security policy: [../../SECURITY.md](../../../SECURITY.md)
+- Full glossary: [Glossary](../../../docs/categories/platform-and-operations/index/glossary.md)
+- Documentation map: [Doc Map](../../../docs/categories/platform-and-operations/index/doc-map.md)
+- Main repo README: [README.md](../../../README.md)
+- Platform architecture: [ARCHITECTURE.md](../../../ARCHITECTURE.md)
+- Contributing guide: [CONTRIBUTING.md](../../../CONTRIBUTING.md)
+- Security policy: [SECURITY.md](../../../SECURITY.md)

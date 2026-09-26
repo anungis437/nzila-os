@@ -154,4 +154,4 @@
 
 - [Scope Checklist](01-scope-checklist.md)
 - [Security & Privacy Packet](03-security-privacy-packet.md)
-- [Deploy Profiles](../deploy/profiles.md)
+- [Deploy Profiles](../../platform-and-operations/deploy/profiles.md)

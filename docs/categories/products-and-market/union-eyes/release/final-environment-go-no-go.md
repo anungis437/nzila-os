@@ -38,7 +38,7 @@
 | Key Vault                 | **1** | `nzila-staging-kv` (RG `nzila-staging-rg`)                                                                                                                  |
 | union-eyes container app  | **1** | `nzila-os-union-eyes` (RG `nzila-canada-staging-rg`, revision `nzila-os-union-eyes--0000262`, image tag `f1e66a2d04720c5e8df59454e14e75104292f250`)         |
 | Custom domains on that 1 container app | **5** | `app.unioneyes.app`, `unioneyes.app`, `www.unioneyes.app`, `staging.unioneyes.app`, `staging-app.unioneyes.app`                                  |
-| Discrete `nzila-os-union-eyes-staging` ACA referenced by [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74) | **0** | Does not exist in the subscription.                                                                                                                       |
+| Discrete `nzila-os-union-eyes-staging` ACA referenced by [deploy-union-eyes.yml](../../../../../.github/workflows/deploy-union-eyes.yml#L74) | **0** | Does not exist in the subscription.                                                                                                                       |
 | Demo or pilot ACAs        | **0** | None.                                                                                                                                                      |
 
 **DNS proof of shared backend:**
@@ -90,7 +90,7 @@ Selected env vars (from `az containerapp show ... env`):
 | `AUTH_URL`            | `https://app.unioneyes.app`                                    | Same problem — auth callbacks always assume the prod hostname.                           |
 | `PGHOST`              | `nzila-staging-db.postgres.database.azure.com`                 | Production traffic writes to `nzila_os_staging`.                                         |
 | `PGDATABASE`          | `nzila_os_staging`                                              |                                                                                          |
-| `NZILA_MODE`          | **not set**                                                    | Pilot-mode flag is **fail-closed** — see [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27). |
+| `NZILA_MODE`          | **not set**                                                    | Pilot-mode flag is **fail-closed** — see [feature-flags/route.ts](../../../../../apps/union-eyes/app/api/feature-flags/route.ts#L27). |
 
 ---
 
@@ -111,7 +111,7 @@ Connected as `nzilaadmin` over TLS (password retrieved from `nzila-staging-kv/DB
 
 Findings:
 - Migration head is dramatically behind the repo (4 vs 93). Either many migrations were never applied, or the project tracks migration history in a different table not present here. Either way, there is no auditable proof that the repo schema matches the live DB.
-- The CLC convention demo seed [seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts) has **never been run** against this DB. The org `CUPE Local 4279` (UUID `a1b2c3d4-0001-4000-a000-clcdemo000001`) does not exist; no demo personas; no demo claims.
+- The CLC convention demo seed [seed-clc-demo-environment.ts](../../../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts) has **never been run** against this DB. The org `CUPE Local 4279` (UUID `a1b2c3d4-0001-4000-a000-clcdemo000001`) does not exist; no demo personas; no demo claims.
 - Total business volume (14 orgs, 15 claims) is consistent with a sparse staging dataset, not a populated production user base. Confirm with product whether this is the expected production state.
 
 ---
@@ -160,12 +160,12 @@ The `/proof` and `/insights` page files exist **only** as untracked working-tree
 These pieces of the code are correct and would work *if the routes were deployed and pilot-mode were enabled*:
 
 - Typecheck green: `pnpm --filter @nzila/union-eyes typecheck` → exit 0.
-- Pilot-mode gate is fail-closed by design: [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27).
-- Demo data mutation routes refuse to run unless `NZILA_MODE` ∈ {pilot, demo}: [pilot/demo-data/route.ts](../../../apps/union-eyes/app/api/pilot/demo-data/route.ts#L43), [pilot-demo-runtime.ts](../../../apps/union-eyes/lib/config/pilot-demo-runtime.ts).
-- Role-first IA: [role-experience.ts](../../../apps/union-eyes/lib/dashboard/role-experience.ts) maps every supported role to one of `member|staff|executive|governance|admin` and locks down `ALLOWED_PREFIXES_BY_EXPERIENCE`.
-- Hard pilot-route exclusion: [role-fixtures.ts](../../../apps/union-eyes/e2e/helpers/role-fixtures.ts#L203) lists `/dashboard/{workflow-builder,fsm,orchestration,deep-analytics,advanced-intelligence,federation-controls,integrations/advanced}` as `PILOT_EXCLUDED_ROUTES`, enforced by [role-experience-guard.tsx](../../../apps/union-eyes/components/dashboard/role-experience-guard.tsx#L37).
+- Pilot-mode gate is fail-closed by design: [feature-flags/route.ts](../../../../../apps/union-eyes/app/api/feature-flags/route.ts#L27).
+- Demo data mutation routes refuse to run unless `NZILA_MODE` ∈ {pilot, demo}: [pilot/demo-data/route.ts](../../../../../apps/union-eyes/app/api/pilot/demo-data/route.ts#L43), [pilot-demo-runtime.ts](../../../../../apps/union-eyes/lib/config/pilot-demo-runtime.ts).
+- Role-first IA: [role-experience.ts](../../../../../apps/union-eyes/lib/dashboard/role-experience.ts) maps every supported role to one of `member|staff|executive|governance|admin` and locks down `ALLOWED_PREFIXES_BY_EXPERIENCE`.
+- Hard pilot-route exclusion: [role-fixtures.ts](../../../../../apps/union-eyes/e2e/helpers/role-fixtures.ts#L203) lists `/dashboard/{workflow-builder,fsm,orchestration,deep-analytics,advanced-intelligence,federation-controls,integrations/advanced}` as `PILOT_EXCLUDED_ROUTES`, enforced by [role-experience-guard.tsx](../../../../../apps/union-eyes/components/dashboard/role-experience-guard.tsx#L37).
 - `/dashboard` redirects by role: [`/[locale]/dashboard/page.tsx`](../../../apps/union-eyes/app/[locale]/dashboard/page.tsx).
-- CLC demo seed is structurally idempotent and namespaces all writes into `a1b2c3d4-0001-4000-a000-clcdemo000001`, never touching unrelated orgs ([seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)).
+- CLC demo seed is structurally idempotent and namespaces all writes into `a1b2c3d4-0001-4000-a000-clcdemo000001`, never touching unrelated orgs ([seed-clc-demo-environment.ts](../../../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)).
 - DB connection from app to PG: live `/api/health.checks.database = "ok"`.
 
 ---
@@ -236,7 +236,7 @@ Legend: PASS · FAIL · ATTENTION · UNKNOWN
 
 | Check                                          | Status | Note                                                                               |
 | ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| 6 personas mapped (member/steward/staff/exec/gov/admin) | PASS | [role-experience.ts](../../../apps/union-eyes/lib/dashboard/role-experience.ts).             |
+| 6 personas mapped (member/steward/staff/exec/gov/admin) | PASS | [role-experience.ts](../../../../../apps/union-eyes/lib/dashboard/role-experience.ts).             |
 | `/dashboard` redirect by role                  | PASS (code) |                                                                                |
 | Cross-role access blocked                      | PASS (code, client) | Server-side enforcement should also be confirmed; not verified in this run. |
 | Raw FSM/workflow/orchestration hidden          | PASS (code) | In `PILOT_EXCLUDED_ROUTES` and `FORBIDDEN_LABELS`.                              |
@@ -251,7 +251,7 @@ Legend: PASS · FAIL · ATTENTION · UNKNOWN
 | Distinct DNS for staging vs prod               | PASS (DNS) / FAIL (backend) | DNS records are distinct; backend they point to is identical.            |
 | TLS valid                                      | PASS   | ACA managed cert.                                                                  |
 | Staging/demo/prod clearly separated            | FAIL   | No separation at the infrastructure level.                                         |
-| Workflow-vs-reality drift                      | FAIL   | [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74) references `nzila-os-union-eyes-staging` — that ACA does **not exist**. |
+| Workflow-vs-reality drift                      | FAIL   | [deploy-union-eyes.yml](../../../../../.github/workflows/deploy-union-eyes.yml#L74) references `nzila-os-union-eyes-staging` — that ACA does **not exist**. |
 
 ---
 
@@ -289,7 +289,7 @@ E2E suites and `pnpm build` were intentionally **not** executed: the verdict is 
 | **MEDIUM**   | `staging-app.unioneyes.app` falsely reports `environment:"production"` — operators cannot trust the health endpoint to identify which env they're hitting.    | platform-ops  |
 | **MEDIUM**   | Demo seed scripts have no `if (UE_ENVIRONMENT==='production') throw` guard. Operator hygiene is the only control.                                              | union-eyes    |
 | **MEDIUM**   | Deployed image is 26 commits behind `origin/main` (deployed 2026-05-04; main as of 2026-05-06).                                                                | platform-ops  |
-| **MEDIUM**   | Production rollback exception in [deployment-inventory.json](../../../governance/release/deployment-inventory.json#L21) expires 2026-06-30; CLC week falls inside that. | platform-ops  |
+| **MEDIUM**   | Production rollback exception in [deployment-inventory.json](../../../../../governance/release/deployment-inventory.json#L21) expires 2026-06-30; CLC week falls inside that. | platform-ops  |
 | **LOW**      | Duplicate marketing routes under `app/(marketing)/...` and `app/[locale]/(marketing)/...` may produce sitemap collisions.                                       | union-eyes    |
 
 ---
@@ -304,7 +304,7 @@ These are the minimum items required to convert NO-GO to GO.
 2. Provision a **separate** Container App `nzila-os-union-eyes-prod` (or rename the existing one and stand up a new staging) so that staging and production have independent revisions.
 3. Provision a **separate** Key Vault for production secrets, or scope secrets in `nzila-staging-kv` by name (`-staging-` vs `-prod-`).
 4. If "demo" and "pilot" are intended to be visible environments to CLC stakeholders, repeat (1)–(3) for them, or explicitly downgrade the requirement to "modes overlaid on staging" and communicate that to CLC.
-5. Update [deployment-inventory.json](../../../governance/release/deployment-inventory.json) to reflect actual topology (currently lies about a discrete production app).
+5. Update [deployment-inventory.json](../../../../../governance/release/deployment-inventory.json) to reflect actual topology (currently lies about a discrete production app).
 
 ### 13.2 Required CLC routes (must)
 
@@ -320,7 +320,7 @@ These are the minimum items required to convert NO-GO to GO.
 ### 13.4 Database hygiene (must)
 
 11. Determine why `drizzle.__drizzle_migrations` has only 4 entries despite 93 migration files. Either:
-    - The repo's migration journal has been re-baselined and the 4 entries are the correct head — in which case confirm in writing and update [README](../../../apps/union-eyes/db/migrations/README.md);
+    - The repo's migration journal has been re-baselined and the 4 entries are the correct head — in which case confirm in writing and update [README](../../../../../apps/union-eyes/db/migrations/README.md);
     - Or migrations are tracked elsewhere (audit migration table, manual SQL applied via `psql`) — document the source of truth;
     - Or migrations are genuinely behind — execute `pnpm --filter @nzila/union-eyes db:migrate` against the (new, isolated) production DB and capture the diff.
 12. Add a CI assertion that `db:migrate` reports "no pending migrations" against staging and production before deploy.

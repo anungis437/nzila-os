@@ -56,7 +56,7 @@ Until the team picks one cause and writes it down, **Phase A cannot certify sche
    - **Option A:** `__drizzle_migrations` is canonical → re-baseline migrations in the repo so its head matches the DB ledger; commit a `0000_baseline.sql` and remove the unrelated 89 files (or move them to a `legacy/` archive with a README).
    - **Option B:** the repo migration directory is canonical → run `pnpm --filter @nzila/union-eyes db:migrate` against `nzila_os_staging` (after taking a backup) and confirm the ledger advances to head; if it doesn't, write a one-time SQL script to insert missing rows into `__drizzle_migrations`.
 2. Add a CI assertion: a step that runs `db:migrate --dry-run` (or equivalent) against staging and **fails** if it reports any pending migration.
-3. Document the chosen strategy in [`apps/union-eyes/db/migrations/README.md`](../../../apps/union-eyes/db/migrations/README.md).
+3. Document the chosen strategy in [`apps/union-eyes/db/migrations/README.md`](../../../../../apps/union-eyes/db/migrations/README.md).
 
 ---
 

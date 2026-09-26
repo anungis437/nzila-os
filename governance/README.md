@@ -14,7 +14,7 @@ Governance policy, controls, assurance, and portfolio strategy.
 - [privacy/](./privacy/) - Privacy policy and data governance
 - [exceptions/](./exceptions/) - Approved governance exceptions and waivers
 - [release/](./release/) - Release governance controls
-- [releases/](./releases/) - Historical release governance records
+- [releases/](foundations/releases/) - Historical release governance records
 
 ### Operating Controls
 - [ga/](./ga/) - Governance automation checks and gating logic

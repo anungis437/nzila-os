@@ -1,6 +1,6 @@
 # Nzila Institutional Assurance Layer
 
-This directory is the **assurance and certification layer** of the Nzila ecosystem. It transforms the doctrine corpus under [../nzila-ip/](../nzila-ip/) and the operational governance corpus under [../nzila-governance/](../nzila-governance/) into **continuously verifiable, certifiable, procurement-grade institutional governance infrastructure**.
+This directory is the **assurance and certification layer** of the Nzila ecosystem. It transforms the doctrine corpus under [../nzila-ip/](../../historical-archive/archive/iterations/nzila-ip/) and the operational governance corpus under [../nzila-governance/](../../historical-archive/archive/iterations/nzila-governance/) into **continuously verifiable, certifiable, procurement-grade institutional governance infrastructure**.
 
 Where the IP layer states what Nzila believes, and the governance layer ensures Nzila acts on it, this layer ensures Nzila can **prove it** — through evidence, certification, attestation, and observation rather than through narrative or trust.
 
@@ -18,8 +18,8 @@ Where the IP layer states what Nzila believes, and the governance layer ensures 
 
 ## What does NOT live here
 
-- New doctrine (lives in [../nzila-ip/](../nzila-ip/))
-- Governance procedure or review methodology (lives in [../nzila-governance/](../nzila-governance/))
+- New doctrine (lives in [../nzila-ip/](../../historical-archive/archive/iterations/nzila-ip/))
+- Governance procedure or review methodology (lives in [../nzila-governance/](../../historical-archive/archive/iterations/nzila-governance/))
 - Product specifications or marketing
 - Engineering implementation code
 

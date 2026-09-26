@@ -22,62 +22,62 @@ It provides:
 - **Finance controls** — QBO sync, Stripe reconciliation, tax calendar
 - **Partner entitlements** — Row-level partner access gating
 
+## Machine-readable authorities
+
+When documentation and these artifacts disagree, these artifacts win.
+
+| Concern                                           | Authority                                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Capability ownership between apps                 | `apps/control-plane/lib/capability-ownership.ts`                             |
+| Operational / integration registry                | `packages/platform-contracts/src/registry.ts`                                |
+| Product tier, GTM posture, revenue status         | `governance/portfolio/product-catalog.json` (only editable portfolio source) |
+| Platform + app status manifest                    | `nzila-truth-manifest.json` (generated)                                      |
+| Repo inventory (apps, packages, workflows, tests) | `tooling/repo-inventory/output/inventory.json` (generated)                   |
+| Union Eyes capability state                       | `apps/union-eyes/lib/reality/capability-registry.ts`                         |
+| Per-app control posture                           | `apps/<app>/control-manifest.json`                                           |
+| Package ownership metadata                        | `packages/<pkg>/package.meta.json`                                           |
+| Platform adoption exceptions                      | `governance/exceptions/platform-adoption-exceptions.json`                    |
+
 ## Monorepo Structure
+
+The enumerated, always-current inventory of apps, packages, workflows and tests is generated:
+[tooling/repo-inventory/output/repo-inventory.md](./tooling/repo-inventory/output/repo-inventory.md)
+(regenerate with `pnpm inventory:generate`, verify with `pnpm docs:sync`). The shape below is the
+stable layout; it deliberately names authorities rather than listing every workspace.
 
 ```
 apps/
-  console/       Internal ops console (governance, finance, ML, AI)
-  partners/      Partner portal (entitlement-gated)
-  web/           Public marketing/landing
-  union-eyes/    UE case management
-  agrimo/         Agri field operations (producers, harvests, lots, quality, warehouse, shipments, payments)
-  cora/          Agri intelligence dashboard (yield, pricing, risk, traceability)
+  control-plane/     Authority layer (policy, governance, entitlements, registries)
+  orchestrator-api/  Execution engine (workflow runs, dispatch, event fabric, job state)
+  console/           Operator interface (dashboards, break-glass, audit visualisation)
+  platform-admin/    Org-scoped administration (org users, settings, member roles)
+  union-eyes/        Union Eyes — commercial lane 1 (Django-authoritative)
+  abr/               CourtLens — access-to-justice / matter intelligence (Django-authoritative)
+  civic/             CIVIC public-institution surface (discovery lane)
+  <others>/          Portfolio and internal surfaces — see the generated inventory
 
 packages/
-  os-core/       Control backbone (evidence, policy, telemetry, retention, config, secrets)
-  db/            Drizzle ORM schema + migrations
-  blob/          Azure Blob Storage abstraction
-  ai-core/       AI infrastructure (profiles, budget, RAG, actions)
-  ai-sdk/        App-facing AI client + ESLint no-shadow-ai rule
-  ml-core/       ML infrastructure (registry, scoring, drift monitoring)
-  ml-sdk/        App-facing ML client + ESLint no-shadow-ml rule
-  payments-stripe/ Stripe integration + webhook handling
-  qbo/           QuickBooks Online OAuth + sync
-  tax/           Tax calendar + obligation engine
-  analytics/     Aggregation + reporting
-  ui/            Shared component library
-  agri-core/     Agri domain primitives (enums, types, schemas, FSMs)
-  agri-db/       Agri database repositories (org-scoped)
-  agri-events/   Agri domain event bus + integration dispatch
-  agri-intelligence/ Agri computation library (yield, loss, payout)
-  agri-traceability/ Agri evidence packs + hash chain verification
-  agri-adapters/ Agri external system adapters (weather, market, mobile-money, SMS)
+  decision-core/          Canonical decision primitives, registry and enforcement helper
+  platform-auth/          Canonical authentication authority (Argon2id + optional Entra SSO)
+  platform-contracts/     Cross-app contracts, control-plane client, operational registry
+  platform-policy-engine/ Policy evaluation engine (consumed via Control Plane)
+  platform-shell/         Shared application shell
+  platform-*/             One authoritative package per shared concern (see authority docs)
+  os-core/                Control backbone (evidence, telemetry, retention, config, secrets)
+  db/                     Drizzle ORM schema + migrations
+  blob/                   Azure Blob Storage abstraction
+  ai-core/, ai-sdk/       AI infrastructure and app-facing client (no direct provider imports)
+  ml-core/, ml-sdk/       ML infrastructure and app-facing client
+  <domain packages>/      Domain-specific layering (agri-*, union-eyes-*, trustcore-*, …)
 
-tooling/
-  scripts/       CLI tools (thin wrappers over packages)
-  contract-tests/ Invariant enforcement tests
-  ai-evals/      AI evaluation harness
-  ml/            ML training/inference scripts
-  security/      Security artifact publishing
-  db/            Schema snapshot tooling
-  ops/           Ops pack validation
-
-ops/
-  incident-response/  Playbooks + templates
-  runbooks/           Step-by-step operational guides
-  change-management/  Change request templates
-  compliance/         Control test plan + evidence schema
-  security-operations/ Security runbooks
-
-.github/workflows/
-  ci.yml                 Primary CI gate
-  control-tests.yml      Scheduled control validation
-  codeql.yml             Static analysis
-  dependency-audit.yml   CVE scanning
-  secret-scan.yml        Secret leak detection
-  sbom.yml               Software Bill of Materials
-  ops-pack.yml           Ops pack completeness gate
-  release-train.yml      Release evidence + SBOM generation
+services/     Standalone backend services
+tooling/      Contract tests, repo inventory, scaffolding, CI and validation tooling
+governance/   Portfolio catalog, capital model, exception registries, commercial data
+scripts/      Validation, release, SRE and finops entrypoints referenced by package.json
+ops/          Environment configs, runbooks, incident response, compliance packs
+reports/      Generated reports — not hand-edited
+infrastructure/ IaC and deployment configuration
+.github/workflows/ CI, governance, security, compliance and release automation
 ```
 
 ## Key Architectural Decisions
@@ -117,22 +117,24 @@ Enforced by `scripts/platform-authority-check.ts` and `scripts/platform-adoption
 ### 4c. App Lifecycle Governance
 
 Lifecycle tier definitions and promotion rules are documented in
-[docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md),
+[docs/categories/platform-and-operations/platform/APP_LIFECYCLE_PROCESS.md](docs/categories/platform-and-operations/platform/APP_LIFECYCLE_PROCESS.md),
 with machine validation enforced by `pnpm app:lifecycle:check`.
 
 Operational command groupings and script entrypoints are documented in
-[docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md).
+[docs/categories/platform-and-operations/platform/COMMAND_CATALOG.md](docs/categories/platform-and-operations/platform/COMMAND_CATALOG.md).
 
 ### 4d. Evidence Lifecycle Governance
 
 Evidence retention, archival, legal-hold, and deletion policy is defined in
-[docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md),
+[docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/platform/EVIDENCE_LIFECYCLE_POLICY.md)
+(canonical; the longer background version lives at
+[docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md](./docs/categories/platform-and-operations/platform/EVIDENCE_LIFECYCLE_POLICY.md)),
 with fail-closed checks enforced by `pnpm validate:evidence:lifecycle`.
 
 ### 4e. Strategic Telemetry Governance
 
 Quarterly adoption/cost/delivery scorecards are defined in
-[docs/platform/STRATEGIC_TELEMETRY.md](./docs/platform/STRATEGIC_TELEMETRY.md)
+[docs/categories/platform-and-operations/platform/STRATEGIC_TELEMETRY.md](docs/categories/platform-and-operations/platform/STRATEGIC_TELEMETRY.md)
 and generated by `pnpm strategic:quarterly`.
 
 ### 5. Correlation IDs Everywhere
@@ -171,8 +173,9 @@ See [SECURITY.md](./SECURITY.md) for threat model, supply chain controls, and in
 
 ## Control System Unification
 
-> **Added in the Master Alignment Pass (2025)**
-> Single canonical execution flow. No policy logic outside Control Plane. No governance logic outside Control Plane.
+> Single canonical execution flow. No policy logic outside Control Plane. No governance logic
+> outside Control Plane. This unification is current architecture, enforced by the boundary
+> tests listed below — not a historical plan.
 
 ### App Authority Boundaries
 
@@ -263,7 +266,9 @@ The following invariants are checked in CI by `tests/system/control-plane-bounda
 
 ### Control Manifests
 
-Each app declares its control posture in `control-manifest.json`:
+Each app declares its control posture in `apps/<app>/control-manifest.json`. Every app in
+`apps/` carries one; the manifests are read by the platform surface and adoption checks
+(`pnpm platform:surface:model:check`, `pnpm platform:adoption:check`).
 
 ### Authority Services (Control Plane)
 

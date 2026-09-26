@@ -8,7 +8,7 @@ Runtime governance middleware. Wires the governance packages into product code t
 - `attachGovernanceHeaders(headers, envelope)` — propagates correlation + release identity through outbound responses.
 - `ensureLegitimateEnvironment()` — convenience wrapper around `validateDeploymentLegitimacy` for boot-time checks.
 
-See [docs/nzila-runtime-integration/governance-policy-engine-live-execution.md](../../docs/nzila-runtime-integration/governance-policy-engine-live-execution.md).
+See [docs/categories/historical-archive/archive/iterations/nzila-runtime-integration/governance-policy-engine-live-execution.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-integration/governance-policy-engine-live-execution.md).
 
 ## Posture
 

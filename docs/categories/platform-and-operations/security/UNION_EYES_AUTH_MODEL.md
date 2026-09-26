@@ -106,21 +106,21 @@ Every auth event is written to `user_management.auth_audit_log` (best-effort, ne
 
 | Concern | Module |
 |---|---|
-| Password service | [packages/platform-auth/src/password/auth-service.ts](../../packages/platform-auth/src/password/auth-service.ts) |
-| Sessions | [packages/platform-auth/src/password/session.ts](../../packages/platform-auth/src/password/session.ts) |
-| Argon2id | [packages/platform-auth/src/password/password.ts](../../packages/platform-auth/src/password/password.ts) |
-| Magic link | [packages/platform-auth/src/magic-link/service.ts](../../packages/platform-auth/src/magic-link/service.ts) |
-| Invites | [packages/platform-auth/src/invites/service.ts](../../packages/platform-auth/src/invites/service.ts) |
-| Org policy | [packages/platform-auth/src/policy/service.ts](../../packages/platform-auth/src/policy/service.ts) |
-| DB schema | [packages/db/src/schema/auth.ts](../../packages/db/src/schema/auth.ts) |
-| Migration | [migrations/2026-04-23_multi_mode_auth.sql](../../migrations/2026-04-23_multi_mode_auth.sql) |
+| Password service | [packages/platform-auth/src/password/auth-service.ts](../../../../packages/platform-auth/src/password/auth-service.ts) |
+| Sessions | [packages/platform-auth/src/password/session.ts](../../../../packages/platform-auth/src/password/session.ts) |
+| Argon2id | [packages/platform-auth/src/password/password.ts](../../../../packages/platform-auth/src/password/password.ts) |
+| Magic link | [packages/platform-auth/src/magic-link/service.ts](../../../../packages/platform-auth/src/magic-link/service.ts) |
+| Invites | [packages/platform-auth/src/invites/service.ts](../../../../packages/platform-auth/src/invites/service.ts) |
+| Org policy | [packages/platform-auth/src/policy/service.ts](../../../../packages/platform-auth/src/policy/service.ts) |
+| DB schema | [packages/db/src/schema/auth.ts](../../../../packages/db/src/schema/auth.ts) |
+| Migration | [migrations/2026-04-23_multi_mode_auth.sql](../../../../migrations/2026-04-23_multi_mode_auth.sql) |
 | Entra/NextAuth catchall | [apps/union-eyes/app/api/auth/[...nextauth]/route.ts](../../apps/union-eyes/app/api/auth/%5B...nextauth%5D/route.ts) |
-| Login UI | [apps/union-eyes/components/auth/login-form.tsx](../../apps/union-eyes/components/auth/login-form.tsx) |
-| MFA (TOTP) | [packages/platform-auth/src/mfa/totp.ts](../../packages/platform-auth/src/mfa/totp.ts) |
-| MFA service | [packages/platform-auth/src/mfa/service.ts](../../packages/platform-auth/src/mfa/service.ts) |
-| Risk assessment | [packages/platform-auth/src/risk/assess.ts](../../packages/platform-auth/src/risk/assess.ts) |
-| Lifecycle service | [packages/platform-auth/src/lifecycle/service.ts](../../packages/platform-auth/src/lifecycle/service.ts) |
-| Email transport | [apps/union-eyes/lib/auth-emails.ts](../../apps/union-eyes/lib/auth-emails.ts) |
+| Login UI | [apps/union-eyes/components/auth/login-form.tsx](../../../../apps/union-eyes/components/auth/login-form.tsx) |
+| MFA (TOTP) | [packages/platform-auth/src/mfa/totp.ts](../../../../packages/platform-auth/src/mfa/totp.ts) |
+| MFA service | [packages/platform-auth/src/mfa/service.ts](../../../../packages/platform-auth/src/mfa/service.ts) |
+| Risk assessment | [packages/platform-auth/src/risk/assess.ts](../../../../packages/platform-auth/src/risk/assess.ts) |
+| Lifecycle service | [packages/platform-auth/src/lifecycle/service.ts](../../../../packages/platform-auth/src/lifecycle/service.ts) |
+| Email transport | [apps/union-eyes/lib/auth-emails.ts](../../../../apps/union-eyes/lib/auth-emails.ts) |
 
 ## 9. Multi-factor authentication (MFA)
 
@@ -137,7 +137,7 @@ See [UNION_EYES_MFA_AND_PASSWORDLESS.md](./UNION_EYES_MFA_AND_PASSWORDLESS.md) f
 ## 10. Risk-based authentication
 
 Every login runs through `assessRisk()` in
-[packages/platform-auth/src/risk/assess.ts](../../packages/platform-auth/src/risk/assess.ts).
+[packages/platform-auth/src/risk/assess.ts](../../../../packages/platform-auth/src/risk/assess.ts).
 The function returns a tier and a recommended action:
 
 | Tier | Trigger | Action |

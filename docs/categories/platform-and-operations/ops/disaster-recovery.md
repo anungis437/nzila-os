@@ -131,6 +131,6 @@ Backup integrity is verified via `pnpm exec tsx scripts/backup-verify.ts`, which
 
 - [Incident Response Plan](incident-response.md)
 - [Enterprise Readiness Index](../governance/enterprise-readiness.md)
-- [Business Continuity](../../ops/business-continuity/)
-- [SLO Policy](../../ops/slo-policy.yml)
-- [On-Call Runbooks](../../ops/runbooks/)
+- [Business Continuity](../../../../ops/business-continuity/)
+- [SLO Policy](../../../../ops/slo-policy.yml)
+- [On-Call Runbooks](../../../../ops/runbooks/)

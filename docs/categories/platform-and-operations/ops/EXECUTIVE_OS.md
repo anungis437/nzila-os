@@ -23,7 +23,7 @@ promptware. It is a governed multi-agent stack that runs the company.
 
 ## 2. Data substrate
 
-Three tables in [`packages/db/src/schema/executive.ts`](../../packages/db/src/schema/executive.ts)
+Three tables in [`packages/db/src/schema/executive.ts`](../../../../packages/db/src/schema/executive.ts)
 are the spine of ExecutiveOS:
 
 | Table | Purpose |
@@ -33,7 +33,7 @@ are the spine of ExecutiveOS:
 | `executive_agent_actions` | Insight / Recommendation / Draft Action — with approval state machine |
 
 All three are org-scoped, indexed by `(orgId, ...)`, and registered in
-[`packages/db/src/org-registry.ts`](../../packages/db/src/org-registry.ts).
+[`packages/db/src/org-registry.ts`](../../../../packages/db/src/org-registry.ts).
 
 ---
 
@@ -41,7 +41,7 @@ All three are org-scoped, indexed by `(orgId, ...)`, and registered in
 
 Every ExecutiveOS agent (Chief of Staff, CFO, RevOps, Platform Reliability,
 Legal, Knowledge Steward, …) implements `ExecutiveAgent<TInput>` from
-[`@nzila/executive-os`](../../packages/executive-os/src/contract.ts):
+[`@nzila/executive-os`](../../../../packages/executive-os/src/contract.ts):
 
 ```ts
 interface ExecutiveAgent<TInput> {
@@ -59,7 +59,7 @@ APIs, and do not depend on Next.js. The host (`apps/console/lib/executive-os.ts`
 fetches their inputs and persists their outputs.
 
 This makes every agent unit-testable in isolation
-(see [`chief-of-staff.test.ts`](../../packages/executive-os/src/agents/chief-of-staff.test.ts)).
+(see [`chief-of-staff.test.ts`](../../../../packages/executive-os/src/agents/chief-of-staff.test.ts)).
 
 ---
 
@@ -71,7 +71,7 @@ This makes every agent unit-testable in isolation
 | `recommendation` | **Yes** | "Pause product X for 30 days" |
 | `draft_action` | **Yes** | "Send collections email to client Y" |
 
-The state machine in [`action-queue.ts`](../../packages/executive-os/src/action-queue.ts)
+The state machine in [`action-queue.ts`](../../../../packages/executive-os/src/action-queue.ts)
 enforces:
 
 ```

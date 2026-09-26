@@ -15,7 +15,7 @@ Nzila OS provides five categories of verifiable evidence:
 | **Compliance snapshots** | Point-in-time compliance state (deterministic, hash-chained) | Reproduce via `pnpm exec tsx packages/platform-validation/src/run-all.ts` |
 | **Build attestation** | Ed25519-signed build provenance | Verify signature against published public key |
 | **SBOM** | CycloneDX software bill of materials | `scripts/generate-sbom.ts` → `ops/security/sbom.json` |
-| **Procurement pack** | Signed ZIP bundle (security + data + ops + governance + sovereignty) | 5-step verification in [procurement-pack.md](../governance/procurement-pack.md) |
+| **Procurement pack** | Signed ZIP bundle (security + data + ops + governance + sovereignty) | 5-step verification in [procurement-pack.md](../../platform-and-operations/governance/procurement-pack.md) |
 
 ---
 
@@ -42,9 +42,9 @@ Nzila OS provides five categories of verifiable evidence:
 | Artefact | Location |
 |----------|----------|
 | Corporate policies | `governance/corporate/governance/` (24+ policies) |
-| AI governance | `governance/ai/` + [AI Platform Contract](../architecture/AI_PLATFORM_CONTRACT.md) |
-| Security policies | `governance/security/` + [SECURITY.md](../../SECURITY.md) |
-| GA readiness | `governance/ga/ga-check.json` + [GA_CHECK_REPORT.md](../../governance/ga/GA_CHECK_REPORT.md) |
+| AI governance | `governance/ai/` + [AI Platform Contract](../../platform-and-operations/architecture/AI_PLATFORM_CONTRACT.md) |
+| Security policies | `governance/security/` + [SECURITY.md](../../../../SECURITY.md) |
+| GA readiness | `governance/ga/ga-check.json` + [GA_CHECK_REPORT.md](../../../../governance/ga/GA_CHECK_REPORT.md) |
 | Control manifests | `tooling/governance/validate-control-manifests.ts` (CM-001 through CM-009) |
 
 ---
@@ -142,14 +142,14 @@ pnpm exec tsx packages/platform-validation/src/run-all.ts
 
 | Document | Purpose | Path |
 |----------|---------|------|
-| Enterprise Readiness | Full audit index | [enterprise-readiness.md](../governance/enterprise-readiness.md) |
-| Architecture | System design | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
-| Security | Security posture | [SECURITY.md](../../SECURITY.md) |
-| Auth Architecture | Dual auth model | [AUTH_ARCHITECTURE.md](../architecture/AUTH_ARCHITECTURE.md) |
-| Change Policy | Change management | [CHANGE_POLICY.md](../governance/CHANGE_POLICY.md) |
-| Vulnerability Disclosure | Responsible disclosure | [vulnerability-disclosure-policy.md](../governance/vulnerability-disclosure-policy.md) |
-| App Gold Standard | Per-app compliance baseline | [APP_GOLD_STANDARD.md](../governance/APP_GOLD_STANDARD.md) |
-| Adoption Gate | Platform mandate enforcement | [platform-adoption-gate.ts](../../scripts/platform-adoption-gate.ts) |
+| Enterprise Readiness | Full audit index | [enterprise-readiness.md](../../platform-and-operations/governance/enterprise-readiness.md) |
+| Architecture | System design | [ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md) |
+| Security | Security posture | [SECURITY.md](../../../../SECURITY.md) |
+| Auth Architecture | Dual auth model | [AUTH_ARCHITECTURE.md](../../platform-and-operations/architecture/AUTH_ARCHITECTURE.md) |
+| Change Policy | Change management | [CHANGE_POLICY.md](../../platform-and-operations/governance/CHANGE_POLICY.md) |
+| Vulnerability Disclosure | Responsible disclosure | [vulnerability-disclosure-policy.md](../../platform-and-operations/governance/vulnerability-disclosure-policy.md) |
+| App Gold Standard | Per-app compliance baseline | [APP_GOLD_STANDARD.md](../../platform-and-operations/governance/APP_GOLD_STANDARD.md) |
+| Adoption Gate | Platform mandate enforcement | [platform-adoption-gate.ts](../../../../scripts/platform-adoption-gate.ts) |
 
 ---
 
@@ -159,5 +159,5 @@ pnpm exec tsx packages/platform-validation/src/run-all.ts
 |------|------|
 | Buyer's view | [01-buyer.md](01-buyer.md) |
 | Operator's view | [02-operator.md](02-operator.md) |
-| Full architecture | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
-| Procurement pack | [procurement-pack.md](../governance/procurement-pack.md) |
+| Full architecture | [ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md) |
+| Procurement pack | [procurement-pack.md](../../platform-and-operations/governance/procurement-pack.md) |

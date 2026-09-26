@@ -53,4 +53,4 @@
 
 ---
 
-**See also:** [Terminology Alignment Matrix](../../apps/union-eyes/docs/TERMINOLOGY_ALIGNMENT.md) (technical)
+**See also:** [Terminology Alignment Matrix](../../../../apps/union-eyes/docs/governance/TERMINOLOGY_ALIGNMENT.md) (technical)

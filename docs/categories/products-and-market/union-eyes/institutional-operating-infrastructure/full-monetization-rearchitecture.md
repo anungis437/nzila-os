@@ -89,4 +89,4 @@ Avoid:
 
 ## 9. Authority
 
-Anchored to [UE Operating System Reclassification](ue-operating-system-reclassification.md) and [Procurement Maturity Elevation](../../nzila-maturity-elevation/procurement-maturity-elevation.md).
+Anchored to [UE Operating System Reclassification](ue-operating-system-reclassification.md) and [Procurement Maturity Elevation](../../../historical-archive/archive/iterations/nzila-maturity-elevation/procurement-maturity-elevation.md).

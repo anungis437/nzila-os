@@ -104,7 +104,7 @@ items.
 | **Priorities** | The rep-facing view of what needs action next |
 | **Outcomes** | Resolution and follow-through information |
 
-For the full glossary, see [Glossary](../index/glossary.md).
+For the full glossary, see [Glossary](../../platform-and-operations/index/glossary.md).
 
 ## Related Documents
 

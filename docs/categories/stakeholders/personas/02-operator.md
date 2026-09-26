@@ -14,7 +14,7 @@
 | Run architecture checks | `pnpm exec tsx scripts/architecture-layer-check.ts && pnpm exec tsx scripts/app-domain-core-check.ts && pnpm exec tsx scripts/platform-surface-model-check.ts && pnpm exec tsx scripts/platform-authority-check.ts && pnpm exec tsx scripts/platform-contract-check.ts && pnpm exec tsx scripts/registry-consistency-check.ts && pnpm exec tsx scripts/control-plane-coherence-check.ts && pnpm exec tsx scripts/platform-adoption-gate.ts` |
 | Run governance checks | `pnpm exec tsx scripts/governance-check.ts` |
 | Run platform adoption gate | `pnpm exec tsx scripts/platform-adoption-gate.ts` |
-| Deploy to staging | [gitops-deploy.yml](../../.github/workflows/gitops-deploy.yml) |
+| Deploy to staging | [gitops-deploy.yml](../../../../.github/workflows/gitops-deploy.yml) |
 | Validate release | `pnpm exec tsx tooling/ga-check/ga-check.ts && pnpm contract-tests && pnpm inventory:check && pnpm exec tsx scripts/check-brand-leakage.ts && pnpm exec tsx scripts/validate-product-catalog.ts && pnpm exec tsx scripts/validate-portfolio.ts && pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts && pnpm exec tsx scripts/validate-auth-authority.ts && pnpm exec tsx scripts/validate-ga-state.ts && pnpm exec tsx scripts/validate-workspace-links.ts && pnpm exec tsx scripts/validate-release-strict.ts && pnpm exec tsx scripts/generate-commercial-traction.ts` |
 
 ---
@@ -159,4 +159,4 @@ All operational runbooks live in `ops/runbooks/`:
 | Developer onboarding | [Golden Path](../GOLDEN_PATH_DEVELOPER_GUIDE.md) |
 | Buyer's view | [01-buyer.md](01-buyer.md) |
 | Auditor's view | [03-auditor.md](03-auditor.md) |
-| Full architecture | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
+| Full architecture | [ARCHITECTURE.md](../../platform-and-operations/itsm/ARCHITECTURE.md) |

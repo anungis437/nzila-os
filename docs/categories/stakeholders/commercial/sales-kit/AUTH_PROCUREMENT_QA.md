@@ -154,7 +154,7 @@ and `created_at`. Writes are best-effort — auth flow is never blocked
 by a failed audit insert.
 
 Audit-log queries are documented in
-[`docs/runbooks/union-eyes-auth-operations.md`](../../runbooks/union-eyes-auth-operations.md).
+[`docs/runbooks/union-eyes-auth-operations.md`](../../../platform-and-operations/runbooks/union-eyes-auth-operations.md).
 
 ---
 
@@ -225,7 +225,7 @@ combined with conditional-access policies on your Entra tenant.
 
 - Trust Center: [`../trust-center/`](../trust-center/)
 - Security one-pager: [`../UNION_EYES_SECURITY_ONE_PAGER.md`](../UNION_EYES_SECURITY_ONE_PAGER.md)
-- Auth model (technical): [`../../security/UNION_EYES_AUTH_MODEL.md`](../../security/UNION_EYES_AUTH_MODEL.md)
-- MFA + passwordless: [`../../security/UNION_EYES_MFA_AND_PASSWORDLESS.md`](../../security/UNION_EYES_MFA_AND_PASSWORDLESS.md)
-- Identity lifecycle runbook: [`../../runbooks/union-eyes-identity-lifecycle.md`](../../runbooks/union-eyes-identity-lifecycle.md)
-- Auth operations runbook: [`../../runbooks/union-eyes-auth-operations.md`](../../runbooks/union-eyes-auth-operations.md)
+- Auth model (technical): [`../../security/UNION_EYES_AUTH_MODEL.md`](../../../platform-and-operations/security/UNION_EYES_AUTH_MODEL.md)
+- MFA + passwordless: [`../../security/UNION_EYES_MFA_AND_PASSWORDLESS.md`](../../../platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md)
+- Identity lifecycle runbook: [`../../runbooks/union-eyes-identity-lifecycle.md`](../../../platform-and-operations/runbooks/union-eyes-identity-lifecycle.md)
+- Auth operations runbook: [`../../runbooks/union-eyes-auth-operations.md`](../../../platform-and-operations/runbooks/union-eyes-auth-operations.md)

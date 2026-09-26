@@ -359,5 +359,5 @@ To add a new jurisdiction (e.g., Tanzania):
 ## Related Files
 
 - [API Policy Reference](./POLICY_API_REFERENCE.md)
-- [Capacity Planning](../../docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md)
-- [Remediation Tasks](../../docs/REMEDIATION_TASKS.md)
+- [Capacity Planning](../../docs/categories/historical-archive/archive/iterations/plans/LOAD_PROJECTION_CAPACITY_PLAN.md)
+- [Remediation Tasks](../../docs/categories/historical-archive/REMEDIATION_TASKS.md)

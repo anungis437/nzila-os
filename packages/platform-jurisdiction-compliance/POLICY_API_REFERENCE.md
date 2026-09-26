@@ -34,4 +34,4 @@ Retrieve compliance check audit trail.
 ## Related
 
 - [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
-- [Capacity Planning](../../docs/plans/LOAD_PROJECTION_CAPACITY_PLAN.md)
+- [Capacity Planning](../../docs/categories/historical-archive/archive/iterations/plans/LOAD_PROJECTION_CAPACITY_PLAN.md)

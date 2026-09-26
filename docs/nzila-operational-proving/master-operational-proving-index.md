@@ -1,5 +1,14 @@
 # Master Operational Proving Index
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-08-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `tooling/scripts/validate-operational-proving.mjs` resolves this directory by path; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 **Status:** Active
 **Effective:** 2026-05-09
 **Authority root:** Nzila Ventures institutional operational proving layer.

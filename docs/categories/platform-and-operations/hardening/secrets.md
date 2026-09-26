@@ -102,7 +102,7 @@ Both must pass for PRs to merge.
 
 1. The PR will be blocked — the secret-scan job will fail.
 2. Remove the secret, push a fixup commit.
-3. If the secret was a real credential: follow the [Incident Response playbook](../../ops/incident-response/README.md).
+3. If the secret was a real credential: follow the [Incident Response playbook](../../../../ops/incident-response/README.md).
 4. Report to `security@nzila.app`.
 
 ### If a Real Secret Was Exposed

@@ -107,5 +107,5 @@ restricted to operator-facing apps (`apps/console`, `apps/partners`,
 
 * [`STATUS.md`](STATUS.md) — what is real, what is calibrated, what is
   Phase-2 deferred.
-* [`docs/commercial/GROWTHOS_OVERVIEW.md`](../../docs/commercial/GROWTHOS_OVERVIEW.md)
-* [`docs/runbooks/growthos-operator-runbook.md`](../../docs/runbooks/growthos-operator-runbook.md)
+* [`docs/commercial/GROWTHOS_OVERVIEW.md`](../../docs/categories/stakeholders/commercial/GROWTHOS_OVERVIEW.md)
+* [`docs/runbooks/growthos-operator-runbook.md`](../../docs/categories/platform-and-operations/runbooks/growthos-operator-runbook.md)

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-27T20:40:36.543Z",
-  "overallScore": 7,
+  "generatedAt": "2026-09-24T12:59:54.194Z",
+  "overallScore": 7.8,
   "categories": {
     "runtime_proof": {
-      "score": 9,
+      "score": 8,
       "findings": [
-        "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+        "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
       ]
     },
     "duplication": {
@@ -27,10 +27,8 @@
       "findings": []
     },
     "docs_truth": {
-      "score": 0,
-      "findings": [
-        "927 indexed documents are stale by repo-mtime policy (>90 days)."
-      ]
+      "score": 9,
+      "findings": []
     },
     "naming_consistency": {
       "score": 10,
@@ -41,11 +39,11 @@
       "findings": [
         "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml",
         "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml",
-        "Effective active workflow count is 50 (total 53, emergency/manual 3)."
+        "Effective active workflow count is 51 (total 54, emergency/manual 3)."
       ]
     },
     "overengineering": {
-      "score": 6,
+      "score": 5.9,
       "findings": [
         "Effective workflow surface remains larger than ideal for a disciplined canonical release path."
       ]
@@ -65,7 +63,7 @@
   "improvementBacklog": [
     {
       "category": "runtime_proof",
-      "finding": "Only 1 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
+      "finding": "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
     },
     {
       "category": "duplication",
@@ -84,10 +82,6 @@
       "finding": "Root command surface is still dense and benefits from continued pruning."
     },
     {
-      "category": "docs_truth",
-      "finding": "927 indexed documents are stale by repo-mtime policy (>90 days)."
-    },
-    {
       "category": "ci_efficiency",
       "finding": "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml"
     },
@@ -97,7 +91,7 @@
     },
     {
       "category": "ci_efficiency",
-      "finding": "Effective active workflow count is 50 (total 53, emergency/manual 3)."
+      "finding": "Effective active workflow count is 51 (total 54, emergency/manual 3)."
     },
     {
       "category": "overengineering",

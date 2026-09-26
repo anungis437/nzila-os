@@ -114,7 +114,7 @@ Key documents:
 **Status**: 🛠️ Playbooks Ready
 
 Key documents:
-- [COO Playbook](../knowledge/playbooks/coo-playbook-overview.md)
+- [COO Playbook](../foundations/knowledge/playbooks/coo-playbook-overview.md)
 - [Shared Services SLA Tracker](../corporate/legal/tools-shared-services-sla-tracker.md)
 - [Request Intake Form Template](../corporate/operations/checklist-request-intake-form-template.md)
 
@@ -196,7 +196,7 @@ Key documents:
 Key documents:
 - [Backbone Build Plan](BACKBONE_BUILD_PLAN.md)
 - [Backbone Architecture](BACKBONE_ARCHITECTURE.md)
-- [Platform Manifest](nzila-platform-manifest.json)
+- [Platform Manifest](../../packages/automation/data/nzila-platform-manifest.json)
 - [Multi-Vertical Strategy](MULTI_VERTICAL_STRATEGY.md)
 
 ### Migration Roadmap (7 Phases, 87 Weeks)
@@ -209,23 +209,23 @@ Key documents:
 6. **Phase 6**: Consolidation (19 weeks) - C3UO merge, niche platforms
 7. **Phase 7**: DevOps (6 weeks) - AgrimoOps integration
 
-### [Portfolio Analysis](automation/data/)
-- [Legacy Portfolio Analysis](automation/data/legacy_portfolio_analysis.json) (39,822 lines) - 13 platforms analyzed
+### [Portfolio Analysis](../../packages/automation/data/)
+- [Legacy Portfolio Analysis](../../packages/automation/data/legacy_portfolio_analysis.json) (39,822 lines) - 13 platforms analyzed
 - **New Additions**: Lexora (legaltech), Insight-CFO (fintech) - Analysis pending
 - [Portfolio Deep Dive](PORTFOLIO_DEEP_DIVE.md) (70+ pages)
-- [Content Metadata](automation/data/content_metadata.json)
+- [Content Metadata](../../packages/automation/data/content_metadata.json)
 
 ---
 
 ## 🤖 Automation & Tools
 
 ### Analyzers
-- [Legacy Portfolio Analyzer](automation/analyzers/legacy_portfolio_analyzer.py) - 13 platforms analyzed
+- [Legacy Portfolio Analyzer](../../packages/automation/analyzers/legacy_portfolio_analyzer.py) - 13 platforms analyzed
 - Business Intelligence Automation (coming soon)
 
 ### Organizers
-- [Nzila Content Organizer](automation/organizers/nzila_content_organizer.py) - 96 corporate docs organized
-- [Healthtech Strategy Organizer](automation/organizers/organize_healthtech.py) - 3,359 docs categorized
+- [Nzila Content Organizer](../../packages/automation/organizers/nzila_content_organizer.py) - 96 corporate docs organized
+- [Healthtech Strategy Organizer](../../packages/automation/organizers/organize_healthtech.py) - 3,359 docs categorized
 
 ### Generators (Coming Soon)
 - Tech repo scaffold generator
@@ -245,7 +245,7 @@ Key documents:
 ### [Legacy Codebases](legacy-codebases/)
 - 13 platforms (814 MB total)
 - All platforms extracted and analyzed
-- [Portfolio Analysis Results](automation/data/legacy_portfolio_analysis.json)
+- [Portfolio Analysis Results](../../packages/automation/data/legacy_portfolio_analysis.json)
 
 ### [Strategic Documentation](../)
 - Notion exports: 3,456 total documents (116 MB)
@@ -259,8 +259,8 @@ Key documents:
 - Strategic review templates
 - (More coming soon)
 
-### [Playbooks](../knowledge/playbooks/)
-- [COO Playbook Overview](../knowledge/playbooks/coo-playbook-overview.md)
+### [Playbooks](../foundations/knowledge/playbooks/)
+- [COO Playbook Overview](../foundations/knowledge/playbooks/coo-playbook-overview.md)
 - Security & incident response
 - (More coming soon)
 
@@ -361,7 +361,7 @@ Technical debt scoring          →    Risk management
 ### Technology
 - [Backbone Build Plan](BACKBONE_BUILD_PLAN.md)
 - [Portfolio Deep Dive](PORTFOLIO_DEEP_DIVE.md)
-- [Platform Architecture](../architecture/)
+- [Platform Architecture](../../docs/architecture/)
 
 ### Governance
 - [Board Governance](../corporate/board/)

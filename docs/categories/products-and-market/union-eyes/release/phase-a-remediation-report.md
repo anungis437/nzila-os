@@ -67,7 +67,7 @@ See [environment-topology-audit.md](environment-topology-audit.md) for the full 
 | `workflow_dispatch` env=`pilot`   | `pilot`          | 1 reviewer          |
 | `workflow_dispatch` env=`production` | `production`  | 2 reviewers         |
 
-The `plan` step in [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml) computes per-env values for `app_name`, `resource_group`, `containerapp_environment`, `nzila_mode`, `deployment_type`, `feature_profile`, `release_id`, `build_time`. All downstream `az` calls consume these outputs.
+The `plan` step in [.github/workflows/deploy-union-eyes.yml](../../../../../.github/workflows/deploy-union-eyes.yml) computes per-env values for `app_name`, `resource_group`, `containerapp_environment`, `nzila_mode`, `deployment_type`, `feature_profile`, `release_id`, `build_time`. All downstream `az` calls consume these outputs.
 
 ---
 
@@ -184,7 +184,7 @@ TLS: ACA managed certs continue to apply per custom-domain binding.
 | Pilot-mode flag fail-closed without `NZILA_MODE`      | ✅ (code)       | ✅                   | ✅                                                 |
 | `NZILA_MODE` set to a real value on live container    | ❌              | ✅ (`staging`)        | ✅ (`pilot` / `demo` / `prod`)                     |
 | Pilot tables present in DB                            | ✅              | ✅                    | ✅                                                 |
-| Pilot org seeded                                      | ❌              | ❌                    | depends on operator running [seed-cupe-pilot.mjs](../../../apps/union-eyes/scripts/seed-cupe-pilot.mjs) against pilot DB |
+| Pilot org seeded                                      | ❌              | ❌                    | depends on operator running [seed-cupe-pilot.mjs](../../../../../apps/union-eyes/scripts/seed-cupe-pilot.mjs) against pilot DB |
 | Hard route gating (`PILOT_EXCLUDED_ROUTES`)           | ✅ (code)       | ✅                    | ✅                                                 |
 
 ---
@@ -238,7 +238,7 @@ Execute in order. Each step is independent and reversible up to step 6.
 2. **Stage and commit only Phase A files** (exact `git add` block in §6).
 3. **Push branch.**
 4. **Open PR** scoped to "Phase A: environment isolation". Two reviewers required.
-5. **Provision the four envs** with [provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1). Capture the per-env outputs (PG FQDN, KV name, ACA FQDN) for the next steps.
+5. **Provision the four envs** with [provision-all.ps1](../../../../../apps/union-eyes/infra/environments/provision-all.ps1). Capture the per-env outputs (PG FQDN, KV name, ACA FQDN) for the next steps.
 6. **Configure GitHub repo `vars` and `secrets`** for each new GitHub Environment (`staging`, `demo`, `pilot`, `production`) with the values surfaced by step 5.
 7. **Add custom-domain bindings** in each new ACA: `staging-app.unioneyes.app`, `demo.unioneyes.app`, `pilot.unioneyes.app`, `app.unioneyes.app` (+ marketing aliases).
 8. **Provision DNS** CNAMEs to the new ACA FQDNs. Cut over staging first.

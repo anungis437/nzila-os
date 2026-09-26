@@ -1,5 +1,15 @@
 # Live Evidence Capture Runbook
 
+> **Temporal status — SUPERSEDED FOR CURRENT POSTURE (added 2026-09-24):** this document is dated
+> 2026-05 and predates the `UE_SAAS_OPERATIONAL_READINESS` gate ruling of 2026-08-31
+> ([`../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md`](../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md))
+> and the Phase 3A runtime findings of 2026-09-01
+> ([`../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md`](../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md)).
+> The current gate reads **`NO_GO — RUNTIME_PROOF_REQUIRED`**. Any `CURRENT`, `GO`, `LOCKED`, or
+> `VERIFIED` marking below describes this document's own state in 2026-05, not the current pilot
+> posture, and must not be quoted as buyer-facing readiness. Body retained unmodified as
+> historical evidence; current posture lives in [`../README.md`](../README.md).
+
 **Status:** TEMPLATE — requires live Azure access to execute  
 **Last updated:** 2026-05-14  
 **Source of truth:** This document + `reports/runtime/live-evidence-manifest.template.json`  
@@ -17,11 +27,11 @@ requires Azure access outside the repository.
 
 **Three distinct layers:**
 
-| Layer | State | Source |
-|-------|-------|--------|
-| Code/config posture | ✅ HEALTHY | `reports/runtime/platform-runtime-truth-latest.json` |
-| Live operational proof | ⏳ PENDING | This runbook |
-| Production expansion approval | 🔒 CONDITIONAL | Expansion gate (post-pilot) |
+| Layer                         | State          | Source                                               |
+| ----------------------------- | -------------- | ---------------------------------------------------- |
+| Code/config posture           | ✅ HEALTHY     | `reports/runtime/platform-runtime-truth-latest.json` |
+| Live operational proof        | ⏳ PENDING     | This runbook                                         |
+| Production expansion approval | 🔒 CONDITIONAL | Expansion gate (post-pilot)                          |
 
 ---
 
@@ -387,14 +397,14 @@ _______________
 
 ## Interpreting Results
 
-| Result | Meaning |
-|--------|---------|
+| Result       | Meaning                                                                                        |
+| ------------ | ---------------------------------------------------------------------------------------------- |
 | All A–G pass | Live operational proof complete — Section B of RUNTIME_EVIDENCE_PACK.md can be marked VERIFIED |
-| Partial pass | Document specific gaps in SIGN_OFF.md; update exceptions in evidence manifest |
-| Any fail | Escalate to platform engineering before pilot launch with real member data |
+| Partial pass | Document specific gaps in SIGN_OFF.md; update exceptions in evidence manifest                  |
+| Any fail     | Escalate to platform engineering before pilot launch with real member data                     |
 
 ---
 
-*This runbook captures what the repository cannot verify autonomously. The code/config posture
+_This runbook captures what the repository cannot verify autonomously. The code/config posture
 is already HEALTHY per `reports/runtime/platform-runtime-truth-latest.json`. This runbook
-converts that to live operational proof.*
+converts that to live operational proof._

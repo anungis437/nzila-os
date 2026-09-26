@@ -8,54 +8,78 @@ Every product surface is a thin interface over a shared decision core:
 Decision = Input + Policy + Actor Authority + Outcome + Proof
 ```
 
+## What NzilaOS is not
+
+- Not a product sold under the name "NzilaOS" — customers buy a product surface (Union Eyes, CIVIC, …), not the platform.
+- Not a general-purpose application framework — apps consume platform authorities, they do not re-implement them.
+- Not a description of production readiness. Code existing in this repository does not imply a capability is deployed, runtime-verified, or operationally proven. Readiness is asserted only where explicit evidence is on file.
+
+## Where to start
+
+| You are… | Start here |
+| --- | --- |
+| Reading for the first time | This file, then [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Looking for any document | [docs/INDEX.md](docs/INDEX.md) (curated) · [docs/documentation-index.md](docs/documentation-index.md) (generated, exhaustive) |
+| Building | [docs/categories/stakeholders/builders/](docs/categories/stakeholders/builders/) |
+| Operating / on call | [docs/categories/platform-and-operations/ops/](docs/categories/platform-and-operations/ops/) |
+| Reviewing security or governance | [SECURITY.md](SECURITY.md) · [docs/categories/platform-and-operations/governance/](docs/categories/platform-and-operations/governance/) |
+| Working on Union Eyes | [docs/union-eyes/README.md](docs/union-eyes/README.md) — read it before touching `apps/union-eyes` |
+| Working on CIVIC / OCI | [docs/CIVIC_OCI_ALIGNMENT.md](docs/CIVIC_OCI_ALIGNMENT.md) |
+| Looking for history | [docs/categories/historical-archive/README.md](docs/categories/historical-archive/README.md) |
+
 ## Commercial spine (two lanes only)
 
-As of the Aug 2026 condensed plan, only two lanes are the active commercial motion:
+Only two lanes are the active commercial motion:
 
-1. **Union Eyes** — near-term revenue. Living engineering status:
+1. **Union Eyes** — near-term commercial lane. Living engineering and readiness authority:
    [docs/union-eyes/README.md](docs/union-eyes/README.md). Current gate:
-   `UE_SAAS_OPERATIONAL_READINESS = NO_GO` (stale relative to `HEAD` — see that page).
-2. **CIVIC** — cautious public-institution path, currently in discovery/market-engagement.
-   See [docs/CIVIC_OCI_ALIGNMENT.md](docs/CIVIC_OCI_ALIGNMENT.md).
+   `UE_SAAS_OPERATIONAL_READINESS = NO_GO — RUNTIME_PROOF_REQUIRED`.
+2. **CIVIC** — cautious public-institution lane, currently in discovery / market engagement,
+   pre-revenue. See [docs/CIVIC_OCI_ALIGNMENT.md](docs/CIVIC_OCI_ALIGNMENT.md) and
+   [docs/oci/README.md](docs/oci/README.md).
 
-Everything else below is portfolio inventory or an internal hold, not part of the
-current commercial spine — see [governance/portfolio/README.md](governance/portfolio/README.md)
-before quoting a tier/GTM-posture/revenue figure from the catalog as an active sales motion.
+Everything else is portfolio inventory or an internal surface, not part of the current
+commercial spine. Read [governance/portfolio/README.md](governance/portfolio/README.md)
+before quoting a tier, GTM posture, or revenue field from the catalog as an active sales motion.
 
-## Domain Interfaces
+## Product surfaces
 
-| Product | Domain | Status | Tier |
-|---------|--------|--------|------|
-| **Union Eyes** | Labour representation & case management | Pilot — commercial spine, lane 1 | 1 |
-| **CIVIC** | Public-institution continuity (cautious, discovery/market-engagement phase) | Hold — commercial spine, lane 2, pre-revenue | 2 |
-| **CourtLens** | Access-to-justice & legal matter intelligence (on ABR substrate; retains FAIRCASE tribunal-intelligence lineage) | Pilot — portfolio inventory, not current spine | 2 |
-| **Flow** | SMB operations & commerce automation | Pilot — portfolio inventory, not current spine | 2 |
-| **CFO** | Finance workflows | Pilot | 2 |
-| **Partners** | Partner enablement portal | Pilot | 2 |
-| **Console** | Internal ops & governance control surface | Internal | 3 |
-| **Control Plane** | Platform governance engine | Internal | 3 |
-| **Web** | Public marketing & lead generation | Maintain | 3 |
-| **Agrimo** | Agricultural field operations | Incubating | 4 |
-| **Cora** | Agri intelligence dashboard | Incubating | 4 |
-| **Zonga** | Creator economy platform | Incubating | 4 |
-| **Trade** | Cross-border trade & deal infrastructure (distinct from 3CUO/DiasporaCore banking) | Incubating | 4 |
-| **Mobility** | Immigration & mobility | Incubating | 4 |
-| **NACP Exams** | DRC national education & examination infrastructure | Incubating | 4 |
+The fields below are the current values in the portfolio catalog. They describe **inventory
+posture**, not an active sales motion — see the commercial spine above.
 
-Portfolio truth source (inventory, not GTM plan): [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json).
-Read [governance/portfolio/README.md](governance/portfolio/README.md) first — a `tier: 1` /
-`sell-now` label in that file does not mean active sales motion this quarter (see "Commercial
-spine" above).
+| Product | Domain | Tier | GTM posture |
+| --- | --- | --- | --- |
+| **Union Eyes** | Labour representation & case management | 1 | `sell-now` |
+| **CIVIC** | Public-institution continuity | 2 | `hold` |
+| **CourtLens** (`apps/abr`) | Access-to-justice & legal matter intelligence; retains FAIRCASE tribunal-intelligence lineage | 2 | `hold` |
+| **Flow** | SMB operations & commerce automation | 2 | `hold` |
+| **CFO** | Finance workflows | 2 | `maintain` |
+| **Partners** | Partner enablement portal | 2 | `maintain` |
+| **Console** | Internal ops & governance control surface | 3 | `internal-only` |
+| **Control Plane** | Platform governance engine | 3 | `internal-only` |
+| **Orchestrator API** | Workflow execution engine | 3 | `internal-only` |
+| **Web** | Public marketing & lead generation | 3 | `maintain` |
+| **Agrimo** · **Cora** · **Trade** · **Mobility** · **NACP Exams** · **Zonga** | Incubating domain surfaces | 4 | `hold` |
+| **Platform Admin** · **Mobility Client Portal** | Being wound down | 5 | `sunset` |
 
-## Decision Core
+- Editable truth source: [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json)
+  (the only editable portfolio authority — everything else is generated from it).
+- Generated portfolio view: [reports/portfolio-status.md](reports/portfolio-status.md).
+- Generated platform/app status manifest: [nzila-truth-manifest.json](nzila-truth-manifest.json).
 
-- `packages/decision-core` defines the canonical decision primitives, registry, and enforcement helper
-- Control Plane governs decision integrity and policy evaluation
-- Orchestrator executes approved decision workflows
-- Console reviews proof, replay, and operating risk
-- Platform Admin governs tenants, authority, and policy activation
+## Decision core
 
-## Quick Start
+- `packages/decision-core` defines the canonical decision primitives, registry, and enforcement helper.
+- **Control Plane** governs policy evaluation, governance lifecycle, entitlements, workflow definitions, approval policy, and the integration registry.
+- **Orchestrator** executes approved workflows and owns command dispatch, event fabric, and job state.
+- **Console** is an operator interface: it reviews proof, replay, and operating risk; it does not own policy evaluation or governance writes.
+- **Platform Admin** governs org-scoped users, settings, and member roles.
+- `@nzila/platform-auth` is the canonical authentication authority.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the authoritative capability-ownership map and the
+rules that prevent parallel sources of truth.
+
+## Quick start
 
 ```bash
 pnpm install            # Install all dependencies
@@ -65,28 +89,31 @@ pnpm test:fast          # Run unit tests (skip contract tests)
 pnpm build              # Build everything
 ```
 
-Bootstrap and seed workflows are idempotent and safe to re-run multiple times.
+Bootstrap and seed workflows are idempotent and safe to re-run.
 
-## Repo Structure
+## Repo structure
 
 ```
-apps/              28 applications
-packages/          canonical inventory (platform, domain, infra)
+apps/              Product and internal application surfaces
+packages/          Shared platform, domain, and infrastructure libraries
 services/          Backend services
 tooling/           Contract tests, scaffolding, CI tools
 governance/        Portfolio catalog, capital model, commercial data
 scripts/           Validation, release, SRE, finops tooling
-docs/              Documentation (builders, buyers, operators, security)
+docs/              Documentation (see docs/INDEX.md)
 ops/               Environment configs, runbooks, policies
-reports/           Generated reports (capital, SRE, compliance)
+reports/           Generated reports (portfolio, SRE, compliance)
 infrastructure/    IaC and deployment configs
 ```
 
-Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tooling/repo-inventory/output/repo-inventory.md)
+Counts of apps, packages, workflows, and tests are deliberately not hardcoded here. The
+canonical, regenerated inventory is
+[tooling/repo-inventory/output/repo-inventory.md](tooling/repo-inventory/output/repo-inventory.md)
+(`pnpm docs:sync` verifies docs against it).
 
-## Canonical Commands
+## Canonical commands
 
-### Daily Development
+### Daily development
 
 | Command | Purpose |
 |---------|---------|
@@ -97,7 +124,18 @@ Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tool
 | `pnpm test:fast` | Fast tests (skip contracts) |
 | `pnpm test` | Full test suite |
 
-### Release & Deploy
+### Validation before review
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm format:check` | Prettier formatting check |
+| `pnpm validate:docs` | Documentation consistency check |
+| `pnpm link-check` | Markdown link check (honours `.linkcheckignore`) |
+| `pnpm docs:sync` | Verify docs against the canonical repo inventory |
+| `pnpm architecture:check` | Layer, authority, contract, and registry checks |
+| `pnpm governance:audit` | Doc, ownership, release, and repo audit |
+
+### Release & deploy
 
 | Command | Purpose |
 |---------|---------|
@@ -105,18 +143,6 @@ Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tool
 | `pnpm release:prod` | Production gate (full checks) |
 | `pnpm release:rollback` | Roll back production |
 | `pnpm release:hotfix` | Initiate hotfix |
-
-### Governance & Audit
-
-| Command | Purpose |
-|---------|---------|
-| `pnpm validate:governance` | Full governance gate |
-| `pnpm governance:audit` | Doc, ownership, release, and repo audit |
-| `pnpm decision:coverage` | Warn-only decision registration coverage check |
-| `pnpm decision:coverage -- --strict` | Blocking decision-proof coverage gate |
-| `pnpm audit:pack:verify -- --input=<pack.json|pack.zip>` | External audit-pack integrity verification |
-| `pnpm repo:audit` | Repo excellence audit |
-| `pnpm docs:index` | Rebuild documentation index |
 
 ### Operations
 
@@ -128,78 +154,86 @@ Canonical repo inventory: [tooling/repo-inventory/output/repo-inventory.md](tool
 | `pnpm finops:build` | FinOps portfolio report |
 | `pnpm evidence:pack:monthly` | Monthly evidence pack |
 
-### Portfolio & Capital
+### Portfolio & capital
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm generate:portfolio-artifacts` | Regenerate all portfolio reports |
+| `pnpm generate:portfolio-artifacts` | Regenerate all portfolio reports from the catalog |
 | `pnpm generate:capital-allocation` | Capital allocation engine |
 | `pnpm generate:commercial-traction` | Commercial traction reports |
 
-Full command catalog: `pnpm help:commands`
+Full command catalog: `pnpm help:commands`.
 
-## Release Model
+## Release model
 
-Staging → Production promotion with governance gates at every step:
+Staging → production promotion with governance gates at every step:
 
-1. **Staging gate** — `pnpm release:staging` runs audit, migration safety, and smoke tests
-2. **Production gate** — `pnpm release:prod` adds secret audit and full deployment resolution
-3. **Rollback** — `pnpm release:rollback` for immediate revert
-4. **Hotfix** — `pnpm release:hotfix` with SLA tracking
+1. **Staging gate** — `pnpm release:staging` runs audit, migration safety, and smoke tests.
+2. **Production gate** — `pnpm release:prod` adds secret audit and full deployment resolution.
+3. **Rollback** — `pnpm release:rollback` for immediate revert.
+4. **Hotfix** — `pnpm release:hotfix` with SLA tracking.
 
 CI enforces portfolio-governance, compliance drift, and reliability checks on every PR.
 
 ## Portfolio Governance
 
-- **Single truth source** — [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json) drives all portfolio artifacts
-- **Portfolio status** — Generated report at [reports/portfolio-status.md](reports/portfolio-status.md)
-- **Capital discipline** — Allocation weights, runway scenarios, override tracking
-- **Commercial traction** — Pipeline, pilot conversion, retention risk with evidence separation
-- **Evidence packs** — Monthly tamper-evident audit packs in [proof-artifacts/](proof-artifacts/)
-- **200+ contract tests** — Enforcing platform boundaries, security posture, and operating standards
+- **Single truth source** — [governance/portfolio/product-catalog.json](governance/portfolio/product-catalog.json) drives all portfolio artifacts.
+- **Generated status** — [reports/portfolio-status.md](reports/portfolio-status.md).
+- **Capital discipline** — allocation weights, runway scenarios, override tracking.
+- **Commercial traction** — pipeline, pilot conversion, retention risk, with evidence separation.
+- **Evidence packs** — monthly tamper-evident audit packs in [proof-artifacts/](proof-artifacts/).
+- **Contract tests** — `tooling/contract-tests/` enforces platform boundaries, security posture, and operating standards.
 
-## Architecture
+## Architecture at a glance
 
-- **Decision infrastructure**: `@nzila/decision-core` defines canonical decision records, registry entries, and route-level enforcement helpers
-- **Auth**: `@nzila/platform-auth` — email/password (Argon2id) + optional Entra SSO. All apps use `@nzila/platform-auth` as the canonical auth authority; legacy Clerk references in `apps/union-eyes` are compatibility-only.
-- **Database**: PostgreSQL + Drizzle ORM
-- **Infra**: Azure Container Apps (Canada Central staging)
-- **CI**: 47 GitHub Actions workflows covering governance, security, deployment, and compliance
-- **Monorepo**: pnpm workspaces + Turborepo
+- **Decision infrastructure** — `@nzila/decision-core` defines canonical decision records, registry entries, and route-level enforcement helpers.
+- **Auth** — `@nzila/platform-auth` is the canonical authority: email/password (Argon2id) plus optional Entra SSO. Legacy Clerk references in `apps/union-eyes` are compatibility-only.
+- **Database** — PostgreSQL + Drizzle ORM.
+- **Infra** — Azure Container Apps (Canada Central staging).
+- **CI** — GitHub Actions covering governance, security, deployment, and compliance.
+- **Monorepo** — pnpm workspaces + Turborepo.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical overview, [docs/architecture/ARCHITECTURE_MAP.md](docs/architecture/ARCHITECTURE_MAP.md) for the decision-infrastructure architecture map, and [docs/architecture/decision-infrastructure-map.md](docs/architecture/decision-infrastructure-map.md) for product-to-decision mapping.
+Deeper reading: [ARCHITECTURE.md](ARCHITECTURE.md),
+[docs/categories/platform-and-operations/architecture/ARCHITECTURE_MAP.md](docs/categories/platform-and-operations/architecture/ARCHITECTURE_MAP.md),
+[docs/categories/platform-and-operations/architecture/decision-infrastructure-map.md](docs/categories/platform-and-operations/architecture/decision-infrastructure-map.md).
 
-## Audit Guarantees
+## Audit guarantees
+
+These are the designed and implemented properties of the audit substrate. Where a property
+requires runtime proof for a specific product, that product's readiness page is authoritative.
 
 - Decisions are immutable: each NAR is persisted to append-only storage and immutable Azure Blob retention.
 - Proofs are independently verifiable: records include hash, signature, and chain linkage for external validation.
 - Records are retained under policy: immutable retention defaults to 7 years with legal-hold support.
-- System is audit-ready: scoped auditor tokens can verify and export signed evidence packs without mutation access.
+- Scoped auditor tokens can verify and export signed evidence packs without mutation access.
 
-## Decision Intelligence
+## Decision intelligence
 
 - `@nzila/decision-intelligence` aggregates irreversible decision records into analytics-ready models.
 - `@nzila/policy-intelligence` scores production policies, detects drift, and suggests rule improvements.
 - `/api/intelligence/*` exposes tiered intelligence APIs: Basic for metrics, Pro for policy insights, Enterprise for anonymized benchmarks.
-- Intelligence is the moat: exports remain raw; benchmark and recommendation layers are only available inside Nzila.
+- Exports remain raw; benchmark and recommendation layers stay inside Nzila.
 
-## Documentation
+## Documentation map
 
-| Audience | Location | Contents |
-|----------|----------|----------|
-| **Builders** | [docs/builders/](docs/builders/) | Setup, commands, architecture, contributing |
-| **Operators** | [docs/ops/](docs/ops/) | Release, incidents, staging, runbooks |
-| **Buyers** | [docs/buyers/](docs/buyers/) | Product packs, security, reliability, pricing |
-| **Security** | [SECURITY.md](SECURITY.md), [docs/governance/](docs/governance/) | Policies, threat model, vendor assessment |
-| **Investors** | [docs/investor/](docs/investor/) | Growth narrative, moat analysis, revenue scenarios |
-| **All** | [docs/INDEX.md](docs/INDEX.md) | Complete documentation index |
+| Audience | Location |
+|----------|----------|
+| **Builders** | [docs/categories/stakeholders/builders/](docs/categories/stakeholders/builders/) |
+| **Operators** | [docs/categories/platform-and-operations/ops/](docs/categories/platform-and-operations/ops/) · [docs/ops/](docs/ops/) |
+| **Buyers** | [docs/categories/stakeholders/buyers/](docs/categories/stakeholders/buyers/) |
+| **Security & governance** | [SECURITY.md](SECURITY.md) · [docs/categories/platform-and-operations/governance/](docs/categories/platform-and-operations/governance/) |
+| **Investors** | [docs/categories/stakeholders/investor/](docs/categories/stakeholders/investor/) |
+| **Products & market** | [docs/categories/products-and-market/](docs/categories/products-and-market/) |
+| **Historical archive** | [docs/categories/historical-archive/](docs/categories/historical-archive/) |
+| **Everything** | [docs/INDEX.md](docs/INDEX.md) |
 
-## Maturity Signals
+## Conventions for contributors and coding agents
 
-- 170+ governed packages with lifecycle classification
-- Board-grade capital allocation with live signal connectors
-- SOC 2 / ISO 27001 compliance automation
-- SBOM generation, Trivy container scans, DAST via OWASP ZAP
-- Red-team adversarial testing (nightly)
-- Game-day chaos engineering (weekly)
-- Evidence-first proof packs for buyer diligence
+- `ARCHITECTURE.md` owns capability ownership and the rules that forbid shadow authorities.
+- `governance/portfolio/product-catalog.json` owns product posture; generated artifacts must not be hand-edited.
+- `docs/union-eyes/README.md` owns Union Eyes readiness; `apps/union-eyes/lib/reality/capability-registry.ts` owns Union Eyes capability state.
+- `docs/oci/SUPERSEDED.md` owns the disposition ledger for OCI/CIVIC doctrine.
+- Documents that describe a completed programme or a past state carry a status banner at the top and are not current authority.
+- Before changing Union Eyes, read the order stated in [AGENTS.md](AGENTS.md).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the repo contract and PR expectations.

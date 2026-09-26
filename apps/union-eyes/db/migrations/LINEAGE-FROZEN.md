@@ -2,7 +2,7 @@
 
 **Status:** **FROZEN — read-only historical lineage**
 **Effective:** 2026-05-09
-**Authority:** [docs/architecture/orm-governance/historical-migration-lineage-governance.md](../../../../docs/architecture/orm-governance/historical-migration-lineage-governance.md)
+**Authority:** [docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md](../../../../docs/categories/platform-and-operations/architecture/orm-governance/historical-migration-lineage-governance.md)
 
 ## What this means
 
@@ -37,8 +37,8 @@ The canonical Drizzle authority lives at:
 
 ## How fresh databases are bootstrapped now
 
-Per [`docs/architecture/orm-governance/environment-bootstrap-strategy.md`](../../../../docs/architecture/orm-governance/environment-bootstrap-strategy.md)
-and [`docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md`](../../../../docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md):
+Per [`docs/architecture/orm-governance/environment-bootstrap-strategy.md`](../../../../docs/categories/platform-and-operations/architecture/orm-governance/environment-bootstrap-strategy.md)
+and [`docs/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md`](../../../../docs/categories/platform-and-operations/architecture/orm-governance/fresh-database-bootstrap-reference-implementation.md):
 
 1. Run `pnpm --filter @nzila/union-eyes db:bootstrap`.
 2. Bootstrap installs DB extensions, applies the scoped Drizzle

@@ -1,5 +1,14 @@
 # Master Field Operations Index
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-08-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `pnpm field-ops:validate` resolves this directory by path; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 **Status:** Active
 **Effective:** 2026-05-09
 **Authority root:** Nzila Ventures institutional field operations layer.
@@ -20,14 +29,17 @@ pressure, or operational intensity.
 ## Doctrine corpus
 
 ### Foundations
+
 - [institutional-field-operations-framework.md](./institutional-field-operations-framework.md)
 
 ### Operator and review cadence
+
 - [operator-cadence-system.md](./operator-cadence-system.md)
 - [governance-review-cadence.md](./governance-review-cadence.md)
 - [executive-briefing-rhythm.md](./executive-briefing-rhythm.md)
 
 ### Field execution
+
 - [pilot-execution-discipline.md](./pilot-execution-discipline.md)
 - [onboarding-governance-operations.md](./onboarding-governance-operations.md)
 - [environment-lifecycle-governance.md](./environment-lifecycle-governance.md)
@@ -35,14 +47,17 @@ pressure, or operational intensity.
 - [live-operational-readiness-system.md](./live-operational-readiness-system.md)
 
 ### Operational fabric
+
 - [field-operations-workflow-fabric.md](./field-operations-workflow-fabric.md)
 - [operational-rehearsal-governance.md](./operational-rehearsal-governance.md)
 - [cross-app-field-operations-consistency.md](./cross-app-field-operations-consistency.md)
 
 ### Audit
+
 - [operational-legitimacy-audit-system.md](./operational-legitimacy-audit-system.md)
 
 ### Readiness
+
 - [field-operations-readiness-review.md](./field-operations-readiness-review.md)
 
 ---

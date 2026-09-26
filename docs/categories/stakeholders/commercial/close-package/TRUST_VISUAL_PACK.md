@@ -15,11 +15,11 @@
 | **Hosting** | Microsoft Azure Canada Central. No member data leaves Canada. | [data-flow-summary.md](../vendor-risk-pack/data-flow-summary.md) |
 | **Encryption** | TLS 1.2+ in transit; AES-256 at rest (Azure Storage, PostgreSQL, Key Vault). | [trust-center/01](../trust-center/01-security-overview.md) |
 | **Identity** | Email/password (Argon2id), passwordless magic-link, optional Microsoft Entra SSO. Per-org admin policy. | [trust-center/11](../trust-center/11-identity-and-access-management.md) |
-| **Multi-factor auth** | TOTP (RFC 6238) self-enrolment with AES-256-GCM secret encryption + Argon2id recovery codes. Enforceable by role. | [packages/platform-auth/mfa](../../../packages/platform-auth/src/mfa/) |
+| **Multi-factor auth** | TOTP (RFC 6238) self-enrolment with AES-256-GCM secret encryption + Argon2id recovery codes. Enforceable by role. | [packages/platform-auth/mfa](../../../../../packages/platform-auth/src/mfa/) |
 | **Single sign-on** | Microsoft Entra ID (Azure AD). Per-org `requireSso` switch. SAML/Okta on roadmap. | [trust-center/04](../trust-center/04-access-control-model.md) |
 | **Lifecycle controls** | Invite → active → suspended → deprovisioned. Session revocation on suspend. | [trust-center/04](../trust-center/04-access-control-model.md) |
 | **Audit log** | Append-only `auth_audit_log` with 25+ event types. Org-scoped queryable. | [trust-center/11](../trust-center/11-identity-and-access-management.md) |
-| **Risk monitoring** | Velocity, geolocation-stub, soft-lockout after 5 failed attempts (15-min). Step-up on elevated risk. | [packages/platform-auth/risk](../../../packages/platform-auth/src/risk/) |
+| **Risk monitoring** | Velocity, geolocation-stub, soft-lockout after 5 failed attempts (15-min). Step-up on elevated risk. | [packages/platform-auth/risk](../../../../../packages/platform-auth/src/risk/) |
 | **Data isolation** | Org-scoped at the type-system level. Cross-org reads raise runtime errors. | [trust-center/04](../trust-center/04-access-control-model.md) |
 | **Backups & restore** | Daily PITR (Azure PG flexible server, 7-day window). Quarterly restore drills documented. | [backup-restore-summary.md](../vendor-risk-pack/backup-restore-summary.md) |
 | **Incident response** | 24×7 monitoring; severity matrix Critical 1h ack / 24h resolve. | [trust-center/09](../trust-center/09-contact-and-sla.md) |

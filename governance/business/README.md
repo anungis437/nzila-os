@@ -155,9 +155,9 @@ Nzila Ventures builds **category-defining platforms** in **underserved markets**
 ## 🎓 LEARNING & RESOURCES
 
 ### Internal Resources
-- [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md) — Complete technical audit
-- [Migration Plan](../MIGRATION_PLAN.md) — Infrastructure consolidation strategy
-- [Corporate Dashboard](../CORPORATE_DASHBOARD.md) — Portfolio-wide metrics
+- [Portfolio Deep Dive Analysis](../docs/PORTFOLIO_DEEP_DIVE.md) — Complete technical audit
+- [Migration Plan](../docs/MIGRATION_PLAN.md) — Infrastructure consolidation strategy
+- [Corporate Dashboard](../docs/CORPORATE_DASHBOARD.md) — Portfolio-wide metrics
 
 ### External Benchmarks
 - Y Combinator: Multi-vertical studio strategy comparables
@@ -176,7 +176,7 @@ Nzila Ventures builds **category-defining platforms** in **underserved markets**
 **For Team:**
 - [OKRs & KPIs](./metrics/okrs-2026.md)
 - [Product Roadmaps](./verticals/README.md)
-- [Operational Playbooks](./playbooks/README.md)
+- [Operational Playbooks](../../docs/oci/superseded/stabilization/playbooks/README.md)
 
 **For Partners:**
 - [Partnership Overview](./reports/partnership-customer-success-strategy.md)

@@ -148,6 +148,6 @@ If rollback does not restore health within 30 minutes:
 
 - [Restore Drill Runbook](restore-drill-runbook.md)
 - [Database Restore Runbook](database-restore.md)
-- [Rollback Script](../../../scripts/rollback.ts)
-- [Release Rollback Script](../../../scripts/release/rollback-prod.ts)
-- [Pilot Runbook](../../../ops/runbooks/ue-pilot.md)
+- [Rollback Script](../../../../../scripts/rollback.ts)
+- [Release Rollback Script](../../../../../scripts/release/rollback-prod.ts)
+- [Pilot Runbook](../../../../../ops/runbooks/ue-pilot.md)

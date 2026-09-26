@@ -53,9 +53,9 @@ Coexists with — does not replace:
 
 ## Authority Anchors
 
-- [Institutional Operational Cognition Doctrine](../../nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md)
-- [Final Full Maturity Review](../../nzila-final-convergence/final-full-maturity-review.md)
-- [Master Maturity Index](../../nzila-maturity-elevation/master-maturity-index.md)
+- [Institutional Operational Cognition Doctrine](../../../historical-archive/archive/iterations/nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md)
+- [Final Full Maturity Review](../../../historical-archive/archive/iterations/nzila-final-convergence/final-full-maturity-review.md)
+- [Master Maturity Index](../../../historical-archive/archive/iterations/nzila-maturity-elevation/master-maturity-index.md)
 
 ## Implementation Discipline
 

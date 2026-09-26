@@ -30,7 +30,7 @@ discriminée succès/erreur). Les tests vérifient la conformité avec l'ordre d
 calcul ARQ (TVQ appliquée sur base + TPS).
 
 **Référence code :**
-[`packages/pricing-engine/src/pricing-engine.ts`](../../packages/pricing-engine/src/pricing-engine.ts)
+[`packages/pricing-engine/src/pricing-engine.ts`](../../../../../packages/pricing-engine/src/pricing-engine.ts)
 lignes 73–140
 
 **État :** ✅ **Résolue**
@@ -52,7 +52,7 @@ commercial (chaînes if/else dans `workflow-engine.ts`) par des machines à
 - Fonction `attemptTransition()` agnostique de l'entité
 - Fonction `getAvailableTransitions()` pour l'UI
 
-**Référence code :** [`packages/commerce-state/`](../../packages/commerce-state/)
+**Référence code :** [`packages/commerce-state/`](../../../../../packages/commerce-state/)
 
 **État :** ✅ **Résolue**
 
@@ -78,8 +78,8 @@ scellés via le pipeline d'evidence de `@nzila/os-core`.
 
 **Référence code :**
 
-- [`packages/commerce-audit/src/audit.ts`](../../packages/commerce-audit/src/audit.ts)
-- [`packages/commerce-evidence/src/evidence.ts`](../../packages/commerce-evidence/src/evidence.ts)
+- [`packages/commerce-audit/src/audit.ts`](../../../../../packages/commerce-audit/src/audit.ts)
+- [`packages/commerce-evidence/src/evidence.ts`](../../../../../packages/commerce-evidence/src/evidence.ts)
 
 **État :** ✅ **Résolue**
 
@@ -109,7 +109,7 @@ tout en établissant l'isolation par organisation ?
 5. Import par lot avec rapports de diagnostic par enregistrement
 6. Injection de `OrgContext.orgId` pour chaque opération
 
-**Référence code :** [`apps/flow/`](../../apps/flow/) (supersède `packages/shop-quoter/`)
+**Référence code :** [`apps/flow/`](../../../../../apps/flow/) (supersède `packages/shop-quoter/`)
 
 **État :** ✅ **Résolue**
 
@@ -136,7 +136,7 @@ organisation ?
 Toutes les gardes sont des prédicats purs. Les seuils sont configurables
 via `GovernancePolicy`, résolue avec des défauts sensibles via `resolvePolicy()`.
 
-**Référence code :** [`packages/commerce-governance/src/gates.ts`](../../packages/commerce-governance/src/gates.ts)
+**Référence code :** [`packages/commerce-governance/src/gates.ts`](../../../../../packages/commerce-governance/src/gates.ts)
 
 **État :** ✅ **Résolue**
 

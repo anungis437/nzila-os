@@ -86,4 +86,4 @@ service.registerHook({
 ## See Also
 
 - [Revenue Architecture](./revenue-architecture.md) — system architecture and diagrams
-- [Zonga Monetization](../zonga/monetization-model.md) — marketplace-specific model
+- [Zonga Monetization](../../products-and-market/zonga/monetization-model.md) — marketplace-specific model

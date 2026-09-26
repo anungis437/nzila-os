@@ -241,7 +241,7 @@ pnpm exec tsx scripts/release/run-smoke.ts --env staging --apps web,console,part
 ## References
 
 - [Restore Drill Runbook](restore-drill-runbook.md)
-- [Bicep Postgres Module](../../../infrastructure/bicep/modules/postgres.bicep)
-- [Platform DR Plan](../../../docs/ops/disaster-recovery.md)
-- [Rollback Script](../../../scripts/rollback.ts)
-- [Restore Drill Script](../../../scripts/db/restore-drill.ts)
+- [Bicep Postgres Module](../../../../../infrastructure/bicep/modules/postgres.bicep)
+- [Platform DR Plan](../../../platform-and-operations/ops/disaster-recovery.md)
+- [Rollback Script](../../../../../scripts/rollback.ts)
+- [Restore Drill Script](../../../../../scripts/db/restore-drill.ts)

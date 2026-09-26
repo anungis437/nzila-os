@@ -11,7 +11,7 @@ canonical scoped Drizzle authority going forward.
 
 Only migrations generated from the scoped barrel
 `apps/union-eyes/db/schema-cache/cache.ts`. Per
-[`docs/architecture/orm-governance/drizzle-scope-reconstruction.md`](../../../../docs/architecture/orm-governance/drizzle-scope-reconstruction.md),
+[`docs/architecture/orm-governance/drizzle-scope-reconstruction.md`](../../../../docs/categories/platform-and-operations/architecture/orm-governance/drizzle-scope-reconstruction.md),
 that means:
 
 - cache tables (`ue_cache.*` and similar non-authoritative projections)
@@ -25,7 +25,7 @@ that means:
 - Canonical business entities (Django-owned).
 - Anything that already exists in `../migrations/` (the frozen lineage).
 - Schema additions that have not been recorded in
-  [`docs/architecture/orm-governance/canonical-schema-topology.md`](../../../../docs/architecture/orm-governance/canonical-schema-topology.md).
+  [`docs/architecture/orm-governance/canonical-schema-topology.md`](../../../../docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md).
 
 ## How migrations are created
 
@@ -36,4 +36,4 @@ pnpm --filter @nzila/union-eyes db:bootstrap  # extensions + scoped migrate + re
 
 `db:bootstrap` is the only legitimate entrypoint to materialize a Union
 Eyes database from scratch. It refuses to replay the frozen lineage. See
-[`docs/architecture/orm-governance/migration-execution-governance.md`](../../../../docs/architecture/orm-governance/migration-execution-governance.md).
+[`docs/architecture/orm-governance/migration-execution-governance.md`](../../../../docs/categories/platform-and-operations/architecture/orm-governance/migration-execution-governance.md).

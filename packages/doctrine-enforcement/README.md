@@ -3,9 +3,9 @@
 Doctrine policy registry, deterministic evaluator, AI capability registry, and runtime enforcement primitives.
 
 See:
-- [docs/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md](../../docs/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md)
-- [docs/nzila-runtime-governance/governance-policy-engine.md](../../docs/nzila-runtime-governance/governance-policy-engine.md)
-- [docs/nzila-runtime-governance/governance-safe-ai-runtime-validation.md](../../docs/nzila-runtime-governance/governance-safe-ai-runtime-validation.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/runtime-doctrine-enforcement-engine.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-policy-engine.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-policy-engine.md)
+- [docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-safe-ai-runtime-validation.md](../../docs/categories/historical-archive/archive/iterations/nzila-runtime-governance/governance-safe-ai-runtime-validation.md)
 
 ## Posture
 

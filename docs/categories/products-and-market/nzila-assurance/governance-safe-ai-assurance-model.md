@@ -1,6 +1,6 @@
 # Governance-Safe AI Assurance Model
 
-> **Status:** Canonical assurance · **Layer:** AI assurance · **Inherits:** [../nzila-governance/continuity-safe-ai-governance.md](../nzila-governance/continuity-safe-ai-governance.md), [../nzila-ip/governance-safe-intelligence.md](../nzila-ip/governance-safe-intelligence.md), [institutional-certification-framework.md](institutional-certification-framework.md)
+> **Status:** Canonical assurance · **Layer:** AI assurance · **Inherits:** [docs/categories/historical-archive/archive/iterations/nzila-governance/continuity-safe-ai-governance.md](../../historical-archive/archive/iterations/nzila-governance/continuity-safe-ai-governance.md), [docs/categories/historical-archive/archive/iterations/nzila-ip/governance-safe-intelligence.md](../../historical-archive/archive/iterations/nzila-ip/governance-safe-intelligence.md), [institutional-certification-framework.md](institutional-certification-framework.md)
 
 This document defines the **measurable assurance standards** for governance-safe intelligence at Nzila. Where the AI governance regime states what AI must do, this model specifies how AI capability is **assured to be doing it** — through evidence, attestation, and certification.
 

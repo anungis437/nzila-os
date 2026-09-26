@@ -171,14 +171,14 @@
 ### Playbooks
 *Path*: `knowledge/playbooks/`
 
-- [COO Playbook Overview](../knowledge/playbooks/coo-playbook-overview.md) — *Owner: Aubert*
+- [COO Playbook Overview](../foundations/knowledge/playbooks/coo-playbook-overview.md) — *Owner: Aubert*
 
 ### Architecture
 *Path*: `platform/architecture/`
 
-- [🏗️ Multi-Product Operating Architecture](../platform/architecture/multi-product-operating-architecture.md) — *Owner: Aubert*
-- [💡 Future Tech Investments Strategy](../platform/architecture/innovation-future-tech-investments-strategy.md) — *Owner: Aubert*
-- [🛠️ Nzila CTO Technical Strategy Summary](../platform/architecture/tools-nzila-cto-technical-strategy-summary.md) — *Owner: Aubert*
+- [🏗️ Multi-Product Operating Architecture](../../docs/categories/platform-and-operations/architecture/multi-product-operating-architecture.md) — *Owner: Aubert*
+- [💡 Future Tech Investments Strategy](../../docs/categories/platform-and-operations/architecture/innovation-future-tech-investments-strategy.md) — *Owner: Aubert*
+- [🛠️ Nzila CTO Technical Strategy Summary](../../docs/categories/platform-and-operations/architecture/tools-nzila-cto-technical-strategy-summary.md) — *Owner: Aubert*
 
 
 ---
@@ -203,7 +203,7 @@
 ### Platform & Technology
 - [Platform Architecture](../../platform/architecture)
 - [Technical Blueprints](../platform/blueprints/)
-- [Migration Plans](../platform/migrations/)
+- [Migration Plans](../../migrations/)
 
 ---
 

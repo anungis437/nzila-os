@@ -37,8 +37,8 @@ Source of truth: governance/portfolio/product-catalog.json
 
 ## Proof references
 
-- [Proof Center](../proof-center/portfolio-proof-index.md)
-- [Union Eyes Proof](../proof-center/union-eyes-proof.md)
-- [Flow Proof](../proof-center/flow-proof.md)
+- [Proof Center](../../../proof-center/portfolio-proof-index.md)
+- [Union Eyes Proof](../../products-and-market/proof-center/union-eyes-proof.md)
+- [Flow Proof](../../products-and-market/proof-center/flow-proof.md)
 
 No paid or scaled claims are made without explicit evidence.

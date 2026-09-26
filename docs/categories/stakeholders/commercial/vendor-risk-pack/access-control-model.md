@@ -3,7 +3,7 @@
 _Vendor risk pack. Last revised: 2026-04-24._
 
 For the buyer-facing version see [`../trust-center/04-access-control-model.md`](../trust-center/04-access-control-model.md).
-For the technical reference see [`../../security/UNION_EYES_AUTH_MODEL.md`](../../security/UNION_EYES_AUTH_MODEL.md).
+For the technical reference see [`../../security/UNION_EYES_AUTH_MODEL.md`](../../../platform-and-operations/security/UNION_EYES_AUTH_MODEL.md).
 
 ## Authentication factors (shipped)
 

@@ -157,7 +157,7 @@ The data model and service layer needed for SCIM 2.0 are present:
 Public SCIM endpoints are **not** shipped. We will not deliver a
 half-built SCIM surface — when we ship it, it will pass the
 `scim2-compliance-test-utils` suite and have a per-tenant attribute
-mapping contract. See [docs/runbooks/union-eyes-identity-lifecycle.md](../../runbooks/union-eyes-identity-lifecycle.md)
+mapping contract. See [docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md](../../../platform-and-operations/runbooks/union-eyes-identity-lifecycle.md)
 for the engineering position.
 
 ## 10. Honest gaps (known and named)

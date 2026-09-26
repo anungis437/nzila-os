@@ -1,25 +1,20 @@
 # .linkcheckignore — Directories/files excluded from link-check
 # Lines are matched as path prefixes against workspace-relative paths.
+#
+# Rules for this file:
+#  - Add an entry only for material that cannot be made link-correct: verbatim historical
+#    documents, generated output, third-party exports, or link-checker parser limitations.
+#  - Do not add an entry to silence a fixable broken link in current documentation.
+#  - Remove an entry once the underlying path or document is gone.
 
 # Notion export artifacts — contain UUID-based links that will never resolve
 governance/corporate/governance/strategy-operating-model-dashboard.md
 
-# Planning docs — aspirational links to files not yet written
-plans/
-
 # App delta/changelog docs — reference planned changes that may not all be committed yet
 apps/nzila-hq/NZILA_HQ_DELTA.md
 
-# Aspirational tutorial/guide/reference links (targets not yet authored)
-docs/tutorials/
-docs/how-to/
-docs/README.md
-docs/reference/
-docs/explanation/
+# Runbook index — aspirational runbook links
 docs/runbooks/
-
-# Commerce MEIE docs — reference packages not yet built
-docs/commerce/meie/
 
 # Governance Notion-export files with unresolvable cross-references
 governance/corporate/finance/knowledge-capital-strategy-resource-allocation-overview.md
@@ -53,7 +48,6 @@ reports/doc-consistency.md
 docs/documentation-index.md
 
 # Archived docs — historical, links to removed/relocated content
-docs/archive/
 reports/archive/
 
 # Historical auth-migration artifacts — reference pre-migration file paths
@@ -81,16 +75,12 @@ governance/corporate/operations/framework-shared-services-playbooks.md
 
 # Link-checker edge cases — valid links the checker can't resolve
 # Anchor uses & → double-dash which the checker's anchor parser doesn't handle
-docs/migration/legacy-trade-domain-models.md
+docs/categories/platform-and-operations/migration/legacy-trade-domain-models.md
+# Anchor contains accented characters the checker's slugifier does not normalise
+docs/categories/products-and-market/commerce/meie/WP_DELIVERABLES.md
 # URL-encoded filename with spaces — file exists but checker doesn't decode %20
-docs/risk/nzila-ai-risk-register.md
+docs/categories/platform-and-operations/risk/nzila-ai-risk-register.md
 
-# Categorised docs directory — contains historical, cross-referenced, and aspirational docs
-# that reference paths from previous iterations and reorganisations
-docs/categories/
-
-# docs/INDEX.md — top-level index referencing aspirational docs not yet authored
-docs/INDEX.md
 
 # App-level docs with cross-repo or aspirational links
 apps/cfo/docs/
@@ -104,11 +94,6 @@ apps/union-eyes/db/migrations-cache/
 apps/union-eyes/db/migrations/LINEAGE-FROZEN.md
 apps/union-eyes/README.md
 
-# Root-level docs with legacy cross-references
-ARCHITECTURE.md
-CONTRIBUTING.md
-AWS_ZONGA_SETUP.md
-README.md
 
 # Artifacts — pilot and commercial docs with aspirational references
 artifacts/commercial/
@@ -155,8 +140,7 @@ scripts/migrations/
 artifacts/README.md
 proof-artifacts/README.md
 
-# Temp directories — generated artifacts not committed (governance report dumps)
-tmp-gov-report/
-tmp-art/
-tmp-e2e-report/
 
+# Historical archive — archived documents reference paths that existed when they were written.
+# Archived text is preserved verbatim; see docs/categories/historical-archive/README.md.
+docs/categories/historical-archive/

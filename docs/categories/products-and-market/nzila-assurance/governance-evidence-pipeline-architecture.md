@@ -166,7 +166,7 @@ The pipeline is built for evolution. Stack changes do not destroy evidence conti
 
 The pipeline itself is a governed system:
 
-- It is reviewed under the [doctrine compliance review framework](../nzila-governance/doctrine-compliance-review-framework.md)
+- It is reviewed under the [doctrine compliance review framework](../../historical-archive/archive/iterations/nzila-governance/doctrine-compliance-review-framework.md)
 - It is observable under [continuous-doctrine-compliance-observability.md](continuous-doctrine-compliance-observability.md)
 - Its outputs are scorecard-eligible
 - Its degradations are themselves drift indicators

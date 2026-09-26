@@ -93,7 +93,7 @@ The CUPE pilot is the current live engagement. All artifacts are in `docs/pilot/
 | [CUPE_PILOT_ADMIN_RUNBOOK.md](../pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) | Admin operational guide |
 | [CUPE_RBAC_MATRIX.md](../pilot/cupe/CUPE_RBAC_MATRIX.md) | Role permissions reference |
 | [CUPE_PILOT_GO_NO_GO_REVIEW.md](../pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md) | Go/No-Go gate review |
-| [Procurement Pack](../governance/procurement-pack.md) | Buyer-facing governance evidence |
+| [Procurement Pack](../../platform-and-operations/governance/procurement-pack.md) | Buyer-facing governance evidence |
 
 ---
 
@@ -138,7 +138,7 @@ The CUPE pilot is the current live engagement. All artifacts are in `docs/pilot/
 4. **Week 2:** Officer dashboard live; pilot feedback cycle begins
 5. **Day 30:** Pilot review vs. readiness checklist — go/no-go for expansion
 
-Full runbook: [docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md](../pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
+Full runbook: [docs/categories/products-and-market/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md](../pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
 
 ---
 

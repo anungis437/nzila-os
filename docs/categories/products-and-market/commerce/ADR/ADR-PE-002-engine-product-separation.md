@@ -6,7 +6,7 @@
 > **Decision Makers:** NzilaOS Platform Engineering, Portfolio Governance
 > **Domain:** Platform Architecture · Portfolio Topology
 > **Supersedes:** N/A
-> **Related:** [ADR-PE-001](./ADR-PE-001-dapl-platform-ledger.md), [PLATFORM_VS_APP_DECISION_RULE](../../governance/PLATFORM_VS_APP_DECISION_RULE.md), [PACKAGE_OWNERSHIP](../../governance/PACKAGE_OWNERSHIP.md), [PACKAGE_LIFECYCLE_POLICY](../../governance/PACKAGE_LIFECYCLE_POLICY.md)
+> **Related:** [ADR-PE-001](./ADR-PE-001-dapl-platform-ledger.md), [PLATFORM_VS_APP_DECISION_RULE](../../../platform-and-operations/governance/PLATFORM_VS_APP_DECISION_RULE.md), [PACKAGE_OWNERSHIP](../../../platform-and-operations/governance/PACKAGE_OWNERSHIP.md), [PACKAGE_LIFECYCLE_POLICY](../../../platform-and-operations/governance/PACKAGE_LIFECYCLE_POLICY.md)
 
 ---
 
@@ -109,10 +109,10 @@ Concretely, NzilaOS resolves to the following topology at the time of this ADR:
 
 ## References
 
-- [docs/governance/PLATFORM_VS_APP_DECISION_RULE.md](../../governance/PLATFORM_VS_APP_DECISION_RULE.md) — the underlying decision framework this ADR operationalises.
-- [docs/governance/PACKAGE_OWNERSHIP.md](../../governance/PACKAGE_OWNERSHIP.md) — owner-of-record for each engine.
-- [docs/governance/PACKAGE_LIFECYCLE_POLICY.md](../../governance/PACKAGE_LIFECYCLE_POLICY.md) — the `incubating | stable | deprecated` lifecycle engines follow.
-- [docs/commerce/ADR/ADR-PE-001-dapl-platform-ledger.md](./ADR-PE-001-dapl-platform-ledger.md) — `ledger-engine` (DAPL) is reclassified by this ADR.
-- [tooling/contract-tests/platform-api-surface.test.ts](../../../tooling/contract-tests/platform-api-surface.test.ts) — existing surface-area enforcement that the new brand-leakage check complements.
-- [apps/flow/scripts/flow-lockdown-check.ts](../../../apps/flow/scripts/flow-lockdown-check.ts) — pattern source for `scripts/check-brand-leakage.ts`.
-- [governance/portfolio/product-catalog.json](../../../governance/portfolio/product-catalog.json) — receives the new top-level `engines[]` array and the Maestria entry.
+- [docs/categories/platform-and-operations/governance/PLATFORM_VS_APP_DECISION_RULE.md](../../../platform-and-operations/governance/PLATFORM_VS_APP_DECISION_RULE.md) — the underlying decision framework this ADR operationalises.
+- [docs/categories/platform-and-operations/governance/PACKAGE_OWNERSHIP.md](../../../platform-and-operations/governance/PACKAGE_OWNERSHIP.md) — owner-of-record for each engine.
+- [docs/categories/platform-and-operations/governance/PACKAGE_LIFECYCLE_POLICY.md](../../../platform-and-operations/governance/PACKAGE_LIFECYCLE_POLICY.md) — the `incubating | stable | deprecated` lifecycle engines follow.
+- [docs/categories/products-and-market/commerce/ADR/ADR-PE-001-dapl-platform-ledger.md](./ADR-PE-001-dapl-platform-ledger.md) — `ledger-engine` (DAPL) is reclassified by this ADR.
+- [tooling/contract-tests/platform-api-surface.test.ts](../../../../../tooling/contract-tests/platform-api-surface.test.ts) — existing surface-area enforcement that the new brand-leakage check complements.
+- [apps/flow/scripts/flow-lockdown-check.ts](../../../../../apps/flow/scripts/flow-lockdown-check.ts) — pattern source for `scripts/check-brand-leakage.ts`.
+- [governance/portfolio/product-catalog.json](../../../../../governance/portfolio/product-catalog.json) — receives the new top-level `engines[]` array and the Maestria entry.

@@ -166,7 +166,7 @@ const summary = summariseDecisions(loadAllDecisions())
 - Every decision is evidence-backed and policy-filtered
 - Full audit trail for every lifecycle transition
 - Export packs include SHA-256 integrity hashes
-- See [Decision Layer docs](../../docs/decision-layer/) for commercial documentation
+- See [Decision Layer docs](../../docs/categories/platform-and-operations/decision-layer/) for commercial documentation
 
 ## Scripts
 

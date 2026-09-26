@@ -11,7 +11,7 @@
 
 Phase A is complete and verified — see
 [`PHASE_A_PRODUCTION_INFRA_VALIDATION.md`](./PHASE_A_PRODUCTION_INFRA_VALIDATION.md)
-and [`AUTH_REALITY_AUDIT.md`](./AUTH_REALITY_AUDIT.md). Auth stack is PG
+and [`AUTH_REALITY_AUDIT.md`](../security/AUTH_REALITY_AUDIT.md). Auth stack is PG
 session primary + Entra External ID secondary; legacy auth vendor fully
 removed (see audit for history).
 
@@ -33,7 +33,7 @@ removed (see audit for history).
 | # | Sub-phase | Status | Evidence |
 |---|---|---|---|
 | B1A | Infra inventory | **validated** | Redis (Upstash), DB (PG16 ZR-HA), KV, LAW all live in canadacentral; [`PRODUCTION_INFRA_INVENTORY.md`](./PRODUCTION_INFRA_INVENTORY.md) |
-| B1B | Secret management | **validated** | All secrets in ACA secretRefs; Redis token stored as ACA secret (`upstash-redis-url/token`); Key Vault RBAC enforced; rotation policy documented; [`SECRET_MANAGEMENT_VALIDATION.md`](./SECRET_MANAGEMENT_VALIDATION.md) |
+| B1B | Secret management | **validated** | All secrets in ACA secretRefs; Redis token stored as ACA secret (`upstash-redis-url/token`); Key Vault RBAC enforced; rotation policy documented; [`SECRET_MANAGEMENT_VALIDATION.md`](../security/SECRET_MANAGEMENT_VALIDATION.md) |
 | B1C | DNS / SSL | **validated** (custom domain + HSTS) + **configured** (AFD + WAF) | `app.unioneyes.app` bound to ACA with managed cert (SniEnabled); 2-year HSTS with preload + full security header suite live `2026-05-17T20:00:00Z`. AFD Standard `nzila-ue-afd-prod` + WAF `nzilauewafdprod` (Prevention mode, 2 custom rules) provisioned; security policy linked (`Succeeded`). DNS CNAME for `app.unioneyes.app` → AFD hostname pending registrar update (requires human action). |
 | B2A | Deployment rehearsal | **validated** | deploy `3c43cf116` → `--0000043` → `--0000045` captured with timings; [`DEPLOYMENT_REHEARSAL.md`](./DEPLOYMENT_REHEARSAL.md) |
 | B2B | Health-gated deploy | configured | health probe live, `--0000043` promoted in ~9 min |
@@ -41,12 +41,12 @@ removed (see audit for history).
 | B3A | Production smoke | **validated** | Revision `--0000049`; `/api/health` → `redis:{status:"ok",ms:37}` (Redis live ✅); `database:{status:"ok",ms:87}`; `auth:{status:"ok"}`; `/api/metrics/operational` 401 ✅ |
 | B3B | Governance runtime proof | **deferred** (endpoints 401-gated; awaiting authenticated drill) | — |
 | B3C | Observability validation | **validated** | LAW environment binding validated; 3 KQL alert rules; action group `ue-prod-ops-alerts` attached to all 3 rules (`2026-05-17`); LAW ingesting 400+ events/hr; [`OBSERVABILITY_VALIDATION.md`](./OBSERVABILITY_VALIDATION.md) |
-| B4A | Dependency degradation | **validated** (Django backend non-critical degraded observed live + fast-fail deploy drill) | §Smoke, [`INCIDENT_DRILL_REPORT.md`](./INCIDENT_DRILL_REPORT.md) |
+| B4A | Dependency degradation | **validated** (Django backend non-critical degraded observed live + fast-fail deploy drill) | §Smoke, [`INCIDENT_DRILL_REPORT.md`](../security/INCIDENT_DRILL_REPORT.md) |
 | B4B | Evidence integrity under failure | **deferred** | — |
-| B4C | Incident drill | **validated** — Drill 1 (failed deploy fast-fail) `2026-05-17T19:18:22Z`; Drill 2 (backend degraded) observed live; 3 drills deferred (maintenance window) | [`INCIDENT_DRILL_REPORT.md`](./INCIDENT_DRILL_REPORT.md) |
-| B5A | Backup verification | **validated** | 30-day PITR, geo-redundant, earliest restore `2026-05-11`, confirmed live `2026-05-17`; [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
-| B5B | Restore rehearsal | **validated** (PITR mechanism proven; row-level integrity deferred) | drill `2026-05-17T18:52:09Z`, 4-min restore to Ready, smoke passed, drill server deleted; [`BACKUP_RESTORE_VALIDATION.md`](./BACKUP_RESTORE_VALIDATION.md) |
-| B6A | Runtime observation window | **open** `2026-05-17T18:34:00Z` | [`PILOT_RUNTIME_REVIEW.md`](./PILOT_RUNTIME_REVIEW.md) |
+| B4C | Incident drill | **validated** — Drill 1 (failed deploy fast-fail) `2026-05-17T19:18:22Z`; Drill 2 (backend degraded) observed live; 3 drills deferred (maintenance window) | [`INCIDENT_DRILL_REPORT.md`](../security/INCIDENT_DRILL_REPORT.md) |
+| B5A | Backup verification | **validated** | 30-day PITR, geo-redundant, earliest restore `2026-05-11`, confirmed live `2026-05-17`; [`BACKUP_RESTORE_VALIDATION.md`](../security/BACKUP_RESTORE_VALIDATION.md) |
+| B5B | Restore rehearsal | **validated** (PITR mechanism proven; row-level integrity deferred) | drill `2026-05-17T18:52:09Z`, 4-min restore to Ready, smoke passed, drill server deleted; [`BACKUP_RESTORE_VALIDATION.md`](../security/BACKUP_RESTORE_VALIDATION.md) |
+| B6A | Runtime observation window | **open** `2026-05-17T18:34:00Z` | [`PILOT_RUNTIME_REVIEW.md`](../procurement/PILOT_RUNTIME_REVIEW.md) |
 | B6B | Operational review cadence | **started** — week 1 baseline captured | same |
 | B7  | Procurement / trust finalization | **validated** | B7A: `FINAL_READINESS_STATUS.md` → PRODUCTION CANDIDATE; B7B: `ue-procurement-pack-cupe.md` updated with Phase B operational evidence; legacy auth vendor refs removed from all buyer-facing docs — commit `b335ae2e8` |
 | B8  | Final validation | **validated** | typecheck ✅, lint 0 errors ✅, 7075 UE tests ✅, 8962 contract tests ✅, governance 54/54 ✅, platform contract 0 errors ✅, app lifecycle 0 errors ✅ — `2026-05-17T19:24Z` |
@@ -107,7 +107,7 @@ Status: `validated` (custom domain + HSTS), `configured` (AFD + WAF), DNS routin
 7. ~~Rollback drill not executed~~ — **DONE** `2026-05-17T18:45:00Z`, 23s.
 8. ~~PITR restore not executed~~ — **DONE** `2026-05-17T18:52:09Z`, 4 min to Ready.
 9. ~~Alert action groups missing~~ — **DONE** `ue-prod-ops-alerts` wired to all 3 rules.
-10. ~~Incident drill (B4C) not executed~~ — **DONE** Failed-deploy drill `2026-05-17T19:18:22Z`: ACA fast-failed on unknown image, prod unaffected; [`INCIDENT_DRILL_REPORT.md`](./INCIDENT_DRILL_REPORT.md).
+10. ~~Incident drill (B4C) not executed~~ — **DONE** Failed-deploy drill `2026-05-17T19:18:22Z`: ACA fast-failed on unknown image, prod unaffected; [`INCIDENT_DRILL_REPORT.md`](../security/INCIDENT_DRILL_REPORT.md).
 11. Governance runtime proof (B3B) and evidence integrity under failure (B4B) — pending authenticated drills.
 12. Alert fire drill — alerts wired; not yet fired/acknowledged in production (deferred to maintenance window).
 13. Expired-secret, DB-timeout, telemetry-outage drills — deferred (require maintenance window).
@@ -116,6 +116,6 @@ Status: `validated` (custom domain + HSTS), `configured` (AFD + WAF), DNS routin
 ## Decision
 
 Readiness label advanced to **PRODUCTION CANDIDATE** — see
-[`FINAL_READINESS_STATUS.md`](./FINAL_READINESS_STATUS.md).
+[`FINAL_READINESS_STATUS.md`](../procurement/FINAL_READINESS_STATUS.md).
 
 Phase B operational validation substantially complete. Remaining deferred items (alert fire drill, governance authenticated drill, KV RBAC migration, observation window) do not block PRODUCTION CANDIDATE but block PRODUCTION READY.

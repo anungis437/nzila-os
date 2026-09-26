@@ -379,4 +379,4 @@ This document is pre-populated with the full testing structure and per-session s
 
 See [USER_TESTING_PLAN.md](./USER_TESTING_PLAN.md) for session scheduling, task instructions, success criteria, and the issue severity rubric.
 
-See [PILOT_SCOPE.md](./PILOT_SCOPE.md) for the quantitative pilot success metrics that this testing validates against.
+See [PILOT_SCOPE.md](../procurement/PILOT_SCOPE.md) for the quantitative pilot success metrics that this testing validates against.

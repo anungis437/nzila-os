@@ -46,7 +46,7 @@ representation work actually happens.
 - Each organization's data is isolated from every other organization
 - Access is role-based and scoped to the work a user is authorized to see
 - The system records auditable activity for intake, review, conversion, work, and outcomes
-- For full security details, see the [Security Policy](../../SECURITY.md)
+- For full security details, see the [Security Policy](../../../../SECURITY.md)
 
 ## What UnionEyes Does Not Do
 
@@ -83,4 +83,4 @@ operations and representation workflows.
 - [Pilot Overview](./pilot-overview.md) — What the pilot includes and how it works
 - [User Guide](./user-guide.md) — Full feature walkthrough
 - [FAQ](./faq.md) — Common questions and answers
-- [Security Policy](../../SECURITY.md) — Security controls and policies
+- [Security Policy](../../../../SECURITY.md) — Security controls and policies

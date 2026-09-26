@@ -152,4 +152,4 @@ Full security policy: [SECURITY.md](https://github.com/anungis437/nzila-os/blob/
 - Trust Center: [`trust-center/`](./trust-center/)
 - Procurement Q&A pack: [`sales-kit/AUTH_PROCUREMENT_QA.md`](./sales-kit/AUTH_PROCUREMENT_QA.md)
 - Access modes (commercial-friendly): [`UNION_EYES_ACCESS_MODES.md`](./UNION_EYES_ACCESS_MODES.md)
-- Auth model (technical): [`../security/UNION_EYES_AUTH_MODEL.md`](../security/UNION_EYES_AUTH_MODEL.md)
+- Auth model (technical): [`../security/UNION_EYES_AUTH_MODEL.md`](../../platform-and-operations/security/UNION_EYES_AUTH_MODEL.md)

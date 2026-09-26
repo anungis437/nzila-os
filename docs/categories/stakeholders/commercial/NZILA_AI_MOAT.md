@@ -151,7 +151,7 @@ Hard to dollar-quantify pre-revenue, but the qualitative gating effect:
 
 ## Read this with
 
-- [`packages/platform-cognition-core/README.md`](../../packages/platform-cognition-core/README.md)
-- [`packages/platform-cognition-core/STATUS.md`](../../packages/platform-cognition-core/STATUS.md)
-- [`packages/platform-decision-engine/README.md`](../../packages/platform-decision-engine/README.md)
+- [`packages/platform-cognition-core/README.md`](../../../../packages/platform-cognition-core/README.md)
+- [`packages/platform-cognition-core/STATUS.md`](../../../../packages/platform-cognition-core/STATUS.md)
+- [`packages/platform-decision-engine/README.md`](../../../../packages/platform-decision-engine/README.md)
   (the existing pipeline cognition feeds)

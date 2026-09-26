@@ -1,5 +1,14 @@
 # Nzila OS — Tier 3 Operating Infrastructure Authority
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-05-27 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> no validator reads this tree; it is retained beside its sibling programmes; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 > Canonical Tier 3 authority layer for institutional operating infrastructure progression.
 
 Tier 3 is the first full operating-infrastructure tier after Tier 2 sovereignty conditioning. The posture is institutional, continuity-safe, governance-safe, anti-surveillance, evidence-anchored, and reviewer-of-record bound.

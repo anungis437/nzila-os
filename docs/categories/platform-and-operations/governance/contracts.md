@@ -15,10 +15,10 @@ pnpm contract-tests
 
 | Rule ID | Name | File | What it enforces |
 |---|---|---|---|
-| `TS_STRICT_001` | No strict:false | [ts-strict.test.ts](../../tooling/contract-tests/ts-strict.test.ts) | Every `tsconfig*.json` must have `strict: true` (or inherit it) |
-| `NO_CONSOLE_001` | No console in runtime | [no-console.test.ts](../../tooling/contract-tests/no-console.test.ts) | No `console.*` calls in `apps/` runtime code |
-| `ARCH_LAYER_001` | No DB from routes | [arch-layer.test.ts](../../tooling/contract-tests/arch-layer.test.ts) | Route handlers must not import DB/repository modules directly |
-| `CONTRACT_META_001` | Contracts meta | [contract-meta.test.ts](../../tooling/contract-tests/contract-meta.test.ts) | Exception files are valid, non-expired, and test files exist |
+| `TS_STRICT_001` | No strict:false | [ts-strict.test.ts](../../../../tooling/contract-tests/ts-strict.test.ts) | Every `tsconfig*.json` must have `strict: true` (or inherit it) |
+| `NO_CONSOLE_001` | No console in runtime | [no-console.test.ts](../../../../tooling/contract-tests/no-console.test.ts) | No `console.*` calls in `apps/` runtime code |
+| `ARCH_LAYER_001` | No DB from routes | [arch-layer.test.ts](../../../../tooling/contract-tests/arch-layer.test.ts) | Route handlers must not import DB/repository modules directly |
+| `CONTRACT_META_001` | Contracts meta | [contract-meta.test.ts](../../../../tooling/contract-tests/contract-meta.test.ts) | Exception files are valid, non-expired, and test files exist |
 
 ## Exception Mechanism
 

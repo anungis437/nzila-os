@@ -1,8 +1,17 @@
 # Nzila OS — Final Tier 2 Runtime Sovereignty & Institutional Hardening
 
+> **Temporal status — PROGRAMME RECORD, NOT CURRENT AUTHORITY (annotated 2026-09-24):** this
+> corpus was committed 2026-05-09 and records the evidence gathered while that programme ran. Any
+> `PASS`, `LIVE`, `CERTIFIED`, `canonical authority`, or `GO` marking below is a statement about
+> that programme run at that date — not about today's runtime. It stays in this location because
+> `pnpm validate:tier2-hardening` (`tooling/scripts/validate-tier2-hardening.mjs`) resolves this directory by path; moving it would break a gate rather than improve clarity. Current authority lives in
+> [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md), the portfolio catalog, and — for Union
+> Eyes readiness — [`../union-eyes/README.md`](../union-eyes/README.md). Disposition and
+> validator dependency are recorded in [`../DOCUMENT_DISPOSITION.md`](../DOCUMENT_DISPOSITION.md).
+
 > **Authority:** Tier 2 operational sovereignty over runtime substrate. This
-> layer closes the final distance between *operationally real* and
-> *institutionally sovereign and fail-safe*. Authority is **operational
+> layer closes the final distance between _operationally real_ and
+> _institutionally sovereign and fail-safe_. Authority is **operational
 > hardening only** — not architecture expansion, not governance expansion,
 > not feature velocity, not infra experimentation.
 
@@ -35,16 +44,16 @@ verification → next single targeted PR**. Maturity, not accumulation.
 
 ## Index
 
-| #  | Document                                                                                                                       | Authorized downstream PR                                  |
-| -- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
-| 01 | [full-fail-closed-runtime-architecture.md](full-fail-closed-runtime-architecture.md)                                           | `feat/runtime-fail-closed-gate`                           |
-| 02 | [full-secret-topology-sovereignty.md](full-secret-topology-sovereignty.md)                                                     | `feat/secret-topology-isolation`                          |
-| 03 | [full-runtime-mode-feature-sovereignty-hardening.md](full-runtime-mode-feature-sovereignty-hardening.md)                       | `feat/runtime-mode-sovereignty`                           |
-| 04 | [full-pilot-fabric-legitimacy.md](full-pilot-fabric-legitimacy.md)                                                             | `feat/pilot-fabric-provisioning`                          |
-| 05 | [full-auth-identity-isolation-hardening.md](full-auth-identity-isolation-hardening.md)                                         | `feat/auth-identity-isolation`                            |
-| 06 | [full-workspace-substrate-sovereignty.md](full-workspace-substrate-sovereignty.md)                                             | `feat/workspace-substrate-sovereignty`                    |
-| 07 | [full-live-operational-degradation-certification.md](full-live-operational-degradation-certification.md)                       | `chore/live-degradation-traversal`                        |
-| 08 | [full-live-runtime-sovereignty-certification.md](full-live-runtime-sovereignty-certification.md)                               | `chore/live-runtime-sovereignty-traversal`                |
+| #   | Document                                                                                                 | Authorized downstream PR                   |
+| --- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 01  | [full-fail-closed-runtime-architecture.md](full-fail-closed-runtime-architecture.md)                     | `feat/runtime-fail-closed-gate`            |
+| 02  | [full-secret-topology-sovereignty.md](full-secret-topology-sovereignty.md)                               | `feat/secret-topology-isolation`           |
+| 03  | [full-runtime-mode-feature-sovereignty-hardening.md](full-runtime-mode-feature-sovereignty-hardening.md) | `feat/runtime-mode-sovereignty`            |
+| 04  | [full-pilot-fabric-legitimacy.md](full-pilot-fabric-legitimacy.md)                                       | `feat/pilot-fabric-provisioning`           |
+| 05  | [full-auth-identity-isolation-hardening.md](full-auth-identity-isolation-hardening.md)                   | `feat/auth-identity-isolation`             |
+| 06  | [full-workspace-substrate-sovereignty.md](full-workspace-substrate-sovereignty.md)                       | `feat/workspace-substrate-sovereignty`     |
+| 07  | [full-live-operational-degradation-certification.md](full-live-operational-degradation-certification.md) | `chore/live-degradation-traversal`         |
+| 08  | [full-live-runtime-sovereignty-certification.md](full-live-runtime-sovereignty-certification.md)         | `chore/live-runtime-sovereignty-traversal` |
 
 Each document is **authority**, not implementation; the implementation lives
 in the authorized downstream PR.

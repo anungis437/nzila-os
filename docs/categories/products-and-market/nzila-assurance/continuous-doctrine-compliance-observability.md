@@ -1,6 +1,6 @@
 # Continuous Doctrine Compliance Observability
 
-> **Status:** Canonical assurance · **Layer:** Continuous observability · **Inherits:** [automated-governance-evidence-system.md](automated-governance-evidence-system.md), [../nzila-governance/doctrine-governance-scorecard.md](../nzila-governance/doctrine-governance-scorecard.md)
+> **Status:** Canonical assurance · **Layer:** Continuous observability · **Inherits:** [automated-governance-evidence-system.md](automated-governance-evidence-system.md), [docs/categories/historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md](../../historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md)
 
 This document defines how Nzila makes **doctrine compliance continuously observable** — so that drift, violations, destabilization, overload, contamination, and degradation are detected as they emerge rather than discovered in retrospect.
 
@@ -18,7 +18,7 @@ The observability layer:
 - **Surfaces leading indicators** — drift signals precede violations
 - **Stays calm** — observability does not generate alert chaos
 - **Attributes to systems, not people** — findings target structures
-- **Feeds the scorecard** — observability outputs flow into [../nzila-governance/doctrine-governance-scorecard.md](../nzila-governance/doctrine-governance-scorecard.md)
+- **Feeds the scorecard** — observability outputs flow into [docs/categories/historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md](../../historical-archive/archive/iterations/nzila-governance/doctrine-governance-scorecard.md)
 - **Refuses surveillance affordances** — anti-surveillance applies to observability itself
 
 Observability that resolves to individuals would itself be a doctrine violation.

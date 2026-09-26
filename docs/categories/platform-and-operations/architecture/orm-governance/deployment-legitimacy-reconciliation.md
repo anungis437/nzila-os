@@ -32,7 +32,7 @@ canonical snapshot restored.
 
 - An environment can be **runtime-legitimate but schema-illegitimate**
   (the demo environment as of 2026-05-09 is exactly this state — see
-  [`demo-environment-validation-report.md`](../../union-eyes/release/demo-environment-validation-report.md)).
+  [`demo-environment-validation-report.md`](../../../products-and-market/union-eyes/release/demo-environment-validation-report.md)).
 - An environment can be schema-legitimate but runtime-illegitimate (e.g.
   schema is correct but the new revision crashes on startup).
 - Both must be true for the environment to be release-legitimate.

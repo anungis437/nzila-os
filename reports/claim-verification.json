@@ -1,5 +1,21 @@
 {
-  "generatedAt": "2026-05-04T01:55:09.188Z",
+  "generatedAt": "2026-09-24T13:02:14.003Z",
+  "evidenceScope": {
+    "establishes": [
+      "DESIGN — the claim is documented in a repository artifact",
+      "IMPLEMENTED — supporting code/configuration exists in the working tree",
+      "TESTED — only where the cited evidence for a claim names a test file"
+    ],
+    "doesNotEstablish": [
+      "DEPLOYED — no environment, image digest or release is inspected",
+      "RUNTIME-VERIFIED — nothing is executed against a running system",
+      "OPERATIONALLY PROVEN — no operational record is read",
+      "Customer availability — entitlement/tenant state is not inspected",
+      "Production readiness — readiness gates live in their own programme documents",
+      "Procurement-safe truth — publishing a claim requires the evidence layers above"
+    ],
+    "residualLimitation": "This generator distinguishes evidence layers only as far as static repository inspection allows. Separating TESTED from IMPLEMENTED per claim, and attaching deployment/runtime evidence, would require a broader redesign (per-claim test attribution plus an environment evidence source). Until then, treat every status below as an implementation-evidence statement, never as a readiness or buyer-facing safety statement."
+  },
   "totalClaims": 22,
   "summary": {
     "implemented": 21,
@@ -15,10 +31,7 @@
       "text": "Org-level tenant isolation with row-level security",
       "source": "ARCHITECTURE.md, procurement-pack.md",
       "status": "implemented",
-      "evidence": [
-        "packages/db/src/schema (org_id columns)",
-        "packages/platform-isolation"
-      ],
+      "evidence": ["packages/db/src/schema (org_id columns)", "packages/platform-isolation"],
       "notes": ""
     },
     {
@@ -27,9 +40,7 @@
       "text": "Azure Key Vault for secrets management",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/secrets"
-      ],
+      "evidence": ["packages/secrets"],
       "notes": ""
     },
     {
@@ -38,10 +49,7 @@
       "text": "Secret scanning in CI (Gitleaks + TruffleHog)",
       "source": "procurement-pack.md",
       "status": "implemented",
-      "evidence": [
-        ".github/workflows",
-        "package.json#secret-scan"
-      ],
+      "evidence": [".github/workflows", "package.json#secret-scan"],
       "notes": ""
     },
     {
@@ -50,11 +58,7 @@
       "text": "Tamper-evident audit trails with hash-chaining",
       "source": "ARCHITECTURE.md, procurement-pack.md",
       "status": "implemented",
-      "evidence": [
-        "packages/evidence",
-        "packages/platform-proof",
-        "hash-chain code"
-      ],
+      "evidence": ["packages/evidence", "packages/platform-proof", "hash-chain code"],
       "notes": ""
     },
     {
@@ -63,10 +67,7 @@
       "text": "Evidence packs with sealed artifacts for procurement",
       "source": "procurement-pack.md, evidence-packs.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-evidence-pack",
-        "packages/platform-procurement-proof"
-      ],
+      "evidence": ["packages/platform-evidence-pack", "packages/platform-procurement-proof"],
       "notes": ""
     },
     {
@@ -75,10 +76,7 @@
       "text": "AI control plane with per-app profiles and budget enforcement",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/ai-core",
-        "packages/platform-governed-ai"
-      ],
+      "evidence": ["packages/ai-core", "packages/platform-governed-ai"],
       "notes": ""
     },
     {
@@ -87,10 +85,7 @@
       "text": "ML registry with versioned model activation and approval workflows",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/ml-core",
-        "packages/ai-registry"
-      ],
+      "evidence": ["packages/ml-core", "packages/ai-registry"],
       "notes": ""
     },
     {
@@ -99,10 +94,7 @@
       "text": "Structured telemetry with OpenTelemetry and request correlation",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/otel-core",
-        "packages/platform-observability"
-      ],
+      "evidence": ["packages/otel-core", "packages/platform-observability"],
       "notes": ""
     },
     {
@@ -111,9 +103,7 @@
       "text": "Zod-validated config with fail-fast at startup",
       "source": "ARCHITECTURE.md",
       "status": "partial",
-      "evidence": [
-        "packages/config"
-      ],
+      "evidence": ["packages/config"],
       "notes": "Zod validation not confirmed"
     },
     {
@@ -122,9 +112,7 @@
       "text": "Data retention enforcement with audit logging",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/data-lifecycle"
-      ],
+      "evidence": ["packages/data-lifecycle"],
       "notes": ""
     },
     {
@@ -133,9 +121,7 @@
       "text": "Centralized RBAC/authorization policy engine",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-policy-engine"
-      ],
+      "evidence": ["packages/platform-policy-engine"],
       "notes": ""
     },
     {
@@ -144,10 +130,7 @@
       "text": "Partner entitlements as data (no hardcoded defaults)",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/db/src/schema (partner_entities)",
-        "packages/org"
-      ],
+      "evidence": ["packages/db/src/schema (partner_entities)", "packages/org"],
       "notes": ""
     },
     {
@@ -156,10 +139,7 @@
       "text": "SBOM generation and build attestation",
       "source": "procurement-pack.md",
       "status": "implemented",
-      "evidence": [
-        "package.json#generate:sbom",
-        "package.json#attest:build"
-      ],
+      "evidence": ["package.json#generate:sbom", "package.json#attest:build"],
       "notes": ""
     },
     {
@@ -168,9 +148,7 @@
       "text": "QuickBooks Online sync with reconciliation",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/qbo"
-      ],
+      "evidence": ["packages/qbo"],
       "notes": ""
     },
     {
@@ -179,9 +157,7 @@
       "text": "Stripe payment processing with reconciliation",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/payments-stripe"
-      ],
+      "evidence": ["packages/payments-stripe"],
       "notes": ""
     },
     {
@@ -190,9 +166,7 @@
       "text": "Platform ontology with typed entity taxonomy",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-ontology"
-      ],
+      "evidence": ["packages/platform-ontology"],
       "notes": ""
     },
     {
@@ -201,9 +175,7 @@
       "text": "Entity graph with cross-domain relationship tracking",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-entity-graph"
-      ],
+      "evidence": ["packages/platform-entity-graph"],
       "notes": ""
     },
     {
@@ -212,9 +184,7 @@
       "text": "Event fabric for cross-domain event routing",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-event-fabric"
-      ],
+      "evidence": ["packages/platform-event-fabric"],
       "notes": ""
     },
     {
@@ -223,9 +193,7 @@
       "text": "Semantic search across platform data",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-semantic-search"
-      ],
+      "evidence": ["packages/platform-semantic-search"],
       "notes": ""
     },
     {
@@ -234,9 +202,7 @@
       "text": "Governed AI with policy controls and compliance",
       "source": "ARCHITECTURE.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-governed-ai"
-      ],
+      "evidence": ["packages/platform-governed-ai"],
       "notes": ""
     },
     {
@@ -245,10 +211,7 @@
       "text": "Contract tests covering org isolation, authz, stack authority",
       "source": "ALIGNMENT_REPORT.md",
       "status": "implemented",
-      "evidence": [
-        "tooling/contract-tests/",
-        "package.json#contract-tests"
-      ],
+      "evidence": ["tooling/contract-tests/", "package.json#contract-tests"],
       "notes": ""
     },
     {
@@ -257,9 +220,7 @@
       "text": "Compliance snapshots for point-in-time auditing",
       "source": "procurement-pack.md",
       "status": "implemented",
-      "evidence": [
-        "packages/platform-compliance-snapshots"
-      ],
+      "evidence": ["packages/platform-compliance-snapshots"],
       "notes": ""
     }
   ],

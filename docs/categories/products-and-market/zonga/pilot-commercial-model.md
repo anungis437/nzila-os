@@ -16,9 +16,9 @@
 
 ## In-Product Trust Surfaces
 
-- Rights summary panel: [apps/zonga/components/dashboard/rights-terms-panel.tsx](../../apps/zonga/components/dashboard/rights-terms-panel.tsx)
-- Terms acceptance log API: [apps/zonga/app/api/rights/terms/route.ts](../../apps/zonga/app/api/rights/terms/route.ts)
-- Downloadable agreement copy: [apps/zonga/app/api/rights/terms/agreement/route.ts](../../apps/zonga/app/api/rights/terms/agreement/route.ts)
+- Rights summary panel: [apps/zonga/components/dashboard/rights-terms-panel.tsx](../../../../apps/zonga/components/dashboard/rights-terms-panel.tsx)
+- Terms acceptance log API: [apps/zonga/app/api/rights/terms/route.ts](../../../../apps/zonga/app/api/rights/terms/route.ts)
+- Downloadable agreement copy: [apps/zonga/app/api/rights/terms/agreement/route.ts](../../../../apps/zonga/app/api/rights/terms/agreement/route.ts)
 
 ## Governance Notes
 

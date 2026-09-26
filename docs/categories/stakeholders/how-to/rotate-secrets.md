@@ -74,5 +74,5 @@ If a secret is compromised:
 1. **Immediately** rotate in Azure Key Vault
 2. Invalidate all caches (`client.clearCache()`)
 3. Restart affected services
-4. Follow the [Secret Compromise Runbook](../runbooks/secret-compromise.md)
+4. Follow the [Secret Compromise Runbook](../../../../ops/runbooks/platform/secret-compromise.md)
 5. Create an incident report

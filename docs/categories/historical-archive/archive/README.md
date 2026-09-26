@@ -1,9 +1,15 @@
 # Archive
 
-> Historical documents relocated from the repository root during cleanup.
-> These files are retained for traceability but are **not actively maintained**.
+> **HISTORICAL.** Documents relocated from the repository root during cleanup. Retained for
+> traceability, **not actively maintained**, and not current authority. Current authority is
+> listed in [../README.md](../README.md).
 
 ## Contents
+
+### [iterations/](iterations/)
+
+Planning, convergence, phase, remediation, audit and handoff documents produced by completed
+work programmes. Each describes the state of the repository at the time it was written.
 
 ### [audit-reports/](audit-reports/)
 
@@ -20,12 +26,14 @@ These were originally committed to the repository root.
 | INTAKE_VS_CASE_AUTHORITY_AUDIT.md | 2026-04 |
 | PREDEPLOYMENT_AUDIT_2026-04-09.md | 2026-04-09 |
 
-### [debug-logs/](debug-logs/)
+### debug-logs/ (removed)
 
-Build, lint, typecheck, and test output logs captured during development.
-These were originally committed to the repository root and are now gitignored
-for future runs (see root `.gitignore`).
+Raw build, lint, typecheck and test output logs were committed here. They were machine output
+with no institutional value, and one file contained real user names and email addresses. They
+were deleted rather than archived; such logs are gitignored for future runs (see root
+`.gitignore`). The content remains recoverable from git history.
 
-### [auth-migration/](auth-migration/)
+### auth-migration/ (never created)
 
-Reserved for Clerk → platform-auth migration artifacts. Currently empty.
+The Clerk → `@nzila/platform-auth` migration left no archived artifacts. `@nzila/platform-auth`
+is the current canonical authentication authority — see [../../../../ARCHITECTURE.md](../../../../ARCHITECTURE.md).

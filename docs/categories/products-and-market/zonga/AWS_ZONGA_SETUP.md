@@ -1,4 +1,5 @@
 # AWS Setup Guide for Zonga
+
 **Date**: 2026-04-19 | **Status**: Implementation Guide for Client Launch
 
 ---
@@ -6,6 +7,7 @@
 ## Overview
 
 Zonga requires three AWS services for media streaming:
+
 1. **MediaConvert** — Audio transcoding (VOD)
 2. **IVS** — Live streaming channels (deferred for launch)
 3. **CloudFront** — CDN delivery with signed URLs
@@ -175,12 +177,12 @@ Save this endpoint URL — you'll need it for environment config.
 
 MediaConvert uses **presets** (templates) for encoding. Zonga needs 4 quality tiers:
 
-| Quality Tier | Codec | Bitrate | Use Case |
-|---|---|---|---|
-| `preview` | Opus | 32 kbps | Streaming preview |
-| `standard` | AAC | 128 kbps | Standard playback |
-| `high` | AAC | 256 kbps | Premium users |
-| `hifi` | FLAC | 1411 kbps | Lossless (audiophiles) |
+| Quality Tier | Codec | Bitrate   | Use Case               |
+| ------------ | ----- | --------- | ---------------------- |
+| `preview`    | Opus  | 32 kbps   | Streaming preview      |
+| `standard`   | AAC   | 128 kbps  | Standard playback      |
+| `high`       | AAC   | 256 kbps  | Premium users          |
+| `hifi`       | FLAC  | 1411 kbps | Lossless (audiophiles) |
 
 These are created programmatically by the `@nzila/zonga-streaming-aws/mediaconvert` module during job submission. No manual preset creation needed.
 
@@ -255,6 +257,7 @@ base64 -i /tmp/public-key.pem | tr -d '\n'
 ```
 
 **Save**:
+
 - Private key (PEM format) — goes in `ZONGA_CLOUDFRONT_PRIVATE_KEY_PEM`
 - Key Pair ID — returned by CloudFront API
 
@@ -408,12 +411,12 @@ aws s3api get-bucket-request-payment \
 
 ### Cost Estimation (Launch Constraints)
 
-| Service | Usage | Est. Cost/month |
-|---|---|---|
-| S3 Storage | 500 tracks × 50 MB avg | $12 |
-| MediaConvert | 500 tracks × 4 minutes avg transcode | $200 |
-| CloudFront | 100 concurrent listeners × 100 kbps | $30–60 |
-| **Total** | First client launch | **$250–300** |
+| Service      | Usage                                | Est. Cost/month |
+| ------------ | ------------------------------------ | --------------- |
+| S3 Storage   | 500 tracks × 50 MB avg               | $12             |
+| MediaConvert | 500 tracks × 4 minutes avg transcode | $200            |
+| CloudFront   | 100 concurrent listeners × 100 kbps  | $30–60          |
+| **Total**    | First client launch                  | **$250–300**    |
 
 Monitor after week 1 and adjust capacity/limits accordingly.
 
@@ -424,9 +427,9 @@ Monitor after week 1 and adjust capacity/limits accordingly.
 - [AWS MediaConvert API](https://docs.aws.amazon.com/mediaconvert/latest/ug/what-is.html)
 - [AWS IVS Getting Started](https://docs.aws.amazon.com/ivs/latest/userguide/getting-started.html)
 - [CloudFront Signed URLs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-signed-urls.html)
-- [Zonga Streaming Code](packages/zonga-streaming-aws/)
-- [Zonga Launch Readiness Report](reports/zonga-launch-readiness.md)
+- [Zonga Streaming Code](../../../../packages/zonga-streaming-aws/)
+- [Zonga Launch Readiness Report](../../../../reports/operational/zonga-launch-readiness.md)
 
 ---
 
-*Last Updated: 2026-04-19*
+_Last Updated: 2026-04-19_

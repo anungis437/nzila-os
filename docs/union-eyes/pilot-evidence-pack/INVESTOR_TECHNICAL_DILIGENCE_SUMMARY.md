@@ -1,5 +1,15 @@
 # Investor Technical Diligence Summary — Nzila OS / Union Eyes
 
+> **Temporal status — SUPERSEDED FOR CURRENT POSTURE (added 2026-09-24):** this document is dated
+> 2026-05 and predates the `UE_SAAS_OPERATIONAL_READINESS` gate ruling of 2026-08-31
+> ([`../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md`](../reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md))
+> and the Phase 3A runtime findings of 2026-09-01
+> ([`../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md`](../reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md)).
+> The current gate reads **`NO_GO — RUNTIME_PROOF_REQUIRED`**. Any `CURRENT`, `GO`, `LOCKED`, or
+> `VERIFIED` marking below describes this document's own state in 2026-05, not the current pilot
+> posture, and must not be quoted as buyer-facing readiness. Body retained unmodified as
+> historical evidence; current posture lives in [`../README.md`](../README.md).
+
 **Status:** CURRENT  
 **Last updated:** 2026-05-14  
 **Source of truth:** Codebase state as of commit `a6f2a5490` + current session changes  
@@ -15,33 +25,33 @@ built on top of the Nzila OS monorepo infrastructure platform.
 
 ### Core Capabilities (Implemented)
 
-| Capability | Status | Evidence |
-|-----------|--------|---------|
-| Multi-org case/grievance management | ✅ Production-ready code | `apps/union-eyes/app/api/cases/` |
-| Org-scoped authentication + RBAC | ✅ Production-ready code | `apps/union-eyes/lib/auth/` |
-| Row-Level Security (238 policies) | ✅ Committed to DB migrations | `migrations/` |
-| Fail-closed org isolation | ✅ withRLSContext throws on missing orgId | `lib/db/with-rls-context.ts` |
-| Evidence file management + OCR | ✅ Implemented | `apps/union-eyes/lib/storage/` |
-| Hash-chained audit trail schema | ✅ Schema committed | `apps/union-eyes/db/schema/` |
-| FSM-enforced case workflow | ✅ Engine implemented | `apps/union-eyes/lib/workflow/` |
-| Case intake idempotency (org-scoped) | ✅ Fixed 2026-04 | `app/api/cases/intake/route.ts` |
-| TypeScript strict mode (noImplicitAny) | ✅ Enabled, 0 errors | `apps/union-eyes/tsconfig.json` |
-| Zero raw DB bypass violations | ✅ CI-enforced guard | `scripts/check-ue-db-import-guard.ts` |
-| Production/staging blast-radius separation | ✅ Hardcoded + gate | `.github/workflows/deploy-production.yml` |
-| Pilot evidence pack (buyer-grade) | ✅ This folder | `docs/union-eyes/pilot-evidence-pack/` |
+| Capability                                 | Status                                    | Evidence                                  |
+| ------------------------------------------ | ----------------------------------------- | ----------------------------------------- |
+| Multi-org case/grievance management        | ✅ Production-ready code                  | `apps/union-eyes/app/api/cases/`          |
+| Org-scoped authentication + RBAC           | ✅ Production-ready code                  | `apps/union-eyes/lib/auth/`               |
+| Row-Level Security (238 policies)          | ✅ Committed to DB migrations             | `migrations/`                             |
+| Fail-closed org isolation                  | ✅ withRLSContext throws on missing orgId | `lib/db/with-rls-context.ts`              |
+| Evidence file management + OCR             | ✅ Implemented                            | `apps/union-eyes/lib/storage/`            |
+| Hash-chained audit trail schema            | ✅ Schema committed                       | `apps/union-eyes/db/schema/`              |
+| FSM-enforced case workflow                 | ✅ Engine implemented                     | `apps/union-eyes/lib/workflow/`           |
+| Case intake idempotency (org-scoped)       | ✅ Fixed 2026-04                          | `app/api/cases/intake/route.ts`           |
+| TypeScript strict mode (noImplicitAny)     | ✅ Enabled, 0 errors                      | `apps/union-eyes/tsconfig.json`           |
+| Zero raw DB bypass violations              | ✅ CI-enforced guard                      | `scripts/check-ue-db-import-guard.ts`     |
+| Production/staging blast-radius separation | ✅ Hardcoded + gate                       | `.github/workflows/deploy-production.yml` |
+| Pilot evidence pack (buyer-grade)          | ✅ This folder                            | `docs/union-eyes/pilot-evidence-pack/`    |
 
 ### Platform Infrastructure (Nzila OS)
 
-| Component | Status |
-|-----------|--------|
-| Turborepo + pnpm monorepo | ✅ Production configuration |
-| os-core SDK boundary enforcement (eslint gates) | ✅ CI-enforced |
-| Contract tests + invariants | ✅ Blocking CI gates |
-| Azure Canada Central deployment | ✅ Workflow committed; live pending |
-| SBOM + Trivy + gitleaks CI | ✅ Configured |
-| Dependabot + branch protection | ✅ Configured |
-| SOC 2 gap log + readiness scaffold | ✅ Initiated |
-| PIPEDA-aware DPA template | ✅ Authored |
+| Component                                       | Status                              |
+| ----------------------------------------------- | ----------------------------------- |
+| Turborepo + pnpm monorepo                       | ✅ Production configuration         |
+| os-core SDK boundary enforcement (eslint gates) | ✅ CI-enforced                      |
+| Contract tests + invariants                     | ✅ Blocking CI gates                |
+| Azure Canada Central deployment                 | ✅ Workflow committed; live pending |
+| SBOM + Trivy + gitleaks CI                      | ✅ Configured                       |
+| Dependabot + branch protection                  | ✅ Configured                       |
+| SOC 2 gap log + readiness scaffold              | ✅ Initiated                        |
+| PIPEDA-aware DPA template                       | ✅ Authored                         |
 
 ---
 
@@ -85,17 +95,17 @@ Series A scaling.
 
 ## 3. Security Posture
 
-| Control | Implementation |
-|---------|---------------|
-| Org isolation | withRLSContext fail-closed; 238 RLS policies; 0 bypass violations |
-| Auth | Next-Auth + Argon2id password hashing; JWT with org-scoped claims |
-| Transit encryption | TLS 1.3 (Azure-enforced) |
-| Data residency | Azure Canada Central; contractual no-US-processing |
-| AI boundary | Code-enforced; no LLM sees member PII; contractual no-training clause |
-| Audit trail | Schema committed; hash-chain design in place |
-| Secret management | Azure Key Vault (prod); separate from staging |
-| CI security gates | gitleaks, Trivy, SBOM, DB import guard — all blocking |
-| Prod/staging separation | Hardcoded prod RG; blast-radius gate in deploy workflow |
+| Control                 | Implementation                                                        |
+| ----------------------- | --------------------------------------------------------------------- |
+| Org isolation           | withRLSContext fail-closed; 238 RLS policies; 0 bypass violations     |
+| Auth                    | Next-Auth + Argon2id password hashing; JWT with org-scoped claims     |
+| Transit encryption      | TLS 1.3 (Azure-enforced)                                              |
+| Data residency          | Azure Canada Central; contractual no-US-processing                    |
+| AI boundary             | Code-enforced; no LLM sees member PII; contractual no-training clause |
+| Audit trail             | Schema committed; hash-chain design in place                          |
+| Secret management       | Azure Key Vault (prod); separate from staging                         |
+| CI security gates       | gitleaks, Trivy, SBOM, DB import guard — all blocking                 |
+| Prod/staging separation | Hardcoded prod RG; blast-radius gate in deploy workflow               |
 
 **Senior assessment:** Security posture is now **8.2/10** (post-hardening sprint).
 No known P0/P1 code blockers. Live operational proof is the remaining gap (runbook exists).
@@ -107,14 +117,14 @@ No known P0/P1 code blockers. Live operational proof is the remaining gap (runbo
 Union Eyes is the flagship vertical on top of the Nzila OS platform.
 The platform infrastructure is designed for multi-vertical reuse:
 
-| Infrastructure Layer | Union Eyes | Future verticals |
-|---------------------|------------|-----------------|
-| os-core (evidence/policy/telemetry SDK) | ✅ Used | Available to all apps |
-| RLS + multi-org middleware | ✅ Used | Reusable pattern |
-| Auth + RBAC framework | ✅ Used | Reusable |
-| Azure Canada Central infra | ✅ Configured | Reusable environment |
-| CI/CD pipeline + governance | ✅ Used | Inherited by new apps |
-| DPA + compliance templates | ✅ Authored | Adaptable |
+| Infrastructure Layer                    | Union Eyes    | Future verticals      |
+| --------------------------------------- | ------------- | --------------------- |
+| os-core (evidence/policy/telemetry SDK) | ✅ Used       | Available to all apps |
+| RLS + multi-org middleware              | ✅ Used       | Reusable pattern      |
+| Auth + RBAC framework                   | ✅ Used       | Reusable              |
+| Azure Canada Central infra              | ✅ Configured | Reusable environment  |
+| CI/CD pipeline + governance             | ✅ Used       | Inherited by new apps |
+| DPA + compliance templates              | ✅ Authored   | Adaptable             |
 
 The marginal cost to add a second governed-data vertical on this platform is
 significantly lower than building a second platform from scratch.
@@ -125,37 +135,37 @@ significantly lower than building a second platform from scratch.
 
 ### Technical
 
-| Gap | Effort estimate | Blocking enterprise? |
-|-----|----------------|---------------------|
-| Live Azure environment evidence (smoke tests, RG proof) | 1–2 days | Yes for enterprise credibility |
-| SOC 2 Type II audit | 6–12 months post-audit-period start | Yes for large enterprise |
-| Pen test | 2–4 weeks (external) | Yes for most enterprise buyers |
-| ClamAV malware scanning (compensating controls documented) | 1–2 sprints | No for pilot; yes for enterprise |
-| Monitoring workbook / alerting maturity | 1–2 sprints | No for pilot; yes for enterprise |
-| Evidence export UI (end-to-end PDF + seal) | Partial — complete in next sprint | Yes for pilot close |
+| Gap                                                        | Effort estimate                     | Blocking enterprise?             |
+| ---------------------------------------------------------- | ----------------------------------- | -------------------------------- |
+| Live Azure environment evidence (smoke tests, RG proof)    | 1–2 days                            | Yes for enterprise credibility   |
+| SOC 2 Type II audit                                        | 6–12 months post-audit-period start | Yes for large enterprise         |
+| Pen test                                                   | 2–4 weeks (external)                | Yes for most enterprise buyers   |
+| ClamAV malware scanning (compensating controls documented) | 1–2 sprints                         | No for pilot; yes for enterprise |
+| Monitoring workbook / alerting maturity                    | 1–2 sprints                         | No for pilot; yes for enterprise |
+| Evidence export UI (end-to-end PDF + seal)                 | Partial — complete in next sprint   | Yes for pilot close              |
 
 ### Operational
 
-| Gap | Notes |
-|-----|-------|
-| First live member data | Requires DPA + L-001 to L-006 conditions met |
+| Gap                           | Notes                                                         |
+| ----------------------------- | ------------------------------------------------------------- |
+| First live member data        | Requires DPA + L-001 to L-006 conditions met                  |
 | First sealed evidence package | Critical milestone; one test export needed before pilot close |
-| Customer success function | Currently founder-led |
-| On-call SRE coverage | Currently team coverage; formalize before second pilot org |
+| Customer success function     | Currently founder-led                                         |
+| On-call SRE coverage          | Currently team coverage; formalize before second pilot org    |
 
 ---
 
 ## 6. Honest Risk Register
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| Live environment not matching code posture | LOW | HIGH | Runbook created; SRE execution pending |
-| SOC 2 / pen-test gap in enterprise sales | HIGH | MEDIUM | Acknowledged in buyer pack; 12-month roadmap |
-| Labour law changes requiring platform updates | LOW | MEDIUM | Domain experts engaged; platform is adaptable |
-| Key person dependency (technical founders) | MEDIUM | HIGH | Document architecture, knowledge transfer plan needed |
-| Competitive entry (Salesforce, ServiceNow union modules) | LOW | HIGH | Governance moat + Canadian regulatory head start |
-| Pilot org churn before expansion | LOW | MEDIUM | Success metrics defined; weekly check-ins |
-| Python/Django backend maintenance burden | MEDIUM | LOW | Contained to specific services; migration path documented |
+| Risk                                                     | Likelihood | Impact | Mitigation                                                |
+| -------------------------------------------------------- | ---------- | ------ | --------------------------------------------------------- |
+| Live environment not matching code posture               | LOW        | HIGH   | Runbook created; SRE execution pending                    |
+| SOC 2 / pen-test gap in enterprise sales                 | HIGH       | MEDIUM | Acknowledged in buyer pack; 12-month roadmap              |
+| Labour law changes requiring platform updates            | LOW        | MEDIUM | Domain experts engaged; platform is adaptable             |
+| Key person dependency (technical founders)               | MEDIUM     | HIGH   | Document architecture, knowledge transfer plan needed     |
+| Competitive entry (Salesforce, ServiceNow union modules) | LOW        | HIGH   | Governance moat + Canadian regulatory head start          |
+| Pilot org churn before expansion                         | LOW        | MEDIUM | Success metrics defined; weekly check-ins                 |
+| Python/Django backend maintenance burden                 | MEDIUM     | LOW    | Contained to specific services; migration path documented |
 
 ---
 
@@ -179,6 +189,7 @@ evidence**. That converts "architecture credibility" into "market evidence."
 **Milestone:** Successful controlled pilot close with sealed evidence package
 
 **What it proves:**
+
 - Real union data can be safely managed
 - FSM-enforced workflow is usable by stewards
 - Evidence packages are arbitration-ready
@@ -208,5 +219,5 @@ These gaps are documented and have mitigation plans. None are architectural regr
 
 ---
 
-*Prepared by Nzila engineering team. Language is diligence-grade, not marketing copy.
-For questions: technical@nzila.ca*
+_Prepared by Nzila engineering team. Language is diligence-grade, not marketing copy.
+For questions: technical@nzila.ca_

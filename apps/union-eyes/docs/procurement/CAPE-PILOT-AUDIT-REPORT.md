@@ -2,9 +2,9 @@
 
 > Historical CAPE audit snapshot.
 > For current pilot-metrics architecture and runtime validation, refer to:
-> - [apps/union-eyes/docs/PILOT_SCOPE.md](apps/union-eyes/docs/PILOT_SCOPE.md)
-> - [apps/union-eyes/docs/PILOT_VALIDATION.md](apps/union-eyes/docs/PILOT_VALIDATION.md)
-> - [docs/union-eyes/pilot-kpis.md](docs/union-eyes/pilot-kpis.md)
+> - [apps/union-eyes/docs/procurement/PILOT_SCOPE.md](PILOT_SCOPE.md)
+> - [apps/union-eyes/docs/procurement/PILOT_VALIDATION.md](PILOT_VALIDATION.md)
+> - [docs/categories/products-and-market/union-eyes/pilot-kpis.md](../../../../docs/categories/products-and-market/union-eyes/pilot-kpis.md)
 
 **Date:** 2025-07-14
 **Revision:** 2.0 — Full rewrite reflecting current codebase state
