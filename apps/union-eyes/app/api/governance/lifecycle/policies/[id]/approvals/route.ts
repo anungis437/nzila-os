@@ -2,7 +2,7 @@
  * GET  /api/governance/lifecycle/policies/[id]/approvals
  * POST /api/governance/lifecycle/policies/[id]/approvals
  */
-import { withApi } from '@/lib/api/framework'
+import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { policyApprovalChains, policyApprovalActions } from '@nzila/db/schema'
@@ -43,6 +43,11 @@ export const POST = withApi(
     entitlement: 'governance_suite',
   },
   async ({ request, params, user }) => {
+    const actorId = user?.id
+    if (!actorId) {
+      throw ApiError.badRequest('Authenticated user is required to record a policy approval.')
+    }
+
     const id = (params as Record<string, string>).id
     const body = await request.json() as {
       op: 'create_chain' | 'record_action'
@@ -68,7 +73,7 @@ export const POST = withApi(
             approverRoles: body.approverRoles ?? [],
             namedApproverIds: body.namedApproverIds ?? [],
             requiresNamedApprovers: (body.namedApproverIds ?? []).length > 0,
-            createdBy: user?.id ?? 'system',
+            createdBy: actorId,
           })
           .returning()
         return { chain }
@@ -83,7 +88,7 @@ export const POST = withApi(
           .values({
             chainId: body.chainId,
             governedPolicyId: id,
-            approverUserId: user?.id ?? 'system',
+            approverUserId: actorId,
             approverRole: body.actorRole,
             action: body.action,
             rationale: body.rationale,
