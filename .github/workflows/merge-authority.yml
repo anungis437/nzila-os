@@ -1,0 +1,41 @@
+name: Merge Authority
+
+# Always runs for pull requests to main, including documentation-only changes
+# that CI paths-ignore skips. This workflow does not install the monorepo and
+# does not execute lint, tests, schema, RLS, migrations, or builds.
+# Those invariants are reported by "Report merge authority" inside CI when
+# the change can affect them.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: merge-authority-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  classify:
+    name: Classify merge impact
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Classify and publish canonical contexts
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
+          printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-and-publish

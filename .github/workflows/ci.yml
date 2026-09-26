@@ -671,3 +671,39 @@ jobs:
           name: k6-perf-results
           path: tests/load/
           retention-days: 30
+
+  # Canonical merge-authority contexts. This job reports; it is not itself a
+  # required context. It does not run on docs-only PRs because CI paths-ignore
+  # skips the workflow. The Merge Authority workflow covers that case.
+  report-merge-authority:
+    name: Report merge authority
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs:
+      - lint-and-typecheck
+      - test
+      - schema-drift
+      - sage-postgres-concurrency
+      - sage-live-postgres
+      - build
+    if: always() && !cancelled()
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish canonical merge-authority checks
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          MA_RESULT_LINT: ${{ needs.lint-and-typecheck.result }}
+          MA_RESULT_UNIT: ${{ needs.test.result }}
+          MA_RESULT_SCHEMA: ${{ needs.schema-drift.result }}
+          MA_RESULT_RLS: ${{ needs.sage-postgres-concurrency.result }}
+          MA_RESULT_MIGRATION: ${{ needs.sage-live-postgres.result }}
+          MA_RESULT_BUILD: ${{ needs.build.result }}
+        run: node tooling/ci/merge-authority/publish.mjs publish-ci-results
