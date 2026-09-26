@@ -91,6 +91,12 @@ export const POST = withApi(
         .where(eq(sharedClauseLibrary.id, id))
         .returning();
 
+      // ue_shared_library_update is owner-org only. A zero-row write is the
+      // same non-disclosure as a missing clause — do not read updated.id.
+      if (!updated) {
+        throw ApiError.notFound('clause', id);
+      }
+
       return {
         sharing: {
           id: updated.id,
