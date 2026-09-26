@@ -41,7 +41,20 @@
       "unknownRole": "Role not recognized. This destination stays closed.",
       "stubSection": "Not available from a stub section.",
       "unavailableSection": "Not available for your role.",
-      "outOfRole": "Outside your role."
+      "outOfRole": "Outside your role.",
+      "recoveryHint": "Authorized surface for this deep work.",
+      "destinations": {
+        "caseworkConsole": "Casework console",
+        "institutionalIntelligenceReports": "Institutional intelligence reports",
+        "membersRoster": "Members roster",
+        "continuityIntelligence": "Continuity intelligence",
+        "governanceCenter": "Governance center",
+        "governanceOverview": "Governance overview"
+      },
+      "remapReason": {
+        "caseworkConsole": "Opens the casework console. The cases list is outside your role.",
+        "institutionalIntelligenceReports": "Opens institutional intelligence reports. Continuity intelligence is outside your role."
+      }
     }
   },
   "qcBilingualBanner": {

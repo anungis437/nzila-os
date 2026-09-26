@@ -21,16 +21,18 @@ import { useWorkspaceTelemetry } from "@/lib/hooks/use-workspace-telemetry";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import {
   WORKSPACE_TABS,
+  type WorkspaceDeepWorkLink,
   type WorkspaceTabId,
 } from "@/components/workspace/workspace-config";
 import {
-  gateWorkspaceDeepWork,
   getWorkspaceTabAvailability,
   initialWorkspaceTab,
+  resolveWorkspaceDeepWork,
   resolveWorkspacePersonaClass,
   type WorkspaceDeepWorkGate,
   type WorkspaceTabAvailability,
 } from "@/components/workspace/workspace-persona-availability";
+import type { WorkspaceTabDeepWorkItem } from "@/components/workspace/workspace-tab-panel";
 
 export interface WorkspaceShellProps {
   /**
@@ -43,6 +45,49 @@ export interface WorkspaceShellProps {
 function translate(t: (key: string) => string, key: string, fallback: string): string {
   const value = t(key);
   return value && value !== key ? value : fallback;
+}
+
+function presentDeepWork(
+  t: (key: string) => string,
+  role: string | null,
+  tabId: WorkspaceTabId,
+  link: WorkspaceDeepWorkLink,
+  isPilotMode: boolean,
+): WorkspaceTabDeepWorkItem {
+  const unavailableLabel = translate(t, "deepWork.unavailable", "Unavailable");
+  const resolution = resolveWorkspaceDeepWork(role, tabId, link.href, isPilotMode);
+  if (resolution.kind === "reachable") {
+    return { link, allowed: true, unavailableLabel, unavailableReason: "" };
+  }
+  if (resolution.kind === "remapped") {
+    return {
+      link,
+      allowed: true,
+      navigateHref: resolution.href,
+      displayLabel: translate(t, resolution.labelKey, resolution.labelFallback),
+      remapReason: translate(t, resolution.reasonKey, resolution.reasonFallback),
+      unavailableLabel,
+      unavailableReason: "",
+    };
+  }
+  const gate: WorkspaceDeepWorkGate = { allowed: false, reason: resolution.reason };
+  return {
+    link,
+    allowed: false,
+    unavailableLabel,
+    unavailableReason: translate(t, deepWorkReasonKey(gate), "Unavailable"),
+    recovery: resolution.recovery
+      ? {
+          href: resolution.recovery.href,
+          label: translate(t, resolution.recovery.labelKey, resolution.recovery.labelFallback),
+          hint: translate(
+            t,
+            "deepWork.recoveryHint",
+            "Authorized surface for this deep work.",
+          ),
+        }
+      : undefined,
+  };
 }
 
 function deepWorkReasonKey(gate: WorkspaceDeepWorkGate): string {
@@ -164,17 +209,9 @@ export function WorkspaceShell({ role }: WorkspaceShellProps) {
                 tab={tab}
                 availability={availability}
                 personaMessage={personaMessage}
-                deepWork={tab.deepWork.map((link) => {
-                  const gate = gateWorkspaceDeepWork(role, tab.id, link.href, pilotGate);
-                  return {
-                    link,
-                    allowed: gate.allowed,
-                    unavailableLabel: translate(t, "deepWork.unavailable", "Unavailable"),
-                    unavailableReason: gate.allowed
-                      ? ""
-                      : translate(t, deepWorkReasonKey(gate), "Unavailable"),
-                  };
-                })}
+                deepWork={tab.deepWork.map((link) =>
+                  presentDeepWork(t, role, tab.id, link, pilotGate),
+                )}
               />
             </TabsContent>
           );

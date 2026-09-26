@@ -17,7 +17,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WorkspaceEmptyState } from "@/components/workspace/workspace-empty-state";
-import { DeepWorkLink } from "@/components/workspace/deep-work-link";
+import {
+  DeepWorkLink,
+  type DeepWorkRecoveryLink,
+} from "@/components/workspace/deep-work-link";
 import type {
   WorkspaceDeepWorkLink,
   WorkspaceTabConfig,
@@ -26,9 +29,13 @@ import type { WorkspaceTabAvailability } from "@/components/workspace/workspace-
 
 export interface WorkspaceTabDeepWorkItem {
   link: WorkspaceDeepWorkLink;
+  navigateHref?: string;
+  displayLabel?: string;
   allowed: boolean;
   unavailableLabel: string;
   unavailableReason: string;
+  remapReason?: string;
+  recovery?: DeepWorkRecoveryLink;
 }
 
 export interface WorkspaceTabPanelProps {
@@ -106,9 +113,13 @@ export function WorkspaceTabPanel({
                 key={item.link.href}
                 link={item.link}
                 tab={tab.id}
+                navigateHref={item.navigateHref}
+                displayLabel={item.displayLabel}
                 allowed={item.allowed}
                 unavailableLabel={item.unavailableLabel}
                 unavailableReason={item.unavailableReason}
+                remapReason={item.remapReason}
+                recovery={item.recovery}
               />
             ))}
           </div>

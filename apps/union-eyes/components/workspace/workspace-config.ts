@@ -261,9 +261,20 @@ export function getWorkspaceTab(id: string): WorkspaceTabConfig | undefined {
  * Telemetry `route` values must be one of these — anything else is dropped so
  * that instance routes carrying case/member identifiers can never be recorded.
  */
-export const WORKSPACE_KNOWN_ROUTES: ReadonlySet<string> = new Set(
-  WORKSPACE_TABS.flatMap((tab) => tab.deepWork.map((link) => link.href.split("?")[0])),
-);
+/**
+ * Static authorized alternates a deep-work control may open when the doctrine
+ * href is outside that persona's path policy (EC-005). Not new workspace tabs.
+ * Identifier-free so they can be recorded as telemetry routes.
+ */
+export const WORKSPACE_AUTHORIZED_ALTERNATE_ROUTES = [
+  "/dashboard/workbench",
+  "/dashboard/intelligence",
+] as const;
+
+export const WORKSPACE_KNOWN_ROUTES: ReadonlySet<string> = new Set([
+  ...WORKSPACE_TABS.flatMap((tab) => tab.deepWork.map((link) => link.href.split("?")[0])),
+  ...WORKSPACE_AUTHORIZED_ALTERNATE_ROUTES,
+]);
 
 const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const NUMERIC_SEGMENT = /^\d+$/;

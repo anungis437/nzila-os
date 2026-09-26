@@ -147,10 +147,42 @@ describe("WorkspaceShell persona labels", () => {
     const intake = screen.getByRole("link", { name: /Intake Queue/i });
     expect(intake).toHaveAttribute("href", "/en/dashboard/inbox?type=intake");
     expect(intake).not.toHaveAttribute("aria-disabled");
+    expect(intake).toHaveAttribute("data-deep-work-state", "available");
 
-    const cases = screen.getByRole("link", { name: /^Cases/i });
-    expect(cases).toHaveAttribute("aria-disabled", "true");
-    expect(cases).toHaveTextContent("Unavailable");
-    expect(cases).toHaveAccessibleDescription(/Outside your role/i);
+    const casework = screen.getByRole("link", { name: /Opens the casework console/i });
+    expect(casework).toHaveAttribute("href", "/en/dashboard/workbench");
+    expect(casework).toHaveAttribute("data-deep-work-state", "remapped");
+    expect(casework.className).toContain("min-h-11");
+    expect(casework).toHaveTextContent(/cases list is outside your role/i);
+    expect(casework).toHaveAccessibleDescription(/cases list is outside your role/i);
+
+    const claims = screen.getByRole("link", { name: /^Claims/i });
+    expect(claims).toHaveAttribute("aria-disabled", "true");
+    expect(claims).toHaveTextContent("Unavailable");
+    expect(claims).toHaveAccessibleDescription(/Outside your role/i);
+
+    const priorities = screen.getByRole("link", { name: /^Priorities/i });
+    expect(priorities).toHaveAttribute("aria-disabled", "true");
+    expect(priorities).not.toHaveAttribute("href");
+
+    const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href") ?? "");
+    expect(hrefs.some((href) => href.includes("/dashboard/operations"))).toBe(false);
+    expect(hrefs.some((href) => href.includes("/dashboard/cases"))).toBe(false);
+    expect(hrefs.some((href) => href.includes("/dashboard/priorities"))).toBe(false);
+    expect(hrefs.filter((href) => href.endsWith("/dashboard/workbench")).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("workspace-deep-work").className).toContain("flex-wrap");
+  });
+
+  it("remaps steward continuity intelligence to institutional intelligence reports", async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceShell role="steward" />);
+
+    await user.click(screen.getByRole("tab", { name: /Continuity/i }));
+
+    const reports = screen.getByRole("link", { name: /Opens institutional intelligence reports/i });
+    expect(reports).toHaveAttribute("href", "/en/dashboard/intelligence");
+    expect(reports).toHaveAttribute("data-deep-work-state", "remapped");
+    expect(reports).toHaveTextContent(/outside your role/i);
+    expect(screen.queryByRole("tab", { name: /^Intelligence$/i })).not.toBeInTheDocument();
   });
 });
