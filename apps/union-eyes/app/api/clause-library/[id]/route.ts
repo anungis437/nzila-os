@@ -8,13 +8,19 @@
  * broad reader visibility never implies write authority. `sharedWithOrgIds`
  * (the explicit private-grant list) is only returned to the owner — it is
  * owner-internal sharing configuration, not shared clause content.
+ *
+ * Mutations run in the caller's tenant RLS context. ue_shared_library_update
+ * and ue_shared_library_delete already restrict writes to the source org,
+ * matching isSharedClauseOwner. GET stays on the system role: federation and
+ * congress visibility is not expressed by ue_shared_library_select (owner,
+ * explicit share, or public only) and must not be added by weakening RLS.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
 import { eq } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
@@ -92,6 +98,9 @@ export const GET = withApi(
     const id = url.pathname.split('/').filter(Boolean).pop()!;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
+    // PRIVILEGED_CROSS_TENANT_REVIEW: federation/congress readers are not
+    // visible under ue_shared_library_select. Keep this read on the system
+    // role and apply canReadSharedClause. Do not widen the runtime policy.
     return withSystemContext(async () => {
       const row = await getClauseRow(id);
       if (!row || !(await canReadSharedClause(organizationId, row))) {
@@ -114,11 +123,12 @@ export const PATCH = withApi(
     const body = await request.json();
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    return withSystemContext(async () => {
+    return withRLSContext({ organizationId }, async () => {
       const existing = await getClauseRow(id);
       // Fail closed identically whether the row is missing or the caller
       // simply isn't its owner — broad reader visibility never implies
-      // write authority (round 55).
+      // write authority (round 55). Tenant RLS hides non-visible rows;
+      // the owner predicate still rejects public/explicit-share readers.
       if (!existing || !isSharedClauseOwner(organizationId, existing)) {
         throw ApiError.notFound('clause', id);
       }
@@ -162,7 +172,7 @@ export const DELETE = withApi(
     const id = url.pathname.split('/').filter(Boolean).pop()!;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    return withSystemContext(async () => {
+    return withRLSContext({ organizationId }, async () => {
       const existing = await getClauseRow(id);
       if (!existing || !isSharedClauseOwner(organizationId, existing)) {
         throw ApiError.notFound('clause', id);
