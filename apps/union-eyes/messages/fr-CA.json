@@ -45,7 +45,6 @@
       "recoveryHint": "Surface autorisée pour ce travail approfondi.",
       "destinations": {
         "caseworkConsole": "Console de dossiers",
-        "operationsPriorities": "Priorités des opérations",
         "institutionalIntelligenceReports": "Rapports d'intelligence institutionnelle",
         "membersRoster": "Liste des membres",
         "continuityIntelligence": "Intelligence de continuité",
@@ -54,7 +53,6 @@
       },
       "remapReason": {
         "caseworkConsole": "Ouvre la console de dossiers. La liste des dossiers est hors de votre rôle.",
-        "operationsPriorities": "Ouvre les priorités des opérations. La liste des priorités est hors de votre rôle.",
         "institutionalIntelligenceReports": "Ouvre les rapports d'intelligence institutionnelle. L'intelligence de continuité est hors de votre rôle."
       }
     }

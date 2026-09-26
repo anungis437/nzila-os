@@ -45,7 +45,6 @@
       "recoveryHint": "Superfície autorizada para este trabalho aprofundado.",
       "destinations": {
         "caseworkConsole": "Console de casos",
-        "operationsPriorities": "Prioridades operacionais",
         "institutionalIntelligenceReports": "Relatórios de inteligência institucional",
         "membersRoster": "Lista de membros",
         "continuityIntelligence": "Inteligência de continuidade",
@@ -54,7 +53,6 @@
       },
       "remapReason": {
         "caseworkConsole": "Abre o console de casos. A lista de casos está fora do seu papel.",
-        "operationsPriorities": "Abre as prioridades operacionais. A lista de prioridades está fora do seu papel.",
         "institutionalIntelligenceReports": "Abre os relatórios de inteligência institucional. A inteligência de continuidade está fora do seu papel."
       }
     }

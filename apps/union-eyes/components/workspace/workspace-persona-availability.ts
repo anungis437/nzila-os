@@ -286,6 +286,13 @@ interface DeepWorkRemap {
   reasonFallback: string;
 }
 
+/**
+ * Paths that pass the staff prefix list but bounce a steward off the page.
+ * `/dashboard/operations` requires platform_lead and redirects everyone else
+ * to `/dashboard`, so it is not a casework destination.
+ */
+const STEWARD_CASE_OPS_PAGE_DEAD_ENDS = new Set(["/dashboard/operations"]);
+
 const DEEP_WORK_REMAPS: readonly DeepWorkRemap[] = [
   {
     persona: "steward",
@@ -296,16 +303,6 @@ const DEEP_WORK_REMAPS: readonly DeepWorkRemap[] = [
     labelFallback: "Casework console",
     reasonKey: "deepWork.remapReason.caseworkConsole",
     reasonFallback: "Opens the casework console. The cases list is outside your role.",
-  },
-  {
-    persona: "steward",
-    tabId: "case-operations",
-    fromPath: "/dashboard/priorities",
-    href: "/dashboard/operations",
-    labelKey: "deepWork.destinations.operationsPriorities",
-    labelFallback: "Operations priorities",
-    reasonKey: "deepWork.remapReason.operationsPriorities",
-    reasonFallback: "Opens operations priorities. The priorities list is outside your role.",
   },
   {
     persona: "steward",
@@ -390,7 +387,16 @@ export function resolveWorkspaceDeepWork(
     (candidate) =>
       candidate.persona === persona && candidate.tabId === tabId && candidate.fromPath === path,
   );
-  if (remap && gateWorkspaceDeepWork(role, tabId, remap.href, isPilotMode).allowed) {
+  const remapIsDeadEnd =
+    persona === "steward" &&
+    tabId === "case-operations" &&
+    remap != null &&
+    STEWARD_CASE_OPS_PAGE_DEAD_ENDS.has(remap.href);
+  if (
+    remap &&
+    !remapIsDeadEnd &&
+    gateWorkspaceDeepWork(role, tabId, remap.href, isPilotMode).allowed
+  ) {
     return {
       kind: "remapped",
       href: remap.href,
@@ -403,10 +409,16 @@ export function resolveWorkspaceDeepWork(
 
   const recovery = DEEP_WORK_RECOVERY[persona]?.[tabId];
   const recoveryPath = recovery?.href.split("?")[0];
+  const recoveryIsDeadEnd =
+    persona === "steward" &&
+    tabId === "case-operations" &&
+    recoveryPath != null &&
+    STEWARD_CASE_OPS_PAGE_DEAD_ENDS.has(recoveryPath);
   if (
     recovery &&
     recoveryPath &&
     recoveryPath !== path &&
+    !recoveryIsDeadEnd &&
     gateWorkspaceDeepWork(role, tabId, recovery.href, isPilotMode).allowed
   ) {
     return { kind: "blocked", reason: "out-of-role", recovery };

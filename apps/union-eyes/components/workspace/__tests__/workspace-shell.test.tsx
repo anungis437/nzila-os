@@ -161,9 +161,16 @@ describe("WorkspaceShell persona labels", () => {
     expect(claims).toHaveTextContent("Unavailable");
     expect(claims).toHaveAccessibleDescription(/Outside your role/i);
 
-    const priorities = screen.getByRole("link", { name: /Operations priorities/i });
-    expect(priorities).toHaveAttribute("href", "/en/dashboard/operations");
-    expect(priorities).toHaveAttribute("data-deep-work-state", "remapped");
+    const priorities = screen.getByRole("link", { name: /^Priorities/i });
+    expect(priorities).toHaveAttribute("aria-disabled", "true");
+    expect(priorities).not.toHaveAttribute("href");
+
+    const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href") ?? "");
+    expect(hrefs.some((href) => href.includes("/dashboard/operations"))).toBe(false);
+    expect(hrefs.some((href) => href.includes("/dashboard/cases"))).toBe(false);
+    expect(hrefs.some((href) => href.includes("/dashboard/priorities"))).toBe(false);
+    expect(hrefs.filter((href) => href.endsWith("/dashboard/workbench")).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("workspace-deep-work").className).toContain("flex-wrap");
   });
 
   it("remaps steward continuity intelligence to institutional intelligence reports", async () => {

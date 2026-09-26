@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { getWorkspaceTab, WORKSPACE_TABS } from "../workspace-config";
-import { canAccessDashboardPath, getAllowedPrefixesByExperience } from "@/lib/dashboard/role-experience";
+import {
+  canAccessDashboardPath,
+  getAllowedPrefixesByExperience,
+  getRoleLandingPath,
+} from "@/lib/dashboard/role-experience";
 import {
   R6_PERSONA_CLASSES,
   WORKSPACE_DEEP_WORK_COHERENCE_SCOPE,
@@ -262,11 +266,10 @@ describe("workspace deep-work path coherence", () => {
           "/dashboard/priorities",
           pilot,
         );
-        expect(priorities).toMatchObject({
-          kind: "remapped",
-          href: "/dashboard/operations",
-          labelFallback: "Operations priorities",
-        });
+        expect(priorities.kind).toBe("blocked");
+        if (priorities.kind !== "blocked") continue;
+        expect(priorities.recovery?.href).toBe("/dashboard/workbench");
+        expect(priorities.recovery?.labelFallback).toBe("Casework console");
 
         expect(
           resolveWorkspaceDeepWork(role, "case-operations", "/dashboard/inbox?type=intake", pilot),
@@ -348,6 +351,83 @@ describe("workspace deep-work path coherence", () => {
       const resolution = resolveWorkspaceDeepWork("steward", "financial", link.href, true);
       expect(resolution).toEqual({ kind: "blocked", reason: "stub-section" });
     }
+  });
+
+  it("keeps steward case operations off page dead-ends and unrelated personas unchanged", () => {
+    const staffPrefixes = [
+      "/dashboard",
+      "/dashboard/workspace",
+      "/dashboard/workbench",
+      "/dashboard/operations",
+      "/dashboard/inbox",
+      "/dashboard/intelligence",
+      "/dashboard/members",
+      "/dashboard/documents",
+      "/dashboard/correspondence",
+      "/dashboard/notifications",
+      "/dashboard/settings",
+      "/dashboard/profile",
+    ];
+    expect(getAllowedPrefixesByExperience().staff).toEqual(staffPrefixes);
+    expect(getRoleLandingPath("steward")).toBe("/dashboard/workbench");
+    expect(getRoleLandingPath("chief_steward")).toBe("/dashboard/workbench");
+
+    const caseOps = getWorkspaceTab("case-operations")!;
+    const deniedDoctrine = [
+      "/dashboard/cases",
+      "/dashboard/claims",
+      "/dashboard/grievances",
+      "/dashboard/priorities",
+    ];
+    for (const pilot of [true, false]) {
+      for (const href of deniedDoctrine) {
+        expect(gateWorkspaceDeepWork("steward", "case-operations", href, pilot)).toEqual({
+          allowed: false,
+          reason: "out-of-role",
+        });
+        expect(canAccessDashboardPath(href, "staff", pilot)).toBe(false);
+      }
+
+      for (const link of caseOps.deepWork) {
+        const resolution = resolveWorkspaceDeepWork("steward", "case-operations", link.href, pilot);
+        const launched =
+          resolution.kind === "remapped"
+            ? resolution.href
+            : resolution.kind === "reachable"
+              ? link.href.split("?")[0]
+              : resolution.recovery?.href;
+        expect(launched).toBeDefined();
+        expect(launched).not.toBe("/dashboard/operations");
+        expect(deniedDoctrine).not.toContain(launched);
+        expect(canAccessDashboardPath(launched!, "staff", pilot)).toBe(true);
+        expect(gateWorkspaceDeepWork("steward", "case-operations", launched!, pilot).allowed).toBe(
+          true,
+        );
+      }
+
+      const cases = resolveWorkspaceDeepWork("steward", "case-operations", "/dashboard/cases", pilot);
+      expect(cases).toMatchObject({
+        kind: "remapped",
+        href: getRoleLandingPath("steward"),
+        labelFallback: "Casework console",
+      });
+    }
+
+    for (const role of ["executive", "governance", "onboarding", "procurement", "degraded-runtime", "member", null]) {
+      for (const link of caseOps.deepWork) {
+        const resolution = resolveWorkspaceDeepWork(role, "case-operations", link.href, true);
+        expect(resolution.kind).toBe("blocked");
+        if (resolution.kind !== "blocked") continue;
+        expect(resolution.recovery).toBeUndefined();
+        expect(resolution.kind === "blocked" && "href" in resolution).toBe(false);
+      }
+    }
+
+    expect(getWorkspaceTabAvailability("executive", "case-operations")).toBe("stub");
+    expect(resolveWorkspaceDeepWork("executive", "case-operations", "/dashboard/cases", false)).toEqual({
+      kind: "blocked",
+      reason: "stub-section",
+    });
   });
 
   it("covers the named coherence tabs and no new workspace tab", () => {

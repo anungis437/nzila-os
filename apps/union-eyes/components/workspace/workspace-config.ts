@@ -268,7 +268,6 @@ export function getWorkspaceTab(id: string): WorkspaceTabConfig | undefined {
  */
 export const WORKSPACE_AUTHORIZED_ALTERNATE_ROUTES = [
   "/dashboard/workbench",
-  "/dashboard/operations",
   "/dashboard/intelligence",
 ] as const;
 

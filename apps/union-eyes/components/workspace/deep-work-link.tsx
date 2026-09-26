@@ -11,6 +11,9 @@
  * a visible recovery link to an already-authorized surface. A remapped control
  * navigates to that surface and names it in the label.
  *
+ * Allowed and recovery controls are real links, so browser Back returns to
+ * the workspace. They do not replace history.
+ *
  * On an allowed click it emits `deep_work.clicked` and `legacy_page.visited`
  * telemetry with a PII-free, static-route payload.
  * See UNION_EYES_TELEMETRY_SCHEMA.md.
