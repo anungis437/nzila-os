@@ -1,0 +1,120 @@
+name: Merge Authority
+
+# Always runs for pull requests to main, including documentation-only changes
+# that CI paths-ignore skips. Classification does not install the monorepo.
+# When CI will run, canonical contexts are published by "Report merge authority".
+# When CI will not run, this workflow publishes per-invariant results and executes
+# only governance integrity or the inventory lock when those families apply.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: merge-authority-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: false
+
+jobs:
+  classify:
+    name: Classify merge impact
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      ci_skip: ${{ steps.plan.outputs.ci_skip }}
+      governance: ${{ steps.plan.outputs.governance }}
+      inventory: ${{ steps.plan.outputs.inventory }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Classify changed paths
+        id: plan
+        run: |
+          set -euo pipefail
+          files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
+          printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-outputs >> "$GITHUB_OUTPUT"
+
+  governance-integrity-if-ci-skipped:
+    name: Governance integrity when CI is skipped
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: classify
+    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.governance == 'REQUIRES_EXECUTION'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Script alias regression guard
+        run: node tooling/scripts/check-script-alias-regression.mjs
+      - name: Governance fail-closed gate
+        run: pnpm exec tsx tooling/governance/validate-governance-gate.ts
+      - name: Evidence lifecycle policy gate
+        run: pnpm exec tsx scripts/validate-evidence-lifecycle-policy.ts
+      - name: Truth authority validation
+        run: pnpm exec tsx scripts/validate-truth-authority.ts
+      - name: Auth authority validation
+        run: pnpm exec tsx scripts/validate-auth-authority.ts
+      - name: GA state machine validation
+        run: pnpm exec tsx scripts/validate-ga-state.ts
+      - name: Workspace dependency integrity
+        run: pnpm exec tsx scripts/validate-workspace-links.ts
+      - name: Control manifest validation
+        run: pnpm exec tsx tooling/governance/validate-control-manifests.ts
+
+  repository-inventory-if-ci-skipped:
+    name: Repository inventory when CI is skipped
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: classify
+    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.inventory == 'REQUIRES_EXECUTION'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
+      - name: Regenerate inventory
+        run: pnpm inventory:generate
+      - name: Enforce committed inventory lock
+        run: |
+          DIFF=$(git diff -- tooling/repo-inventory/output/inventory.json tooling/repo-inventory/output/inventory.md tooling/repo-inventory/output/repo-inventory.json tooling/repo-inventory/output/repo-inventory.md)
+          SUBSTANTIVE=$(echo "$DIFF" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | grep -Ev '"generatedAt"|Auto-generated on' || true)
+          if [ -n "$SUBSTANTIVE" ]; then
+            echo "Substantive inventory drift detected:"
+            echo "$DIFF"
+            exit 1
+          fi
+          echo "Inventory check passed (date-stamp differences ignored)"
+
+  publish:
+    name: Publish merge authority fast path
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs:
+      - classify
+      - governance-integrity-if-ci-skipped
+      - repository-inventory-if-ci-skipped
+    if: always() && needs.classify.result == 'success'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish per-invariant contexts when CI will not run
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          MA_EXEC_GOVERNANCE: ${{ needs.governance-integrity-if-ci-skipped.result }}
+          MA_EXEC_INVENTORY: ${{ needs.repository-inventory-if-ci-skipped.result }}
+        run: |
+          set -euo pipefail
+          files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"
+          printf '%s\n' "$files" | node tooling/ci/merge-authority/publish.mjs classify-and-publish

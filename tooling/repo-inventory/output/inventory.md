@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 224 |
 | Workspace Packages (apps|packages|services|tooling) | 258 |
-| GitHub Workflows | 54 |
-| Contract Test Files | 286 |
-| TS/JS Test Files | 2686 |
+| GitHub Workflows | 55 |
+| Contract Test Files | 287 |
+| TS/JS Test Files | 2687 |
 | Python Test Files | 35 |
 
 ## Apps
@@ -82,6 +82,7 @@
 - game-day.yml
 - gitops-deploy.yml
 - lighthouse.yml
+- merge-authority.yml
 - nzila-ga-gate.yml
 - nzila-governance.yml
 - nzila-playbook-runner.yml
