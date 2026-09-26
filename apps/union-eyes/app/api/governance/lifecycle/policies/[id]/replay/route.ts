@@ -2,7 +2,7 @@
  * GET  /api/governance/lifecycle/policies/[id]/replay
  * POST /api/governance/lifecycle/policies/[id]/replay
  */
-import { withApi } from '@/lib/api/framework'
+import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { policyReplaySessions, governedPolicies } from '@nzila/db/schema'
@@ -39,6 +39,11 @@ export const POST = withApi(
     entitlement: 'governance_suite',
   },
   async ({ request, params, user }) => {
+    const actorId = user?.id
+    if (!actorId) {
+      throw ApiError.badRequest('Authenticated user is required to start a policy replay.')
+    }
+
     const id = (params as Record<string, string>).id
     const body = await request.json() as {
       replayType?: 'historical' | 'candidate' | 'drift_check'
@@ -64,7 +69,7 @@ export const POST = withApi(
           sourcePolicyVersion: source.semver,
           targetPolicyId: body.targetPolicyId ?? null,
           replayType: body.replayType ?? 'historical',
-          initiatorUserId: user?.id ?? 'system',
+          initiatorUserId: actorId,
           initiatorRole: body.actorRole,
           fromDate: body.fromDate ? new Date(body.fromDate) : null,
           toDate: body.toDate ? new Date(body.toDate) : null,

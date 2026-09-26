@@ -2,7 +2,7 @@
  * GET  /api/governance/lifecycle/snapshots
  * POST /api/governance/lifecycle/snapshots
  */
-import { withApi } from '@/lib/api/framework'
+import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { policyGovernanceSnapshots, governedPolicies } from '@nzila/db/schema'
@@ -40,6 +40,11 @@ export const POST = withApi(
     entitlement: 'governance_suite',
   },
   async ({ request, user }) => {
+    const actorId = user?.id
+    if (!actorId) {
+      throw ApiError.badRequest('Authenticated user is required to create a governance snapshot.')
+    }
+
     const body = await request.json() as { correlationId?: string }
     void body
 
@@ -59,7 +64,7 @@ export const POST = withApi(
           snapshotHash,
           triggerType: 'manual',
           activePolicyGraph: active as never,
-          generatedByUserId: user?.id ?? 'system',
+          generatedByUserId: actorId,
         })
         .returning()
 
