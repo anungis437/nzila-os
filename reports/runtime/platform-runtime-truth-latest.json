@@ -1,8 +1,27 @@
 {
   "schemaVersion": 1,
   "reportId": "platform-runtime-truth-2026-05",
+  "evidenceClass": "HISTORICAL_STALE_EVIDENCE",
+  "stalenessNotice": "HISTORICAL / STALE EVIDENCE. Annotated 2026-09-26 (NZ-008-C06) with no live probe. Last live verify is May 2026: generatedAt 2026-05-14T00:00:00.000Z and liveEvidenceVerifiedAt 2026-05-21T01:46:00Z (manifest reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json). This artifact does NOT certify MAIN tip cce162dbb2f89cf68abb9085f3f0cc051de38887, or current MAIN, as RUNTIME_VERIFIED. MAIN_GREEN ≠ DEPLOYED ≠ RUNTIME_VERIFIED. Classification: historical / stale evidence (ROUTINE_FACTUAL). overallStatus HEALTHY is the unchanged historical May 2026 record — do not promote maturity from HEALTHY. This file does not establish September 2026 tip runtime.",
+  "freshness": {
+    "evidenceClass": "HISTORICAL_STALE_EVIDENCE",
+    "classification": "ROUTINE_FACTUAL",
+    "generatedAt": "2026-05-14T00:00:00.000Z",
+    "liveEvidenceVerifiedAt": "2026-05-21T01:46:00Z",
+    "lastLiveVerify": "May 2026",
+    "annotatedAt": "2026-09-26",
+    "annotationSlice": "NZ-008-C06-RUNTIME-TRUTH-FRESHNESS-BANNER",
+    "annotationBaselineSha": "cce162dbb2f89cf68abb9085f3f0cc051de38887",
+    "certifiesAnnotationBaselineAsRuntimeVerified": false,
+    "certifiesCurrentMainAsRuntimeVerified": false,
+    "chainRule": "MAIN_GREEN ≠ DEPLOYED ≠ RUNTIME_VERIFIED",
+    "maturityPromotion": "forbidden",
+    "historicalOverallStatusUnchanged": "HEALTHY",
+    "historicalOverallStatusScope": "May 2026 live evidence only. Not a September 2026 runtime claim and not a maturity promotion."
+  },
   "generatedAt": "2026-05-14T00:00:00.000Z",
   "authoritative": true,
+  "authoritativeScope": "Historical authority among the May 2026 runtime reports listed in supersedes. Not a certification that MAIN tip cce162dbb2f89cf68abb9085f3f0cc051de38887 or current MAIN is RUNTIME_VERIFIED.",
   "supersedes": [
     "reports/runtime/runtime-latest.json",
     "reports/runtime/azure-runtime-latest.json",

@@ -1,8 +1,20 @@
 # Platform Runtime Truth — May 2026
 
+> **STALENESS NOTICE — HISTORICAL / STALE EVIDENCE.** Annotated 2026-09-26 (NZ-008-C06). No live probe was run for this note.
+>
+> Last live verify is **May 2026**. This markdown file is dated **2026-05-14**. The companion JSON records `generatedAt` **2026-05-14** and `liveEvidenceVerifiedAt` **2026-05-21** (`reports/runtime/live-captures/2026-05-20/live-evidence-manifest.2026-05-20.json`).
+>
+> This artifact does **not** certify MAIN tip `cce162dbb2f89cf68abb9085f3f0cc051de38887`, or current MAIN, as **RUNTIME_VERIFIED**.
+>
+> **MAIN_GREEN ≠ DEPLOYED ≠ RUNTIME_VERIFIED.**
+>
+> Classification: historical / stale evidence. JSON `overallStatus` remains the historical May 2026 value **HEALTHY** — do not promote maturity from HEALTHY. The narrative below is unchanged May 2026 text (it still reads DEGRADED / EXC-001 open as of the 2026-05-14 draft). Neither status is a September 2026 runtime claim.
+
 > **Authoritative runtime status report.** This file supersedes all prior runtime health, deployment, and residency reports.
 > Generated: 2026-05-14
 > Source JSON: `reports/runtime/platform-runtime-truth-latest.json`
+>
+> The word "authoritative" in this May 2026 header means authoritative among the May 2026 runtime reports it superseded. It does not certify current MAIN as RUNTIME_VERIFIED. See the staleness notice above.
 
 ---
 
