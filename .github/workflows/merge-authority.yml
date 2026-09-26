@@ -4,7 +4,8 @@ name: Merge Authority
 # that CI paths-ignore skips. Classification does not install the monorepo.
 # When CI will run, canonical contexts are published by "Report merge authority".
 # When CI will not run, this workflow publishes per-invariant results and executes
-# only governance integrity or the inventory lock when those families apply.
+# governance integrity, the inventory lock, the Checkov IaC scan, or the ops pack
+# validator when that invariant applies. A skipped CI workflow is not a waiver.
 
 on:
   pull_request:
@@ -27,6 +28,8 @@ jobs:
       ci_skip: ${{ steps.plan.outputs.ci_skip }}
       governance: ${{ steps.plan.outputs.governance }}
       inventory: ${{ steps.plan.outputs.inventory }}
+      iac: ${{ steps.plan.outputs.iac }}
+      ops: ${{ steps.plan.outputs.ops }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -91,6 +94,41 @@ jobs:
           fi
           echo "Inventory check passed (date-stamp differences ignored)"
 
+  iac-security-if-ci-skipped:
+    name: IaC security when CI is skipped
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: classify
+    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.iac == 'REQUIRES_EXECUTION'
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Checkov
+        run: pip install checkov
+      - name: Run Checkov on Bicep templates
+        run: |
+          checkov \
+            --directory infrastructure/bicep \
+            --framework bicep \
+            --output cli --output sarif \
+            --output-file-path console,results.sarif \
+            --skip-check CKV_AZURE_99 \
+            --skip-check CKV_AZURE_139 \
+            --skip-check CKV_AZURE_163 \
+            --skip-check CKV_AZURE_166 \
+            --skip-check CKV_AZURE_189
+
+  ops-documentation-if-ci-skipped:
+    name: Ops documentation when CI is skipped
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: classify
+    if: needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.ops == 'REQUIRES_EXECUTION'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-monorepo
+      - name: Validate ops pack completeness
+        run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+
   publish:
     name: Publish merge authority fast path
     runs-on: ubuntu-latest
@@ -99,6 +137,8 @@ jobs:
       - classify
       - governance-integrity-if-ci-skipped
       - repository-inventory-if-ci-skipped
+      - iac-security-if-ci-skipped
+      - ops-documentation-if-ci-skipped
     if: always() && needs.classify.result == 'success'
     steps:
       - uses: actions/checkout@v5
@@ -114,6 +154,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           MA_EXEC_GOVERNANCE: ${{ needs.governance-integrity-if-ci-skipped.result }}
           MA_EXEC_INVENTORY: ${{ needs.repository-inventory-if-ci-skipped.result }}
+          MA_EXEC_IAC: ${{ needs.iac-security-if-ci-skipped.result }}
+          MA_EXEC_OPS: ${{ needs.ops-documentation-if-ci-skipped.result }}
         run: |
           set -euo pipefail
           files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")"

@@ -83,21 +83,35 @@ export const CANONICAL_CONTEXTS = [
     family: 'operating-layer',
     evidence: 'CI job Operating Layer Gate runs pnpm test:operating-layer.',
   },
+  {
+    name: 'Merge Authority / IaC Security',
+    ciJob: 'iac-scan',
+    family: 'iac',
+    authority: 'CHANGE_CONDITIONAL_MERGE_CRITICAL',
+    evidence:
+      'CI job IaC Security Scan runs Checkov --directory infrastructure/bicep --framework bicep. CHANGE_CONDITIONAL_MERGE_CRITICAL. Applicability is the scan input set, not every infrastructure file.',
+  },
+  {
+    name: 'Merge Authority / Ops Documentation',
+    ciJob: 'ops-pack-validation',
+    family: 'ops-pack',
+    authority: 'CHANGE_CONDITIONAL_MERGE_CRITICAL',
+    evidence:
+      'CI job Ops Documentation Pack runs pnpm tsx tooling/ops/validate-ops-pack.ts. CHANGE_CONDITIONAL_MERGE_CRITICAL. Applicability is the validator read set, not all documentation.',
+  },
 ]
 
 /** Direct contexts. They already run on every PR to main and are not waived for docs. */
 export const SECRET_AUTHORITY_CONTEXTS = ['Gitleaks', 'TruffleHog OSS', 'Docker Secret Policy']
 
 /**
- * Conditional jobs that are not canonical in this remediation.
- * Ruleset activation stays blocked while this residual remains.
+ * Accepted non-blocking residuals. Command ruled these stay outside the
+ * canonical surface. This mission does not promote them.
  */
-export const CONDITIONAL_AUTHORITY_RESIDUAL = [
-  'IaC Security Scan',
-  'ML Tooling Gates',
-  'Ops Documentation Pack',
-  'AI Eval Gate',
-]
+export const ACCEPTABLE_AUTHORITY_RESIDUAL = ['ML Tooling Gates', 'AI Eval Gate']
+
+/** Same list. The previous conditional gap for IaC and Ops Documentation is closed. */
+export const CONDITIONAL_AUTHORITY_RESIDUAL = ACCEPTABLE_AUTHORITY_RESIDUAL
 
 /**
  * Must stay identical to pull_request.paths-ignore in .github/workflows/ci.yml.
@@ -264,6 +278,117 @@ function requiresOperatingLayer(path) {
   return true
 }
 
+/**
+ * Checkov invocation in IaC Security Scan:
+ *   checkov --directory infrastructure/bicep --framework bicep
+ * The bicep runner collects files with rglob("*.bicep") only.
+ * .bicepparam is not parsed. Bicep outside that directory is not scanned.
+ * Default config search is infrastructure/bicep/.checkov.y(a)ml, then ./.checkov.y(a)ml.
+ */
+export const IAC_SCAN_ROOT = 'infrastructure/bicep/'
+
+export const IAC_CHECKOV_CONFIGS = [
+  'infrastructure/bicep/.checkov.yaml',
+  'infrastructure/bicep/.checkov.yml',
+  '.checkov.yaml',
+  '.checkov.yml',
+]
+
+export const IAC_AUTHORITY_FILES = [
+  '.github/workflows/ci.yml',
+  '.github/workflows/merge-authority.yml',
+  'tooling/ci/merge-authority/surface.mjs',
+  'tooling/ci/merge-authority/publish.mjs',
+]
+
+/**
+ * Exact files read by tooling/ops/validate-ops-pack.ts.
+ * The contract test fails if REQUIRED_DOCS or the snapshot path drifts.
+ */
+export const OPS_PACK_CONTENT_INPUTS = [
+  'ops/runbooks/README.md',
+  'ops/oncall/README.md',
+  'ops/incident-response/README.md',
+  'ops/disaster-recovery/README.md',
+  'ops/business-continuity/README.md',
+  'ops/compliance/README.md',
+  'ops/change-management/README.md',
+  'ops/security-operations/README.md',
+  'ARCHITECTURE.md',
+  'SECURITY.md',
+  'reports/ops/snapshot.json',
+]
+
+export const OPS_PACK_TOOLING = [
+  'tooling/ops/validate-ops-pack.ts',
+  '.github/workflows/ci.yml',
+  '.github/workflows/ops-pack.yml',
+  '.github/workflows/merge-authority.yml',
+  'tooling/ci/merge-authority/surface.mjs',
+  'tooling/ci/merge-authority/publish.mjs',
+]
+
+const IAC_EXPLICIT_INPUTS = new Set([...IAC_CHECKOV_CONFIGS, ...IAC_AUTHORITY_FILES])
+const OPS_EXPLICIT_INPUTS = new Set([...OPS_PACK_CONTENT_INPUTS, ...OPS_PACK_TOOLING])
+
+/** Trees the Checkov bicep invocation does not read. docs/ is intentionally absent. */
+const IAC_PROVEN_NON_INPUT_PREFIXES = [
+  'apps/',
+  'packages/',
+  'services/',
+  'tooling/',
+  'scripts/',
+  'ops/',
+  'migrations/',
+  'db/',
+  'supabase/',
+  'tests/',
+  'security/',
+  'reports/',
+  'governance/',
+  '.github/',
+  'infrastructure/',
+  'tech-repo-scaffold/',
+  'e2e/',
+]
+
+/** Trees validate-ops-pack.ts does not read. Exact content inputs are excluded first. */
+const OPS_PROVEN_NON_INPUT_PREFIXES = [...IAC_PROVEN_NON_INPUT_PREFIXES, 'docs/']
+
+function isExplicitIacInput(path) {
+  if (IAC_EXPLICIT_INPUTS.has(path)) return true
+  return path.startsWith(IAC_SCAN_ROOT) && path.endsWith('.bicep')
+}
+
+function provenIacIrrelevant(path) {
+  if (isExplicitIacInput(path)) return false
+  if (path.endsWith('.md') || path.endsWith('.markdown')) return true
+  if (isDocumentationOnlyPath(path)) return true
+  if (path.endsWith('.bicepparam')) return true
+  if (path.endsWith('.bicep')) return true
+  if (IAC_PROVEN_NON_INPUT_PREFIXES.some((prefix) => path.startsWith(prefix))) return true
+  return false
+}
+
+function requiresIac(path) {
+  if (isExplicitIacInput(path)) return true
+  if (provenIacIrrelevant(path)) return false
+  return true
+}
+
+function provenOpsIrrelevant(path) {
+  if (OPS_EXPLICIT_INPUTS.has(path)) return false
+  if (isDocumentationOnlyPath(path)) return true
+  if (OPS_PROVEN_NON_INPUT_PREFIXES.some((prefix) => path.startsWith(prefix))) return true
+  return false
+}
+
+function requiresOps(path) {
+  if (OPS_EXPLICIT_INPUTS.has(path)) return true
+  if (provenOpsIrrelevant(path)) return false
+  return true
+}
+
 const FAMILY_REQUIRES = {
   engineering: requiresEngineering,
   governance: requiresGovernance,
@@ -271,6 +396,8 @@ const FAMILY_REQUIRES = {
   contracts: requiresContracts,
   'hash-chain': requiresHashChain,
   'operating-layer': requiresOperatingLayer,
+  iac: requiresIac,
+  'ops-pack': requiresOps,
 }
 
 export function classifyChangedPaths(paths) {
@@ -291,7 +418,24 @@ export function classifyChangedPaths(paths) {
     contexts,
     secretSafety: 'APPLICABLE',
     ciSkippedByPathsIgnore: ciWillSkip(Array.isArray(paths) ? paths : []),
+    acceptableAuthorityResidual: ACCEPTABLE_AUTHORITY_RESIDUAL,
     conditionalAuthorityResidual: CONDITIONAL_AUTHORITY_RESIDUAL,
+  }
+}
+
+/**
+ * Validators the Merge Authority workflow runs when CI paths-ignore skips the
+ * CI workflow. A normal code pull request defers to CI and must not re-run them.
+ */
+export function fastPathExecution(classification) {
+  const skipped = Boolean(classification && classification.ciSkippedByPathsIgnore)
+  const contexts = classification && classification.contexts ? classification.contexts : {}
+  const required = (name) => contexts[name] === 'REQUIRES_EXECUTION'
+  return {
+    iac: skipped && required('Merge Authority / IaC Security'),
+    ops: skipped && required('Merge Authority / Ops Documentation'),
+    governance: skipped && required('Merge Authority / Governance Integrity'),
+    inventory: skipped && required('Merge Authority / Repository Inventory'),
   }
 }
 

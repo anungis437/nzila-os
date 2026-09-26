@@ -9,12 +9,18 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
 import {
+  ACCEPTABLE_AUTHORITY_RESIDUAL,
   CANONICAL_CONTEXTS,
   CI_PATHS_IGNORE,
+  IAC_CHECKOV_CONFIGS,
+  IAC_AUTHORITY_FILES,
+  OPS_PACK_CONTENT_INPUTS,
+  OPS_PACK_TOOLING,
   SECRET_AUTHORITY_CONTEXTS,
   applyExecution,
   classifyChangedPaths,
   evaluateCiResults,
+  fastPathExecution,
   planFastPath,
   verdictToCheckRun,
 } from '../ci/merge-authority/surface.mjs'
@@ -169,8 +175,10 @@ describe('merge authority surface', () => {
 
   it('scenario C — a shared package is code and requires execution', () => {
     const plan = planFastPath(['packages/db/src/index.ts'])
-    expect(plan.classification.classification).toBe('CODE_OR_UNKNOWN')
+    expect(plan.classification.classification).toBe('MIXED')
     expect(plan.classification.contexts['Merge Authority / Schema Integrity']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('NOT_APPLICABLE')
     expect(plan.action).toBe('DEFER_TO_CI')
   })
 
@@ -180,7 +188,10 @@ describe('merge authority surface', () => {
       'migrations/0045_example.sql',
       'apps/union-eyes/db/migrations/0099_rls.sql',
     ])
-    expect(plan.classification.classification).toBe('CODE_OR_UNKNOWN')
+    expect(plan.classification.classification).toBe('MIXED')
+    expect(plan.classification.contexts['Merge Authority / Schema Integrity']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / PostgreSQL RLS']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / Migration Chain']).toBe('REQUIRES_EXECUTION')
     expect(plan.action).toBe('DEFER_TO_CI')
     const verdicts = evaluateCiResults({
       'lint-and-typecheck': 'success',
@@ -427,12 +438,279 @@ describe('merge authority surface', () => {
     expect(lint?.evidence).toBe('NOT_APPLICABLE')
   })
 
-  it('records conditional authority as residual rather than a fake required context', () => {
+  it('keeps the canonical surface at 13 contexts and does not promote accepted residuals', () => {
     const ci = readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8')
     expect(ci).not.toContain('Merge Authority / CI')
     expect(ci).not.toContain('Merge Authority / Governance Gates')
     const names = CANONICAL_CONTEXTS.map((context) => context.name)
-    expect(names).toHaveLength(11)
-    expect(new Set(names).size).toBe(11)
+    expect(names).toEqual([
+      'Merge Authority / Lint & Typecheck',
+      'Merge Authority / Unit Tests',
+      'Merge Authority / Schema Integrity',
+      'Merge Authority / PostgreSQL RLS',
+      'Merge Authority / Migration Chain',
+      'Merge Authority / Affected Build',
+      'Merge Authority / Architectural Contracts',
+      'Merge Authority / Repository Inventory',
+      'Merge Authority / Governance Integrity',
+      'Merge Authority / Hash Chain Integrity',
+      'Merge Authority / Operating Layer',
+      'Merge Authority / IaC Security',
+      'Merge Authority / Ops Documentation',
+    ])
+    expect(new Set(names).size).toBe(13)
+    expect(SECRET_AUTHORITY_CONTEXTS).toEqual(['Gitleaks', 'TruffleHog OSS', 'Docker Secret Policy'])
+    expect(ACCEPTABLE_AUTHORITY_RESIDUAL).toEqual(['ML Tooling Gates', 'AI Eval Gate'])
+    expect(names.some((name) => name.includes('ML Tooling') || name.includes('AI Eval'))).toBe(false)
+    const conditional = CANONICAL_CONTEXTS.filter(
+      (context) => context.authority === 'CHANGE_CONDITIONAL_MERGE_CRITICAL',
+    )
+    expect(conditional.map((context) => context.name)).toEqual([
+      'Merge Authority / IaC Security',
+      'Merge Authority / Ops Documentation',
+    ])
+  })
+
+  function contextByName(name: string) {
+    return CANONICAL_CONTEXTS.find((context) => context.name === name)
+  }
+
+  it('locks the ops pack read set to the validator source', () => {
+    const source = readFileSync(join(ROOT, 'tooling/ops/validate-ops-pack.ts'), 'utf8')
+    const requiredStart = source.indexOf('const REQUIRED_DOCS')
+    const requiredEnd = source.indexOf('function countWords')
+    const requiredBlock = source.slice(requiredStart, requiredEnd)
+    const documented = [...requiredBlock.matchAll(/path: '([^']+)'/g)].map((match) => match[1])
+    expect(documented).toEqual(OPS_PACK_CONTENT_INPUTS.filter((path) => path !== 'reports/ops/snapshot.json'))
+    expect(source).toContain("join(repoRoot, 'reports/ops/snapshot.json')")
+    expect(OPS_PACK_CONTENT_INPUTS).toContain('reports/ops/snapshot.json')
+    expect(OPS_PACK_TOOLING).toContain('tooling/ops/validate-ops-pack.ts')
+  })
+
+  it('locks Checkov applicability to the scan invocation rather than every IaC extension', () => {
+    expect(IAC_CHECKOV_CONFIGS).toEqual([
+      'infrastructure/bicep/.checkov.yaml',
+      'infrastructure/bicep/.checkov.yml',
+      '.checkov.yaml',
+      '.checkov.yml',
+    ])
+    expect(IAC_AUTHORITY_FILES).toContain('.github/workflows/ci.yml')
+    const bicep = classifyChangedPaths(['infrastructure/bicep/main.bicep'])
+    expect(bicep.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    const parameter = classifyChangedPaths(['infrastructure/bicep/parameters/prod.bicepparam'])
+    expect(parameter.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    const outside = classifyChangedPaths(['apps/union-eyes/infra/main.bicep'])
+    expect(outside.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    const scaffold = classifyChangedPaths(['tech-repo-scaffold/infra-as-code/bicep/main.bicep'])
+    expect(scaffold.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+  })
+
+  it('IaC applicable + pass — canonical IaC is PASS', () => {
+    const verdicts = withResults({ 'iac-scan': 'success' })
+    const iac = verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    expect(iac).toMatchObject({ evidence: 'PASS', conclusion: 'success', applicability: 'REQUIRES_EXECUTION' })
+  })
+
+  it('IaC applicable + failure — canonical IaC is FAILURE', () => {
+    const verdicts = withResults({ 'iac-scan': 'failure' })
+    const iac = verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    expect(iac).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+  })
+
+  it('IaC irrelevant — canonical IaC is NOT_APPLICABLE', () => {
+    const plan = planFastPath(['docs/engineering-convergence/ci-execution/CI_AUTHORITY_SURFACE.md'])
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    const iac = plan.verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    expect(iac).toMatchObject({
+      evidence: 'NOT_APPLICABLE',
+      conclusion: 'success',
+      classifier: 'PROVEN_IRRELEVANT',
+    })
+    expect(verdictToCheckRun(iac, 'abc123').conclusion).toBe('success')
+  })
+
+  it('IaC unknown cannot become successful NOT_APPLICABLE', () => {
+    for (const paths of [['something-unexpected.bin'], ['../secrets.md'], []]) {
+      const classified = classifyChangedPaths(paths)
+      expect(classified.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    }
+    const deferred = planFastPath(['something-unexpected.bin'])
+    expect(deferred.action).toBe('DEFER_TO_CI')
+    expect(deferred.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(() =>
+      verdictToCheckRun(
+        {
+          name: 'Merge Authority / IaC Security',
+          ciJob: 'iac-scan',
+          classifier: 'CODE_OR_UNKNOWN',
+          applicability: 'REQUIRES_EXECUTION',
+          evidence: 'NOT_APPLICABLE',
+          conclusion: 'success',
+          detail: 'illegal',
+        },
+        'abc123',
+      ),
+    ).toThrow(/NOT_APPLICABLE requires a PROVEN_IRRELEVANT classifier/)
+  })
+
+  it('IaC CI skipped but applicable — fast path executes validation', () => {
+    const plan = planFastPath(['docs/foo.yml'])
+    expect(plan.classification.ciSkippedByPathsIgnore).toBe(true)
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(plan.action).toBe('PUBLISH')
+    expect(fastPathExecution(plan.classification).iac).toBe(true)
+    const before = plan.verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    expect(before.evidence).not.toBe('NOT_APPLICABLE')
+    expect(before.conclusion).not.toBe('success')
+    const applied = applyExecution(plan.verdicts, {
+      'iac-scan': 'success',
+      'ops-pack-validation': 'skipped',
+    })
+    const after = applied.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    expect(after).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+    const authority = parse(readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8'))
+    const job = authority.jobs['iac-security-if-ci-skipped']
+    expect(job.if).toBe(
+      "needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.iac == 'REQUIRES_EXECUTION'",
+    )
+    expect(job.name).not.toBe('Merge Authority / IaC Security')
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    const fastRun = job.steps.find((step: { name?: string }) => step.name === 'Run Checkov on Bicep templates').run
+    const ciRun = ci.jobs['iac-scan'].steps.find(
+      (step: { name?: string }) => step.name === 'Run Checkov on Bicep templates',
+    ).run
+    expect(fastRun).toBe(ciRun)
+    expect(fastRun).toContain('--directory infrastructure/bicep')
+    expect(fastRun).toContain('--framework bicep')
+    expect(fastRun).toContain('--skip-check CKV_AZURE_99')
+    expect(fastRun).toContain('--skip-check CKV_AZURE_139')
+    expect(fastRun).toContain('--skip-check CKV_AZURE_163')
+    expect(fastRun).toContain('--skip-check CKV_AZURE_166')
+    expect(fastRun).toContain('--skip-check CKV_AZURE_189')
+    const fastInstall = job.steps.find((step: { name?: string }) => step.name === 'Install Checkov').run
+    const ciInstall = ci.jobs['iac-scan'].steps.find((step: { name?: string }) => step.name === 'Install Checkov').run
+    expect(fastInstall).toBe(ciInstall)
+  })
+
+  it('does not run a second IaC scan when CI will already run the authoritative job', () => {
+    const plan = planFastPath(['infrastructure/bicep/main.bicep'])
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.ciSkippedByPathsIgnore).toBe(false)
+    expect(plan.action).toBe('DEFER_TO_CI')
+    expect(fastPathExecution(plan.classification).iac).toBe(false)
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    expect(ci.jobs['iac-scan'].needs).toEqual(['lint-and-typecheck'])
+    expect(ci.jobs['report-merge-authority'].needs).toContain('iac-scan')
+    expect(ci.jobs['report-merge-authority'].needs).not.toContain('ml-gates')
+    expect(ci.jobs['report-merge-authority'].needs).not.toContain('ai-eval-gate')
+    expect(ci.jobs['report-merge-authority'].needs).not.toContain('governance-gates')
+  })
+
+  it('Ops applicable + pass — canonical Ops Documentation is PASS', () => {
+    const verdicts = withResults({ 'ops-pack-validation': 'success' })
+    const ops = verdicts.find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
+    expect(ops).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+  })
+
+  it('Ops applicable + failure — canonical Ops Documentation is FAILURE', () => {
+    const verdicts = withResults({ 'ops-pack-validation': 'failure' })
+    const ops = verdicts.find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
+    expect(ops).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+  })
+
+  it('Ops irrelevant — canonical Ops Documentation is NOT_APPLICABLE', () => {
+    const plan = planFastPath(['ops/runbooks/security/keyvault-rotation.md', 'README.md'])
+    expect(plan.classification.ciSkippedByPathsIgnore).toBe(true)
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    expect(fastPathExecution(plan.classification).ops).toBe(false)
+    const ops = plan.verdicts.find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
+    expect(ops).toMatchObject({ evidence: 'NOT_APPLICABLE', conclusion: 'success', classifier: 'PROVEN_IRRELEVANT' })
+  })
+
+  it('Ops unknown cannot become successful NOT_APPLICABLE', () => {
+    for (const paths of [['something-unexpected.bin'], ['../secrets.md'], []]) {
+      const classified = classifyChangedPaths(paths)
+      expect(classified.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+    }
+    const deferred = planFastPath(['package.json'])
+    expect(deferred.action).toBe('DEFER_TO_CI')
+    expect(deferred.classification.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+  })
+
+  it('Ops documentation PR skipped by CI — fast path executes Ops Pack validation', () => {
+    const plan = planFastPath(['ARCHITECTURE.md', 'ops/runbooks/README.md', 'SECURITY.md'])
+    expect(plan.classification.ciSkippedByPathsIgnore).toBe(true)
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    expect(plan.classification.contexts['Merge Authority / Lint & Typecheck']).toBe('NOT_APPLICABLE')
+    expect(plan.action).toBe('PUBLISH')
+    expect(fastPathExecution(plan.classification)).toEqual({
+      iac: false,
+      ops: true,
+      governance: false,
+      inventory: false,
+    })
+    const before = plan.verdicts.find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
+    expect(before.evidence).not.toBe('NOT_APPLICABLE')
+    expect(before.conclusion).not.toBe('success')
+    const passed = applyExecution(plan.verdicts, {
+      'ops-pack-validation': 'success',
+      'iac-scan': 'skipped',
+    }).find((verdict) => verdict.name === 'Merge Authority / Ops Documentation')
+    expect(passed).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+    const failed = applyExecution(plan.verdicts, { 'ops-pack-validation': 'failure' }).find(
+      (verdict) => verdict.name === 'Merge Authority / Ops Documentation',
+    )
+    expect(failed).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+    const authority = parse(readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8'))
+    const job = authority.jobs['ops-documentation-if-ci-skipped']
+    expect(job.if).toBe(
+      "needs.classify.outputs.ci_skip == 'true' && needs.classify.outputs.ops == 'REQUIRES_EXECUTION'",
+    )
+    expect(job.name).not.toBe('Merge Authority / Ops Documentation')
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    const fastRun = job.steps.find((step: { name?: string }) => step.name === 'Validate ops pack completeness').run
+    const ciRun = ci.jobs['ops-pack-validation'].steps.find(
+      (step: { name?: string }) => step.name === 'Validate ops pack completeness',
+    ).run
+    expect(fastRun).toBe(ciRun)
+    expect(fastRun).toContain('pnpm tsx tooling/ops/validate-ops-pack.ts')
+    expect(ci.jobs['ops-pack-validation'].needs).toBeUndefined()
+    expect(ci.jobs['report-merge-authority'].needs).toContain('ops-pack-validation')
+  })
+
+  it('missing or cancelled IaC and Ops source results are not success', () => {
+    const missing = evaluateCiResults({ 'lint-and-typecheck': 'success' })
+    for (const name of ['Merge Authority / IaC Security', 'Merge Authority / Ops Documentation']) {
+      const verdict = missing.find((item) => item.name === name)
+      expect(verdict.evidence).toBe('MISSING')
+      expect(verdict.conclusion).not.toBe('success')
+    }
+    const cancelled = withResults({ 'iac-scan': 'cancelled', 'ops-pack-validation': 'cancelled' })
+    for (const name of ['Merge Authority / IaC Security', 'Merge Authority / Ops Documentation']) {
+      const verdict = cancelled.find((item) => item.name === name)
+      expect(verdict.evidence).toBe('UNRESOLVED')
+      expect(verdict.conclusion).not.toBe('success')
+    }
+    const skipped = withResults({ 'iac-scan': 'skipped', 'ops-pack-validation': 'skipped' })
+    for (const name of ['Merge Authority / IaC Security', 'Merge Authority / Ops Documentation']) {
+      const verdict = skipped.find((item) => item.name === name)
+      expect(verdict.evidence).toBe('UNRESOLVED')
+      expect(verdict.evidence).not.toBe('NOT_APPLICABLE')
+      expect(verdict.conclusion).not.toBe('success')
+    }
+  })
+
+  it('a generic documentation path does not waive an ops pack input', () => {
+    const plan = planFastPath(['docs/readme-style.md'])
+    expect(plan.classification.contexts['Merge Authority / Ops Documentation']).toBe('NOT_APPLICABLE')
+    const consumed = planFastPath(['reports/ops/snapshot.json'])
+    expect(consumed.classification.contexts['Merge Authority / Ops Documentation']).toBe('REQUIRES_EXECUTION')
+    expect(consumed.classification.ciSkippedByPathsIgnore).toBe(false)
+    expect(consumed.action).toBe('DEFER_TO_CI')
+    expect(fastPathExecution(consumed.classification).ops).toBe(false)
+    expect(contextByName('Merge Authority / Ops Documentation')?.ciJob).toBe('ops-pack-validation')
+    expect(contextByName('Merge Authority / IaC Security')?.ciJob).toBe('iac-scan')
   })
 })
