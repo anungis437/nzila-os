@@ -93,9 +93,31 @@ describe('documents route', () => {
       }),
     }));
     expect(response.status).toBe(403);
+    expect(m.createDocument).not.toHaveBeenCalled();
   });
 
-  it('POST creates document on valid payload', async () => {
+  it('POST denies a body org that matches the session user but not membership context', async () => {
+    const sessionOrganizationId = '00000000-0000-0000-0000-000000000999';
+    const contextOrganizationId = '00000000-0000-0000-0000-000000000001';
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: sessionOrganizationId });
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        organizationId: sessionOrganizationId,
+        name: 'Policy',
+        fileUrl: 'https://example.com/policy.pdf',
+        fileType: 'pdf',
+      }),
+    }), { userId: 'u1', organizationId: contextOrganizationId });
+
+    expect(response.status).toBe(403);
+    expect(m.createDocument).not.toHaveBeenCalled();
+  });
+
+  it('POST rejects a write when server organization is missing', async () => {
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: null });
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/documents', {
       method: 'POST',
@@ -106,11 +128,52 @@ describe('documents route', () => {
         fileUrl: 'https://example.com/policy.pdf',
         fileType: 'pdf',
       }),
+    }), { userId: 'u1' });
+
+    expect(response.status).toBe(403);
+    expect(m.createDocument).not.toHaveBeenCalled();
+  });
+
+  it('POST creates document on valid payload', async () => {
+    const serverOrganizationId = '00000000-0000-0000-0000-000000000001';
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        organizationId: serverOrganizationId,
+        name: 'Policy',
+        fileUrl: 'https://example.com/policy.pdf',
+        fileType: 'pdf',
+      }),
     }));
     const payload = await response.json();
 
     expect(response.status).toBe(201);
     expect(payload.id).toBe('doc_new');
-    expect(m.createDocument).toHaveBeenCalled();
+    expect(m.createDocument).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: serverOrganizationId,
+    }));
+  });
+
+  it('POST stamps membership context organization even when the session user org differs', async () => {
+    const contextOrganizationId = '00000000-0000-0000-0000-000000000001';
+    m.getCurrentUser.mockResolvedValue({ id: 'u1', organizationId: '00000000-0000-0000-0000-000000000002' });
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        organizationId: contextOrganizationId,
+        name: 'Policy',
+        fileUrl: 'https://example.com/policy.pdf',
+        fileType: 'pdf',
+      }),
+    }), { userId: 'u1', organizationId: contextOrganizationId });
+
+    expect(response.status).toBe(201);
+    expect(m.createDocument).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: contextOrganizationId,
+    }));
   });
 });
