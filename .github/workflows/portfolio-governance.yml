@@ -35,6 +35,9 @@ jobs:
       - name: Check portfolio drift
         run: pnpm exec tsx scripts/validate-portfolio.ts
 
+      - name: Enforce CIVIC / OCI doctrine integrity
+        run: pnpm exec tsx scripts/validate-civic-oci-doctrine.ts
+
       - name: Check canonical truth surfaces
         run: pnpm exec tsx scripts/validate-canonical-truth.ts && pnpm exec tsx scripts/validate-truth-authority.ts
 

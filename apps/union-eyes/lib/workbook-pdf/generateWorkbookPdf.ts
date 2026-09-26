@@ -5,6 +5,14 @@
  * holders, every module result the engines can produce today, and
  * cross-module synthesis), runs the deterministic narrative engine,
  * and renders to Buffer for streaming.
+ *
+ * AUTHORITY: this entry point and loadWorkbookContext read protected
+ * workbook + child rows through the module-level `db` import. It MUST be
+ * invoked from inside the claimed-workbook authority boundary
+ * (withClaimedWorkbookAccess in lib/workbook/access-control.ts) so those
+ * reads inherit the established DB execution context (claimant runtime or
+ * bounded system). Calling it outside that boundary reads protected data
+ * with no authority context.
  */
 
 import React from 'react';

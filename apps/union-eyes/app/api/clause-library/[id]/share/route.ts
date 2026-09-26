@@ -6,12 +6,16 @@
  * (sharingLevel, the explicit sharedWithOrgIds grant list) is owner-internal
  * — broad clause READERS (federation/congress/public/explicit-grant) never
  * see or change it. Both GET and POST here are owner-only.
+ *
+ * Owner SELECT and UPDATE are expressed by ue_shared_library_select /
+ * ue_shared_library_update, so both handlers use the caller's tenant RLS
+ * context. Organization id is taken from the session, never the body.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { eq } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +30,7 @@ export const GET = withApi(
     const id = url.pathname.split('/clause-library/')[1]?.split('/share')[0];
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    return withSystemContext(async () => {
+    return withRLSContext({ organizationId }, async () => {
       const [clause] = await db
         .select({
           id: sharedClauseLibrary.id,
@@ -70,7 +74,7 @@ export const POST = withApi(
       throw ApiError.badRequest('No sharing fields to update');
     }
 
-    return withSystemContext(async () => {
+    return withRLSContext({ organizationId }, async () => {
       const [clause] = await db
         .select({ id: sharedClauseLibrary.id, sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId })
         .from(sharedClauseLibrary)
@@ -86,6 +90,12 @@ export const POST = withApi(
         .set({ ...updates, updatedAt: new Date() })
         .where(eq(sharedClauseLibrary.id, id))
         .returning();
+
+      // ue_shared_library_update is owner-org only. A zero-row write is the
+      // same non-disclosure as a missing clause — do not read updated.id.
+      if (!updated) {
+        throw ApiError.notFound('clause', id);
+      }
 
       return {
         sharing: {

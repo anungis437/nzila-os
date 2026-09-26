@@ -44,8 +44,9 @@ vi.mock('@/db/schema', () => ({
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn().mockImplementation((fn: () => Promise<any>) => fn()),
-  withSystemRLSContext: vi.fn().mockImplementation(
-    (_reason: string, fn: (tx: any) => Promise<any>) => {
+  withSystemRLSContext: vi.fn(),
+  withRLSContext: vi.fn().mockImplementation(
+    (_context: { organizationId: string }, fn: (tx: any) => Promise<any>) => {
       const tx = {
         execute: vi.fn().mockResolvedValue([{ max_num: null }]),
         insert: vi.fn().mockReturnValue({
@@ -92,6 +93,7 @@ vi.mock('drizzle-orm', () => ({
 // ── Import handler after mocks are established ─────────────────────────────
 // We import the raw handler function (withApi mock returns it directly)
 const { POST } = await import('@/app/api/claims/route');
+const { withRLSContext, withSystemRLSContext } = await import('@/lib/db/with-rls-context');
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -152,6 +154,17 @@ describe('POST /api/claims', () => {
     await handler(makeCtx());
 
     expect(capturedInsertValues!.organizationId).toBe('9210418f-6a4f-4dab-a7d2-4450d581dc81');
+  });
+
+  it('creates the claim in tenant RLS context for the active organization', async () => {
+    const handler = POST as any as (ctx: Record<string, unknown>) => Promise<any>;
+    await handler(makeCtx());
+
+    expect(withRLSContext).toHaveBeenCalledWith(
+      { organizationId: '9210418f-6a4f-4dab-a7d2-4450d581dc81' },
+      expect.any(Function),
+    );
+    expect(withSystemRLSContext).not.toHaveBeenCalled();
   });
 
   it('throws ApiError.badRequest when organizationId is null', async () => {

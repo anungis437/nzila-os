@@ -69,6 +69,16 @@ import {
   sha256Hex,
 } from './export-scope'
 import {
+  applyAuthorizedEvidenceContextChoke,
+  type SageEvidenceContextCandidate,
+} from './synthesis-context'
+import {
+  buildSageInstitutionalQaContext,
+  filterExportEvidenceResourcesThroughAuthorizedContext,
+  type SageInstitutionalQaContext,
+} from './institutional-context'
+import type { SageClaimChainEntry } from './claim-chain'
+import {
   buildSageExportPackage,
   verifySageExportPackageBytes,
   type SageExportPackageResource,
@@ -831,7 +841,20 @@ export async function listSageEvidenceSources(
   })
   const access = await loadSageAccessContext(deps, ctx, ws.id)
   const sources = await deps.repo.listEvidenceSources(ws.id, ws.orgId)
-  return sources.filter((s) => canAccessEvidenceLevel(access, s.authorizationLevel))
+  // Synthesis-safety choke (sources projected as candidates; id == sourceId).
+  const candidates: SageEvidenceContextCandidate[] = sources.map((s) => ({
+    evidenceItemId: s.id,
+    sourceId: s.id,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    authorizationLevel: s.authorizationLevel,
+  }))
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    candidates,
+  )
+  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
+  return sources.filter((s) => allowed.has(s.id))
 }
 
 /**
@@ -850,11 +873,28 @@ export async function listSageEvidenceItems(
   })
   const access = await loadSageAccessContext(deps, ctx, ws.id)
   const sources = await deps.repo.listEvidenceSources(ws.id, ws.orgId)
-  const accessibleSourceIds = new Set(
-    sources.filter((s) => canAccessEvidenceLevel(access, s.authorizationLevel)).map((s) => s.id),
-  )
+  const sourceById = new Map(sources.map((s) => [s.id, s]))
   const items = await deps.repo.listEvidenceItems(ws.id, ws.orgId, input.sourceId)
-  return items.filter((i) => accessibleSourceIds.has(i.sourceId))
+  // Mandated synthesis-safety choke: list JSON may only include items that
+  // survive buildAuthorizedEvidenceContextPayload (same rules as Q&A/export).
+  const candidates: SageEvidenceContextCandidate[] = []
+  for (const item of items) {
+    const src = sourceById.get(item.sourceId)
+    if (!src) continue
+    candidates.push({
+      evidenceItemId: item.id,
+      sourceId: src.id,
+      workspaceId: ws.id,
+      orgId: ws.orgId,
+      authorizationLevel: src.authorizationLevel,
+    })
+  }
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    candidates,
+  )
+  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
+  return items.filter((i) => allowed.has(i.id))
 }
 
 /** Load a single evidence source if accessible; NOT_FOUND otherwise (non-disclosure). */
@@ -870,7 +910,19 @@ export async function getSageEvidenceSource(
   const src = await deps.repo.getEvidenceSource(input.sourceId, ws.id, ws.orgId)
   if (!src) notFound('evidence source')
   const access = await loadSageAccessContext(deps, ctx, ws.id)
-  if (!canAccessEvidenceLevel(access, src.authorizationLevel)) notFound('evidence source')
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    [
+      {
+        evidenceItemId: src.id,
+        sourceId: src.id,
+        workspaceId: ws.id,
+        orgId: ws.orgId,
+        authorizationLevel: src.authorizationLevel,
+      },
+    ],
+  )
+  if (!payload.evidence.some((e) => e.evidenceItemId === src.id)) notFound('evidence source')
   return src
 }
 
@@ -889,8 +941,75 @@ export async function getSageEvidenceItem(
   const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
   if (!src) notFound('evidence item')
   const access = await loadSageAccessContext(deps, ctx, ws.id)
-  if (!canAccessEvidenceLevel(access, src.authorizationLevel)) notFound('evidence item')
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    [
+      {
+        evidenceItemId: item.id,
+        sourceId: src.id,
+        workspaceId: ws.id,
+        orgId: ws.orgId,
+        authorizationLevel: src.authorizationLevel,
+      },
+    ],
+  )
+  if (!payload.evidence.some((e) => e.evidenceItemId === item.id)) notFound('evidence item')
   return item
+}
+
+/**
+ * Institutional Q&A / continuity-answer context. Loads workspace evidence,
+ * optional claim-register annotations, and ALWAYS filters through the
+ * synthesis-context choke before returning JSON suitable for answers.
+ */
+export async function buildSageInstitutionalQaContextForWorkspace(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: {
+    workspaceId: string
+    claimRegister?: readonly SageClaimChainEntry[]
+    question?: string
+    /** Optional narrative overlays keyed by evidence item id (CLEAR-side). */
+    annotations?: ReadonlyArray<{
+      evidenceItemId: string
+      title?: string
+      excerpt?: string
+    }>
+  },
+): Promise<SageInstitutionalQaContext> {
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.WORKSPACE_READ,
+  })
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const sources = await deps.repo.listEvidenceSources(ws.id, ws.orgId)
+  const sourceById = new Map(sources.map((s) => [s.id, s]))
+  const items = await deps.repo.listEvidenceItems(ws.id, ws.orgId)
+  const annById = new Map((input.annotations ?? []).map((a) => [a.evidenceItemId, a]))
+  const candidates: SageEvidenceContextCandidate[] = []
+  for (const item of items) {
+    const src = sourceById.get(item.sourceId)
+    if (!src) continue
+    const ann = annById.get(item.id)
+    candidates.push({
+      evidenceItemId: item.id,
+      sourceId: src.id,
+      workspaceId: ws.id,
+      orgId: ws.orgId,
+      authorizationLevel: src.authorizationLevel,
+      ...(ann?.title !== undefined ? { title: ann.title } : {}),
+      ...(ann?.excerpt !== undefined ? { excerpt: ann.excerpt } : {}),
+    })
+  }
+  return buildSageInstitutionalQaContext({
+    actorId: ctx.actor.actorId,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    access,
+    candidates,
+    claimRegister: input.claimRegister,
+    question: input.question,
+  })
 }
 
 // ─── Boundary flags, review notes, decision records (Phase 6 human governance) ─
@@ -1357,7 +1476,7 @@ export async function listSageBoundaryFlags(
   })
   const access = await loadSageAccessContext(deps, ctx, ws.id)
   const flags = await deps.repo.listBoundaryFlags(ws.id, ws.orgId, input.filters)
-  const visible: SageBoundaryFlag[] = []
+  const previsible: SageBoundaryFlag[] = []
   for (const f of flags) {
     // Filter on the record's OWN authorization envelope AND the target's
     // accessibility (defense in depth for legacy rows predating the envelope).
@@ -1365,10 +1484,24 @@ export async function listSageBoundaryFlags(
       canAccessGovernanceRecord(access, f) &&
       (await isGovernanceTargetAccessible(deps, ws, access, f.targetType, f.targetId))
     ) {
-      visible.push(f)
+      previsible.push(f)
     }
   }
-  return visible
+  // Synthesis-safety choke on governance narrative records.
+  const candidates: SageEvidenceContextCandidate[] = previsible.map((f) => ({
+    evidenceItemId: f.id,
+    sourceId: f.targetId ?? f.id,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    authorizationLevel: f.authorizationLevel,
+    excerpt: f.note ?? undefined,
+  }))
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    candidates,
+  )
+  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
+  return previsible.filter((f) => allowed.has(f.id))
 }
 
 /** List review notes the actor may see (evidence-target notes are redacted). */
@@ -1383,16 +1516,29 @@ export async function listSageReviewNotes(
   })
   const access = await loadSageAccessContext(deps, ctx, ws.id)
   const notes = await deps.repo.listReviewNotes(ws.id, ws.orgId, input.filters)
-  const visible: SageReviewNote[] = []
+  const previsible: SageReviewNote[] = []
   for (const n of notes) {
     if (
       canAccessGovernanceRecord(access, n) &&
       (await isGovernanceTargetAccessible(deps, ws, access, n.targetType, n.targetId))
     ) {
-      visible.push(n)
+      previsible.push(n)
     }
   }
-  return visible
+  const candidates: SageEvidenceContextCandidate[] = previsible.map((n) => ({
+    evidenceItemId: n.id,
+    sourceId: n.targetId ?? n.id,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    authorizationLevel: n.authorizationLevel,
+    excerpt: n.note,
+  }))
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    candidates,
+  )
+  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
+  return previsible.filter((n) => allowed.has(n.id))
 }
 
 /** Redact a decision's evidence references down to those the actor can access. */
@@ -1400,16 +1546,32 @@ async function redactDecisionReferences(
   deps: SageServiceDeps,
   ws: SageWorkspace,
   access: SageAccessContext,
+  actorId: string,
   record: SageDecisionRecord,
 ): Promise<SageDecisionRecord> {
-  const accessibleEvidence: string[] = []
+  const candidates: SageEvidenceContextCandidate[] = []
   for (const itemId of record.referencedEvidenceItemIds) {
     const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
     if (!item) continue
     const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
-    if (src && canAccessEvidenceLevel(access, src.authorizationLevel)) accessibleEvidence.push(itemId)
+    if (!src) continue
+    candidates.push({
+      evidenceItemId: item.id,
+      sourceId: src.id,
+      workspaceId: ws.id,
+      orgId: ws.orgId,
+      authorizationLevel: src.authorizationLevel,
+    })
   }
-  return { ...record, referencedEvidenceItemIds: accessibleEvidence }
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    candidates,
+  )
+  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
+  return {
+    ...record,
+    referencedEvidenceItemIds: record.referencedEvidenceItemIds.filter((id) => allowed.has(id)),
+  }
 }
 
 export async function listSageDecisionRecords(
@@ -1423,12 +1585,25 @@ export async function listSageDecisionRecords(
   })
   const access = await loadSageAccessContext(deps, ctx, ws.id)
   const records = await deps.repo.listDecisionRecords(ws.id, ws.orgId)
+  const previsible = records.filter((record) => canAccessGovernanceRecord(access, record))
+  const candidates: SageEvidenceContextCandidate[] = previsible.map((r) => ({
+    evidenceItemId: r.id,
+    sourceId: r.id,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    authorizationLevel: r.authorizationLevel,
+    excerpt: r.decision,
+    metadata: { rationale: r.rationale ?? null },
+  }))
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    candidates,
+  )
+  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
   const out: SageDecisionRecord[] = []
-  for (const record of records) {
-    // A decision narrative is disclosed only when the actor can access the
-    // record's own authorization level; otherwise the record is omitted whole.
-    if (!canAccessGovernanceRecord(access, record)) continue
-    out.push(await redactDecisionReferences(deps, ws, access, record))
+  for (const record of previsible) {
+    if (!allowed.has(record.id)) continue
+    out.push(await redactDecisionReferences(deps, ws, access, ctx.actor.actorId, record))
   }
   return out
 }
@@ -1448,7 +1623,21 @@ export async function getSageDecisionRecord(
   // Non-disclosure: an inaccessible decision resolves to NOT_FOUND rather than
   // leaking its existence or narrative.
   if (!canAccessGovernanceRecord(access, record)) notFound('decision record')
-  return redactDecisionReferences(deps, ws, access, record)
+  const payload = applyAuthorizedEvidenceContextChoke(
+    { actorId: ctx.actor.actorId, workspaceId: ws.id, orgId: ws.orgId, access },
+    [
+      {
+        evidenceItemId: record.id,
+        sourceId: record.id,
+        workspaceId: ws.id,
+        orgId: ws.orgId,
+        authorizationLevel: record.authorizationLevel,
+        excerpt: record.decision,
+      },
+    ],
+  )
+  if (!payload.evidence.some((e) => e.evidenceItemId === record.id)) notFound('decision record')
+  return redactDecisionReferences(deps, ws, access, ctx.actor.actorId, record)
 }
 
 // ─── Export workflow (Phase 7 — controlled export packages) ──────────────────
@@ -1929,13 +2118,26 @@ export async function generateSageExportPackage(
     conflict('the approved scope changed; the package cannot be generated')
   }
 
+  // Mandated synthesis-safety choke on evidence_item resources before package bytes.
+  const gated = filterExportEvidenceResourcesThroughAuthorizedContext({
+    actorId: ctx.actor.actorId,
+    workspaceId: ws.id,
+    orgId: ws.orgId,
+    access,
+    resources: recomputed.resources,
+  })
+  if (gated.resources.length !== recomputed.resources.length) {
+    // An evidence_item in the approved scope failed the authorized-context gate.
+    forbidden('the generator cannot access every resource in the approved scope')
+  }
+
   // Build the bytes + hashes ONCE, then commit those exact bytes and hashes.
   const artifact = buildSageExportPackage({
     scope: recomputed.scope,
     workspaceId: ws.id,
     exportRequestId: req.id,
     approvedScopeHash: approval.approvedScopeHash,
-    resources: recomputed.resources,
+    resources: gated.resources,
   })
   const storageReference = sageExportPackageStorageReference({
     orgId: ws.orgId,

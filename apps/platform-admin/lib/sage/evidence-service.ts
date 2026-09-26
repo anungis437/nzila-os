@@ -26,7 +26,10 @@ import {
   linkSageEvidenceItem,
   listSageEvidenceItems,
   listSageEvidenceSources,
+  buildSageInstitutionalQaContextForWorkspace,
   type SageAuthorizationLevel,
+  type SageClaimChainEntry,
+  type SageInstitutionalQaContext,
   type SageConfidenceLevel,
   type SageSourceQuality,
   type SageSourceType,
@@ -297,4 +300,36 @@ export async function linkSageEvidenceItemForScope(
       return toEvidenceItemResponse(item)
     },
   )
+}
+
+
+// ─── Institutional Q&A context (synthesis-safety choke) ──────────────────────
+
+/**
+ * Build authorized-only institutional Q&A / continuity context for a workspace.
+ * Always filters candidates through `@nzila/sage-core` synthesis-context before
+ * returning JSON. Optional claimRegister supplies claim→source→date→authority.
+ */
+export async function buildInstitutionalQaContextForScope(
+  scope: SageActorScope,
+  workspaceId: string,
+  input?: {
+    claimRegister?: readonly SageClaimChainEntry[]
+    question?: string
+    annotations?: ReadonlyArray<{ evidenceItemId: string; title?: string; excerpt?: string }>
+  },
+): Promise<SageInstitutionalQaContext | null> {
+  const deps = createSageRuntime(scope)
+  const ctx = createSageServiceContext(scope)
+  try {
+    return await buildSageInstitutionalQaContextForWorkspace(deps, ctx, {
+      workspaceId,
+      claimRegister: input?.claimRegister,
+      question: input?.question,
+      annotations: input?.annotations,
+    })
+  } catch (error) {
+    if (isAccessDenied(error)) return null
+    throw error
+  }
 }

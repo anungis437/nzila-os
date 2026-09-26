@@ -64,6 +64,48 @@
       "when": 1789588800000,
       "tag": "0008_runtime_acceptance_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789660000000,
+      "tag": "0009_baseline_runtime_role_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789720000000,
+      "tag": "0010_tenant_isolation_rls_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789780000000,
+      "tag": "0011_storage_authority_rls_completion",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789840000000,
+      "tag": "0012_storage_authority_rls_final_closure",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789900000000,
+      "tag": "0013_workbook_credential_payment_authority",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789960000000,
+      "tag": "0014_lineage_restoration_rls_closure",
+      "breakpoints": true
     }
   ]
 }

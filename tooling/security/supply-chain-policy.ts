@@ -167,35 +167,8 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-11-26',
     severity: 'high',
   },
-  {
-    // minimatch ReDoS via multiple non-adjacent GLOBSTAR segments — npm advisory 1113686 / GHSA-7r86-cg39-jmmj
-    // Affected paths: apps/union-eyes > glob > minimatch (>=10.0.0 <10.2.3)
-    // Same root cause as other minimatch waivers: no user-controlled input reaches minimatch in production.
-    // The glob package is used only in build/script tooling, not in production runtime.
-    id: '1113686',
-    package: 'minimatch',
-    reason: 'Build/script tooling dependency (glob > minimatch). No user input reaches minimatch in production runtime. Upgrade to minimatch@10.2.3 pending upstream glob release. Risk confined to local/CI tooling DoS only.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-06-18',
-    expiresAt: '2026-09-18',
-    severity: 'high',
-  },
-  {
-    // immutable Prototype Pollution — CVE-2026-29063 / GHSA-wf6x-7x77-mvgw / npm advisory 1113984
-    // Affected path: apps/union-eyes > swagger-ui-react > immutable@3.8.2
-    // immutable@3.x has no upstream fix — the fix requires upgrading to v4.3.8+ (breaking API change).
-    // swagger-ui-react@5.x is hard-coupled to immutable@3.x internals; forcing v4 via override breaks rendering.
-    // swagger-ui-react is used exclusively for internal API documentation (no public user access).
-    // No user-controlled data flows through immutable merge/toJS operations in our usage pattern.
-    // Remediation plan: track swagger-ui migration off immutable@3; re-evaluate when a compatible release is available.
-    id: '1113984',
-    package: 'immutable',
-    reason: 'Transitive dependency of swagger-ui-react (internal API docs only). immutable@3.x has no npm fix; v4 upgrade is a breaking API change that breaks swagger-ui-react rendering. No user-controlled data flows through affected APIs. Mitigated by internal-only access and no untrusted merge input.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-06-18',
-    expiresAt: '2026-09-18',
-    severity: 'high',
-  },
+
+
   // NOTE: protobufjs waivers (1116756, 1116757) removed 2026-07-19 —
   // pnpm overrides on @grpc/proto-loader>protobufjs, google-gax>protobufjs,
   // @google-cloud/firestore>protobufjs, @opentelemetry/otlp-transformer>protobufjs,
@@ -255,38 +228,16 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-11-26',
     severity: 'high',
   },
-  // Next.js advisories (1117930, 1117931, 1117960, 1117961, 1117964, 1117965, 1117966, 1117967,
-  //   1117970, 1117971, 1117972, 1117973, 1117979, 1117980) — DoS / SSRF / middleware bypass
-  // Tracked for upgrade in next dependency sweep. Triaged 2026-05-11.
-  // Mitigations: edge proxy.ts is minimal (no auth in middleware); no user-controlled WebSocket
-  // upgrade targets; cache components disabled in production; i18n routes have explicit allow-list.
-  ...['1117930', '1117931', '1117960', '1117961', '1117964', '1117965', '1117966', '1117967',
-      '1117970', '1117971', '1117972', '1117973', '1117979', '1117980'].map((id) => ({
-    id,
-    package: 'next',
-    reason: 'Next.js high-severity advisory triaged 2026-05-11. Mitigations in place (minimal edge middleware, no user-controlled WS upgrade targets, cache components off in prod, i18n allow-list). Tracked for upgrade in next dependency sweep.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-05-11',
-    expiresAt: '2026-09-18',
-    severity: 'high' as const,
-  })),
-  // OpenTelemetry Prometheus exporter crash (1117941, 1117942, 1117943)
-  // Affects @opentelemetry/auto-instrumentations-node, sdk-node, exporter-prometheus.
-  // Prometheus exporter endpoint is internal-only (cluster network), not exposed externally.
-  // Tracked for upgrade in next dependency sweep.
-  ...[
-    { id: '1117941', pkg: '@opentelemetry/auto-instrumentations-node' },
-    { id: '1117942', pkg: '@opentelemetry/sdk-node' },
-    { id: '1117943', pkg: '@opentelemetry/exporter-prometheus' },
-  ].map(({ id, pkg }) => ({
-    id,
-    package: pkg,
-    reason: 'Prometheus exporter crash via malformed HTTP request. Exporter endpoint is internal cluster-network only, not externally exposed. Tracked for upgrade in next dependency sweep.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-05-11',
-    expiresAt: '2026-09-18',
-    severity: 'high' as const,
-  })),
+
+
+
+  // NOTE: Expired 2026-09-18 waivers removed 2026-09-23 after remediation review:
+  //   - 1113686 (minimatch) — override pins minimatch>=10.2.3; advisory no longer in audit
+  //   - 1113984 (immutable@3 via swagger-ui) — override pins immutable>=5.1.8; advisory no longer in audit
+  //   - 1117930–1117980 (next) — pnpm override resolves next@16.3.4; old advisory IDs absent from audit
+  //   - 1117941–1117943 (otel) — auto-instrumentations-node>=0.75.0 / sdk-node@0.217+; absent from audit
+  // Fresh high finding 1239030 (adm-zip) remediated by override adm-zip>=0.6.1 (also clears 1193734).
+
   // npm advisory feed rollover (2026-08-01): new IDs for previously triaged dependency families.
   // Approved as a temporary bridge while dependency upgrades are prepared.
   ...[

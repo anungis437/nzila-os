@@ -13,7 +13,7 @@ import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { organizations, congressMemberships } from '@/db/schema';
 import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { buildClauseVisibilityCondition } from '@/lib/clause-library/sharing-authority';
 
 export const dynamic = 'force-dynamic';
@@ -39,6 +39,9 @@ export const GET = withApi(
     const sharingLevels = url.searchParams.get('sharingLevels')?.split(',').filter(Boolean) || [];
     const includeExpired = url.searchParams.get('includeExpired') === 'true';
 
+    // Federation and congress reads are not covered by ue_shared_library_select
+    // (owner, explicit share, or public only). LIST stays on the system role
+    // and applies buildClauseVisibilityCondition. CREATE is an owner write.
     return await withSystemContext(async () => {
       const visibilityCondition = await buildClauseVisibilityCondition(organizationId);
       const conditions: ReturnType<typeof eq>[] = [visibilityCondition];
@@ -160,9 +163,10 @@ export const POST = withApi(
   },
   async ({ request, userId, organizationId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!userId) throw ApiError.badRequest('Authenticated user is required to create a clause.');
     const body = await request.json();
 
-    return await withSystemContext(async () => {
+    return await withRLSContext({ organizationId }, async () => {
       const [created] = await db
         .insert(sharedClauseLibrary)
         .values({
@@ -186,7 +190,7 @@ export const POST = withApi(
           expiryDate: body.expiryDate ?? null,
           sector: body.sector ?? null,
           province: body.province ?? null,
-          createdBy: userId || 'system',
+          createdBy: userId,
         })
         .returning();
 

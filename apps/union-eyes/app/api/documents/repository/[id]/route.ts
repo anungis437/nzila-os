@@ -23,6 +23,7 @@ import {
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { auditCaseMutation, CaseAuditEvent } from '@/lib/audited-case-mutations';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 const updateLabelSchema = z.object({
   privacyLabel: z.enum([
@@ -48,55 +49,63 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing document ID');
   }
 
-  const row = (
-    await db
-      .select({
-        id: documents.id,
-        title: documents.title,
-        filename: documents.filename,
-        name: documents.name,
-        fileUrl: documents.fileUrl,
-        documentType: documents.documentType,
-        privacyLabel: documents.privacyLabel,
-        uploadedBy: documents.uploadedBy,
-        createdAt: documents.createdAt,
-        updatedAt: documents.updatedAt,
-        linkedEntityType: documentLinks.linkedEntityType,
-        linkedEntityId: documentLinks.linkedEntityId,
-      })
-      .from(documents)
-      .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
-      .where(
-        and(
-          eq(documents.id, params.id),
-          eq(documents.organizationId, organizationId),
-          sql`${documents.deletedAt} IS NULL`,
-        ),
-      )
-      .limit(1)
-  )[0];
+  const { row, explicitGrant } = await withRLSContext({ organizationId }, async () => {
+    const rowInner = (
+      await db
+        .select({
+          id: documents.id,
+          title: documents.title,
+          filename: documents.filename,
+          name: documents.name,
+          fileUrl: documents.fileUrl,
+          documentType: documents.documentType,
+          privacyLabel: documents.privacyLabel,
+          uploadedBy: documents.uploadedBy,
+          createdAt: documents.createdAt,
+          updatedAt: documents.updatedAt,
+          linkedEntityType: documentLinks.linkedEntityType,
+          linkedEntityId: documentLinks.linkedEntityId,
+        })
+        .from(documents)
+        .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
+        .where(
+          and(
+            eq(documents.id, params.id),
+            eq(documents.organizationId, organizationId),
+            sql`${documents.deletedAt} IS NULL`,
+          ),
+        )
+        .limit(1)
+    )[0];
+
+    if (!rowInner) {
+      return { row: null as typeof rowInner, explicitGrant: null as { id: string } | null };
+    }
+
+    const explicitGrantInner = (
+      await db
+        .select({ id: documentAccessGrants.id })
+        .from(documentAccessGrants)
+        .where(
+          and(
+            eq(documentAccessGrants.organizationId, organizationId),
+            eq(documentAccessGrants.documentId, rowInner.id),
+            eq(documentAccessGrants.userId, userId),
+            eq(documentAccessGrants.status, 'active'),
+            eq(documentAccessGrants.canView, true),
+            sql`${documentAccessGrants.revokedAt} IS NULL`,
+            sql`(${documentAccessGrants.expiresAt} IS NULL OR ${documentAccessGrants.expiresAt} > NOW())`,
+          ),
+        )
+        .limit(1)
+    )[0];
+
+    return { row: rowInner, explicitGrant: explicitGrantInner ?? null };
+  });
 
   if (!row) {
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
-
-  const explicitGrant = (
-    await db
-      .select({ id: documentAccessGrants.id })
-      .from(documentAccessGrants)
-      .where(
-        and(
-          eq(documentAccessGrants.organizationId, organizationId),
-          eq(documentAccessGrants.documentId, row.id),
-          eq(documentAccessGrants.userId, userId),
-          eq(documentAccessGrants.status, 'active'),
-          eq(documentAccessGrants.canView, true),
-          sql`${documentAccessGrants.revokedAt} IS NULL`,
-          sql`(${documentAccessGrants.expiresAt} IS NULL OR ${documentAccessGrants.expiresAt} > NOW())`,
-        ),
-      )
-      .limit(1)
-  )[0];
 
   const isStewardPlus = await hasMinRole('steward');
   let caseAccess = {
@@ -134,16 +143,18 @@ export const GET = withOrganizationAuth(async (_request, context, params?: { id:
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this document');
   }
 
-  const versions = await db
-    .select()
-    .from(documentVersions)
-    .where(
-      and(
-        eq(documentVersions.organizationId, organizationId),
-        eq(documentVersions.documentId, row.id),
-      ),
-    )
-    .orderBy(desc(documentVersions.versionNo));
+  const versions = await withRLSContext({ organizationId }, async () =>
+    db
+      .select()
+      .from(documentVersions)
+      .where(
+        and(
+          eq(documentVersions.organizationId, organizationId),
+          eq(documentVersions.documentId, row.id),
+        ),
+      )
+      .orderBy(desc(documentVersions.versionNo)),
+  );
 
   return standardSuccessResponse({
     ...row,

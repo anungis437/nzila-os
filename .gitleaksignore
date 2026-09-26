@@ -68,3 +68,24 @@ apps/abr/e2e/courtlens-review-packet.spec.mjs:nzila-database-url-with-password:3
 apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:23
 apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:34
 apps/union-eyes/scripts/rls-manual-proof.sql:nzila-database-url-with-password:78
+
+# ---------------------------------------------------------------------------
+# nzila-database-url-with-password — false positive (schema-contract harness)
+# Justification: the Phase D/E schema-contract fresh-build harness originally
+#   built a connection-string template of the form scheme://user:token@host/db
+#   where every value is a function parameter sourced from env/config — never a
+#   hardcoded credential. Identical class of false positive as the
+#   rls-manual-proof.sql entries above: the rule matches connection-string
+#   SHAPE, not real secret material. The harness has since been refactored to
+#   use pg client CONFIG OBJECTS (no connection-string literal at all), so this
+#   allowlist covers only the historical introducing commit f7ceba2b8 still
+#   inside the PR's scanned range. Both the short and commit-qualified
+#   fingerprint forms are listed to match the scanner across scan modes.
+# Reviewed: Union Eyes canonical runtime schema convergence PR (Phase D/E + F), 2026-09-22.
+apps/union-eyes/scripts/schema-authority/fresh-build.ts:nzila-database-url-with-password:75
+f7ceba2b811b5303a8d9fe01459402c6761bda1c:apps/union-eyes/scripts/schema-authority/fresh-build.ts:nzila-database-url-with-password:75
+# Transient self-match: an earlier revision of THIS file quoted the connection
+# -string shape verbatim in the justification comment above (now reworded to a
+# generic `scheme://user:token@host/db`). Covers only that historical commit
+# still inside the PR's scanned range.
+.gitleaksignore:nzila-database-url-with-password:75

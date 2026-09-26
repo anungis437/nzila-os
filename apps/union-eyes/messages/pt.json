@@ -1,4 +1,62 @@
 {
+  "workspaceNav": {
+    "metaTitle": "Área de trabalho | UnionEyes",
+    "metaDescription": "Uma superfície de trabalho para o sindicato.",
+    "title": "Área de trabalho",
+    "intro": "Uma superfície de trabalho para o sindicato. Cada seção responde a uma única pergunta operacional. Os rótulos indicam se a seção está no papel, é um rascunho de orientação, ou está indisponível.",
+    "tabsLabel": "Seções da área de trabalho",
+    "unknownRoleBanner": "Este papel não está no mapa de personas da área de trabalho. Cada seção é rotulada como rascunho para não ser apresentada como disponível.",
+    "availability": {
+      "available": "No papel",
+      "stub": "Rascunho",
+      "unavailable": "Indisponível"
+    },
+    "tabs": {
+      "overview": {
+        "label": "Visão geral"
+      },
+      "case-operations": {
+        "label": "Operações de casos"
+      },
+      "members": {
+        "label": "Membros"
+      },
+      "governance": {
+        "label": "Governança"
+      },
+      "continuity": {
+        "label": "Continuidade"
+      },
+      "financial": {
+        "label": "Finanças"
+      },
+      "documents": {
+        "label": "Documentos"
+      }
+    },
+    "stubPanel": "Esta seção está visível apenas para orientação. Não é uma superfície operacional para o seu papel, e nada aqui é uma métrica ao vivo.",
+    "unavailablePanel": "Esta seção não está disponível para o seu papel.",
+    "deepWork": {
+      "unavailable": "Indisponível",
+      "unknownRole": "Papel não reconhecido. Este destino permanece fechado.",
+      "stubSection": "Não disponível a partir de uma seção rascunho.",
+      "unavailableSection": "Não disponível para o seu papel.",
+      "outOfRole": "Fora do seu papel.",
+      "recoveryHint": "Superfície autorizada para este trabalho aprofundado.",
+      "destinations": {
+        "caseworkConsole": "Console de casos",
+        "institutionalIntelligenceReports": "Relatórios de inteligência institucional",
+        "membersRoster": "Lista de membros",
+        "continuityIntelligence": "Inteligência de continuidade",
+        "governanceCenter": "Centro de governança",
+        "governanceOverview": "Visão geral da governança"
+      },
+      "remapReason": {
+        "caseworkConsole": "Abre o console de casos. A lista de casos está fora do seu papel.",
+        "institutionalIntelligenceReports": "Abre os relatórios de inteligência institucional. A inteligência de continuidade está fora do seu papel."
+      }
+    }
+  },
   "common": {
     "appName": "UnionEyes",
     "loading": "Carregando...",

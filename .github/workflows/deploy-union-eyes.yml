@@ -968,6 +968,40 @@ jobs:
 
           ADMIN_URL=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" --query value -o tsv)
 
+          # The runner talks to Postgres directly (icra:capability-rollout
+          # check/apply) — open a temporary, runner-IP-scoped firewall rule on
+          # the flexible server, matching the RLS-foundation preflight pattern
+          # below. Without it the DB connection times out (5432 blocked) and
+          # this mandatory 0005 gate fails closed on infrastructure, not schema.
+          RUNNER_IP=$(curl -sS --max-time 10 https://api.ipify.org)
+          if [ -z "$RUNNER_IP" ]; then
+            echo "::error::Could not determine this runner's public IP; refusing to proceed without a scoped firewall rule."
+            exit 1
+          fi
+          RULE_NAME="gha-icra-capability-${{ github.run_id }}"
+          POSTGRES_SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER_NAME }}"
+          POSTGRES_RG="${{ vars.AZURE_POSTGRES_RESOURCE_GROUP }}"
+          if [ -z "$POSTGRES_SERVER_NAME" ] || [ -z "$POSTGRES_RG" ]; then
+            echo "::error::vars.AZURE_POSTGRES_SERVER_NAME / vars.AZURE_POSTGRES_RESOURCE_GROUP not set for this environment — required to scope a temporary firewall rule for the ICRA capability gate. Refusing to proceed."
+            exit 1
+          fi
+
+          cleanup() {
+            az postgres flexible-server firewall-rule delete \
+              --server-name "$POSTGRES_SERVER_NAME" \
+              --resource-group "$POSTGRES_RG" \
+              --name "$RULE_NAME" \
+              --yes >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          az postgres flexible-server firewall-rule create \
+            --server-name "$POSTGRES_SERVER_NAME" \
+            --resource-group "$POSTGRES_RG" \
+            --name "$RULE_NAME" \
+            --start-ip-address "$RUNNER_IP" \
+            --end-ip-address "$RUNNER_IP" >/dev/null
+
           set +x  # never trace this — the export line contains a secret
           export RLS_MIGRATION_ADMIN_DATABASE_URL="$ADMIN_URL"
 

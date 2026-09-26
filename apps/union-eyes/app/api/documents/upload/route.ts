@@ -168,6 +168,24 @@ export const POST = withRoleAuth('member', async (request, context) => {
     );
     }
 
+    // Membership context is the write authority. A form organizationId may
+    // only deny a mismatch; it is never the stamp source.
+    if (!organizationId) {
+      logApiAuditEvent({
+        timestamp: new Date().toISOString(),
+        userId,
+        endpoint: '/api/documents/upload',
+        method: 'POST',
+        eventType: 'unauthorized_access',
+        severity: 'high',
+        details: { dataType: 'DOCUMENTS', reason: 'Missing server organization' },
+      });
+      return standardErrorResponse(
+      ErrorCode.FORBIDDEN,
+      'Forbidden'
+    );
+    }
+
     // Verify organization ID matches context
     if (organizationIdFromForm !== organizationId) {
       logApiAuditEvent({
@@ -241,7 +259,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
 
     // Create document record
     const document = await createDocument({
-      organizationId: organizationIdFromForm,
+      organizationId,
       folderId: folderId || null,
       name,
       fileUrl: blob.url,
@@ -273,7 +291,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
       severity: 'medium',
       details: {
         dataType: 'DOCUMENTS',
-        organizationId: organizationIdFromForm,
+        organizationId,
         documentId: document.id,
         fileName: file.name,
         fileSize: file.size,

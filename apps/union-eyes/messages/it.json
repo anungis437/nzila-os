@@ -1,4 +1,62 @@
 {
+  "workspaceNav": {
+    "metaTitle": "Area di lavoro | UnionEyes",
+    "metaDescription": "Una superficie di lavoro per il sindacato.",
+    "title": "Area di lavoro",
+    "intro": "Una superficie di lavoro per il sindacato. Ogni sezione risponde a una sola domanda operativa. Le etichette indicano se la sezione è nel ruolo, una bozza di orientamento, o non disponibile.",
+    "tabsLabel": "Sezioni dell'area di lavoro",
+    "unknownRoleBanner": "Questo ruolo non è nella mappa dei persona dell'area di lavoro. Ogni sezione è etichettata come bozza così non viene presentata come disponibile.",
+    "availability": {
+      "available": "Nel ruolo",
+      "stub": "Bozza",
+      "unavailable": "Non disponibile"
+    },
+    "tabs": {
+      "overview": {
+        "label": "Panoramica"
+      },
+      "case-operations": {
+        "label": "Operazioni sui casi"
+      },
+      "members": {
+        "label": "Membri"
+      },
+      "governance": {
+        "label": "Governance"
+      },
+      "continuity": {
+        "label": "Continuità"
+      },
+      "financial": {
+        "label": "Finanze"
+      },
+      "documents": {
+        "label": "Documenti"
+      }
+    },
+    "stubPanel": "Questa sezione è visibile solo per orientamento. Non è una superficie operativa per il tuo ruolo, e nulla qui è una metrica in tempo reale.",
+    "unavailablePanel": "Questa sezione non è disponibile per il tuo ruolo.",
+    "deepWork": {
+      "unavailable": "Non disponibile",
+      "unknownRole": "Ruolo non riconosciuto. Questa destinazione resta chiusa.",
+      "stubSection": "Non disponibile da una sezione bozza.",
+      "unavailableSection": "Non disponibile per il tuo ruolo.",
+      "outOfRole": "Fuori dal tuo ruolo.",
+      "recoveryHint": "Superficie autorizzata per questo lavoro approfondito.",
+      "destinations": {
+        "caseworkConsole": "Console dei casi",
+        "institutionalIntelligenceReports": "Report di intelligence istituzionale",
+        "membersRoster": "Elenco membri",
+        "continuityIntelligence": "Intelligence di continuità",
+        "governanceCenter": "Centro di governance",
+        "governanceOverview": "Panoramica della governance"
+      },
+      "remapReason": {
+        "caseworkConsole": "Apre la console dei casi. L'elenco dei casi è fuori dal tuo ruolo.",
+        "institutionalIntelligenceReports": "Apre i report di intelligence istituzionale. L'intelligence di continuità è fuori dal tuo ruolo."
+      }
+    }
+  },
   "common": {
     "appName": "UnionEyes",
     "loading": "Caricamento...",

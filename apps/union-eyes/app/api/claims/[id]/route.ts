@@ -79,7 +79,7 @@ const GET = withApi(
       FROM claims c
       LEFT JOIN organization_members m
         ON m.user_id = c.member_id
-       AND m.organization_id = c.organization_id::text
+       AND m.organization_id::text = c.organization_id::text
       WHERE (c.claim_number = ${id} OR c.claim_id::text = ${id})
         ${orgFilter}
       LIMIT 1

@@ -20,6 +20,14 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
  */
 const nextConfig = {
   reactStrictMode: true,
+  // Dev HMR and the React debug channel are WebSocket upgrades to
+  // `/_next/hmr`. Next blocks those when the browser Origin host is not
+  // localhost (or the server hostname). 127.0.0.1 is a normal local
+  // origin for this demo and must be listed or the client never hydrates.
+  allowedDevOrigins: ['127.0.0.1'],
+  // Next 16 writes AGENTS.md / CLAUDE.md into the app on `next dev`.
+  // This demo already follows the repo root policy files.
+  agentRules: false,
   typescript: { ignoreBuildErrors: true },
   output: process.platform === 'win32' ? undefined : 'standalone',
 

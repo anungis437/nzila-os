@@ -1,82 +1,3274 @@
 {
   "$schema": "canonical-schema-manifest-v1",
-  "description": "Critical tables and columns that MUST exist in the Drizzle ORM schema. Verified on every CI run. Adding a table here makes its presence a hard CI gate.",
+  "description": "Published from Union Eyes runtime-schema authority oracle (disposition-adjusted REQUIRED). Not an independent table list.",
+  "authoritySource": "reports/union-eyes-runtime-schema-authority-oracle.json",
+  "publisherSecondSchemaAuthority": false,
+  "generatedAt": "2026-09-23T15:17:02.328Z",
   "tables": {
-    "dues_transactions": {
-      "source": "apps/union-eyes/db/schema/domains/finance/dues.ts",
+    "account_mappings": {
+      "source": "apps/union-eyes/db/schema/domains/financial/chart-of-accounts.ts",
       "requiredColumns": [
-        "id", "organization_id", "member_id", "transaction_type", "amount",
-        "period_start", "period_end", "due_date", "status",
-        "dues_amount", "cope_amount", "pac_amount", "strike_fund_amount",
-        "late_fee_amount", "adjustment_amount",
-        "processor_type", "processor_payment_id", "processor_customer_id",
-        "created_at", "updated_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ai_clause_reasonings": {
+      "source": "apps/union-eyes/db/schema/domains/ml/ai-clause-reasoning.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ai_copilot_sessions": {
+      "source": "apps/union-eyes/db/schema/domains/ml/ai-copilot-sessions.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ai_grievance_triages": {
+      "source": "apps/union-eyes/db/schema/domains/ml/ai-grievance-triage.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ai_insight_reports": {
+      "source": "apps/union-eyes/db/schema/domains/ml/ai-insight-reports.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ai_safety_filters": {
+      "source": "apps/union-eyes/db/schema/ai-chatbot-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ai_usage_metrics": {
+      "source": "apps/union-eyes/db/schema/ai-chatbot-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "alert_executions": {
+      "source": "apps/union-eyes/db/schema/alerting-automation-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "alert_rules": {
+      "source": "apps/union-eyes/db/schema/alerting-automation-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "allocation_basis_snapshots": {
+      "source": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "allocation_rule_versions": {
+      "source": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "allocation_rules": {
+      "source": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "allocation_run_lines": {
+      "source": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "allocation_runs": {
+      "source": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "analytics_metrics": {
+      "source": "apps/union-eyes/db/schema/analytics.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "api_integrations": {
+      "source": "apps/union-eyes/db/schema/integration-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "arbitration_decisions": {
+      "source": "apps/union-eyes/db/schema/cba-intelligence-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "arbitration_precedents": {
+      "source": "apps/union-eyes/db/schema/arbitration-precedents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "arbitrations": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "automation_rules": {
+      "source": "apps/union-eyes/db/schema/automation-rules-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "bank_accounts": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/erp.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "bank_reconciliation": {
+      "source": "apps/union-eyes/db/schema/domains/finance/payments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "bank_reconciliations": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/erp.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "bargaining_notes": {
+      "source": "apps/union-eyes/db/schema/cba-intelligence-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "bargaining_proposals": {
+      "source": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "bargaining_units": {
+      "source": "apps/union-eyes/db/schema/union-structure-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "billing_accounts": {
       "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
       "requiredColumns": [
-        "id", "organization_id", "display_name", "billing_email",
-        "currency", "status", "net_terms_days", "created_at", "updated_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "platform_invoices": {
+    "billing_periods": {
       "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
       "requiredColumns": [
-        "id", "billing_account_id", "organization_id", "invoice_number",
-        "issue_date", "due_date", "subtotal", "tax_amount", "total_amount",
-        "amount_paid", "currency", "status", "created_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "platform_payments": {
+    "billing_subscriptions": {
       "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
       "requiredColumns": [
-        "id", "billing_account_id", "organization_id", "amount",
-        "currency", "status", "method", "created_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "audit_events": {
-      "source": "packages/db/src/schema/operations.ts",
+    "board_packet_distributions": {
+      "source": "apps/union-eyes/db/schema/board-packet-schema.ts",
       "requiredColumns": [
-        "id", "org_id", "actor_user_id", "action",
-        "target_type", "hash", "created_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "documents": {
-      "source": "packages/db/src/schema/operations.ts",
+    "board_packets": {
+      "source": "apps/union-eyes/db/schema/board-packet-schema.ts",
       "requiredColumns": [
-        "id", "org_id", "category", "title", "sha256",
-        "uploaded_by", "created_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "commerce_refunds": {
-      "source": "packages/db/src/schema/commerce.ts",
+    "break_policies": {
+      "source": "apps/union-eyes/db/schema/domains/member/member-breaks.ts",
       "requiredColumns": [
-        "id", "org_id", "payment_id", "invoice_id", "amount",
-        "reason", "status", "created_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "budget_pool": {
+      "source": "apps/union-eyes/db/schema/award-templates-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "calendar_events": {
+      "source": "apps/union-eyes/db/schema/calendar-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "calendars": {
+      "source": "apps/union-eyes/db/schema/calendar-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "campaigns": {
+      "source": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "case_documents": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "case_studies": {
+      "source": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_clauses": {
+      "source": "apps/union-eyes/db/schema/cba-clauses-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_agreements": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/extraction.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_benchmark_snapshots": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/benchmarks.ts",
+      "requiredColumns": [
+        "id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_clauses": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/extraction.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_documents": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/documents.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_extraction_runs": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/extraction.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_findings": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/extraction.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_ingestion_jobs": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/ingestion.ts",
+      "requiredColumns": [
+        "id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_review_decisions": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/review.ts",
+      "requiredColumns": [
+        "id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_sources": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/source-registry.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_intel_wage_adjustments": {
+      "source": "apps/union-eyes/db/schema/domains/cba-intelligence/extraction.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_rule_set_items": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-execution-core.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cba_rule_versions": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-execution-core.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "chargeback_statements": {
+      "source": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "chart_of_accounts": {
+      "source": "apps/union-eyes/db/schema/clc-sync-audit-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "chat_messages": {
+      "source": "apps/union-eyes/db/schema/ai-chatbot-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "chat_sessions": {
+      "source": "apps/union-eyes/db/schema/ai-chatbot-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "claim_deadlines": {
+      "source": "apps/union-eyes/db/schema/deadlines-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "claim_updates": {
+      "source": "apps/union-eyes/db/schema/claims-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "claims": {
       "source": "apps/union-eyes/db/schema/claims-schema.ts",
       "requiredColumns": [
-        "id", "claim_id", "claim_number", "organization_id", "member_id",
-        "claim_type", "status", "priority", "incident_date", "location",
-        "description", "desired_outcome", "created_at", "updated_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "claim_deadlines": {
-      "source": "apps/union-eyes/db/schema/domains/claims/deadlines.ts",
+    "clause_comparisons": {
+      "source": "apps/union-eyes/db/schema/cba-clauses-schema.ts",
       "requiredColumns": [
-        "id", "claim_id", "deadline_name", "deadline_type",
-        "due_date", "status", "created_at", "updated_at"
-      ]
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
-    "deadline_rules": {
-      "source": "apps/union-eyes/db/schema/domains/claims/deadlines.ts",
+    "clause_embeddings": {
+      "source": "apps/union-eyes/db/schema/domains/agreements/clause-embeddings.ts",
       "requiredColumns": [
-        "id", "rule_name", "rule_code", "claim_type",
-        "days_from_event", "is_active", "created_at", "updated_at"
-      ]
+        "id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "clause_library_tags": {
+      "source": "apps/union-eyes/db/schema/domains/agreements/shared-library.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "clc_remittance_mapping": {
+      "source": "apps/union-eyes/db/schema/clc-sync-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "clc_sync_log": {
+      "source": "apps/union-eyes/db/schema/clc-partnership-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cms_media_library": {
+      "source": "apps/union-eyes/db/schema/cms-website-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cms_pages": {
+      "source": "apps/union-eyes/db/schema/cms-website-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "collective_agreements": {
+      "source": "apps/union-eyes/db/schema/collective-agreements-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "commercial_contracts": {
+      "source": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "committee_action_items": {
+      "source": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "committee_documents": {
+      "source": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "committee_intelligence_snapshots": {
+      "source": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "committee_meeting_attendees": {
+      "source": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "committee_meetings": {
+      "source": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "committees": {
+      "source": "apps/union-eyes/db/schema/union-structure-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "communication_preferences": {
+      "source": "apps/union-eyes/db/schema/communication-analytics-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "compliance_alerts": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/employer-compliance.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "congress_memberships": {
+      "source": "apps/union-eyes/db/schema/congress-memberships-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "consent_records": {
+      "source": "apps/union-eyes/db/schema/data-governance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "contract_covered_orgs": {
+      "source": "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "contract_line_items": {
+      "source": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "contribution_rates": {
+      "source": "apps/union-eyes/db/schema/domains/data/benchmarks.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cookie_consents": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/gdpr.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "correspondence": {
+      "source": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "correspondence_audit_trail": {
+      "source": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "correspondence_recipients": {
+      "source": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "cost_centers": {
+      "source": "apps/union-eyes/db/schema/domains/finance/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "course_registrations": {
+      "source": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "course_sessions": {
+      "source": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "data_aggregation_consent": {
+      "source": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "data_classification_policy": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/employer-interference.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "data_quality_warnings": {
+      "source": "apps/union-eyes/db/schema/ingestion-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "data_subject_access_requests": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/provincial-privacy.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "deadline_audit_events": {
+      "source": "apps/union-eyes/db/schema/deadline-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "deadline_reminders": {
+      "source": "apps/union-eyes/db/schema/deadline-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "defensibility_packs": {
+      "source": "apps/union-eyes/db/schema/defensibility-packs-schema.ts",
+      "requiredColumns": [
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "dispatch_assignments": {
+      "source": "apps/union-eyes/db/schema/domains/dispatch/dispatch.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "dispatch_requests": {
+      "source": "apps/union-eyes/db/schema/domains/dispatch/dispatch.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "dispatch_rules": {
+      "source": "apps/union-eyes/db/schema/domains/dispatch/dispatch.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_access_grants": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_folders": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_links": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_signers": {
+      "source": "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "document_versions": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "documents": {
+      "source": "apps/union-eyes/db/schema/documents-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "donation_campaigns": {
+      "source": "apps/union-eyes/db/schema/cms-website-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "dues_assignments": {
+      "source": "apps/union-eyes/db/schema/domains/finance/dues-assignments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "dues_rates": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "dues_transactions": {
+      "source": "apps/union-eyes/db/schema/domains/finance/dues.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "duplicate_group_members": {
+      "source": "apps/union-eyes/db/schema/ingestion-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "duplicate_groups": {
+      "source": "apps/union-eyes/db/schema/ingestion-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_communications": {
+      "source": "apps/union-eyes/db/schema/domains/communications/employer-communications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_contacts": {
+      "source": "apps/union-eyes/db/schema/domains/communications/employer-communications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_execution_artifacts": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_execution_compliance_events": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-compliance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_execution_evidence_links": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_execution_profiles": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-runtime-profile.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_execution_replays": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_payroll_run_items": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-payroll-runs.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_payroll_runs": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-payroll-runs.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_remittance_run_items": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-remittance-runs.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_remittance_runs": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-remittance-runs.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_remittances": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_reports": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/employer-compliance.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_risk_scores": {
+      "source": "apps/union-eyes/db/schema/domains/ml/employer-risk-scores.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_timesheet_batches": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-timesheets.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employer_timesheet_entries": {
+      "source": "apps/union-eyes/db/schema/domains/employer-execution/employer-timesheets.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "employers": {
+      "source": "apps/union-eyes/db/schema/union-structure-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "entitlement_usage_log": {
+      "source": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "erp_invoices": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/erp.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "exit_interview_documents": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "exit_interview_events": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "exit_interviews": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_accounts": {
+      "source": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_benefit_coverage": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_benefit_dependents": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_benefit_enrollments": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_benefit_plans": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_benefit_utilization": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_calendar_connections": {
+      "source": "apps/union-eyes/db/schema/calendar-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_communication_channels": {
+      "source": "apps/union-eyes/db/schema/domains/data/communication.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_communication_files": {
+      "source": "apps/union-eyes/db/schema/domains/data/communication.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_communication_messages": {
+      "source": "apps/union-eyes/db/schema/domains/data/communication.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_communication_users": {
+      "source": "apps/union-eyes/db/schema/domains/data/communication.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_customers": {
+      "source": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_data_sync_log": {
+      "source": "apps/union-eyes/db/schema/domains/data/benchmarks.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_departments": {
+      "source": "apps/union-eyes/db/schema/domains/data/hris.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_document_access_grants": {
+      "source": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_employees": {
+      "source": "apps/union-eyes/db/schema/domains/data/hris.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_insurance_beneficiaries": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_insurance_claims": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_insurance_policies": {
+      "source": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_invoices": {
+      "source": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_lms_completions": {
+      "source": "apps/union-eyes/db/schema/domains/data/lms.ts",
+      "requiredColumns": [
+        "id",
+        "org_id"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_lms_courses": {
+      "source": "apps/union-eyes/db/schema/domains/data/lms.ts",
+      "requiredColumns": [
+        "id",
+        "org_id"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_lms_enrollments": {
+      "source": "apps/union-eyes/db/schema/domains/data/lms.ts",
+      "requiredColumns": [
+        "id",
+        "org_id"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_lms_learners": {
+      "source": "apps/union-eyes/db/schema/domains/data/lms.ts",
+      "requiredColumns": [
+        "id",
+        "org_id"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_lms_progress": {
+      "source": "apps/union-eyes/db/schema/domains/data/lms.ts",
+      "requiredColumns": [
+        "id",
+        "org_id"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_matter_access_grants": {
+      "source": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_payments": {
+      "source": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "external_positions": {
+      "source": "apps/union-eyes/db/schema/domains/data/hris.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "feature_flags": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/features.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "federations": {
+      "source": "apps/union-eyes/db/schema/domains/federation/federation-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "fee_adjustments": {
+      "source": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "financial_periods": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "gdpr_data_requests": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/gdpr.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "geofence_events": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "geofences": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "gl_account_mappings": {
+      "source": "apps/union-eyes/db/schema/domains/finance/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "gl_transaction_log": {
+      "source": "apps/union-eyes/db/schema/domains/finance/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "gl_trial_balance": {
+      "source": "apps/union-eyes/db/schema/domains/finance/accounting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "governance_policies": {
+      "source": "apps/union-eyes/db/schema/domains/governance/governance-policies.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_case_access_assignments": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_deadlines": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_documents": {
+      "source": "apps/union-eyes/db/schema/domains/claims/workflows.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_events": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_settlements": {
+      "source": "apps/union-eyes/db/schema/domains/claims/workflows.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_timeline": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_timeline_events": {
+      "source": "apps/union-eyes/db/schema/ingestion-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievance_transitions": {
+      "source": "apps/union-eyes/db/schema/domains/claims/workflows.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "grievances": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "hazard_reports": {
+      "source": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "holidays": {
+      "source": "apps/union-eyes/db/schema/deadlines-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "in_app_notifications": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ingestion_batches": {
+      "source": "apps/union-eyes/db/schema/ingestion-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ingestion_records": {
+      "source": "apps/union-eyes/db/schema/ingestion-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "insight_recommendations": {
+      "source": "apps/union-eyes/db/schema/analytics.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "integration_api_keys": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/integrations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "integration_configs": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/integrations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "integration_partners": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/integrations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "integration_sync_log": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/integrations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "integration_webhooks": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/integrations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "knowledge_base": {
+      "source": "apps/union-eyes/db/schema/ai-chatbot-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "kpi_configurations": {
+      "source": "apps/union-eyes/db/schema/analytics.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "location_deletion_log": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "location_tracking": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "location_tracking_audit": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "location_tracking_config": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "meeting_rooms": {
+      "source": "apps/union-eyes/db/schema/calendar-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_arrears": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_breaks": {
+      "source": "apps/union-eyes/db/schema/domains/member/member-breaks.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_certifications": {
+      "source": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_dues_ledger": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_employment": {
+      "source": "apps/union-eyes/db/schema/domains/member/member-employment.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_history_events": {
+      "source": "apps/union-eyes/db/schema/member-profile-v2-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_jurisdiction_preferences": {
+      "source": "apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_location_consent": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "member_segments": {
+      "source": "apps/union-eyes/db/schema/domains/member/member-segments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_log": {
+      "source": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_read_receipts": {
+      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_templates": {
+      "source": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "message_threads": {
+      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "messages": {
+      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ml_predictions": {
+      "source": "apps/union-eyes/db/schema/analytics.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "mobile_devices": {
+      "source": "apps/union-eyes/db/schema/mobile-devices-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "model_metadata": {
+      "source": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "movement_trends": {
+      "source": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "negotiations": {
+      "source": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "newsletter_campaigns": {
+      "source": "apps/union-eyes/db/schema/domains/communications/newsletters.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "newsletter_distribution_lists": {
+      "source": "apps/union-eyes/db/schema/domains/communications/newsletters.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "newsletter_list_subscribers": {
+      "source": "apps/union-eyes/db/schema/domains/communications/newsletters.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "newsletter_recipients": {
+      "source": "apps/union-eyes/db/schema/domains/communications/newsletters.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "notification_delivery_log": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "notification_queue": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "notification_templates": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "notification_tracking": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "notifications": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "org_configurations": {
+      "source": "apps/union-eyes/db/schema-organizations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "org_entitlements": {
+      "source": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "org_subscriptions": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "organization_members": {
+      "source": "apps/union-eyes/db/schema-organizations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "organizations": {
+      "source": "apps/union-eyes/db/schema-organizations.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "organizer_tasks": {
+      "source": "apps/union-eyes/db/schema/domains/communications/organizer-workflows.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "organizing_campaigns": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "payment_allocations": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "payment_cycles": {
+      "source": "apps/union-eyes/db/schema/domains/finance/payments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "payment_disputes": {
+      "source": "apps/union-eyes/db/schema/domains/finance/payments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "payment_methods": {
+      "source": "apps/union-eyes/db/schema/domains/finance/payments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "payment_plans": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "payments": {
+      "source": "apps/union-eyes/db/schema/domains/finance/payments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pending_profiles": {
+      "source": "apps/union-eyes/db/schema/domains/member/pending-profiles.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_benefit_claims": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_contributions": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_members": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_plans": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_t4a_records": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_trustee_meetings": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pension_trustees": {
+      "source": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "per_capita_remittances": {
+      "source": "apps/union-eyes/db/schema/clc-per-capita-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_applications": {
+      "source": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_checklist_items": {
+      "source": "apps/union-eyes/db/schema/domains/pilot/pilot-onboarding.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_demo_seeds": {
+      "source": "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_enrollments": {
+      "source": "apps/union-eyes/db/schema/domains/pilot/pilot-enrollments.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_events": {
+      "source": "apps/union-eyes/db/schema/domains/pilot/pilot-events.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_feedback": {
+      "source": "apps/union-eyes/db/schema/domains/pilot/pilot-feedback.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_metrics": {
+      "source": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "pilot_milestones": {
+      "source": "apps/union-eyes/db/schema/domains/pilot/pilot-milestones.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "platform_cost_ledger_entries": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "platform_invoice_line_items": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "platform_invoices": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "platform_payments": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "policy_evaluations": {
+      "source": "apps/union-eyes/db/schema/policy-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "policy_exceptions": {
+      "source": "apps/union-eyes/db/schema/policy-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "policy_rules": {
+      "source": "apps/union-eyes/db/schema/policy-engine-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "poll_votes": {
+      "source": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "polls": {
+      "source": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "ppe_equipment": {
+      "source": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "profiles": {
+      "source": "apps/union-eyes/db/schema/domains/member/profiles.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "provincial_consent": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/provincial-privacy.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "provincial_data_handling": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/provincial-privacy.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "provincial_privacy_config": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/provincial-privacy.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "push_devices": {
+      "source": "apps/union-eyes/db/schema/domains/communications/push-notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "push_notifications": {
+      "source": "apps/union-eyes/db/schema/domains/communications/push-notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "recognition_award_types": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "recognition_awards": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "recognition_programs": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reconciliation_exceptions": {
+      "source": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reconciliation_matches": {
+      "source": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reconciliation_runs": {
+      "source": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "remittance_exceptions": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "remittance_line_items": {
+      "source": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reports": {
+      "source": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "representation_authorities": {
+      "source": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reward_budget_envelopes": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reward_redemptions": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "reward_wallet_ledger": {
+      "source": "apps/union-eyes/db/schema/award-templates-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "safety_inspections": {
+      "source": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "safety_training_records": {
+      "source": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "satisfaction_surveys": {
+      "source": "apps/union-eyes/db/schema/domains/claims/satisfaction.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "security_events": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/audit.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "security_posture_checks": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/audit.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "settlements": {
+      "source": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "shared_clause_library": {
+      "source": "apps/union-eyes/db/schema/domains/agreements/shared-library.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "signature_audit_trail": {
+      "source": "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "signature_documents": {
+      "source": "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "sms_campaigns": {
+      "source": "apps/union-eyes/db/schema/domains/communications/sms.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "sms_conversations": {
+      "source": "apps/union-eyes/db/schema/domains/communications/sms.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "sms_messages": {
+      "source": "apps/union-eyes/db/schema/domains/communications/sms.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "social_accounts": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/social-media.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "social_analytics": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/social-media.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "social_campaigns": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/social-media.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "social_posts": {
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/social-media.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "sso_providers": {
+      "source": "apps/union-eyes/db/schema/sso-scim-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "steward_assignments": {
+      "source": "apps/union-eyes/db/schema/union-structure-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "stewards": {
+      "source": "apps/union-eyes/db/schema/domains/member/stewards.ts",
+      "requiredColumns": [
+        "id",
+        "org_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "strategic_goals": {
+      "source": "apps/union-eyes/db/schema/domains/governance/strategic-goals.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "strike_fund_disbursements": {
+      "source": "apps/union-eyes/db/schema/domains/finance/taxes.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "subscription_events_log": {
+      "source": "apps/union-eyes/db/schema/domains/finance/dunning.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "subscription_plans": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "survey_answers": {
+      "source": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "survey_questions": {
+      "source": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "survey_responses": {
+      "source": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "surveys": {
+      "source": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "tentative_agreements": {
+      "source": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "testimonials": {
+      "source": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "training_courses": {
+      "source": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "training_programs": {
+      "source": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "transaction_fee_events": {
+      "source": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "transaction_fee_rules": {
+      "source": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "trend_analyses": {
+      "source": "apps/union-eyes/db/schema/analytics.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "user_consents": {
+      "source": "apps/union-eyes/db/schema/domains/compliance/gdpr.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "user_notification_preferences": {
+      "source": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "user_signatures": {
+      "source": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "voter_eligibility": {
+      "source": "apps/union-eyes/db/schema/domains/governance/voting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "votes": {
+      "source": "apps/union-eyes/db/schema/domains/governance/voting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "voting_options": {
+      "source": "apps/union-eyes/db/schema/domains/governance/voting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "voting_sessions": {
+      "source": "apps/union-eyes/db/schema/domains/governance/voting.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "workbook_governance_lineage_entries": {
+      "source": "apps/union-eyes/db/schema/workbook-schema.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "workbook_memory_holders": {
+      "source": "apps/union-eyes/db/schema/workbook-schema.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "workbook_modules": {
+      "source": "apps/union-eyes/db/schema/workbook-schema.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "workbook_purchases": {
+      "source": "apps/union-eyes/db/schema/workbook-schema.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "workbooks": {
+      "source": "apps/union-eyes/db/schema/workbook-schema.ts",
+      "requiredColumns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "workplace_incidents": {
+      "source": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
+    },
+    "worksites": {
+      "source": "apps/union-eyes/db/schema/union-structure-schema.ts",
+      "requiredColumns": [
+        "id",
+        "organization_id",
+        "created_at",
+        "updated_at"
+      ],
+      "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     }
   }
 }

@@ -17,7 +17,8 @@ The canonical Drizzle authority lives at:
 
 - `apps/union-eyes/drizzle.config.ts` (scope: cache only)
 - `apps/union-eyes/db/schema-cache/cache.ts` (scoped barrel)
-- `apps/union-eyes/db/migrations-cache/` (active migration root)
+- `apps/union-eyes/db/migrations-cache/` (active scoped/cache/RLS migration root)
+- `apps/union-eyes/db/migrations-platform/` (active post-freeze PLATFORM_SQL SCHEMA_CREATION root)
 
 ## What is prohibited
 

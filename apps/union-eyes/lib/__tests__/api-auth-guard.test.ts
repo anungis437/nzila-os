@@ -39,6 +39,8 @@ function chain(resolveValue: any): any {
   return new Proxy({}, handler);
 }
 
+
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: any) => fn() }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.mockAuth,
   currentUser: mocks.mockClerkCurrentUser,

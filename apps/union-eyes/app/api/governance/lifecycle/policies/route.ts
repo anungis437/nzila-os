@@ -5,7 +5,7 @@
  * POST /api/governance/lifecycle/policies
  *   — Create a new policy draft
  */
-import { withApi } from '@/lib/api/framework'
+import { withApi, ApiError } from '@/lib/api/framework'
 import { db } from '@/db/db'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { governedPolicies, type NewGovernedPolicyRow } from '@nzila/db/schema'
@@ -49,6 +49,11 @@ export const POST = withApi(
     entitlement: 'governance_suite',
   },
   async ({ request, user }) => {
+    const actorId = user?.id
+    if (!actorId) {
+      throw ApiError.badRequest('Authenticated user is required to create a policy.')
+    }
+
     const body = await request.json() as {
       policyFamilyId: string
       semver: string
@@ -72,7 +77,7 @@ export const POST = withApi(
         domain: body.domain,
         workflowBindings: (body.workflowBindings as string[] | undefined) ?? [],
         operationalScope: (body.operationalScope ?? {}) as Record<string, unknown>,
-        authorId: user?.id ?? 'system',
+        authorId: actorId,
         authorRole: body.authorRole,
         governanceRationale: body.governanceRationale,
         riskClassification: (body.riskClassification ?? 'medium') as 'low' | 'medium' | 'high' | 'critical',

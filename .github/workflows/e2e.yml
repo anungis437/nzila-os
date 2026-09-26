@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -32,7 +33,10 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: E2E · ${{ matrix.app }}
-    timeout-minutes: 45  # union-eyes includes DB migration + seed; other apps finish in ≤5 min
+    # staging env supplies AZURE_CLIENT_ID/TENANT_ID for OIDC snapshot retrieve
+    # (repo-level secrets lack those; staging has no protection reviewers).
+    environment: staging
+    timeout-minutes: 60  # union-eyes: snapshot restore + platform DDL + seed + full Playwright; others ≤5 min
     strategy:
       fail-fast: false
       matrix:
@@ -100,16 +104,98 @@ jobs:
           fi
           echo "Staged $(find "$STANDALONE_APP/.next/static" -type f | wc -l) static files into standalone output"
 
-      - name: Bootstrap Union Eyes E2E database
+      - name: Azure login (UE snapshot retrieve)
+        if: matrix.app == 'union-eyes'
+        continue-on-error: true
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Bootstrap Union Eyes E2E database (canonical PG15 snapshot)
         if: matrix.app == 'union-eyes'
         run: |
-          docker run --name ci-e2e-postgres -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e -p 5432:5432 -d postgres:16
-          timeout 60 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
+          set -euo pipefail
+          SNAPSHOT_ID="${UE_DB_SNAPSHOT_ID}"
+          EXPECTED_SHA256="5b67def829412676a33f49d0155949253a76bc7e33efe5334131853cb64783a4"
+          DUMP_DIR="${RUNNER_TEMP}/ue-canonical-snapshot"
+          DUMP_PATH="${DUMP_DIR}/${SNAPSHOT_ID}.dump"
+          mkdir -p "$DUMP_DIR"
+
+          # Empty PG15 with vector extension support (matches restore-proof target).
+          # Retry image pull — Docker Hub intermittently returns 502.
+          for attempt in 1 2 3 4 5; do
+            if docker pull pgvector/pgvector:pg15; then
+              break
+            fi
+            echo "docker pull attempt ${attempt} failed; sleeping $((attempt * 5))s"
+            sleep $((attempt * 5))
+            if [ "$attempt" -eq 5 ]; then
+              echo "::error::Failed to pull pgvector/pgvector:pg15 after 5 attempts"
+              exit 1
+            fi
+          done
+          docker run --name ci-e2e-postgres             -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e             -p 5432:5432 -d pgvector/pgvector:pg15
+          timeout 90 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
+
+          # Roles expected by canonical dump / RLS helpers (idempotent).
+          docker exec -i ci-e2e-postgres psql -U ci -d ci_e2e <<'SQL'
+          DO $$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
+              CREATE ROLE union_eyes_runtime LOGIN PASSWORD 'ci';
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system') THEN
+              CREATE ROLE union_eyes_system LOGIN PASSWORD 'ci';
+            END IF;
+          END $$;
+          GRANT ALL ON DATABASE ci_e2e TO union_eyes_runtime, union_eyes_system;
+          GRANT ALL ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
+          SQL
+
+          echo "Retrieving canonical snapshot ${SNAPSHOT_ID} from Azure Blob..."
+          if az account show >/dev/null 2>&1; then
+            az storage blob download \
+              --account-name nzilastagingstore \
+              --container-name nzila-staging-snapshots \
+              --name "${SNAPSHOT_ID}.dump" \
+              --file "$DUMP_PATH" \
+              --auth-mode login
+          elif [ -n "${AZURE_STORAGE_ACCOUNT_KEY:-}" ]; then
+            echo "OIDC session unavailable; falling back to account-key auth for snapshot retrieve"
+            az storage blob download \
+              --account-name nzilastagingstore \
+              --container-name nzila-staging-snapshots \
+              --name "${SNAPSHOT_ID}.dump" \
+              --file "$DUMP_PATH" \
+              --account-key "$AZURE_STORAGE_ACCOUNT_KEY"
+          else
+            echo "::error::No Azure auth for snapshot retrieve (OIDC login failed and AZURE_STORAGE_ACCOUNT_KEY unset)"
+            exit 1
+          fi
+
+          ACTUAL_SHA256="$(sha256sum "$DUMP_PATH" | awk '{print $1}')"
+          echo "Retrieved SHA256=${ACTUAL_SHA256}"
+          if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+            echo "::error::Snapshot SHA256 mismatch (expected ${EXPECTED_SHA256})"
+            exit 1
+          fi
+          echo "VERIFY_SHA256=PASS"
+
+          # Restore via file:// so bootstrap skips stale QA baseline.
+          export UE_DB_RESTORE_SNAPSHOT_URL="file://${DUMP_PATH}"
+          export PGSSLMODE=disable
+          export POSTGRES_MAJOR=15
           pnpm --filter @nzila/union-eyes db:migrate
           pnpm --filter @nzila/union-eyes seed:test-env
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           QA_TEST_ENV: 'true'
+          UE_DB_SNAPSHOT_ID: staging-canonical-20260923T184938Z-92611387
+          POSTGRES_MAJOR: '15'
+          PGSSLMODE: disable
+          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
 
       - name: Start app
         run: |
@@ -119,6 +205,7 @@ jobs:
         env:
           AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           NODE_ENV: production
           PORT: ${{ matrix.port }}
           QA_TEST_ENV: 'true'
@@ -138,6 +225,7 @@ jobs:
         env:
           CI: true
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
+          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
           PLAYWRIGHT_TEST_AUTH: 'true'
           # Override env vars used by spec files that construct their own URLs
           WEB_URL: http://localhost:${{ matrix.port }}

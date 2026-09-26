@@ -236,7 +236,7 @@
     "cash:calendar": "tsx scripts/cash-calendar.ts",
     "runway:model": "tsx scripts/runway-model.ts",
     "validate:portfolio": "tsx scripts/validate-portfolio.ts",
-    "validate:doctrine": "tsx scripts/validate-doctrine.ts",
+    "validate:doctrine": "tsx scripts/validate-doctrine.ts && pnpm exec tsx scripts/validate-civic-oci-doctrine.ts",
     "brand:leakage:check": "tsx scripts/check-brand-leakage.ts",
     "validate:capital-discipline": "tsx scripts/validate-capital-discipline.ts",
     "validate:portfolio-governance": "pnpm brand:leakage:check && pnpm validate:product-catalog && pnpm validate:portfolio && pnpm validate:doctrine && pnpm validate:canonical-truth && pnpm validate:truth-authority",
@@ -408,7 +408,7 @@
       "@opentelemetry/propagator-jaeger": ">=2.9.0",
       "@opentelemetry/exporter-prometheus": ">=0.217.0",
       "websocket-driver": ">=0.7.5",
-      "adm-zip": ">=0.6.0"
+      "adm-zip": ">=0.6.1"
     }
   },
   "dependencies": {}

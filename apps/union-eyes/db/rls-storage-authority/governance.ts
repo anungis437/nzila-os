@@ -25,6 +25,30 @@ import type { StorageAuthorityEntry } from './types';
 
 export const governanceEntries: StorageAuthorityEntry[] = [
   {
+    table: "compliance_snapshots",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "CLOSED (0011 source-native storage-authority completion): Django services/compliance_snapshot app (backend/services/compliance_snapshot/models.py db_table='compliance_snapshots', backend/services/migrations/0001_enterprise_hardening.py). org_id NOT NULL. Reachable via ComplianceSnapshotViewSet (backend/services/compliance_snapshot/views.py, ReadOnlyModelViewSet + IsAuthenticated) whose get_queryset() filters ComplianceSnapshot.objects.filter(org_id=request.organization_id) and returns .none() with no org context — plus a `capture` action that writes a snapshot for request.organization_id. 0011 adds direct-org RLS on org_id (runtime sees/creates only current_org snapshots; union_eyes_system full access for verify_chain/background integrity passes).",
+    supportingCapability: ["backend/services/compliance_snapshot/models.py","backend/services/compliance_snapshot/views.py","backend/services/compliance_snapshot/service.py"],
+    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: ["SELECT"],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
+    table: "evidence_packs",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "CLOSED (0011 source-native storage-authority completion): Django services/evidence_pack app (backend/services/evidence_pack/models.py db_table='evidence_packs', backend/services/migrations/0001_enterprise_hardening.py). org_id NOT NULL. Reachable via EvidencePackViewSet (backend/services/evidence_pack/views.py, ReadOnlyModelViewSet + IsAuthenticated) whose get_queryset() filters EvidencePack.objects.filter(org_id=request.organization_id) and returns .none() with no org context — plus an `export` action that builds+seals a pack for the caller's org (backend/services/evidence_pack/builder.py). 0011 adds direct-org RLS on org_id (runtime sees/creates only current_org packs; union_eyes_system full access for background pack sealing/verification).",
+    supportingCapability: ["backend/services/evidence_pack/models.py","backend/services/evidence_pack/views.py","backend/services/evidence_pack/builder.py"],
+    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    requiredSystemPrivileges: ["SELECT"],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
+  },
+  {
     table: "board_packet_templates",
     classification: "LATENT_UNREACHABLE",
     reason: "Zero references to the 'boardPacketTemplates' Drizzle export found outside db/schema/**, __tests__/**, .test./.spec./.stories. files, and migrations via git grep across app/, actions/, lib/, services/ (scan: 2026-09-01, corrected pass with test-file exclusion). No known application code path queries this table.",

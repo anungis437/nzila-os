@@ -4,6 +4,7 @@ const m = vi.hoisted(() => ({
   crudRoutes: vi.fn(),
   withApi: vi.fn(),
   badRequest: vi.fn(),
+  withRLSContext: vi.fn(),
   withSystemRLSContext: vi.fn(),
   claims: { table: 'claims' },
   sql: vi.fn(),
@@ -15,7 +16,10 @@ vi.mock('@/lib/api/crud-factory', () => ({
 vi.mock('@/lib/api/with-api', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/api/errors', () => ({ ApiError: { badRequest: m.badRequest } }));
 vi.mock('@/db/schema', () => ({ claims: m.claims }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemRLSContext: m.withSystemRLSContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: m.withRLSContext,
+  withSystemRLSContext: m.withSystemRLSContext,
+}));
 vi.mock('drizzle-orm', () => ({ sql: m.sql }));
 
 async function loadRoute() {
@@ -36,7 +40,7 @@ describe('claims route', () => {
       throw error;
     });
     m.sql.mockImplementation((parts: TemplateStringsArray, ...values: unknown[]) => ({ parts, values }));
-    m.withSystemRLSContext.mockImplementation(async (_label: string, fn: (tx: any) => Promise<unknown>) => {
+    m.withRLSContext.mockImplementation(async (_context: { organizationId: string }, fn: (tx: any) => Promise<unknown>) => {
       const tx = {
         execute: vi.fn(async () => [{ max_num: null }]),
         insert: vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ claimId: 'claim_1' }]) })) })),
@@ -76,6 +80,7 @@ describe('claims route', () => {
     });
 
     expect(result).toEqual({ data: { claimId: 'claim_1' } });
-    expect(m.withSystemRLSContext).toHaveBeenCalledWith('system-query: create-claim', expect.any(Function));
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+    expect(m.withSystemRLSContext).not.toHaveBeenCalled();
   });
 });

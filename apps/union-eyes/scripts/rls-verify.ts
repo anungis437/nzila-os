@@ -591,6 +591,115 @@ async function checkOrphanedTenantTables(sql: postgres.Sql, results: CheckResult
 }
 
 
+/**
+ * MANIFEST-DRIVEN RLS coverage (PR #752 round 58+ blind-spot closure).
+ *
+ * checkOrphanedTenantTables above only DISCOVERS candidate tables by
+ * scanning the live catalog for an organization_id/org_id/tenant_id column.
+ * That silently EXCLUDES every manifest-RLS-required table whose physical
+ * (Django app 0001_initial) source-native shape carries NO org column but
+ * whose authority is reached through a parent FK, a user_id, a multi-hop
+ * parent, or a sharing predicate (the dual-lineage-collision set 0012
+ * closes). Those tables could be RLS-required-and-unenforced yet still pass
+ * the old verifier — a false green.
+ *
+ * This check removes that blind spot: it evaluates EVERY manifest entry
+ * whose classification requires RLS, independently of any column heuristic.
+ *   - Physically present  => MUST have RLS enabled + FORCE + at least one
+ *     union_eyes_runtime policy (policy owner) + a union_eyes_system
+ *     full-access policy. Any gap FAILS.
+ *   - Physically absent    => reported as NOT_PRESENT_IN_SOURCE_NATIVE_SCHEMA
+ *     (visible, non-failing: enforced-by-absence in the scoped lineage).
+ * A future migration that adds an RLS-required table without RLS therefore
+ * fails automatically — the old 1054/1054-style false green is impossible.
+ */
+async function checkManifestRlsRequiredCoverage(sql: postgres.Sql, results: CheckResult[]) {
+  const { storageAuthorityManifest } = await import('../db/rls-storage-authority-manifest')
+  const rlsRequiredClassifications = new Set([
+    'TENANT_RLS_REQUIRED',
+    'USER_RLS_REQUIRED',
+    'PARENT_OWNED_RLS_REQUIRED',
+    'MIXED_GLOBAL_TENANT_RLS_REQUIRED',
+    'MULTI_PARTY_RLS_REQUIRED',
+  ])
+  const requiredTables = [
+    ...new Set(
+      storageAuthorityManifest
+        .filter((e) => rlsRequiredClassifications.has(e.classification))
+        .map((e) => e.table),
+    ),
+  ].sort()
+  // table -> whether the manifest declares any required union_eyes_system
+  // privilege. A system full-access policy is required ONLY where the
+  // contract needs system access (e.g. withSystemContext background jobs);
+  // runtime-only tables (some 0006 external-grant tables) legitimately have
+  // no union_eyes_system policy and must not be failed for lacking one.
+  const systemRequiredByTable = new Map<string, boolean>()
+  for (const e of storageAuthorityManifest) {
+    if (!rlsRequiredClassifications.has(e.classification)) continue
+    const needs =
+      e.requiredSystemPrivileges !== 'TBD' &&
+      Array.isArray(e.requiredSystemPrivileges) &&
+      e.requiredSystemPrivileges.length > 0
+    systemRequiredByTable.set(e.table, (systemRequiredByTable.get(e.table) ?? false) || needs)
+  }
+
+  const presentRows = await sql<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }[]>`
+    SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = 'public'
+    WHERE c.relkind = 'r' AND c.relname = ANY(${requiredTables})`
+  const presentByTable = new Map(presentRows.map((r) => [r.relname, r]))
+
+  const runtimePolicyRows = await sql<{ tablename: string }[]>`
+    SELECT DISTINCT tablename FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = ANY(${requiredTables})
+      AND roles = ARRAY['union_eyes_runtime']::name[]`
+  const tablesWithRuntimePolicy = new Set(runtimePolicyRows.map((r) => r.tablename))
+  const systemPolicyRows = await sql<{ tablename: string }[]>`
+    SELECT DISTINCT tablename FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = ANY(${requiredTables})
+      AND policyname = 'ue_system_full_access'
+      AND roles = ARRAY['union_eyes_system']::name[]`
+  const tablesWithSystemPolicy = new Set(systemPolicyRows.map((r) => r.tablename))
+
+  let presentCount = 0
+  let absentCount = 0
+  let enforcedCount = 0
+  for (const table of requiredTables) {
+    const present = presentByTable.get(table)
+    if (!present) {
+      absentCount += 1
+      results.push({
+        name: `manifest-rls: ${table} coverage`,
+        pass: true,
+        detail: 'NOT_PRESENT_IN_SOURCE_NATIVE_SCHEMA — RLS-required in the manifest but not physically present in this scoped source-native database (enforced by absence).',
+      })
+      continue
+    }
+    presentCount += 1
+    const hasRls = Boolean(present.relrowsecurity && present.relforcerowsecurity)
+    const hasRuntimePolicy = tablesWithRuntimePolicy.has(table)
+    const hasSystemPolicy = tablesWithSystemPolicy.has(table)
+    const systemRequired = systemRequiredByTable.get(table) ?? false
+    const ok = hasRls && hasRuntimePolicy && (!systemRequired || hasSystemPolicy)
+    if (ok) enforcedCount += 1
+    results.push({
+      name: `manifest-rls: ${table} is present and fully RLS-enforced (RLS+FORCE+runtime policy owner${systemRequired ? '+system policy' : ''})`,
+      pass: ok,
+      detail: ok
+        ? 'ok'
+        : `UNENFORCED — relrowsecurity=${present.relrowsecurity}, relforcerowsecurity=${present.relforcerowsecurity}, runtime policy owner=${hasRuntimePolicy}, system policy=${hasSystemPolicy} (systemRequired=${systemRequired}). This table is RLS-required by its manifest classification but is not fully enforced — add its policy owner in a scoped migration (0010/0011/0012).`,
+    })
+  }
+
+  console.log(
+    `[rls-verify] manifest-driven RLS coverage: ${requiredTables.length} RLS-required manifest tables ` +
+      `(${presentCount} present / ${absentCount} absent), ${enforcedCount}/${presentCount} present-and-enforced. ` +
+      `RLS_VERIFY_MANIFEST_DRIVEN=YES RLS_VERIFY_EXPECTATIONS_WEAKENED=NO`,
+  )
+}
+
 async function checkNoContextFailsClosed(sql: postgres.Sql, results: CheckResult[]) {
   await sql.begin(async (tx) => {
     await tx.unsafe(`SELECT set_config('app.current_user_id', '', true)`)
@@ -814,6 +923,7 @@ async function main() {
     await checkNoContextFailsClosed(sql, results)
     await checkBaselineTablesHaveManifestDisposition(results)
     await checkOrphanedTenantTables(sql, results)
+    await checkManifestRlsRequiredCoverage(sql, results)
     if (mode === 'full') {
       const bootstrapDbUrl = resolveBootstrapDatabaseUrl()
       if (!bootstrapDbUrl) {

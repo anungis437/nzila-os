@@ -313,12 +313,14 @@ export const GET = withOrganizationAuth(async (request, context) => {
       scopedFilter = eq(grievances.organizationId, organizationId);
     }
 
-    const filtered = await db
-      .select()
-      .from(grievances)
-      .where(scopedFilter)
-      .orderBy(desc(grievances.createdAt))
-      .limit(500);
+    const filtered = await withRLSContext({ organizationId }, async () =>
+      db
+        .select()
+        .from(grievances)
+        .where(scopedFilter)
+        .orderBy(desc(grievances.createdAt))
+        .limit(500),
+    );
 
     return standardSuccessResponse(filtered);
   } catch (_error) {

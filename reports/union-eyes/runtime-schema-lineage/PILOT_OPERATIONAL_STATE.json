@@ -1,0 +1,71 @@
+{
+  "artifact": "PILOT_OPERATIONAL_STATE",
+  "generatedAt": "2026-09-23T22:36:17Z",
+  "generatedAtET": "2026-09-23, 6:36 PM ET",
+  "posture": "EXECUTE / incident-driven",
+  "next_formal_checkpoint": "PILOT_EVIDENCE_REVIEW",
+  "next_formal_checkpoint_note": "NOT a readiness reassessment.",
+  "PHASE_H": "CLOSED",
+  "LIUNA_DEMO_READINESS": "READY_WITH_LIMITATIONS",
+  "CONTROLLED_PILOT_READINESS": "READY_WITH_LIMITATIONS",
+  "PILOT_PREFLIGHT": "PASS",
+  "PILOT_EXECUTION_AUTHORIZED": "YES",
+  "LIVE_REVISION": "nzila-os-union-eyes-staging--0000259",
+  "LIVE_TRAFFIC": "100%",
+  "TECHNICAL_ACCESS_CONTROL": "PASS",
+  "EXTERNAL_SPECIALIST_MATRIX": "10/10 PASS",
+  "GENERAL_PRODUCTION_READINESS": "BLOCKED",
+  "PR_797_MERGE": "NOT_AUTHORIZED",
+  "PRODUCTION_PROMOTION": "NOT_AUTHORIZED",
+  "PRODUCTION_DATA_MIGRATION": "NOT_AUTHORIZED",
+  "PILOT_END": "2026-10-07",
+  "PILOT_SCOPE": "STAGING_ONLY",
+  "ORGS_MAX": 2,
+  "Approver": "Aubert / Nzila designated pilot authority; signedAt 2026-09-23T22:03:50Z",
+  "support": "support@onelabtech.com",
+  "auto_stop_kill_criteria": [
+    "Tenant isolation failure",
+    "Authority bypass",
+    "Audit-integrity failure",
+    "Unrecoverable corruption",
+    "Restore failure",
+    "Severe security regression"
+  ],
+  "existing_kill_list_reference": "PHASE_H_PILOT_ROLLBACK_SUPPORT_SIGNOFF",
+  "residuals": [
+    {
+      "id": "RESIDUAL-001",
+      "defect": "GET /api/members → 500 (while /api/members/me → 200)",
+      "classification": "TRACKED_DEFECT_ONLY",
+      "phase_h_reopener": false,
+      "handling": "Triage during pilot ops if a workflow hits it."
+    },
+    {
+      "id": "RESIDUAL-002",
+      "defect": "QA-primary org /api/grievances → 500 (known limitation)",
+      "classification": "TRACKED_DEFECT_ONLY",
+      "phase_h_reopener": false,
+      "handling": "Does not supersede PhaseG Org A path unless pilot depends on QA-primary route."
+    }
+  ],
+  "constraints": [
+    "No readiness assessment",
+    "No rematrix",
+    "No governance reopen",
+    "No PR merge",
+    "No production action"
+  ],
+  "artifactPointers": {
+    "incidentLog": "PILOT_INCIDENT_LOG.md|.json",
+    "day0Execution": "PILOT_EXECUTION_DAY0.md|.json",
+    "evidenceReviewTemplate": "PILOT_EVIDENCE_REVIEW_TEMPLATE.md"
+  },
+  "existing_kill_criteria": [
+    "Cross-org data leak detected",
+    "Audit log NAR chain breaks or gaps found",
+    "Authentication bypass or session fixation confirmed",
+    "More than 3 unhandled 500 errors per hour sustained for 30+ minutes",
+    "Pilot sponsor / platform lead requests halt",
+    "Authority regression on PRIMARY auth, RLS, tenant isolation, or external-specialist boundary"
+  ]
+}

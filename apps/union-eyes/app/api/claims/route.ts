@@ -11,7 +11,7 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { claims } from '@/db/schema';
 import { sql } from 'drizzle-orm';
-import { withSystemRLSContext } from '@/lib/db/with-rls-context';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
 
 const claimCreateSchema = z.object({
@@ -73,7 +73,9 @@ export const POST = withApi(
       throw ApiError.badRequest('No active organization. Please select an organization and try again.');
     }
 
-    return withSystemRLSContext('system-query: create-claim', async (tx) => {
+    // Ordinary same-organization create uses the tenant runtime role.
+    // System context is reserved for background, webhook, and maintenance work.
+    return withRLSContext({ organizationId }, async (tx) => {
       // Generate claim number: CLM-YYYYMMDD-XXXX
       // Sequence is scoped to organizationId to prevent cross-org information leakage.
       const today = new Date();

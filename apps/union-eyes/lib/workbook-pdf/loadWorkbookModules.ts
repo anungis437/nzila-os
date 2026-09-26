@@ -12,6 +12,11 @@
  *
  * Anti-surveillance: only structural fields cross the engine boundary.
  * Holder names, lineage prose, and notes never leave the row.
+ *
+ * AUTHORITY: reads protected workbook child rows (workbook_memory_holders,
+ * workbook_governance_lineage_entries) through the module-level `db`. It
+ * inherits the active DB execution context and MUST run inside the
+ * claimed-workbook authority boundary (withClaimedWorkbookAccess).
  */
 
 import { eq } from 'drizzle-orm';

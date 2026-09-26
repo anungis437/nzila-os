@@ -80,15 +80,28 @@ describe('documents/folders route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ organizationId: '22222222-2222-2222-2222-222222222222', name: 'Folder' }),
     }), { userId: 'u1', organizationId: '11111111-1111-1111-1111-111111111111' });
     expect(response.status).toBe(403);
+    expect(m.createFolder).not.toHaveBeenCalled();
   });
 
-  it('POST creates folder successfully', async () => {
+  it('POST rejects a write when server organization context is missing', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/documents/folders', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ organizationId: '11111111-1111-1111-1111-111111111111', name: 'Folder' }),
-    }), { userId: 'u1', organizationId: '11111111-1111-1111-1111-111111111111' });
+    }), { userId: 'u1' });
+    expect(response.status).toBe(403);
+    expect(m.createFolder).not.toHaveBeenCalled();
+  });
+
+  it('POST creates folder successfully', async () => {
+    const serverOrganizationId = '11111111-1111-1111-1111-111111111111';
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents/folders', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ organizationId: serverOrganizationId, name: 'Folder' }),
+    }), { userId: 'u1', organizationId: serverOrganizationId });
 
     expect(response.status).toBe(201);
-    expect(m.createFolder).toHaveBeenCalled();
+    expect(m.createFolder).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: serverOrganizationId,
+    }));
   });
 });

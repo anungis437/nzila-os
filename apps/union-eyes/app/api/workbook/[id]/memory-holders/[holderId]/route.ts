@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { workbookMemoryHolders } from '@/db/schema/workbook-schema';
-import { verifyClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -35,11 +35,6 @@ export async function PATCH(
 ) {
   const { id: workbookId, holderId } = await params;
 
-  const access = await verifyClaimedWorkbookAccess(workbookId);
-  if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
-  }
-
   let body: any;
   try {
     body = await request.json();
@@ -61,18 +56,28 @@ export async function PATCH(
   }
 
   try {
-    const result = await db
-      .update(workbookMemoryHolders)
-      .set(patch)
-      .where(
-        and(
-          eq(workbookMemoryHolders.id, holderId),
-          eq(workbookMemoryHolders.workbookId, workbookId),
-        ),
-      )
-      .returning({ id: workbookMemoryHolders.id });
+    // Authorization is resolved first; the protected update then runs inside
+    // the DB execution context that matches the resolved authority.
+    const access = await withClaimedWorkbookAccess(
+      { workbookId, operation: 'write' },
+      async () =>
+        db
+          .update(workbookMemoryHolders)
+          .set(patch)
+          .where(
+            and(
+              eq(workbookMemoryHolders.id, holderId),
+              eq(workbookMemoryHolders.workbookId, workbookId),
+            ),
+          )
+          .returning({ id: workbookMemoryHolders.id }),
+    );
 
-    if (result.length === 0) {
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
+    if (access.value.length === 0) {
       return NextResponse.json({ error: 'Memory holder not found' }, { status: 404 });
     }
 
@@ -89,22 +94,28 @@ export async function DELETE(
 ) {
   const { id: workbookId, holderId } = await params;
 
-  const access = await verifyClaimedWorkbookAccess(workbookId);
-  if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
-  }
   try {
-    const result = await db
-      .delete(workbookMemoryHolders)
-      .where(
-        and(
-          eq(workbookMemoryHolders.id, holderId),
-          eq(workbookMemoryHolders.workbookId, workbookId),
-        ),
-      )
-      .returning({ id: workbookMemoryHolders.id });
+    // Authorization is resolved first; the protected delete then runs inside
+    // the DB execution context that matches the resolved authority.
+    const access = await withClaimedWorkbookAccess(
+      { workbookId, operation: 'write' },
+      async () =>
+        db
+          .delete(workbookMemoryHolders)
+          .where(
+            and(
+              eq(workbookMemoryHolders.id, holderId),
+              eq(workbookMemoryHolders.workbookId, workbookId),
+            ),
+          )
+          .returning({ id: workbookMemoryHolders.id }),
+    );
 
-    if (result.length === 0) {
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
+    if (access.value.length === 0) {
       return NextResponse.json({ error: 'Memory holder not found' }, { status: 404 });
     }
 

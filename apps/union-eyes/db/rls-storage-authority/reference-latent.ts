@@ -25,6 +25,18 @@ import type { StorageAuthorityEntry } from './types';
 
 export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
+    table: "audit_logs",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "CLOSED (0011 source-native storage-authority completion): the SOURCE-NATIVE public.audit_logs is the Django `core` app's AuditLog model (backend/core/models.py db_table='audit_logs', backend/core/migrations/0001_initial.py) — a DIFFERENT physical table from the Drizzle audit_security.audit_logs the app reads schema-qualified (app/api/activities, app/api/admin/ai-usage) and from the 0008 ue_runtime_audit_* set. Router-registered at /api/audit-logs/ via backend/core/urls.py -> backend/core/views.py AuditLogsViewSet, a full ModelViewSet with queryset=AuditLogs.objects.all() + permission_classes=[IsAuthenticated] + filterset_fields=['organization_id','user_id'] — the unscoped objects.all()+IsAuthenticated cross-org pattern (any authenticated user of any org could list/retrieve/create/update/delete every org's audit rows). organization_id is nullable: NULL rows are platform/system audit events, which a strict direct-org policy correctly keeps invisible to every tenant (fail-closed). backend/core/tasks.py archives (UPDATE audit_logs) on a background schedule (system). 0011 adds direct-org RLS (runtime sees only current_org rows; union_eyes_system full access for the archival job and cross-org compliance reads) — DB-level closure of the ViewSet's missing scoping.",
+    supportingCapability: ["backend/core/models.py","backend/core/views.py","backend/core/urls.py","backend/core/tasks.py"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
+    requiredSystemPrivileges: ["SELECT","UPDATE"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
+    reviewPriority: "NONE",
+  },
+  {
     table: "ab_tests",
     classification: "CONTAINED_NO_AUTHORITY",
     reason: "CLOSED (round 50, state-machine root and fan-out cascade authority): lib/ab-testing/ab-test-engine.ts (the TS side) has zero real callers anywhere under app/, actions/, lib/, services/. Django (ai_core app) has a live, router-registered AbTestsViewSet (queryset=AbTests.objects.all(), IsAuthenticated-only, no organization scoping) — contained via the existing DenyAllPermission in backend/ai_core/views.py (round 35). There is no legitimate consumer on either side. Root of the ab_test_variants/ab_test_assignments/ab_test_events cascade, all closed identically this round.",
@@ -3195,10 +3207,10 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
   {
     table: "workbook_purchases",
     classification: "PARENT_OWNED_RLS_REQUIRED",
-    reason: "CLOSED (round 50, state-machine root and fan-out cascade authority — direct child of the now-closed workbooks root): no direct ownership column; authority derives through workbookId -> workbooks. Sole write path is app/api/payments/webhooks/stripe/route.ts (SYSTEM/WEBHOOK principal, not TENANT_USER) — verifies the Stripe signature (verifyStripeSignature) before processing, derives workbookId from the checkout session's own metadata (set server-side when WE created the session, never client input), and is idempotent via onConflictDoNothing on the unique stripePaymentRef. Classified PARENT_OWNED rather than ejected: the parent root (workbooks) is now proven, and the webhook-vs-tenant invocation distinction is exactly what dbExecutionPrincipal/invocationAuthority already exist to encode (SYSTEM_RUNTIME/WEBHOOK).",
-    supportingCapability: ["app/api/payments/webhooks/stripe/route.ts"],
+    reason: "CLOSED (round 50, state-machine root and fan-out cascade authority — direct child of the now-closed workbooks root): no direct ownership column; authority derives through workbookId -> workbooks. Sole write path is app/api/payments/webhooks/stripe/route.ts (SYSTEM/WEBHOOK principal, not TENANT_USER) — verifies the Stripe signature (verifyStripeSignature) before processing, derives workbookId from the checkout session's own metadata (set server-side when WE created the session, never client input), and is idempotent via reservation-first ON CONFLICT DO NOTHING on the unique stripePaymentRef. Classified PARENT_OWNED rather than ejected: the parent root (workbooks) is now proven, and the webhook-vs-tenant invocation distinction is exactly what dbExecutionPrincipal/invocationAuthority already exist to encode (SYSTEM_RUNTIME/WEBHOOK). DB ENFORCEMENT (20260921_workbook_credential_and_payment_authority.sql): union_eyes_system is granted SELECT+INSERT (INSERT reserves the purchase; SELECT resolves the conflicting purchase by stripe_payment_ref); union_eyes_runtime retains ZERO table privileges — no product path reads or writes this table as the tenant principal.",
+    supportingCapability: ["app/api/payments/webhooks/stripe/route.ts","db/migrations/20260921_workbook_credential_and_payment_authority.sql"],
     requiredRuntimePrivileges: [],
-    requiredSystemPrivileges: ["INSERT"],
+    requiredSystemPrivileges: ["SELECT", "INSERT"],
     invocationAuthority: "WEBHOOK",
     dbExecutionPrincipal: "SYSTEM_RUNTIME",
     reviewPriority: "NONE",
@@ -3231,9 +3243,18 @@ export const referenceLatentEntries: StorageAuthorityEntry[] = [
     reason: "CLOSED (round 50, state-machine root and fan-out cascade authority): the Governance Entropy Workbook™ is a deliberately pseudonymous product (own doc comment: 'A workbook can exist with no user account'). No organization_id column. STATE MACHINE: status draft -> awaiting_claim (Stripe webhook, on purchase) -> active (claim) -> [no further transitions found]. OWNERSHIP MODEL (two phases, both proven safe): (1) UNCLAIMED — the workbookId itself is the bearer credential by design (app/api/workbook/start/route.ts creates with no auth, matching its own docstring 'No authentication required'); (2) CLAIMED — app/api/workbook/[id]/claim/route.ts requires authentication + a single-use claimToken verified against the exact row (eq(workbooks.id, workbookId) AND eq(workbooks.claimToken, claimToken)), rejects already-claimed/expired tokens, and nulls the token after use (replay-proof) — stamping claimedByUserId/claimedOrgId/claimedAt, matching this app's USER_RLS_REQUIRED archetype (member_location_consent, round 17) once claimed. SECURITY DEFECT FOUND AND FIXED: 3 surfaces that read/write IDENTITY-LINKED child data for a workbook only checked workbook EXISTENCE, not the claimed-ownership rule the product's own design already documented and already correctly implemented in app/api/workbook/[id]/export/route.ts — app/api/workbook/[id]/memory-holders/route.ts (GET+POST), its [holderId]/route.ts sibling (PATCH+DELETE), and app/[locale]/workbook/[id]/memory-holders/page.tsx (a server component querying workbookMemoryHolders, including free-text notes, directly with no auth at all). Any caller who ever held a workbookId (e.g. from the anonymous pre-claim phase, a shared link, or logs) could keep reading/editing/deleting institutional-succession data indefinitely after the workbook became identity-linked. Fixed by extracting the export route's proven ownership check into a shared lib/workbook/access-control.ts (verifyClaimedWorkbookAccess) and applying it to all 3 surfaces; 15 new tests across 3 test files.",
     supportingCapability: ["app/[locale]/workbook/[id]/memory-holders/page.tsx","app/[locale]/workbook/[id]/page.tsx","app/[locale]/workbook/start/page.tsx","app/api/payments/webhooks/stripe/route.ts","app/api/workbook/[id]/claim/route.ts","app/api/workbook/[id]/export/route.ts","app/api/workbook/[id]/memory-holders/route.ts","app/api/workbook/checkout/route.ts","app/api/workbook/start/route.ts","lib/workbook/access-control.ts","lib/workbook/__tests__/access-control.test.ts","lib/hubspot/syncWorkbookPurchase.ts","lib/oci/facilitation/facilitationGuide.ts","lib/workbook-pdf/generateWorkbookPdf.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
-    requiredSystemPrivileges: ["UPDATE"],
+    requiredSystemPrivileges: ["SELECT","UPDATE"],
     invocationAuthority: "MIXED",
     dbExecutionPrincipal: "MIXED",
     reviewPriority: "NONE",
+    // DB ENFORCEMENT (20260921_workbook_credential_and_payment_authority.sql):
+    // (1) union_eyes_system is granted SELECT+UPDATE — the guarded fulfillment
+    //     UPDATE and the claim UPDATE read columns in WHERE/RETURNING, which
+    //     Postgres requires SELECT for; UPDATE alone was insufficient.
+    // (2) a BEFORE INSERT OR UPDATE trigger makes claim_token,
+    //     claim_token_expires_at, and stripe_payment_ref system-only, and
+    //     enforces claim-credential pair consistency for every principal.
+    //     status/report_tier_id/claimed_* remain runtime-mutable (the
+    //     claimed-workbook access chain is the next tranche).
   },
 ]

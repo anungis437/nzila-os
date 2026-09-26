@@ -20,6 +20,11 @@ const h = vi.hoisted(() => {
   return { queue, db, execute, auditLog, jsonMock };
 });
 
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn(async (fn: (tx?: unknown) => unknown) => fn(h.db as never)),
+  withRLSContext: vi.fn(async (fn: (tx?: unknown) => unknown) => fn(h.db as never)),
+}));
+
 vi.mock('@/db', () => ({ db: h.db }));
 vi.mock('@/db/schema', () =>
   new Proxy(

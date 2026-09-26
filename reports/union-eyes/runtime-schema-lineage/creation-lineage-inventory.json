@@ -1,0 +1,3160 @@
+{
+  "generatedAt": "2026-09-23T14:14:30.955Z",
+  "counts": {
+    "storageAuthorityEntries": 805,
+    "runtimeUniverseTables": 349,
+    "tenantOrMixedRuntimePrincipalTables": 349,
+    "tablesWithNonEmptyRuntimePrivileges": 346,
+    "rlsRequiredTables": 326,
+    "runtimeTablesWithExistingCreationMigration": 339,
+    "runtimeTablesWithoutCreationMigration": 10,
+    "runtimeTablesWithOwner": 339,
+    "runtimeTablesWithoutSchemaOwner": 10,
+    "runtimeTablesWithMultipleSchemaOwners": 233,
+    "bootstrapParticipatingCreationTables": 41,
+    "bootstrapMissingCreationTables": 308
+  },
+  "records": [
+    {
+      "TABLE": "account_mappings",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ai_clause_reasonings",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ai_copilot_sessions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ai_grievance_triages",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ai_insight_reports",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ai_safety_filters",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ai_usage_metrics",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "alert_executions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "alert_rules",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "allocation_basis_snapshots",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "allocation_rule_versions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "allocation_rules",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "allocation_run_lines",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "allocation_runs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "analytics_metrics",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "anti_scab_violations",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "api_integrations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "arbitration_decisions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "arbitration_precedents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "arbitrations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "audit_logs",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "automation_rules",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "bank_accounts",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "bank_reconciliation",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "bank_reconciliations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "bargaining_notes",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "bargaining_proposals",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "bargaining_units",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "billing_accounts",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "billing_periods",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "billing_subscriptions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0001_billing_subscriptions.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "board_packet_distributions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "board_packets",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "break_policies",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "budget_pool",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "calendar_events",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "calendars",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "campaigns",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "case_documents",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0098_predeployment_hardening.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "case_studies",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_clauses",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_agreements",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_benchmark_snapshots",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_clauses",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_documents",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_extraction_runs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_findings",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_ingestion_jobs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_review_decisions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_sources",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_intel_wage_adjustments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260401_cba_intelligence_public_sources.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_rule_set_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cba_rule_versions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "chargeback_statements",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "chart_of_accounts",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "chat_messages",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "chat_sessions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "claim_deadlines",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "claim_updates",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "claims",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "clause_comparisons",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "clause_embeddings",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "clause_library_tags",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "clc_remittance_mapping",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "clc_sync_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cms_media_library",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cms_pages",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cnesst_filings",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "collective_agreements",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "commercial_contracts",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "committee_action_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "committee_documents",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "committee_intelligence_snapshots",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "committee_meeting_attendees",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "committee_meetings",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0096_add_missing_ue_required_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "committees",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "communication_preferences",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "compliance_alerts",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "compliance_snapshots",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "congress_memberships",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "consent_records",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "contract_covered_orgs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "contract_line_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "contribution_rates",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cookie_consents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "correspondence",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "correspondence_audit_trail",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "correspondence_recipients",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "cost_centers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "course_registrations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "course_sessions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "data_aggregation_consent",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "data_classification_policy",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "data_quality_warnings",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "data_subject_access_requests",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "deadline_audit_events",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "migrations/0045_union_eyes_deadline_engine.sql",
+      "MIGRATION_LINEAGE": "ROOT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "deadline_reminders",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "migrations/0045_union_eyes_deadline_engine.sql",
+      "MIGRATION_LINEAGE": "ROOT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "defensibility_packs",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "dispatch_assignments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "dispatch_requests",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "dispatch_rules",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0001_silky_elektra.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "document_access_grants",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "document_folders",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "document_links",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "document_signers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "document_versions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "documents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "domain_events",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "donation_campaigns",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "dues_assignments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0083_data_source_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "dues_rates",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "dues_transactions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "duplicate_group_members",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "duplicate_groups",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0104_dedup_and_quality_warnings.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_communications",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_contacts",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_execution_artifacts",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_execution_compliance_events",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_execution_evidence_links",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_execution_profiles",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_execution_replays",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_payroll_run_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_payroll_runs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_remittance_run_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_remittance_runs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_remittances",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_reports",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_risk_scores",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_timesheet_batches",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employer_timesheet_entries",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "employers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "entitlement_usage_log",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "erp_invoices",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "evidence_packs",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "exit_interview_documents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "exit_interview_events",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "exit_interviews",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/exit_interviews/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_accounts",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_benefit_coverage",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_benefit_dependents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_benefit_enrollments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_benefit_plans",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_benefit_utilization",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_calendar_connections",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_communication_channels",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_communication_files",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_communication_messages",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_communication_users",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_customers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_data_sync_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_departments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_document_access_grants",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_employees",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_insurance_beneficiaries",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_insurance_claims",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_insurance_policies",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_invoices",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_lms_completions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_lms_courses",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_lms_enrollments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_lms_learners",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_lms_progress",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_matter_access_grants",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_payments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "external_positions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "feature_flags",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "federations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "fee_adjustments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "financial_periods",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "gdpr_data_requests",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "geofence_events",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "geofences",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "gl_account_mappings",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "gl_transaction_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "gl_trial_balance",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "governance_policies",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_case_access_assignments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/manual/070_governed_case_access_documents.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_deadlines",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_documents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_events",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_settlements",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_timeline",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_timeline_events",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievance_transitions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "grievances",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "hazard_reports",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "holidays",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "in_app_notifications",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ingestion_batches",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ingestion_records",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0089_ingestion_hardening.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "insight_recommendations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_api_keys",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_configs",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_idempotency_keys",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_partners",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_registry",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/services/migrations/0001_enterprise_hardening.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_sync_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "integration_webhooks",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "joint_hs_committees",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "knowledge_base",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "kpi_configurations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "location_deletion_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "location_tracking",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "location_tracking_audit",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "location_tracking_config",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "meeting_rooms",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_arrears",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_breaks",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_certifications",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_dues_issues",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "G"
+    },
+    {
+      "TABLE": "member_dues_ledger",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_employment",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_history_events",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_jurisdiction_preferences",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260328_jurisdiction_preferences.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_location_consent",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "member_segments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "message_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "message_read_receipts",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "message_templates",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "message_threads",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "messages",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ml_predictions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "mobile_devices",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "model_metadata",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/ai_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "movement_trends",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "negotiations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "newsletter_campaigns",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "newsletter_distribution_lists",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "newsletter_list_subscribers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "newsletter_recipients",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "notification_delivery_log",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "notification_queue",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "notification_templates",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "notification_tracking",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "notifications",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "org_configurations",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0041_steady_reavers.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "org_entitlements",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "org_subscriptions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "organization_members",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "organization_users",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "organizations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "organizer_tasks",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "organizing_campaigns",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pay_equity_exercises",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "payment_allocations",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "payment_cycles",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "payment_disputes",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "payment_methods",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "payment_plans",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "payments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "payroll_deductions",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "G"
+    },
+    {
+      "TABLE": "pending_profiles",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_benefit_claims",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_contributions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_members",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_plans",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_t4a_records",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_trustee_meetings",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pension_trustees",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "per_capita_remittances",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_applications",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_checklist_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0082_add_pilot_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_demo_seeds",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0082_add_pilot_tables.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_enrollments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0025_pilot_enrollments.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_events",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260404_pilot_observability.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_feedback",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260404_pilot_observability.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_metrics",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "pilot_milestones",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0025_pilot_enrollments.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "platform_cost_ledger_entries",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "platform_invoice_line_items",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "platform_invoices",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "platform_payments",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "policy_evaluations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "policy_exceptions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "policy_rules",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "poll_votes",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "polls",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "ppe_equipment",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "preventive_withdrawals",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "profiles",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "provincial_consent",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "provincial_data_handling",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "provincial_privacy_config",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "push_devices",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "push_notifications",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "recognition_award_types",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "recognition_awards",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "recognition_programs",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reconciliation_exceptions",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reconciliation_matches",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reconciliation_runs",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "remittance_exceptions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "remittance_line_items",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reports",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "representation_authorities",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260915_external_representation_authority.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reward_budget_envelopes",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reward_redemptions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "reward_wallet_ledger",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "right_of_refusal_events",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "safety_inspections",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "safety_training_records",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "satisfaction_surveys",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0002_employer_execution_and_related_a.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "security_events",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "security_posture_checks",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-platform/0003_integration_partners_and_security_posture.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_PLATFORM_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "settlements",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/grievances/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "shared_clause_library",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "signature_audit_trail",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "signature_documents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "sms_campaigns",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "sms_conversations",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "sms_messages",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "social_accounts",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "social_analytics",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "social_campaigns",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "social_posts",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "sso_providers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/auth_core/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "steward_assignments",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "stewards",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "strategic_goals",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-audit/0000_familiar_silhouette.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_AUDIT_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "strike_fund_disbursements",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/billing/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "subscription_events_log",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0085_monetization_infrastructure_layer.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "subscription_plans",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/20260325_dapl_platform_ledger.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "survey_answers",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "survey_questions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "survey_responses",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "surveys",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "tentative_agreements",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/bargaining/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "testimonials",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/content/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "training_courses",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "training_programs",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "transaction_fee_events",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "transaction_fee_rules",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0086_monetization_phase2.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "trend_analyses",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/analytics/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "user_consents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "user_notification_preferences",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/notifications/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "user_signatures",
+      "SCHEMA_OWNER": "PLATFORM_SQL_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations/0105_correspondence_pipeline.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_LEGACY_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "ACTIVE_SQL_PLATFORM_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "voter_eligibility",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "votes",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "voting_options",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "voting_sessions",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "wcb_claims",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "wcb_employer_assessments",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "PROJECTED_OR_RUNTIME_USED_WITHOUT_CREATION_LINEAGE",
+      "DISPOSITION": "F"
+    },
+    {
+      "TABLE": "workbook_governance_lineage_entries",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_SCOPED_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "workbook_memory_holders",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_SCOPED_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "workbook_modules",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_SCOPED_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "workbook_purchases",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_SCOPED_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "workbooks",
+      "SCHEMA_OWNER": "SCOPED_AUTHORITY_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/db/migrations-cache/0001_lean_iron_man.sql",
+      "MIGRATION_LINEAGE": "UNION_EYES_SCOPED_SQL",
+      "CURRENT_BOOTSTRAP_INCLUDED": true,
+      "CREATION_LINEAGE_CLASS": "OTHER_GOVERNED_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "workplace_incidents",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/compliance/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    },
+    {
+      "TABLE": "worksites",
+      "SCHEMA_OWNER": "DJANGO_OWNED",
+      "CREATION_MIGRATION": "apps/union-eyes/backend/unions/migrations/0001_initial.py",
+      "MIGRATION_LINEAGE": "DJANGO_MIGRATIONS",
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "CREATION_LINEAGE_CLASS": "DJANGO_CANONICAL_LINEAGE",
+      "DISPOSITION": ""
+    }
+  ]
+}

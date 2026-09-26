@@ -72,21 +72,24 @@ describe('communications/track/click route', () => {
     await expect(response.json()).resolves.toMatchObject({ error: 'Missing or invalid url parameter' });
   });
 
-  it('redirects immediately when campaignId or recipientId is absent', async () => {
+  it('rejects (no redirect) when campaignId or recipientId is absent', async () => {
     const { GET } = await loadRoute();
     const response = await GET(new NextRequest('http://localhost/api/communications/track/click?url=https://example.com'));
 
-    expect(response.status).toBe(302);
-    expect(response.headers.get('location')).toBe('https://example.com/');
+    expect(response.status).toBe(400);
+    expect(response.headers.get('location')).toBeNull();
+    expect(mockDb.update).not.toHaveBeenCalled();
   });
 
-  it('redirects when token is invalid under configured secret', async () => {
+  it('rejects (no redirect) when token is invalid under configured secret', async () => {
     process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret_1';
     const { GET } = await loadRoute();
 
     const response = await GET(new NextRequest('http://localhost/api/communications/track/click?campaignId=c1&recipientId=r1&url=https://example.com&token=bad'));
 
-    expect(response.status).toBe(302);
+    expect(response.status).toBe(400);
+    expect(response.headers.get('location')).toBeNull();
+    expect(mockDb.update).not.toHaveBeenCalled();
     expect(m.logger.warn).toHaveBeenCalled();
   });
 
@@ -108,14 +111,30 @@ describe('communications/track/click route', () => {
     expect(mockDb.update).toHaveBeenCalledTimes(2);
   });
 
-  it('allows click-through when no secret is configured', async () => {
+  it('fails closed with no configured secret: no redirect, no record', async () => {
     const { GET } = await loadRoute();
-    m.queueSelect([{ id: 'msg_2', clickedAt: null, openedAt: null, status: 'sent' }], [{ stats: {} }]);
 
-    const response = await GET(new NextRequest('http://localhost/api/communications/track/click?campaignId=c3&recipientId=r3&url=https://example.org'));
+    const response = await GET(new NextRequest('http://localhost/api/communications/track/click?campaignId=c3&recipientId=r3&url=https://example.org&token=whatever'));
 
-    expect(response.status).toBe(302);
-    expect(m.logger.warn).not.toHaveBeenCalled();
+    expect(response.status).toBe(400);
+    expect(response.headers.get('location')).toBeNull();
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.logger.warn).toHaveBeenCalled();
+  });
+
+  it('does not honor a token signed for a different destination (no open redirect)', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret_x';
+    const { GET } = await loadRoute();
+    const signedFor = 'https://trusted.example.com/a';
+    const attackerUrl = 'https://evil.example.com/';
+    // Token is validly signed, but bound to a DIFFERENT destination.
+    const token = crypto.createHmac('sha256', 'secret_x').update(`c9:r9:${signedFor}`).digest('hex');
+
+    const response = await GET(new NextRequest(`http://localhost/api/communications/track/click?campaignId=c9&recipientId=r9&url=${encodeURIComponent(attackerUrl)}&token=${token}`));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get('location')).toBeNull();
+    expect(mockDb.update).not.toHaveBeenCalled();
   });
 
   it('accepts messageId-specific tracking tokens', async () => {
@@ -137,7 +156,10 @@ describe('communications/track/click route', () => {
   });
 
   it('skips db writes when the message was already clicked', async () => {
+    process.env.COMMUNICATIONS_TRACKING_SECRET = 'secret_click';
     const { GET } = await loadRoute();
+    const redirect = 'https://example.net/welcome';
+    const token = crypto.createHmac('sha256', 'secret_click').update(`c5:r5:${redirect}`).digest('hex');
 
     m.queueSelect([
       {
@@ -148,9 +170,10 @@ describe('communications/track/click route', () => {
       },
     ]);
 
-    const response = await GET(new NextRequest('http://localhost/api/communications/track/click?campaignId=c5&recipientId=r5&url=https://example.net'));
+    const response = await GET(new NextRequest(`http://localhost/api/communications/track/click?campaignId=c5&recipientId=r5&url=${encodeURIComponent(redirect)}&token=${token}`));
 
     expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe(redirect);
     expect(mockDb.update).not.toHaveBeenCalled();
   });
 });

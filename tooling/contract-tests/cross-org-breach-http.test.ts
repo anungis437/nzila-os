@@ -87,6 +87,7 @@ const ORG_SCOPED_AUTH_PATTERNS = [
   /withOrgScope\s*\(/,               // Org-scoped composite guard (auth + context + org)
   /crudRoutes\s*\(/,                 // UE crud factory (handles auth + org scope internally)
   /requireApiAuth\s*\(/,             // UE API auth guard (checks userId + org)
+  /withClaimedWorkbookAccess\s*\(/,  // UE claimed-workbook resource authorization (claimant or same-org peer)
 ]
 
 // ── Cross-org attack vectors ──────────────────────────────────────────────── 
@@ -345,5 +346,26 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
       expect(content).toContain('requireOrgAccess')
       expect(content).toContain('verifyEntityAuditChain')
     })
+  })
+})
+
+// ── Recognizer negative controls (fail-closed proof) ───────────────────────
+// Exercise the ORG_SCOPED_AUTH_PATTERNS predicate used by the export/proof
+// scenario. Prove the recognizer accepts the canonical resource-authorization
+// wrapper AND still rejects an export route with no org/resource authorization.
+describe('SEC-ORG-ISO-002: org-scoped auth recognizer fails closed', () => {
+  const hasOrgAuth = (content: string) => ORG_SCOPED_AUTH_PATTERNS.some((p) => p.test(content))
+
+  it('recognizes a claimed-workbook export authorized via withClaimedWorkbookAccess', () => {
+    const content =
+      "import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control'\n" +
+      'export async function GET(_req, { params }) { return withClaimedWorkbookAccess({ workbookId: (await params).id, operation: "read" }, async () => new Response("ok")) }'
+    expect(hasOrgAuth(content)).toBe(true)
+  })
+
+  it('does NOT recognize an export route with no org/resource authorization', () => {
+    const content =
+      'export async function GET(_req, { params }) { const { id } = await params; return new Response(id) }'
+    expect(hasOrgAuth(content)).toBe(false)
   })
 })

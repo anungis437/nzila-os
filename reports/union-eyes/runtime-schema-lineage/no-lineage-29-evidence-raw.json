@@ -1,0 +1,1799 @@
+{
+  "generatedAt": "2026-09-23T13:49:16.846Z",
+  "cards": [
+    {
+      "TABLE": "anti_scab_violations",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/cnesst-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/cnesst-schema.antiScabViolations"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\cnesst-schema.ts:387:export const antiScabViolations = pgTable(\"anti_scab_violations\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:117:    table: \"anti_scab_violations\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2239:  IF to_regclass('anti_scab_violations') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2240:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'anti_scab_violations' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2241:      PERFORM ue_create_direct_org_rls_policy('anti_scab_violations', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2243:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'anti_scab_violations', 'ue_create_direct_org_rls_policy', 'anti_scab_violations.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7052:  IF to_regclass('anti_scab_violations') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7053:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'anti_scab_violations');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7054:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'anti_scab_violations');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7055:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'anti_scab_violations');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "billing_subscriptions",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/api/dues/billing-cycle/route.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/finance/platform-billing",
+      "DRIZZLE_PROJECTION": [
+        "domains/finance/platform-billing.billingSubscriptions"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\finance\\platform-billing.ts:371:export const billingSubscriptions = pgTable('billing_subscriptions', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:138:    table: \"billing_subscriptions\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1144:  IF to_regclass('billing_subscriptions') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1145:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'billing_subscriptions' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1146:      PERFORM ue_create_direct_org_rls_policy('billing_subscriptions', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1148:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'billing_subscriptions', 'ue_create_direct_org_rls_policy', 'billing_subscriptions.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4763:  IF to_regclass('billing_subscriptions') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4764:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'billing_subscriptions');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4765:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'billing_subscriptions');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4766:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'billing_subscriptions');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "break_policies",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/member/member-breaks",
+      "DRIZZLE_PROJECTION": [
+        "domains/member/member-breaks.breakPolicies"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\member\\member-breaks.ts:74:export const breakPolicies = pgTable(\"break_policies\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:150:    table: \"break_policies\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/lib\\quebec\\break-defaults.ts:5: * These are meant to be inserted into the `break_policies` table when an"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2257:  IF to_regclass('break_policies') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2258:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'break_policies' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2259:      PERFORM ue_create_direct_org_rls_policy('break_policies', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2261:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'break_policies', 'ue_create_direct_org_rls_policy', 'break_policies.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7075:  IF to_regclass('break_policies') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7076:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'break_policies');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7077:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'break_policies');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7078:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'break_policies');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 1,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "cba_rule_set_items",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/services/employer-execution/rule-resolution-engine.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-execution-core",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-execution-core.cbaRuleSetItems"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-execution-core.ts:77:  \"cba_rule_set_items\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\claims-continuity.ts:215:    table: \"cba_rule_set_items\",",
+          "apps/union-eyes\\db\\rls-storage-authority\\claims-continuity.ts:228:    reason: \"4 non-test reference(s) to 'cbaRuleVersions' found. At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). RESOLVED (round 11): same employer-execution/payroll-runs/remittance-runs/replay route family as cba_rule_set_items above — org-filtered via withRLSContext.\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\services\\employer-execution\\rule-resolution-engine.ts:627:    from cba_rule_set_items"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:533:  IF to_regclass('cba_rule_set_items') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:534:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'cba_rule_set_items' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:535:      PERFORM ue_create_direct_org_rls_policy('cba_rule_set_items', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:537:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'cba_rule_set_items', 'ue_create_direct_org_rls_policy', 'cba_rule_set_items.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3701:  IF to_regclass('cba_rule_set_items') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3702:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'cba_rule_set_items');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3703:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'cba_rule_set_items');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3704:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'cba_rule_set_items');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 2,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 1,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "cba_rule_versions",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/services/employer-execution/cba-version-resolver.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-execution-core",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-execution-core.cbaRuleVersions"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-execution-core.ts:38:  \"cba_rule_versions\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\claims-continuity.ts:226:    table: \"cba_rule_versions\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\services\\employer-execution\\cba-version-resolver.ts:21:    from cba_rule_versions"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:542:  IF to_regclass('cba_rule_versions') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:543:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'cba_rule_versions' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:544:      PERFORM ue_create_direct_org_rls_policy('cba_rule_versions', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:546:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'cba_rule_versions', 'ue_create_direct_org_rls_policy', 'cba_rule_versions.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3709:  IF to_regclass('cba_rule_versions') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3710:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'cba_rule_versions');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3711:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'cba_rule_versions');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3712:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'cba_rule_versions');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 1,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "cnesst_filings",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/cnesst-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/cnesst-schema.cneesstFilings"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\cnesst-schema.ts:107:export const cneesstFilings = pgTable(\"cnesst_filings\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:293:    table: \"cnesst_filings\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2311:  IF to_regclass('cnesst_filings') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2312:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'cnesst_filings' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2313:      PERFORM ue_create_direct_org_rls_policy('cnesst_filings', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2315:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'cnesst_filings', 'ue_create_direct_org_rls_policy', 'cnesst_filings.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7173:  IF to_regclass('cnesst_filings') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7174:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'cnesst_filings');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7175:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'cnesst_filings');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7176:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'cnesst_filings');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_execution_artifacts",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "mixed",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx",
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/remittance-runs/[id]/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/lib/workers/employer-execution/process-evidence-seal.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-remittance-runs.ts",
+        "apps/union-eyes/services/financial-service/src/services/employer-execution/evidence-chain.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-remittance-runs.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-artifacts",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-artifacts.employerExecutionArtifacts"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-artifacts.ts:40:  \"employer_execution_artifacts\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:524:    table: \"employer_execution_artifacts\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-remittance-runs.ts:89:      insert into employer_execution_artifacts (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-remittance-runs.ts:142:    select * from employer_execution_artifacts",
+          "apps/union-eyes/services\\financial-service\\src\\services\\employer-execution\\evidence-chain.ts:95:      from employer_execution_artifacts"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2427:  IF to_regclass('employer_execution_artifacts') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2428:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_execution_artifacts' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2429:      PERFORM ue_create_direct_org_rls_policy('employer_execution_artifacts', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2431:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_execution_artifacts', 'ue_create_direct_org_rls_policy', 'employer_execution_artifacts.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7333:  IF to_regclass('employer_execution_artifacts') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7334:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_execution_artifacts');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7335:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_execution_artifacts');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7336:    EXECUTE format('GRANT SELECT, INSERT ON TABLE %I TO union_eyes_runtime', 'employer_execution_artifacts');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 3,
+          "rls": 9
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_execution_compliance_events",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "mixed",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/compliance/page.tsx",
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx",
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/remittance-runs/[id]/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/compliance/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/lib/workers/employer-execution/process-compliance-watchdog.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-compliance.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/compliance/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-compliance.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-compliance",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-compliance.employerExecutionComplianceEvents"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-compliance.ts:30:  \"employer_execution_compliance_events\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:535:    table: \"employer_execution_compliance_events\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-compliance.ts:37:        insert into employer_execution_compliance_events (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-compliance.ts:66:    select * from employer_execution_compliance_events"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2436:  IF to_regclass('employer_execution_compliance_events') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2437:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_execution_compliance_events' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2438:      PERFORM ue_create_direct_org_rls_policy('employer_execution_compliance_events', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2440:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_execution_compliance_events', 'ue_create_direct_org_rls_policy', 'employer_execution_compliance_events.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7342:  IF to_regclass('employer_execution_compliance_events') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7343:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_execution_compliance_events');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7344:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_execution_compliance_events');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7345:    EXECUTE format('GRANT SELECT, INSERT ON TABLE %I TO union_eyes_runtime', 'employer_execution_compliance_events');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 2,
+          "rls": 9
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_execution_evidence_links",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-artifacts",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-artifacts.employerExecutionEvidenceLinks"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-artifacts.ts:97:  \"employer_execution_evidence_links\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\documents-evidence.ts:138:    table: \"employer_execution_evidence_links\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1001:  IF to_regclass('employer_execution_evidence_links') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1002:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_execution_evidence_links' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1003:      PERFORM ue_create_direct_org_rls_policy('employer_execution_evidence_links', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1005:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_execution_evidence_links', 'ue_create_direct_org_rls_policy', 'employer_execution_evidence_links.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4501:  IF to_regclass('employer_execution_evidence_links') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4502:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_execution_evidence_links');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4503:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_execution_evidence_links');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4504:    EXECUTE format('GRANT SELECT, INSERT ON TABLE %I TO union_eyes_runtime', 'employer_execution_evidence_links');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_execution_profiles",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/settings/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-runtime-profile",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-runtime-profile.employerExecutionProfiles"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-runtime-profile.ts:21:  \"employer_execution_profiles\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\documents-evidence.ts:149:    table: \"employer_execution_profiles\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1010:  IF to_regclass('employer_execution_profiles') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1011:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_execution_profiles' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1012:      PERFORM ue_create_direct_org_rls_policy('employer_execution_profiles', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1014:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_execution_profiles', 'ue_create_direct_org_rls_policy', 'employer_execution_profiles.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4509:  IF to_regclass('employer_execution_profiles') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4510:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_execution_profiles');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4511:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_execution_profiles');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4512:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'employer_execution_profiles');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_execution_replays",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "mixed",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx",
+        "apps/union-eyes/lib/workers/employer-execution/process-replay-run.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-replay.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-artifacts",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-artifacts.employerExecutionReplays"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-artifacts.ts:68:  \"employer_execution_replays\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:546:    table: \"employer_execution_replays\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-replay.ts:49:      insert into employer_execution_replays ("
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2445:  IF to_regclass('employer_execution_replays') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2446:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_execution_replays' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2447:      PERFORM ue_create_direct_org_rls_policy('employer_execution_replays', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2449:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_execution_replays', 'ue_create_direct_org_rls_policy', 'employer_execution_replays.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7351:  IF to_regclass('employer_execution_replays') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7352:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_execution_replays');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7353:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_execution_replays');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7354:    EXECUTE format('GRANT SELECT, INSERT ON TABLE %I TO union_eyes_runtime', 'employer_execution_replays');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 1,
+          "rls": 9
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_payroll_run_items",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-payroll-runs.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-remittance-runs.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-payroll-runs.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-payroll-runs",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-payroll-runs.employerPayrollRunItems"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-payroll-runs.ts:68:  \"employer_payroll_run_items\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:270:    table: \"employer_payroll_run_items\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/scripts\\rls-enforcement\\enforcement-geometry-overrides.ts:233:    table: \"employer_payroll_run_items\",",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-remittance-runs.ts:26:      from employer_payroll_run_items",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-payroll-runs.ts:167:        insert into employer_payroll_run_items (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-payroll-runs.ts:226:    select * from employer_payroll_run_items"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1216:  IF to_regclass('employer_payroll_run_items') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1217:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_payroll_run_items' AND column_name = 'payroll_run_id') AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_payroll_runs' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1218:      PERFORM ue_create_parent_owned_rls_policy_v2('employer_payroll_run_items', 'payroll_run_id', 'employer_payroll_runs', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1220:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_payroll_run_items', 'ue_create_parent_owned_rls_policy_v2', 'employer_payroll_run_items.payroll_run_id, employer_payroll_runs.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4856:  IF to_regclass('employer_payroll_run_items') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4857:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_payroll_run_items');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4858:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_payroll_run_items');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4859:    EXECUTE format('GRANT SELECT, INSERT, UPDATE ON TABLE %I TO union_eyes_runtime', 'employer_payroll_run_items');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 4,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_payroll_runs",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/payroll-runs/[id]/page.tsx",
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/payroll-runs/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-payroll-runs.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-replay.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/lib/workers/employer-execution/process-payroll-run.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-payroll-runs.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-payroll-runs",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-payroll-runs.employerPayrollRuns"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-payroll-runs.ts:29:  \"employer_payroll_runs\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:272:    reason: \"Manually verified (2026-09-04, finance.ts round 1): no direct organization_id column; scopes through employer_payroll_runs.organization_id via the runId FK. Reachable via app/api/employer-execution/payroll-runs/route.ts and app/api/employer-execution/payroll-runs/[id]/route.ts, both gated on the parent run's org.\",",
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:281:    table: \"employer_payroll_runs\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/scripts\\rls-enforcement\\enforcement-geometry-overrides.ts:235:    parentTable: \"employer_payroll_runs\",",
+          "apps/union-eyes/scripts\\rls-enforcement\\enforcement-geometry-overrides.ts:240:      `payroll-runs/[id]/route.ts) — payroll_run_id -> employer_payroll_runs (HIGH_CONFIDENCE_DIRECT ` +",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-replay.ts:29:      from employer_payroll_runs",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-replay.ts:36:      from employer_payroll_runs",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-payroll-runs.ts:148:      insert into employer_payroll_runs (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-payroll-runs.ts:198:    from employer_payroll_runs",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-payroll-runs.ts:216:    select * from employer_payroll_runs"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1217:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_payroll_run_items' AND column_name = 'payroll_run_id') AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_payroll_runs' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1218:      PERFORM ue_create_parent_owned_rls_policy_v2('employer_payroll_run_items', 'payroll_run_id', 'employer_payroll_runs', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1220:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_payroll_run_items', 'ue_create_parent_owned_rls_policy_v2', 'employer_payroll_run_items.payroll_run_id, employer_payroll_runs.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1225:  IF to_regclass('employer_payroll_runs') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1226:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_payroll_runs' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1227:      PERFORM ue_create_direct_org_rls_policy('employer_payroll_runs', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1229:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_payroll_runs', 'ue_create_direct_org_rls_policy', 'employer_payroll_runs.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4864:  IF to_regclass('employer_payroll_runs') IS NOT NULL THEN"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 2,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 7,
+          "rls": 11
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_remittance_run_items",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/route.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-remittance-runs",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-remittance-runs.employerRemittanceRunItems"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-remittance-runs.ts:55:  \"employer_remittance_run_items\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:292:    table: \"employer_remittance_run_items\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1234:  IF to_regclass('employer_remittance_run_items') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1235:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_remittance_run_items' AND column_name = 'remittance_run_id') AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_remittance_runs' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1236:      PERFORM ue_create_parent_owned_rls_policy_v2('employer_remittance_run_items', 'remittance_run_id', 'employer_remittance_runs', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1238:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_remittance_run_items', 'ue_create_parent_owned_rls_policy_v2', 'employer_remittance_run_items.remittance_run_id, employer_remittance_runs.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4872:  IF to_regclass('employer_remittance_run_items') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4873:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_remittance_run_items');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4874:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_remittance_run_items');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4875:    EXECUTE format('GRANT SELECT, INSERT, UPDATE ON TABLE %I TO union_eyes_runtime', 'employer_remittance_run_items');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_remittance_runs",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/remittance-runs/[id]/page.tsx",
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/remittance-runs/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/route.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-remittance-runs.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/lib/workers/employer-execution/process-remittance-run.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-remittance-runs.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-remittance-runs",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-remittance-runs.employerRemittanceRuns"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-remittance-runs.ts:25:  \"employer_remittance_runs\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:294:    reason: \"Manually verified (2026-09-04, finance.ts round 1): no direct organization_id column; scopes through employer_remittance_runs.organization_id via the runId FK. Reachable via the same employer-execution/remittance-runs routes as its parent.\",",
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:303:    table: \"employer_remittance_runs\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-remittance-runs.ts:72:      insert into employer_remittance_runs (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-remittance-runs.ts:116:    from employer_remittance_runs",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-remittance-runs.ts:133:    select * from employer_remittance_runs"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1235:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_remittance_run_items' AND column_name = 'remittance_run_id') AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_remittance_runs' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1236:      PERFORM ue_create_parent_owned_rls_policy_v2('employer_remittance_run_items', 'remittance_run_id', 'employer_remittance_runs', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1238:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_remittance_run_items', 'ue_create_parent_owned_rls_policy_v2', 'employer_remittance_run_items.remittance_run_id, employer_remittance_runs.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1243:  IF to_regclass('employer_remittance_runs') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1244:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_remittance_runs' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1245:      PERFORM ue_create_direct_org_rls_policy('employer_remittance_runs', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1247:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_remittance_runs', 'ue_create_direct_org_rls_policy', 'employer_remittance_runs.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4880:  IF to_regclass('employer_remittance_runs') IS NOT NULL THEN"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 2,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 3,
+          "rls": 11
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_timesheet_batches",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/timesheets/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/timesheets/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-timesheets.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/timesheets/route.ts",
+        "apps/union-eyes/lib/workers/employer-execution/process-timesheet-validation.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-timesheets.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-timesheets",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-timesheets.employerTimesheetBatches"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-timesheets.ts:33:  \"employer_timesheet_batches\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:570:    reason: \"CLOSED round 56 (DIRECT_TENANT_RESOURCE archetype): organization_id NOT NULL. Reachable via app/api/employer-execution/{payroll-runs,replay,timesheets}/** routes (withApi()-backed, server-derived organizationId). batch_id/member_employment_id/employer_id/worksite_id/bargaining_unit_id/job_classification_id are parent FKs consistent with the same tenant boundary as employer_timesheet_batches.\",",
+          "apps/union-eyes\\db\\rls-storage-authority\\integrations-workers.ts:97:    table: \"employer_timesheet_batches\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-timesheets.ts:31:      insert into employer_timesheet_batches (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-timesheets.ts:91:    from employer_timesheet_batches",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-timesheets.ts:109:    select * from employer_timesheet_batches"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1785:  IF to_regclass('employer_timesheet_batches') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1786:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_timesheet_batches' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1787:      PERFORM ue_create_direct_org_rls_policy('employer_timesheet_batches', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1789:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_timesheet_batches', 'ue_create_direct_org_rls_policy', 'employer_timesheet_batches.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6303:  IF to_regclass('employer_timesheet_batches') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6304:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_timesheet_batches');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6305:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_timesheet_batches');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6306:    EXECUTE format('GRANT SELECT, INSERT, UPDATE ON TABLE %I TO union_eyes_runtime', 'employer_timesheet_batches');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 2,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 3,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "employer_timesheet_entries",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/employer-execution/timesheets/page.tsx",
+        "apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts",
+        "apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts",
+        "apps/union-eyes/lib/workers/employer-execution/process-timesheet-validation.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-timesheets.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/employer-execution/timesheets/route.ts",
+        "apps/union-eyes/services/financial-service/src/routes/employer-timesheets.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/employer-execution/employer-timesheets",
+      "DRIZZLE_PROJECTION": [
+        "domains/employer-execution/employer-timesheets.employerTimesheetEntries"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\employer-execution\\employer-timesheets.ts:62:  \"employer_timesheet_entries\","
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:568:    table: \"employer_timesheet_entries\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-timesheets.ts:49:        insert into employer_timesheet_entries (",
+          "apps/union-eyes/services\\financial-service\\src\\routes\\employer-timesheets.ts:119:    select * from employer_timesheet_entries"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2454:  IF to_regclass('employer_timesheet_entries') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2455:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'employer_timesheet_entries' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2456:      PERFORM ue_create_direct_org_rls_policy('employer_timesheet_entries', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2458:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'employer_timesheet_entries', 'ue_create_direct_org_rls_policy', 'employer_timesheet_entries.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7367:  IF to_regclass('employer_timesheet_entries') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7368:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'employer_timesheet_entries');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7369:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'employer_timesheet_entries');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7370:    EXECUTE format('GRANT SELECT, INSERT, UPDATE ON TABLE %I TO union_eyes_runtime', 'employer_timesheet_entries');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 2,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "integration_partners",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/integrations/page.tsx"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/infrastructure/integrations",
+      "DRIZZLE_PROJECTION": [
+        "domains/infrastructure/integrations.integrationPartners"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\infrastructure\\integrations.ts:241:export const integrationPartners = pgTable('integration_partners', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\integrations-workers.ts:482:    table: \"integration_partners\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/app\\[locale]\\dashboard\\integrations\\page.tsx:156:    FROM integration_partners"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2001:  IF to_regclass('integration_partners') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2002:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'integration_partners' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2003:      PERFORM ue_create_direct_org_rls_policy('integration_partners', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2005:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'integration_partners', 'ue_create_direct_org_rls_policy', 'integration_partners.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6572:  IF to_regclass('integration_partners') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6573:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'integration_partners');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6574:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'integration_partners');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6575:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'integration_partners');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 1,
+          "rls": 9
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "joint_hs_committees",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/cnesst-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/cnesst-schema.jointHsCommittees"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\cnesst-schema.ts:271:export const jointHsCommittees = pgTable(\"joint_hs_committees\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\governance.ts:184:    table: \"joint_hs_committees\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1646:  IF to_regclass('joint_hs_committees') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1647:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'joint_hs_committees' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1648:      PERFORM ue_create_direct_org_rls_policy('joint_hs_committees', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1650:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'joint_hs_committees', 'ue_create_direct_org_rls_policy', 'joint_hs_committees.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6034:  IF to_regclass('joint_hs_committees') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6035:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'joint_hs_committees');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6036:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'joint_hs_committees');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6037:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'joint_hs_committees');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "member_breaks",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/api/breaks/compliance/route.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/member/member-breaks",
+      "DRIZZLE_PROJECTION": [
+        "domains/member/member-breaks.memberBreaks"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\member\\member-breaks.ts:121:export const memberBreaks = pgTable(\"member_breaks\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\organizations-membership.ts:106:    table: \"member_breaks\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2070:  IF to_regclass('member_breaks') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2071:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'member_breaks' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2072:      PERFORM ue_create_direct_org_rls_policy('member_breaks', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2074:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'member_breaks', 'ue_create_direct_org_rls_policy', 'member_breaks.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6758:  IF to_regclass('member_breaks') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6759:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'member_breaks');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6760:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'member_breaks');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6761:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'member_breaks');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "member_dues_issues",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/app/api/dues/issues/route.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "dues-finance-schema",
+      "DRIZZLE_PROJECTION": [
+        "dues-finance-schema.memberDuesIssues"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\dues-finance-schema.ts:452:export const memberDuesIssues = pgTable('member_dues_issues', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\organizations-membership.ts:150:    table: \"member_dues_issues\","
+        ],
+        "sqlCreateHits": [
+          "migrations\\staging\\union-eyes\\create-dues-finance-tables.sql:236:CREATE TABLE IF NOT EXISTS member_dues_issues ("
+        ],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/lib\\reality\\capability-registry.ts:544:      'app/api/dues/issues/route.ts — persists to member_dues_issues via db.insert(); previously returned a fabricated success acknowledgement (crypto.randomUUID() id) with no database write at all',",
+          "apps/union-eyes/app\\api\\dues\\issues\\route.ts:6: * Persisted to member_dues_issues for review by union administrators."
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2088:  IF to_regclass('member_dues_issues') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2089:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'member_dues_issues' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2090:      PERFORM ue_create_direct_org_rls_policy('member_dues_issues', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2092:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'member_dues_issues', 'ue_create_direct_org_rls_policy', 'member_dues_issues.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6788:  IF to_regclass('member_dues_issues') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6789:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'member_dues_issues');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6790:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'member_dues_issues');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:6791:    EXECUTE format('GRANT SELECT, INSERT ON TABLE %I TO union_eyes_runtime', 'member_dues_issues');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 1,
+          "pyCreate": 0,
+          "runtime": 2,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "pay_equity_exercises",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/cnesst-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/cnesst-schema.payEquityExercises"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\cnesst-schema.ts:336:export const payEquityExercises = pgTable(\"pay_equity_exercises\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:997:    table: \"pay_equity_exercises\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2596:  IF to_regclass('pay_equity_exercises') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2597:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'pay_equity_exercises' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2598:      PERFORM ue_create_direct_org_rls_policy('pay_equity_exercises', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2600:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'pay_equity_exercises', 'ue_create_direct_org_rls_policy', 'pay_equity_exercises.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7656:  IF to_regclass('pay_equity_exercises') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7657:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'pay_equity_exercises');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7658:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'pay_equity_exercises');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7659:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'pay_equity_exercises');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "payroll_deductions",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/api/dues/deductions/route.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "dues-finance-schema",
+      "DRIZZLE_PROJECTION": [
+        "dues-finance-schema.payrollDeductions"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\dues-finance-schema.ts:409:export const payrollDeductions = pgTable('payroll_deductions', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\finance.ts:446:    table: \"payroll_deductions\","
+        ],
+        "sqlCreateHits": [
+          "migrations\\staging\\union-eyes\\create-dues-finance-tables.sql:214:CREATE TABLE IF NOT EXISTS payroll_deductions ("
+        ],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1360:  IF to_regclass('payroll_deductions') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1361:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'payroll_deductions' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1362:      PERFORM ue_create_direct_org_rls_policy('payroll_deductions', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:1364:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'payroll_deductions', 'ue_create_direct_org_rls_policy', 'payroll_deductions.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4985:  IF to_regclass('payroll_deductions') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4986:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'payroll_deductions');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4987:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'payroll_deductions');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:4988:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'payroll_deductions');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 1,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "preventive_withdrawals",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/cnesst-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/cnesst-schema.preventiveWithdrawals"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\cnesst-schema.ts:228:export const preventiveWithdrawals = pgTable(\"preventive_withdrawals\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:1162:    table: \"preventive_withdrawals\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2686:  IF to_regclass('preventive_withdrawals') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2687:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'preventive_withdrawals' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2688:      PERFORM ue_create_direct_org_rls_policy('preventive_withdrawals', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2690:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'preventive_withdrawals', 'ue_create_direct_org_rls_policy', 'preventive_withdrawals.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7773:  IF to_regclass('preventive_withdrawals') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7774:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'preventive_withdrawals');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7775:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'preventive_withdrawals');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7776:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'preventive_withdrawals');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "right_of_refusal_events",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/cnesst-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/cnesst-schema.rightOfRefusalEvents"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\cnesst-schema.ts:170:export const rightOfRefusalEvents = pgTable(\"right_of_refusal_events\", {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:1316:    table: \"right_of_refusal_events\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2749:  IF to_regclass('right_of_refusal_events') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2750:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'right_of_refusal_events' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2751:      PERFORM ue_create_direct_org_rls_policy('right_of_refusal_events', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2753:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'right_of_refusal_events', 'ue_create_direct_org_rls_policy', 'right_of_refusal_events.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7880:  IF to_regclass('right_of_refusal_events') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7881:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'right_of_refusal_events');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7882:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'right_of_refusal_events');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7883:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'right_of_refusal_events');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "satisfaction_surveys",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/lib/services/satisfaction-service.ts"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [
+        "apps/union-eyes/lib/services/satisfaction-service.ts"
+      ],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/claims/satisfaction",
+      "DRIZZLE_PROJECTION": [
+        "domains/claims/satisfaction.satisfactionSurveys"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\claims\\satisfaction.ts:42:  'satisfaction_surveys',"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:1338:    table: \"satisfaction_surveys\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2758:  IF to_regclass('satisfaction_surveys') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2759:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'satisfaction_surveys' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2760:      PERFORM ue_create_direct_org_rls_policy('satisfaction_surveys', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2762:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'satisfaction_surveys', 'ue_create_direct_org_rls_policy', 'satisfaction_surveys.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7895:  IF to_regclass('satisfaction_surveys') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7896:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'satisfaction_surveys');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7897:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'satisfaction_surveys');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7898:    EXECUTE format('GRANT SELECT, INSERT, UPDATE ON TABLE %I TO union_eyes_runtime', 'satisfaction_surveys');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "security_posture_checks",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": true,
+      "ACTIVE_RUNTIME_READERS": [
+        "apps/union-eyes/app/[locale]/dashboard/security/page.tsx"
+      ],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/infrastructure/audit",
+      "DRIZZLE_PROJECTION": [
+        "domains/infrastructure/audit.securityPostureChecks"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\infrastructure\\audit.ts:133:export const securityPostureChecks = pgTable('security_posture_checks', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:1393:    table: \"security_posture_checks\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [
+          "apps/union-eyes/app\\[locale]\\dashboard\\security\\page.tsx:96:    FROM security_posture_checks"
+        ],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2776:  IF to_regclass('security_posture_checks') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2777:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'security_posture_checks' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2778:      PERFORM ue_create_direct_org_rls_policy('security_posture_checks', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2780:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'security_posture_checks', 'ue_create_direct_org_rls_policy', 'security_posture_checks.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7932:  IF to_regclass('security_posture_checks') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7933:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'security_posture_checks');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7934:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'security_posture_checks');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:7935:    EXECUTE format('GRANT SELECT ON TABLE %I TO union_eyes_runtime', 'security_posture_checks');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 1,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "wcb_claims",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/provincial-wcb-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/provincial-wcb-schema.wcbClaims"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\provincial-wcb-schema.ts:52:export const wcbClaims = pgTable('wcb_claims', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\claims-continuity.ts:413:    table: \"wcb_claims\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:623:  IF to_regclass('wcb_claims') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:624:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'wcb_claims' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:625:      PERFORM ue_create_direct_org_rls_policy('wcb_claims', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:627:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'wcb_claims', 'ue_create_direct_org_rls_policy', 'wcb_claims.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3838:  IF to_regclass('wcb_claims') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3839:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'wcb_claims');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3840:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'wcb_claims');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:3841:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'wcb_claims');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    },
+    {
+      "TABLE": "wcb_employer_assessments",
+      "SCHEMA_OWNER": "UNKNOWN",
+      "CREATION_MIGRATION": null,
+      "MIGRATION_LINEAGE": null,
+      "MIGRATION_ORDER": null,
+      "CURRENT_BOOTSTRAP_INCLUDED": false,
+      "RUNTIME_PRINCIPAL": "tenant",
+      "RUNTIME_PRIVILEGES": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ],
+      "RLS_REQUIRED": true,
+      "ACTIVE_RUNTIME_REFERENCE": false,
+      "ACTIVE_RUNTIME_READERS": [],
+      "ACTIVE_RUNTIME_WRITERS": [],
+      "STORAGE_AUTHORITY_DOMAIN": "domains/health-safety/provincial-wcb-schema",
+      "DRIZZLE_PROJECTION": [
+        "domains/health-safety/provincial-wcb-schema.wcbEmployerAssessments"
+      ],
+      "DJANGO_MODEL": null,
+      "CANONICAL_REQUIREMENT": "UNRESOLVED",
+      "EVIDENCE": {
+        "schemaHits": [
+          "apps/union-eyes\\db\\schema\\domains\\health-safety\\provincial-wcb-schema.ts:119:export const wcbEmployerAssessments = pgTable('wcb_employer_assessments', {"
+        ],
+        "authorityHits": [
+          "apps/union-eyes\\db\\rls-storage-authority\\reference-latent.ts:1668:    table: \"wcb_employer_assessments\","
+        ],
+        "sqlCreateHits": [],
+        "pyCreateHits": [],
+        "runtimeHits": [],
+        "rlsHits": [
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2937:  IF to_regclass('wcb_employer_assessments') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2938:    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = ANY(current_schemas(false)) AND table_name = 'wcb_employer_assessments' AND column_name = 'organization_id') THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2939:      PERFORM ue_create_direct_org_rls_policy('wcb_employer_assessments', 'organization_id', FALSE);",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:2941:      RAISE EXCEPTION 'RLS enforcement geometry incomplete for table %: helper % requires column(s) [%] which are not all present in this environment', 'wcb_employer_assessments', 'ue_create_direct_org_rls_policy', 'wcb_employer_assessments.organization_id';",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:8127:  IF to_regclass('wcb_employer_assessments') IS NOT NULL THEN",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:8128:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_runtime', 'wcb_employer_assessments');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:8129:    EXECUTE format('REVOKE ALL ON TABLE %I FROM union_eyes_system', 'wcb_employer_assessments');",
+          "apps/union-eyes\\db\\migrations\\20260910_rls_enforcement_expansion_round58.sql:8130:    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE %I TO union_eyes_runtime', 'wcb_employer_assessments');"
+        ],
+        "counts": {
+          "schema": 1,
+          "authority": 1,
+          "sqlCreate": 0,
+          "pyCreate": 0,
+          "runtime": 0,
+          "rls": 8
+        }
+      },
+      "DISPOSITION": "",
+      "DISPOSITION_RATIONALE": "",
+      "EVIDENCE_SUMMARY": ""
+    }
+  ]
+}

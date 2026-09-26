@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": "2.0.0",
-    "generated_at": "2026-09-09T22:44:01.180Z",
+    "generated_at": "2026-09-24T01:48:54.100Z",
     "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
     "window_days": 30
@@ -13,14 +13,14 @@
       "source_needed": null
     },
     "build_success_rate_30d": {
-      "value": null,
-      "source": "GitHub Actions API (not available in current execution context)",
-      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
+      "value": 65.93,
+      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 91)",
+      "source_needed": null
     },
     "median_build_minutes": {
-      "value": null,
-      "source": "GitHub Actions API (not available in current execution context)",
-      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
+      "value": 37.77,
+      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 91)",
+      "source_needed": null
     },
     "change_failure_rate_30d": {
       "value": 0,

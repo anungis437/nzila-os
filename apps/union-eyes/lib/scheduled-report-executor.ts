@@ -236,7 +236,7 @@ async function executeClaimsQuery(organizationId: string, _config: Record<string
       om.name as claimant_name,
       om.membership_number as member_id
     FROM claims c
-    LEFT JOIN organization_members om ON om.id::text = c.member_id AND om.organization_id = c.organization_id::text
+    LEFT JOIN organization_members om ON om.id::text = c.member_id AND om.organization_id::text = c.organization_id::text
     WHERE c.organization_id = ${organizationId}::uuid
       AND c.created_at >= NOW() - INTERVAL '90 days'
     ORDER BY c.created_at DESC

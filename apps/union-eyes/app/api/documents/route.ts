@@ -239,7 +239,7 @@ return NextResponse.json(
  * - accessLevel: string
  * - metadata: object
  */
-export const POST = withRoleAuth('member', async (request, _context) => {
+export const POST = withRoleAuth('member', async (request, context) => {
   if (!LEGACY_DOCUMENT_API_ENABLED) {
     return standardErrorResponse(
       ErrorCode.NOT_IMPLEMENTED,
@@ -249,7 +249,12 @@ export const POST = withRoleAuth('member', async (request, _context) => {
 
   const postUser = await getCurrentUser();
   const userId = postUser?.id ?? '';
-  const organizationId = postUser?.organizationId ?? '';
+  // Prefer membership context. Session org is only a fallback when context
+  // has no organization. The request body is never the stamp source.
+  const contextOrganizationId =
+    typeof context.organizationId === 'string' ? context.organizationId.trim() : '';
+  const sessionOrganizationId = postUser?.organizationId?.trim() ?? '';
+  const serverOrganizationId = contextOrganizationId || sessionOrganizationId;
 
   let rawBody: any;
   try {
@@ -286,8 +291,9 @@ export const POST = withRoleAuth('member', async (request, _context) => {
 
   const body = parsed.data;
 
-  // Verify organization ID matches context
-  if (body.organizationId !== organizationId) {
+  // Client organizationId may deny a mismatched write. Missing server org
+  // fails closed so a body org cannot select the write tenant.
+  if (!serverOrganizationId || body.organizationId !== serverOrganizationId) {
     logApiAuditEvent({
       timestamp: new Date().toISOString(),
       userId,
@@ -295,7 +301,10 @@ export const POST = withRoleAuth('member', async (request, _context) => {
       method: 'POST',
       eventType: 'auth_failed',
       severity: 'high',
-      details: { dataType: 'DOCUMENTS', reason: 'Organization ID mismatch' },
+      details: {
+        dataType: 'DOCUMENTS',
+        reason: serverOrganizationId ? 'Organization ID mismatch' : 'Missing server organization',
+      },
     });
     return standardErrorResponse(ErrorCode.FORBIDDEN, 'Forbidden');
   }
@@ -303,7 +312,7 @@ export const POST = withRoleAuth('member', async (request, _context) => {
   try {
     // Create document
     const document = await createDocument({
-      organizationId: body.organizationId,
+      organizationId: serverOrganizationId,
       folderId: body.folderId || null,
       name: body.name,
       fileUrl: body.fileUrl,
@@ -329,7 +338,7 @@ export const POST = withRoleAuth('member', async (request, _context) => {
       severity: 'medium',
       details: { 
         dataType: 'DOCUMENTS',
-        organizationId: body.organizationId, 
+        organizationId: serverOrganizationId,
         documentId: document.id,
         documentName: body.name, 
         fileType: body.fileType 

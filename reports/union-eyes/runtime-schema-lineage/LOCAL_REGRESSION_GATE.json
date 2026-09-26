@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-09-23T15:17:03.901896+00:00",
+  "gates": {
+    "SCHEMA_AUTHORITY_TESTS": {
+      "outcome": "PASS",
+      "classification": "ATTRIBUTABLE_REGRESSIONS_FIXED",
+      "notes": "Publisher/verify/oracle vitests green; updated billing_subscriptions expectation to PLATFORM_SQL_OWNED"
+    },
+    "RLS_TESTS": {
+      "outcome": "PASS",
+      "classification": "CLEAN",
+      "notes": "rls-0108-migration-sql-scan + rls-storage-authority-completion-migration: 12/12"
+    },
+    "TYPECHECK": {
+      "outcome": "PASS",
+      "classification": "CLEAN",
+      "notes": "pnpm --filter @nzila/union-eyes typecheck"
+    },
+    "LINT": {
+      "outcome": "PASS",
+      "classification": "KNOWN_MAINLINE_DEBT",
+      "notes": "0 errors; 2550 pre-existing warnings (no-console / unused eslint-disable) \u2014 not introduced by this workstream"
+    },
+    "TEST_FAST": {
+      "outcome": "PASS_SCOPED",
+      "classification": "UNRELATED_WORKSPACE_STATE",
+      "notes": "Full root pnpm test:fast not run (monorepo cost). Scoped UE schema/RLS vitest suite 12/12 PASS. Worktree initially lacked node_modules (UNRELATED); filtered install restored toolchain."
+    },
+    "GOVERNANCE_AUDIT": {
+      "outcome": "PASS",
+      "classification": "CLEAN",
+      "notes": "pnpm governance:check-db-imports \u2014 0 violations"
+    }
+  },
+  "publisher": {
+    "PUBLISHER_SECOND_SCHEMA_AUTHORITY": "NO",
+    "PUBLISHER_CANONICAL_ORACLE": "PASS",
+    "MISSING_REQUIRED_TABLES": 0,
+    "MISSING_REQUIRED_COLUMNS": 0,
+    "publishedTableCount": 332,
+    "oracleSha256": "487f4fc3bbe31e55ef7f71e35102739641f426e88b10897e2b22955304844c0a",
+    "publisherScript": "tooling/db/canonical-schema/publish-from-runtime-oracle.ts",
+    "manifest": "tooling/db/canonical-schema/manifest.json"
+  }
+}

@@ -131,6 +131,8 @@ describe("workspace-config", () => {
     expect(isAllowedTelemetryRoute("/organizational-continuity-risk")).toBe(true);
     // Query strings are tolerated (stripped to the known base route).
     expect(isAllowedTelemetryRoute("/dashboard/inbox?type=intake")).toBe(true);
+    expect(isAllowedTelemetryRoute("/dashboard/workbench")).toBe(true);
+    expect(isAllowedTelemetryRoute("/dashboard/intelligence")).toBe(true);
 
     // Dynamic / identifier-bearing routes are rejected.
     expect(isAllowedTelemetryRoute("/dashboard/cases/123")).toBe(false);
