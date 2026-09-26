@@ -48,6 +48,11 @@ export default function proxy(req: NextRequest): NextResponse {
 export const config = {
   matcher: [
     // Skip Next internals and any file with an extension.
-    '/((?!api|_next/static|_next/image|.*\\..*).*)',
+    // `_next/hmr` and `_next/webpack-hmr` must be excluded here, not only
+    // passed through inside the function. A middleware response cannot
+    // complete a WebSocket upgrade, so those paths otherwise return a
+    // normal HTTP response. Next dev then never delivers the React debug
+    // channel and the client waits forever without hydrating.
+    '/((?!api|_next/static|_next/image|_next/hmr|_next/webpack-hmr|.*\\..*).*)',
   ],
 };
