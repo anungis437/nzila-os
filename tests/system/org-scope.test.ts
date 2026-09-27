@@ -13,12 +13,6 @@ import {
 
 // ── OrgScopeIdentitySchema ────────────────────────────────────────────────────
 
-describe('E5-E negative probe — intentional fail', () => {
-  it('e5e-probe-negative-former-test-fast-only', () => {
-    expect(true).toBe(false) // INTENTIONAL: formerly test:fast-only M must fail Unit Tests
-  })
-})
-
 describe('OrgScopeIdentitySchema', () => {
   it('accepts a valid org scope identity', () => {
     const result = OrgScopeIdentitySchema.safeParse({
