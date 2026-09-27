@@ -41,3 +41,5 @@ When adding a runbook:
 | [Governance & Compliance](./governance/) | Governance | — |
 | [Infrastructure Operations](./infrastructure/) | Infrastructure | — |
 | [Finance Close](./finance-close/) | Finance | — |
+
+<!-- NZ-20260926-010 activation probe P4 ops -->
