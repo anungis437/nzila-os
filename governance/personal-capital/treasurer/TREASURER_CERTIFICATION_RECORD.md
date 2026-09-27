@@ -1,14 +1,14 @@
 # TREASURER certification record
 
-Produced by `packages/treasurer/src/verifier.ts`. YES is emitted only when every gate passes.
+Produced by `packages/treasurer/src/verifier.ts`. TREASURER_CERTIFIED stays NO until an independent VERIFIER re-gate returns YES. In-process gates do not grant certification. PASS_PACKAGE_LOCAL is not a full-repo regression PASS.
 
 TREASURER_DOCTRINE: VALID
 TREASURER_BOUNDARIES: ENFORCED
 TREASURER_CALCULATIONS: VERIFIED
 TREASURER_AUTHORITY: FAIL_CLOSED
 TREASURER_RED_TEAM: PASS
-TREASURER_REGRESSION: PASS
-TREASURER_CERTIFIED: YES
+TREASURER_REGRESSION: PASS_PACKAGE_LOCAL
+TREASURER_CERTIFIED: NO
 PRODUCTION_AUTHORITY: NO
 FINANCIAL_TRANSACTION_AUTHORITY: NEVER
 
@@ -22,4 +22,8 @@ FINANCIAL_TRANSACTION_AUTHORITY: NEVER
 
 ## Gate notes
 
-- none
+- TREASURER_CERTIFIED remains NO until an independent VERIFIER re-gate returns YES. This implementer module cannot emit YES.
+- TREASURER_REGRESSION PASS_PACKAGE_LOCAL is package-local static anchors and in-package checks only. It is not a full-repo PASS of pnpm lint, pnpm typecheck, pnpm test:fast, or pnpm governance:audit, and it is not independent re-execution of corporate treasury, doctrine-enforcement, or capital contract suites.
+- Independent VERIFIER on PR #859 at 5f25a566 returned TREASURER_CERTIFIED NO. Findings recorded here: CI merge was BLOCKED (branch-policy, secret-scan integration 403, Trivy SARIF upload 403, repository inventory drift, governance gate cascade); monorepo suites had not been run at that gate; certification was self-certified by this module (circularity).
+- Self-certification circularity is closed for YES. Passing in-process gates does not upgrade TREASURER_CERTIFIED.
+- PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER.

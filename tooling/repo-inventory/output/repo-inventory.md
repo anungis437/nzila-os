@@ -7,11 +7,11 @@
 | Metric | Count |
 |--------|-------|
 | Apps | 28 |
-| Packages (packages/*) | 224 |
-| Workspace Packages (apps|packages|services|tooling) | 258 |
+| Packages (packages/*) | 225 |
+| Workspace Packages (apps|packages|services|tooling) | 259 |
 | GitHub Workflows | 55 |
 | Contract Test Files | 288 |
-| TS/JS Test Files | 2688 |
+| TS/JS Test Files | 2698 |
 | Python Test Files | 35 |
 
 ## Apps

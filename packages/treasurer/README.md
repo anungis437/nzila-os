@@ -12,4 +12,4 @@ Normative doctrine: `docs/doctrine/treasurer/TREASURER_DOCTRINE.md`
 
 Governance artifacts: `governance/personal-capital/treasurer/`
 
-The verifier in `src/verifier.ts` re-executes doctrine, boundary, calculation, authority, red-team, and regression gates. `TREASURER_CERTIFIED` is YES only when every gate passes.
+The in-process gates in `src/verifier.ts` re-execute doctrine, boundary, calculation, authority, red-team, and package-local regression checks. `TREASURER_CERTIFIED` stays NO until an independent VERIFIER re-gate returns YES. `PASS_PACKAGE_LOCAL` is not a full-repo regression PASS.

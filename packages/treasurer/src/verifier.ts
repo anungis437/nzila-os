@@ -1,7 +1,7 @@
 /**
- * Independent VERIFIER gates for TREASURER.
- * Certification is YES only when every required gate passes.
- * This module re-executes checks; it does not trust a self-declared certificate.
+ * In-process TREASURER gates.
+ * This module re-executes checks. It is not an independent VERIFIER.
+ * certificationFromGates never emits TREASURER_CERTIFIED YES.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -59,19 +59,34 @@ export interface GateResults {
   readonly notes: readonly string[]
 }
 
+/** Package-local regression is not a full-repo PASS. */
+export type ScopedRegression = 'PASS_PACKAGE_LOCAL' | 'FAIL'
+
 export interface CertificationRecord {
   readonly TREASURER_DOCTRINE: GateResults['TREASURER_DOCTRINE']
   readonly TREASURER_BOUNDARIES: GateResults['TREASURER_BOUNDARIES']
   readonly TREASURER_CALCULATIONS: GateResults['TREASURER_CALCULATIONS']
   readonly TREASURER_AUTHORITY: GateResults['TREASURER_AUTHORITY']
   readonly TREASURER_RED_TEAM: GateResults['TREASURER_RED_TEAM']
-  readonly TREASURER_REGRESSION: GateResults['TREASURER_REGRESSION']
-  readonly TREASURER_CERTIFIED: 'YES' | 'NO'
+  readonly TREASURER_REGRESSION: ScopedRegression
+  readonly TREASURER_CERTIFIED: 'NO'
   readonly PRODUCTION_AUTHORITY: 'NO'
   readonly FINANCIAL_TRANSACTION_AUTHORITY: 'NEVER'
   readonly acceptedLimitations: readonly string[]
   readonly notes: readonly string[]
 }
+
+/**
+ * Standing honesty notes. These record the independent VERIFIER refusal
+ * and keep package-local evidence from being read as full-repo certification.
+ */
+export const CERTIFICATION_HONESTY_NOTES = [
+  'TREASURER_CERTIFIED remains NO until an independent VERIFIER re-gate returns YES. This implementer module cannot emit YES.',
+  'TREASURER_REGRESSION PASS_PACKAGE_LOCAL is package-local static anchors and in-package checks only. It is not a full-repo PASS of pnpm lint, pnpm typecheck, pnpm test:fast, or pnpm governance:audit, and it is not independent re-execution of corporate treasury, doctrine-enforcement, or capital contract suites.',
+  'Independent VERIFIER on PR #859 at 5f25a566 returned TREASURER_CERTIFIED NO. Findings recorded here: CI merge was BLOCKED (branch-policy, secret-scan integration 403, Trivy SARIF upload 403, repository inventory drift, governance gate cascade); monorepo suites had not been run at that gate; certification was self-certified by this module (circularity).',
+  'Self-certification circularity is closed for YES. Passing in-process gates does not upgrade TREASURER_CERTIFIED.',
+  'PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER.',
+] as const
 
 export function repoRootFromHere(): string {
   let dir = dirname(fileURLToPath(import.meta.url))
@@ -301,25 +316,19 @@ export function evaluateGates(root = repoRootFromHere()): GateResults {
 }
 
 export function certificationFromGates(gates: GateResults): CertificationRecord {
-  const certified =
-    gates.TREASURER_DOCTRINE === 'VALID' &&
-    gates.TREASURER_BOUNDARIES === 'ENFORCED' &&
-    gates.TREASURER_CALCULATIONS === 'VERIFIED' &&
-    gates.TREASURER_AUTHORITY === 'FAIL_CLOSED' &&
-    gates.TREASURER_RED_TEAM === 'PASS' &&
-    gates.TREASURER_REGRESSION === 'PASS'
+  const regression: ScopedRegression = gates.TREASURER_REGRESSION === 'PASS' ? 'PASS_PACKAGE_LOCAL' : 'FAIL'
   return {
     TREASURER_DOCTRINE: gates.TREASURER_DOCTRINE,
     TREASURER_BOUNDARIES: gates.TREASURER_BOUNDARIES,
     TREASURER_CALCULATIONS: gates.TREASURER_CALCULATIONS,
     TREASURER_AUTHORITY: gates.TREASURER_AUTHORITY,
     TREASURER_RED_TEAM: gates.TREASURER_RED_TEAM,
-    TREASURER_REGRESSION: gates.TREASURER_REGRESSION,
-    TREASURER_CERTIFIED: certified ? 'YES' : 'NO',
+    TREASURER_REGRESSION: regression,
+    TREASURER_CERTIFIED: 'NO',
     PRODUCTION_AUTHORITY: 'NO',
     FINANCIAL_TRANSACTION_AUTHORITY: 'NEVER',
     acceptedLimitations: ACCEPTED_LIMITATIONS.map((item) => item.id),
-    notes: gates.notes,
+    notes: [...gates.notes, ...CERTIFICATION_HONESTY_NOTES],
   }
 }
 
@@ -327,7 +336,7 @@ export function renderCertificationMarkdown(record: CertificationRecord): string
   return [
     '# TREASURER certification record',
     '',
-    'Produced by `packages/treasurer/src/verifier.ts`. YES is emitted only when every gate passes.',
+    'Produced by `packages/treasurer/src/verifier.ts`. TREASURER_CERTIFIED stays NO until an independent VERIFIER re-gate returns YES. In-process gates do not grant certification. PASS_PACKAGE_LOCAL is not a full-repo regression PASS.',
     '',
     `TREASURER_DOCTRINE: ${record.TREASURER_DOCTRINE}`,
     `TREASURER_BOUNDARIES: ${record.TREASURER_BOUNDARIES}`,

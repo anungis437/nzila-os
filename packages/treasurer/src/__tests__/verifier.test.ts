@@ -23,7 +23,7 @@ import {
 describe('verifier', () => {
   const root = repoRootFromHere()
 
-  it('passes every gate and certifies only then', () => {
+  it('passes package-local gates and still withholds certification', () => {
     const gates = evaluateGates(root)
     expect(gates.notes).toEqual([])
     expect(gates).toMatchObject({
@@ -35,17 +35,26 @@ describe('verifier', () => {
       TREASURER_REGRESSION: 'PASS',
     })
     const record = certificationFromGates(gates)
-    expect(record.TREASURER_CERTIFIED).toBe('YES')
+    expect(record.TREASURER_CERTIFIED).toBe('NO')
+    expect(record.TREASURER_REGRESSION).toBe('PASS_PACKAGE_LOCAL')
     expect(record.PRODUCTION_AUTHORITY).toBe('NO')
     expect(record.FINANCIAL_TRANSACTION_AUTHORITY).toBe('NEVER')
+    expect(record.notes.join('\n')).toContain('independent VERIFIER')
+    expect(record.notes.join('\n')).toContain('not a full-repo PASS')
+    expect(record.notes.join('\n')).toContain('self-certified')
   })
 
   it('refuses YES when any gate is not passing', () => {
     const gates = evaluateGates(root)
     const denied = certificationFromGates({ ...gates, TREASURER_AUTHORITY: 'OPEN' })
     expect(denied.TREASURER_CERTIFIED).toBe('NO')
+    expect(denied.TREASURER_REGRESSION).toBe('PASS_PACKAGE_LOCAL')
+    const failedRegression = certificationFromGates({ ...gates, TREASURER_REGRESSION: 'FAIL' })
+    expect(failedRegression.TREASURER_REGRESSION).toBe('FAIL')
+    expect(failedRegression.TREASURER_CERTIFIED).toBe('NO')
     const markdown = renderCertificationMarkdown(denied)
     expect(markdown).toContain('TREASURER_CERTIFIED: NO')
+    expect(markdown).not.toContain('TREASURER_CERTIFIED: YES')
   })
 
   it('matches the committed certification and red-team artifacts', () => {

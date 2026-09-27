@@ -36,6 +36,8 @@ on:
 permissions:
   contents: read
   security-events: write
+  pull-requests: read
+  actions: read
 
 env:
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
@@ -49,6 +51,9 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     name: Secret Scan (Gitleaks + TruffleHog)
+    permissions:
+      contents: read
+      pull-requests: read # required for gitleaks-action@v2 PR scan mode (GET pulls/commits)
     steps:
       - uses: actions/checkout@v5
         with:
@@ -96,6 +101,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Trivy Container Scan
     if: ${{ inputs.run-trivy != false }}
+    permissions:
+      contents: read
+      security-events: write
+      actions: read # private-repo SARIF upload reads the workflow run
     steps:
       - uses: actions/checkout@v5
 
