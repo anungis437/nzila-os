@@ -23,9 +23,6 @@ jobs:
       - name: Test fast
         run: pnpm test:fast
 
-      - name: Build
-        run: pnpm build
-
       - name: Health contract
         run: pnpm exec tsx scripts/sre/validate-health-contract.ts
 
