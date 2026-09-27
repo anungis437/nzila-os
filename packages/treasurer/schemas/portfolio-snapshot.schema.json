@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nzilaos://treasurer/portfolio-snapshot.schema.json",
+  "title": "PORTFOLIO_SNAPSHOT_SCHEMA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "asOf",
+    "capitalDomain",
+    "ownerPrincipalId",
+    "baseCurrency",
+    "positions",
+    "cashMinor",
+    "evidence"
+  ],
+  "properties": {
+    "capitalDomain": { "const": "PERSONAL" },
+    "cashMinor": { "type": "integer", "minimum": 0 },
+    "positions": { "type": "array" },
+    "evidence": { "type": "array" }
+  }
+}

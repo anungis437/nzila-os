@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nzilaos://treasurer/personal-capital-ledger.schema.json",
+  "title": "PERSONAL_CAPITAL_LEDGER_SCHEMA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "asOf",
+    "capitalDomain",
+    "ownerPrincipalId",
+    "baseCurrency",
+    "positions",
+    "cashMinor",
+    "cashCurrency",
+    "cashEvidenceId",
+    "evidence"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "asOf": { "type": "string" },
+    "capitalDomain": { "const": "PERSONAL" },
+    "ownerPrincipalId": { "type": "string" },
+    "baseCurrency": { "type": "string" },
+    "positions": { "type": "array" },
+    "cashMinor": { "type": "integer", "minimum": 0 },
+    "cashCurrency": { "type": "string" },
+    "cashEvidenceId": { "type": "string" },
+    "evidence": { "type": "array" }
+  }
+}

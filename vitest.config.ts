@@ -222,6 +222,8 @@ export default defineConfig({
       'packages/finance-governance',
       'packages/finance-analytics',
       'packages/finance-identity',
+      // Personal investment-capital intelligence (not corporate CAPITAL)
+      'packages/treasurer',
     ],
   },
 })

@@ -1,0 +1,28 @@
+{
+  "name": "@nzila/treasurer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TREASURER — governed personal investment-capital intelligence for the Principal. No production authority. No financial transaction authority.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./verifier": "./src/verifier.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "materialize": "tsx src/materialize.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "tsx": "^4.19.3",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}

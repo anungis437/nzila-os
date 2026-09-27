@@ -1,0 +1,11 @@
+{
+  "owner": "platform",
+  "category": "DOMAIN_SHARED",
+  "stability": "EXPERIMENTAL",
+  "description": "Personal investment-capital intelligence for the Principal. Distinct from corporate CAPITAL and from ExecutiveOS treasury. Production authority NO. Financial transaction authority NEVER.",
+  "allowed_dependents": ["apps/*", "packages/*"],
+  "forbidden_dependents": [],
+  "replacement_for": null,
+  "deprecated": false,
+  "deprecation_note": null
+}

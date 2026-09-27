@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nzilaos://treasurer/capital-envelope.schema.json",
+  "title": "CAPITAL_ENVELOPE_SCHEMA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "epistemicClass",
+    "ceilingMinor",
+    "releasedMinor",
+    "unreleasedMinor",
+    "committedMinor",
+    "investmentAuthorized",
+    "transactionExecuted",
+    "benchmarkAlternativeId",
+    "evidenceGateIds",
+    "thesisId",
+    "downsideCaseIds",
+    "impairmentScenarioIds",
+    "liquidityNote",
+    "concentrationNote",
+    "status",
+    "decisionIds"
+  ],
+  "properties": {
+    "ceilingMinor": { "type": "integer", "minimum": 0 },
+    "releasedMinor": { "type": "integer", "minimum": 0 },
+    "unreleasedMinor": { "type": "integer", "minimum": 0 },
+    "committedMinor": { "const": 0 },
+    "investmentAuthorized": { "const": false },
+    "transactionExecuted": { "const": false },
+    "epistemicClass": { "const": "ASSUMPTION" },
+    "status": { "enum": ["PLANNING", "RELEASED_FOR_CONSIDERATION", "CLOSED"] }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nzilaos://treasurer/investment-decision-record.schema.json",
+  "title": "INVESTMENT_DECISION_RECORD_SCHEMA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "stage",
+    "analysisComplete",
+    "decisionReady",
+    "humanAuthorized",
+    "transactionExternallyConfirmed",
+    "investmentAuthorized",
+    "transactionExecuted",
+    "amountMinor"
+  ],
+  "properties": {
+    "transactionExecuted": { "const": false },
+    "investmentAuthorized": { "type": "boolean" },
+    "humanAuthorized": { "type": "boolean" },
+    "decisionReady": { "type": "boolean" },
+    "analysisComplete": { "type": "boolean" },
+    "transactionExternallyConfirmed": { "type": "boolean" },
+    "amountMinor": { "type": "integer", "minimum": 0 }
+  }
+}

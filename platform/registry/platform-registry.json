@@ -942,6 +942,12 @@
       "category": "APP_SUPPORT",
       "owner": "platform",
       "stability": "EVOLVING"
+    },
+    {
+      "name": "treasurer",
+      "category": "DOMAIN_SHARED",
+      "owner": "platform",
+      "stability": "EXPERIMENTAL"
     }
   ],
   "governance_surfaces": [
@@ -969,6 +975,11 @@
       "name": "governance-security",
       "path": "governance/security",
       "purpose": "HSM, mTLS, and threat model documentation"
+    },
+    {
+      "name": "governance-personal-capital",
+      "path": "governance/personal-capital",
+      "purpose": "Principal personal investment-capital governance. Distinct from corporate capital strategy."
     }
   ],
   "control_plane_surfaces": [
