@@ -331,6 +331,12 @@ export function recordExternalConfirmation(
   if (claimedTreasurerExecuted === true) {
     return fail('TRANSACTION_AUTHORITY_NEVER', 'TREASURER cannot be the executor of a transaction')
   }
+  if (decision.stage !== 'AUTHORIZED' || decision.investmentAuthorized !== true) {
+    return fail(
+      'AUTHORIZATION_REQUIRED',
+      'external confirmation requires stage AUTHORIZED and investmentAuthorized; confirmation does not create either',
+    )
+  }
   const verified = verifyEvidence(evidence, asOf)
   if (!verified.ok) return verified
   if (evidence.origin !== 'EXTERNAL') {

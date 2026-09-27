@@ -53,6 +53,13 @@ describe('verifier', () => {
     expect(record.FINANCIAL_TRANSACTION_AUTHORITY).toBe('NEVER')
     expect(record.notes.join('\n')).toContain('IMPLEMENTER_PASS is not FLEET_CERTIFIED')
     expect(record.notes.join('\n')).toContain('not a full-repo PASS')
+    expect(record.notes.join('\n')).toContain('eef575eec5600a28c041126785490e0f79d42b19 is INVALID')
+    expect(record.notes.join('\n')).toContain('unrelated-id-concentration-split')
+    expect(record.acceptedLimitations).toContain('NO_CRYPTOGRAPHIC_PRINCIPAL_BINDING')
+    expect(record.acceptedLimitations).toContain('NO_ISSUER_REGISTRY_RELATED_ASSETS')
+    expect(record.acceptedLimitations).not.toContain(
+      'EXTERNAL_CONFIRMATION_DOES_NOT_REQUIRE_PRIOR_IN_MODULE_AUTHORIZATION',
+    )
   })
 
   it('refuses YES when any gate is not passing', () => {
@@ -119,7 +126,8 @@ describe('northstar interface', () => {
   it('withholds capacity when evidence is missing and does not spend envelopes', () => {
     const unknown = reportToNorthstar({
       snapshot: null,
-      snapshotIsFreshFact: false,
+      asOf: AS_OF,
+      riskConstraints: null,
       liquidityFloorMinor: null,
       decisions: [],
       envelopes: [],
@@ -151,7 +159,8 @@ describe('northstar interface', () => {
     if (!released.ok) return
     const report = reportToNorthstar({
       snapshot: snapshot(),
-      snapshotIsFreshFact: true,
+      asOf: AS_OF,
+      riskConstraints: risk,
       liquidityFloorMinor: 1_000,
       decisions: [authorized.value],
       envelopes: [released.value],
@@ -175,5 +184,24 @@ describe('northstar interface', () => {
     expect(report.value.ambitionFundingGaps[0]).toEqual({ ambitionId: 'dream', gapMinor: 8_000, status: 'GAP' })
     expect(report.value.trajectories[0].epistemicClass).toBe('SCENARIO')
     expect(report.value.risks.join(' ')).toContain('planning authority')
+    expect(report.value.availableDeployableClass).toBe('FACT')
+  })
+
+  it('does not treat an unvalidated snapshot as FACT deployable capacity', () => {
+    const forged = reportToNorthstar({
+      snapshot: { id: 'forged', cashMinor: 9_000_000, capitalDomain: 'PERSONAL', baseCurrency: 'CAD' },
+      asOf: AS_OF,
+      riskConstraints: constraints(),
+      liquidityFloorMinor: 0,
+      decisions: [],
+      envelopes: [],
+      ambitions: [{ id: 'dream', name: 'studio', fundingNeedMinor: 1, currency: 'CAD', asOf: AS_OF }],
+      scenarios: [],
+    })
+    expect(forged.ok).toBe(true)
+    if (!forged.ok) return
+    expect(forged.value.availableDeployableClass).not.toBe('FACT')
+    expect(forged.value.availableDeployableCapitalMinor).toBeNull()
+    expect(forged.value.ambitionFundingGaps[0].status).toBe('UNKNOWN')
   })
 })

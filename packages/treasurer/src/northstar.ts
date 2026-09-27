@@ -5,7 +5,8 @@
  */
 import { fail, ok, type EpistemicClass, type Result } from './kernel'
 import { committedCapitalMinor } from './decision'
-import type { CapitalEnvelope, DecisionCase, NorthstarAmbition, PortfolioSnapshot, Scenario } from './schemas'
+import { validateSnapshot } from './integrity'
+import type { CapitalEnvelope, DecisionCase, NorthstarAmbition, PortfolioSnapshot, RiskConstraints, Scenario } from './schemas'
 import { acceptScenarioForDecision, applyScenario } from './calculations'
 
 export interface NorthstarCapitalReport {
@@ -42,8 +43,9 @@ export function capacityFromNorthstarAmbition(_ambition: NorthstarAmbition): Res
 }
 
 export function reportToNorthstar(input: {
-  readonly snapshot: PortfolioSnapshot | null
-  readonly snapshotIsFreshFact: boolean
+  readonly snapshot: unknown | null
+  readonly asOf: string
+  readonly riskConstraints: RiskConstraints | null
   readonly liquidityFloorMinor: number | null
   readonly decisions: readonly DecisionCase[]
   readonly envelopes: readonly CapitalEnvelope[]
@@ -58,10 +60,23 @@ export function reportToNorthstar(input: {
       return fail('ENVELOPE_IS_NOT_COMMITTED_CAPITAL', 'envelope leaked into committed capital')
     }
   }
+
+  let validated: PortfolioSnapshot | null = null
+  if (input.snapshot !== null) {
+    if (!input.riskConstraints) {
+      reasons.push('snapshot was not validated; risk constraints are required')
+    } else {
+      const checked = validateSnapshot(input.snapshot, input.asOf, input.riskConstraints)
+      if (!checked.ok) reasons.push(checked.reason)
+      else if (!checked.value.cashIsFact) reasons.push('validated snapshot cash is not FACT')
+      else validated = checked.value.snapshot
+    }
+  }
+
   let committed: number | null = null
   let committedClass: EpistemicClass | 'UNKNOWN' = 'UNKNOWN'
-  if (input.snapshot) {
-    const sum = committedCapitalMinor(input.decisions, input.snapshot.baseCurrency)
+  if (validated) {
+    const sum = committedCapitalMinor(input.decisions, validated.baseCurrency)
     if (!sum.ok) {
       reasons.push(sum.reason)
     } else {
@@ -69,16 +84,16 @@ export function reportToNorthstar(input: {
       committedClass = 'DECISION'
     }
   } else {
-    reasons.push('no personal snapshot; committed capital is unknown')
+    reasons.push('no validated personal snapshot; committed capital is unknown')
   }
 
   let available: number | null = null
   let availableClass: EpistemicClass | 'UNKNOWN' = 'UNKNOWN'
-  if (!input.snapshot || !input.snapshotIsFreshFact || input.liquidityFloorMinor === null || committed === null) {
-    reasons.push('deployable capital is unknown without fresh FACT cash, a liquidity floor, and committed capital')
-    risks.push('capacity withheld because evidence is missing')
+  if (!validated || input.liquidityFloorMinor === null || committed === null) {
+    reasons.push('deployable capital is unknown without a validated FACT snapshot, a liquidity floor, and committed capital')
+    risks.push('capacity withheld because evidence is missing or the snapshot did not validate')
   } else {
-    available = input.snapshot.cashMinor - input.liquidityFloorMinor - committed
+    available = validated.cashMinor - input.liquidityFloorMinor - committed
     if (available < 0) {
       risks.push('liquidity floor and commitments exceed cash')
       available = 0
@@ -93,8 +108,8 @@ export function reportToNorthstar(input: {
       reasons.push(accepted.reason)
       continue
     }
-    if (!input.snapshot || available === null) continue
-    const applied = applyScenario(input.snapshot.cashMinor, accepted.value)
+    if (!validated || available === null) continue
+    const applied = applyScenario(validated.cashMinor, accepted.value)
     if (!applied.ok) {
       reasons.push(applied.reason)
       continue
@@ -107,7 +122,7 @@ export function reportToNorthstar(input: {
   }
 
   const gaps = input.ambitions.map((ambition) => {
-    if (available === null || ambition.currency !== input.snapshot?.baseCurrency) {
+    if (available === null || ambition.currency !== validated?.baseCurrency) {
       return { ambitionId: ambition.id, gapMinor: null, status: 'UNKNOWN' as const }
     }
     const gap = ambition.fundingNeedMinor - available

@@ -91,6 +91,7 @@ export const CERTIFICATION_HONESTY_NOTES = [
   'RECORD_KIND is IMPLEMENTER_ASSESSMENT. This module cannot issue FLEET_CERTIFIED.',
   'IMPLEMENTER_PASS is not FLEET_CERTIFIED. LOCAL_RED_TEAM pass is not FLEET_CERTIFIED. PACKAGE_TESTS pass is not FLEET_CERTIFIED.',
   'Independent VERIFIER on PR #859 at 5f25a566 returned a NO verdict. VERIFIER NO implies TREASURER_CERTIFIED NO.',
+  'Candidate eef575eec5600a28c041126785490e0f79d42b19 is INVALID. Independent Fleet REDTEAM returned RED_TEAM_PASS NO on that SHA. This record remains an IMPLEMENTER_ASSESSMENT and FLEET_CERTIFIED stays NO.',
   'Findings recorded here: CI merge was BLOCKED (branch-policy, secret-scan integration 403, Trivy SARIF upload 403, repository inventory drift, governance gate cascade); monorepo suites had not been run at that gate; certification was previously self-certified by this module.',
   'TREASURER_REGRESSION PASS_PACKAGE_LOCAL is package-local static anchors and in-package checks only. It is not a full-repo PASS of pnpm lint, pnpm typecheck, pnpm test:fast, or pnpm governance:audit, and it is not independent re-execution of corporate treasury, doctrine-enforcement, or capital contract suites.',
   'PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER.',
@@ -224,11 +225,17 @@ function authorityGate(): { pass: boolean; notes: string[] } {
 function redTeamGate(): { pass: boolean; notes: string[] } {
   const notes: string[] = []
   const executed = runRedTeam()
-  if (!executed.pass) notes.push('one or more red-team attacks were not blocked')
+  if (!executed.pass) notes.push('one or more resolved red-team attacks were not blocked')
   const report = renderRedTeamReport()
   for (const attack of RED_TEAM_ATTACKS) {
     if (!report.includes(attack.id)) notes.push(`report missing attack ${attack.id}`)
-    if (attack.disposition !== 'RESOLVED') notes.push(`attack ${attack.id} is not resolved`)
+    const outcome = executed.results.find((result) => result.id === attack.id)
+    if (attack.disposition === 'RESOLVED' && outcome?.blocked !== true) {
+      notes.push(`resolved attack ${attack.id} was not blocked`)
+    }
+    if (attack.disposition === 'OPEN' && outcome?.blocked === true) {
+      notes.push(`attack ${attack.id} is marked OPEN but was blocked`)
+    }
   }
   if (!report.includes('## Findings') || !report.includes('## Remediations') || !report.includes('## Accepted limitations')) {
     notes.push('red-team report sections missing')
@@ -236,7 +243,9 @@ function redTeamGate(): { pass: boolean; notes: string[] } {
   for (const limitation of ACCEPTED_LIMITATIONS) {
     if (!report.includes(limitation.id)) notes.push(`report missing limitation ${limitation.id}`)
   }
-  if (report.includes('OPEN')) notes.push('red-team report contains an OPEN finding')
+  if (executed.openIds.length > 0 && !report.includes('Disposition: OPEN')) {
+    notes.push('red-team report hides an OPEN finding')
+  }
   return { pass: notes.length === 0 && executed.pass, notes }
 }
 
@@ -337,6 +346,13 @@ export function implementerAssessmentFromGates(gates: GateResults): ImplementerA
 export function certificationFromGates(gates: GateResults): CertificationRecord {
   const assessment = implementerAssessmentFromGates(gates)
   const regression: ScopedRegression = gates.TREASURER_REGRESSION === 'PASS' ? 'PASS_PACKAGE_LOCAL' : 'FAIL'
+  const openIds = runRedTeam().openIds
+  const openNotes =
+    openIds.length > 0
+      ? [
+          `Material OPEN local red-team findings block fleet certification claims: ${openIds.join(', ')}. LOCAL_RED_TEAM is not Fleet REDTEAM.`,
+        ]
+      : []
   return {
     RECORD_KIND: 'IMPLEMENTER_ASSESSMENT',
     IMPLEMENTER_ASSESSMENT: assessment,
@@ -351,7 +367,7 @@ export function certificationFromGates(gates: GateResults): CertificationRecord 
     PRODUCTION_AUTHORITY: 'NO',
     FINANCIAL_TRANSACTION_AUTHORITY: 'NEVER',
     acceptedLimitations: ACCEPTED_LIMITATIONS.map((item) => item.id),
-    notes: [...gates.notes, ...CERTIFICATION_HONESTY_NOTES],
+    notes: [...gates.notes, ...CERTIFICATION_HONESTY_NOTES, ...openNotes],
   }
 }
 

@@ -66,7 +66,8 @@ describe('NORTHSTAR contract surface', () => {
     ).toBe(false)
     const report = reportToNorthstar({
       snapshot: null,
-      snapshotIsFreshFact: false,
+      asOf: AS_OF,
+      riskConstraints: null,
       liquidityFloorMinor: null,
       decisions: [],
       envelopes: [],
@@ -153,12 +154,27 @@ describe('authority separations', () => {
       origin: 'EXTERNAL',
       payload: { instrumentId: 'SYN-EQ', amountMinor: 100 },
     })
-    expect(recordExternalConfirmation(ready, evidence, AS_OF, true).ok).toBe(false)
-    const recorded = recordExternalConfirmation(ready, evidence, AS_OF, false)
+    const premature = recordExternalConfirmation(ready, evidence, AS_OF, false)
+    expect(premature.ok).toBe(false)
+    if (!premature.ok) expect(premature.code).toBe('AUTHORIZATION_REQUIRED')
+    const risk = constraints()
+    const authorized = advanceDecision({
+      decision: ready,
+      to: 'AUTHORIZED',
+      asOf: AS_OF,
+      riskConstraints: risk,
+      authorization: investmentAuthorization({ decisionId: ready.id, riskHash: risk.contentHash }),
+      envelope: sampleEnvelope(),
+    })
+    expect(authorized.ok).toBe(true)
+    if (!authorized.ok) return
+    expect(recordExternalConfirmation(authorized.value, evidence, AS_OF, true).ok).toBe(false)
+    const recorded = recordExternalConfirmation(authorized.value, evidence, AS_OF, false)
     expect(recorded.ok).toBe(true)
     if (!recorded.ok) return
     expect(recorded.value.transactionExternallyConfirmed).toBe(true)
     expect(recorded.value.transactionExecuted).toBe(false)
-    expect(recorded.value.humanAuthorized).toBe(false)
+    expect(recorded.value.humanAuthorized).toBe(true)
+    expect(recorded.value.investmentAuthorized).toBe(true)
   })
 })

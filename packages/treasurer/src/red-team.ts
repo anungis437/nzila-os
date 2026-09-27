@@ -10,6 +10,7 @@ import {
   ingestCorporateTreasurySignal,
 } from './boundaries'
 import { applyScenario } from './calculations'
+import { reportToNorthstar } from './northstar'
 import {
   advanceDecision,
   markProposedTradeExecuted,
@@ -46,7 +47,7 @@ export interface RedTeamAttack {
   readonly id: string
   readonly title: string
   readonly vector: string
-  readonly disposition: 'RESOLVED'
+  readonly disposition: 'RESOLVED' | 'OPEN'
   readonly remediation: string
   readonly run: () => { readonly blocked: boolean; readonly code: string }
 }
@@ -85,6 +86,18 @@ export const ACCEPTED_LIMITATIONS: readonly AcceptedLimitation[] = [
     id: 'NO_CORPORATE_ACTION_ADJUSTMENT',
     title: 'No inferred corporate-action adjustment',
     statement: 'Splits, mergers, and returns of capital are not inferred. Quantities change only when new evidence is supplied.',
+  },
+  {
+    id: 'NO_CRYPTOGRAPHIC_PRINCIPAL_BINDING',
+    title: 'No cryptographic principal binding',
+    statement:
+      'The Principal check is a literal id and name match. TREASURER does not verify a signature, credential, or custody attestation. A well-formed payload is not proof of the Principal.',
+  },
+  {
+    id: 'NO_ISSUER_REGISTRY_RELATED_ASSETS',
+    title: 'No issuer registry for related assets',
+    statement:
+      'Related series that share an instrument stem are clustered across exposure groups. Distinct instrument strings for one economic issuer are not detected. That residual BLOCKS fleet certification claims. A well-formed external fact can still be analyzed; this is not a claim that forged facts are rejected without custodian binding.',
   },
 ]
 
@@ -366,17 +379,176 @@ export const RED_TEAM_ATTACKS: readonly RedTeamAttack[] = [
       return blocked(spoof.code, succeeded)
     },
   },
+  {
+    id: 'split-exposure-group',
+    title: 'Split exposure group',
+    vector: 'Place related series SYN-EQ-A and SYN-EQ-B in different exposure groups under the group ceiling',
+    disposition: 'RESOLVED',
+    remediation:
+      'instrumentStem clusters series suffixes across caller exposure groups. Combined stem weight above maxGroupWeightBps is CONCENTRATION_BREACH.',
+    run: () => {
+      const seriesA = marketEvidence({ id: 'ev-a', instrumentId: 'SYN-EQ-A', marketValueMinor: 2_000 })
+      const seriesB = marketEvidence({ id: 'ev-b', instrumentId: 'SYN-EQ-B', marketValueMinor: 2_000 })
+      const result = validateSnapshot(
+        snapshot({
+          positions: [
+            position({
+              id: 'p-a',
+              instrumentId: 'SYN-EQ-A',
+              marketValueMinor: 2_000,
+              exposureGroupId: 'group-a',
+              evidenceId: 'ev-a',
+            }),
+            position({
+              id: 'p-b',
+              instrumentId: 'SYN-EQ-B',
+              marketValueMinor: 2_000,
+              exposureGroupId: 'group-b',
+              evidenceId: 'ev-b',
+            }),
+          ],
+          evidence: [seriesA, seriesB, cashEvidence(2_000)],
+          cashMinor: 2_000,
+        }),
+        AS_OF,
+        constraints({ maxPositionWeightBps: 4_000, maxGroupWeightBps: 5_000, minLiquidityMinor: 0 }),
+      )
+      return blocked(result.ok ? 'UNEXPECTED' : result.code, result.ok)
+    },
+  },
+  {
+    id: 'ambiguous-corporate-identifier',
+    title: 'Ambiguous corporate identifier',
+    vector: 'Admit instrument id union-eyes on a PERSONAL snapshot without a corporate prefix',
+    disposition: 'RESOLVED',
+    remediation:
+      'isCorporateOrAmbiguousInstrument refuses known product tokens and compact forms, not only corp:, product:, nzila-product:, and org: prefixes.',
+    run: () => {
+      const evidence = marketEvidence({ id: 'ev-ue', instrumentId: 'union-eyes', marketValueMinor: 1_000 })
+      const result = validateSnapshot(
+        snapshot({
+          positions: [
+            position({
+              id: 'p-ue',
+              instrumentId: 'union-eyes',
+              marketValueMinor: 1_000,
+              exposureGroupId: 'product',
+              evidenceId: 'ev-ue',
+            }),
+          ],
+          evidence: [evidence, cashEvidence(4_000)],
+          cashMinor: 4_000,
+        }),
+        AS_OF,
+        constraints(),
+      )
+      return blocked(result.ok ? 'UNEXPECTED' : result.code, result.ok)
+    },
+  },
+  {
+    id: 'northstar-unvalidated-fact',
+    title: 'NORTHSTAR unvalidated fact',
+    vector: 'Promote a forged snapshot to FACT deployable capacity without validateSnapshot',
+    disposition: 'RESOLVED',
+    remediation:
+      'reportToNorthstar calls validateSnapshot. availableDeployableClass is FACT only after validation succeeds and cash is FACT. A caller flag cannot promote the class.',
+    run: () => {
+      const report = reportToNorthstar({
+        snapshot: { id: 'forged', cashMinor: 9_000_000, capitalDomain: 'PERSONAL', baseCurrency: 'CAD' },
+        asOf: AS_OF,
+        riskConstraints: constraints(),
+        liquidityFloorMinor: 0,
+        decisions: [],
+        envelopes: [],
+        ambitions: [],
+        scenarios: [],
+      })
+      const succeeded =
+        report.ok &&
+        (report.value.availableDeployableClass === 'FACT' || report.value.availableDeployableCapitalMinor !== null)
+      return blocked(report.ok ? 'FACT_WITHHELD' : report.code, succeeded)
+    },
+  },
+  {
+    id: 'external-confirmation-without-authorization',
+    title: 'External confirmation without authorization',
+    vector: 'Record broker confirmation against a decision that is not AUTHORIZED',
+    disposition: 'RESOLVED',
+    remediation:
+      'recordExternalConfirmation requires stage AUTHORIZED and investmentAuthorized. Confirmation does not set humanAuthorized, investmentAuthorized, or transactionExecuted.',
+    run: () => {
+      const evidence = buildEvidence({
+        id: 'confirm-unauth',
+        epistemicClass: 'FACT',
+        sourceType: 'BROKER_CONFIRMATION',
+        sourceName: 'synthetic-broker',
+        observedAt: AS_OF,
+        origin: 'EXTERNAL',
+        payload: { instrumentId: 'SYN-EQ', amountMinor: 100 },
+      })
+      const confirmed = recordExternalConfirmation(decisionReadyCase(), evidence, AS_OF, false)
+      return blocked(confirmed.ok ? 'UNEXPECTED' : confirmed.code, confirmed.ok)
+    },
+  },
+  {
+    id: 'unrelated-id-concentration-split',
+    title: 'Unrelated instrument-id concentration split',
+    vector: 'Hold one economic exposure as AAA and BBB in different groups, with no shared stem',
+    disposition: 'OPEN',
+    remediation:
+      'No issuer registry exists. Distinct instrument strings are not clustered. This residual BLOCKS fleet certification claims and is not marked resolved. A well-formed external fact can still be analyzed.',
+    run: () => {
+      const seriesA = marketEvidence({ id: 'ev-aaa', instrumentId: 'AAA', marketValueMinor: 2_000 })
+      const seriesB = marketEvidence({ id: 'ev-bbb', instrumentId: 'BBB', marketValueMinor: 2_000 })
+      const result = validateSnapshot(
+        snapshot({
+          positions: [
+            position({
+              id: 'p-aaa',
+              instrumentId: 'AAA',
+              marketValueMinor: 2_000,
+              exposureGroupId: 'group-a',
+              evidenceId: 'ev-aaa',
+            }),
+            position({
+              id: 'p-bbb',
+              instrumentId: 'BBB',
+              marketValueMinor: 2_000,
+              exposureGroupId: 'group-b',
+              evidenceId: 'ev-bbb',
+            }),
+          ],
+          evidence: [seriesA, seriesB, cashEvidence(2_000)],
+          cashMinor: 2_000,
+        }),
+        AS_OF,
+        constraints({ maxPositionWeightBps: 4_000, maxGroupWeightBps: 5_000, minLiquidityMinor: 0 }),
+      )
+      return blocked(result.ok ? 'UNRELATED_IDS_NOT_CLUSTERED' : result.code, result.ok)
+    },
+  },
 ]
 
 export function runRedTeam(): {
   readonly pass: boolean
+  readonly redTeamPass: boolean
+  readonly openIds: readonly string[]
   readonly results: readonly { id: string; blocked: boolean; code: string }[]
 } {
   const results = RED_TEAM_ATTACKS.map((attack) => {
     const outcome = attack.run()
     return { id: attack.id, blocked: outcome.blocked, code: outcome.code }
   })
-  return { pass: results.every((result) => result.blocked), results }
+  const openIds = RED_TEAM_ATTACKS.filter((attack) => attack.disposition === 'OPEN').map((attack) => attack.id)
+  const resolvedBlocked = RED_TEAM_ATTACKS.filter((attack) => attack.disposition === 'RESOLVED').every((attack) => {
+    return results.find((result) => result.id === attack.id)?.blocked === true
+  })
+  return {
+    pass: resolvedBlocked,
+    redTeamPass: resolvedBlocked && openIds.length === 0,
+    openIds,
+    results,
+  }
 }
 
 export function renderRedTeamReport(): string {
@@ -396,6 +568,7 @@ export function renderRedTeamReport(): string {
     lines.push('')
     lines.push(`- Title: ${attack.title}`)
     lines.push(`- Vector: ${attack.vector}`)
+    lines.push(`- Disposition: ${attack.disposition}`)
     lines.push(`- Blocked: ${outcome?.blocked ? 'YES' : 'NO'}`)
     lines.push(`- Code: ${outcome?.code ?? 'NOT_RUN'}`)
     lines.push('')
@@ -404,7 +577,7 @@ export function renderRedTeamReport(): string {
   lines.push('')
   for (const attack of RED_TEAM_ATTACKS) {
     const outcome = executed.results.find((result) => result.id === attack.id)
-    lines.push(`- ${attack.id}: ${outcome?.blocked ? 'blocked' : 'OPEN'} (${outcome?.code ?? 'NOT_RUN'})`)
+    lines.push(`- ${attack.id}: ${attack.disposition}. ${outcome?.blocked ? 'blocked' : 'not blocked'} (${outcome?.code ?? 'NOT_RUN'})`)
   }
   lines.push('')
   lines.push('## Remediations')
@@ -419,8 +592,10 @@ export function renderRedTeamReport(): string {
     lines.push(`- ${limitation.id}: ${limitation.statement}`)
   }
   lines.push('')
-  lines.push(`RED_TEAM_PASS: ${executed.pass ? 'YES' : 'NO'}`)
-  lines.push('LOCAL_RED_TEAM is not FLEET_CERTIFIED.')
+  lines.push(`RED_TEAM_PASS: ${executed.redTeamPass ? 'YES' : 'NO'}`)
+  lines.push(`RESOLVED_ATTACKS_BLOCKED: ${executed.pass ? 'YES' : 'NO'}`)
+  lines.push('LOCAL_RED_TEAM is not Fleet REDTEAM and is not FLEET_CERTIFIED.')
+  lines.push('OPEN findings block fleet certification claims.')
   lines.push('FLEET_CERTIFIED: NO')
   lines.push('TREASURER_CERTIFIED: NO')
   lines.push('')

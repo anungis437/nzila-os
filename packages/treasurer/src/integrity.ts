@@ -24,7 +24,27 @@ import {
   type RiskConstraints,
 } from './schemas'
 
-const CORPORATE_INSTRUMENT = /^(corp:|product:|nzila-product:|org:)/i
+const CORPORATE_PREFIX = /^(corp:|product:|nzila-product:|org:)/i
+const CORPORATE_SEGMENT = /(?:^|[/._-])(?:corp|product|org|nzila-product)(?:[/._-]|$)/i
+const KNOWN_CORPORATE_PRODUCT = /union-eyes|nzila-os|nzila-product|agrimo|zonga|capital-allocation|(?:^|[^a-z0-9])nzila(?:[^a-z0-9]|$)/i
+const SERIES_SUFFIX = /(?:[:./_-])(?:CL|PREF|WT|PR|RT|W|U|[A-C]|\d{1,2})$/i
+
+/** Cluster related series (SYN-EQ-A and SYN-EQ-B) without trusting exposureGroupId. */
+export function instrumentStem(instrumentId: string): string {
+  let stem = instrumentId.trim().toUpperCase()
+  let previous = ''
+  while (stem !== previous) {
+    previous = stem
+    stem = stem.replace(SERIES_SUFFIX, '')
+  }
+  return stem
+}
+
+export function isCorporateOrAmbiguousInstrument(id: string): boolean {
+  if (CORPORATE_PREFIX.test(id) || CORPORATE_SEGMENT.test(id) || KNOWN_CORPORATE_PRODUCT.test(id)) return true
+  const compact = id.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  return compact.includes('unioneyes') || compact.includes('nzila') || compact.includes('agrimo') || compact.includes('zonga')
+}
 
 export interface WeightRow {
   readonly id: string
@@ -197,8 +217,8 @@ export function validateSnapshot(
     if (position.ownerPrincipalId !== TREASURER_IDENTITY.principalId) {
       return fail('PERSONAL_CAPITAL_ONLY', `position ${position.id} is not owned by the Principal`)
     }
-    if (CORPORATE_INSTRUMENT.test(position.instrumentId) || CORPORATE_INSTRUMENT.test(position.accountId)) {
-      return fail('CORPORATE_CAPITAL_BOUNDARY', `position ${position.id} carries a corporate identifier`)
+    if (isCorporateOrAmbiguousInstrument(position.instrumentId) || isCorporateOrAmbiguousInstrument(position.accountId)) {
+      return fail('CORPORATE_CAPITAL_BOUNDARY', `position ${position.id} carries a corporate or ambiguous identifier`)
     }
     const key = `${position.accountId}|${position.instrumentId}`
     if (positionKeys.has(key)) return fail('DUPLICATE_POSITION', `duplicate position ${key}`)
@@ -265,6 +285,19 @@ export function validateSnapshot(
   for (const [groupId, weight] of Object.entries(groupWeightsBps)) {
     if (weight > constraints.maxGroupWeightBps) {
       return fail('CONCENTRATION_BREACH', `exposure group ${groupId} weight ${weight} exceeds ceiling`)
+    }
+  }
+  const stemWeightsBps: Record<string, number> = {}
+  for (const row of rows) {
+    if (row.id === 'cash') continue
+    const position = snapshot.positions.find((item) => item.id === row.id)
+    if (!position) continue
+    const stem = instrumentStem(position.instrumentId)
+    stemWeightsBps[stem] = (stemWeightsBps[stem] ?? 0) + row.weightBps
+  }
+  for (const [stem, weight] of Object.entries(stemWeightsBps)) {
+    if (weight > constraints.maxGroupWeightBps) {
+      return fail('CONCENTRATION_BREACH', `instrument stem ${stem} weight ${weight} exceeds the group ceiling across exposure groups`)
     }
   }
   if (snapshot.cashMinor < constraints.minLiquidityMinor) {

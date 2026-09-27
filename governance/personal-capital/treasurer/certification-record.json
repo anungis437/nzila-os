@@ -16,14 +16,18 @@
     "NO_TAX_COMPUTATION",
     "PEER_AGENTS_ARE_BOUNDARIES_NOT_RUNTIMES",
     "NO_PRODUCTION_DEPLOYMENT",
-    "NO_CORPORATE_ACTION_ADJUSTMENT"
+    "NO_CORPORATE_ACTION_ADJUSTMENT",
+    "NO_CRYPTOGRAPHIC_PRINCIPAL_BINDING",
+    "NO_ISSUER_REGISTRY_RELATED_ASSETS"
   ],
   "notes": [
     "RECORD_KIND is IMPLEMENTER_ASSESSMENT. This module cannot issue FLEET_CERTIFIED.",
     "IMPLEMENTER_PASS is not FLEET_CERTIFIED. LOCAL_RED_TEAM pass is not FLEET_CERTIFIED. PACKAGE_TESTS pass is not FLEET_CERTIFIED.",
     "Independent VERIFIER on PR #859 at 5f25a566 returned a NO verdict. VERIFIER NO implies TREASURER_CERTIFIED NO.",
+    "Candidate eef575eec5600a28c041126785490e0f79d42b19 is INVALID. Independent Fleet REDTEAM returned RED_TEAM_PASS NO on that SHA. This record remains an IMPLEMENTER_ASSESSMENT and FLEET_CERTIFIED stays NO.",
     "Findings recorded here: CI merge was BLOCKED (branch-policy, secret-scan integration 403, Trivy SARIF upload 403, repository inventory drift, governance gate cascade); monorepo suites had not been run at that gate; certification was previously self-certified by this module.",
     "TREASURER_REGRESSION PASS_PACKAGE_LOCAL is package-local static anchors and in-package checks only. It is not a full-repo PASS of pnpm lint, pnpm typecheck, pnpm test:fast, or pnpm governance:audit, and it is not independent re-execution of corporate treasury, doctrine-enforcement, or capital contract suites.",
-    "PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER."
+    "PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER.",
+    "Material OPEN local red-team findings block fleet certification claims: unrelated-id-concentration-split. LOCAL_RED_TEAM is not Fleet REDTEAM."
   ]
 }
