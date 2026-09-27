@@ -156,3 +156,10 @@ describe('Platform Admin routing invariants', () => {
     expect(cpConfig.timeoutMs).toBeGreaterThan(0)
   })
 })
+
+/** E5-D UNIQUE probe — intentional fail in TEST_FAST_ONLY file — DO NOT MERGE */
+describe('e5d-probe-unique-test-fast-only', () => {
+  it('fails only under test:fast project system-boundary-tests', () => {
+    expect(true).toBe(false)
+  })
+})
