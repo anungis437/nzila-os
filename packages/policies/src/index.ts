@@ -129,3 +129,5 @@ export function evaluateDomainPolicies(context: Partial<LegacyPolicyContext>): P
 }
 
 export { evaluatePolicies }
+// E5-C Probe C: shared package break — DO NOT MERGE
+export const E5C_PROBE_C_BREAK: string = 12345;
