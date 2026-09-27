@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { parse } from 'yaml'
 
 const ROOT = join(__dirname, '..', '..')
 
@@ -221,5 +222,89 @@ describe('CI-005: GitOps deploy is exact-tip and app-scoped', () => {
     expect(drift).toContain("env === 'staging' ? cfg.routing?.stagingFallback : undefined")
 
     expect(evidence).toContain("if (promotionVerdict !== 'ready') process.exit(1)")
+  })
+})
+
+// ── CI-006: Reliability Guard authority convergence (E2) ───────────────────
+
+describe('CI-006: Reliability Guard does not duplicate lint and typecheck', () => {
+  function shellSegments(run: unknown): string[] {
+    if (typeof run !== 'string') return []
+    return run
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('#'))
+      .flatMap((line) => line.split(/(?:&&|\|\||;)/).map((segment) => segment.trim()))
+      .filter((segment) => segment.length > 0)
+  }
+
+  function reliabilityGuardCommands(): string[] {
+    const src = readSafe(join(ROOT, '.github', 'workflows', 'reliability-guard.yml'))
+    const doc = parse(src) as {
+      jobs?: Record<string, { steps?: Array<{ run?: unknown }> }>
+    }
+    const commands: string[] = []
+    for (const job of Object.values(doc.jobs ?? {})) {
+      for (const step of job?.steps ?? []) {
+        commands.push(...shellSegments(step?.run))
+      }
+    }
+    return commands
+  }
+
+  const PNPM_FLAGS_WITH_VALUES = new Set([
+    '--filter',
+    '-F',
+    '--dir',
+    '-C',
+    '--reporter',
+    '--output-logs',
+    '--log-level',
+    '--config',
+  ])
+
+  function pnpmScriptName(segment: string): string | undefined {
+    const tokens = segment.split(/\s+/)
+    const pnpmAt = tokens.indexOf('pnpm')
+    if (pnpmAt < 0) return undefined
+    const positional: string[] = []
+    for (let index = pnpmAt + 1; index < tokens.length; index += 1) {
+      const token = tokens[index]
+      if (token === '--') {
+        positional.push(...tokens.slice(index + 1))
+        break
+      }
+      if (token.startsWith('-')) {
+        if (!token.includes('=') && PNPM_FLAGS_WITH_VALUES.has(token)) index += 1
+        continue
+      }
+      positional.push(token)
+    }
+    if (positional[0] === 'exec') return undefined
+    if (positional[0] === 'run') return positional[1]
+    return positional[0]
+  }
+
+  function invokesPnpmScript(commands: string[], script: string): boolean {
+    return commands.some((segment) => pnpmScriptName(segment) === script)
+  }
+
+  it('keeps fast tests, the portfolio build, and SRE validation without typecheck or lint', () => {
+    const commands = reliabilityGuardCommands()
+
+    expect(invokesPnpmScript(commands, 'typecheck')).toBe(false)
+    expect(invokesPnpmScript(commands, 'lint')).toBe(false)
+    expect(invokesPnpmScript(commands, 'test:fast')).toBe(true)
+    expect(invokesPnpmScript(commands, 'build')).toBe(true)
+
+    for (const script of [
+      'scripts/sre/validate-health-contract.ts',
+      'scripts/sre/synthetic-dry-run.ts',
+      'scripts/sre/alert-routing-dry-run.ts',
+      'scripts/sre/audit-reliability.ts',
+      'scripts/sre/generate-executive-dashboard.ts',
+    ]) {
+      expect(commands.some((segment) => segment.includes(script)), script).toBe(true)
+    }
   })
 })
