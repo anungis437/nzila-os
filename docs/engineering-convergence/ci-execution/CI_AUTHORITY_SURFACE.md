@@ -11,7 +11,7 @@ Architecture B stays. Existing jobs implement validation. Canonical `Merge Autho
 | `Merge Authority / Schema Integrity` | `schema-drift` |
 | `Merge Authority / PostgreSQL RLS` | `sage-postgres-concurrency` |
 | `Merge Authority / Migration Chain` | `sage-live-postgres` |
-| `Merge Authority / Affected Build` | `build` (`turbo run build --affected`) |
+| `Merge Authority / Affected Build` | `build` (`turbo run build --affected`, or `pnpm build` when the diff is not package-scoped) |
 | `Merge Authority / Architectural Contracts` | `contract-tests` |
 | `Merge Authority / Repository Inventory` | `repository-inventory` |
 | `Merge Authority / Governance Integrity` | `governance-integrity` |
@@ -22,7 +22,9 @@ Architecture B stays. Existing jobs implement validation. Canonical `Merge Autho
 
 Direct secret contexts, unchanged: `Gitleaks`, `TruffleHog OSS`, `Docker Secret Policy`.
 
-`Merge Authority / Affected Build` is affected closure only. `PORTFOLIO_BUILD_AUTHORITY` stays unresolved. Unit tests do not retire `pnpm test:fast`. `TEST_FAST_SUBSET` stays unresolved. `E2` stays blocked. Reliability Guard is unchanged.
+`Merge Authority / Affected Build` runs `turbo run build --affected` when every relevant path sits inside a pnpm workspace package. Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock`, `bun.lock`, `bun.lockb`), `turbo.json` / `turbo.jsonc`, `pnpm-workspace.yaml`, root `package.json`, root `.npmrc`, and any other path that is not inside a workspace package and is not proven documentation force `pnpm build` (`turbo build`, the same portfolio command Reliability Guard already runs). Proven documentation stays not applicable. Unknown paths are not not-applicable. An empty diff or an unreadable SCM base also runs `pnpm build`.
+
+On turbo 2.9.14, a diff that only touches `pnpm-lock.yaml`, root `package.json`, `pnpm-workspace.yaml`, `.npmrc`, or another non-package path makes `--affected` select `//` and schedule 0 build tasks. `turbo.json` currently schedules the full build task graph; Build All still runs `pnpm build` for it so the result does not depend on that global-trigger behavior. Package-scoped affected closure still does not build the whole portfolio, so `PORTFOLIO_BUILD_AUTHORITY` stays unresolved. Unit tests do not retire `pnpm test:fast`. `TEST_FAST_SUBSET` stays unresolved. `E2` stays blocked. Reliability Guard is unchanged, including its `pnpm build`.
 
 ## Auth boundary
 
