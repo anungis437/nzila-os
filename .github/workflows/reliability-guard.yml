@@ -19,12 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
+      # Merge-critical lint and typecheck already run on CI Lint & Typecheck.
       - name: Test fast
         run: pnpm test:fast
 
