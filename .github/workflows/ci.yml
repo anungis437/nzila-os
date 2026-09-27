@@ -81,6 +81,17 @@ jobs:
           UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
+      # E5-E: transfer TEST_FAST_ONLY orphan merge-correctness projects into Unit Tests job.
+      # Preserves vitest project configs/aliases/timeouts/assertions; does not alter RG.
+      - name: Run transferred orphan merge-correctness tests
+        run: |
+          set -euo pipefail
+          pnpm exec vitest run --project system-boundary-tests --project e2e-platform
+          pnpm exec vitest run --config scripts/proof/vitest.config.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
+
       # Pre-tar keeps the upload to a single file: workspace-wide **/coverage-final.json
       # glob-walking was the dominant cost across 250+ packages. tar is ~10-30x faster
       # than upload-artifact's per-file API for many small JSON files.
