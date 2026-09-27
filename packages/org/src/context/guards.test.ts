@@ -85,10 +85,3 @@ describe('withOrgScope', () => {
     expect(() => guarded(null as unknown as OrgContext)).toThrow(OrgScopeRequiredError)
   })
 })
-
-/** E5-D adversarial NEGATIVE probe — intentional fail — DO NOT MERGE */
-describe('e5d-probe-negative', () => {
-  it('deterministic unit failure for authority proof', () => {
-    expect(true).toBe(false)
-  })
-})
