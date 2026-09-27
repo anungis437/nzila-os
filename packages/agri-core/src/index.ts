@@ -3,3 +3,5 @@ export * from './schemas/index'
 export * from './enums'
 export * from './fsm/index'
 export { buildActionAuditEntry, hashAuditEntry } from './audit'
+
+// NZ-20260926-010 activation probe P2 code (harmless)
