@@ -2,6 +2,15 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import {
+  canonicalCertificationHasStaleYes,
+  certifiedFromVerifierVerdict,
+  fleetCertifiedFromImplementerAssessment,
+  fleetCertifiedFromLocalRedTeam,
+  fleetCertifiedFromPackageTests,
+  rejectCertificationSpoof,
+} from '../certification-authority'
+
 import { releaseEnvelope } from '../envelope'
 import { reportToNorthstar } from '../northstar'
 import { advanceDecision } from '../decision'
@@ -35,13 +44,15 @@ describe('verifier', () => {
       TREASURER_REGRESSION: 'PASS',
     })
     const record = certificationFromGates(gates)
+    expect(record.RECORD_KIND).toBe('IMPLEMENTER_ASSESSMENT')
+    expect(record.IMPLEMENTER_ASSESSMENT).toBe('IMPLEMENTER_PASS')
+    expect(record.FLEET_CERTIFIED).toBe('NO')
     expect(record.TREASURER_CERTIFIED).toBe('NO')
     expect(record.TREASURER_REGRESSION).toBe('PASS_PACKAGE_LOCAL')
     expect(record.PRODUCTION_AUTHORITY).toBe('NO')
     expect(record.FINANCIAL_TRANSACTION_AUTHORITY).toBe('NEVER')
-    expect(record.notes.join('\n')).toContain('independent VERIFIER')
+    expect(record.notes.join('\n')).toContain('IMPLEMENTER_PASS is not FLEET_CERTIFIED')
     expect(record.notes.join('\n')).toContain('not a full-repo PASS')
-    expect(record.notes.join('\n')).toContain('self-certified')
   })
 
   it('refuses YES when any gate is not passing', () => {
@@ -55,6 +66,38 @@ describe('verifier', () => {
     const markdown = renderCertificationMarkdown(denied)
     expect(markdown).toContain('TREASURER_CERTIFIED: NO')
     expect(markdown).not.toContain('TREASURER_CERTIFIED: YES')
+    expect(markdown).not.toContain('FLEET_CERTIFIED: YES')
+  })
+
+  it('keeps implementer, red-team, and package results distinct from fleet certification', () => {
+    const gates = evaluateGates(root)
+    const record = certificationFromGates(gates)
+    expect(record.IMPLEMENTER_ASSESSMENT).toBe('IMPLEMENTER_PASS')
+    expect(fleetCertifiedFromImplementerAssessment('IMPLEMENTER_PASS')).toBe('NO')
+    expect(fleetCertifiedFromLocalRedTeam(true)).toBe('NO')
+    expect(fleetCertifiedFromPackageTests(true)).toBe('NO')
+    expect(record.FLEET_CERTIFIED).toBe('NO')
+    expect(record.TREASURER_CERTIFIED).toBe('NO')
+    expect(certifiedFromVerifierVerdict('NO')).toBe('NO')
+    const spoof = rejectCertificationSpoof({
+      IMPLEMENTER_ASSESSMENT: 'IMPLEMENTER_PASS',
+      TREASURER_CERTIFIED: 'YES',
+      FLEET_CERTIFIED: 'YES',
+    })
+    expect(spoof.accepted).toBe(false)
+    expect(spoof.code).toBe('CERT_SPOOF_REJECTED')
+    expect(spoof.TREASURER_CERTIFIED).toBe('NO')
+    expect(spoof.FLEET_CERTIFIED).toBe('NO')
+  })
+
+  it('has no stale fleet YES in the canonical certification artifacts', () => {
+    const json = readFileSync(join(root, 'governance/personal-capital/treasurer/certification-record.json'), 'utf8')
+    const markdown = readFileSync(
+      join(root, 'governance/personal-capital/treasurer/TREASURER_CERTIFICATION_RECORD.md'),
+      'utf8',
+    )
+    expect(canonicalCertificationHasStaleYes(json)).toBe(false)
+    expect(canonicalCertificationHasStaleYes(markdown)).toBe(false)
   })
 
   it('matches the committed certification and red-team artifacts', () => {

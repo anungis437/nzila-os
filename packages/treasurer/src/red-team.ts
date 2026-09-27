@@ -20,6 +20,12 @@ import {
 } from './decision'
 import { treatEnvelopeAsCommitted } from './envelope'
 import {
+  fleetCertifiedFromImplementerAssessment,
+  fleetCertifiedFromLocalRedTeam,
+  fleetCertifiedFromPackageTests,
+  rejectCertificationSpoof,
+} from './certification-authority'
+import {
   AS_OF,
   STALE_AS_OF,
   cashEvidence,
@@ -329,6 +335,37 @@ export const RED_TEAM_ATTACKS: readonly RedTeamAttack[] = [
       return blocked(treated.ok ? 'UNEXPECTED' : treated.code, treated.ok || leaked)
     },
   },
+  {
+    id: 'self-certification',
+    title: 'Implementer self-certification',
+    vector: 'Treat an implementer pass, a local red-team pass, or a package-test pass as fleet certification',
+    disposition: 'RESOLVED',
+    remediation:
+      'fleetCertifiedFromImplementerAssessment, fleetCertifiedFromLocalRedTeam, and fleetCertifiedFromPackageTests return NO. The package record kind is IMPLEMENTER_ASSESSMENT.',
+    run: () => {
+      const fromImplementer = fleetCertifiedFromImplementerAssessment('IMPLEMENTER_PASS')
+      const fromRedTeam = fleetCertifiedFromLocalRedTeam(true)
+      const fromTests = fleetCertifiedFromPackageTests(true)
+      const succeeded = fromImplementer !== 'NO' || fromRedTeam !== 'NO' || fromTests !== 'NO'
+      return blocked('SELF_CERT_REJECTED', succeeded)
+    },
+  },
+  {
+    id: 'certification-spoof',
+    title: 'Certification spoof',
+    vector: 'Submit a record that sets TREASURER_CERTIFIED and FLEET_CERTIFIED to an issued fleet pass',
+    disposition: 'RESOLVED',
+    remediation: 'rejectCertificationSpoof discards the submitted values and returns TREASURER_CERTIFIED NO and FLEET_CERTIFIED NO.',
+    run: () => {
+      const spoof = rejectCertificationSpoof({
+        IMPLEMENTER_ASSESSMENT: 'IMPLEMENTER_PASS',
+        TREASURER_CERTIFIED: 'YES',
+        FLEET_CERTIFIED: 'YES',
+      })
+      const succeeded = spoof.accepted || spoof.TREASURER_CERTIFIED !== 'NO' || spoof.FLEET_CERTIFIED !== 'NO'
+      return blocked(spoof.code, succeeded)
+    },
+  },
 ]
 
 export function runRedTeam(): {
@@ -383,6 +420,9 @@ export function renderRedTeamReport(): string {
   }
   lines.push('')
   lines.push(`RED_TEAM_PASS: ${executed.pass ? 'YES' : 'NO'}`)
+  lines.push('LOCAL_RED_TEAM is not FLEET_CERTIFIED.')
+  lines.push('FLEET_CERTIFIED: NO')
+  lines.push('TREASURER_CERTIFIED: NO')
   lines.push('')
   return lines.join('\n')
 }

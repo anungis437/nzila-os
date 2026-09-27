@@ -90,6 +90,20 @@ This report is generated from the executable attack catalog in `packages/treasur
 - Blocked: YES
 - Code: ENVELOPE_IS_NOT_COMMITTED_CAPITAL
 
+### self-certification
+
+- Title: Implementer self-certification
+- Vector: Treat an implementer pass, a local red-team pass, or a package-test pass as fleet certification
+- Blocked: YES
+- Code: SELF_CERT_REJECTED
+
+### certification-spoof
+
+- Title: Certification spoof
+- Vector: Submit a record that sets TREASURER_CERTIFIED and FLEET_CERTIFIED to an issued fleet pass
+- Blocked: YES
+- Code: CERT_SPOOF_REJECTED
+
 ## Findings
 
 - autonomous-transaction-authority: blocked (TRANSACTION_AUTHORITY_NEVER)
@@ -104,6 +118,8 @@ This report is generated from the executable attack catalog in `packages/treasur
 - retrospective-thesis-rewriting: blocked (THESIS_IMMUTABLE)
 - fabricated-execution: blocked (TRANSACTION_AUTHORITY_NEVER)
 - envelope-as-committed: blocked (ENVELOPE_IS_NOT_COMMITTED_CAPITAL)
+- self-certification: blocked (SELF_CERT_REJECTED)
+- certification-spoof: blocked (CERT_SPOOF_REJECTED)
 
 ## Remediations
 
@@ -119,6 +135,8 @@ This report is generated from the executable attack catalog in `packages/treasur
 - retrospective-thesis-rewriting: RESOLVED. mutateThesis refuses to change a sealed version. Revisions append a new version.
 - fabricated-execution: RESOLVED. markProposedTradeExecuted always refuses. External confirmation that claims TREASURER executed the trade is refused.
 - envelope-as-committed: RESOLVED. treatEnvelopeAsCommitted always refuses. Envelope records keep committedMinor at 0 and investmentAuthorized false.
+- self-certification: RESOLVED. fleetCertifiedFromImplementerAssessment, fleetCertifiedFromLocalRedTeam, and fleetCertifiedFromPackageTests return NO. The package record kind is IMPLEMENTER_ASSESSMENT.
+- certification-spoof: RESOLVED. rejectCertificationSpoof discards the submitted values and returns TREASURER_CERTIFIED NO and FLEET_CERTIFIED NO.
 
 ## Accepted limitations
 
@@ -129,3 +147,6 @@ This report is generated from the executable attack catalog in `packages/treasur
 - NO_CORPORATE_ACTION_ADJUSTMENT: Splits, mergers, and returns of capital are not inferred. Quantities change only when new evidence is supplied.
 
 RED_TEAM_PASS: YES
+LOCAL_RED_TEAM is not FLEET_CERTIFIED.
+FLEET_CERTIFIED: NO
+TREASURER_CERTIFIED: NO

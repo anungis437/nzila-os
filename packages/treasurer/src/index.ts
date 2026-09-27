@@ -119,7 +119,17 @@ export {
   DOCTRINE_MARKERS,
   certificationFromGates,
   evaluateGates,
+  implementerAssessmentFromGates,
   renderCertificationMarkdown,
   repoRootFromHere,
 } from './verifier'
 export type { CertificationRecord, GateResults } from './verifier'
+export {
+  canonicalCertificationHasStaleYes,
+  certifiedFromVerifierVerdict,
+  fleetCertifiedFromImplementerAssessment,
+  fleetCertifiedFromLocalRedTeam,
+  fleetCertifiedFromPackageTests,
+  rejectCertificationSpoof,
+} from './certification-authority'
+export type { CertificationSpoof, ImplementerAssessment, SpoofRejection } from './certification-authority'

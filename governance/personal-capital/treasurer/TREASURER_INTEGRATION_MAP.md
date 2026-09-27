@@ -18,7 +18,7 @@ COMMAND = execution authority within governed missions.
 | ORACLE | Runtime schema oracle under `tooling/db/canonical-schema/` is not a personal-capital oracle | Its output is not a holding or a price. |
 | SCOUT | No scout runtime | Outside text stays IDEA or RESEARCH until evidenced. |
 | RED_TEAM | `packages/treasurer/src/red-team.ts` | Attacks TREASURER. Cannot authorize. |
-| VERIFIER | `packages/treasurer/src/verifier.ts` | Re-executes gates. Cannot authorize a transaction. |
+| VERIFIER | `packages/treasurer/src/verifier.ts` and `packages/treasurer/src/certification-authority.ts` | Emits IMPLEMENTER_ASSESSMENT only. Cannot set FLEET_CERTIFIED. Cannot authorize a transaction. |
 | CHRONICLE | No chronicle runtime | Thesis and decision history inside TREASURER is append-only. |
 | COUNSEL | Corporate legal agent in ExecutiveOS is not personal tax counsel | Tax context exists only when evidence is supplied. |
 | NORTHSTAR | `packages/treasurer/src/northstar.ts` | Receives capacity reports. Cannot fabricate capacity. |

@@ -12,4 +12,4 @@ Normative doctrine: `docs/doctrine/treasurer/TREASURER_DOCTRINE.md`
 
 Governance artifacts: `governance/personal-capital/treasurer/`
 
-The in-process gates in `src/verifier.ts` re-execute doctrine, boundary, calculation, authority, red-team, and package-local regression checks. `TREASURER_CERTIFIED` stays NO until an independent VERIFIER re-gate returns YES. `PASS_PACKAGE_LOCAL` is not a full-repo regression PASS.
+The in-process gates in `src/verifier.ts` re-execute doctrine, boundary, calculation, authority, red-team, and package-local regression checks. The committed record is an IMPLEMENTER_ASSESSMENT. It cannot set FLEET_CERTIFIED. `PASS_PACKAGE_LOCAL` is not a full-repo regression PASS.
