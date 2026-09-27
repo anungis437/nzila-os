@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node -e \"console.error(\"E5C-B intentional build failure\"); process.exit(1)\"",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
