@@ -48,7 +48,7 @@ export const CANONICAL_CONTEXTS = [
     ciJob: 'build',
     family: 'engineering',
     evidence:
-      'CI job Build All runs pnpm exec turbo run build --affected. This is not a full portfolio build. PORTFOLIO_BUILD_AUTHORITY remains UNRESOLVED.',
+      'CI job Build All runs pnpm exec turbo run build --affected for workspace-package changes. Lockfiles, turbo.json, pnpm-workspace.yaml, root package.json, .npmrc, and any other changed path that is not inside a workspace package and is not proven documentation run pnpm build (turbo build). Proven documentation stays not applicable. A zero-task --affected result is not a pass for those paths. Package-scoped affected closure is not a full portfolio build on every change. PORTFOLIO_BUILD_AUTHORITY remains UNRESOLVED.',
   },
   {
     name: 'Merge Authority / Architectural Contracts',

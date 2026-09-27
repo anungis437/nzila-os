@@ -36,11 +36,13 @@ describe('CI-001: CI workflow includes contract test gate', () => {
     expect(src, 'CI must trigger on push to main').toMatch(/push[\s\S]*main|main[\s\S]*push/)
   })
 
-  it('keeps the protected build check while compiling only the affected graph', () => {
+  it('keeps the protected build check and the portfolio fallback for non-package diffs', () => {
     const src = readSafe(join(ROOT, '.github', 'workflows', 'ci.yml'))
 
     expect(src).toContain('name: Build All')
     expect(src).toContain('fetch-depth: 0')
+    expect(src).toContain('node tooling/ci/affected-build-plan.mjs --base "$BASE" --head "$HEAD"')
+    expect(src).toContain('pnpm build')
     expect(src).toContain('TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD"')
     expect(src).toContain('pnpm exec turbo run build --affected')
   })

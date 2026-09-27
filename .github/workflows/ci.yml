@@ -172,7 +172,7 @@ jobs:
         with:
           turbo-cache-key: build
 
-      - name: Build affected packages
+      - name: Build affected packages or full portfolio
         run: |
           BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
           HEAD="${{ github.event.pull_request.head.sha || github.sha }}"
@@ -181,8 +181,33 @@ jobs:
             BASE="${HEAD}^"
           fi
 
-          TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD" \
-            pnpm exec turbo run build --affected
+          if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "SCM base unavailable; running full portfolio build"
+            pnpm build
+            exit $?
+          fi
+
+          MODE="$(node tooling/ci/affected-build-plan.mjs --base "$BASE" --head "$HEAD")"
+          echo "affected-build mode=$MODE"
+
+          case "$MODE" in
+            full)
+              # Root/global inputs and any path that is not a proven documentation
+              # change or a workspace-package change. `pnpm build` is `turbo build`.
+              pnpm build
+              ;;
+            affected)
+              TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD" \
+                pnpm exec turbo run build --affected
+              ;;
+            not_applicable)
+              echo "Build All: every changed path is proven irrelevant to compilation"
+              ;;
+            *)
+              echo "::error::Refusing unknown affected-build mode: ${MODE}"
+              exit 1
+              ;;
+          esac
         env:
           NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
