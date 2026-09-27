@@ -129,3 +129,5 @@ This change does not activate a ruleset, does not enable required status checks,
 `RULESET_SURFACE_READY = YES`
 
 That is a structural assessment for Command. It is not ruleset activation. The 13 canonical contexts fail closed, the 3 secret contexts stay authoritative, IaC and Ops applicability are per invariant, a CI skip cannot waive either, and unknown classifications do not pass. `ML_TOOLING_AUTHORITY` and `AI_EVAL_AUTHORITY` remain accepted non-blocking residuals.
+
+Probe note: docs-only path for IaC applicability. Not an authority change.
