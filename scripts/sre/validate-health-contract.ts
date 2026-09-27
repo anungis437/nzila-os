@@ -30,7 +30,7 @@ function appEndpoints(app: string) {
 }
 
 function main() {
-  const failures: string[] = []
+  const failures: string[] = ['e5e-probe-reliability-intentional']
 
   for (const app of REQUIRED) {
     const e = appEndpoints(app)
