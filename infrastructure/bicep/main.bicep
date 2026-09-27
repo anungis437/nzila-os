@@ -323,3 +323,5 @@ output dbConnectionPort int = database.?outputs.?connectionPort ?? 5432
 output dbReplicaFqdns array = database.?outputs.?replicaFqdns ?? []
 output secondaryContainerEnvId string = containerAppsSecondary.?outputs.?environmentId ?? ''
 output alertActionGroupId string = alerts.outputs.actionGroupId
+
+// NZ-20260926-010 activation probe P3 IaC (comment-only)
