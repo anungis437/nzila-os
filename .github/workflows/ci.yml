@@ -87,7 +87,8 @@ jobs:
         run: |
           set -euo pipefail
           pnpm exec vitest run --project system-boundary-tests --project e2e-platform
-          pnpm exec vitest run --config scripts/proof/vitest.config.ts
+          # cwd must be scripts/proof so include __tests__/** resolves (root cwd finds 0 files)
+          pnpm exec vitest run --config scripts/proof/vitest.config.ts --dir scripts/proof
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
