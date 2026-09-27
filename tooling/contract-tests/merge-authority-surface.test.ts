@@ -24,6 +24,7 @@ import {
   planFastPath,
   verdictToCheckRun,
 } from '../ci/merge-authority/surface.mjs'
+import { classifySarifProbe } from '../ci/merge-authority/sarif-reporting.mjs'
 
 const ROOT = join(__dirname, '..', '..')
 const WORKFLOWS = join(ROOT, '.github', 'workflows')
@@ -712,5 +713,156 @@ describe('merge authority surface', () => {
     expect(fastPathExecution(consumed.classification).ops).toBe(false)
     expect(contextByName('Merge Authority / Ops Documentation')?.ciJob).toBe('ops-pack-validation')
     expect(contextByName('Merge Authority / IaC Security')?.ciJob).toBe('iac-scan')
+  })
+})
+
+describe('IaC validation and SARIF reporting separation', () => {
+  function iacVerdict(overrides = {}) {
+    const base = Object.fromEntries(CANONICAL_CONTEXTS.map((context) => [context.ciJob, 'success']))
+    return evaluateCiResults({ ...base, ...overrides }).find(
+      (verdict) => verdict.name === 'Merge Authority / IaC Security',
+    )
+  }
+
+  function workflows() {
+    return {
+      ci: parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8')),
+      authority: parse(readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8')),
+      publisher: readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8'),
+    }
+  }
+
+  it('C1 — Checkov PASS and reporting SUCCESS still yield canonical PASS', () => {
+    const verdict = iacVerdict({ 'iac-scan': 'success', 'iac-sarif-reporting': 'success' })
+    expect(verdict).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+  })
+
+  it('C2 — Checkov PASS and reporting NOT_CONFIGURED still yield canonical PASS', () => {
+    const verdict = iacVerdict({ 'iac-scan': 'success', 'iac-sarif-reporting': 'NOT_CONFIGURED' })
+    expect(verdict).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+    expect(classifySarifProbe(403, 'Code scanning is not enabled for this repository.')).toBe(
+      'NOT_CONFIGURED',
+    )
+  })
+
+  it('C3 — Checkov PASS and reporting FAILURE still yield canonical PASS', () => {
+    const verdict = iacVerdict({ 'iac-scan': 'success', 'iac-sarif-reporting': 'failure' })
+    expect(verdict).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+    expect(classifySarifProbe(500, 'upstream unavailable')).toBe('FAILURE')
+  })
+
+  it('C4 — Checkov FAILURE blocks canonical IaC regardless of reporting', () => {
+    const verdict = iacVerdict({ 'iac-scan': 'failure', 'iac-sarif-reporting': 'success' })
+    expect(verdict).toMatchObject({ evidence: 'FAILURE', conclusion: 'failure' })
+    expect(verdict.conclusion).not.toBe('success')
+  })
+
+  it('C5 — missing Checkov evidence cannot become canonical PASS', () => {
+    const verdict = evaluateCiResults({ 'lint-and-typecheck': 'success' }).find(
+      (item) => item.name === 'Merge Authority / IaC Security',
+    )
+    expect(verdict.evidence).toBe('MISSING')
+    expect(verdict.conclusion).not.toBe('success')
+  })
+
+  it('C6 — cancelled Checkov cannot become canonical PASS', () => {
+    const verdict = iacVerdict({ 'iac-scan': 'cancelled' })
+    expect(verdict.evidence).toBe('UNRESOLVED')
+    expect(verdict.conclusion).not.toBe('success')
+  })
+
+  it('C7 — unexpected Checkov skip cannot become canonical PASS or N/A', () => {
+    const verdict = iacVerdict({ 'iac-scan': 'skipped' })
+    expect(verdict.evidence).toBe('UNRESOLVED')
+    expect(verdict.evidence).not.toBe('NOT_APPLICABLE')
+    expect(verdict.conclusion).not.toBe('success')
+  })
+
+  it('C8 — unknown applicability cannot take the N/A shortcut', () => {
+    const plan = planFastPath(['something-unexpected.bin'])
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(plan.action).toBe('DEFER_TO_CI')
+    const unresolved = planFastPath(['docs/foo.yml'])
+    expect(unresolved.classification.ciSkippedByPathsIgnore).toBe(true)
+    expect(unresolved.classification.contexts['Merge Authority / IaC Security']).toBe('REQUIRES_EXECUTION')
+    expect(unresolved.verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security').evidence).not.toBe(
+      'NOT_APPLICABLE',
+    )
+  })
+
+  it('C9 — proven documentation is deterministic canonical N/A', () => {
+    const plan = planFastPath(['docs/guide.md'])
+    expect(plan.classification.contexts['Merge Authority / IaC Security']).toBe('NOT_APPLICABLE')
+    expect(plan.action).toBe('PUBLISH')
+    expect(fastPathExecution(plan.classification).iac).toBe(false)
+    const iac = plan.verdicts.find((verdict) => verdict.name === 'Merge Authority / IaC Security')
+    expect(iac).toMatchObject({
+      evidence: 'NOT_APPLICABLE',
+      conclusion: 'success',
+      classifier: 'PROVEN_IRRELEVANT',
+    })
+  })
+
+  it('C10 — CI-skip applicable IaC executes Checkov and that result owns authority', () => {
+    const plan = planFastPath(['docs/foo.yml'])
+    expect(fastPathExecution(plan.classification).iac).toBe(true)
+    const passed = applyExecution(plan.verdicts, { 'iac-scan': 'success' }).find(
+      (verdict) => verdict.name === 'Merge Authority / IaC Security',
+    )
+    expect(passed).toMatchObject({ evidence: 'PASS', conclusion: 'success' })
+    const failed = applyExecution(plan.verdicts, { 'iac-scan': 'failure' }).find(
+      (verdict) => verdict.name === 'Merge Authority / IaC Security',
+    )
+    expect(failed.conclusion).not.toBe('success')
+    const { ci, authority } = workflows()
+    const fast = authority.jobs['iac-security-if-ci-skipped']
+    const validation = ci.jobs['iac-scan']
+    const fastRun = fast.steps.find((step) => step.name === 'Run Checkov on Bicep templates').run
+    const ciRun = validation.steps.find((step) => step.name === 'Run Checkov on Bicep templates').run
+    expect(fastRun).toBe(ciRun)
+    expect(JSON.stringify(fast)).not.toContain('upload-sarif')
+    expect(JSON.stringify(validation)).not.toContain('upload-sarif')
+  })
+
+  it('C11 — a malformed Checkov feeder result cannot become canonical PASS', () => {
+    for (const malformed of ['passed', 'ok', 'SUCCESS', 'error', 'neutral']) {
+      const verdict = iacVerdict({ 'iac-scan': malformed })
+      expect(verdict.conclusion).not.toBe('success')
+      expect(verdict.evidence).not.toBe('PASS')
+      expect(verdict.evidence).not.toBe('NOT_APPLICABLE')
+    }
+  })
+
+  it('C12 — reporting presence does not feed IaC authority', () => {
+    const { ci, publisher } = workflows()
+    const reporter = ci.jobs['report-merge-authority']
+    expect(reporter.needs).toContain('iac-scan')
+    expect(reporter.needs).not.toContain('iac-sarif-reporting')
+    expect(reporter.env ?? ci.jobs['report-merge-authority'].steps.at(-1).env.MA_RESULT_IAC).toBe(
+      '${{ needs.iac-scan.result }}',
+    )
+    expect(publisher).toContain("'iac-scan': 'MA_RESULT_IAC'")
+    expect(publisher).not.toContain('iac-sarif-reporting')
+    expect(ci.jobs['iac-sarif-reporting'].needs).toEqual(['iac-scan'])
+    expect(ci.jobs['iac-scan'].permissions).toEqual({ contents: 'read' })
+    expect(ci.jobs['iac-sarif-reporting'].permissions).toEqual({
+      contents: 'read',
+      'security-events': 'read',
+    })
+    expect(JSON.stringify(ci.jobs['iac-sarif-reporting'])).not.toContain('actions: read')
+    expect(JSON.stringify(ci.jobs['iac-scan'])).not.toContain('upload-sarif')
+    const removed = iacVerdict()
+    expect(removed).toMatchObject({ evidence: 'PASS', conclusion: 'success', ciJob: 'iac-scan' })
+  })
+
+  it('does not treat a configured destination or an unknown probe error as NOT_CONFIGURED', () => {
+    expect(classifySarifProbe(200, '[]')).toBe('CONFIGURED')
+    expect(classifySarifProbe(403, 'Resource not accessible by integration')).toBe('FAILURE')
+    expect(
+      classifySarifProbe(
+        403,
+        'GitHub Code Security or GitHub Advanced Security must be enabled for this repository to use code scanning',
+      ),
+    ).toBe('NOT_CONFIGURED')
   })
 })

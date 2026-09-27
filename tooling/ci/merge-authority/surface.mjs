@@ -89,7 +89,7 @@ export const CANONICAL_CONTEXTS = [
     family: 'iac',
     authority: 'CHANGE_CONDITIONAL_MERGE_CRITICAL',
     evidence:
-      'CI job IaC Security Scan runs Checkov --directory infrastructure/bicep --framework bicep. CHANGE_CONDITIONAL_MERGE_CRITICAL. Applicability is the scan input set, not every infrastructure file.',
+      'CI job IaC Security Validation runs Checkov --directory infrastructure/bicep --framework bicep. The job result is Checkov only. SARIF reporting is not an input. CHANGE_CONDITIONAL_MERGE_CRITICAL. Applicability is the scan input set, not every infrastructure file.',
   },
   {
     name: 'Merge Authority / Ops Documentation',

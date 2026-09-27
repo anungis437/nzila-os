@@ -94,6 +94,7 @@ jobs:
           fi
           echo "Inventory check passed (date-stamp differences ignored)"
 
+  # Checkov-only, same command as ci.yml iac-scan. No SARIF publication.
   iac-security-if-ci-skipped:
     name: IaC security when CI is skipped
     runs-on: ubuntu-latest
