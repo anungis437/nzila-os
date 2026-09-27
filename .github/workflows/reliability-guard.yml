@@ -17,6 +17,31 @@ jobs:
   reliability-validation:
     runs-on: ubuntu-latest
     steps:
+      # GitHub-hosted runners ship with Android, .NET, CodeQL, and Docker
+      # images this job never uses. The monorepo build then fills the disk.
+      # Node stays in the toolcache for setup-node.
+      - name: Free runner disk
+        run: |
+          set -euxo pipefail
+          df -h /
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /usr/local/share/powershell \
+            /usr/local/share/boost \
+            /usr/share/swift \
+            /opt/ghc \
+            /opt/hostedtoolcache/CodeQL \
+            /opt/hostedtoolcache/go \
+            /opt/hostedtoolcache/Python \
+            /opt/hostedtoolcache/PyPy \
+            /opt/hostedtoolcache/Ruby \
+            /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk
+          if command -v docker >/dev/null 2>&1; then
+            docker system prune --all --force
+          fi
+          df -h /
+
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       - name: Typecheck
