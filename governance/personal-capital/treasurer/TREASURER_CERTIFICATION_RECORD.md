@@ -9,7 +9,7 @@ TREASURER_DOCTRINE: VALID
 TREASURER_BOUNDARIES: ENFORCED
 TREASURER_CALCULATIONS: VERIFIED
 TREASURER_AUTHORITY: FAIL_CLOSED
-TREASURER_RED_TEAM: PASS
+RESOLVED_ATTACKS_BLOCKED: PASS
 TREASURER_REGRESSION: PASS_PACKAGE_LOCAL
 TREASURER_CERTIFIED: NO
 PRODUCTION_AUTHORITY: NO
@@ -23,7 +23,7 @@ FINANCIAL_TRANSACTION_AUTHORITY: NEVER
 - NO_PRODUCTION_DEPLOYMENT
 - NO_CORPORATE_ACTION_ADJUSTMENT
 - NO_CRYPTOGRAPHIC_PRINCIPAL_BINDING
-- NO_ISSUER_REGISTRY_RELATED_ASSETS
+- RELATEDNESS_REQUIRES_ISSUER_EVIDENCE
 
 ## Gate notes
 
@@ -31,7 +31,8 @@ FINANCIAL_TRANSACTION_AUTHORITY: NEVER
 - IMPLEMENTER_PASS is not FLEET_CERTIFIED. LOCAL_RED_TEAM pass is not FLEET_CERTIFIED. PACKAGE_TESTS pass is not FLEET_CERTIFIED.
 - Independent VERIFIER on PR #859 at 5f25a566 returned a NO verdict. VERIFIER NO implies TREASURER_CERTIFIED NO.
 - Candidate eef575eec5600a28c041126785490e0f79d42b19 is INVALID. Independent Fleet REDTEAM returned RED_TEAM_PASS NO on that SHA. This record remains an IMPLEMENTER_ASSESSMENT and FLEET_CERTIFIED stays NO.
+- Candidate 28ac10067df4fd571a87d0119b0f86e88b2f4175 is INVALID. Independent Fleet REDTEAM returned RED_TEAM_PASS NO on that SHA because unrelated-id-concentration-split was OPEN. This record remains an IMPLEMENTER_ASSESSMENT and FLEET_CERTIFIED stays NO.
+- RESOLVED_ATTACKS_BLOCKED records only that resolved local attacks were blocked. It is not RED_TEAM_PASS and it is not Fleet REDTEAM.
 - Findings recorded here: CI merge was BLOCKED (branch-policy, secret-scan integration 403, Trivy SARIF upload 403, repository inventory drift, governance gate cascade); monorepo suites had not been run at that gate; certification was previously self-certified by this module.
 - TREASURER_REGRESSION PASS_PACKAGE_LOCAL is package-local static anchors and in-package checks only. It is not a full-repo PASS of pnpm lint, pnpm typecheck, pnpm test:fast, or pnpm governance:audit, and it is not independent re-execution of corporate treasury, doctrine-enforcement, or capital contract suites.
 - PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER.
-- Material OPEN local red-team findings block fleet certification claims: unrelated-id-concentration-split. LOCAL_RED_TEAM is not Fleet REDTEAM.

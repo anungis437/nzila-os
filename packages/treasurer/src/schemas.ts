@@ -57,6 +57,7 @@ export const positionSchema = z
     currency: currencySchema,
     exposureGroupId: idSchema,
     priceEvidenceId: idSchema,
+    issuerEvidenceId: idSchema.optional(),
     asOf: isoDateSchema,
   })
   .strict()

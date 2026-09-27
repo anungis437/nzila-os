@@ -40,7 +40,7 @@ describe('verifier', () => {
       TREASURER_BOUNDARIES: 'ENFORCED',
       TREASURER_CALCULATIONS: 'VERIFIED',
       TREASURER_AUTHORITY: 'FAIL_CLOSED',
-      TREASURER_RED_TEAM: 'PASS',
+      RESOLVED_ATTACKS_BLOCKED: 'PASS',
       TREASURER_REGRESSION: 'PASS',
     })
     const record = certificationFromGates(gates)
@@ -54,9 +54,12 @@ describe('verifier', () => {
     expect(record.notes.join('\n')).toContain('IMPLEMENTER_PASS is not FLEET_CERTIFIED')
     expect(record.notes.join('\n')).toContain('not a full-repo PASS')
     expect(record.notes.join('\n')).toContain('eef575eec5600a28c041126785490e0f79d42b19 is INVALID')
-    expect(record.notes.join('\n')).toContain('unrelated-id-concentration-split')
+    expect(record.notes.join('\n')).toContain('28ac10067df4fd571a87d0119b0f86e88b2f4175 is INVALID')
+    expect(record.RESOLVED_ATTACKS_BLOCKED).toBe('PASS')
+    expect(record.notes.join('\n')).toContain('RESOLVED_ATTACKS_BLOCKED records only')
     expect(record.acceptedLimitations).toContain('NO_CRYPTOGRAPHIC_PRINCIPAL_BINDING')
-    expect(record.acceptedLimitations).toContain('NO_ISSUER_REGISTRY_RELATED_ASSETS')
+    expect(record.acceptedLimitations).toContain('RELATEDNESS_REQUIRES_ISSUER_EVIDENCE')
+    expect(record.acceptedLimitations).not.toContain('NO_ISSUER_REGISTRY_RELATED_ASSETS')
     expect(record.acceptedLimitations).not.toContain(
       'EXTERNAL_CONFIRMATION_DOES_NOT_REQUIRE_PRIOR_IN_MODULE_AUTHORIZATION',
     )

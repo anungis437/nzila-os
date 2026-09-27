@@ -58,12 +58,34 @@ export function cashEvidence(amountMinor: number, observedAt = AS_OF): EvidenceR
   })
 }
 
+export function issuerEvidence(input: {
+  id: string
+  instrumentId: string
+  issuerId: string
+  observedAt?: string
+}): EvidenceRef {
+  return buildEvidence({
+    id: input.id,
+    epistemicClass: 'FACT',
+    sourceType: 'CUSTODIAN_STATEMENT',
+    sourceName: 'synthetic-custodian',
+    observedAt: input.observedAt ?? AS_OF,
+    origin: 'EXTERNAL',
+    payload: {
+      kind: 'ISSUER',
+      instrumentId: input.instrumentId,
+      issuerId: input.issuerId,
+    },
+  })
+}
+
 export function position(input: {
   id: string
   instrumentId: string
   marketValueMinor: number
   exposureGroupId: string
   evidenceId: string
+  issuerEvidenceId?: string
   asOf?: string
   quantity?: number
 }): Position {
@@ -78,6 +100,7 @@ export function position(input: {
     currency: 'CAD',
     exposureGroupId: input.exposureGroupId,
     priceEvidenceId: input.evidenceId,
+    ...(input.issuerEvidenceId ? { issuerEvidenceId: input.issuerEvidenceId } : {}),
     asOf: input.asOf ?? AS_OF,
   }
 }
@@ -106,11 +129,39 @@ export function snapshot(options?: {
   const cashMinor = options?.cashMinor ?? 4_000
   const equity = marketEvidence({ id: 'ev-eq', instrumentId: 'SYN-EQ', marketValueMinor: 3_000, observedAt: asOf })
   const bond = marketEvidence({ id: 'ev-bd', instrumentId: 'SYN-BD', marketValueMinor: 3_000, observedAt: asOf })
+  const equityIssuer = issuerEvidence({
+    id: 'issuer-eq',
+    instrumentId: 'SYN-EQ',
+    issuerId: 'issuer:syn-eq',
+    observedAt: asOf,
+  })
+  const bondIssuer = issuerEvidence({
+    id: 'issuer-bd',
+    instrumentId: 'SYN-BD',
+    issuerId: 'issuer:syn-bd',
+    observedAt: asOf,
+  })
   const positions = options?.positions ?? [
-    position({ id: 'p-eq', instrumentId: 'SYN-EQ', marketValueMinor: 3_000, exposureGroupId: 'equity', evidenceId: 'ev-eq', asOf }),
-    position({ id: 'p-bd', instrumentId: 'SYN-BD', marketValueMinor: 3_000, exposureGroupId: 'bond', evidenceId: 'ev-bd', asOf }),
+    position({
+      id: 'p-eq',
+      instrumentId: 'SYN-EQ',
+      marketValueMinor: 3_000,
+      exposureGroupId: 'equity',
+      evidenceId: 'ev-eq',
+      issuerEvidenceId: 'issuer-eq',
+      asOf,
+    }),
+    position({
+      id: 'p-bd',
+      instrumentId: 'SYN-BD',
+      marketValueMinor: 3_000,
+      exposureGroupId: 'bond',
+      evidenceId: 'ev-bd',
+      issuerEvidenceId: 'issuer-bd',
+      asOf,
+    }),
   ]
-  const evidence = options?.evidence ?? [equity, bond, cashEvidence(cashMinor, asOf)]
+  const evidence = options?.evidence ?? [equity, bond, equityIssuer, bondIssuer, cashEvidence(cashMinor, asOf)]
   return {
     id: 'snap-1',
     asOf,

@@ -58,7 +58,8 @@ export interface GateResults {
   readonly TREASURER_BOUNDARIES: 'ENFORCED' | 'NOT_ENFORCED'
   readonly TREASURER_CALCULATIONS: 'VERIFIED' | 'FAILED'
   readonly TREASURER_AUTHORITY: 'FAIL_CLOSED' | 'OPEN'
-  readonly TREASURER_RED_TEAM: 'PASS' | 'FAIL'
+  /** Resolved catalog attacks blocked. This is not RED_TEAM_PASS and not Fleet REDTEAM. */
+  readonly RESOLVED_ATTACKS_BLOCKED: 'PASS' | 'FAIL'
   readonly TREASURER_REGRESSION: 'PASS' | 'FAIL'
   readonly notes: readonly string[]
 }
@@ -74,7 +75,7 @@ export interface CertificationRecord {
   readonly TREASURER_BOUNDARIES: GateResults['TREASURER_BOUNDARIES']
   readonly TREASURER_CALCULATIONS: GateResults['TREASURER_CALCULATIONS']
   readonly TREASURER_AUTHORITY: GateResults['TREASURER_AUTHORITY']
-  readonly TREASURER_RED_TEAM: GateResults['TREASURER_RED_TEAM']
+  readonly RESOLVED_ATTACKS_BLOCKED: GateResults['RESOLVED_ATTACKS_BLOCKED']
   readonly TREASURER_REGRESSION: ScopedRegression
   readonly TREASURER_CERTIFIED: 'NO'
   readonly PRODUCTION_AUTHORITY: 'NO'
@@ -92,6 +93,8 @@ export const CERTIFICATION_HONESTY_NOTES = [
   'IMPLEMENTER_PASS is not FLEET_CERTIFIED. LOCAL_RED_TEAM pass is not FLEET_CERTIFIED. PACKAGE_TESTS pass is not FLEET_CERTIFIED.',
   'Independent VERIFIER on PR #859 at 5f25a566 returned a NO verdict. VERIFIER NO implies TREASURER_CERTIFIED NO.',
   'Candidate eef575eec5600a28c041126785490e0f79d42b19 is INVALID. Independent Fleet REDTEAM returned RED_TEAM_PASS NO on that SHA. This record remains an IMPLEMENTER_ASSESSMENT and FLEET_CERTIFIED stays NO.',
+  'Candidate 28ac10067df4fd571a87d0119b0f86e88b2f4175 is INVALID. Independent Fleet REDTEAM returned RED_TEAM_PASS NO on that SHA because unrelated-id-concentration-split was OPEN. This record remains an IMPLEMENTER_ASSESSMENT and FLEET_CERTIFIED stays NO.',
+  'RESOLVED_ATTACKS_BLOCKED records only that resolved local attacks were blocked. It is not RED_TEAM_PASS and it is not Fleet REDTEAM.',
   'Findings recorded here: CI merge was BLOCKED (branch-policy, secret-scan integration 403, Trivy SARIF upload 403, repository inventory drift, governance gate cascade); monorepo suites had not been run at that gate; certification was previously self-certified by this module.',
   'TREASURER_REGRESSION PASS_PACKAGE_LOCAL is package-local static anchors and in-package checks only. It is not a full-repo PASS of pnpm lint, pnpm typecheck, pnpm test:fast, or pnpm governance:audit, and it is not independent re-execution of corporate treasury, doctrine-enforcement, or capital contract suites.',
   'PRODUCTION AUTHORITY remains NO. FINANCIAL TRANSACTION AUTHORITY remains NEVER.',
@@ -319,7 +322,7 @@ export function evaluateGates(root = repoRootFromHere()): GateResults {
     TREASURER_BOUNDARIES: boundaries.pass ? 'ENFORCED' : 'NOT_ENFORCED',
     TREASURER_CALCULATIONS: calculations.pass ? 'VERIFIED' : 'FAILED',
     TREASURER_AUTHORITY: authority.pass ? 'FAIL_CLOSED' : 'OPEN',
-    TREASURER_RED_TEAM: redTeam.pass ? 'PASS' : 'FAIL',
+    RESOLVED_ATTACKS_BLOCKED: redTeam.pass ? 'PASS' : 'FAIL',
     TREASURER_REGRESSION: regression.pass ? 'PASS' : 'FAIL',
     notes: [
       ...doctrine.notes,
@@ -338,7 +341,7 @@ export function implementerAssessmentFromGates(gates: GateResults): ImplementerA
     gates.TREASURER_BOUNDARIES === 'ENFORCED' &&
     gates.TREASURER_CALCULATIONS === 'VERIFIED' &&
     gates.TREASURER_AUTHORITY === 'FAIL_CLOSED' &&
-    gates.TREASURER_RED_TEAM === 'PASS' &&
+    gates.RESOLVED_ATTACKS_BLOCKED === 'PASS' &&
     gates.TREASURER_REGRESSION === 'PASS'
   return pass ? 'IMPLEMENTER_PASS' : 'IMPLEMENTER_FAIL'
 }
@@ -361,7 +364,7 @@ export function certificationFromGates(gates: GateResults): CertificationRecord 
     TREASURER_BOUNDARIES: gates.TREASURER_BOUNDARIES,
     TREASURER_CALCULATIONS: gates.TREASURER_CALCULATIONS,
     TREASURER_AUTHORITY: gates.TREASURER_AUTHORITY,
-    TREASURER_RED_TEAM: gates.TREASURER_RED_TEAM,
+    RESOLVED_ATTACKS_BLOCKED: gates.RESOLVED_ATTACKS_BLOCKED,
     TREASURER_REGRESSION: regression,
     TREASURER_CERTIFIED: 'NO',
     PRODUCTION_AUTHORITY: 'NO',
@@ -384,7 +387,7 @@ export function renderCertificationMarkdown(record: CertificationRecord): string
     `TREASURER_BOUNDARIES: ${record.TREASURER_BOUNDARIES}`,
     `TREASURER_CALCULATIONS: ${record.TREASURER_CALCULATIONS}`,
     `TREASURER_AUTHORITY: ${record.TREASURER_AUTHORITY}`,
-    `TREASURER_RED_TEAM: ${record.TREASURER_RED_TEAM}`,
+    `RESOLVED_ATTACKS_BLOCKED: ${record.RESOLVED_ATTACKS_BLOCKED}`,
     `TREASURER_REGRESSION: ${record.TREASURER_REGRESSION}`,
     `TREASURER_CERTIFIED: ${record.TREASURER_CERTIFIED}`,
     `PRODUCTION_AUTHORITY: ${record.PRODUCTION_AUTHORITY}`,

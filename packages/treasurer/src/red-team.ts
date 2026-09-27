@@ -94,10 +94,10 @@ export const ACCEPTED_LIMITATIONS: readonly AcceptedLimitation[] = [
       'The Principal check is a literal id and name match. TREASURER does not verify a signature, credential, or custody attestation. A well-formed payload is not proof of the Principal.',
   },
   {
-    id: 'NO_ISSUER_REGISTRY_RELATED_ASSETS',
-    title: 'No issuer registry for related assets',
+    id: 'RELATEDNESS_REQUIRES_ISSUER_EVIDENCE',
+    title: 'Relatedness requires hashed issuer evidence',
     statement:
-      'Related series that share an instrument stem are clustered across exposure groups. Distinct instrument strings for one economic issuer are not detected. That residual BLOCKS fleet certification claims. A well-formed external fact can still be analyzed; this is not a claim that forged facts are rejected without custodian binding.',
+      'Distinct instrument ids are independent for concentration only when each holding carries hashed external issuer evidence. Absence fails closed with CONCENTRATION_UNPROVEN and does not assert that ceilings are met. There is no live issuer registry. A forged issuer fact that declares two instruments unrelated is not rejected by a registry lookup. That does not leave unrelated-id-concentration-split open: the attack without issuer evidence is blocked.',
   },
 ]
 
@@ -493,10 +493,10 @@ export const RED_TEAM_ATTACKS: readonly RedTeamAttack[] = [
   {
     id: 'unrelated-id-concentration-split',
     title: 'Unrelated instrument-id concentration split',
-    vector: 'Hold one economic exposure as AAA and BBB in different groups, with no shared stem',
-    disposition: 'OPEN',
+    vector: 'Hold AAA and BBB in different exposure groups with no issuer evidence and claim both are inside the ceilings',
+    disposition: 'RESOLVED',
     remediation:
-      'No issuer registry exists. Distinct instrument strings are not clustered. This residual BLOCKS fleet certification claims and is not marked resolved. A well-formed external fact can still be analyzed.',
+      'Distinct instrument stems without hashed external issuer evidence fail CONCENTRATION_UNPROVEN. Caller exposureGroupId is not proof they are independent. The snapshot is not accepted as within ceilings.',
     run: () => {
       const seriesA = marketEvidence({ id: 'ev-aaa', instrumentId: 'AAA', marketValueMinor: 2_000 })
       const seriesB = marketEvidence({ id: 'ev-bbb', instrumentId: 'BBB', marketValueMinor: 2_000 })

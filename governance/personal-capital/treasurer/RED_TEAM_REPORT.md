@@ -153,10 +153,10 @@ This report is generated from the executable attack catalog in `packages/treasur
 ### unrelated-id-concentration-split
 
 - Title: Unrelated instrument-id concentration split
-- Vector: Hold one economic exposure as AAA and BBB in different groups, with no shared stem
-- Disposition: OPEN
-- Blocked: NO
-- Code: UNRELATED_IDS_NOT_CLUSTERED
+- Vector: Hold AAA and BBB in different exposure groups with no issuer evidence and claim both are inside the ceilings
+- Disposition: RESOLVED
+- Blocked: YES
+- Code: CONCENTRATION_UNPROVEN
 
 ## Findings
 
@@ -178,7 +178,7 @@ This report is generated from the executable attack catalog in `packages/treasur
 - ambiguous-corporate-identifier: RESOLVED. blocked (CORPORATE_CAPITAL_BOUNDARY)
 - northstar-unvalidated-fact: RESOLVED. blocked (FACT_WITHHELD)
 - external-confirmation-without-authorization: RESOLVED. blocked (AUTHORIZATION_REQUIRED)
-- unrelated-id-concentration-split: OPEN. not blocked (UNRELATED_IDS_NOT_CLUSTERED)
+- unrelated-id-concentration-split: RESOLVED. blocked (CONCENTRATION_UNPROVEN)
 
 ## Remediations
 
@@ -200,7 +200,7 @@ This report is generated from the executable attack catalog in `packages/treasur
 - ambiguous-corporate-identifier: RESOLVED. isCorporateOrAmbiguousInstrument refuses known product tokens and compact forms, not only corp:, product:, nzila-product:, and org: prefixes.
 - northstar-unvalidated-fact: RESOLVED. reportToNorthstar calls validateSnapshot. availableDeployableClass is FACT only after validation succeeds and cash is FACT. A caller flag cannot promote the class.
 - external-confirmation-without-authorization: RESOLVED. recordExternalConfirmation requires stage AUTHORIZED and investmentAuthorized. Confirmation does not set humanAuthorized, investmentAuthorized, or transactionExecuted.
-- unrelated-id-concentration-split: OPEN. No issuer registry exists. Distinct instrument strings are not clustered. This residual BLOCKS fleet certification claims and is not marked resolved. A well-formed external fact can still be analyzed.
+- unrelated-id-concentration-split: RESOLVED. Distinct instrument stems without hashed external issuer evidence fail CONCENTRATION_UNPROVEN. Caller exposureGroupId is not proof they are independent. The snapshot is not accepted as within ceilings.
 
 ## Accepted limitations
 
@@ -210,9 +210,9 @@ This report is generated from the executable attack catalog in `packages/treasur
 - NO_PRODUCTION_DEPLOYMENT: PRODUCTION AUTHORITY remains NO. This module is not wired to a host runner, database, broker, or payment rail.
 - NO_CORPORATE_ACTION_ADJUSTMENT: Splits, mergers, and returns of capital are not inferred. Quantities change only when new evidence is supplied.
 - NO_CRYPTOGRAPHIC_PRINCIPAL_BINDING: The Principal check is a literal id and name match. TREASURER does not verify a signature, credential, or custody attestation. A well-formed payload is not proof of the Principal.
-- NO_ISSUER_REGISTRY_RELATED_ASSETS: Related series that share an instrument stem are clustered across exposure groups. Distinct instrument strings for one economic issuer are not detected. That residual BLOCKS fleet certification claims. A well-formed external fact can still be analyzed; this is not a claim that forged facts are rejected without custodian binding.
+- RELATEDNESS_REQUIRES_ISSUER_EVIDENCE: Distinct instrument ids are independent for concentration only when each holding carries hashed external issuer evidence. Absence fails closed with CONCENTRATION_UNPROVEN and does not assert that ceilings are met. There is no live issuer registry. A forged issuer fact that declares two instruments unrelated is not rejected by a registry lookup. That does not leave unrelated-id-concentration-split open: the attack without issuer evidence is blocked.
 
-RED_TEAM_PASS: NO
+RED_TEAM_PASS: YES
 RESOLVED_ATTACKS_BLOCKED: YES
 LOCAL_RED_TEAM is not Fleet REDTEAM and is not FLEET_CERTIFIED.
 OPEN findings block fleet certification claims.

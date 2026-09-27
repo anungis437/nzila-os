@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
 import { validateSnapshot } from '../integrity'
-import { AS_OF, STALE_AS_OF, cashEvidence, constraints, marketEvidence, position, snapshot } from '../fixtures'
+import {
+  AS_OF,
+  STALE_AS_OF,
+  cashEvidence,
+  constraints,
+  issuerEvidence,
+  marketEvidence,
+  position,
+  snapshot,
+} from '../fixtures'
 import { buildEvidence } from '../integrity'
 
 describe('C. data integrity', () => {
@@ -117,5 +126,96 @@ describe('C. data integrity', () => {
     )
     expect(broken.ok).toBe(false)
     if (!broken.ok) expect(broken.code).toBe('MALFORMED')
+  })
+
+  it('refuses distinct instrument ids that have no issuer evidence', () => {
+    const seriesA = marketEvidence({ id: 'ev-aaa', instrumentId: 'AAA', marketValueMinor: 2_000 })
+    const seriesB = marketEvidence({ id: 'ev-bbb', instrumentId: 'BBB', marketValueMinor: 2_000 })
+    const unproven = validateSnapshot(
+      snapshot({
+        positions: [
+          position({
+            id: 'p-aaa',
+            instrumentId: 'AAA',
+            marketValueMinor: 2_000,
+            exposureGroupId: 'group-a',
+            evidenceId: 'ev-aaa',
+          }),
+          position({
+            id: 'p-bbb',
+            instrumentId: 'BBB',
+            marketValueMinor: 2_000,
+            exposureGroupId: 'group-b',
+            evidenceId: 'ev-bbb',
+          }),
+        ],
+        evidence: [seriesA, seriesB, cashEvidence(2_000)],
+        cashMinor: 2_000,
+      }),
+      AS_OF,
+      constraints({ maxPositionWeightBps: 4_000, maxGroupWeightBps: 5_000, minLiquidityMinor: 0 }),
+    )
+    expect(unproven.ok).toBe(false)
+    if (!unproven.ok) expect(unproven.code).toBe('CONCENTRATION_UNPROVEN')
+
+    const issuerA = issuerEvidence({ id: 'issuer-aaa', instrumentId: 'AAA', issuerId: 'issuer:same' })
+    const issuerB = issuerEvidence({ id: 'issuer-bbb', instrumentId: 'BBB', issuerId: 'issuer:same' })
+    const sameIssuer = validateSnapshot(
+      snapshot({
+        positions: [
+          position({
+            id: 'p-aaa',
+            instrumentId: 'AAA',
+            marketValueMinor: 2_000,
+            exposureGroupId: 'group-a',
+            evidenceId: 'ev-aaa',
+            issuerEvidenceId: 'issuer-aaa',
+          }),
+          position({
+            id: 'p-bbb',
+            instrumentId: 'BBB',
+            marketValueMinor: 2_000,
+            exposureGroupId: 'group-b',
+            evidenceId: 'ev-bbb',
+            issuerEvidenceId: 'issuer-bbb',
+          }),
+        ],
+        evidence: [seriesA, seriesB, issuerA, issuerB, cashEvidence(2_000)],
+        cashMinor: 2_000,
+      }),
+      AS_OF,
+      constraints({ maxPositionWeightBps: 4_000, maxGroupWeightBps: 5_000, minLiquidityMinor: 0 }),
+    )
+    expect(sameIssuer.ok).toBe(false)
+    if (!sameIssuer.ok) expect(sameIssuer.code).toBe('CONCENTRATION_BREACH')
+
+    const issuerOther = issuerEvidence({ id: 'issuer-bbb', instrumentId: 'BBB', issuerId: 'issuer:other' })
+    const distinct = validateSnapshot(
+      snapshot({
+        positions: [
+          position({
+            id: 'p-aaa',
+            instrumentId: 'AAA',
+            marketValueMinor: 2_000,
+            exposureGroupId: 'group-a',
+            evidenceId: 'ev-aaa',
+            issuerEvidenceId: 'issuer-aaa',
+          }),
+          position({
+            id: 'p-bbb',
+            instrumentId: 'BBB',
+            marketValueMinor: 2_000,
+            exposureGroupId: 'group-b',
+            evidenceId: 'ev-bbb',
+            issuerEvidenceId: 'issuer-bbb',
+          }),
+        ],
+        evidence: [seriesA, seriesB, issuerA, issuerOther, cashEvidence(2_000)],
+        cashMinor: 2_000,
+      }),
+      AS_OF,
+      constraints({ maxPositionWeightBps: 4_000, maxGroupWeightBps: 5_000, minLiquidityMinor: 0 }),
+    )
+    expect(distinct.ok).toBe(true)
   })
 })

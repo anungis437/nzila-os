@@ -159,6 +159,38 @@ function checkContradictions(snapshot: PortfolioSnapshot): Result<true> {
   return ok(true)
 }
 
+function resolveIssuerId(
+  snapshot: PortfolioSnapshot,
+  position: Position,
+  asOf: string,
+): Result<string | null> {
+  if (!position.issuerEvidenceId) return ok(null)
+  const evidence = findEvidence(snapshot, position.issuerEvidenceId)
+  if (!evidence.ok) return evidence
+  const verified = verifyEvidence(evidence.value, asOf)
+  if (!verified.ok) return verified
+  if (evidence.value.epistemicClass !== 'FACT' || evidence.value.origin !== 'EXTERNAL') {
+    return fail('CONCENTRATION_UNPROVEN', `issuer evidence ${evidence.value.id} is not an external FACT`)
+  }
+  if (!(MARKET_FACT_SOURCES as readonly string[]).includes(evidence.value.sourceType)) {
+    return fail(
+      'CONCENTRATION_UNPROVEN',
+      `issuer evidence ${evidence.value.id} is not a custodian, broker, or market-data source`,
+    )
+  }
+  const stale = isStale(evidence.value.observedAt, asOf, PRICE_MAX_AGE_DAYS)
+  if (!stale.ok) return stale
+  if (stale.value) return fail('STALE_EVIDENCE', `issuer evidence ${evidence.value.id} is stale`)
+  if (evidence.value.payload.kind !== 'ISSUER') {
+    return fail('CONCENTRATION_UNPROVEN', `issuer evidence ${evidence.value.id} is not issuer evidence`)
+  }
+  const issuerId = evidence.value.payload.issuerId
+  if (typeof issuerId !== 'string' || issuerId.length === 0 || evidence.value.payload.instrumentId !== position.instrumentId) {
+    return fail('CONCENTRATION_UNPROVEN', `issuer evidence ${evidence.value.id} does not bind ${position.instrumentId}`)
+  }
+  return ok(issuerId)
+}
+
 function largestRemainder(total: number, parts: readonly { id: string; value: number }[]): Result<Map<string, number>> {
   if (total === 0) return fail('ILLOGICAL_QUANTITY', 'cannot weight an empty portfolio')
   const rows = parts.map((part) => {
@@ -298,6 +330,42 @@ export function validateSnapshot(
   for (const [stem, weight] of Object.entries(stemWeightsBps)) {
     if (weight > constraints.maxGroupWeightBps) {
       return fail('CONCENTRATION_BREACH', `instrument stem ${stem} weight ${weight} exceeds the group ceiling across exposure groups`)
+    }
+  }
+  const distinctStems = new Set(snapshot.positions.map((position) => instrumentStem(position.instrumentId)))
+  if (distinctStems.size > 1) {
+    const issuerByPosition = new Map<string, string>()
+    const issuerByStem = new Map<string, string>()
+    for (const position of snapshot.positions) {
+      const issuer = resolveIssuerId(snapshot, position, asOf)
+      if (!issuer.ok) return issuer
+      if (!issuer.value) {
+        return fail(
+          'CONCENTRATION_UNPROVEN',
+          `position ${position.id} has no issuer evidence; distinct instrument ids are not treated as independent`,
+        )
+      }
+      const stem = instrumentStem(position.instrumentId)
+      const prior = issuerByStem.get(stem)
+      if (prior && prior !== issuer.value) {
+        return fail('CONTRADICTORY_EVIDENCE', `instrument stem ${stem} has conflicting issuer evidence`)
+      }
+      issuerByStem.set(stem, issuer.value)
+      issuerByPosition.set(position.id, issuer.value)
+    }
+    const issuerWeightsBps: Record<string, number> = {}
+    for (const row of rows) {
+      if (row.id === 'cash') continue
+      const issuerId = issuerByPosition.get(row.id)
+      if (!issuerId) {
+        return fail('CONCENTRATION_UNPROVEN', `position ${row.id} has no evidenced issuer`)
+      }
+      issuerWeightsBps[issuerId] = (issuerWeightsBps[issuerId] ?? 0) + row.weightBps
+    }
+    for (const [issuerId, weight] of Object.entries(issuerWeightsBps)) {
+      if (weight > constraints.maxGroupWeightBps) {
+        return fail('CONCENTRATION_BREACH', `issuer ${issuerId} weight ${weight} exceeds the group ceiling`)
+      }
     }
   }
   if (snapshot.cashMinor < constraints.minLiquidityMinor) {
