@@ -22,7 +22,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -235,11 +234,14 @@ jobs:
           path: docs/api/specs/
           retention-days: 90
 
-  # ── W1-5: IaC Security Scan (Checkov) ──────────────────────────────────────
+  # Checkov-only merge authority. SARIF publication is the separate
+  # iac-sarif-reporting job and is not a feeder for this result.
   iac-scan:
     runs-on: ubuntu-latest
-    name: IaC Security Scan
+    name: IaC Security Validation
     needs: [lint-and-typecheck]
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -259,12 +261,35 @@ jobs:
             --skip-check CKV_AZURE_166 \
             --skip-check CKV_AZURE_189
 
-      - name: Upload Checkov SARIF
+      # Evidence retention only. A failed upload must not change the Checkov result.
+      - name: Retain Checkov SARIF evidence
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: results.sarif
-          category: checkov
+          name: iac-checkov-sarif
+          path: results.sarif
+          retention-days: 14
+          if-no-files-found: warn
+
+  # Evidence-only. This job is not a Merge Authority feeder.
+  # NOT_CONFIGURED does not fail the workflow. FAILURE stays visible and
+  # still does not feed Merge Authority / IaC Security.
+  iac-sarif-reporting:
+    runs-on: ubuntu-latest
+    name: IaC SARIF Reporting
+    needs: [iac-scan]
+    if: always() && !cancelled() && needs.iac-scan.result != 'skipped'
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Classify SARIF reporting
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node tooling/ci/merge-authority/sarif-reporting.mjs
 
   governance-gates:
     runs-on: ubuntu-latest
