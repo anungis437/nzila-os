@@ -1,0 +1,67 @@
+name: Runner disk hygiene
+description: >-
+  Reclaim free space on GitHub-hosted ubuntu runners before heavy docker/build
+  work, print df before/after, and fail closed if free headroom is below threshold.
+  Preferred mitigation for SAME_CLASS ENOSPC (UE Build&Push / RES_RG_DISK_01).
+
+inputs:
+  min_free_gib:
+    description: Minimum free GiB on / after reclaim (fail-closed headroom guardrail)
+    required: false
+    default: '6'
+  prune_docker:
+    description: Whether to run docker system prune --all --force
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Free runner disk + headroom guardrail
+      shell: bash
+      env:
+        MIN_FREE_GIB: ${{ inputs.min_free_gib }}
+        PRUNE_DOCKER: ${{ inputs.prune_docker }}
+      run: |
+        set -euo pipefail
+        echo "::group::df before reclaim"
+        df -h /
+        echo "::endgroup::"
+
+        # GitHub-hosted images ship toolchains this job does not need.
+        # Keep Node toolcache for setup-node / composite consumers.
+        sudo rm -rf \
+          /usr/share/dotnet \
+          /usr/local/lib/android \
+          /usr/local/share/powershell \
+          /usr/local/share/boost \
+          /usr/share/swift \
+          /opt/ghc \
+          /opt/hostedtoolcache/CodeQL \
+          /opt/hostedtoolcache/go \
+          /opt/hostedtoolcache/Python \
+          /opt/hostedtoolcache/PyPy \
+          /opt/hostedtoolcache/Ruby \
+          /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk \
+          || true
+
+        if [ "${PRUNE_DOCKER}" = "true" ] && command -v docker >/dev/null 2>&1; then
+          docker system prune --all --force || true
+        fi
+
+        echo "::group::df after reclaim"
+        df -h /
+        echo "::endgroup::"
+
+        # Fail-closed headroom: Available KiB from df -Pk /
+        avail_kib="$(df -Pk / | awk 'NR==2 {print $4}')"
+        avail_gib="$(awk -v k="$avail_kib" 'BEGIN { printf "%.2f", k/1024/1024 }')"
+        echo "RUNNER_DISK_AVAIL_GIB=${avail_gib}"
+        echo "RUNNER_DISK_MIN_FREE_GIB=${MIN_FREE_GIB}"
+        awk -v a="$avail_gib" -v m="$MIN_FREE_GIB" 'BEGIN {
+          if (a+0 < m+0) {
+            printf "::error::Runner disk headroom guardrail failed: %.2f GiB free < %s GiB required (ENOSPC class).\n", a, m
+            exit 1
+          }
+          printf "Headroom OK: %.2f GiB free >= %s GiB\n", a, m
+        }'
