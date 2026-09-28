@@ -22,7 +22,6 @@
 
 // ── Types ────────────────────────────────────────────────────────
 export type {
-  CurrencyCode,
   CurrencyInfo,
   ExchangeRate,
   RateSource,
