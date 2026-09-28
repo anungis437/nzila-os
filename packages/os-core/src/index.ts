@@ -70,3 +70,5 @@ export {
   type RuntimeHealthResponse,
   type BuildRuntimeHealthInput,
 } from './health'
+
+// PROBE CI-TYPECHECK shared marker. Do not merge.
