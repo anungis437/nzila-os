@@ -57,15 +57,22 @@ jobs:
           fi
           echo "proof_tag=proof-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ steps.source.outputs.sha }}
+      # First checkout the workflow-definition SHA so the new local action exists.
+      - name: Checkout workflow definition
+        uses: actions/checkout@v5
 
       - name: Runner disk hygiene (Preferred ENOSPC mitigation)
         uses: ./.github/actions/runner-disk-hygiene
         with:
           min_free_gib: '6'
           prune_docker: 'true'
+
+      # Then replace the workspace with the authorized application-source SHA.
+      - name: Checkout application source (two-SHA pin)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          clean: true
 
       - name: Assert build identity is configured (fail-closed)
         env:
