@@ -15,7 +15,8 @@ export const CANONICAL_CONTEXTS = [
     name: 'Merge Authority / Lint & Typecheck',
     ciJob: 'lint-and-typecheck',
     family: 'engineering',
-    evidence: 'pnpm lint and pnpm typecheck',
+    evidence:
+      'pnpm lint, then tooling/ci/affected-typecheck-plan.mjs. Doctrine PROVE_AFFECTED_OR_RUN_FULL. Workspace-package changes typecheck the changed packages and their dependents. Lockfiles, turbo.json, pnpm-workspace.yaml, root package.json, .npmrc, shared tsconfig/jsconfig inputs, paths outside a workspace package, unresolved SCM, and a zero-task affected result run pnpm typecheck. Proven documentation stays not applicable. A zero-task result is not a pass and is not NOT_APPLICABLE.',
   },
   {
     name: 'Merge Authority / Unit Tests',
