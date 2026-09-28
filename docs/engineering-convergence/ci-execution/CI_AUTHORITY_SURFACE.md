@@ -26,6 +26,14 @@ Direct secret contexts, unchanged: `Gitleaks`, `TruffleHog OSS`, `Docker Secret 
 
 On turbo 2.9.14, a diff that only touches `pnpm-lock.yaml`, root `package.json`, `pnpm-workspace.yaml`, `.npmrc`, or another non-package path makes `--affected` select `//` and schedule 0 build tasks. `turbo.json` currently schedules the full build task graph; Build All still runs `pnpm build` for it so the result does not depend on that global-trigger behavior. Package-scoped affected closure still does not build the whole portfolio, so `PORTFOLIO_BUILD_AUTHORITY` stays unresolved. Unit tests do not retire `pnpm test:fast`. `TEST_FAST_SUBSET` stays unresolved. `E2` stays blocked. Reliability Guard is unchanged, including its `pnpm build`.
 
+## Affected typecheck
+
+`lint-and-typecheck` still runs `pnpm lint` for the workspace. The required check name stays `Merge Authority / Lint & Typecheck`. Typecheck is planned by `tooling/ci/affected-typecheck-plan.mjs` (`PLAN_VERSION=e6c-1`) and executed by `tooling/ci/run-affected-typecheck.sh`. Doctrine: `PROVE_AFFECTED_OR_RUN_FULL`.
+
+The planner reuses Affected Build SCM classification. Every path class that forces `pnpm build` also forces `pnpm typecheck`. Shared compilation inputs (`tsconfig.json`, `tsconfig.*.json`, `jsconfig.json`) force `pnpm typecheck` even inside a workspace package. A workspace-package diff typechecks the changed packages plus workspace dependents that have a `typecheck` script, and only when that closure is non-empty. Turbo must report at least that closure; a missing dependent, a turbo query failure, or a closure that is the whole universe runs `pnpm typecheck`. Checkout is full history (`fetch-depth: 0`) and the turbo range is `TURBO_SCM_BASE` / `TURBO_SCM_HEAD`. A missing base, a zero base SHA, an unreadable diff, or history with no merge-base runs `pnpm typecheck`. A checkout that does not contain the planned head fails the job.
+
+`NOT_APPLICABLE` is only the proven-irrelevant documentation classification. A zero-task `--affected` result is not a pass and is not `NOT_APPLICABLE`. `E3` stays not started. Lint is not scoped by this planner.
+
 ## Auth boundary
 
 PostgreSQL RLS is database row-access enforcement. Auth authority is the application and platform authorization-truth check inside Governance Integrity (`scripts/validate-auth-authority.ts`). A passing RLS context does not prove auth authority, and a passing Governance Integrity context does not prove row-level security.

@@ -35,6 +35,8 @@ jobs:
     name: Lint & Typecheck
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
         with:
           turbo-cache-key: lint
@@ -42,10 +44,13 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Typecheck
-        run: pnpm typecheck
+      # E6-C: prove an affected closure or run pnpm typecheck. Lint stays full-workspace.
+      - name: Typecheck affected packages or full universe
+        run: bash tooling/ci/run-affected-typecheck.sh
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
+          TYPECHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          TYPECHECK_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
 
   test:
     runs-on: ubuntu-latest
