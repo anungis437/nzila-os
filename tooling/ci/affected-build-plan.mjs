@@ -245,3 +245,5 @@ if (isDirectRun()) {
     process.exit(1)
   }
 }
+
+// PROBE CI-TYPECHECK tooling marker. Do not merge.
