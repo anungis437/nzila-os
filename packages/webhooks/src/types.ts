@@ -65,3 +65,5 @@ export const WebhookEventPayloadSchema = z.object({
 
 export type CreateWebhookSubscriptionInput = z.infer<typeof CreateWebhookSubscriptionSchema>
 export type WebhookEventPayload = z.infer<typeof WebhookEventPayloadSchema>
+
+// PROBE CI-TYPECHECK leaf marker. Do not merge.
