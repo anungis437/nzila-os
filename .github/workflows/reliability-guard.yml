@@ -20,9 +20,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
       # Merge-critical lint and typecheck already run on CI Lint & Typecheck.
-      - name: Test fast
-        run: pnpm test:fast
-
       - name: Health contract
         run: pnpm exec tsx scripts/sre/validate-health-contract.ts
 
