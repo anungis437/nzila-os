@@ -112,3 +112,5 @@ export type {
   TrialBalanceLine,
   CurrencyExposure,
 } from './ledger'
+
+// PROBE CI-TYPECHECK api marker. Do not merge.
