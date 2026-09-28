@@ -203,9 +203,9 @@ describe('CI Build All invokes the portfolio fallback', () => {
     expect(affectedBranch).not.toContain('pnpm build')
   })
 
-  it('keeps Reliability Guard test:fast and SRE without portfolio pnpm build (E5-C)', () => {
+  it('keeps Reliability Guard SRE-only without test:fast or portfolio pnpm build (E5-F)', () => {
     const guard = readFileSync(join(ROOT, '.github', 'workflows', 'reliability-guard.yml'), 'utf8')
-    expect(guard).toContain('pnpm test:fast')
+    expect(guard).not.toContain('pnpm test:fast')
     expect(guard).not.toContain('pnpm build')
     expect(guard).toContain('validate-health-contract')
     expect(guard).toContain('synthetic-dry-run')

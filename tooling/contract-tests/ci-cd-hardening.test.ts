@@ -291,12 +291,12 @@ describe('CI-006: Reliability Guard does not duplicate lint and typecheck', () =
     return commands.some((segment) => pnpmScriptName(segment) === script)
   }
 
-  it('keeps fast tests and SRE validation without typecheck, lint, or portfolio build (E5-C)', () => {
+  it('keeps SRE-only Reliability Guard without test:fast, typecheck, lint, or portfolio build (E5-F)', () => {
     const commands = reliabilityGuardCommands()
 
     expect(invokesPnpmScript(commands, 'typecheck')).toBe(false)
     expect(invokesPnpmScript(commands, 'lint')).toBe(false)
-    expect(invokesPnpmScript(commands, 'test:fast')).toBe(true)
+    expect(invokesPnpmScript(commands, 'test:fast')).toBe(false)
     expect(invokesPnpmScript(commands, 'build')).toBe(false)
 
     for (const script of [
