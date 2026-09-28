@@ -22,7 +22,20 @@
 name: Build Identity Proof (BR-5)
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      run_ue_docker_proof:
+        description: >-
+          When true, run representative UE frontend+backend docker Build&Push
+          with runner-disk hygiene (no migrate/deploy; proof tags only).
+        required: false
+        type: boolean
+        default: false
+      application_source_sha:
+        description: Application source SHA for UE docker proof (two-SHA pin)
+        required: false
+        type: string
+        default: '25b6b5dff1dfad669d3c3f368c15287337ee3375'
 
 permissions:
   contents: read
@@ -125,3 +138,132 @@ jobs:
           set -euo pipefail
           az acr repository delete --name "${ACR_NAME}" --repository "${PROOF_REPO}" --yes || true
           echo "Cleanup: deleted ${PROOF_REPO} repository (best-effort)."
+
+  ue-docker-proof:
+    if: ${{ github.event.inputs.run_ue_docker_proof == 'true' }}
+    runs-on: ubuntu-latest
+    name: UE docker Build&Push proof (no deploy)
+    environment: build
+    steps:
+      - name: Resolve source SHA
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          PIN="${{ github.event.inputs.application_source_sha }}"
+          if [ -z "$PIN" ]; then PIN="${GITHUB_SHA}"; fi
+          echo "sha=$PIN" >> "$GITHUB_OUTPUT"
+          echo "proof_tag=proof-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+
+      - name: Runner disk hygiene (Preferred ENOSPC mitigation)
+        uses: ./.github/actions/runner-disk-hygiene
+        with:
+          min_free_gib: '6'
+          prune_docker: 'true'
+
+      - name: Assert build identity is configured (fail-closed)
+        env:
+          BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          BUILD_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BUILD_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_CLIENT_ID}" ] || [ -z "${BUILD_TENANT_ID}" ] || [ -z "${BUILD_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No dedicated build identity on build environment (BR-5)."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, build identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify authenticated identity is the build identity (fail-closed)
+        env:
+          EXPECTED_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          ACTUAL=$(az account show --query user.name -o tsv)
+          if [ "$ACTUAL" != "$EXPECTED_CLIENT_ID" ]; then
+            echo "::error::Authenticated identity ($ACTUAL) is not expected build identity."
+            exit 1
+          fi
+
+      - name: ACR login
+        run: az acr login --name "${ACR_NAME}"
+
+      - name: Build & push frontend (proof tags only)
+        run: |
+          set -euo pipefail
+          PROOF="${{ steps.source.outputs.proof_tag }}"
+          SHA="${{ steps.source.outputs.sha }}"
+          docker build \
+            --target union-eyes \
+            --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
+            --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
+            --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
+            --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
+            --build-arg NEXT_PUBLIC_SITE_URL=https://staging.unioneyes.app \
+            --build-arg NEXT_PUBLIC_APP_URL=https://staging-app.unioneyes.app \
+            --build-arg NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app \
+            --build-arg NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app \
+            --build-arg UE_ENVIRONMENT=staging \
+            --build-arg NEXT_PUBLIC_APP_ENV=staging \
+            --build-arg UE_DEPLOYMENT_TYPE=standard \
+            --build-arg UE_FEATURE_PROFILE=full \
+            --build-arg NEXT_PUBLIC_UE_FEATURE_PROFILE=full \
+            --build-arg UE_DEMO_PROFILE= \
+            --build-arg NEXT_PUBLIC_UE_DEMO_PROFILE= \
+            --build-arg UE_DEMO_ORG_ID= \
+            --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG= \
+            --build-arg UE_MARKETING_URL=https://staging.unioneyes.app \
+            --build-arg UE_APP_URL=https://staging-app.unioneyes.app \
+            -t nzilacanadaacr.azurecr.io/nzila-os-union-eyes:${PROOF} \
+            -t nzilacanadaacr.azurecr.io/nzila-os-union-eyes:${SHA} \
+            .
+          docker push nzilacanadaacr.azurecr.io/nzila-os-union-eyes:${PROOF}
+          docker push nzilacanadaacr.azurecr.io/nzila-os-union-eyes:${SHA}
+
+      - name: Reclaim docker layer headroom between images
+        run: |
+          set -euo pipefail
+          docker builder prune --force || true
+          docker system prune --force || true
+          df -h /
+
+      - name: Build & push backend (proof tags only)
+        run: |
+          set -euo pipefail
+          PROOF="${{ steps.source.outputs.proof_tag }}"
+          SHA="${{ steps.source.outputs.sha }}"
+          docker build \
+            --file apps/union-eyes/backend/Dockerfile \
+            -t nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend:${PROOF} \
+            -t nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend:${SHA} \
+            apps/union-eyes/backend
+          docker push nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend:${PROOF}
+          docker push nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend:${SHA}
+
+      - name: Resolve digests (proof)
+        run: |
+          set -euo pipefail
+          PROOF="${{ steps.source.outputs.proof_tag }}"
+          FRONTEND_DIGEST=$(az acr repository show --name "${ACR_NAME}" --image "nzila-os-union-eyes:${PROOF}" --query digest -o tsv)
+          BACKEND_DIGEST=$(az acr repository show --name "${ACR_NAME}" --image "nzila-os-union-eyes-backend:${PROOF}" --query digest -o tsv)
+          case "$FRONTEND_DIGEST" in sha256:*) : ;; *) echo "::error::bad frontend digest"; exit 1 ;; esac
+          case "$BACKEND_DIGEST" in sha256:*) : ;; *) echo "::error::bad backend digest"; exit 1 ;; esac
+          {
+            echo "### UE docker Build&Push proof (no deploy)"
+            echo "- source_sha: ${{ steps.source.outputs.sha }}"
+            echo "- proof_tag: ${PROOF}"
+            echo "- frontend: ${FRONTEND_DIGEST}"
+            echo "- backend: ${BACKEND_DIGEST}"
+            echo "- deploy: NOT_RUN"
+            echo "- migrate: NOT_RUN"
+          } >> "$GITHUB_STEP_SUMMARY"
