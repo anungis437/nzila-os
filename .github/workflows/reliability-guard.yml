@@ -18,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Runner disk hygiene (Preferred ENOSPC mitigation)
+        uses: ./.github/actions/runner-disk-hygiene
+        with:
+          min_free_gib: '6'
+          prune_docker: 'true'
       - uses: ./.github/actions/setup-monorepo
       # Merge-critical lint and typecheck already run on CI Lint & Typecheck.
       - name: Health contract

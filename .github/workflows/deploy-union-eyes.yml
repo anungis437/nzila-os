@@ -59,6 +59,17 @@ on:
         type: boolean
         default: false
 
+
+      application_source_sha:
+        description: >-
+          Optional two-SHA pin. When set, Build & Push checks out this commit
+          for the docker build context while the workflow definition runs from
+          the dispatch ref (ORIGINAL_PIN_REDEPLOYABLE). Leave empty to build
+          github.sha. Does not by itself deploy.
+        required: false
+        type: string
+        default: ''
+
 permissions:
   contents: read
   id-token: write
@@ -1204,7 +1215,36 @@ jobs:
       frontend_digest: ${{ steps.digests.outputs.frontend_digest }}
       backend_digest: ${{ steps.digests.outputs.backend_digest }}
     steps:
-      - uses: actions/checkout@v5
+      - name: Resolve application source SHA (two-SHA pin)
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          PIN="${{ github.event.inputs.application_source_sha || '' }}"
+          if [ -n "$PIN" ]; then
+            echo "sha=$PIN" >> "$GITHUB_OUTPUT"
+            echo "Using application_source_sha pin: $PIN"
+          else
+            echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+            echo "Using github.sha: ${GITHUB_SHA}"
+          fi
+
+      # First checkout the workflow-definition SHA so the new local action exists.
+      - name: Checkout workflow definition
+        uses: actions/checkout@v5
+
+      - name: Runner disk hygiene (Preferred ENOSPC mitigation)
+        uses: ./.github/actions/runner-disk-hygiene
+        with:
+          min_free_gib: '6'
+          prune_docker: 'true'
+
+      # Then replace the workspace with the authorized application-source SHA.
+      - name: Checkout application source (two-SHA pin)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          clean: true
 
       - name: Assert build identity is configured (fail-closed)
         env:
@@ -1263,11 +1303,20 @@ jobs:
             --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ needs.plan.outputs.demo_org_slug }} \
             --build-arg UE_MARKETING_URL=${{ needs.plan.outputs.marketing_url }} \
             --build-arg UE_APP_URL=${{ needs.plan.outputs.app_url }} \
-            -t ${{ env.IMAGE }}:${{ github.sha }} \
+            -t ${{ env.IMAGE }}:${{ steps.source.outputs.sha }} \
             -t ${{ env.IMAGE }}:${{ needs.plan.outputs.environment }} \
             .
-          docker push ${{ env.IMAGE }}:${{ github.sha }}
+          docker push ${{ env.IMAGE }}:${{ steps.source.outputs.sha }}
           docker push ${{ env.IMAGE }}:${{ needs.plan.outputs.environment }}
+
+      - name: Reclaim docker layer headroom between images
+        run: |
+          set -euo pipefail
+          if command -v docker >/dev/null 2>&1; then
+            docker builder prune --force || true
+            docker system prune --force || true
+          fi
+          df -h /
 
       - name: Build & push backend image
         run: |
@@ -1277,10 +1326,10 @@ jobs:
           # server-side ACR build; runner-side push needs only AcrPush.
           docker build \
             --file apps/union-eyes/backend/Dockerfile \
-            -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.BACKEND_IMAGE }}:${{ steps.source.outputs.sha }} \
             -t ${{ env.BACKEND_IMAGE }}:latest \
             apps/union-eyes/backend
-          docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.BACKEND_IMAGE }}:${{ steps.source.outputs.sha }}
           docker push ${{ env.BACKEND_IMAGE }}:latest
 
       - name: Resolve immutable image digests (BR-5 promotion evidence)
@@ -1290,11 +1339,11 @@ jobs:
           ACR='${{ needs.plan.outputs.acr_name }}'
           FRONTEND_DIGEST=$(az acr repository show \
             --name "$ACR" \
-            --image "nzila-os-union-eyes:${{ github.sha }}" \
+            --image "nzila-os-union-eyes:${{ steps.source.outputs.sha }}" \
             --query digest -o tsv)
           BACKEND_DIGEST=$(az acr repository show \
             --name "$ACR" \
-            --image "nzila-os-union-eyes-backend:${{ github.sha }}" \
+            --image "nzila-os-union-eyes-backend:${{ steps.source.outputs.sha }}" \
             --query digest -o tsv)
           if [ -z "${FRONTEND_DIGEST:-}" ] || [ -z "${BACKEND_DIGEST:-}" ]; then
             echo "::error::Failed to resolve immutable @sha256 digest for pushed images (frontend='${FRONTEND_DIGEST:-}' backend='${BACKEND_DIGEST:-}'). Refusing to promote a mutable-only tag (BR-5)."

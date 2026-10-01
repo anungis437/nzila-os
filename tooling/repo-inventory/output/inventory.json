@@ -3,7 +3,7 @@
   "appCount": 28,
   "packageCount": 224,
   "workspacePackageCount": 258,
-  "workflowCount": 55,
+  "workflowCount": 56,
   "contractTestCount": 289,
   "tsTestFileCount": 2689,
   "pythonTestFileCount": 35,
@@ -904,6 +904,7 @@
     "secret-scan.yml",
     "security-design-review.yml",
     "trivy.yml",
+    "ue-build-push-proof.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"
   ]

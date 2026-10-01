@@ -1,0 +1,221 @@
+##
+# UE Build & Push Proof (runner-disk remediation)
+#
+# Dispatch-only representative Build & Push WITHOUT migrate/deploy.
+# Preferred proof vehicle for REPRESENTATIVE_BUILD_PASS_COUNT under
+# RUNNER_DISK_REMEDIATION (UE_REDEPLOY_AUTHORIZED=NO).
+#
+# Hard bans: does not touch ACA, Django migrate, Key Vault grants, or
+# GitOps. Pushes proof-tagged images only (no :staging / :latest).
+##
+name: UE Build & Push Proof (no deploy)
+
+on:
+  workflow_dispatch:
+    inputs:
+      application_source_sha:
+        description: >-
+          Application source SHA to build (two-SHA). Default empty uses the
+          workflow ref tip. For pin proof use
+          25b6b5dff1dfad669d3c3f368c15287337ee3375.
+        required: false
+        type: string
+        default: ''
+      environment:
+        description: Topology inputs only (URLs/ACR) — does NOT deploy
+        required: true
+        type: choice
+        options: [staging, demo, pilot, production]
+        default: staging
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes
+  BACKEND_IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  ACR_NAME: nzilacanadaacr
+
+jobs:
+  proof-build-push:
+    runs-on: ubuntu-latest
+    name: Build & Push UnionEyes images (proof, no deploy)
+    environment: build
+    steps:
+      - name: Resolve application source SHA
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          PIN="${{ github.event.inputs.application_source_sha }}"
+          if [ -n "$PIN" ]; then
+            echo "sha=$PIN" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "proof_tag=proof-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+
+      # First checkout the workflow-definition SHA so the new local action exists.
+      - name: Checkout workflow definition
+        uses: actions/checkout@v5
+
+      - name: Runner disk hygiene (Preferred ENOSPC mitigation)
+        uses: ./.github/actions/runner-disk-hygiene
+        with:
+          min_free_gib: '6'
+          prune_docker: 'true'
+
+      # Then replace the workspace with the authorized application-source SHA.
+      - name: Checkout application source (two-SHA pin)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          clean: true
+
+      - name: Assert build identity is configured (fail-closed)
+        env:
+          BUILD_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          BUILD_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BUILD_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_CLIENT_ID}" ] || [ -z "${BUILD_TENANT_ID}" ] || [ -z "${BUILD_SUBSCRIPTION_ID}" ]; then
+            echo "::error::No dedicated build identity on 'build' environment (BR-5)."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, build identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify authenticated identity is the build identity (fail-closed)
+        env:
+          EXPECTED_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          set -euo pipefail
+          ACTUAL=$(az account show --query user.name -o tsv)
+          if [ "$ACTUAL" != "$EXPECTED_CLIENT_ID" ]; then
+            echo "::error::Authenticated identity ($ACTUAL) is not the expected build identity."
+            exit 1
+          fi
+
+      - name: ACR login
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Resolve topology URLs (no deploy)
+        id: topo
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENV="${{ github.event.inputs.environment }}"
+          case "$ENV" in
+            staging)
+              echo "marketing_url=https://staging.unioneyes.app" >> "$GITHUB_OUTPUT"
+              echo "app_url=https://staging-app.unioneyes.app" >> "$GITHUB_OUTPUT"
+              ;;
+            production)
+              echo "marketing_url=https://unioneyes.app" >> "$GITHUB_OUTPUT"
+              echo "app_url=https://app.unioneyes.app" >> "$GITHUB_OUTPUT"
+              ;;
+            demo)
+              echo "marketing_url=https://demo.unioneyes.app" >> "$GITHUB_OUTPUT"
+              echo "app_url=https://demo-app.unioneyes.app" >> "$GITHUB_OUTPUT"
+              ;;
+            pilot)
+              echo "marketing_url=https://pilot.unioneyes.app" >> "$GITHUB_OUTPUT"
+              echo "app_url=https://pilot-app.unioneyes.app" >> "$GITHUB_OUTPUT"
+              ;;
+            *) echo "::error::unknown env"; exit 1 ;;
+          esac
+          echo "environment=$ENV" >> "$GITHUB_OUTPUT"
+          echo "deployment_type=standard" >> "$GITHUB_OUTPUT"
+          echo "feature_profile=full" >> "$GITHUB_OUTPUT"
+          echo "demo_profile=" >> "$GITHUB_OUTPUT"
+          echo "demo_org_id=" >> "$GITHUB_OUTPUT"
+          echo "demo_org_slug=" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push frontend image (proof tags only)
+        run: |
+          set -euo pipefail
+          PROOF="${{ steps.source.outputs.proof_tag }}"
+          SHA="${{ steps.source.outputs.sha }}"
+          docker build \
+            --target union-eyes \
+            --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
+            --build-arg BUILD_AUTH_PLACEHOLDER=ci_build_placeholder_secret_32_chars_x \
+            --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
+            --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
+            --build-arg NEXT_PUBLIC_SITE_URL=${{ steps.topo.outputs.marketing_url }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ steps.topo.outputs.app_url }} \
+            --build-arg NEXT_PUBLIC_SITE_URL_STAGING=https://staging.unioneyes.app \
+            --build-arg NEXT_PUBLIC_APP_URL_STAGING=https://staging-app.unioneyes.app \
+            --build-arg UE_ENVIRONMENT=${{ steps.topo.outputs.environment }} \
+            --build-arg NEXT_PUBLIC_APP_ENV=${{ steps.topo.outputs.environment }} \
+            --build-arg UE_DEPLOYMENT_TYPE=${{ steps.topo.outputs.deployment_type }} \
+            --build-arg UE_FEATURE_PROFILE=${{ steps.topo.outputs.feature_profile }} \
+            --build-arg NEXT_PUBLIC_UE_FEATURE_PROFILE=${{ steps.topo.outputs.feature_profile }} \
+            --build-arg UE_DEMO_PROFILE=${{ steps.topo.outputs.demo_profile }} \
+            --build-arg NEXT_PUBLIC_UE_DEMO_PROFILE=${{ steps.topo.outputs.demo_profile }} \
+            --build-arg UE_DEMO_ORG_ID=${{ steps.topo.outputs.demo_org_id }} \
+            --build-arg NEXT_PUBLIC_UE_DEMO_ORG_SLUG=${{ steps.topo.outputs.demo_org_slug }} \
+            --build-arg UE_MARKETING_URL=${{ steps.topo.outputs.marketing_url }} \
+            --build-arg UE_APP_URL=${{ steps.topo.outputs.app_url }} \
+            -t ${{ env.IMAGE }}:${PROOF} \
+            -t ${{ env.IMAGE }}:${SHA} \
+            .
+          docker push ${{ env.IMAGE }}:${PROOF}
+          docker push ${{ env.IMAGE }}:${SHA}
+          # Explicitly do NOT push :staging / environment mutable tags in proof.
+
+      - name: Reclaim docker layer headroom between images
+        run: |
+          set -euo pipefail
+          docker builder prune --force || true
+          docker system prune --force || true
+          df -h /
+
+      - name: Build & push backend image (proof tags only)
+        run: |
+          set -euo pipefail
+          PROOF="${{ steps.source.outputs.proof_tag }}"
+          SHA="${{ steps.source.outputs.sha }}"
+          docker build \
+            --file apps/union-eyes/backend/Dockerfile \
+            -t ${{ env.BACKEND_IMAGE }}:${PROOF} \
+            -t ${{ env.BACKEND_IMAGE }}:${SHA} \
+            apps/union-eyes/backend
+          docker push ${{ env.BACKEND_IMAGE }}:${PROOF}
+          docker push ${{ env.BACKEND_IMAGE }}:${SHA}
+          # Explicitly do NOT push :latest in proof.
+
+      - name: Resolve immutable digests (proof)
+        id: digests
+        run: |
+          set -euo pipefail
+          PROOF="${{ steps.source.outputs.proof_tag }}"
+          FRONTEND_DIGEST=$(az acr repository show \
+            --name "${{ env.ACR_NAME }}" \
+            --image "nzila-os-union-eyes:${PROOF}" \
+            --query digest -o tsv)
+          BACKEND_DIGEST=$(az acr repository show \
+            --name "${{ env.ACR_NAME }}" \
+            --image "nzila-os-union-eyes-backend:${PROOF}" \
+            --query digest -o tsv)
+          case "$FRONTEND_DIGEST" in sha256:*) : ;; *) echo "::error::bad frontend digest"; exit 1 ;; esac
+          case "$BACKEND_DIGEST" in sha256:*) : ;; *) echo "::error::bad backend digest"; exit 1 ;; esac
+          echo "frontend_digest=$FRONTEND_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "backend_digest=$BACKEND_DIGEST" >> "$GITHUB_OUTPUT"
+          {
+            echo "### UE Build & Push Proof (no deploy)"
+            echo "- source_sha: ${{ steps.source.outputs.sha }}"
+            echo "- proof_tag: ${PROOF}"
+            echo "- frontend: ${FRONTEND_DIGEST}"
+            echo "- backend: ${BACKEND_DIGEST}"
+            echo "- deploy: NOT_RUN"
+            echo "- migrate: NOT_RUN"
+          } >> "$GITHUB_STEP_SUMMARY"
