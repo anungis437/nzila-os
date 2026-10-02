@@ -159,7 +159,7 @@ test.describe('UnionEyes authenticated role-centric navigation', () => {
     await gotoDashboardAsRole(page, 'member');
 
     // Find and click the "Home" sidebar link (links to /dashboard/inbox).
-    const primarySidebar = 'aside[aria-label="Primary navigation"]:not([role="dialog"])';
+    const primarySidebar = 'aside[aria-label="Role execution navigation"]:not([role="dialog"])';
     const homeLink = page.locator(`${primarySidebar} a[href]`).filter({ hasText: 'Home' }).first();
     await expect(homeLink).toBeVisible({ timeout: 10_000 });
 

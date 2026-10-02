@@ -31,8 +31,15 @@ import {
 import type { SelectProfile } from "@/db/schema/domains/member";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
+import { Badge } from "@/components/ui/badge";
 import {
-  getDashboardExperience,
+  ROLE_EXECUTION_CHROME_LABEL,
+  ROLE_EXECUTION_DESTINATIONS_LABEL,
+  honestyForNavigationItem,
+  roleHomeHubCue,
+} from "@/lib/dashboard/dual-nav-honesty";
+import {
+  getDualNavHomes,
   getVisibleNavigationForExperience,
   type NavigationGroup,
   type NavigationItem,
@@ -124,11 +131,12 @@ export default function Sidebar({
     organization.id !== platformOrgId
   );
 
-  const experience = useMemo(() => getDashboardExperience(userRole), [userRole]);
+  const homes = useMemo(() => getDualNavHomes(userRole), [userRole]);
+  const hubCue = useMemo(() => roleHomeHubCue(homes), [homes]);
 
   const items = useMemo<NavigationItem[]>(
-    () => getVisibleNavigationForExperience(experience, isPilotMode),
-    [experience, isPilotMode],
+    () => getVisibleNavigationForExperience(homes.experience, isPilotMode),
+    [homes.experience, isPilotMode],
   );
 
   // Build ordered groups from the nav. Use demo-defined order when available;
@@ -202,13 +210,54 @@ export default function Sidebar({
 
   // ----- Render helpers -----
 
+  const renderHubCue = (showLabels: boolean) => {
+    if (!hubCue.show) return null;
+    const href = withLocale(hubCue.hubHref);
+    if (!showLabels) {
+      return (
+        <div className="mb-3 flex justify-center px-2" data-nav-role="hub-cue">
+          <Link
+            href={href}
+            data-nav-role="hub"
+            aria-label={hubCue.linkLabel}
+            title={hubCue.linkLabel}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+          >
+            <LayoutDashboard size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      );
+    }
+    return (
+      <div
+        className="mx-2 mb-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800"
+        data-nav-role="hub-cue"
+      >
+        <p>{hubCue.message}</p>
+        {hubCue.intelligenceNote ? (
+          <p className="mt-1">{hubCue.intelligenceNote}</p>
+        ) : null}
+        <Link
+          href={href}
+          data-nav-role="hub"
+          className="mt-1 inline-flex font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900"
+        >
+          {hubCue.linkLabel}
+        </Link>
+      </div>
+    );
+  };
+
   const renderNav = (variant: "desktop" | "drawer") => {
     const showLabels = variant === "drawer" ? true : !collapsed;
     return (
-      <nav
-        aria-label="Primary"
-        className="px-2 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]"
-      >
+      <div>
+        {renderHubCue(showLabels)}
+        <nav
+          aria-label={ROLE_EXECUTION_DESTINATIONS_LABEL}
+          data-nav-role="legacy-side"
+          className="px-2 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]"
+        >
         {groups.map(({ group, items: groupItems }) => {
           const isFlat = group.key === "__flat";
           const isGroupCollapsed = !isFlat && collapsedGroups.has(group.key);
@@ -249,14 +298,19 @@ export default function Sidebar({
                   const href = withLocale(item.href);
                   const active = isActive(item.href);
                   const showLabel = showLabels;
+                  const honesty = honestyForNavigationItem(item, homes.roleHomeHref);
                   return (
                     <li key={`${item.href}-${item.label}`}>
                       <Link
                         href={href}
-                        title={!showLabel ? item.label : undefined}
+                        title={!showLabel ? honesty.collapsedTitle : undefined}
+                        aria-label={
+                          honesty.visibleQualifier ? honesty.accessibleName : undefined
+                        }
                         aria-current={active ? "page" : undefined}
-                        className={`relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
-                          showLabel ? "" : "justify-center"
+                        data-nav-role={honesty.navRole}
+                        className={`relative flex gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
+                          showLabel ? "items-start" : "items-center justify-center"
                         } ${
                           active
                             ? "bg-blue-600 text-white shadow-sm"
@@ -271,7 +325,21 @@ export default function Sidebar({
                         )}
                         <IconForItem item={item} />
                         {showLabel && (
-                          <span className="truncate">{item.label}</span>
+                          <span className="min-w-0">
+                            <span className="block truncate">{item.label}</span>
+                            {honesty.visibleQualifier ? (
+                              <Badge
+                                variant="outline"
+                                className={`mt-1 h-auto max-w-full whitespace-normal px-1.5 py-0.5 text-left text-[10px] font-medium leading-tight ${
+                                  active
+                                    ? "border-blue-200 bg-transparent text-blue-50"
+                                    : "border-gray-200 bg-white text-gray-600"
+                                }`}
+                              >
+                                {honesty.visibleQualifier}
+                              </Badge>
+                            ) : null}
+                          </span>
                         )}
                       </Link>
                     </li>
@@ -281,7 +349,8 @@ export default function Sidebar({
             </div>
           );
         })}
-      </nav>
+        </nav>
+      </div>
     );
   };
 
@@ -362,7 +431,9 @@ export default function Sidebar({
       {/* Desktop sidebar (hidden on small screens) */}
       <aside
         className={`hidden h-screen shrink-0 flex-col justify-between border-r border-gray-200 bg-white py-4 transition-[width] duration-200 ease-out md:flex ${desktopWidth}`}
-        aria-label="Primary navigation"
+        aria-label={ROLE_EXECUTION_CHROME_LABEL}
+        data-nav-role="legacy-side"
+        data-nav-surface="desktop"
       >
         <div>
           <div
@@ -430,7 +501,9 @@ export default function Sidebar({
           id="ue-mobile-drawer"
           role="dialog"
           aria-modal="true"
-          aria-label="Primary navigation"
+          aria-label={ROLE_EXECUTION_CHROME_LABEL}
+          data-nav-role="legacy-side"
+          data-nav-surface="drawer"
           className={`relative ml-0 flex h-full w-72 max-w-[85vw] flex-col justify-between border-r border-gray-200 bg-white py-4 shadow-xl transition-transform duration-200 ease-out ${
             mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
