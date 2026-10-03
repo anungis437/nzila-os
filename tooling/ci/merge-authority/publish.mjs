@@ -17,6 +17,7 @@ import {
   deferPublications,
   verdictToCheckRun,
 } from './surface.mjs'
+import { publicationTarget, secretTerminalPublications } from './supersession.mjs'
 
 const RESULT_ENV = {
   'lint-and-typecheck': 'MA_RESULT_LINT',
@@ -32,6 +33,12 @@ const RESULT_ENV = {
   'operating-layer-gate': 'MA_RESULT_OPERATING',
   'iac-scan': 'MA_RESULT_IAC',
   'ops-pack-validation': 'MA_RESULT_OPS',
+}
+
+const SECRET_RESULT_ENV = {
+  Gitleaks: 'MA_SECRET_GITLEAKS',
+  'TruffleHog OSS': 'MA_SECRET_TRUFFLEHOG',
+  'Docker Secret Policy': 'MA_SECRET_DOCKER',
 }
 
 function readStdin() {
@@ -67,6 +74,11 @@ async function createCheckRun(body) {
   }
 }
 
+function resolveHeadSha() {
+  const runHead = process.env.MA_RUN_HEAD_SHA || process.env.HEAD_SHA
+  return publicationTarget(runHead, process.env.HEAD_SHA || runHead)
+}
+
 async function publishCheckRuns(verdicts, headSha) {
   for (const verdict of verdicts) {
     await createCheckRun(verdictToCheckRun(verdict, headSha))
@@ -86,7 +98,7 @@ async function publishVerdicts(verdicts, headSha) {
 }
 
 async function classifyAndPublish() {
-  const headSha = process.env.HEAD_SHA
+  const headSha = resolveHeadSha()
   const plan = planFastPath(pathsFromStdin(readStdin()))
   process.stdout.write(`${JSON.stringify({ action: plan.action, classification: plan.classification })}\n`)
   if (plan.action === 'DEFER_TO_CI') {
@@ -108,8 +120,31 @@ function diffPathsFromEnv() {
   return pathsFromStdin(value)
 }
 
+async function publishSecretTerminals() {
+  const headSha = resolveHeadSha()
+  const results = {}
+  for (const [name, envName] of Object.entries(SECRET_RESULT_ENV)) {
+    const value = process.env[envName]
+    if (value == null || value === '') throw new Error(`${envName} is required`)
+    results[name] = value
+  }
+  for (const publication of secretTerminalPublications(results)) {
+    if (publication.conclusion === 'success') {
+      throw new Error(`unexecuted secret context cannot be success: ${publication.name}`)
+    }
+    await createCheckRun({
+      name: publication.name,
+      head_sha: headSha,
+      status: publication.status,
+      conclusion: publication.conclusion,
+      output: publication.output,
+    })
+    process.stdout.write(`${publication.name}: ${publication.evidence}\n`)
+  }
+}
+
 async function publishCiResults() {
-  const headSha = process.env.HEAD_SHA
+  const headSha = resolveHeadSha()
   if (process.env.GITHUB_EVENT_NAME === 'pull_request' && process.env.MA_CHANGED_PATHS === undefined) {
     throw new Error('MA_CHANGED_PATHS is required to publish CI results for a pull request')
   }
@@ -150,7 +185,11 @@ if (command === 'classify-and-publish') {
   classifyOutputs()
 } else if (command === 'publish-ci-results') {
   await publishCiResults()
+} else if (command === 'publish-secret-terminals') {
+  await publishSecretTerminals()
 } else {
-  process.stderr.write('usage: publish.mjs classify-and-publish | publish-ci-results\n')
+  process.stderr.write(
+    'usage: publish.mjs classify-and-publish | publish-ci-results | publish-secret-terminals\n',
+  )
   process.exit(1)
 }

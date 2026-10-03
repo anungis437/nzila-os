@@ -153,6 +153,7 @@ jobs:
       - name: Publish proven NOT_APPLICABLE contexts or the CI-skip fast path
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MA_RUN_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           MA_EXEC_GOVERNANCE: ${{ needs.governance-integrity-if-ci-skipped.result }}

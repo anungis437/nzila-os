@@ -28,6 +28,19 @@ import {
   verdictToCheckRun,
 } from '../ci/merge-authority/surface.mjs'
 import { classifySarifProbe } from '../ci/merge-authority/sarif-reporting.mjs'
+import {
+  CI_EXPENSIVE_CONCURRENCY,
+  CI_REPORTER_CONCURRENCY,
+  CI_REPORTER_IF,
+  CI_REPORTER_JOB_ID,
+  MERGE_AUTHORITY_CONCURRENCY,
+  SECRET_EXPENSIVE_CONCURRENCY,
+  SECRET_REPORTER_CONCURRENCY,
+  SECRET_REPORTER_IF,
+  SECRET_REPORTER_JOB_ID,
+  publicationTarget,
+  terminalChecksForHead,
+} from '../ci/merge-authority/supersession.mjs'
 
 const ROOT = join(__dirname, '..', '..')
 const WORKFLOWS = join(ROOT, '.github', 'workflows')
@@ -1026,9 +1039,10 @@ describe('phase 1 NOT_APPLICABLE publication', () => {
       REQUIRED_CHECK_NAMES.every((name) => publishedNames.includes(name)) &&
       executedChecks.every((check) => check.status === 'completed' && check.conclusion === 'success') &&
       postedChecks.every((check) => REQUIRED_CHECK_NAMES.includes(check.name)) &&
-      SECRET_AUTHORITY_CONTEXTS.every((name) => secretJobNames.includes(name)) &&
-      secretJobNames.every((name) => SECRET_AUTHORITY_CONTEXTS.includes(name)) &&
-      Object.values(secret.jobs).every((job) => job.if == null) &&
+      SECRET_AUTHORITY_CONTEXTS.every((name) => {
+        const job = Object.values(secret.jobs).find((item) => item.name === name)
+        return Boolean(job) && job.if == null
+      }) &&
       CANONICAL_CONTEXTS.map((context) => context.name).join('\n') ===
         REQUIRED_CHECK_NAMES.slice(0, 13).join('\n') &&
       publisher.includes('MA_CHANGED_PATHS') &&
@@ -1192,5 +1206,248 @@ globalThis.fetch = async (_url, init) => {
     expect(unknown.find((check) => check.name === 'Merge Authority / Ops Documentation')?.conclusion).not.toBe(
       'success',
     )
+  })
+})
+
+function renderConcurrencyGroup(template: string, vars: Record<string, string>) {
+  return template
+    .replaceAll('${{ github.workflow }}', vars.workflow)
+    .replaceAll('${{ github.ref }}', vars.ref)
+    .replaceAll('${{ github.job }}', vars.job)
+    .replaceAll('${{ github.event.pull_request.head.sha || github.sha }}', vars.head)
+    .replaceAll('${{ github.event.pull_request.head.sha }}', vars.head)
+}
+
+describe('phase 2 supersession', () => {
+  const oldHead = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  const newHead = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+  const ref = 'refs/pull/897/merge'
+  const codePaths = ['apps/union-eyes/app/api/example/route.ts']
+
+  function cancelledJobs() {
+    return Object.fromEntries(CANONICAL_CONTEXTS.map((context) => [context.ciJob, 'cancelled']))
+  }
+
+  function cancelledSecrets() {
+    return Object.fromEntries(SECRET_AUTHORITY_CONTEXTS.map((name) => [name, 'cancelled']))
+  }
+
+  it('posts terminal required checks when a newer commit supersedes expensive work', () => {
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    const secret = parse(readFileSync(join(WORKFLOWS, 'secret-scan.yml'), 'utf8'))
+    const authority = parse(readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8'))
+    const reporter = ci.jobs[CI_REPORTER_JOB_ID]
+    const secretReporter = secret.jobs[SECRET_REPORTER_JOB_ID]
+    const expensiveIds = Object.keys(ci.jobs).filter((id) => id !== CI_REPORTER_JOB_ID)
+    const scanIds = ['docker-secret-policy', 'trufflehog', 'gitleaks']
+
+    const oldExpensive = renderConcurrencyGroup(CI_EXPENSIVE_CONCURRENCY.group, {
+      workflow: 'CI',
+      ref,
+      job: 'lint-and-typecheck',
+      head: oldHead,
+    })
+    const newExpensive = renderConcurrencyGroup(CI_EXPENSIVE_CONCURRENCY.group, {
+      workflow: 'CI',
+      ref,
+      job: 'lint-and-typecheck',
+      head: newHead,
+    })
+    const oldReporterGroup = renderConcurrencyGroup(CI_REPORTER_CONCURRENCY.group, {
+      workflow: 'CI',
+      ref,
+      job: CI_REPORTER_JOB_ID,
+      head: oldHead,
+    })
+    const newReporterGroup = renderConcurrencyGroup(CI_REPORTER_CONCURRENCY.group, {
+      workflow: 'CI',
+      ref,
+      job: CI_REPORTER_JOB_ID,
+      head: newHead,
+    })
+
+    const supersededRunCancelled =
+      ci.concurrency == null &&
+      secret.concurrency == null &&
+      expensiveIds.length > 0 &&
+      expensiveIds.every((id) => {
+        const job = ci.jobs[id]
+        return (
+          job.concurrency?.group === CI_EXPENSIVE_CONCURRENCY.group &&
+          job.concurrency?.['cancel-in-progress'] === CI_EXPENSIVE_CONCURRENCY.cancelInProgress
+        )
+      }) &&
+      scanIds.every((id) => {
+        const job = secret.jobs[id]
+        return (
+          SECRET_AUTHORITY_CONTEXTS.includes(job.name) &&
+          job.concurrency?.group === SECRET_EXPENSIVE_CONCURRENCY.group &&
+          job.concurrency?.['cancel-in-progress'] === SECRET_EXPENSIVE_CONCURRENCY.cancelInProgress
+        )
+      }) &&
+      oldExpensive === newExpensive &&
+      CI_EXPENSIVE_CONCURRENCY.cancelInProgress.includes("pull_request")
+
+    const reporterCommands = reporter.steps
+      .map((step: { run?: string; uses?: string }) => `${step.run ?? ''}\n${step.uses ?? ''}`)
+      .join('\n')
+    const secretCommands = secretReporter.steps
+      .map((step: { run?: string; uses?: string }) => `${step.run ?? ''}\n${step.uses ?? ''}`)
+      .join('\n')
+    const currentHeadReporterSurvives =
+      reporter.if === CI_REPORTER_IF &&
+      !String(reporter.if).includes('!cancelled()') &&
+      reporter.concurrency?.group === CI_REPORTER_CONCURRENCY.group &&
+      reporter.concurrency?.['cancel-in-progress'] === CI_REPORTER_CONCURRENCY.cancelInProgress &&
+      secretReporter.if === SECRET_REPORTER_IF &&
+      secretReporter.concurrency?.group === SECRET_REPORTER_CONCURRENCY.group &&
+      secretReporter.concurrency?.['cancel-in-progress'] === false &&
+      authority.concurrency?.group === MERGE_AUTHORITY_CONCURRENCY.group &&
+      authority.concurrency?.['cancel-in-progress'] === false &&
+      oldReporterGroup !== newReporterGroup &&
+      !oldReporterGroup.includes(ref) &&
+      !reporterCommands.includes('inventory:generate') &&
+      !reporterCommands.includes('pnpm ') &&
+      !reporterCommands.includes('contract-tests') &&
+      !secretCommands.includes('trufflehog') &&
+      !secretCommands.includes('gitleaks') &&
+      !secretCommands.includes('audit-secrets') &&
+      secretReporter.steps.at(-1).run === 'node tooling/ci/merge-authority/publish.mjs publish-secret-terminals'
+
+    let refusedOverride = false
+    try {
+      publicationTarget(oldHead, newHead)
+    } catch (error) {
+      refusedOverride = error instanceof Error && /refusing to publish checks for/.test(error.message)
+    }
+    const ownedByOldHead = terminalChecksForHead({
+      results: cancelledJobs(),
+      diffPaths: codePaths,
+      secretResults: cancelledSecrets(),
+      runHeadSha: oldHead,
+      requestedHeadSha: oldHead,
+    })
+    let rejectedRetarget = false
+    try {
+      terminalChecksForHead({
+        results: cancelledJobs(),
+        diffPaths: codePaths,
+        secretResults: cancelledSecrets(),
+        runHeadSha: oldHead,
+        requestedHeadSha: newHead,
+      })
+    } catch (error) {
+      rejectedRetarget = error instanceof Error && /this run owns/.test(error.message)
+    }
+    const oldHeadCannotOverride =
+      refusedOverride &&
+      rejectedRetarget &&
+      ownedByOldHead.every((check) => check.head_sha === oldHead) &&
+      publicationTarget(newHead, newHead) === newHead
+
+    const byName = Object.fromEntries(ownedByOldHead.map((check) => [check.name, check]))
+    const mixed = terminalChecksForHead({
+      results: { ...cancelledJobs(), 'lint-and-typecheck': 'failure', 'iac-scan': 'failure' },
+      diffPaths: ['infrastructure/bicep/main.bicep'],
+      secretResults: {
+        Gitleaks: 'failure',
+        'TruffleHog OSS': 'success',
+        'Docker Secret Policy': 'cancelled',
+      },
+      runHeadSha: newHead,
+    })
+    const mixedByName = Object.fromEntries(mixed.map((check) => [check.name, check]))
+    const unknown = terminalChecksForHead({
+      results: cancelledJobs(),
+      diffPaths: ['something-unexpected.bin'],
+      secretResults: Object.fromEntries(SECRET_AUTHORITY_CONTEXTS.map((name) => [name, 'skipped'])),
+      runHeadSha: oldHead,
+    })
+    const requiredNotPending =
+      ownedByOldHead.length === 16 &&
+      new Set(ownedByOldHead.map((check) => check.name)).size === 16 &&
+      REQUIRED_CHECK_NAMES.every((name) => byName[name]?.status === 'completed') &&
+      byName['Merge Authority / Lint & Typecheck'].conclusion === 'failure' &&
+      byName['Merge Authority / Ops Documentation'].conclusion === 'success' &&
+      byName['Merge Authority / Ops Documentation'].output.title === 'NOT_APPLICABLE' &&
+      byName['Merge Authority / IaC Security'].output.title === 'NOT_APPLICABLE' &&
+      byName.Gitleaks.conclusion === 'failure' &&
+      byName.Gitleaks.output.title === 'SUPERSEDED' &&
+      byName['TruffleHog OSS'].conclusion === 'failure' &&
+      byName['Docker Secret Policy'].conclusion === 'failure' &&
+      mixedByName['Merge Authority / Lint & Typecheck'].conclusion === 'failure' &&
+      mixedByName['Merge Authority / IaC Security'].conclusion === 'failure' &&
+      mixedByName['Merge Authority / IaC Security'].output.title === 'FAILURE' &&
+      mixedByName.Gitleaks.conclusion === 'failure' &&
+      mixedByName['TruffleHog OSS'].conclusion === 'success' &&
+      mixedByName['Docker Secret Policy'].conclusion === 'failure' &&
+      mixedByName['Docker Secret Policy'].output.title === 'SUPERSEDED' &&
+      mixed.every((check) => check.head_sha === newHead) &&
+      unknown.every(
+        (check) =>
+          check.status === 'completed' && check.conclusion !== 'success' && check.output.title !== 'NOT_APPLICABLE',
+      )
+
+    expect({
+      SUPERSEDED_RUN_CANCELLED: supersededRunCancelled ? 'YES' : 'NO',
+      CURRENT_HEAD_REPORTER_SURVIVES: currentHeadReporterSurvives ? 'YES' : 'NO',
+      OLD_HEAD_CANNOT_OVERRIDE_NEW_HEAD: oldHeadCannotOverride ? 'YES' : 'NO',
+      REQUIRED_CONTEXTS_NOT_LEFT_PENDING: requiredNotPending ? 'YES' : 'NO',
+    }).toEqual({
+      SUPERSEDED_RUN_CANCELLED: 'YES',
+      CURRENT_HEAD_REPORTER_SURVIVES: 'YES',
+      OLD_HEAD_CANNOT_OVERRIDE_NEW_HEAD: 'YES',
+      REQUIRED_CONTEXTS_NOT_LEFT_PENDING: 'YES',
+    })
+  })
+
+  it('posts only unexecuted secret contexts, and only for the captured head', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'merge-authority-secret-'))
+    const postedPath = join(dir, 'posted.json')
+    const preload = join(dir, 'preload.mjs')
+    writeFileSync(
+      preload,
+      `import { writeFileSync } from 'node:fs'
+const posted = []
+globalThis.fetch = async (_url, init) => {
+  posted.push(JSON.parse(init.body))
+  writeFileSync(${JSON.stringify(postedPath)}, JSON.stringify(posted))
+  return new Response('{}', { status: 201 })
+}
+`,
+    )
+    const command = [
+      '--import',
+      preload,
+      join(ROOT, 'tooling/ci/merge-authority/publish.mjs'),
+      'publish-secret-terminals',
+    ]
+    const baseEnv = {
+      ...process.env,
+      GITHUB_REPOSITORY: 'anungis437/nzila-os',
+      GITHUB_TOKEN: 'test-token',
+      MA_SECRET_GITLEAKS: 'cancelled',
+      MA_SECRET_TRUFFLEHOG: 'success',
+      MA_SECRET_DOCKER: 'failure',
+    }
+    const postedRun = spawnSync(process.execPath, command, {
+      encoding: 'utf8',
+      env: { ...baseEnv, HEAD_SHA: oldHead, MA_RUN_HEAD_SHA: oldHead },
+    })
+    expect(postedRun.status, postedRun.stderr).toBe(0)
+    const posted = JSON.parse(readFileSync(postedPath, 'utf8'))
+    expect(posted.map((check: { name: string }) => check.name)).toEqual(['Gitleaks'])
+    expect(posted[0]).toMatchObject({
+      head_sha: oldHead,
+      status: 'completed',
+      conclusion: 'failure',
+      output: { title: 'SUPERSEDED' },
+    })
+    const mismatch = spawnSync(process.execPath, command, {
+      encoding: 'utf8',
+      env: { ...baseEnv, HEAD_SHA: newHead, MA_RUN_HEAD_SHA: oldHead },
+    })
+    expect(mismatch.status).not.toBe(0)
+    expect(mismatch.stderr).toMatch(/refusing to publish checks for/)
   })
 })
