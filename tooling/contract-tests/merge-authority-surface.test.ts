@@ -4,7 +4,9 @@
  *
  * @invariant MERGE_AUTHORITY_SURFACE_001
  */
-import { readdirSync, readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parse } from 'yaml'
@@ -19,6 +21,7 @@ import {
   SECRET_AUTHORITY_CONTEXTS,
   applyExecution,
   classifyChangedPaths,
+  deferPublications,
   evaluateCiResults,
   fastPathExecution,
   planFastPath,
@@ -864,5 +867,330 @@ describe('IaC validation and SARIF reporting separation', () => {
         'GitHub Code Security or GitHub Advanced Security must be enabled for this repository to use code scanning',
       ),
     ).toBe('NOT_CONFIGURED')
+  })
+})
+
+const REQUIRED_CHECK_NAMES = [
+  'Merge Authority / Lint & Typecheck',
+  'Merge Authority / Unit Tests',
+  'Merge Authority / Schema Integrity',
+  'Merge Authority / PostgreSQL RLS',
+  'Merge Authority / Migration Chain',
+  'Merge Authority / Affected Build',
+  'Merge Authority / Architectural Contracts',
+  'Merge Authority / Repository Inventory',
+  'Merge Authority / Governance Integrity',
+  'Merge Authority / Hash Chain Integrity',
+  'Merge Authority / Operating Layer',
+  'Merge Authority / IaC Security',
+  'Merge Authority / Ops Documentation',
+  'Gitleaks',
+  'TruffleHog OSS',
+  'Docker Secret Policy',
+]
+
+describe('phase 1 NOT_APPLICABLE publication', () => {
+  const codePaths = ['apps/union-eyes/app/api/example/route.ts']
+
+  function jobResults(overrides: Record<string, string> = {}) {
+    return {
+      ...Object.fromEntries(CANONICAL_CONTEXTS.map((context) => [context.ciJob, 'success'])),
+      ...overrides,
+    }
+  }
+
+  function byName(verdicts: ReturnType<typeof evaluateCiResults>) {
+    return Object.fromEntries(verdicts.map((verdict) => [verdict.name, verdict]))
+  }
+
+  it('posts proven NOT_APPLICABLE contexts and keeps the five publication proofs', () => {
+    const plan = planFastPath(codePaths)
+    const posted = deferPublications(plan)
+    const postedChecks = posted.map((verdict) => verdictToCheckRun(verdict, 'abc123'))
+    const publisher = readFileSync(join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), 'utf8')
+    const ci = parse(readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8'))
+    const authority = readFileSync(join(WORKFLOWS, 'merge-authority.yml'), 'utf8')
+    const secret = parse(readFileSync(join(WORKFLOWS, 'secret-scan.yml'), 'utf8'))
+
+    const failedJobs = jobResults({
+      'lint-and-typecheck': 'failure',
+      'iac-scan': 'failure',
+      'ops-pack-validation': 'failure',
+    })
+    const honored = byName(evaluateCiResults(failedJobs, codePaths))
+    const iacNowApplicable = byName(
+      evaluateCiResults(failedJobs, [...codePaths, 'infrastructure/bicep/main.bicep']),
+    )
+    const opsNowApplicable = byName(
+      evaluateCiResults(failedJobs, [...codePaths, 'ops/runbooks/README.md']),
+    )
+    const skippedButProven = byName(
+      evaluateCiResults(
+        jobResults({ 'iac-scan': 'skipped', 'ops-pack-validation': 'skipped' }),
+        codePaths,
+      ),
+    )
+    const skippedWithoutDiff = byName(
+      evaluateCiResults(jobResults({ 'iac-scan': 'skipped', 'ops-pack-validation': 'skipped' })),
+    )
+
+    const unknownPlan = planFastPath(['something-unexpected.bin'])
+    const unknownMissing = evaluateCiResults({}, ['something-unexpected.bin'])
+    const unknownExecuted = evaluateCiResults(jobResults(), ['something-unexpected.bin'])
+    const emptyDiff = byName(evaluateCiResults(jobResults({ 'ops-pack-validation': 'failure' }), []))
+    const traversal = byName(evaluateCiResults(jobResults({ 'iac-scan': 'failure' }), ['../secrets.md']))
+
+    const executedChecks = evaluateCiResults(jobResults(), ['something-unexpected.bin']).map((verdict) =>
+      verdictToCheckRun(verdict, 'abc123'),
+    )
+    const secretJobNames = Object.values(secret.jobs).map((job) =>
+      typeof job.name === 'string' ? job.name : '',
+    )
+    const publishedNames = [...executedChecks.map((check) => check.name), ...SECRET_AUTHORITY_CONTEXTS]
+
+    const naPosts =
+      plan.action === 'DEFER_TO_CI' &&
+      posted.length > 0 &&
+      posted.some((verdict) => verdict.name === 'Merge Authority / IaC Security') &&
+      posted.some((verdict) => verdict.name === 'Merge Authority / Ops Documentation') &&
+      posted.every(
+        (verdict) =>
+          verdict.evidence === 'NOT_APPLICABLE' &&
+          verdict.applicability === 'NOT_APPLICABLE' &&
+          verdict.classifier === 'PROVEN_IRRELEVANT',
+      ) &&
+      !posted.some((verdict) => verdict.name === 'Merge Authority / Lint & Typecheck') &&
+      publisher.includes('await publishCheckRuns(deferPublications(plan), headSha)') &&
+      !/if \(plan\.action === 'DEFER_TO_CI'\) return/.test(publisher) &&
+      authority.includes('classify-and-publish') &&
+      honored['Merge Authority / IaC Security'].evidence === 'NOT_APPLICABLE' &&
+      honored['Merge Authority / Ops Documentation'].evidence === 'NOT_APPLICABLE' &&
+      skippedButProven['Merge Authority / Ops Documentation'].evidence === 'NOT_APPLICABLE'
+
+    const naConclusion =
+      naPosts &&
+      postedChecks.length === posted.length &&
+      postedChecks.every(
+        (check) =>
+          check.status === 'completed' &&
+          check.conclusion === 'success' &&
+          check.output.title === 'NOT_APPLICABLE' &&
+          check.output.summary.includes('evidence: NOT_APPLICABLE') &&
+          check.output.summary.includes('classifier: PROVEN_IRRELEVANT'),
+      ) &&
+      honored['Merge Authority / IaC Security'].conclusion === 'success' &&
+      honored['Merge Authority / Ops Documentation'].conclusion === 'success' &&
+      skippedButProven['Merge Authority / IaC Security'].conclusion === 'success'
+
+    const applicableFailureRemains =
+      honored['Merge Authority / Lint & Typecheck'].evidence === 'FAILURE' &&
+      honored['Merge Authority / Lint & Typecheck'].conclusion === 'failure' &&
+      honored['Merge Authority / Lint & Typecheck'].applicability === 'REQUIRES_EXECUTION' &&
+      iacNowApplicable['Merge Authority / IaC Security'].evidence === 'FAILURE' &&
+      iacNowApplicable['Merge Authority / IaC Security'].conclusion === 'failure' &&
+      iacNowApplicable['Merge Authority / Ops Documentation'].evidence === 'NOT_APPLICABLE' &&
+      opsNowApplicable['Merge Authority / Ops Documentation'].evidence === 'FAILURE' &&
+      opsNowApplicable['Merge Authority / Ops Documentation'].conclusion === 'failure' &&
+      opsNowApplicable['Merge Authority / IaC Security'].evidence === 'NOT_APPLICABLE' &&
+      skippedWithoutDiff['Merge Authority / Ops Documentation'].evidence !== 'NOT_APPLICABLE' &&
+      skippedWithoutDiff['Merge Authority / Ops Documentation'].conclusion !== 'success' &&
+      ci.jobs['iac-scan'].if == null &&
+      ci.jobs['ops-pack-validation'].if == null &&
+      ci.jobs['report-merge-authority'].needs.includes('iac-scan') &&
+      ci.jobs['report-merge-authority'].needs.includes('ops-pack-validation')
+
+    const unknownRemains =
+      unknownPlan.action === 'DEFER_TO_CI' &&
+      unknownPlan.classification.classification === 'CODE_OR_UNKNOWN' &&
+      deferPublications(unknownPlan).length === 0 &&
+      unknownMissing.every(
+        (verdict) => verdict.evidence !== 'NOT_APPLICABLE' && verdict.conclusion !== 'success',
+      ) &&
+      unknownExecuted.every(
+        (verdict) =>
+          verdict.applicability === 'REQUIRES_EXECUTION' &&
+          verdict.evidence === 'PASS' &&
+          verdict.conclusion === 'success',
+      ) &&
+      emptyDiff['Merge Authority / Ops Documentation'].evidence === 'FAILURE' &&
+      emptyDiff['Merge Authority / Ops Documentation'].conclusion === 'failure' &&
+      traversal['Merge Authority / IaC Security'].evidence === 'FAILURE' &&
+      traversal['Merge Authority / IaC Security'].applicability === 'REQUIRES_EXECUTION' &&
+      classifyChangedPaths(['../secrets.md']).contexts['Merge Authority / Ops Documentation'] ===
+        'REQUIRES_EXECUTION'
+
+    const sixteenPublishable =
+      publishedNames.length === 16 &&
+      new Set(publishedNames).size === 16 &&
+      publishedNames.every((name) => REQUIRED_CHECK_NAMES.includes(name)) &&
+      REQUIRED_CHECK_NAMES.every((name) => publishedNames.includes(name)) &&
+      executedChecks.every((check) => check.status === 'completed' && check.conclusion === 'success') &&
+      postedChecks.every((check) => REQUIRED_CHECK_NAMES.includes(check.name)) &&
+      SECRET_AUTHORITY_CONTEXTS.every((name) => secretJobNames.includes(name)) &&
+      secretJobNames.every((name) => SECRET_AUTHORITY_CONTEXTS.includes(name)) &&
+      Object.values(secret.jobs).every((job) => job.if == null) &&
+      CANONICAL_CONTEXTS.map((context) => context.name).join('\n') ===
+        REQUIRED_CHECK_NAMES.slice(0, 13).join('\n') &&
+      publisher.includes('MA_CHANGED_PATHS') &&
+      publisher.includes('evaluateCiResults(results, diffPaths)') &&
+      readFileSync(join(WORKFLOWS, 'ci.yml'), 'utf8').includes(
+        'MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"',
+      )
+
+    expect(deferPublications({ action: 'PUBLISH', verdicts: posted })).toEqual([])
+    expect(() =>
+      deferPublications({
+        action: 'DEFER_TO_CI',
+        verdicts: [
+          {
+            name: 'Merge Authority / Unit Tests',
+            evidence: 'UNRESOLVED',
+            applicability: 'REQUIRES_EXECUTION',
+            classifier: 'CODE_OR_UNKNOWN',
+            conclusion: 'failure',
+          },
+        ],
+      }),
+    ).toThrow(/DEFER_TO_CI cannot publish/)
+    expect(() => evaluateCiResults(jobResults(), 'apps/union-eyes/app/api/example/route.ts')).toThrow(
+      /diff paths must be an array/,
+    )
+
+    expect({
+      NA_CONTEXT_POSTS: naPosts ? 'YES' : 'NO',
+      NA_CONTEXT_CONCLUSION: naConclusion ? 'SUCCESS' : 'NO',
+      APPLICABLE_FAILURE_REMAINS_FAILURE: applicableFailureRemains ? 'YES' : 'NO',
+      UNKNOWN_REMAINS_NON_TERMINAL_OR_EXECUTED: unknownRemains ? 'YES' : 'NO',
+      ALL_16_REQUIRED_NAMES_CAN_BE_PUBLISHED: sixteenPublishable ? 'YES' : 'NO',
+    }).toEqual({
+      NA_CONTEXT_POSTS: 'YES',
+      NA_CONTEXT_CONCLUSION: 'SUCCESS',
+      APPLICABLE_FAILURE_REMAINS_FAILURE: 'YES',
+      UNKNOWN_REMAINS_NON_TERMINAL_OR_EXECUTED: 'YES',
+      ALL_16_REQUIRED_NAMES_CAN_BE_PUBLISHED: 'YES',
+    })
+  })
+
+  function postedChecks(
+    command: string,
+    input: string,
+    env: Record<string, string | undefined>,
+  ): Array<{ name: string; conclusion: string; output: { title: string; summary: string } }> {
+    const dir = mkdtempSync(join(tmpdir(), 'merge-authority-'))
+    const postedPath = join(dir, 'posted.json')
+    const preload = join(dir, 'preload.mjs')
+    writeFileSync(
+      preload,
+      `import { writeFileSync } from 'node:fs'
+const posted = []
+globalThis.fetch = async (_url, init) => {
+  posted.push(JSON.parse(init.body))
+  writeFileSync(${JSON.stringify(postedPath)}, JSON.stringify(posted))
+  return new Response('{}', { status: 201 })
+}
+`,
+    )
+    const result = spawnSync(
+      process.execPath,
+      ['--import', preload, join(ROOT, 'tooling/ci/merge-authority/publish.mjs'), command],
+      {
+        input,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          HEAD_SHA: 'abc123',
+          GITHUB_REPOSITORY: 'anungis437/nzila-os',
+          GITHUB_TOKEN: 'test-token',
+          ...env,
+        },
+      },
+    )
+    expect(result.status, result.stderr || result.stdout).toBe(0)
+    return JSON.parse(readFileSync(postedPath, 'utf8'))
+  }
+
+  it('posts terminal NOT_APPLICABLE checks on DEFER_TO_CI and the CI reporter keeps them', () => {
+    const deferred = postedChecks('classify-and-publish', `${codePaths.join('\n')}\n`, {})
+    expect(deferred.length).toBeGreaterThan(0)
+    expect(deferred.map((check) => check.name)).not.toContain('Merge Authority / Lint & Typecheck')
+    expect(deferred.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(deferred.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(deferred.every((check) => check.output.summary.includes('evidence: NOT_APPLICABLE'))).toBe(true)
+
+    const resultEnv = Object.fromEntries(
+      CANONICAL_CONTEXTS.map((context) => {
+        const envName = {
+          'lint-and-typecheck': 'MA_RESULT_LINT',
+          test: 'MA_RESULT_UNIT',
+          'schema-drift': 'MA_RESULT_SCHEMA',
+          'sage-postgres-concurrency': 'MA_RESULT_RLS',
+          'sage-live-postgres': 'MA_RESULT_MIGRATION',
+          build: 'MA_RESULT_BUILD',
+          'contract-tests': 'MA_RESULT_CONTRACTS',
+          'repository-inventory': 'MA_RESULT_INVENTORY',
+          'governance-integrity': 'MA_RESULT_GOVERNANCE',
+          'hash-chain-drift': 'MA_RESULT_HASH',
+          'operating-layer-gate': 'MA_RESULT_OPERATING',
+          'iac-scan': 'MA_RESULT_IAC',
+          'ops-pack-validation': 'MA_RESULT_OPS',
+        }[context.ciJob]
+        return [envName, 'success']
+      }),
+    )
+    const reported = postedChecks('publish-ci-results', '', {
+      ...resultEnv,
+      GITHUB_EVENT_NAME: 'pull_request',
+      MA_CHANGED_PATHS: codePaths.join('\n'),
+      MA_RESULT_LINT: 'failure',
+      MA_RESULT_IAC: 'failure',
+      MA_RESULT_OPS: 'failure',
+    })
+    expect(reported).toHaveLength(13)
+    expect(reported.map((check) => check.name)).toEqual(CANONICAL_CONTEXTS.map((context) => context.name))
+    expect(reported.find((check) => check.name === 'Merge Authority / Lint & Typecheck')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'FAILURE' },
+    })
+    expect(reported.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+    expect(reported.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+      conclusion: 'success',
+      output: { title: 'NOT_APPLICABLE' },
+    })
+
+    const diffChanged = postedChecks('publish-ci-results', '', {
+      ...resultEnv,
+      GITHUB_EVENT_NAME: 'pull_request',
+      MA_CHANGED_PATHS: [...codePaths, 'infrastructure/bicep/main.bicep', 'ops/runbooks/README.md'].join('\n'),
+      MA_RESULT_IAC: 'failure',
+      MA_RESULT_OPS: 'failure',
+    })
+    expect(diffChanged.find((check) => check.name === 'Merge Authority / IaC Security')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'FAILURE' },
+    })
+    expect(diffChanged.find((check) => check.name === 'Merge Authority / Ops Documentation')).toMatchObject({
+      conclusion: 'failure',
+      output: { title: 'FAILURE' },
+    })
+
+    const unknown = postedChecks('publish-ci-results', '', {
+      ...resultEnv,
+      GITHUB_EVENT_NAME: 'pull_request',
+      MA_CHANGED_PATHS: 'something-unexpected.bin',
+      MA_RESULT_OPS: 'skipped',
+    })
+    expect(unknown.every((check) => check.output.title !== 'NOT_APPLICABLE')).toBe(true)
+    expect(unknown.find((check) => check.name === 'Merge Authority / Ops Documentation')?.conclusion).not.toBe(
+      'success',
+    )
   })
 })

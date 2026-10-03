@@ -791,7 +791,11 @@ jobs:
 
   # Canonical merge-authority contexts. This job reports; it is not itself a
   # required context. It does not run on docs-only PRs because CI paths-ignore
-  # skips the workflow. The Merge Authority workflow covers that case.
+  # skips the workflow. The Merge Authority workflow covers that case and posts
+  # proven NOT_APPLICABLE contexts before CI. This reporter recomputes
+  # applicability from the same diff and does not rewrite those contexts.
+  # iac-scan and ops-pack-validation still run; a skip is not success unless
+  # the current diff proves the context irrelevant.
   report-merge-authority:
     name: Report merge authority
     runs-on: ubuntu-latest
@@ -816,6 +820,8 @@ jobs:
       checks: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -824,6 +830,8 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           MA_RESULT_LINT: ${{ needs.lint-and-typecheck.result }}
           MA_RESULT_UNIT: ${{ needs.test.result }}
           MA_RESULT_SCHEMA: ${{ needs.schema-drift.result }}
@@ -837,4 +845,10 @@ jobs:
           MA_RESULT_OPERATING: ${{ needs.operating-layer-gate.result }}
           MA_RESULT_IAC: ${{ needs.iac-scan.result }}
           MA_RESULT_OPS: ${{ needs.ops-pack-validation.result }}
-        run: node tooling/ci/merge-authority/publish.mjs publish-ci-results
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+            export MA_CHANGED_PATHS
+          fi
+          node tooling/ci/merge-authority/publish.mjs publish-ci-results

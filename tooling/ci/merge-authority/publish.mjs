@@ -1,8 +1,12 @@
 /**
  * Publishes canonical merge-authority check runs.
  *
- * classify-and-publish  reads newline-separated paths on stdin
- * publish-ci-results    reads MA_RESULT_* job results from the environment
+ * classify-and-publish  reads newline-separated paths on stdin.
+ *   DEFER_TO_CI posts proven NOT_APPLICABLE checks, then returns.
+ *   REQUIRES_EXECUTION contexts are left to publish-ci-results.
+ * publish-ci-results    reads MA_RESULT_* job results from the environment.
+ *   MA_CHANGED_PATHS, when set, is the current diff. The reporter recomputes
+ *   applicability from it and does not rewrite proven NOT_APPLICABLE contexts.
  */
 import { readFileSync } from 'node:fs'
 import {
@@ -10,6 +14,7 @@ import {
   planFastPath,
   evaluateCiResults,
   applyExecution,
+  deferPublications,
   verdictToCheckRun,
 } from './surface.mjs'
 
@@ -62,6 +67,13 @@ async function createCheckRun(body) {
   }
 }
 
+async function publishCheckRuns(verdicts, headSha) {
+  for (const verdict of verdicts) {
+    await createCheckRun(verdictToCheckRun(verdict, headSha))
+    process.stdout.write(`${verdict.name}: ${verdict.evidence}\n`)
+  }
+}
+
 async function publishVerdicts(verdicts, headSha) {
   if (verdicts.length !== CANONICAL_CONTEXTS.length) {
     throw new Error(`expected ${CANONICAL_CONTEXTS.length} authority contexts, got ${verdicts.length}`)
@@ -70,17 +82,17 @@ async function publishVerdicts(verdicts, headSha) {
   for (const context of CANONICAL_CONTEXTS) {
     if (!names.has(context.name)) throw new Error(`missing authority context ${context.name}`)
   }
-  for (const verdict of verdicts) {
-    await createCheckRun(verdictToCheckRun(verdict, headSha))
-    process.stdout.write(`${verdict.name}: ${verdict.evidence}\n`)
-  }
+  await publishCheckRuns(verdicts, headSha)
 }
 
 async function classifyAndPublish() {
   const headSha = process.env.HEAD_SHA
   const plan = planFastPath(pathsFromStdin(readStdin()))
   process.stdout.write(`${JSON.stringify({ action: plan.action, classification: plan.classification })}\n`)
-  if (plan.action === 'DEFER_TO_CI') return
+  if (plan.action === 'DEFER_TO_CI') {
+    await publishCheckRuns(deferPublications(plan), headSha)
+    return
+  }
   const verdicts = applyExecution(plan.verdicts, {
     'governance-integrity': process.env.MA_EXEC_GOVERNANCE,
     'repository-inventory': process.env.MA_EXEC_INVENTORY,
@@ -90,8 +102,17 @@ async function classifyAndPublish() {
   await publishVerdicts(verdicts, headSha)
 }
 
+function diffPathsFromEnv() {
+  const value = process.env.MA_CHANGED_PATHS
+  if (value === undefined) return undefined
+  return pathsFromStdin(value)
+}
+
 async function publishCiResults() {
   const headSha = process.env.HEAD_SHA
+  if (process.env.GITHUB_EVENT_NAME === 'pull_request' && process.env.MA_CHANGED_PATHS === undefined) {
+    throw new Error('MA_CHANGED_PATHS is required to publish CI results for a pull request')
+  }
   const results = {}
   for (const [job, envName] of Object.entries(RESULT_ENV)) {
     const value = process.env[envName]
@@ -100,7 +121,8 @@ async function publishCiResults() {
     }
     results[job] = value
   }
-  await publishVerdicts(evaluateCiResults(results), headSha)
+  const diffPaths = diffPathsFromEnv()
+  await publishVerdicts(evaluateCiResults(results, diffPaths), headSha)
 }
 
 function classifyOutputs() {

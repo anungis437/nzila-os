@@ -461,9 +461,32 @@ function verdictFor(context, fields) {
   }
 }
 
-export function evaluateCiResults(results) {
+/**
+ * Publish CI job results.
+ *
+ * `diffPaths` is the current changed-path evidence. When it is an array,
+ * applicability is recomputed from that diff. A context the current diff
+ * proves irrelevant stays NOT_APPLICABLE with conclusion success, including
+ * when the source job failed or was skipped. A diff that makes the context
+ * applicable uses the source-job result. Omitting the diff does not invent
+ * NOT_APPLICABLE: unknown, missing, cancelled, and skipped evidence stay
+ * non-success unless the job actually passed.
+ */
+export function evaluateCiResults(results, diffPaths) {
+  if (diffPaths !== undefined && !Array.isArray(diffPaths)) {
+    throw new Error('diff paths must be an array when provided')
+  }
   const source = results && typeof results === 'object' ? results : {}
+  const classification = Array.isArray(diffPaths) ? classifyChangedPaths(diffPaths) : null
   return CANONICAL_CONTEXTS.map((context) => {
+    if (classification && classification.contexts[context.name] === 'NOT_APPLICABLE') {
+      return verdictFor(context, {
+        classifier: 'PROVEN_IRRELEVANT',
+        applicability: 'NOT_APPLICABLE',
+        evidence: 'NOT_APPLICABLE',
+        detail: `${context.evidence} Secret safety remains APPLICABLE (${SECRET_AUTHORITY_CONTEXTS.join(', ')}).`,
+      })
+    }
     const evidence = unresolvedEvidence(source[context.ciJob])
     return verdictFor(context, {
       classifier: 'CODE_OR_UNKNOWN',
@@ -527,9 +550,35 @@ export function planFastPath(paths) {
   }
   const anyRequired = Object.values(classification.contexts).some((value) => value === 'REQUIRES_EXECUTION')
   if (anyRequired && !classification.ciSkippedByPathsIgnore) {
-    return { action: 'DEFER_TO_CI', verdicts: [], classification }
+    // CI will publish REQUIRES_EXECUTION contexts. Proven NOT_APPLICABLE
+    // contexts are already terminal and must be posted before returning.
+    return {
+      action: 'DEFER_TO_CI',
+      verdicts: verdicts.filter((verdict) => verdict.evidence === 'NOT_APPLICABLE'),
+      classification,
+    }
   }
   return { action: 'PUBLISH', verdicts, classification }
+}
+
+/**
+ * Checks classify-and-publish posts on DEFER_TO_CI.
+ * Only proven NOT_APPLICABLE verdicts. REQUIRES_EXECUTION stays with the CI reporter.
+ */
+export function deferPublications(plan) {
+  if (!plan || plan.action !== 'DEFER_TO_CI') return []
+  const verdicts = Array.isArray(plan.verdicts) ? plan.verdicts : []
+  for (const verdict of verdicts) {
+    if (
+      verdict.evidence !== 'NOT_APPLICABLE' ||
+      verdict.applicability !== 'NOT_APPLICABLE' ||
+      verdict.classifier !== 'PROVEN_IRRELEVANT' ||
+      verdict.conclusion !== 'success'
+    ) {
+      throw new Error(`DEFER_TO_CI cannot publish ${verdict.name || 'an unknown context'}`)
+    }
+  }
+  return verdicts
 }
 
 export function verdictToCheckRun(verdict, headSha) {
